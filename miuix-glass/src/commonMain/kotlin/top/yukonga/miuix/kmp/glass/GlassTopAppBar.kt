@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -167,7 +166,7 @@ object GlassTopAppBarDefaults {
 }
 
 /** Starts fading inside the measured bar so its trailing edge does not form an opaque shelf. */
-private class TopAppBarBandBrush(color: Color) : ShaderBrush() {
+private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     private val colors = opacities.map { color.copy(alpha = color.alpha * it) }
 
     override fun createShader(size: Size): Shader = createShader(0f, size.height)
@@ -344,8 +343,7 @@ fun GlassTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     val ramp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior, visualContentOffset)
-    val floating = isContentScrolled
-    val transition = updateTransition(floating, label = "glassTopBarFloat")
+    val transition = updateTransition(isContentScrolled, label = "glassTopBarFloat")
     val maskProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarMask() },
         label = "glassTopBarMask",
@@ -354,8 +352,8 @@ fun GlassTopAppBar(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
     ) { if (it) 1f else 0f }
-    val keepMaterial by remember(floating, materialProgress) {
-        derivedStateOf { floating || materialProgress.value > 0f }
+    val keepMaterial by remember(isContentScrolled, materialProgress) {
+        derivedStateOf { isContentScrolled || materialProgress.value > 0f }
     }
     val rawBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
     val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { keepMaterial && rawBackdrop != null }
@@ -432,7 +430,7 @@ fun GlassTopAppBar(
                 material = resolvedMaterial,
                 underlayMaterial = underlayMaterial,
                 buttonUnderlayMaterial = buttonUnderlay,
-                floating = floating,
+                floating = isContentScrolled,
                 alpha = alpha,
                 ramp = ramp,
                 materialProgress = materialProgress,
