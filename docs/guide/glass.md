@@ -2,8 +2,10 @@
 
 `miuix-glass` provides the glass surfaces and components for Compose Multiplatform: `glassPanel`, `glass`, `glassShadow` and `glassSurface` on top of the [material definitions](/guide/material), with background blur, color blending and lighting effects.
 
-::: warning
-Android requires `minSdk` 33 (Android 13) or higher.
+::: note
+`miuix-glass` targets `minSdk` 24 on Android. The glass effects need `RuntimeShader` (Android 13+); below that the surfaces fall back to their opaque container color — see [Runtime capability checks](/guide/material#runtime-capability-checks).
+
+Note that `miuix-glass` depends on `miuix-blur`, which itself declares `minSdk` 33: an app below API 33 must add `tools:overrideLibrary="top.yukonga.miuix.kmp.blur"` to its manifest and expect the blur layer to be skipped.
 :::
 
 ## Setup
