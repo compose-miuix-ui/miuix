@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,6 +24,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassNavigationRail
+import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Contacts
 import top.yukonga.miuix.kmp.icon.glass.Search
@@ -46,7 +46,7 @@ fun GlassNavigationRailDemo() {
         listOf("Your latest updates", "Your favorite people", "Your personal preferences")
     }
     var selectedIndex by remember { mutableIntStateOf(0) }
-    var expanded by remember { mutableStateOf(true) }
+    val railState = rememberGlassNavigationRailState(initialExpanded = true)
 
     Box(
         modifier = Modifier
@@ -87,7 +87,7 @@ fun GlassNavigationRailDemo() {
                             )
                             Text(descriptions[selectedIndex], color = MiuixTheme.colorScheme.onBackground)
                             Text(
-                                text = if (expanded) "Tap the toggle to collapse" else "Tap the toggle to expand",
+                                text = if (railState.expanded) "Tap the toggle to collapse" else "Tap the toggle to expand",
                                 color = MiuixTheme.colorScheme.onBackground,
                             )
                         }
@@ -98,8 +98,7 @@ fun GlassNavigationRailDemo() {
                         onSelect = { selectedIndex = it },
                         backdrop = backdrop,
                         modifier = Modifier.align(Alignment.TopStart),
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
+                        state = railState,
                         defaultWindowInsetsPadding = false,
                     )
                 }

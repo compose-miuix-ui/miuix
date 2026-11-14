@@ -24,23 +24,25 @@ internal data class NavigationDragTarget(
 /**
  * Computes same-item drag-trail and cross-item edge-spring targets.
  *
- * The 60px trail cap is intentionally not density-scaled. Raw spring targets may extend beyond the
- * container; [navigationIndicatorBounds] limits rendered edges. Stretch is disabled when the
- * leading target reaches the container boundary.
+ * The chip travels within [minLeft]..[maxRight], which reaches slightly past the destinations so
+ * [navigationIndicatorBounds] can squeeze it at either end. The 60px trail cap is intentionally not
+ * density-scaled. Raw spring targets may extend beyond the travel; rendered edges are limited.
+ * Stretch is disabled when the leading target reaches the travel's boundary.
  */
 internal fun navigationDragTarget(
     left: Float,
     width: Float,
-    containerWidth: Float,
+    minLeft: Float,
+    maxRight: Float,
     delta: Float,
     changedItem: Boolean,
 ): NavigationDragTarget {
-    val start = left.coerceIn(0f, (containerWidth - width).coerceAtLeast(0f))
+    val start = left.coerceIn(minLeft, (maxRight - width).coerceAtLeast(minLeft))
     val end = start + width
     val trail = if (changedItem) 0f else (abs(delta) * 4f).coerceAtMost(60f)
     return NavigationDragTarget(
-        left = if (delta > 0f && end < containerWidth) start - trail else start,
-        right = if (delta < 0f && start > 0f) end + trail else end,
+        left = if (delta > 0f && end < maxRight) start - trail else start,
+        right = if (delta < 0f && start > minLeft) end + trail else end,
         following = !changedItem,
         movingRight = delta > 0f,
     )

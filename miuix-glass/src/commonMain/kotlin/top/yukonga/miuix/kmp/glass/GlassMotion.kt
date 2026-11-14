@@ -80,19 +80,6 @@ object GlassMotion {
     @Stable
     fun <T> navShowHide(): SpringSpec<T> = springOf(1f, 0.3f)
 
-    /**
-     * Spring for a navigation rail's expand/collapse morph.
-     *
-     * Slightly underdamped, so the panel lands with a short, visible settle rather than easing
-     * into place, and quick enough that a tap on the toggle reads as the same gesture.
-     */
-    @Stable
-    fun <T> railExpand(visibilityThreshold: T? = null): SpringSpec<T> = folmeSpring(
-        damping = 0.86f,
-        response = 0.34f,
-        visibilityThreshold = visibilityThreshold,
-    )
-
 /** Default spring used by the segmented tab indicator. */
     @Stable
     fun <T> default(): SpringSpec<T> = springOf(0.95f, 0.35f)

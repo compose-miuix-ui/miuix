@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
  *   to a row the indicator only spans visually, so the press feedback does not move the indicator.
  */
 @Composable
-fun GlassNavigationIndicator(
+internal fun GlassNavigationIndicator(
     pressed: Boolean,
     modifier: Modifier = Modifier,
     height: Dp = GlassNavigationBarDefaults.Height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2,

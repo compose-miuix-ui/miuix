@@ -3,7 +3,6 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -51,7 +50,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -63,7 +61,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
@@ -103,11 +101,12 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassNavigationRail
 import top.yukonga.miuix.kmp.glass.GlassNavigationRailDefaults
+import top.yukonga.miuix.kmp.glass.GlassNavigationRailState
+import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -138,6 +137,10 @@ import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import ui.isInDarkTheme
 import utils.FPSMonitor
+import utils.LocalTopAppBarTitleAlpha
+import utils.LocalTopLayer
+import utils.TopLayerHost
+import utils.TopLayerState
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
@@ -206,28 +209,32 @@ fun AppContent(
     // glass sidebar that overlays the page. The glass one is the default.
     val useGlassSidebar = hasNavigationRail && appState.navigationRailStyle == 1
     val expandSidebar = shouldExpandNavigationRail()
-    var sidebarExpanded by rememberSaveable { mutableStateOf(expandSidebar) }
-    LaunchedEffect(expandSidebar) { sidebarExpanded = expandSidebar }
+    val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
+    LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
     // Collapsed, the sidebar is a capsule on the top bar's centre line and reserves nothing at the
-    // start edge; only the expanded panel pushes the page across. The inset follows the same spring
-    // as the surface, so the page and the panel travel as one.
-    val sidebarInset = animateDpAsState(
-        targetValue = if (useGlassSidebar && sidebarExpanded) {
-            GlassNavigationRailDefaults.ExpandedWidth + GlassNavigationRailDefaults.Margin * 2
-        } else {
-            0.dp
-        },
-        animationSpec = GlassMotion.railExpand<Dp>(),
-        label = "sidebarInset",
-    )
+    // start edge; only the expanded panel pushes the page across. Both read the rail's own morph,
+    // so the page and the panel travel as one.
+    val sidebarInset: Density.() -> Int = if (useGlassSidebar) {
+        { ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress).roundToInt() }
+    } else {
+        { 0 }
+    }
+    // The capsule takes the place of the page bar's collapsed title.
+    val topAppBarTitleAlpha: () -> Float = if (useGlassSidebar) {
+        { sidebarState.progress }
+    } else {
+        { 1f }
+    }
     // Sampling is only possible while the page draws into a recorded layer; without a backdrop the
     // rail falls back to the theme's surfaceContainer fill.
     val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
+    val topLayer = remember { TopLayerState() }
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
+        LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
     ) {
         // Follow the device screen corner so the slide-in clip matches the platform (0 on
         // Desktop/Web). The two-pane layout animates inside a mid-screen pane, so no screen corner.
@@ -283,96 +290,107 @@ fun AppContent(
         // expression itself is stable across recompositions.
         val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
 
-        // Keep NavDisplay at one composition location while adaptive chrome changes around it.
-        // Otherwise switching between the compact and wide branches recreates the current route.
-        Row(modifier = Modifier.fillMaxSize()) {
-            if (hasNavigationRail && !useGlassSidebar) {
-                PersistentNavigationRail(
-                    navigationItems = navigationItems,
-                    mainPagerState = mainPagerState,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    // The sibling rail already offsets this pane past the start-side safe area.
-                    // Share that consumption so page bars do not add the same inset again. The
-                    // glass rail lives inside this pane instead, so nothing is consumed for it.
-                    .then(
+        // The root Scaffold sits above the pages and the glass sidebar, so dialogs, sheets and
+        // popups hosted by it are never covered by the sidebar; the top layer does the same for
+        // glass popups drawn inline in a page.
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentWindowInsets = WindowInsets(0),
+        ) {
+            CompositionLocalProvider(LocalTopLayer provides topLayer) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Keep NavDisplay at one composition location while adaptive chrome changes around it.
+                    // Otherwise switching between the compact and wide branches recreates the current route.
+                    Row(modifier = Modifier.fillMaxSize()) {
                         if (hasNavigationRail && !useGlassSidebar) {
-                            Modifier.consumeWindowInsets(
-                                WindowInsets.displayCutout
-                                    .union(WindowInsets.navigationBars)
-                                    .only(WindowInsetsSides.Start),
+                            PersistentNavigationRail(
+                                navigationItems = navigationItems,
+                                mainPagerState = mainPagerState,
                             )
-                        } else {
-                            Modifier
-                        },
-                    )
-                    // The glass rail floats over the page, so the start margin under it needs the
-                    // page color rather than the window background.
-                    .then(
-                        if (useGlassSidebar) {
-                            Modifier.background(MiuixTheme.colorScheme.surface)
-                        } else {
-                            Modifier
-                        },
-                    )
-                    // Wide-screen transition layers must not draw over the navigation rail.
-                    .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (sidebarBackdrop != null) {
-                                Modifier.layerBackdrop(sidebarBackdrop)
-                            } else {
-                                Modifier
-                            },
-                        ),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            // Reserve the rail's animated width in the layout phase, so the morph
-                            // never recomposes the page.
-                            .layout { measurable, constraints ->
-                                val inset = sidebarInset.value.roundToPx()
-                                    .coerceIn(0, constraints.maxWidth)
-                                val end = constraints.maxWidth
-                                val placeable = measurable.measure(
-                                    constraints.copy(
-                                        minWidth = (constraints.minWidth - inset).coerceAtLeast(0),
-                                        maxWidth = end - inset,
-                                    ),
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                // The sibling rail already offsets this pane past the start-side safe area.
+                                // Share that consumption so page bars do not add the same inset again. The
+                                // glass rail lives inside this pane instead, so nothing is consumed for it.
+                                .then(
+                                    if (hasNavigationRail && !useGlassSidebar) {
+                                        Modifier.consumeWindowInsets(
+                                            WindowInsets.displayCutout
+                                                .union(WindowInsets.navigationBars)
+                                                .only(WindowInsetsSides.Start),
+                                        )
+                                    } else {
+                                        Modifier
+                                    },
                                 )
-                                layout(end, constraints.maxHeight) {
-                                    placeable.place(inset, 0)
+                                // The glass rail floats over the page, so the start margin under it needs the
+                                // page color rather than the window background.
+                                .then(
+                                    if (useGlassSidebar) {
+                                        Modifier.background(MiuixTheme.colorScheme.surface)
+                                    } else {
+                                        Modifier
+                                    },
+                                )
+                                // Wide-screen transition layers must not draw over the navigation rail.
+                                .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(
+                                        if (sidebarBackdrop != null) {
+                                            Modifier.layerBackdrop(sidebarBackdrop)
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        // Reserve the rail's animated width in the layout phase, so the morph
+                                        // never recomposes the page.
+                                        .layout { measurable, constraints ->
+                                            val inset = sidebarInset().coerceIn(0, constraints.maxWidth)
+                                            val end = constraints.maxWidth
+                                            val placeable = measurable.measure(
+                                                constraints.copy(
+                                                    minWidth = (constraints.minWidth - inset).coerceAtLeast(0),
+                                                    maxWidth = end - inset,
+                                                ),
+                                            )
+                                            layout(end, constraints.maxHeight) {
+                                                placeable.place(inset, 0)
+                                            }
+                                        },
+                                ) {
+                                    AppNavHost(
+                                        backStack = backStack,
+                                        navigator = navigator,
+                                        transition = navTransition,
+                                        effects = effects,
+                                        swipeBackDirection = swipeBackDirection,
+                                        padding = padding,
+                                        navigationItems = navigationItems,
+                                        mainPagerState = mainPagerState,
+                                    )
                                 }
-                            },
-                    ) {
-                        AppNavHost(
-                            backStack = backStack,
-                            navigator = navigator,
-                            transition = navTransition,
-                            effects = effects,
-                            swipeBackDirection = swipeBackDirection,
-                            padding = padding,
-                            navigationItems = navigationItems,
-                            mainPagerState = mainPagerState,
-                        )
+                            }
+                            if (useGlassSidebar) {
+                                PersistentGlassNavigationRail(
+                                    navigationItems = navigationItems,
+                                    mainPagerState = mainPagerState,
+                                    backdrop = sidebarBackdrop,
+                                    state = sidebarState,
+                                )
+                            }
+                        }
                     }
-                }
-                if (useGlassSidebar) {
-                    PersistentGlassNavigationRail(
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                        backdrop = sidebarBackdrop,
-                        expanded = sidebarExpanded,
-                        onExpandedChange = { sidebarExpanded = it },
-                    )
+                    TopLayerHost(topLayer)
                 }
             }
         }
@@ -496,8 +514,7 @@ private fun PersistentGlassNavigationRail(
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
     backdrop: LayerBackdrop?,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
+    state: GlassNavigationRailState,
     modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
@@ -522,8 +539,7 @@ private fun PersistentGlassNavigationRail(
         },
         backdrop = backdrop,
         modifier = modifier,
-        expanded = expanded,
-        onExpandedChange = onExpandedChange,
+        state = state,
     )
 }
 
@@ -572,7 +588,9 @@ private fun WideScreenContent(
             .fillMaxSize(),
         contentWindowInsets =
         WindowInsets.systemBars.union(
-            if (appState.showNavigationBar) {
+            // Only the plain rail sits beside the pane and already clears the start cutout; the
+            // glass sidebar floats over the page, which must clear it itself.
+            if (appState.showNavigationBar && appState.navigationRailStyle == 0) {
                 WindowInsets.displayCutout.exclude(
                     WindowInsets.displayCutout.only(WindowInsetsSides.Start),
                 )

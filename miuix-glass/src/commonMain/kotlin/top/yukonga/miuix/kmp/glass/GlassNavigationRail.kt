@@ -3,12 +3,13 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
@@ -18,13 +19,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -34,25 +34,33 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -60,14 +68,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Sidebar
@@ -81,6 +92,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 /** Default values for [GlassNavigationRail]. */
@@ -92,70 +104,15 @@ object GlassNavigationRailDefaults {
     /** Distance between the expanded panel and the window edges. */
     val Margin: Dp = 12.dp
 
-    /** Corner radius of the expanded panel. */
-    val CornerRadius: Dp = 22.dp
-
-    /** Size of a destination icon. */
-    val IconSize: Dp = 24.dp
-
-    /** Gap between a destination's icon column and its label. */
-    val IconColumnSpacing: Dp = 12.dp
-
-    /** Width of the column that holds a destination's icon while expanded. */
-    val IconColumnWidth: Dp = IconSize + IconColumnSpacing
-
-    /** Horizontal padding inside a destination. */
-    val ItemContentPadding: Dp = 14.dp
-
-    /** Height of a destination row while collapsed. */
-    val CollapsedRowHeight: Dp = 38.dp
-
-    /** Extra height a row gains as the panel expands. */
-    val ExpandedRowGrowth: Dp = 4.dp
-
-    /** Vertical distance between two destination rows while expanded. */
-    val RowPitch: Dp = 46.dp
-
-    /** Top of a row while collapsed: the bar's own row inset. */
-    val RowTop: Dp = 3.dp
-
-    /** Top of the first row while expanded. */
-    val ExpandedRowTop: Dp = RowTop + 61.dp
-
-    /** Top of the toggle while expanded. */
-    val ExpandedToggleTop: Dp = 12.dp
-
-    /** Left edge of the toggle while collapsed, matching the bar's own leading action. */
-    val CollapsedToggleStart: Dp = GlassNavigationBarDefaults.ContentPaddingHorizontal - 6.dp
-
-    /** Left edge of the toggle while expanded. */
-    val ExpandedToggleStart: Dp = 16.dp
-
-    /** Diameter of the expand/collapse toggle while expanded. */
-    val ToggleSize: Dp = 44.dp
-
-    /** Gap between the collapsed capsule's toggle and its first destination. */
-    val CollapsedToggleSpacing: Dp = 4.dp
-
-    /** Width reserved for the collapsed capsule's toggle, outside destination hit testing. */
-    val LeadingActionWidth: Dp = ToggleSize + CollapsedToggleSpacing
-
-    /** Horizontal margin between a destination and the panel's edges. */
-    val ItemHorizontalMargin: Dp = 12.dp
-
-    /** Inset after the last destination in the collapsed capsule. */
-    val CollapsedEdgePadding: Dp = 3.dp
+    /** Height of the collapsed capsule. */
+    val CollapsedHeight: Dp = GlassTopAppBarDefaults.ButtonSize
 
     /**
-     * Where the first destination's slot begins inside the collapsed capsule. The bar lays its
-     * destinations out after its own content padding plus the leading action, so the panel's rows
-     * and selection surface must collapse to that same origin or the hand-off would jump.
+     * Top of the collapsed capsule, relative to the safe area. It puts the capsule on the centre
+     * line of a [top.yukonga.miuix.kmp.basic.TopAppBar] or [GlassTopAppBar] at the top of the same
+     * area, so the capsule takes the place of the bar's collapsed title.
      */
-    val CollapsedContentStart: Dp = GlassNavigationBarDefaults.ContentPaddingHorizontal +
-        LeadingActionWidth
-
-    /** Top of the rail when collapsed, relative to the safe area. */
-    val CollapsedTopMargin: Dp = 6.dp
+    val CollapsedTop: Dp = (TopAppBarDefaults.SmallTopAppBarCenterHeight - CollapsedHeight) / 2 + 3.dp
 
     /** The default content description of the built-in toggle while the rail is collapsed. */
     val ExpandContentDescription: String = "Expand navigation rail"
@@ -177,35 +134,72 @@ object GlassNavigationRailDefaults {
 }
 
 /**
+ * State of a [GlassNavigationRail].
+ *
+ * @param initialExpanded Whether the rail starts expanded.
+ */
+@Stable
+class GlassNavigationRailState(initialExpanded: Boolean) {
+
+    /** Whether the rail is the expanded panel. Setting it starts the morph. */
+    var expanded: Boolean by mutableStateOf(initialExpanded)
+
+    internal val morph = Animatable(if (initialExpanded) 1f else 0f)
+
+    /**
+     * The morph's position, from `0` (the collapsed capsule) to `1` (the expanded panel). It
+     * changes every frame of the morph, so read it in a layout or draw block, for example to move
+     * the page clear of the panel without recomposing it.
+     */
+    val progress: Float get() = morph.value
+
+    companion object {
+        /** The default [Saver], keeping [expanded]. */
+        val Saver: Saver<GlassNavigationRailState, Boolean> = Saver(
+            save = { it.expanded },
+            restore = { GlassNavigationRailState(it) },
+        )
+    }
+}
+
+/**
+ * Creates and remembers a [GlassNavigationRailState], kept across configuration changes.
+ *
+ * @param initialExpanded Whether the rail starts expanded.
+ */
+@Composable
+fun rememberGlassNavigationRailState(initialExpanded: Boolean = true): GlassNavigationRailState = rememberSaveable(saver = GlassNavigationRailState.Saver) {
+    GlassNavigationRailState(initialExpanded)
+}
+
+/**
  * A floating sidebar on glass for wide layouts: a panel at the start edge that, collapsing, travels
  * to the top centre and becomes the navigation bar itself.
  *
- * The two faces are the same navigation. Expanded, the rail lists destinations as icon and label.
- * Collapsed, it *is* a [GlassNavigationBar] — labels only, with the expand toggle in its leading
- * slot — so a tap, a horizontal drag and the selection indicator behave exactly as they do in the
- * bar, rather than being a second, invented navigation model.
+ * Expanded, the rail lists destinations as icon and label. Collapsed, it *is* a
+ * [GlassNavigationBar] showing labels only, with the expand toggle in its leading slot, so a tap, a
+ * horizontal drag and the selection indicator behave exactly as they do in the bar.
  *
- * Between those two settled states the panel shrinks and rounds while every row flies from its
- * place in the expanded column into its slot in the bar's row. The morph's progress is read in
- * layout and draw blocks, so a morph frame moves rows without recomposing their contents.
+ * Between those settled states every row flies from its place in the column into its slot in the
+ * bar's row. The morph is read in layout and draw blocks, so its frames do not recompose the rows.
  *
  * The rail is an overlay: it fills the space it is given and draws the surface inside it. Place it
- * over the page, outside the recorded backdrop, and reserve the expanded width in the page's own
- * layout if the content must stay clear of the panel.
+ * over the page, outside the recorded backdrop. Move the page clear of the panel with
+ * [GlassNavigationRailState.progress], and hide a top bar's title while the capsule covers it.
  *
  * @param items The destinations, in order.
  * @param selectedIndex The index of the current destination.
- * @param onSelect Called with the destination the bar's own gesture selected.
+ * @param onSelect Called with the destination the user selected.
  * @param backdrop The [Backdrop] supplying the content behind the glass. `null` fills the surface
  *   with the theme's surfaceContainer color instead of sampling.
  * @param modifier The modifier applied to the rail's overlay box.
- * @param expanded Whether the rail is expanded. Collapsing moves it to the top centre and settles
- *   it into the navigation bar.
- * @param onExpandedChange Called when the built-in toggle is activated. `null` hides the toggle and
- *   leaves [expanded] to the caller.
- * @param defaultWindowInsetsPadding Whether to keep the surface inside the system bars and the
- *   display cutout. Disable when the caller insets the rail itself.
- * @param expandedWidth Panel width while [expanded].
+ * @param state The rail's expanded state and morph progress.
+ * @param showToggle Whether to show the built-in expand/collapse toggle. Without it, the caller
+ *   drives [GlassNavigationRailState.expanded].
+ * @param defaultWindowInsetsPadding Whether to keep the surface inside the system bars, the caption
+ *   bar and the display cutout. Disable when the caller insets the rail itself.
+ * @param collapsedTop Top of the collapsed capsule, relative to the safe area.
+ * @param expandedWidth Panel width while expanded.
  * @param style The glass material style.
  * @param alpha Opacity multiplier for the material.
  * @param material The surface's own body when sampling a backdrop. `null` omits explicit material
@@ -214,11 +208,11 @@ object GlassNavigationRailDefaults {
  * @param shadow The shadow the floating surface casts. `null` removes it.
  * @param selectedColor Tint of the selected icon and label. Dynamic colour themes use primary;
  *   other themes use onSurface.
- * @param unselectedColor Tint of the unselected icons and labels, without additional dimming.
- * @param indicatorColor Fill behind the selected destination in both states.
- * @param indicatorPressedColor Fill behind the destination held down in the collapsed bar.
- * @param labelStyle The destinations' label style in both states. It also decides the width of a
- *   collapsed slot, so the capsule hugs its labels instead of splitting the width evenly.
+ * @param unselectedColor Tint of the unselected icons and labels.
+ * @param indicatorColor Fill behind the selected destination.
+ * @param indicatorPressedColor Fill behind the destination held down in the collapsed capsule.
+ * @param labelStyle The destinations' label style. It also decides the width of a collapsed slot,
+ *   so the capsule hugs its labels.
  * @param expandContentDescription The accessible description of the toggle while collapsed.
  * @param collapseContentDescription The accessible description of the toggle while expanded.
  * @param scrollState The [ScrollState] of the expanded destination column.
@@ -230,16 +224,17 @@ fun GlassNavigationRail(
     onSelect: (Int) -> Unit,
     backdrop: Backdrop?,
     modifier: Modifier = Modifier,
-    expanded: Boolean = true,
-    onExpandedChange: ((Boolean) -> Unit)? = null,
+    state: GlassNavigationRailState = rememberGlassNavigationRailState(),
+    showToggle: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
+    collapsedTop: Dp = GlassNavigationRailDefaults.CollapsedTop,
     expandedWidth: Dp = GlassNavigationRailDefaults.ExpandedWidth,
     style: GlassStyle = GlassDefaults.Style,
     alpha: Float = 1f,
     material: GlassMaterial? = GlassNavigationRailDefaults.material(),
     stroke: EdgeStroke? = GlassNavigationRailDefaults.stroke(),
     shadow: GlassShadow? = GlassShadows.Float,
-    selectedColor: Color = railSelectedColor(),
+    selectedColor: Color = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
     unselectedColor: Color = MiuixTheme.colorScheme.onSurface,
     indicatorColor: Color = GlassNavigationBarDefaults.indicatorColor(),
     indicatorPressedColor: Color = GlassNavigationBarDefaults.indicatorPressedColor(),
@@ -250,49 +245,42 @@ fun GlassNavigationRail(
 ) {
     if (items.isEmpty()) return
     val index = selectedIndex.coerceIn(0, items.lastIndex)
+    val expanded = state.expanded
     val density = LocalDensity.current
-    val onSelectState by rememberUpdatedState(onSelect)
-    val onExpandedChangeState by rememberUpdatedState(onExpandedChange)
-    val hasToggle = onExpandedChangeState != null
-
-    // One 0..1 timeline for the shape change, the rows' flights and the labels' fade.
-    val progress = animateFloatAsState(
-        targetValue = if (expanded) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = RAIL_MORPH_DURATION_MILLIS,
-            easing = RailMorphEasing,
-        ),
-        label = "glassNavigationRailMorph",
-    )
-    // The collapsed face is the bar itself, so it must not appear until the morph has settled; it
-    // also has to give way the instant the caller expands it, so the panel can start moving.
-    var settledCollapsed by remember { mutableStateOf(!expanded) }
 
     val textMeasurer = rememberTextMeasurer()
-    // A slot is as wide as its own label needs, so the capsule hugs its text; the bar's own
-    // indicator is reserved in each slot.
+    // A collapsed slot is as wide as its own label plus the bar's indicator reach, so the capsule
+    // hugs its text.
     val labelWidths = remember(items, labelStyle, density) {
         items.map { item ->
-            item.label?.let { with(density) { textMeasurer.measure(it, labelStyle).size.width.toDp() } } ?: 0.dp
+            item.label?.let { with(density) { ceil(textMeasurer.measure(it, labelStyle).size.width.toFloat()).toDp() } } ?: 0.dp
         }
     }
-    val sourceWidths = remember(labelWidths) {
-        labelWidths.map { it + glassRailDestinationPadding() }
+    val sourceWidths = remember(labelWidths) { labelWidths.map { it + RailSlotPadding } }
+
+    // One clock for the surface's width, top and corner; each row and the panel's height and start
+    // edge settle on their own springs, as in the reference motion.
+    val rowProgress = remember(items.size) { List(items.size) { Animatable(if (expanded) 1f else 0f) } }
+    val iconAlpha = remember { Animatable(if (expanded) 1f else 0f) }
+    LaunchedEffect(expanded, rowProgress) {
+        val target = if (expanded) 1f else 0f
+        launch { state.morph.animateTo(target, RailMorphMotion) }
+        launch { iconAlpha.animateTo(target, if (expanded) RailIconEnterMotion else RailIconExitMotion) }
+        rowProgress.forEachIndexed { position, progress ->
+            launch { progress.animateTo(target, railRowMotion(position, expanded)) }
+        }
     }
-    val totalSlots = sourceWidths.fold(0.dp) { sum, width -> sum + width }
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .then(
                 if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(
-                            WindowInsets.systemBars
-                                .union(WindowInsets.captionBar)
-                                .only(WindowInsetsSides.Vertical),
-                        )
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
+                    Modifier.windowInsetsPadding(
+                        WindowInsets.systemBars
+                            .union(WindowInsets.captionBar)
+                            .union(WindowInsets.displayCutout),
+                    )
                 } else {
                     Modifier
                 },
@@ -300,240 +288,189 @@ fun GlassNavigationRail(
     ) {
         val viewportWidth = maxWidth
         val viewportHeight = maxHeight
-        val leadingActionWidth = GlassNavigationRailDefaults.LeadingActionWidth
-        val capsuleTrailingPadding = GlassNavigationBarDefaults.ContentPaddingHorizontal +
-            GlassNavigationRailDefaults.CollapsedEdgePadding
-        // The capsule keeps the whole row on screen: it is only clamped when the labels need more
-        // width than the window can give, and every slot compresses with it.
-        val neededWidth = leadingActionWidth + capsuleTrailingPadding + totalSlots
-        val capsuleWidth = neededWidth.coerceAtMost(
-            (viewportWidth - GlassNavigationRailDefaults.Margin * 2).coerceAtLeast(0.dp),
-        )
+        val totalSlots = sourceWidths.fold(0.dp) { sum, width -> sum + width }
+        // The bar lays out its first destination after its content padding and the toggle's slot.
+        val leadingActionWidth = if (showToggle) RailLeadingActionWidth else 0.dp
+        val contentStart = GlassNavigationBarDefaults.ContentPaddingHorizontal + leadingActionWidth
+        val chrome = contentStart + RailCollapsedEndPadding
+        // The capsule leaves room on both sides for a top bar's navigation icon and actions, and
+        // compresses its slots when the labels need more than that.
+        val neededWidth = chrome + totalSlots
+        val capsuleWidth = neededWidth
+            .coerceAtMost((viewportWidth - RailCollapsedSideReserve * 2).coerceAtLeast(RailMinCollapsedWidth))
+            .coerceAtMost(viewportWidth)
         val widthRatio = if (totalSlots > 0.dp) {
-            with(density) {
-                ((capsuleWidth - leadingActionWidth - capsuleTrailingPadding) / totalSlots).toFloat()
-            }
+            ((capsuleWidth - chrome) / totalSlots).coerceAtLeast(0f)
         } else {
             1f
         }
         val tabWidths = remember(sourceWidths, widthRatio) { sourceWidths.map { it * widthRatio } }
-        val collapsedHeight = GlassNavigationRailDefaults.CollapsedRowHeight +
-            GlassNavigationBarDefaults.IndicatorPaddingVertical * 2
+        val collapsedHeight = GlassNavigationRailDefaults.CollapsedHeight
         val collapsedStart = (viewportWidth - capsuleWidth) / 2
         val expandedStart = GlassNavigationRailDefaults.Margin
-        val collapsedTop = GlassNavigationRailDefaults.CollapsedTopMargin
         val expandedTop = GlassNavigationRailDefaults.Margin
         val expandedHeight = (viewportHeight - expandedTop - GlassNavigationRailDefaults.Margin)
             .coerceAtLeast(collapsedHeight)
-        // The surface's height keeps settling after the morph reaches its end.
-        val panelHeight = remember {
-            Animatable(if (expanded) expandedHeight else collapsedHeight, Dp.VectorConverter)
+
+        val panelHeight = rememberRailMotion(
+            target = if (expanded) expandedHeight else collapsedHeight,
+            expanded = expanded,
+        ) { expanding -> railHeightMotion(expanding, expandedHeight - collapsedHeight) }
+        val panelStart = rememberRailMotion(
+            target = if (expanded) expandedStart else collapsedStart,
+            expanded = expanded,
+        ) { expanding -> if (expanding) RailMorphDpMotion else RailReboundMotion }
+
+        // The bar takes over only once every channel has come to rest, so nothing is still moving
+        // when the panel's geometry is swapped for the bar's.
+        val settledCollapsed by remember(state, rowProgress, panelHeight, panelStart) {
+            derivedStateOf {
+                !state.expanded &&
+                    state.morph.value == 0f &&
+                    !panelHeight.isRunning &&
+                    !panelStart.isRunning &&
+                    rowProgress.all { it.value == 0f }
+            }
         }
 
-        LaunchedEffect(expanded, expandedHeight, capsuleWidth, collapsedStart) {
-            panelHeight.animateTo(
-                targetValue = if (expanded) expandedHeight else collapsedHeight,
-                animationSpec = railHeightMotion(expanded, expandedHeight - collapsedHeight),
-            )
-            settledCollapsed = !expanded
-        }
-
-        // The travel is a right angle, not a diagonal: the surface first changes size and shape in
-        // place at the start edge, and only then slides to the top centre (reversed on the way
-        // out, where it slides back before it grows). Both segments are read off the same morph —
-        // the slide owns the later half of it, so nothing happens on two independent clocks.
-        // The travel lives in the first share of the morph, so it happens while the surface still
-        // holds its other state: expanding slides back to the start edge and then grows; collapsing
-        // shrinks in place and then slides to the top centre. Either way the path turns a corner.
-
-        // Only a *settled* collapse hands over to the bar; expanding hands back immediately so the
-        // panel can start moving on the same frame.
-        if (!expanded && settledCollapsed) {
-            // At rest the collapsed rail is the navigation bar: same gestures, same indicator and
-            // same semantics, so dragging the capsule switches destinations exactly as it does in
-            // the bottom bar. The expand toggle takes the bar's leading slot.
-            GlassNavigationBar(
+        if (settledCollapsed) {
+            GlassNavigationBarImpl(
                 items = items,
                 selectedIndex = index,
-                onSelect = onSelectState,
+                onSelect = onSelect,
                 backdrop = backdrop,
                 modifier = Modifier
                     .offset(x = collapsedStart, y = collapsedTop)
                     .width(capsuleWidth),
                 defaultWindowInsetsPadding = false,
                 style = style,
+                shape = GlassShape(CornerSize(50), CornerSize(50), CornerSize(50), CornerSize(50)),
                 alpha = alpha,
-                material = material,
+                visible = true,
                 stroke = stroke,
                 shadow = shadow,
                 height = collapsedHeight,
-                labelsOnly = true,
-                labelStyle = labelStyle,
-                destinationWidths = tabWidths,
-                indicatorOverhang = 0.dp,
-                contentPaddingEnd = GlassNavigationRailDefaults.CollapsedEdgePadding,
-                leadingActionWidth = leadingActionWidth,
-                selectedColor = selectedColor,
-                unselectedColor = unselectedColor,
+                material = material,
                 indicatorColor = indicatorColor,
                 indicatorPressedColor = indicatorPressedColor,
-                leadingAction = if (hasToggle) {
+                selectedColor = selectedColor,
+                unselectedColor = unselectedColor,
+                trailingAction = null,
+                leadingAction = if (showToggle) {
                     {
-                        GlassIconButton(
-                            onClick = { onExpandedChangeState?.invoke(true) },
-                            size = GlassNavigationRailDefaults.CollapsedRowHeight,
-                            surfaceAlpha = 0f,
-                            shadow = null,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Basic.Sidebar,
-                                contentDescription = expandContentDescription,
-                                modifier = Modifier.size(GlassNavigationRailDefaults.IconSize),
-                                tint = unselectedColor,
-                            )
-                        }
+                        RailToggle(
+                            onClick = { state.expanded = true },
+                            size = RailCollapsedRowHeight,
+                            tint = unselectedColor,
+                            contentDescription = expandContentDescription,
+                        )
                     }
                 } else {
                     null
                 },
+                leadingActionWidth = leadingActionWidth,
+                labelsOnly = true,
+                labelStyle = labelStyle,
+                destinationWidths = tabWidths,
+                indicatorOverhang = 0.dp,
+                contentPaddingEnd = RailCollapsedEndPadding,
             )
         } else {
             GlassNavigationRailPanel(
                 items = items,
                 selectedIndex = index,
-                expanded = expanded,
-                progress = { progress.value },
+                state = state,
+                rowProgress = rowProgress,
+                iconAlpha = { iconAlpha.value },
+                showToggle = showToggle,
                 tabWidths = tabWidths,
                 labelWidths = labelWidths,
+                contentStart = contentStart,
                 collapsedWidth = capsuleWidth,
                 expandedWidth = expandedWidth,
-                collapsedStart = collapsedStart,
-                expandedStart = expandedStart,
+                panelStart = { panelStart.value },
                 collapsedTop = collapsedTop,
                 expandedTop = expandedTop,
                 panelHeight = { panelHeight.value },
-                capsuleHeight = collapsedHeight,
-                leadingActionWidth = leadingActionWidth,
                 backdrop = backdrop,
                 style = style,
                 alpha = alpha,
                 material = material,
                 stroke = stroke,
                 shadow = shadow,
-                hasToggle = hasToggle,
                 selectedColor = selectedColor,
                 unselectedColor = unselectedColor,
                 indicatorColor = indicatorColor,
                 labelStyle = labelStyle,
-                collapseContentDescription = collapseContentDescription,
-                onToggle = { onExpandedChangeState?.invoke(!expanded) },
-                onSelect = onSelectState,
+                toggleContentDescription = if (expanded) collapseContentDescription else expandContentDescription,
+                onSelect = onSelect,
                 scrollState = scrollState,
             )
         }
     }
 }
 
-/** The default selected tint: primary in dynamic colour themes, onSurface elsewhere. */
-@Composable
-private fun railSelectedColor(): Color = if (MiuixTheme.isDynamicColor) {
-    MiuixTheme.colorScheme.primary
-} else {
-    MiuixTheme.colorScheme.onSurface
-}
-
-/**
- * The panel side of the morph. Every row carries its own progress: it starts life as the row of the
- * collapsed bar and flies into the expanded column, so the hand-off at either end is invisible.
- */
+/** The panel side of the morph: the surface, the flying rows, their indicator and the toggle. */
 @Composable
 private fun GlassNavigationRailPanel(
     items: List<GlassNavigationItem>,
     selectedIndex: Int,
-    expanded: Boolean,
-    progress: () -> Float,
+    state: GlassNavigationRailState,
+    rowProgress: List<Animatable<Float, AnimationVector1D>>,
+    iconAlpha: () -> Float,
+    showToggle: Boolean,
     tabWidths: List<Dp>,
     labelWidths: List<Dp>,
+    contentStart: Dp,
     collapsedWidth: Dp,
     expandedWidth: Dp,
-    collapsedStart: Dp,
-    expandedStart: Dp,
+    panelStart: () -> Dp,
     collapsedTop: Dp,
     expandedTop: Dp,
     panelHeight: () -> Dp,
-    capsuleHeight: Dp,
-    leadingActionWidth: Dp,
     backdrop: Backdrop?,
     style: GlassStyle,
     alpha: Float,
     material: GlassMaterial?,
     stroke: EdgeStroke?,
     shadow: GlassShadow?,
-    hasToggle: Boolean,
     selectedColor: Color,
     unselectedColor: Color,
     indicatorColor: Color,
     labelStyle: TextStyle,
-    collapseContentDescription: String,
-    onToggle: () -> Unit,
+    toggleContentDescription: String,
     onSelect: (Int) -> Unit,
     scrollState: ScrollState,
 ) {
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    // The capsule's half-height and the panel's corner radius are the same value, so the shape does
-    // not depend on the morph and the surface never has to recompose while it moves.
-    val shape = GlassShape(GlassNavigationRailDefaults.CornerRadius)
-    val rowShape = RoundedCornerShape(percent = 50)
-    val itemHorizontalMargin = GlassNavigationRailDefaults.ItemHorizontalMargin
-    val itemContentPadding = GlassNavigationRailDefaults.ItemContentPadding
-    val iconColumnWidth = GlassNavigationRailDefaults.IconColumnWidth
-    val collapsedWidthPx = with(density) { collapsedWidth.toPx() }
-    val expandedWidthPx = with(density) { expandedWidth.toPx() }
-    val itemHorizontalMarginPx = with(density) { itemHorizontalMargin.toPx() }
-    val collapsedStartPx = with(density) { collapsedStart.toPx() }
-    val expandedStartPx = with(density) { expandedStart.toPx() }
-    val collapsedTopPx = with(density) { collapsedTop.toPx() }
-    val expandedTopPx = with(density) { expandedTop.toPx() }
-    val itemWidthPx = expandedWidthPx - itemHorizontalMarginPx * 2
-    // The icon fades out as the rail collapses: the capsule is text navigation.
-    val iconAlpha = animateFloatAsState(
-        targetValue = if (expanded) 1f else 0f,
-        animationSpec = if (expanded) {
-            tween(durationMillis = 200, easing = RailMorphEasing)
-        } else {
-            tween(durationMillis = 120, easing = RailMorphEasing)
-        },
-        label = "glassNavigationRailIconAlpha",
-    )
-
-    // The selection surface follows its own row's flight, so the chip lands with the row it belongs
-    // to instead of sliding on a separate timeline.
-    val selectionProgress = animateFloatAsState(
-        targetValue = if (expanded) 1f else 0f,
-        animationSpec = railRowMotion(selectedIndex, expanded),
-        label = "glassNavigationRailSelection",
-    )
+    val expanded = state.expanded
+    // The corner eases from the capsule's half-height to the panel's radius on the morph's clock,
+    // read when the outline is built rather than in composition.
+    val shape = remember(state) {
+        val corner = RailMorphCorner { state.progress }
+        GlassShape(corner, corner, corner, corner)
+    }
+    val itemWidth = expandedWidth - RailItemHorizontalMargin * 2
+    val contentHeight = RailExpandedRowTop + RailRowPitch * items.lastIndex + RailExpandedRowHeight +
+        GlassNavigationRailDefaults.Margin
+    // The column only scrolls once it has settled into the panel; while rows fly they keep their
+    // own geometry.
+    val scrollEnabled by remember(state, rowProgress) {
+        derivedStateOf { state.expanded && state.morph.value == 1f && rowProgress.all { it.value == 1f } }
+    }
 
     Box(
         Modifier
-            // The surface's rectangle is the morph: width from the capsule to the panel, height on
-            // its own settle, and a two-segment travel that holds the start edge until the size
-            // change is done. All of it is read here, so the geometry on the last frame of the
-            // morph is exactly the geometry the settled bar takes over.
-            .layout { measurable, constraints ->
-                val fraction = progress().coerceIn(0f, 1f)
-                val width = lerp(collapsedWidthPx, expandedWidthPx, fraction).roundToInt()
+            .layout { measurable, _ ->
+                val fraction = state.progress.coerceIn(0f, 1f)
+                val width = lerp(collapsedWidth.toPx(), expandedWidth.toPx(), fraction).roundToInt()
                 val height = panelHeight().roundToPx().coerceAtLeast(0)
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(width, height) { placeable.place(0, 0) }
             }
             .offset {
-                val fraction = progress().coerceIn(0f, 1f)
-                val slide = railSlideFraction(fraction)
                 IntOffset(
-                    x = lerp(expandedStartPx, collapsedStartPx, slide).roundToInt(),
-                    y = lerp(expandedTopPx, collapsedTopPx, slide).roundToInt(),
+                    x = panelStart().roundToPx(),
+                    y = lerp(collapsedTop.toPx(), expandedTop.toPx(), state.progress).roundToInt(),
                 )
             }
             .glassPanel(
@@ -549,92 +486,107 @@ private fun GlassNavigationRailPanel(
                     .clip(shape)
                     .background(MiuixTheme.colorScheme.surfaceContainer),
             )
-            .clip(shape)
-            .selectableGroup(),
+            .clip(shape),
     ) {
-        NavigationRailIndicator(
-            selectedIndex = selectedIndex,
-            rowProgress = {
-                selectionProgress.value
-            },
-            tabWidths = tabWidths,
-            itemWidthPx = itemWidthPx,
-            itemHorizontalMargin = itemHorizontalMargin,
-            color = indicatorColor,
-        )
-        items.forEachIndexed { position, item ->
-            key(position, item) {
-                val rowProgress = animateFloatAsState(
-                    targetValue = if (expanded) 1f else 0f,
-                    animationSpec = railRowMotion(position, expanded),
-                    label = "glassNavigationRailRow$position",
-                )
-                NavigationRailRow(
-                    item = item,
-                    selected = position == selectedIndex,
-                    position = position,
-                    rowProgress = { rowProgress.value },
-                    iconAlpha = { iconAlpha.value },
+        Box(
+            Modifier
+                .fillMaxSize()
+                // Rows scrolled up pass under the toggle's header, not over it.
+                .drawWithContent {
+                    clipRect(top = RailHeaderHeight.toPx() * state.progress) {
+                        this@drawWithContent.drawContent()
+                    }
+                }
+                .verticalScroll(scrollState, enabled = scrollEnabled),
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(contentHeight)
+                    .selectableGroup(),
+            ) {
+                NavigationRailIndicator(
+                    selectedIndex = selectedIndex,
+                    rowProgress = { rowProgress[selectedIndex].value },
+                    scrollOffset = { scrollState.value },
                     tabWidths = tabWidths,
-                    labelWidths = labelWidths,
-                    itemWidthPx = itemWidthPx,
-                    itemHorizontalMargin = itemHorizontalMargin,
-                    itemContentPadding = itemContentPadding,
-                    iconColumnWidth = iconColumnWidth,
-                    selectedColor = selectedColor,
-                    unselectedColor = unselectedColor,
-                    labelStyle = labelStyle,
-                    rowShape = rowShape,
-                    layoutDirection = layoutDirection,
-                    onClick = { onSelect(position) },
+                    contentStart = contentStart,
+                    itemWidth = itemWidth,
+                    color = indicatorColor,
                 )
+                items.forEachIndexed { position, item ->
+                    key(position, item) {
+                        NavigationRailRow(
+                            item = item,
+                            selected = position == selectedIndex,
+                            position = position,
+                            rowProgress = { rowProgress[position].value },
+                            iconAlpha = iconAlpha,
+                            scrollOffset = { scrollState.value },
+                            tabWidths = tabWidths,
+                            contentStart = contentStart,
+                            labelWidth = labelWidths[position],
+                            itemWidth = itemWidth,
+                            selectedColor = selectedColor,
+                            unselectedColor = unselectedColor,
+                            labelStyle = labelStyle,
+                            onClick = { onSelect(position) },
+                        )
+                    }
+                }
             }
         }
-        if (hasToggle) {
-            GlassIconButton(
-                onClick = onToggle,
+        if (showToggle) {
+            Box(
                 modifier = Modifier
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints)
-                        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-                    }
                     .offset {
-                        val fraction = progress().coerceIn(0f, 1f)
+                        val fraction = state.progress
                         IntOffset(
-                            x = with(density) {
-                                lerp(
-                                    GlassNavigationRailDefaults.CollapsedToggleStart.toPx(),
-                                    GlassNavigationRailDefaults.ExpandedToggleStart.toPx(),
-                                    fraction,
-                                ).roundToInt()
-                            },
-                            y = with(density) {
-                                androidx.compose.ui.unit.lerp(
-                                    (capsuleHeight - GlassNavigationRailDefaults.CollapsedRowHeight) / 2,
-                                    GlassNavigationRailDefaults.ExpandedToggleTop,
-                                    fraction,
-                                ).roundToPx()
-                            },
+                            x = lerp(RailCollapsedToggleBoxStart.toPx(), RailExpandedToggleStart.toPx(), fraction).roundToInt(),
+                            y = lerp(0f, RailExpandedToggleTop.toPx(), fraction).roundToInt(),
                         )
-                    },
-                size = GlassNavigationRailDefaults.CollapsedRowHeight,
-                surfaceAlpha = 0f,
-                shadow = null,
+                    }
+                    .size(RailToggleBoxSize),
+                contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = MiuixIcons.Basic.Sidebar,
-                    contentDescription = collapseContentDescription,
-                    modifier = Modifier.size(GlassNavigationRailDefaults.IconSize),
+                RailToggle(
+                    onClick = { state.expanded = !expanded },
+                    size = if (expanded) RailToggleBoxSize else RailCollapsedRowHeight,
                     tint = unselectedColor,
+                    contentDescription = toggleContentDescription,
                 )
             }
         }
     }
 }
 
+/** The expand/collapse toggle. Its surface is clear; only the icon and the press read. */
+@Composable
+private fun RailToggle(
+    onClick: () -> Unit,
+    size: Dp,
+    tint: Color,
+    contentDescription: String,
+) {
+    GlassIconButton(
+        onClick = onClick,
+        inheritTopBarMaterial = false,
+        size = size,
+        surfaceAlpha = 0f,
+        shadow = null,
+    ) {
+        Icon(
+            imageVector = MiuixIcons.Basic.Sidebar,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(RailIconSize),
+            tint = tint,
+        )
+    }
+}
+
 /**
- * One destination row. Its slot is interpolated from the collapsed bar's own destination into the
- * expanded column in the layout phase, and only the icon's opacity is animated in the draw phase.
+ * One destination row. Its slot is interpolated in the layout phase from the collapsed bar's
+ * destination into the expanded column; only the icon's opacity changes in the draw phase.
  */
 @Composable
 private fun NavigationRailRow(
@@ -643,118 +595,123 @@ private fun NavigationRailRow(
     position: Int,
     rowProgress: () -> Float,
     iconAlpha: () -> Float,
+    scrollOffset: () -> Int,
     tabWidths: List<Dp>,
-    labelWidths: List<Dp>,
-    itemWidthPx: Float,
-    itemHorizontalMargin: Dp,
-    itemContentPadding: Dp,
-    iconColumnWidth: Dp,
+    contentStart: Dp,
+    labelWidth: Dp,
+    itemWidth: Dp,
     selectedColor: Color,
     unselectedColor: Color,
     labelStyle: TextStyle,
-    rowShape: RoundedCornerShape,
-    layoutDirection: LayoutDirection,
     onClick: () -> Unit,
 ) {
-    val density = LocalDensity.current
-    val tint by androidx.compose.animation.animateColorAsState(
+    val tint by animateColorAsState(
         targetValue = if (selected) selectedColor else unselectedColor,
         animationSpec = GlassMotion.navContent(),
         label = "glassNavigationRailTint",
     )
-    // The collapsed slot is the row's own source position, so the flight begins where the bar's
-    // destination sits: the label is centred in its slot, and the row is that slot widened by the
-    // content padding and icon column the expanded row will need.
-    val slotWidth = tabWidths.getOrElse(position) { 0.dp }
-    val labelWidth = labelWidths.getOrElse(position) { 0.dp }
-    val slotStart = GlassNavigationRailDefaults.CollapsedContentStart +
-        tabWidths.take(position).fold(0.dp) { sum, width -> sum + width }
-    val collapsedTextInset = ((slotWidth - labelWidth) / 2).coerceAtLeast(0.dp)
-    val rowLeftPx = with(density) { itemHorizontalMargin.toPx() }
-    val rowTopPx = with(density) { GlassNavigationRailDefaults.RowTop.toPx() }
-    val expandedTopPx = with(density) {
-        (GlassNavigationRailDefaults.ExpandedRowTop + GlassNavigationRailDefaults.RowPitch * position).toPx()
-    }
-    val sourceWidthPx = with(density) {
-        (labelWidth + itemContentPadding * 2 + iconColumnWidth).toPx()
-    }
-    val sourceLeftPx = with(density) {
-        (slotStart + collapsedTextInset).toPx() - with(density) {
-            (itemContentPadding + iconColumnWidth).toPx()
+    // The flight starts where the bar draws this destination: the label centred in its slot, and
+    // the row that slot's label widened by the padding and icon column the expanded row needs. Both
+    // ends are fixed for a given layout, so only the interpolation runs per frame.
+    val density = LocalDensity.current
+    val geometry = remember(density, position, tabWidths, contentStart, labelWidth, itemWidth) {
+        with(density) {
+            // Everything is summed as the row's own padding and icon column round, and as the bar
+            // lays out its whole-pixel slots and centres the label in one, so neither the label's
+            // width nor the hand-off is a pixel off.
+            val padding = RailItemContentPadding.roundToPx()
+            val labelStart = padding + RailIconColumnWidth.roundToPx()
+            val slotStart = contentStart.roundToPx() + tabWidths.take(position).sumOf { it.roundToPx() }
+            val slotWidth = tabWidths[position].roundToPx()
+            val labelPx = labelWidth.roundToPx()
+            RailRowGeometry(
+                sourceStart = (slotStart + ((slotWidth - labelPx.coerceAtMost(slotWidth)) / 2f).roundToInt() - labelStart).toFloat(),
+                sourceWidth = (labelStart + labelPx + padding).toFloat(),
+                expandedTop = (RailExpandedRowTop + RailRowPitch * position).toPx(),
+                labelMaxWidth = (itemWidth - RailItemContentPadding * 2 - RailIconColumnWidth).roundToPx(),
+            )
         }
     }
     Row(
         modifier = Modifier
             .layout { measurable, constraints ->
                 val fraction = rowProgress().coerceIn(0f, 1f)
-                val width = lerp(sourceWidthPx, itemWidthPx, fraction).roundToInt().coerceAtLeast(0)
-                val height = with(density) {
-                    (
-                        GlassNavigationRailDefaults.CollapsedRowHeight +
-                            GlassNavigationRailDefaults.ExpandedRowGrowth * fraction
-                        ).toPx()
-                }.roundToInt()
+                val width = lerp(geometry.sourceWidth, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
                 val placeable = measurable.measure(Constraints.fixed(width, height))
-                val x = lerp(sourceLeftPx, rowLeftPx, fraction)
-                val y = lerp(rowTopPx, expandedTopPx, fraction)
+                val x = lerp(geometry.sourceStart, RailItemHorizontalMargin.toPx(), fraction)
+                // The column's scroll moves the expanded rows only: the collapsed slot stays on
+                // the capsule's row wherever the column was left.
+                val y = lerp(RailRowTop.toPx() + scrollOffset(), geometry.expandedTop, fraction)
                 layout(constraints.maxWidth, constraints.maxHeight) {
-                    if (layoutDirection == LayoutDirection.Rtl) {
-                        placeable.placeRelative(constraints.maxWidth - x.roundToInt() - width, y.roundToInt())
-                    } else {
-                        placeable.placeRelative(x.roundToInt(), y.roundToInt())
-                    }
+                    placeable.placeRelative(x.roundToInt(), y.roundToInt())
                 }
             }
-            .clip(rowShape)
+            .clip(RoundedCornerShape(percent = 50))
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .padding(horizontal = itemContentPadding),
+            .padding(horizontal = RailItemContentPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .width(iconColumnWidth)
+                .width(RailIconColumnWidth)
                 .graphicsLayer { this.alpha = iconAlpha() },
         ) {
             BadgedBox(badge = { item.badge?.invoke() }) {
                 Icon(
                     imageVector = item.icon,
                     contentDescription = null,
-                    modifier = Modifier.size(GlassNavigationRailDefaults.IconSize),
+                    modifier = Modifier.size(RailIconSize),
                     tint = tint,
                 )
             }
         }
-        Text(
-            text = item.label.orEmpty(),
-            color = tint,
-            style = labelStyle,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (item.label == null) {
+        if (item.label != null) {
+            Text(
+                text = item.label,
+                // The flying row is sized from a separate measurement of the label, which can
+                // disagree with the label's own by a pixel or two. Never offer the label less than
+                // the settled row will, so it only ellipsizes when it would not fit the panel.
+                modifier = Modifier.layout { measurable, constraints ->
+                    val placeable = measurable.measure(
+                        constraints.copy(maxWidth = maxOf(constraints.maxWidth, geometry.labelMaxWidth)),
+                    )
+                    layout(placeable.width.coerceAtMost(constraints.maxWidth), placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                },
+                color = tint,
+                style = labelStyle,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+            )
+        } else {
             item.contentDescription?.let { description ->
-                Spacer(
-                    Modifier.semantics { contentDescription = description },
-                )
+                Spacer(Modifier.semantics { contentDescription = description })
             }
         }
     }
 }
 
-/** The selection surface: the bar's slot growing into the expanded row. */
+/**
+ * The selection surface: the bar's slot growing into the expanded row. A new selection moves it at
+ * once, landing with the row's own press feedback rather than trailing behind it.
+ */
 @Composable
 private fun NavigationRailIndicator(
     selectedIndex: Int,
     rowProgress: () -> Float,
+    scrollOffset: () -> Int,
     tabWidths: List<Dp>,
-    itemWidthPx: Float,
-    itemHorizontalMargin: Dp,
+    contentStart: Dp,
+    itemWidth: Dp,
     color: Color,
 ) {
-    val density = LocalDensity.current
-    val slotWidth = tabWidths.getOrElse(selectedIndex) { 0.dp }
-    val collapsedWidthPx = with(density) { slotWidth.toPx() }
+    // The collapsed slot is the bar's own indicator: its start and width, in the bar's float metric.
+    val collapsedSlot = remember(selectedIndex, tabWidths, contentStart) {
+        contentStart + tabWidths.take(selectedIndex).fold(0.dp) { sum, width -> sum + width } to tabWidths[selectedIndex]
+    }
     GlassNavigationIndicator(
         pressed = false,
         scaleOnPress = false,
@@ -762,30 +719,17 @@ private fun NavigationRailIndicator(
         pressedColor = color,
         modifier = Modifier.layout { measurable, constraints ->
             val fraction = rowProgress().coerceIn(0f, 1f)
-            val width = lerp(collapsedWidthPx, itemWidthPx, fraction).roundToInt().coerceAtLeast(0)
-            val height = with(density) {
-                (
-                    GlassNavigationRailDefaults.CollapsedRowHeight +
-                        GlassNavigationRailDefaults.ExpandedRowGrowth * fraction
-                    ).toPx()
-            }.roundToInt()
+            val (collapsedStartDp, collapsedWidthDp) = collapsedSlot
+            val collapsedStart = collapsedStartDp.toPx()
+            val width = lerp(collapsedWidthDp.toPx(), itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+            val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
             val placeable = measurable.measure(Constraints.fixed(width, height))
-            val x = with(density) { itemHorizontalMargin.toPx() } * fraction +
-                (
-                    with(density) { GlassNavigationRailDefaults.LeadingActionWidth.toPx() } +
-                        with(density) { tabWidths.take(selectedIndex).fold(0.dp) { sum, width -> sum + width }.toPx() }
-                    ) *
-                (1f - fraction)
-            val y = with(density) {
-                lerp(
-                    GlassNavigationRailDefaults.RowTop.toPx(),
-                    (
-                        GlassNavigationRailDefaults.ExpandedRowTop +
-                            GlassNavigationRailDefaults.RowPitch * selectedIndex
-                        ).toPx(),
-                    fraction,
-                )
-            }
+            val x = lerp(collapsedStart, RailItemHorizontalMargin.toPx(), fraction)
+            val y = lerp(
+                RailRowTop.toPx() + scrollOffset(),
+                RailExpandedRowTop.toPx() + RailRowPitch.toPx() * selectedIndex,
+                fraction,
+            )
             layout(constraints.maxWidth, constraints.maxHeight) {
                 placeable.placeRelative(x.roundToInt(), y.roundToInt())
             }
@@ -793,44 +737,60 @@ private fun NavigationRailIndicator(
     )
 }
 
-/** Padding a collapsed slot carries around its label, in the bar's own metric. */
-private fun glassRailDestinationPadding(): Dp = GlassNavigationRailDefaults.IconSize +
-    GlassNavigationBarDefaults.IndicatorOverhang * 2
+/** A row's fixed flight ends, in pixels. */
+private class RailRowGeometry(
+    val sourceStart: Float,
+    val sourceWidth: Float,
+    val expandedTop: Float,
+    val labelMaxWidth: Int,
+)
 
-/** Duration of the rail's expand/collapse morph. */
-private const val RAIL_MORPH_DURATION_MILLIS: Int = 300
-
-/** Easing of the rail's expand/collapse morph. */
-private val RailMorphEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
-
-/**
- * The share of the morph the horizontal travel owns. The rest belongs to the size and shape
- * change, so the surface turns a corner instead of drifting diagonally.
- */
-private const val RAIL_SLIDE_PORTION = 0.45f
-
-/** Eases the travel segment of the morph, clamped so it holds still outside its share. */
-private fun railSlideProgress(fraction: Float): Float {
-    val t = fraction.coerceIn(0f, 1f)
-    return t * t * (3f - 2f * t)
+/** A corner that eases from the capsule's half-height to the panel's radius as [progress] rises. */
+@Stable
+private class RailMorphCorner(private val progress: () -> Float) : CornerSize {
+    override fun toPx(shapeSize: Size, density: Density): Float = with(density) {
+        lerp(RailCollapsedCornerRadius.toPx(), RailExpandedCornerRadius.toPx(), progress().coerceIn(0f, 1f))
+    }
 }
 
-/** The morph's travel share: 1 while the surface still sits at the collapsed position. */
-private fun railSlideFraction(fraction: Float): Float = railSlideProgress((RAIL_SLIDE_PORTION - fraction) / RAIL_SLIDE_PORTION)
-
 /**
- * One row's flight. The frequency falls slightly with the row's index so a column of rows reads as
- * following its leader rather than moving as one rigid block.
+ * Keeps a geometry value on [target]. Flipping [expanded] animates to it with [spec]; a target that
+ * moves on its own, as a window resize does, is followed at once unless a flip is still settling.
  */
+@Composable
+private fun rememberRailMotion(
+    target: Dp,
+    expanded: Boolean,
+    spec: (expanding: Boolean) -> AnimationSpec<Dp>,
+): Animatable<Dp, AnimationVector1D> {
+    val animatable = remember { Animatable(target, Dp.VectorConverter) }
+    val currentTarget by rememberUpdatedState(target)
+    val currentExpanded by rememberUpdatedState(expanded)
+    val currentSpec by rememberUpdatedState(spec)
+    LaunchedEffect(animatable) {
+        var settledExpanded = currentExpanded
+        var animating = false
+        snapshotFlow { currentExpanded to currentTarget }.collectLatest { (expanding, value) ->
+            if (expanding != settledExpanded || animating) {
+                settledExpanded = expanding
+                animating = true
+                animatable.animateTo(value, currentSpec(expanding))
+                animating = false
+            } else {
+                animatable.snapTo(value)
+            }
+        }
+    }
+    return animatable
+}
+
+/** One row's flight. Later rows respond slightly slower, so the column follows its leader. */
 private fun railRowMotion(position: Int, expanded: Boolean): SpringSpec<Float> {
     val frequency = (if (expanded) 26.75f else 21.5f) / (1f + 0.03f * position)
     return spring(stiffness = frequency * frequency, dampingRatio = 0.97f, visibilityThreshold = 0.001f)
 }
 
-/**
- * Height settle of the surface. Expanding and collapsing use different springs, so the panel lands
- * with a short rebound while the capsule's collapse stays crisp.
- */
+/** The panel's height settle: a short rebound when expanding, crisp when collapsing. */
 private fun railHeightMotion(expanded: Boolean, distance: Dp): SpringSpec<Dp> {
     val (stiffness, dampingRatio) = if (expanded) 220f to 0.83f else 462.25f to 0.97f
     return spring(
@@ -839,3 +799,39 @@ private fun railHeightMotion(expanded: Boolean, distance: Dp): SpringSpec<Dp> {
         visibilityThreshold = (distance * 0.001f).coerceAtLeast(0.1.dp),
     )
 }
+
+private val RailMorphEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
+private val RailMorphMotion = tween<Float>(durationMillis = 300, easing = RailMorphEasing)
+private val RailMorphDpMotion = tween<Dp>(durationMillis = 300, easing = RailMorphEasing)
+private val RailReboundMotion = spring<Dp>(stiffness = 200f, dampingRatio = 0.8f)
+private val RailIconEnterMotion = tween<Float>(durationMillis = 200, easing = RailMorphEasing)
+private val RailIconExitMotion = tween<Float>(durationMillis = 120, easing = RailMorphEasing)
+
+private val RailIconSize = 24.dp
+private val RailIconColumnWidth = RailIconSize + 12.dp
+private val RailItemContentPadding = 14.dp
+private val RailItemHorizontalMargin = 12.dp
+private val RailCollapsedRowHeight = GlassNavigationRailDefaults.CollapsedHeight -
+    GlassNavigationBarDefaults.IndicatorPaddingVertical * 2
+private val RailRowGrowth = 4.dp
+private val RailExpandedRowHeight = RailCollapsedRowHeight + RailRowGrowth
+private val RailRowPitch = RailExpandedRowHeight + 4.dp
+private val RailRowTop = GlassNavigationBarDefaults.IndicatorPaddingVertical
+private val RailExpandedRowTop = 64.dp
+private val RailHeaderHeight = RailExpandedRowTop - (RailRowPitch - RailExpandedRowHeight)
+private val RailCollapsedCornerRadius = GlassNavigationRailDefaults.CollapsedHeight / 2
+private val RailExpandedCornerRadius = 20.dp
+
+/** The toggle's box: the bar's leading slot while collapsed, the header corner while expanded. */
+private val RailToggleBoxSize = GlassTopAppBarDefaults.ButtonSize
+private val RailLeadingActionWidth = RailToggleBoxSize + 4.dp
+private val RailCollapsedToggleBoxStart = GlassNavigationBarDefaults.ContentPaddingHorizontal +
+    (RailLeadingActionWidth - RailToggleBoxSize) / 2
+private val RailExpandedToggleStart = 16.dp
+private val RailExpandedToggleTop = 12.dp
+private val RailCollapsedEndPadding = 3.dp
+
+/** A collapsed slot's padding around its label, the bar's indicator reach on each side. */
+private val RailSlotPadding = RailIconSize + GlassNavigationBarDefaults.IndicatorOverhang * 2
+private val RailCollapsedSideReserve = 81.dp
+private val RailMinCollapsedWidth = 192.dp

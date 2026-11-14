@@ -218,21 +218,6 @@ object GlassNavigationBarDefaults {
  * @param trailingAction Optional independent action outside the glass capsule. It owns its size
  *   and material, and shares the bar's show/hide transition. Adding or removing it animates its
  *   size, opacity and reserved space. Use [GlassIconButton] for a round action.
- * @param leadingAction Optional independent control inside the bar's leading end. It keeps its
- *   own material and press feedback, and its area is excluded from destination hit testing.
- * @param leadingActionWidth The width reserved for [leadingAction], excluded from destination
- *   layout and hit testing. It is also where a collapsed side rail's expand toggle sits.
- * @param labelsOnly Hide the destination icons and show their labels alone, on one line. The
- *   navigation itself is unchanged: same slots, same drag, same semantics. Use this when the bar
- *   is a collapsed side rail, where icons would read as a different navigation model.
- * @param labelStyle The destination label style. Defaults to the bar's own caption style.
- * @param destinationWidths Per-destination widths, so a bar can size its slots to its labels
- *   instead of splitting the width evenly. `null` keeps the even split.
- * @param indicatorOverhang How far the indicator reaches past its destination on each side. `0.dp`
- *   makes it cover the slot exactly.
- * @param contentPaddingEnd The inset after the last destination.
- * @param selectionVisible Whether the indicator is drawn. Use `false` while the caller animates
- *   its own selection surface over the bar.
  */
 @Composable
 fun GlassNavigationBar(
@@ -255,6 +240,63 @@ fun GlassNavigationBar(
     selectedColor: Color = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onBackground,
     unselectedColor: Color = MiuixTheme.colorScheme.onBackground,
     trailingAction: (@Composable () -> Unit)? = null,
+) {
+    GlassNavigationBarImpl(
+        items = items,
+        selectedIndex = selectedIndex,
+        onSelect = onSelect,
+        backdrop = backdrop,
+        modifier = modifier,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        style = style,
+        shape = shape,
+        alpha = alpha,
+        visible = visible,
+        stroke = stroke,
+        shadow = shadow,
+        height = height,
+        material = material,
+        indicatorColor = indicatorColor,
+        indicatorPressedColor = indicatorPressedColor,
+        selectedColor = selectedColor,
+        unselectedColor = unselectedColor,
+        trailingAction = trailingAction,
+    )
+}
+
+/**
+ * The bar's implementation, shared with the collapsed face of [GlassNavigationRail].
+ *
+ * @param leadingAction Optional control inside the bar's leading end, centred in
+ *   [leadingActionWidth] and excluded from destination layout and hit testing.
+ * @param leadingActionWidth The width reserved for [leadingAction].
+ * @param labelsOnly Hide the destination icons and show their labels alone, on one line.
+ * @param labelStyle The destination label style. `null` uses the bar's caption style.
+ * @param destinationWidths Per-destination widths. `null` splits the width evenly.
+ * @param indicatorOverhang How far the indicator reaches past its destination on each side.
+ * @param contentPaddingEnd The inset after the last destination.
+ */
+@Composable
+internal fun GlassNavigationBarImpl(
+    items: List<GlassNavigationItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    backdrop: Backdrop?,
+    defaultWindowInsetsPadding: Boolean,
+    style: GlassStyle,
+    shape: GlassShape,
+    alpha: Float,
+    visible: Boolean,
+    stroke: EdgeStroke?,
+    shadow: GlassShadow?,
+    height: Dp,
+    material: GlassMaterial?,
+    indicatorColor: Color,
+    indicatorPressedColor: Color,
+    selectedColor: Color,
+    unselectedColor: Color,
+    trailingAction: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
     leadingAction: (@Composable () -> Unit)? = null,
     leadingActionWidth: Dp = 0.dp,
     labelsOnly: Boolean = false,
@@ -262,7 +304,6 @@ fun GlassNavigationBar(
     destinationWidths: List<Dp>? = null,
     indicatorOverhang: Dp = GlassNavigationBarDefaults.IndicatorOverhang,
     contentPaddingEnd: Dp = GlassNavigationBarDefaults.ContentPaddingHorizontal,
-    selectionVisible: Boolean = true,
 ) {
     if (items.isEmpty()) return
     require(destinationWidths == null || destinationWidths.size == items.size)
@@ -298,9 +339,19 @@ fun GlassNavigationBar(
         }
     }
 
+    val spans = measuredWidths ?: List(items.size) {
+        ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
+    }
+    val targetLeft = contentStart - overhang + navigationSlotPosition(index.toFloat(), spans)
+    val targetRight = contentStart + overhang + navigationSlotPosition(index + 1f, spans)
+    // Measured slots do not depend on the bar's own size, so they are known before it is laid out.
+    val hasSlots = measuredWidths != null || barWidth > contentStart + contentInset
+
     val scope = rememberCoroutineScope()
-    val left = remember { Animatable(0f) }
-    val right = remember { Animatable(0f) }
+    // With measured slots the indicator starts on the selection, so a bar that takes over from
+    // another surface, as the collapsed rail does, draws it from its first frame.
+    val left = remember { Animatable(if (measuredWidths != null) targetLeft else 0f) }
+    val right = remember { Animatable(if (measuredWidths != null) targetRight else 0f) }
     fun animateIndicator(
         newLeft: Float,
         newRight: Float,
@@ -313,15 +364,8 @@ fun GlassNavigationBar(
         scope.launch { right.animateTo(newRight, rightSpring) }
     }
 
-    val spans = measuredWidths ?: List(items.size) {
-        ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
-    }
-    val targetLeft = contentStart - overhang + navigationSlotPosition(index.toFloat(), spans)
-    val targetRight = contentStart + overhang + navigationSlotPosition(index + 1f, spans)
-    val hasSlots = barWidth > contentStart + contentInset
-    // Settle after composition commits the selection returned by onSelect. The measured-width case
-    // needs the bar's own size as a key too: its targets do not depend on it, so the first frame's
-    // "no slot yet" result would otherwise never be revisited.
+    // Settle after composition commits the selection returned by onSelect. The even split waits for
+    // the bar's size, so its first "no slot yet" result is revisited once it is known.
     LaunchedEffect(index, settleGeneration, targetLeft, targetRight, hasSlots) {
         if (dragging.value) return@LaunchedEffect
         if (!hasSlots) return@LaunchedEffect
@@ -465,7 +509,11 @@ fun GlassNavigationBar(
                                         }
                                         val chipW = navigationDragWidth(selectionX - contentStart, currentSpans) +
                                             overhang * 2f
-                                        val maxLeft = (width - chipW).coerceAtLeast(0f)
+                                        // The chip may overshoot the destinations by the trailing inset at either
+                                        // end, which the rendered bounds turn into the edge squeeze. A leading
+                                        // action moves the start of that travel past its own slot.
+                                        val travelStart = contentStart - contentInset
+                                        val maxLeft = (width - chipW).coerceAtLeast(travelStart)
                                         val x = logicalX(change.position.x)
                                         // Both positions use the current local coordinates, so their
                                         // delta excludes movement caused by the capsule's placement.
@@ -480,9 +528,9 @@ fun GlassNavigationBar(
                                             // Preserve the press anchor, not the unfinished animation's lag.
                                             grabOffset = downX - pressedLeft
                                         }
-                                        val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
+                                        val chipLeft = (x - grabOffset).coerceIn(travelStart, maxLeft)
                                         val next = indexAt(selectionX)
-                                        val target = navigationDragTarget(chipLeft, chipW, width, delta, next != current)
+                                        val target = navigationDragTarget(chipLeft, chipW, travelStart, width, delta, next != current)
                                         animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
                                         current = next
                                         pressedIndex = next
@@ -539,7 +587,7 @@ fun GlassNavigationBar(
             ) {
                 items.forEachIndexed { position, item ->
                     key(item) {
-                        val selected = selectionVisible && position == index
+                        val selected = position == index
                         val tint by animateColorAsState(
                             targetValue = if (selected) selectedColor else unselectedColor,
                             animationSpec = GlassMotion.navContent(),
@@ -630,7 +678,7 @@ fun GlassNavigationBar(
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = GlassNavigationBarDefaults.ContentPaddingHorizontal - 4.dp)
+                        .padding(start = GlassNavigationBarDefaults.ContentPaddingHorizontal)
                         .size(leadingWidth, height),
                     contentAlignment = Alignment.Center,
                 ) { action() }

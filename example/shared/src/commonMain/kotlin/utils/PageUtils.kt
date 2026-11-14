@@ -44,6 +44,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
 
+/** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
+val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
+
 @Composable
 fun Modifier.pageScrollModifiers(
     enableScrollEndHaptic: Boolean,
@@ -110,6 +113,7 @@ fun AdaptiveTopAppBar(
 ) {
     if (!showTopAppBar) return
     val appState = LocalAppState.current
+    val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val backgroundBlur = LocalTopAppBarBackgroundBlur.current
@@ -131,7 +135,7 @@ fun AdaptiveTopAppBar(
             progressiveBlur = appState.glassTopBarProgressiveBlur && appState.enableBlur,
             scrollBehavior = scrollBehavior,
             visualContentOffset = visualContentOffset,
-            titleAlpha = titleAlpha,
+            titleAlpha = { titleAlpha() * chromeTitleAlpha() },
             backgroundAlpha = { if (backgroundBlur || !shaderSupported) backgroundAlpha() else 0f },
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             bandBrush = bandBrush,
@@ -146,7 +150,8 @@ fun AdaptiveTopAppBar(
             modifier = contentModifier,
             subtitle = subtitle,
             color = color,
-            titleColor = titleColor,
+            // This bar has no draw-phase title opacity, so it follows the chrome in composition.
+            titleColor = titleColor.copy(alpha = titleColor.alpha * chromeTitleAlpha()),
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             navigationIcon = navigationIcon,

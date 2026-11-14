@@ -72,6 +72,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
+import utils.TopLayer
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
@@ -345,24 +346,27 @@ fun MainPage(
             }
         }
         if (glassTopBar) {
-            GlassIconDropdownMenu(
-                show = showOptionsMenu,
-                onDismissRequest = { showOptionsMenu = false },
-                anchor = optionsAnchor,
-                anchorContent = { Icon(MiuixIcons.Glass.Tune, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                entries = cascadingEntries,
-                backdrop = pageBackdrop,
-                collapseOnSelection = cascadingCollapseOnSelection,
-            )
-            GlassIconDropdownMenu(
-                show = showMoreMenu,
-                onDismissRequest = { showMoreMenu = false },
-                anchor = moreAnchor,
-                anchorContent = { Icon(MiuixIcons.Glass.More, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                entries = moreItems,
-                backdrop = pageBackdrop,
-                collapseOnSelection = false,
-            )
+            // Above the floating glass sidebar, which overlays the page in wide layouts.
+            TopLayer {
+                GlassIconDropdownMenu(
+                    show = showOptionsMenu,
+                    onDismissRequest = { showOptionsMenu = false },
+                    anchor = optionsAnchor,
+                    anchorContent = { Icon(MiuixIcons.Glass.Tune, contentDescription = null, modifier = Modifier.size(28.dp)) },
+                    entries = cascadingEntries,
+                    backdrop = pageBackdrop,
+                    collapseOnSelection = cascadingCollapseOnSelection,
+                )
+                GlassIconDropdownMenu(
+                    show = showMoreMenu,
+                    onDismissRequest = { showMoreMenu = false },
+                    anchor = moreAnchor,
+                    anchorContent = { Icon(MiuixIcons.Glass.More, contentDescription = null, modifier = Modifier.size(28.dp)) },
+                    entries = moreItems,
+                    backdrop = pageBackdrop,
+                    collapseOnSelection = false,
+                )
+            }
         }
     }
 }

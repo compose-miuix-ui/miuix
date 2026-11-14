@@ -45,7 +45,7 @@ import ui.keyColorFor
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
     val state = rememberWindowState(
-        size = DpSize(1200.dp, 800.dp),
+        size = DpSize(420.dp, 840.dp),
         position = WindowPosition.Aligned(Alignment.Center),
     )
     val isHotReloadMode = System.getProperty("app.mode") == "hot"

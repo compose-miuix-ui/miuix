@@ -83,14 +83,6 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | selectedColor | Color | Selected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
 | unselectedColor | Color | Unselected icon and label tint | MiuixTheme.colorScheme.onBackground | No |
 | trailingAction | (@Composable () -> Unit)? | Independent action outside the capsule; adding or removing it animates scale, opacity, capsule width and spacing | null | No |
-| leadingAction | (@Composable () -> Unit)? | Independent control inside the capsule's leading end, outside destination hit testing | null | No |
-| leadingActionWidth | Dp | Width reserved for `leadingAction` | 0.dp | No |
-| labelsOnly | Boolean | Hide the icons and show the labels alone on one line, keeping the full navigation interaction | false | No |
-| labelStyle | TextStyle? | Destination label style; null uses the bar's caption style | null | No |
-| destinationWidths | List\<Dp>? | Per-destination widths instead of an even split; null keeps the even split | null | No |
-| indicatorOverhang | Dp | How far the indicator reaches past a destination on each side | GlassNavigationBarDefaults.IndicatorOverhang | No |
-| contentPaddingEnd | Dp | Inset after the last destination | GlassNavigationBarDefaults.ContentPaddingHorizontal | No |
-| selectionVisible | Boolean | Whether the indicator is drawn; false while the caller animates its own selection surface | true | No |
 
 ### GlassNavigationItem Properties {#glassnavigationitem}
 
@@ -99,6 +91,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | icon | ImageVector | Destination icon | - | Yes |
 | label | String? | Caption below the icon | null | No |
 | contentDescription | String? | Accessibility description; falls back to label | null | No |
+| badge | (@Composable () -> Unit)? | Badge drawn on the icon, typically a `Badge`; keep the item instance stable | null | No |
 
 ### GlassNavigationBarDefaults Object {#glassnavigationbardefaults}
 
