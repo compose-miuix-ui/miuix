@@ -77,13 +77,13 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Home
+import top.yukonga.miuix.kmp.icon.glass.Add
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
-import top.yukonga.miuix.kmp.icon.glass.Create
 import top.yukonga.miuix.kmp.icon.glass.Edit
-import top.yukonga.miuix.kmp.icon.glass.Image
+import top.yukonga.miuix.kmp.icon.glass.HomeOutline
+import top.yukonga.miuix.kmp.icon.glass.ImageOutline
 import top.yukonga.miuix.kmp.icon.glass.Search
-import top.yukonga.miuix.kmp.icon.glass.Settings
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassShadows
@@ -97,10 +97,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 
 private val NavItems: List<GlassNavigationItem> = listOf(
-    GlassNavigationItem(MiuixIcons.Home, "Home"),
-    GlassNavigationItem(MiuixIcons.Glass.Create, "Create"),
-    GlassNavigationItem(MiuixIcons.Glass.Image, "Gallery"),
-    GlassNavigationItem(MiuixIcons.Glass.Settings, "Settings"),
+    GlassNavigationItem(MiuixIcons.Glass.HomeOutline, "Home"),
+    GlassNavigationItem(MiuixIcons.Glass.Add, "Add"),
+    GlassNavigationItem(MiuixIcons.Glass.ImageOutline, "Image"),
+    GlassNavigationItem(MiuixIcons.Glass.SettingsOutline, "Settings"),
 )
 
 private val TabRowPlacements = listOf("TopAppBar", "List")
@@ -339,7 +339,7 @@ fun GlassPage(padding: PaddingValues) {
                                     ),
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Glass.Settings,
+                                        imageVector = MiuixIcons.Glass.SettingsOutline,
                                         contentDescription = "Sort",
                                         modifier = Modifier.size(28.dp).glassPopupAnchorContent(menuAnchor),
                                         tint = MiuixTheme.colorScheme.onSurface,
@@ -547,7 +547,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = pageBackdrop,
                 anchorContent = {
                     Icon(
-                        imageVector = MiuixIcons.Glass.Settings,
+                        imageVector = MiuixIcons.Glass.SettingsOutline,
                         contentDescription = null,
                         modifier = Modifier.size(28.dp),
                         tint = MiuixTheme.colorScheme.onSurface,
@@ -562,7 +562,7 @@ fun GlassPage(padding: PaddingValues) {
                 GlassPopupItem(
                     text = "View",
                     onClick = { overlayIndex = OVERLAY_NONE },
-                    icon = MiuixIcons.Glass.Image,
+                    icon = MiuixIcons.Glass.ImageOutline,
                     summary = "List view",
                     showArrow = true,
                 )
@@ -585,7 +585,7 @@ fun GlassPage(padding: PaddingValues) {
                 GlassPopupItem(
                     text = "Settings",
                     onClick = { overlayIndex = OVERLAY_NONE },
-                    icon = MiuixIcons.Glass.Settings,
+                    icon = MiuixIcons.Glass.SettingsOutline,
                 )
             }
         }

@@ -101,8 +101,8 @@ fun IconsPage(
     val searchCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val density = LocalDensity.current
 
-    val iconFamilies = remember { listOf("Original", "Glass") }
-    var glass by remember { mutableStateOf(false) }
+    val iconFamilies = remember { listOf("Glass", "Original") }
+    var glass by remember { mutableStateOf(true) }
     val allIcons = remember(glass) { if (glass) MiuixIcons.Glass.All else MiuixIcons.All }
     val regularIcons = remember(allIcons) { allIcons["Regular"] ?: emptyList() }
     val weightVariants: List<Pair<String, List<ImageVector>>> = remember(allIcons) {
@@ -217,9 +217,9 @@ fun IconsPage(
                             if (glassTopBar) {
                                 GlassSegmentedTabRow(
                                     tabs = iconFamilies,
-                                    selectedIndex = if (glass) 1 else 0,
+                                    selectedIndex = if (glass) 0 else 1,
                                     onSelect = { index ->
-                                        glass = index == 1
+                                        glass = index == 0
                                         expandedIndex = -1
                                     },
                                     backdrop = backdrop,
@@ -247,9 +247,9 @@ fun IconsPage(
                                     }
                                     TabRow(
                                         tabs = iconFamilies,
-                                        selectedTabIndex = if (glass) 1 else 0,
+                                        selectedTabIndex = if (glass) 0 else 1,
                                         onTabSelected = { index ->
-                                            glass = index == 1
+                                            glass = index == 0
                                             expandedIndex = -1
                                         },
                                         modifier = Modifier.padding(horizontal = 12.dp).padding(top = 6.dp, bottom = 12.dp),

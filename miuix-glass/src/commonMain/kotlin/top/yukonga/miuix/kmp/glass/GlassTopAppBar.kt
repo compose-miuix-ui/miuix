@@ -154,7 +154,7 @@ object GlassTopAppBarDefaults {
     fun bandBrush(color: Color): Brush = TopAppBarBandBrush(color)
 
     /** How far the band reaches past the bottom of the bar. */
-    val BandOverhang: Dp = 48.dp
+    val BandOverhang: Dp = 28.dp
 
     @Composable
     private fun isDarkTheme(): Boolean = MiuixTheme.colorScheme.background.luminance() < 0.5f

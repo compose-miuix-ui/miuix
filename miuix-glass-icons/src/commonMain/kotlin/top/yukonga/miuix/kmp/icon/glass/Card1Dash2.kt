@@ -1,0 +1,367 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.icon.glass
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.group
+import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+
+val MiuixIcons.Glass.Card1Dash2: ImageVector
+    get() = MiuixIcons.Glass.Regular.Card1Dash2
+
+val MiuixIcons.Glass.Light.Card1Dash2: ImageVector
+    get() {
+        if (_card1Dash2SurfaceLight != null) return _card1Dash2SurfaceLight!!
+        _card1Dash2SurfaceLight = buildHyperOSIcon(
+            name = "Card1Dash2.Glass.Light",
+            pathData = listOf(
+                PathNode.MoveTo(1016.8f, -108f),
+                PathNode.QuadTo(1055.2f, -88.8f, 1075f, -49.8f),
+                PathNode.QuadTo(1085.1f, -30.6f, 1087.4f, -1.8f),
+                PathNode.QuadTo(1089.7f, 26.9f, 1089.7f, 98f),
+                PathNode.VerticalTo(482f),
+                PathNode.QuadTo(1089.7f, 515f, 1088.9f, 539.1f),
+                PathNode.QuadTo(1088.1f, 563.2f, 1085.1f, 577.9f),
+                PathNode.QuadTo(1079f, 604.8f, 1061.4f, 632.9f),
+                PathNode.QuadTo(1052.9f, 645.4f, 1040.1f, 660.6f),
+                PathNode.QuadTo(1027.2f, 675.7f, 1007.7f, 694.7f),
+                PathNode.LineTo(997.7f, 704.7f),
+                PathNode.LineTo(920.7f, 781.7f),
+                PathNode.LineTo(911.7f, 790.7f),
+                PathNode.QuadTo(892.7f, 810.2f, 877.1f, 824.1f),
+                PathNode.QuadTo(861.4f, 837.9f, 848.9f, 845.4f),
+                PathNode.QuadTo(825f, 860.6f, 793.9f, 868.1f),
+                PathNode.QuadTo(778.8f, 871.7f, 754.9f, 872.7f),
+                PathNode.QuadTo(731f, 873.7f, 698f, 873.7f),
+                PathNode.HorizontalTo(460f),
+                PathNode.QuadTo(391.2f, 873.7f, 361.6f, 871.2f),
+                PathNode.QuadTo(332f, 868.7f, 312.2f, 859f),
+                PathNode.QuadTo(274.2f, 839.2f, 255f, 800.8f),
+                PathNode.QuadTo(244.9f, 781.6f, 242.6f, 752.8f),
+                PathNode.QuadTo(240.3f, 724.1f, 240.3f, 653f),
+                PathNode.VerticalTo(98f),
+                PathNode.QuadTo(240.3f, 26.9f, 242.6f, -1.8f),
+                PathNode.QuadTo(244.9f, -30.6f, 255f, -49.8f),
+                PathNode.QuadTo(274.8f, -89.2f, 312.2f, -108f),
+                PathNode.QuadTo(332f, -117.7f, 361.6f, -120.2f),
+                PathNode.QuadTo(391.2f, -122.7f, 460f, -122.7f),
+                PathNode.HorizontalTo(869f),
+                PathNode.QuadTo(940.1f, -122.7f, 968.8f, -120.4f),
+                PathNode.QuadTo(997.6f, -118.1f, 1016.8f, -108f),
+                PathNode.Close,
+                PathNode.MoveTo(661.3f, 108.8f),
+                PathNode.VerticalTo(569.6f),
+                PathNode.LineTo(549.6f, 511.4f),
+                PathNode.QuadTo(543.9f, 508.8f, 539.7f, 511.4f),
+                PathNode.QuadTo(535.4f, 514.1f, 535.4f, 519.8f),
+                PathNode.VerticalTo(567.4f),
+                PathNode.QuadTo(535.4f, 575.1f, 541.6f, 578.1f),
+                PathNode.LineTo(668.6f, 642.7f),
+                PathNode.QuadTo(672.1f, 644.7f, 675.9f, 644.7f),
+                PathNode.HorizontalTo(717.3f),
+                PathNode.QuadTo(722f, 644.7f, 724.8f, 641.8f),
+                PathNode.QuadTo(727.7f, 638.9f, 727.7f, 633.8f),
+                PathNode.VerticalTo(108.8f),
+                PathNode.QuadTo(727.7f, 104.2f, 724.8f, 101.3f),
+                PathNode.QuadTo(722f, 98.4f, 717.3f, 98.4f),
+                PathNode.HorizontalTo(671.7f),
+                PathNode.QuadTo(667f, 98.4f, 664.2f, 101.3f),
+                PathNode.QuadTo(661.3f, 104.2f, 661.3f, 108.8f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 1.6667f,
+            translationY = 1042.1667f,
+            autoMirror = false,
+        )
+        return _card1Dash2SurfaceLight!!
+    }
+
+private var _card1Dash2SurfaceLight: ImageVector? = null
+
+val MiuixIcons.Glass.Normal.Card1Dash2: ImageVector
+    get() {
+        if (_card1Dash2SurfaceNormal != null) return _card1Dash2SurfaceNormal!!
+        _card1Dash2SurfaceNormal = buildHyperOSIcon(
+            name = "Card1Dash2.Glass.Normal",
+            pathData = listOf(
+                PathNode.MoveTo(1021.1f, -116.2f),
+                PathNode.QuadTo(1061.9f, -95.8f, 1083.2f, -54.1f),
+                PathNode.QuadTo(1094f, -33.6f, 1096.4f, -3.7f),
+                PathNode.QuadTo(1098.8f, 26.3f, 1098.8f, 98f),
+                PathNode.VerticalTo(482f),
+                PathNode.QuadTo(1098.8f, 515f, 1097.9f, 539.7f),
+                PathNode.QuadTo(1097f, 564.4f, 1094f, 580f),
+                PathNode.QuadTo(1087.2f, 609.1f, 1069.4f, 637.8f),
+                PathNode.QuadTo(1060.5f, 650.6f, 1047.2f, 666.4f),
+                PathNode.QuadTo(1033.9f, 682.1f, 1014.1f, 701.1f),
+                PathNode.LineTo(1004.1f, 711.1f),
+                PathNode.LineTo(927.1f, 788.1f),
+                PathNode.LineTo(918.1f, 797.1f),
+                PathNode.QuadTo(899.1f, 816.9f, 882.9f, 831.2f),
+                PathNode.QuadTo(866.6f, 845.5f, 853.8f, 853.4f),
+                PathNode.QuadTo(827.7f, 869.1f, 796f, 877f),
+                PathNode.QuadTo(780.3f, 880.8f, 755.7f, 881.8f),
+                PathNode.QuadTo(731f, 882.8f, 698f, 882.8f),
+                PathNode.HorizontalTo(460f),
+                PathNode.QuadTo(389.7f, 882.8f, 359.5f, 880.3f),
+                PathNode.QuadTo(329.3f, 877.8f, 307.9f, 867.2f),
+                PathNode.QuadTo(267.2f, 845.9f, 246.8f, 805.1f),
+                PathNode.QuadTo(236f, 784.6f, 233.6f, 754.7f),
+                PathNode.QuadTo(231.2f, 724.7f, 231.2f, 653f),
+                PathNode.VerticalTo(98f),
+                PathNode.QuadTo(231.2f, 26.3f, 233.6f, -3.7f),
+                PathNode.QuadTo(236f, -33.6f, 246.8f, -54.1f),
+                PathNode.QuadTo(268.1f, -95.9f, 307.9f, -116.2f),
+                PathNode.QuadTo(329.3f, -126.8f, 359.5f, -129.3f),
+                PathNode.QuadTo(389.7f, -131.8f, 460f, -131.8f),
+                PathNode.HorizontalTo(869f),
+                PathNode.QuadTo(940.7f, -131.8f, 970.7f, -129.4f),
+                PathNode.QuadTo(1000.6f, -127f, 1021.1f, -116.2f),
+                PathNode.Close,
+                PathNode.MoveTo(652.2f, 107.6f),
+                PathNode.VerticalTo(556.1f),
+                PathNode.LineTo(549.9f, 502.9f),
+                PathNode.QuadTo(543.3f, 499.3f, 537.8f, 502.9f),
+                PathNode.QuadTo(532.4f, 506.5f, 532.4f, 513.1f),
+                PathNode.VerticalTo(575.4f),
+                PathNode.QuadTo(532.4f, 584f, 539.1f, 587f),
+                PathNode.LineTo(666.1f, 651.8f),
+                PathNode.QuadTo(670f, 653.8f, 672.5f, 653.8f),
+                PathNode.HorizontalTo(724.7f),
+                PathNode.QuadTo(730.2f, 653.8f, 733.5f, 650.2f),
+                PathNode.QuadTo(736.8f, 646.5f, 736.8f, 640.8f),
+                PathNode.VerticalTo(107.6f),
+                PathNode.QuadTo(736.8f, 102.7f, 733.5f, 99f),
+                PathNode.QuadTo(730.2f, 95.4f, 724.7f, 95.4f),
+                PathNode.HorizontalTo(664.3f),
+                PathNode.QuadTo(658.8f, 95.4f, 655.5f, 99f),
+                PathNode.QuadTo(652.2f, 102.7f, 652.2f, 107.6f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 1.6667f,
+            translationY = 1042.1667f,
+            autoMirror = false,
+        )
+        return _card1Dash2SurfaceNormal!!
+    }
+
+private var _card1Dash2SurfaceNormal: ImageVector? = null
+
+val MiuixIcons.Glass.Regular.Card1Dash2: ImageVector
+    get() {
+        if (_card1Dash2SurfaceRegular != null) return _card1Dash2SurfaceRegular!!
+        _card1Dash2SurfaceRegular = buildHyperOSIcon(
+            name = "Card1Dash2.Glass.Regular",
+            pathData = listOf(
+                PathNode.MoveTo(1023f, -120f),
+                PathNode.QuadTo(1065f, -99f, 1087f, -56f),
+                PathNode.QuadTo(1098f, -35f, 1100.5f, -4.5f),
+                PathNode.QuadTo(1103f, 26f, 1103f, 98f),
+                PathNode.VerticalTo(482f),
+                PathNode.QuadTo(1103f, 515f, 1102f, 540f),
+                PathNode.QuadTo(1101f, 565f, 1098f, 581f),
+                PathNode.QuadTo(1091f, 611f, 1073f, 640f),
+                PathNode.QuadTo(1064f, 653f, 1050.5f, 669f),
+                PathNode.QuadTo(1037f, 685f, 1017f, 704f),
+                PathNode.LineTo(1007f, 714f),
+                PathNode.LineTo(930f, 791f),
+                PathNode.LineTo(921f, 800f),
+                PathNode.QuadTo(902f, 820f, 885.5f, 834.5f),
+                PathNode.QuadTo(869f, 849f, 856f, 857f),
+                PathNode.QuadTo(829f, 873f, 797f, 881f),
+                PathNode.QuadTo(781f, 885f, 756f, 886f),
+                PathNode.QuadTo(731f, 887f, 698f, 887f),
+                PathNode.HorizontalTo(460f),
+                PathNode.QuadTo(389f, 887f, 358.5f, 884.5f),
+                PathNode.QuadTo(328f, 882f, 306f, 871f),
+                PathNode.QuadTo(264f, 849f, 243f, 807f),
+                PathNode.QuadTo(232f, 786f, 229.5f, 755.5f),
+                PathNode.QuadTo(227f, 725f, 227f, 653f),
+                PathNode.VerticalTo(98f),
+                PathNode.QuadTo(227f, 26f, 229.5f, -4.5f),
+                PathNode.QuadTo(232f, -35f, 243f, -56f),
+                PathNode.QuadTo(265f, -99f, 306f, -120f),
+                PathNode.QuadTo(328f, -131f, 358.5f, -133.5f),
+                PathNode.QuadTo(389f, -136f, 460f, -136f),
+                PathNode.HorizontalTo(869f),
+                PathNode.QuadTo(941f, -136f, 971.5f, -133.5f),
+                PathNode.QuadTo(1002f, -131f, 1023f, -120f),
+                PathNode.Close,
+                PathNode.MoveTo(648f, 107f),
+                PathNode.VerticalTo(550f),
+                PathNode.LineTo(550f, 499f),
+                PathNode.QuadTo(543f, 495f, 537f, 499f),
+                PathNode.QuadTo(531f, 503f, 531f, 510f),
+                PathNode.VerticalTo(579f),
+                PathNode.QuadTo(531f, 588f, 538f, 591f),
+                PathNode.LineTo(665f, 656f),
+                PathNode.QuadTo(669f, 658f, 671f, 658f),
+                PathNode.HorizontalTo(728f),
+                PathNode.QuadTo(734f, 658f, 737.5f, 654f),
+                PathNode.QuadTo(741f, 650f, 741f, 644f),
+                PathNode.VerticalTo(107f),
+                PathNode.QuadTo(741f, 102f, 737.5f, 98f),
+                PathNode.QuadTo(734f, 94f, 728f, 94f),
+                PathNode.HorizontalTo(661f),
+                PathNode.QuadTo(655f, 94f, 651.5f, 98f),
+                PathNode.QuadTo(648f, 102f, 648f, 107f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 1.6667f,
+            translationY = 1042.1667f,
+            autoMirror = false,
+        )
+        return _card1Dash2SurfaceRegular!!
+    }
+
+private var _card1Dash2SurfaceRegular: ImageVector? = null
+
+val MiuixIcons.Glass.Medium.Card1Dash2: ImageVector
+    get() {
+        if (_card1Dash2SurfaceMedium != null) return _card1Dash2SurfaceMedium!!
+        _card1Dash2SurfaceMedium = buildHyperOSIcon(
+            name = "Card1Dash2.Glass.Medium",
+            pathData = listOf(
+                PathNode.MoveTo(1026.8f, -127.3f),
+                PathNode.QuadTo(1070.7f, -105.2f, 1094.3f, -59.8f),
+                PathNode.QuadTo(1105.8f, -37.7f, 1108.5f, -6.1f),
+                PathNode.QuadTo(1111.1f, 25.5f, 1111.1f, 98f),
+                PathNode.VerticalTo(482f),
+                PathNode.QuadTo(1111.1f, 515.3f, 1110.1f, 540.5f),
+                PathNode.QuadTo(1109.1f, 565.8f, 1105.8f, 582.9f),
+                PathNode.QuadTo(1098.3f, 614.8f, 1080f, 644.3f),
+                PathNode.QuadTo(1070.8f, 657.9f, 1056.7f, 674.1f),
+                PathNode.QuadTo(1042.7f, 690.4f, 1022.7f, 709.7f),
+                PathNode.LineTo(1012.7f, 719.7f),
+                PathNode.LineTo(935.7f, 796.7f),
+                PathNode.LineTo(926.4f, 805.9f),
+                PathNode.QuadTo(907.1f, 825.9f, 890.5f, 840.7f),
+                PathNode.QuadTo(873.9f, 855.5f, 860.3f, 864f),
+                PathNode.QuadTo(831.4f, 880.8f, 798.9f, 888.8f),
+                PathNode.QuadTo(782.1f, 893.1f, 758.2f, 894.1f),
+                PathNode.QuadTo(734.2f, 895.1f, 698f, 895.1f),
+                PathNode.HorizontalTo(460f),
+                PathNode.QuadTo(388.5f, 895.1f, 356.9f, 892.5f),
+                PathNode.QuadTo(325.3f, 889.8f, 302.2f, 878.3f),
+                PathNode.QuadTo(257.8f, 855.2f, 235.7f, 810.8f),
+                PathNode.QuadTo(224.2f, 788.7f, 221.5f, 757.1f),
+                PathNode.QuadTo(218.9f, 725.5f, 218.9f, 653f),
+                PathNode.VerticalTo(98f),
+                PathNode.QuadTo(218.9f, 25.5f, 221.5f, -6.1f),
+                PathNode.QuadTo(224.2f, -37.7f, 235.7f, -59.8f),
+                PathNode.QuadTo(259.1f, -104.9f, 302.2f, -127.3f),
+                PathNode.QuadTo(325.3f, -138.8f, 356.9f, -141.5f),
+                PathNode.QuadTo(388.5f, -144.1f, 460f, -144.1f),
+                PathNode.HorizontalTo(869f),
+                PathNode.QuadTo(941.5f, -144.1f, 973.1f, -141.5f),
+                PathNode.QuadTo(1004.7f, -138.8f, 1026.8f, -127.3f),
+                PathNode.Close,
+                PathNode.MoveTo(642.6f, 111.6f),
+                PathNode.VerticalTo(535.7f),
+                PathNode.LineTo(548.4f, 486.8f),
+                PathNode.QuadTo(538.9f, 481.5f, 532.3f, 485.9f),
+                PathNode.QuadTo(525.6f, 490.3f, 525.6f, 500.3f),
+                PathNode.VerticalTo(572.2f),
+                PathNode.QuadTo(525.6f, 585.8f, 537.2f, 591.3f),
+                PathNode.LineTo(662.6f, 655.5f),
+                PathNode.QuadTo(667.6f, 658f, 671f, 658f),
+                PathNode.HorizontalTo(728.8f),
+                PathNode.QuadTo(737.2f, 658f, 741.8f, 653.1f),
+                PathNode.QuadTo(746.4f, 648.1f, 746.4f, 639.7f),
+                PathNode.VerticalTo(111.6f),
+                PathNode.QuadTo(746.4f, 103.9f, 741.8f, 98.9f),
+                PathNode.QuadTo(737.2f, 94f, 728.8f, 94f),
+                PathNode.HorizontalTo(660.2f),
+                PathNode.QuadTo(651.8f, 94f, 647.2f, 98.9f),
+                PathNode.QuadTo(642.6f, 103.9f, 642.6f, 111.6f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 1.6667f,
+            translationY = 1042.1667f,
+            autoMirror = false,
+        )
+        return _card1Dash2SurfaceMedium!!
+    }
+
+private var _card1Dash2SurfaceMedium: ImageVector? = null
+
+val MiuixIcons.Glass.Demibold.Card1Dash2: ImageVector
+    get() {
+        if (_card1Dash2SurfaceDemibold != null) return _card1Dash2SurfaceDemibold!!
+        _card1Dash2SurfaceDemibold = buildHyperOSIcon(
+            name = "Card1Dash2.Glass.Demibold",
+            pathData = listOf(
+                PathNode.MoveTo(1029.4f, -132.4f),
+                PathNode.QuadTo(1074.6f, -109.6f, 1099.4f, -62.4f),
+                PathNode.QuadTo(1111.3f, -39.6f, 1114.1f, -7.3f),
+                PathNode.QuadTo(1116.8f, 25.1f, 1116.8f, 98f),
+                PathNode.VerticalTo(482f),
+                PathNode.QuadTo(1116.8f, 515.5f, 1115.8f, 540.9f),
+                PathNode.QuadTo(1114.8f, 566.4f, 1111.3f, 584.2f),
+                PathNode.QuadTo(1103.4f, 617.4f, 1084.9f, 647.4f),
+                PathNode.QuadTo(1075.5f, 661.3f, 1061.1f, 677.7f),
+                PathNode.QuadTo(1046.6f, 694.2f, 1026.6f, 713.6f),
+                PathNode.LineTo(1016.6f, 723.6f),
+                PathNode.LineTo(939.6f, 800.6f),
+                PathNode.LineTo(930.2f, 810.1f),
+                PathNode.QuadTo(910.7f, 830.1f, 894f, 845.1f),
+                PathNode.QuadTo(877.3f, 860f, 863.4f, 868.9f),
+                PathNode.QuadTo(833.1f, 886.3f, 800.2f, 894.3f),
+                PathNode.QuadTo(782.8f, 898.8f, 759.7f, 899.8f),
+                PathNode.QuadTo(736.5f, 900.8f, 698f, 900.8f),
+                PathNode.HorizontalTo(460f),
+                PathNode.QuadTo(388.1f, 900.8f, 355.7f, 898.1f),
+                PathNode.QuadTo(323.4f, 895.3f, 299.6f, 883.4f),
+                PathNode.QuadTo(253.4f, 859.6f, 230.6f, 813.4f),
+                PathNode.QuadTo(218.7f, 790.6f, 215.9f, 758.3f),
+                PathNode.QuadTo(213.2f, 725.9f, 213.2f, 653f),
+                PathNode.VerticalTo(98f),
+                PathNode.QuadTo(213.2f, 25.1f, 215.9f, -7.3f),
+                PathNode.QuadTo(218.7f, -39.6f, 230.6f, -62.4f),
+                PathNode.QuadTo(254.9f, -109.1f, 299.6f, -132.4f),
+                PathNode.QuadTo(323.4f, -144.3f, 355.7f, -147.1f),
+                PathNode.QuadTo(388.1f, -149.8f, 460f, -149.8f),
+                PathNode.HorizontalTo(869f),
+                PathNode.QuadTo(941.9f, -149.8f, 974.3f, -147.1f),
+                PathNode.QuadTo(1006.6f, -144.3f, 1029.4f, -132.4f),
+                PathNode.Close,
+                PathNode.MoveTo(638.8f, 114.8f),
+                PathNode.VerticalTo(525.6f),
+                PathNode.LineTo(547.2f, 478.3f),
+                PathNode.QuadTo(536.1f, 472f, 529f, 476.7f),
+                PathNode.QuadTo(521.8f, 481.4f, 521.8f, 493.5f),
+                PathNode.VerticalTo(567.5f),
+                PathNode.QuadTo(521.8f, 584.3f, 536.6f, 591.5f),
+                PathNode.LineTo(660.9f, 655.1f),
+                PathNode.QuadTo(666.7f, 658f, 671f, 658f),
+                PathNode.HorizontalTo(729.4f),
+                PathNode.QuadTo(739.5f, 658f, 744.9f, 652.4f),
+                PathNode.QuadTo(750.2f, 646.8f, 750.2f, 636.6f),
+                PathNode.VerticalTo(114.8f),
+                PathNode.QuadTo(750.2f, 105.2f, 744.9f, 99.6f),
+                PathNode.QuadTo(739.5f, 94f, 729.4f, 94f),
+                PathNode.HorizontalTo(659.6f),
+                PathNode.QuadTo(649.5f, 94f, 644.1f, 99.6f),
+                PathNode.QuadTo(638.8f, 105.2f, 638.8f, 114.8f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 1.6667f,
+            translationY = 1042.1667f,
+            autoMirror = false,
+        )
+        return _card1Dash2SurfaceDemibold!!
+    }
+
+private var _card1Dash2SurfaceDemibold: ImageVector? = null
+
