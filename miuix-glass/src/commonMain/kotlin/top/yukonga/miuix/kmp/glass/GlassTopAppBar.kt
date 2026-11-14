@@ -32,8 +32,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
@@ -172,10 +170,38 @@ private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
         colors = colors,
         colorStops = stops,
     )
+    fun createBandShader(size: Size, fadeStart: Float, fadeHeight: Float): Shader {
+        val height = size.height.coerceAtLeast(1f)
+        val start = fadeStart.coerceIn(0f, height)
+        val actualFadeHeight = fadeHeight.coerceAtLeast(1f)
+        val fadeStops = stops.drop(1).map { stop ->
+            (start + actualFadeHeight * stop).coerceAtMost(height) / height
+        }
+        val colorStops = if (start > 0f) listOf(0f, start / height) + fadeStops else listOf(0f) + fadeStops
+        val gradientColors = if (start > 0f) listOf(color, color) + colors.drop(1) else listOf(color) + colors.drop(1)
+        return LinearGradientShader(
+            from = Offset(0f, 0f),
+            to = Offset(0f, height),
+            colors = gradientColors,
+            colorStops = colorStops,
+        )
+    }
 
     private companion object {
         val stops = List(17) { it / 16f }
-        val opacities = stops.map { 1f - it * it * (3f - 2f * it) }
+        val opacities = stops.map { t ->
+            val fade = t * t * t * (t * (t * 6f - 15f) + 10f)
+            1f - fade
+        }
+    }
+}
+private data class TopAppBarFadeBrush(
+    val band: TopAppBarBandBrush,
+    val fadeHeight: Float,
+) : ShaderBrush() {
+    override fun createShader(size: Size): Shader {
+        val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
+        return band.createBandShader(size, fadeStart, fadeHeight)
     }
 }
 
@@ -407,7 +433,7 @@ fun GlassTopAppBar(
             val overhangPx = with(LocalDensity.current) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
             val fadeHeight = overhangPx + with(LocalDensity.current) { 12.dp.toPx() }
             val fadeBrush = remember(bandBrush, fadeHeight) {
-                if (bandBrush is TopAppBarBandBrush) ShaderBrush(bandBrush.createShader(0f, fadeHeight)) else null
+                if (bandBrush is TopAppBarBandBrush) TopAppBarFadeBrush(bandBrush, fadeHeight) else null
             }
             Box(
                 modifier = Modifier
@@ -418,15 +444,9 @@ fun GlassTopAppBar(
                         scaleY = if (bandBrush !is TopAppBarBandBrush && size.height > 0f) (size.height + overhangPx) / size.height else 1f
                     }
                     .then(
-                        if (bandBrush is TopAppBarBandBrush && fadeBrush != null) {
+                        if (fadeBrush != null) {
                             Modifier.drawBehind {
-                                val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
-                                drawRect(bandBrush.color, size = Size(size.width, fadeStart))
-                                translate(top = fadeStart) {
-                                    scale(scaleX = 1f, scaleY = (size.height - fadeStart) / fadeHeight, pivot = Offset.Zero) {
-                                        drawRect(fadeBrush, size = Size(size.width, fadeHeight))
-                                    }
-                                }
+                                drawRect(fadeBrush, size = size)
                             }
                         } else {
                             Modifier.background(bandBrush)
