@@ -44,7 +44,7 @@ import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
-private val FloatingNavigationBarStyleOptions = listOf("Default", "Glass", "iOS-like")
+private val FloatingNavigationBarStyleOptions = listOf("Original", "Glass", "iOS-like")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
     listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter")
@@ -52,7 +52,7 @@ private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
 private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
-private val TopAppBarStyleOptions = listOf("Default", "Glass")
+private val TopAppBarStyleOptions = listOf("Original", "Glass")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
 private val KeyColorOptions = listOf("Default") + ui.KeyColors.map { it.first }

@@ -4,7 +4,7 @@
 
 提供滚动行为或 `visualContentOffset` 时，颜色渐变背景带在绘制阶段直接跟随实际滚动距离，不再等待独立淡入动画。没有滚动来源时，显式内容重叠状态仍使用淡入淡出动画。两种模式均保留 `backgroundAlpha` 的透明度乘数。
 
-默认背景带跟随实测的标题、副标题与 `bottomContent` 高度。渐隐从底边内侧 12.dp 开始，平滑过渡到顶栏下方的 `bandOverhang`（默认 48.dp）处，保留副标题下方的遮挡，同时提供更长的渐隐尾部，不向外延伸实色段。半透明时完整渐变也位于背景层范围内，不会在滚动至完全不透明时突然多出一块。不增加前景布局高度；自定义画刷保留原有拉伸背景带行为。
+默认背景带跟随实测的标题、副标题与 `bottomContent` 高度。渐隐从底边内侧 12.dp 开始，平滑过渡到顶栏下方的 `bandOverhang` 处，保留副标题下方的遮挡，同时提供更长的渐隐尾部，不向外延伸实色段。半透明时完整渐变也位于背景层范围内，不会在滚动至完全不透明时突然多出一块。不增加前景布局高度；自定义画刷保留原有拉伸背景带行为。
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -122,7 +122,7 @@ Scaffold(
 | LargeTitleBlurRadius | Dp | 大标题模糊半径 | 12.dp |
 | ButtonSize | Dp | 按钮直径 | 44.dp |
 | PressedContentAlpha | Float | 按下时的内容透明度 | 0.6f |
-| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 48.dp |
+| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 28.dp |
 
 #### 方法
 
