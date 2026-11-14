@@ -26,12 +26,14 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -69,6 +71,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -77,6 +80,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -97,17 +101,21 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * One destination in a [GlassNavigationBar].
+ * One destination in a [GlassNavigationBar] or a [GlassNavigationRail].
  *
  * @property icon Icon for this destination.
  * @property label Optional caption below the icon.
  * @property contentDescription Accessibility description announced by a screen reader.
+ * @property badge Optional badge drawn on the icon, typically a [top.yukonga.miuix.kmp.basic.Badge].
+ *   It is hosted in a [top.yukonga.miuix.kmp.basic.BadgedBox]; keep the item instance stable so
+ *   the badge keeps its state.
  */
-@Immutable
+@Stable
 data class GlassNavigationItem(
     val icon: ImageVector,
     val label: String? = null,
     val contentDescription: String? = null,
+    val badge: (@Composable () -> Unit)? = null,
 )
 
 /** Default values for [GlassNavigationBar]. */
@@ -210,6 +218,21 @@ object GlassNavigationBarDefaults {
  * @param trailingAction Optional independent action outside the glass capsule. It owns its size
  *   and material, and shares the bar's show/hide transition. Adding or removing it animates its
  *   size, opacity and reserved space. Use [GlassIconButton] for a round action.
+ * @param leadingAction Optional independent control inside the bar's leading end. It keeps its
+ *   own material and press feedback, and its area is excluded from destination hit testing.
+ * @param leadingActionWidth The width reserved for [leadingAction], excluded from destination
+ *   layout and hit testing. It is also where a collapsed side rail's expand toggle sits.
+ * @param labelsOnly Hide the destination icons and show their labels alone, on one line. The
+ *   navigation itself is unchanged: same slots, same drag, same semantics. Use this when the bar
+ *   is a collapsed side rail, where icons would read as a different navigation model.
+ * @param labelStyle The destination label style. Defaults to the bar's own caption style.
+ * @param destinationWidths Per-destination widths, so a bar can size its slots to its labels
+ *   instead of splitting the width evenly. `null` keeps the even split.
+ * @param indicatorOverhang How far the indicator reaches past its destination on each side. `0.dp`
+ *   makes it cover the slot exactly.
+ * @param contentPaddingEnd The inset after the last destination.
+ * @param selectionVisible Whether the indicator is drawn. Use `false` while the caller animates
+ *   its own selection surface over the bar.
  */
 @Composable
 fun GlassNavigationBar(
@@ -232,16 +255,30 @@ fun GlassNavigationBar(
     selectedColor: Color = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onBackground,
     unselectedColor: Color = MiuixTheme.colorScheme.onBackground,
     trailingAction: (@Composable () -> Unit)? = null,
+    leadingAction: (@Composable () -> Unit)? = null,
+    leadingActionWidth: Dp = 0.dp,
+    labelsOnly: Boolean = false,
+    labelStyle: TextStyle? = null,
+    destinationWidths: List<Dp>? = null,
+    indicatorOverhang: Dp = GlassNavigationBarDefaults.IndicatorOverhang,
+    contentPaddingEnd: Dp = GlassNavigationBarDefaults.ContentPaddingHorizontal,
+    selectionVisible: Boolean = true,
 ) {
     if (items.isEmpty()) return
+    require(destinationWidths == null || destinationWidths.size == items.size)
     val index = selectedIndex.coerceIn(0, items.lastIndex)
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val labelSize = with(density) {
         if (fontScale >= 1.6f) GlassNavigationBarDefaults.LargeLabelSize.toSp() else GlassNavigationBarDefaults.LabelSize.toSp()
     }
-    val contentInset = with(density) { GlassNavigationBarDefaults.ContentPaddingHorizontal.toPx() }
-    val overhang = with(density) { GlassNavigationBarDefaults.IndicatorOverhang.toPx() }
+    val leadingWidth = if (leadingAction != null) leadingActionWidth else 0.dp
+    val contentStart = with(density) {
+        (GlassNavigationBarDefaults.ContentPaddingHorizontal + leadingWidth).toPx()
+    }
+    val contentInset = with(density) { contentPaddingEnd.toPx() }
+    val overhang = with(density) { indicatorOverhang.toPx() }
+    val measuredWidths = destinationWidths?.map { with(density) { it.toPx() } }
 
     var barWidth by remember { mutableIntStateOf(0) }
     var pressedIndex by remember { mutableIntStateOf(-1) }
@@ -276,14 +313,18 @@ fun GlassNavigationBar(
         scope.launch { right.animateTo(newRight, rightSpring) }
     }
 
-    val slot = if (barWidth <= 0) 0f else (barWidth - contentInset * 2f) / items.size
-    val chipWidth = slot + overhang * 2f
-    val targetLeft = contentInset - overhang + index * slot
-    val targetRight = targetLeft + chipWidth
-    // Settle after composition commits the selection returned by onSelect.
-    LaunchedEffect(index, settleGeneration, targetLeft, targetRight) {
+    val spans = measuredWidths ?: List(items.size) {
+        ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
+    }
+    val targetLeft = contentStart - overhang + navigationSlotPosition(index.toFloat(), spans)
+    val targetRight = contentStart + overhang + navigationSlotPosition(index + 1f, spans)
+    val hasSlots = barWidth > contentStart + contentInset
+    // Settle after composition commits the selection returned by onSelect. The measured-width case
+    // needs the bar's own size as a key too: its targets do not depend on it, so the first frame's
+    // "no slot yet" result would otherwise never be revisited.
+    LaunchedEffect(index, settleGeneration, targetLeft, targetRight, hasSlots) {
         if (dragging.value) return@LaunchedEffect
-        if (slot <= 0f) return@LaunchedEffect
+        if (!hasSlots) return@LaunchedEffect
         if (right.value <= left.value) {
             left.snapTo(targetLeft)
             right.snapTo(targetRight)
@@ -291,20 +332,7 @@ fun GlassNavigationBar(
             animateIndicator(targetLeft, targetRight)
         }
     }
-    val chipHeldPx = with(density) {
-        (height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2).toPx()
-    }
     val chipPressed = pressedIndex >= 0
-    val chipScale by animateFloatAsState(
-        targetValue = if (chipPressed) glassPressScale(chipHeldPx, density.density) else 1f,
-        animationSpec = if (chipPressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
-        label = "glassNavigationIndicatorPress",
-    )
-    val chipFill = animateColorAsState(
-        targetValue = if (chipPressed) indicatorPressedColor else indicatorColor,
-        animationSpec = if (chipPressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
-        label = "glassNavigationIndicatorFill",
-    )
 
     val onSelectState by rememberUpdatedState(onSelect)
     val bottomPadding = if (defaultWindowInsetsPadding) {
@@ -381,24 +409,39 @@ fun GlassNavigationBar(
                 .onSizeChanged { barWidth = it.width }
                 .then(
                     if (interactionEnabled) {
-                        Modifier.pointerInput(items.size, contentInset, overhang, layoutDirection) {
+                        Modifier.pointerInput(
+                            items.size,
+                            contentStart,
+                            contentInset,
+                            overhang,
+                            layoutDirection,
+                            measuredWidths,
+                        ) {
                             awaitEachGesture {
                                 val down = awaitFirstDown(requireUnconsumed = false)
                                 val selectionWidth = size.width.toFloat()
-                                if (selectionWidth <= contentInset * 2f) return@awaitEachGesture
+                                if (selectionWidth <= contentStart + contentInset) return@awaitEachGesture
                                 // Freeze hit regions until release; only the indicator previews selection.
-                                val selectionSlot = (selectionWidth - contentInset * 2f) / items.size
+                                val selectionSpans = measuredWidths ?: List(items.size) {
+                                    ((selectionWidth - contentStart - contentInset) / items.size)
+                                        .coerceAtLeast(0f)
+                                }
                                 fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) size.width - x else x
-                                fun indexAt(x: Float): Int = ((x - contentInset) / selectionSlot).toInt().coerceIn(0, items.lastIndex)
+                                fun indexAt(x: Float): Int = navigationSlotAt(x - contentStart, selectionSpans)
+                                    .toInt()
+                                    .coerceIn(0, items.lastIndex)
 
-                                val minLeft = contentInset - overhang
+                                val minLeft = contentStart - overhang
                                 val downX = logicalX(down.position.x)
+                                // The leading control owns its own region and its own presses.
+                                if (leadingWidth > 0.dp && downX < contentStart) return@awaitEachGesture
                                 var selectionX = downX
                                 var current = indexAt(downX)
                                 pressedIndex = current
                                 dragging.value = true
-                                val pressedLeft = minLeft + current * selectionSlot
-                                animateIndicator(pressedLeft, pressedLeft + selectionSlot + overhang * 2f)
+                                val pressedLeft = minLeft + navigationSlotPosition(current.toFloat(), selectionSpans)
+                                val pressedWidth = navigationDragWidth(downX - contentStart, selectionSpans)
+                                animateIndicator(pressedLeft, pressedLeft + pressedWidth + overhang * 2f)
                                 var grabOffset = Float.NaN
                                 try {
                                     while (true) {
@@ -416,7 +459,12 @@ fun GlassNavigationBar(
                                         }
                                         // The layout can still resize externally while a pointer is held.
                                         val width = size.width.toFloat()
-                                        val chipW = (width - contentInset * 2f) / items.size + overhang * 2f
+                                        val currentSpans = measuredWidths ?: List(items.size) {
+                                            ((width - contentStart - contentInset) / items.size)
+                                                .coerceAtLeast(0f)
+                                        }
+                                        val chipW = navigationDragWidth(selectionX - contentStart, currentSpans) +
+                                            overhang * 2f
                                         val maxLeft = (width - chipW).coerceAtLeast(0f)
                                         val x = logicalX(change.position.x)
                                         // Both positions use the current local coordinates, so their
@@ -453,7 +501,11 @@ fun GlassNavigationBar(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Box(
+            GlassNavigationIndicator(
+                pressed = chipPressed,
+                height = height - GlassNavigationBarDefaults.IndicatorPaddingVertical * 2,
+                color = indicatorColor,
+                pressedColor = indicatorPressedColor,
                 modifier = Modifier
                     .matchParentSize()
                     .padding(vertical = GlassNavigationBarDefaults.IndicatorPaddingVertical)
@@ -464,6 +516,7 @@ fun GlassNavigationBar(
                             left.value,
                             right.value,
                             constraints.maxWidth.toFloat(),
+                            contentStart - overhang,
                             contentInset - overhang,
                         )
                         val start = bounds.x.roundToInt()
@@ -474,25 +527,19 @@ fun GlassNavigationBar(
                         layout(constraints.maxWidth, placeable.height) {
                             placeable.placeRelative(IntOffset(start, 0))
                         }
-                    }
-                    .graphicsLayer {
-                        scaleX = chipScale
-                        scaleY = chipScale
-                    }
-                    .clip(RoundedCornerShape(percent = 50))
-                    .drawBehind { drawRect(chipFill.value) },
+                    },
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .selectableGroup()
-                    .padding(horizontal = GlassNavigationBarDefaults.ContentPaddingHorizontal),
+                    .padding(start = GlassNavigationBarDefaults.ContentPaddingHorizontal + leadingWidth, end = contentPaddingEnd),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 items.forEachIndexed { position, item ->
                     key(item) {
-                        val selected = position == index
+                        val selected = selectionVisible && position == index
                         val tint by animateColorAsState(
                             targetValue = if (selected) selectedColor else unselectedColor,
                             animationSpec = GlassMotion.navContent(),
@@ -509,9 +556,12 @@ fun GlassNavigationBar(
                         )
                         Box(
                             modifier = Modifier
-                                .weight(1f)
+                                .then(
+                                    destinationWidths?.get(position)?.let { Modifier.width(it) }
+                                        ?: Modifier.weight(1f),
+                                )
                                 .padding(
-                                    horizontal = GlassNavigationBarDefaults.IndicatorOverhang,
+                                    horizontal = indicatorOverhang,
                                     vertical = GlassNavigationBarDefaults.ContentPaddingVertical,
                                 )
                                 .then(
@@ -551,19 +601,23 @@ fun GlassNavigationBar(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
                             ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
-                                    tint = tint,
-                                )
+                                if (!labelsOnly) {
+                                    BadgedBox(badge = { item.badge?.invoke() }) {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
+                                            tint = tint,
+                                        )
+                                    }
+                                }
                                 if (item.label != null) {
                                     Text(
                                         text = item.label,
-                                        style = MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
+                                        style = labelStyle ?: MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
                                         color = tint,
                                         textAlign = TextAlign.Center,
-                                        maxLines = 2,
+                                        maxLines = if (labelsOnly) 1 else 2,
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                 }
@@ -571,6 +625,15 @@ fun GlassNavigationBar(
                         }
                     }
                 }
+            }
+            leadingAction?.let { action ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = GlassNavigationBarDefaults.ContentPaddingHorizontal - 4.dp)
+                        .size(leadingWidth, height),
+                    contentAlignment = Alignment.Center,
+                ) { action() }
             }
         }
     }

@@ -83,6 +83,14 @@ GlassNavigationBar(
 | selectedColor | Color | 选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
 | unselectedColor | Color | 未选中图标和标签颜色 | MiuixTheme.colorScheme.onBackground | 否 |
 | trailingAction | (@Composable () -> Unit)? | 胶囊外的独立操作；添加或移除时平滑调整缩放、透明度、胶囊宽度和间距 | null | 否 |
+| leadingAction | (@Composable () -> Unit)? | 胶囊内前端的独立控件，不参与目标点击判定 | null | 否 |
+| leadingActionWidth | Dp | 为 `leadingAction` 预留的宽度 | 0.dp | 否 |
+| labelsOnly | Boolean | 隐藏图标、仅单行显示文字，导航交互完全保留 | false | 否 |
+| labelStyle | TextStyle? | 目标文字样式；null 使用导航栏自身的说明文字样式 | null | 否 |
+| destinationWidths | List\<Dp>? | 逐项指定目标宽度，替代均分；null 为均分 | null | 否 |
+| indicatorOverhang | Dp | 指示器在目标两侧外扩的距离 | GlassNavigationBarDefaults.IndicatorOverhang | 否 |
+| contentPaddingEnd | Dp | 最后一个目标之后的内边距 | GlassNavigationBarDefaults.ContentPaddingHorizontal | 否 |
+| selectionVisible | Boolean | 是否绘制指示器；调用方自行绘制选中面时可置 false | true | 否 |
 
 ### GlassNavigationItem 属性 {#glassnavigationitem}
 

@@ -44,6 +44,7 @@ import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
+private val SidebarStyleOptions = listOf("Default", "Glass")
 private val FloatingNavigationBarStyleOptions = listOf("Default", "Glass", "iOS-like")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
@@ -235,6 +236,16 @@ private fun SettingsContent(
                         checked = appState.showNavigationBar,
                         onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
                     )
+                    // Sidebar options only exist on the layout that actually shows a sidebar.
+                    AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
+                        GlassDropdownPreference(
+                            backdrop = backdrop,
+                            title = "Sidebar Style",
+                            items = SidebarStyleOptions,
+                            selectedIndex = appState.navigationRailStyle,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailStyle = it) } },
+                        )
+                    }
                     AnimatedVisibility(visible = appState.showNavigationBar) {
                         SwitchPreference(
                             title = "Show Navigation Badge",

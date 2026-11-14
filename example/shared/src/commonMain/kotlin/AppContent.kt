@@ -3,6 +3,7 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -50,6 +51,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -58,8 +60,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
@@ -99,8 +103,11 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
+import top.yukonga.miuix.kmp.glass.GlassNavigationRail
+import top.yukonga.miuix.kmp.glass.GlassNavigationRailDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -131,8 +138,10 @@ import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import ui.isInDarkTheme
 import utils.FPSMonitor
+import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
+import kotlin.math.roundToInt
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -193,6 +202,27 @@ fun AppContent(
 
     val isWideScreen = shouldShowSplitPane()
     val hasNavigationRail = isWideScreen && appState.showNavigationBar
+    // The sidebar has two faces: the plain Miuix rail that owns a layout column, and the floating
+    // glass sidebar that overlays the page. The glass one is the default.
+    val useGlassSidebar = hasNavigationRail && appState.navigationRailStyle == 1
+    val expandSidebar = shouldExpandNavigationRail()
+    var sidebarExpanded by rememberSaveable { mutableStateOf(expandSidebar) }
+    LaunchedEffect(expandSidebar) { sidebarExpanded = expandSidebar }
+    // Collapsed, the sidebar is a capsule on the top bar's centre line and reserves nothing at the
+    // start edge; only the expanded panel pushes the page across. The inset follows the same spring
+    // as the surface, so the page and the panel travel as one.
+    val sidebarInset = animateDpAsState(
+        targetValue = if (useGlassSidebar && sidebarExpanded) {
+            GlassNavigationRailDefaults.ExpandedWidth + GlassNavigationRailDefaults.Margin * 2
+        } else {
+            0.dp
+        },
+        animationSpec = GlassMotion.railExpand<Dp>(),
+        label = "sidebarInset",
+    )
+    // Sampling is only possible while the page draws into a recorded layer; without a backdrop the
+    // rail falls back to the theme's surfaceContainer fill.
+    val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
@@ -256,7 +286,7 @@ fun AppContent(
         // Keep NavDisplay at one composition location while adaptive chrome changes around it.
         // Otherwise switching between the compact and wide branches recreates the current route.
         Row(modifier = Modifier.fillMaxSize()) {
-            if (hasNavigationRail) {
+            if (hasNavigationRail && !useGlassSidebar) {
                 PersistentNavigationRail(
                     navigationItems = navigationItems,
                     mainPagerState = mainPagerState,
@@ -267,9 +297,10 @@ fun AppContent(
                     .weight(1f)
                     .fillMaxHeight()
                     // The sibling rail already offsets this pane past the start-side safe area.
-                    // Share that consumption so page bars do not add the same inset again.
+                    // Share that consumption so page bars do not add the same inset again. The
+                    // glass rail lives inside this pane instead, so nothing is consumed for it.
                     .then(
-                        if (hasNavigationRail) {
+                        if (hasNavigationRail && !useGlassSidebar) {
                             Modifier.consumeWindowInsets(
                                 WindowInsets.displayCutout
                                     .union(WindowInsets.navigationBars)
@@ -279,19 +310,70 @@ fun AppContent(
                             Modifier
                         },
                     )
+                    // The glass rail floats over the page, so the start margin under it needs the
+                    // page color rather than the window background.
+                    .then(
+                        if (useGlassSidebar) {
+                            Modifier.background(MiuixTheme.colorScheme.surface)
+                        } else {
+                            Modifier
+                        },
+                    )
                     // Wide-screen transition layers must not draw over the navigation rail.
                     .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
             ) {
-                AppNavHost(
-                    backStack = backStack,
-                    navigator = navigator,
-                    transition = navTransition,
-                    effects = effects,
-                    swipeBackDirection = swipeBackDirection,
-                    padding = padding,
-                    navigationItems = navigationItems,
-                    mainPagerState = mainPagerState,
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (sidebarBackdrop != null) {
+                                Modifier.layerBackdrop(sidebarBackdrop)
+                            } else {
+                                Modifier
+                            },
+                        ),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            // Reserve the rail's animated width in the layout phase, so the morph
+                            // never recomposes the page.
+                            .layout { measurable, constraints ->
+                                val inset = sidebarInset.value.roundToPx()
+                                    .coerceIn(0, constraints.maxWidth)
+                                val end = constraints.maxWidth
+                                val placeable = measurable.measure(
+                                    constraints.copy(
+                                        minWidth = (constraints.minWidth - inset).coerceAtLeast(0),
+                                        maxWidth = end - inset,
+                                    ),
+                                )
+                                layout(end, constraints.maxHeight) {
+                                    placeable.place(inset, 0)
+                                }
+                            },
+                    ) {
+                        AppNavHost(
+                            backStack = backStack,
+                            navigator = navigator,
+                            transition = navTransition,
+                            effects = effects,
+                            swipeBackDirection = swipeBackDirection,
+                            padding = padding,
+                            navigationItems = navigationItems,
+                            mainPagerState = mainPagerState,
+                        )
+                    }
+                }
+                if (useGlassSidebar) {
+                    PersistentGlassNavigationRail(
+                        navigationItems = navigationItems,
+                        mainPagerState = mainPagerState,
+                        backdrop = sidebarBackdrop,
+                        expanded = sidebarExpanded,
+                        onExpandedChange = { sidebarExpanded = it },
+                    )
+                }
             }
         }
     }
@@ -403,6 +485,46 @@ private fun PersistentNavigationRail(
             )
         }
     }
+}
+
+/**
+ * Wide-screen chrome: the floating glass sidebar. It samples the page behind it, so it stays
+ * outside the layer recorded for it and overlays the page's start edge.
+ */
+@Composable
+private fun PersistentGlassNavigationRail(
+    navigationItems: List<NavigationItem>,
+    mainPagerState: MainPagerState,
+    backdrop: LayerBackdrop?,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val appState = LocalAppState.current
+    val navigator = LocalNavigator.current
+    val page = mainPagerState.selectedPage
+    val items = remember(navigationItems, appState.showNavigationBarBadge) {
+        navigationItems.mapIndexed { index, item ->
+            GlassNavigationItem(
+                icon = item.icon,
+                label = item.label,
+                badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+            )
+        }
+    }
+    GlassNavigationRail(
+        items = items,
+        selectedIndex = page,
+        onSelect = {
+            // A rail tab first pops the pane's stack back to the main route, then switches the pager.
+            navigator.popUntil { route -> route is Route.Main }
+            mainPagerState.animateToPage(it)
+        },
+        backdrop = backdrop,
+        modifier = modifier,
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+    )
 }
 
 @Composable
