@@ -26,7 +26,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
@@ -130,6 +129,7 @@ fun AdaptiveTopAppBar(
             title = title,
             isContentScrolled = contentScrolled,
             contentModifier = contentModifier,
+            expandable = !isWideScreen,
             subtitle = subtitle,
             backdrop = backdrop,
             progressiveBlur = appState.glassTopBarProgressiveBlur && appState.enableBlur,
@@ -144,27 +144,14 @@ fun AdaptiveTopAppBar(
             actions = actions,
             bottomContent = bottomContent,
         )
-    } else if (isWideScreen) {
-        SmallTopAppBar(
-            title = title,
-            modifier = contentModifier,
-            subtitle = subtitle,
-            color = color,
-            // This bar has no draw-phase title opacity, so it follows the chrome in composition.
-            titleColor = titleColor.copy(alpha = titleColor.alpha * chromeTitleAlpha()),
-            scrollBehavior = scrollBehavior,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            bottomContent = bottomContent,
-        )
     } else {
         TopAppBar(
             title = title,
             modifier = contentModifier,
+            expandable = !isWideScreen,
             subtitle = subtitle,
             color = color,
-            titleColor = titleColor,
+            titleColor = titleColor.copy(alpha = titleColor.alpha * if (isWideScreen) chromeTitleAlpha() else 1f),
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             navigationIcon = navigationIcon,

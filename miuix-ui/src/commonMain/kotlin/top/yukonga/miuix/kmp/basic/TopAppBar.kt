@@ -88,6 +88,7 @@ import kotlin.math.abs
  *
  * @param title The title of the [TopAppBar].
  * @param modifier The modifier to be applied to the  [TopAppBar].
+ * @param expandable Whether the large title can expand. `false` keeps the compact title visible.
  * @param color The background color of the [TopAppBar].
  * @param titleColor The color of the collapsed small title text.
  * @param largeTitle The large title of the [TopAppBar].
@@ -107,6 +108,7 @@ import kotlin.math.abs
 fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
+    expandable: Boolean = true,
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
     largeTitle: String = title,
@@ -133,6 +135,7 @@ fun TopAppBar(
 
     TopAppBarLayout(
         title = title,
+        expandable = expandable,
         color = color,
         titleColor = titleColor,
         largeTitle = largeTitle,
@@ -159,6 +162,7 @@ fun TopAppBar(
  * @param largeTitleBlurRadius How far the large title blurs out as it collapses. It reaches this
  *   radius at the point the title has fully faded.
  * @param modifier The modifier to be applied to the [BlurTopAppBar].
+ * @param expandable Whether the large title can expand. `false` keeps the compact title visible.
  * @param color The background color of the [BlurTopAppBar].
  * @param titleColor The color of the collapsed small title text.
  * @param largeTitle The large title of the [BlurTopAppBar].
@@ -180,6 +184,7 @@ fun BlurTopAppBar(
     title: String,
     largeTitleBlurRadius: Dp,
     modifier: Modifier = Modifier,
+    expandable: Boolean = true,
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
     largeTitle: String = title,
@@ -213,6 +218,7 @@ fun BlurTopAppBar(
     TopAppBarLayout(
         title = title,
         titleAlpha = titleAlpha,
+        expandable = expandable,
         color = color,
         titleColor = titleColor,
         largeTitle = largeTitle,
@@ -731,6 +737,7 @@ private fun TopAppBarLayout(
     actionIconPadding: Dp,
     scrollBehavior: ScrollBehavior?,
     modifier: Modifier = Modifier,
+    expandable: Boolean = true,
     largeTitle: String = title,
     largeTitleBlurRadius: Dp = 0.dp,
     defaultWindowInsetsPadding: Boolean = true,
@@ -756,17 +763,23 @@ private fun TopAppBarLayout(
             1f - largeTitleFade()
         }
     }
-    val updateHeightOffsetLimit = remember(scrollBehavior) {
+    val updateHeightOffsetLimit = remember(scrollBehavior, expandable) {
         { height: Int ->
             scrollBehavior?.state?.let { state ->
-                val limit = -height.toFloat()
-                if (state.heightOffsetLimit != limit) {
-                    val restoringFromSmallTopAppBar = state.pinnedBySmallTopAppBar
-                    state.heightOffsetLimit = limit
-                    // A pinned small bar retains contentOffset while its own height stays fixed.
-                    if (restoringFromSmallTopAppBar) {
-                        state.heightOffset = if (state.contentOffset < 0f) limit else 0f
-                        state.pinnedBySmallTopAppBar = false
+                if (!expandable) {
+                    state.pinnedBySmallTopAppBar = true
+                    state.heightOffsetLimit = 0f
+                    state.heightOffset = 0f
+                } else {
+                    val limit = -height.toFloat()
+                    if (state.heightOffsetLimit != limit) {
+                        val restoringFromSmallTopAppBar = state.pinnedBySmallTopAppBar
+                        state.heightOffsetLimit = limit
+                        // A pinned small bar retains contentOffset while its own height stays fixed.
+                        if (restoringFromSmallTopAppBar) {
+                            state.heightOffset = if (state.contentOffset < 0f) limit else 0f
+                            state.pinnedBySmallTopAppBar = false
+                        }
                     }
                 }
             }
@@ -775,15 +788,19 @@ private fun TopAppBarLayout(
     }
 
     // Boolean derivedStateOf invalidates only on flip → the spring fires once per crossing, not per frame.
-    val smallTitleVisible by remember(scrollBehavior) {
+    val smallTitleVisible by remember(scrollBehavior, expandable) {
         derivedStateOf {
-            scrollBehavior?.state?.let { state ->
-                if (state.pinnedBySmallTopAppBar) {
-                    state.contentOffset < 0f
-                } else {
-                    state.collapsedFraction * 3f >= 1f
-                }
-            } ?: false
+            if (!expandable) {
+                true
+            } else {
+                scrollBehavior?.state?.let { state ->
+                    if (state.pinnedBySmallTopAppBar) {
+                        state.contentOffset < 0f
+                    } else {
+                        state.collapsedFraction * 3f >= 1f
+                    }
+                } ?: false
+            }
         }
     }
     val smallTitleAlpha = remember { Animatable(if (smallTitleVisible) 1f else 0f) }
@@ -880,18 +897,20 @@ private fun TopAppBarLayout(
                         }
                         .onSizeChanged { updateHeightOffsetLimit(it.height) },
                 ) {
-                    Text(
-                        text = largeTitle,
-                        color = animatedLargeTitleColor,
-                        fontSize = MiuixTheme.textStyles.title1.fontSize,
-                        fontWeight = FontWeight.Normal,
-                    )
-                    if (subtitle.isNotEmpty()) {
+                    if (expandable) {
                         Text(
-                            text = subtitle,
-                            color = animatedSubtitleColor,
-                            style = MiuixTheme.textStyles.body2,
+                            text = largeTitle,
+                            color = animatedLargeTitleColor,
+                            fontSize = MiuixTheme.textStyles.title1.fontSize,
+                            fontWeight = FontWeight.Normal,
                         )
+                        if (subtitle.isNotEmpty()) {
+                            Text(
+                                text = subtitle,
+                                color = animatedSubtitleColor,
+                                style = MiuixTheme.textStyles.body2,
+                            )
+                        }
                     }
                 }
             }

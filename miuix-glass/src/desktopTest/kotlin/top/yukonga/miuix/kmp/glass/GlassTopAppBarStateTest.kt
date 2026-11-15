@@ -20,15 +20,20 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBarState
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -42,6 +47,88 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassTopAppBarStateTest {
+    @Test
+    fun compactGlassBarStaysCollapsedAndRestoresExpandableScrollState() = assertCompactBarState(glass = true)
+
+    @Test
+    fun compactRegularBarStaysCollapsedAndRestoresExpandableScrollState() = assertCompactBarState(glass = false)
+
+    private fun assertCompactBarState(glass: Boolean) = runComposeUiTest {
+        val name = if (glass) "glass" else "regular"
+        val expandable = mutableStateOf(false)
+        val state = TopAppBarState(-1000f, -100f, 0f)
+        lateinit var behavior: ScrollBehavior
+        setContent {
+            DialogTestHost {
+                behavior = MiuixScrollBehavior(state)
+                if (glass) {
+                    GlassTopAppBar(
+                        title = "Compact",
+                        largeTitle = "Expanded",
+                        expandable = expandable.value,
+                        scrollBehavior = behavior,
+                        contentModifier = Modifier.testTag("foreground"),
+                        bottomContent = { Box(Modifier.size(300.dp, 32.dp).testTag("bottom")) },
+                        actions = { GlassIconButton(onClick = {}) {} },
+                    )
+                } else {
+                    TopAppBar(
+                        title = "Compact",
+                        largeTitle = "Expanded",
+                        expandable = expandable.value,
+                        scrollBehavior = behavior,
+                        modifier = Modifier.testTag("foreground"),
+                        bottomContent = { Box(Modifier.size(300.dp, 32.dp).testTag("bottom")) },
+                    )
+                }
+            }
+        }
+        waitForIdle()
+        onNodeWithText("Expanded").assertDoesNotExist()
+        val compactBounds = onNodeWithTag("foreground").getUnclippedBoundsInRoot()
+        val bottomBounds = onNodeWithTag("bottom").getUnclippedBoundsInRoot()
+
+        runOnIdle {
+            assertEquals(0f, state.heightOffsetLimit)
+            assertEquals(0f, state.heightOffset)
+            val consumed = behavior.nestedScrollConnection.onPreScroll(Offset(0f, -120f), NestedScrollSource.UserInput)
+            assertEquals(Offset.Zero, consumed)
+            behavior.nestedScrollConnection.onPostScroll(Offset(0f, -120f), Offset.Zero, NestedScrollSource.UserInput)
+        }
+        waitForIdle()
+        assertEquals(compactBounds, onNodeWithTag("foreground").getUnclippedBoundsInRoot())
+        assertEquals(bottomBounds, onNodeWithTag("bottom").getUnclippedBoundsInRoot())
+        saveImage("$name-topbar-compact", onRoot().captureToImage())
+
+        // A wide-to-narrow switch restores collapse from content scroll, not the old height offset.
+        runOnIdle { expandable.value = true }
+        waitForIdle()
+        runOnIdle {
+            assertTrue(state.heightOffsetLimit < 0f)
+            assertEquals(1f, state.collapsedFraction)
+            assertEquals(-120f, state.contentOffset)
+            expandable.value = false
+        }
+        waitForIdle()
+        runOnIdle {
+            behavior.nestedScrollConnection.onPostScroll(Offset(0f, 120f), Offset.Zero, NestedScrollSource.UserInput)
+            expandable.value = true
+        }
+        waitForIdle()
+        val expandedBounds = onNodeWithTag("foreground").getUnclippedBoundsInRoot()
+        assertTrue(expandedBounds.bottom - expandedBounds.top > compactBounds.bottom - compactBounds.top)
+        runOnIdle {
+            assertEquals(0f, state.contentOffset)
+            assertEquals(0f, state.heightOffset)
+        }
+        saveImage("$name-topbar-expanded", onRoot().captureToImage())
+
+        runOnIdle { expandable.value = false }
+        waitForIdle()
+        onNodeWithText("Expanded").assertDoesNotExist()
+        assertEquals(compactBounds, onNodeWithTag("foreground").getUnclippedBoundsInRoot())
+    }
+
     @Test
     fun shortPageOverscrollCompletesProgressiveButtonMaterial() = assertElasticButtonMaterial(progressive = true)
 

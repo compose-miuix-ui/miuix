@@ -83,6 +83,7 @@ Scaffold(
 | title | String | 紧凑标题 | - | 是 |
 | modifier | Modifier | 应用于整个顶栏和背景带的修饰符 | Modifier | 否 |
 | contentModifier | Modifier | 仅应用于前景顶栏的修饰符 | Modifier | 否 |
+| expandable | Boolean | 是否允许大标题展开，false 时固定折叠 | true | 否 |
 | backdrop | Backdrop? | 背景采样源，null 时按钮使用回退填充色 | null | 否 |
 | largeTitle | String | 展开时的大标题 | title | 否 |
 | subtitle | String | 副标题 | "" | 否 |

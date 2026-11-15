@@ -108,11 +108,10 @@ object GlassNavigationRailDefaults {
     val CollapsedHeight: Dp = GlassTopAppBarDefaults.ButtonSize
 
     /**
-     * Top of the collapsed capsule, relative to the safe area. It puts the capsule on the centre
-     * line of a [top.yukonga.miuix.kmp.basic.TopAppBar] or [GlassTopAppBar] at the top of the same
-     * area, so the capsule takes the place of the bar's collapsed title.
+     * Top of the collapsed capsule relative to the safe area, optically aligned with top bar
+     * controls by shifting the wide capsule 1.dp above their geometric centre line.
      */
-    val CollapsedTop: Dp = (TopAppBarDefaults.CollapsedHeight - CollapsedHeight) / 2
+    val CollapsedTop: Dp = (TopAppBarDefaults.CollapsedHeight - CollapsedHeight) / 2 - 1.dp
 
     /** The default content description of the built-in toggle while the rail is collapsed. */
     val ExpandContentDescription: String = "Expand navigation rail"
