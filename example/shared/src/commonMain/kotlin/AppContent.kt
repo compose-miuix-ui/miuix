@@ -184,10 +184,7 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    // miuix-nav back stack. The explicit <Route> supertype is required: a bare
-    // rememberNavBackStack(Route.Main) would infer T = the Route.Main singleton type and fail to
-    // encode the whole sealed hierarchy for save/restore. miuix-nav is reflection-free, so no
-    // SerializersModule / SavedStateConfiguration is needed for the @Serializable sealed Route.
+    // Explicit Route type preserves the sealed hierarchy for save/restore.
     val backStack = rememberNavBackStack<Route>(Route.Main)
     val navigator = remember { Navigator(backStack) }
 
@@ -205,28 +202,30 @@ fun AppContent(
 
     val isWideScreen = shouldShowSplitPane()
     val hasNavigationRail = isWideScreen && appState.showNavigationBar
-    // The sidebar has two faces: the plain Miuix rail that owns a layout column, and the floating
-    // glass sidebar that overlays the page. The glass one is the default.
+    // Plain rails occupy a column; glass rails overlay the page.
     val useGlassSidebar = hasNavigationRail && appState.navigationRailStyle == 1
     val expandSidebar = shouldExpandNavigationRail()
+    val layoutDirection = LocalLayoutDirection.current
+    val displayCutout = WindowInsets.displayCutout
     val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
     LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
-    // Collapsed, the sidebar is a capsule on the top bar's centre line and reserves nothing at the
-    // start edge; only the expanded panel pushes the page across. Both read the rail's own morph,
-    // so the page and the panel travel as one.
+    // Reserve the cutout; the expanded rail width is added after it.
     val sidebarInset: Density.() -> Int = if (useGlassSidebar) {
-        { ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress).roundToInt() }
+        {
+            displayCutout.getLeft(this, layoutDirection) +
+                ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress)
+                    .roundToInt()
+        }
     } else {
         { 0 }
     }
-    // The capsule takes the place of the page bar's collapsed title.
+    // The glass rail replaces the collapsed page-bar title.
     val topAppBarTitleAlpha: () -> Float = if (useGlassSidebar) {
         { sidebarState.progress }
     } else {
         { 1f }
     }
-    // Sampling is only possible while the page draws into a recorded layer; without a backdrop the
-    // rail falls back to the theme's surfaceContainer fill.
+    // Blur needs a recorded page layer; otherwise use the surface color.
     val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
     val topLayer = remember { TopLayerState() }
 
@@ -236,8 +235,7 @@ fun AppContent(
         LocalIsWideScreen provides isWideScreen,
         LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
     ) {
-        // Follow the device screen corner so the slide-in clip matches the platform (0 on
-        // Desktop/Web). The two-pane layout animates inside a mid-screen pane, so no screen corner.
+        // Match platform screen corners; split panes have no outer corner.
         val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
         val isCrossActivityStyle = appState.navTransitionStyle == 1
         val backdropColor = MiuixTheme.colorScheme.surface
@@ -253,54 +251,39 @@ fun AppContent(
         ) {
             NavDisplayEffects(
                 enableCornerClip = appState.enableCornerClip,
-                // The cross-activity card should stay rounded on Desktop/Web too, where the
-                // platform reports no screen corner.
+                // Fallback radius for platforms without screen corners.
                 cornerClipRadius = if (isCrossActivityStyle && navCornerRadius <= 0.dp) 32.dp else navCornerRadius,
-                // The cross-activity card scales the whole page (round all four corners); the
-                // slide style rounds only the leading edge.
                 cornerClipMode = if (isCrossActivityStyle) NavCornerClipMode.All else NavCornerClipMode.Leading,
-                // The cross-activity style uses the platform scrim constants (0.2 light / 0.8
-                // dark); the slide style keeps the established 0.5.
-                // The scrim curve itself (hold-during-gesture for the card style, depth-linear
-                // for the slide style) is owned by each transition via NavTransition.scrimFraction.
+                // Card rounds all corners; slide rounds the leading edge.
+                // Card uses platform scrim amounts; slide uses 0.5.
                 dimAmount = when {
                     !appState.enableDim -> 0f
                     isCrossActivityStyle -> if (isDarkTheme) 0.8f else 0.2f
                     else -> 0.5f
                 },
                 blockInputDuringTransition = appState.blockInputDuringTransition,
-                // Fill the area revealed around scaled-down layers with the page background, like
-                // the platform's back-animation background layer.
                 backdropColor = backdropColor,
             )
         }
 
-        // Swipe-to-dismiss is opt-in in miuix-nav and off by default; the example gates it behind a
-        // setting. Directions are physical (not mirrored), so pick per layout direction: rightward
-        // back-swipe under LTR, leftward under RTL.
+        // Swipe direction is physical; mirror it for RTL.
         val swipeBackDirection = when {
             !appState.enableSwipeBack -> NavSwipeDirection.None
             LocalLayoutDirection.current == LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
             else -> NavSwipeDirection.LeftToRight
         }
 
-        // Global transition style: the established default, or the cross-activity feel — the
-        // latter is a fully custom transition defined in this app (navigation/CrossActivityTransition.kt)
-        // on the public API, not a library preset. Both are top-level singletons, so the
-        // expression itself is stable across recompositions.
+        // Select the configured transition.
         val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
 
-        // The root Scaffold sits above the pages and the glass sidebar, so dialogs, sheets and
-        // popups hosted by it are never covered by the sidebar; the top layer does the same for
-        // glass popups drawn inline in a page.
+        // Keep overlays above page content and the glass rail.
         Scaffold(
             containerColor = Color.Transparent,
             contentWindowInsets = WindowInsets(0),
         ) {
             CompositionLocalProvider(LocalTopLayer provides topLayer) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Keep NavDisplay at one composition location while adaptive chrome changes around it.
-                    // Otherwise switching between the compact and wide branches recreates the current route.
+                    // Keep NavDisplay at one site across chrome changes.
                     Row(modifier = Modifier.fillMaxSize()) {
                         if (hasNavigationRail && !useGlassSidebar) {
                             PersistentNavigationRail(
@@ -312,9 +295,7 @@ fun AppContent(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                // The sibling rail already offsets this pane past the start-side safe area.
-                                // Share that consumption so page bars do not add the same inset again. The
-                                // glass rail lives inside this pane instead, so nothing is consumed for it.
+                                // Plain rails consume the inset; glass rails reserve it in sidebarInset.
                                 .then(
                                     if (hasNavigationRail && !useGlassSidebar) {
                                         Modifier.consumeWindowInsets(
@@ -326,8 +307,7 @@ fun AppContent(
                                         Modifier
                                     },
                                 )
-                                // The glass rail floats over the page, so the start margin under it needs the
-                                // page color rather than the window background.
+                                // Match the page background beneath the floating rail.
                                 .then(
                                     if (useGlassSidebar) {
                                         Modifier.background(MiuixTheme.colorScheme.surface)
@@ -335,7 +315,7 @@ fun AppContent(
                                         Modifier
                                     },
                                 )
-                                // Wide-screen transition layers must not draw over the navigation rail.
+                                // Keep wide-screen transitions inside the page pane.
                                 .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
                         ) {
                             Box(
@@ -352,8 +332,7 @@ fun AppContent(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        // Reserve the rail's animated width in the layout phase, so the morph
-                                        // never recomposes the page.
+                                        // Animate page width with the rail.
                                         .layout { measurable, constraints ->
                                             val inset = sidebarInset().coerceIn(0, constraints.maxWidth)
                                             val end = constraints.maxWidth
@@ -468,10 +447,7 @@ private fun AppNavHost(
     }
 }
 
-/**
- * Wide-screen chrome: the always-visible navigation rail on the left of the two-pane layout.
- * A rail tab first pops the pane's stack back to the main route, then switches the pager.
- */
+/** Persistent rail for wide layouts. */
 @Composable
 private fun PersistentNavigationRail(
     navigationItems: List<NavigationItem>,
@@ -505,10 +481,7 @@ private fun PersistentNavigationRail(
     }
 }
 
-/**
- * Wide-screen chrome: the floating glass sidebar. It samples the page behind it, so it stays
- * outside the layer recorded for it and overlays the page's start edge.
- */
+/** Floating glass rail over the page's start edge. */
 @Composable
 private fun PersistentGlassNavigationRail(
     navigationItems: List<NavigationItem>,
@@ -533,7 +506,7 @@ private fun PersistentGlassNavigationRail(
         items = items,
         selectedIndex = page,
         onSelect = {
-            // A rail tab first pops the pane's stack back to the main route, then switches the pager.
+            // Return to the main route before changing the page.
             navigator.popUntil { route -> route is Route.Main }
             mainPagerState.animateToPage(it)
         },
@@ -588,8 +561,7 @@ private fun WideScreenContent(
             .fillMaxSize(),
         contentWindowInsets =
         WindowInsets.systemBars.union(
-            // Only the plain rail sits beside the pane and already clears the start cutout; the
-            // glass sidebar floats over the page, which must clear it itself.
+            // Plain rails consume the start cutout; glass rails leave it for the page pane.
             if (appState.showNavigationBar && appState.navigationRailStyle == 0) {
                 WindowInsets.displayCutout.exclude(
                     WindowInsets.displayCutout.only(WindowInsetsSides.Start),
@@ -912,10 +884,7 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
     FloatingNavigationBarAlignment.End -> Alignment.End
 }
 
-/**
- * The optional badge for navigation item [index], shown only when [show] is enabled: a numeric badge
- * on one item and a dot badge on another to showcase both styles. Returns null when disabled.
- */
+/** Optional demo badge for a navigation item. */
 private fun navigationItemBadge(index: Int, show: Boolean): (@Composable () -> Unit)? = when {
     !show -> null
     index == 1 -> ({ Badge { Text("8") } })
