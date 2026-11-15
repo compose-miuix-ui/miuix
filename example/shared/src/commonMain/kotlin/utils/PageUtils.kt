@@ -53,6 +53,7 @@ private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
 val LocalWideScreenContentInset = staticCompositionLocalOf<() -> Dp> { { 0.dp } }
 val LocalWideScreenContentEndInset = staticCompositionLocalOf<() -> Dp> { { 0.dp } }
+val LocalWideScreenSearchTopInset = staticCompositionLocalOf<() -> Dp> { { 0.dp } }
 
 private class DynamicStartPaddingValues(
     private val base: PaddingValues,

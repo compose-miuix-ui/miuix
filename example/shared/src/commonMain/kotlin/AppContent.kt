@@ -143,6 +143,7 @@ import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
 import utils.LocalWideScreenContentEndInset
 import utils.LocalWideScreenContentInset
+import utils.LocalWideScreenSearchTopInset
 import utils.TopLayerHost
 import utils.TopLayerState
 import utils.rememberBlurBackdrop
@@ -257,6 +258,13 @@ fun AppContent(
             { 0.dp }
         }
     }
+    val wideScreenSearchTopInset = remember(useGlassSidebar, sidebarState) {
+        if (useGlassSidebar) {
+            { (GlassNavigationRailDefaults.CollapsedTop + GlassNavigationRailDefaults.CollapsedHeight + 4.dp) * (1f - sidebarState.progress) }
+        } else {
+            { 0.dp }
+        }
+    }
     val topLayer = remember { TopLayerState() }
 
     CompositionLocalProvider(
@@ -266,6 +274,7 @@ fun AppContent(
         LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
         LocalWideScreenContentInset provides wideScreenContentInset,
         LocalWideScreenContentEndInset provides wideScreenContentEndInset,
+        LocalWideScreenSearchTopInset provides wideScreenSearchTopInset,
     ) {
         // Match platform screen corners; split panes have no outer corner.
         val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()

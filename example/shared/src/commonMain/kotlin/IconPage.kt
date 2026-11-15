@@ -41,12 +41,14 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import component.SearchBarFake
 import component.SearchPager
 import kotlinx.coroutines.delay
@@ -77,9 +79,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.All
 import utils.BlurredBar
+import utils.LocalWideScreenSearchTopInset
 import utils.SearchStatus
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.wideScreenContentInset
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -100,6 +104,14 @@ fun IconsPage(
     val pageCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val searchCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val density = LocalDensity.current
+    val searchTopInset = LocalWideScreenSearchTopInset.current
+    val searchModifier = Modifier.wideScreenContentInset().layout { measurable, constraints ->
+        val top = searchTopInset().roundToPx().coerceIn(0, constraints.maxHeight)
+        val placeable = measurable.measure(constraints.offset(vertical = -top))
+        layout(placeable.width, placeable.height + top) {
+            placeable.placeRelative(0, top)
+        }
+    }
 
     val iconFamilies = remember { listOf("Glass", "Original") }
     var glass by remember { mutableStateOf(true) }
@@ -234,7 +246,7 @@ fun IconsPage(
                                             .graphicsLayer { alpha = if (legacySearchStatus?.isCollapsed() != false) 1f else 0f }
                                             .clickable {
                                                 val offset = checkNotNull(pageCoordinates.value).localPositionOf(checkNotNull(searchCoordinates.value), Offset.Zero)
-                                                legacySearchOffset = with(density) { offset.y.toDp() }
+                                                legacySearchOffset = with(density) { offset.y.toDp() } - searchTopInset()
                                                 legacySearchStatus = SearchStatus(
                                                     label = "Search icons",
                                                 )
@@ -395,6 +407,7 @@ fun IconsPage(
             GlassSearchOverlay(
                 onDismissRequest = { searchExpanded = false },
                 expanded = searchExpanded,
+                modifier = searchModifier,
                 label = "Search icons",
             ) { query ->
                 val filteredIndices = remember(query, iconNames) {
@@ -418,7 +431,7 @@ fun IconsPage(
                     if (status.searchText.isBlank()) emptyList() else iconNames.indices.filter { iconNames[it].contains(status.searchText, ignoreCase = true) }
                 }
                 Box(
-                    Modifier.fillMaxSize().onPreviewKeyEvent {
+                    Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {
                         if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
                             legacySearchStatus = status.copy(current = SearchStatus.Status.COLLAPSING)
                             true
