@@ -109,14 +109,15 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationRailDefaults
 import top.yukonga.miuix.kmp.glass.GlassNavigationRailState
 import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Create
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Home
-import top.yukonga.miuix.kmp.icon.extended.Image
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.glass.EditSubtitle
+import top.yukonga.miuix.kmp.icon.glass.HomeOutline
+import top.yukonga.miuix.kmp.icon.glass.ImageOutline
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
+import top.yukonga.miuix.kmp.icon.glass.Theme
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.EdgeStrokes
 import top.yukonga.miuix.kmp.material.edgeStroke
@@ -193,11 +194,11 @@ fun AppContent(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Home),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Create),
-            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Edit),
-            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Settings),
+            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Glass.HomeOutline),
+            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Glass.ImageOutline),
+            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Glass.Theme),
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Glass.EditSubtitle),
+            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Glass.SettingsOutline),
         )
     }
 

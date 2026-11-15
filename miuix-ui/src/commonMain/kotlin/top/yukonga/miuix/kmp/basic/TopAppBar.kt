@@ -1024,7 +1024,9 @@ private fun TopAppBarLayout(
 
         val verticalCenter = collapsedHeight / 2
         val smallSubtitleHeight = smallSubtitlePlaceable?.height ?: 0
-        val smallSubtitleBottom = verticalCenter + titlePlaceable.height / 2 + smallSubtitleHeight
+        val smallTitleGroupHeight = titlePlaceable.height + smallSubtitleHeight
+        val smallTitleGroupTop = verticalCenter - if (smallSubtitlePlaceable != null) smallTitleGroupHeight / 2 else titlePlaceable.height / 2
+        val smallSubtitleBottom = smallTitleGroupTop + smallTitleGroupHeight
         val expandedBottomPadding = if (smallSubtitlePlaceable != null) {
             TopAppBarDefaults.SubtitleBottomPadding.roundToPx()
         } else {
@@ -1041,29 +1043,35 @@ private fun TopAppBarLayout(
                 y = verticalCenter - navigationIconPlaceable.height / 2,
             )
 
-            // Title
-            var baseX = (constraints.maxWidth - titlePlaceable.width) / 2
-            if (baseX < navigationIconPlaceable.width) {
-                baseX += (navigationIconPlaceable.width - baseX)
-            } else if (baseX + titlePlaceable.width > constraints.maxWidth - actionIconsPlaceable.width) {
-                baseX += ((constraints.maxWidth - actionIconsPlaceable.width) - (baseX + titlePlaceable.width))
+            // Align the collapsed title/subtitle group between the side controls.
+            val titleGroupWidth = maxOf(titlePlaceable.width, smallSubtitlePlaceable?.width ?: 0)
+            val leadingControlWidth = if (layoutDirection == LayoutDirection.Ltr) {
+                navigationIconPlaceable.width
+            } else {
+                actionIconsPlaceable.width
             }
-            val titleY = verticalCenter - titlePlaceable.height / 2
-            titleClip.titleOrigin = IntOffset(
-                if (layoutDirection == LayoutDirection.Ltr) baseX else constraints.maxWidth - baseX - titlePlaceable.width,
-                titleY,
-            )
-            titlePlaceable.placeRelative(x = baseX, y = titleY)
+            val trailingControlWidth = if (layoutDirection == LayoutDirection.Ltr) {
+                actionIconsPlaceable.width
+            } else {
+                navigationIconPlaceable.width
+            }
+            var groupX = (constraints.maxWidth - titleGroupWidth) / 2
+            if (groupX < leadingControlWidth) {
+                groupX = leadingControlWidth
+            } else if (groupX + titleGroupWidth > constraints.maxWidth - trailingControlWidth) {
+                groupX = constraints.maxWidth - trailingControlWidth - titleGroupWidth
+            }
 
-            // Small subtitle (centered below small title, same alpha as small title)
+            val titleX = groupX + (titleGroupWidth - titlePlaceable.width) / 2
+            val titleY = smallTitleGroupTop
+            titleClip.titleOrigin = IntOffset(titleX, titleY)
+            titlePlaceable.place(x = titleX, y = titleY)
+
             smallSubtitlePlaceable?.let { subtitle ->
-                val subtitleX = (constraints.maxWidth - subtitle.width) / 2
-                val subtitleY = verticalCenter + titlePlaceable.height / 2
-                titleClip.subtitleOrigin = IntOffset(
-                    if (layoutDirection == LayoutDirection.Ltr) subtitleX else constraints.maxWidth - subtitleX - subtitle.width,
-                    subtitleY,
-                )
-                subtitle.placeRelative(x = subtitleX, y = subtitleY)
+                val subtitleX = groupX + (titleGroupWidth - subtitle.width) / 2
+                val subtitleY = smallTitleGroupTop + titlePlaceable.height
+                titleClip.subtitleOrigin = IntOffset(subtitleX, subtitleY)
+                subtitle.place(x = subtitleX, y = subtitleY)
             }
 
             // Action icons
@@ -1258,7 +1266,9 @@ private fun SmallTopAppBarLayout(
         val subtitleHeight = subtitlePlaceable?.height ?: 0
         val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
         val verticalCenter = TopAppBarDefaults.SmallTopAppBarCenterHeight.roundToPx() / 2
-        val subtitleY = verticalCenter + titlePlaceable.height / 2
+        val titleGroupHeight = titlePlaceable.height + subtitleHeight
+        val titleGroupTop = verticalCenter - if (subtitlePlaceable != null) titleGroupHeight / 2 else titlePlaceable.height / 2
+        val subtitleY = titleGroupTop + titlePlaceable.height
         val subtitleBottomPadding = if (subtitlePlaceable != null) TopAppBarDefaults.SubtitleBottomPadding.roundToPx() else 0
         val contentTop = maxOf(collapsedHeight, subtitleY + subtitleHeight + subtitleBottomPadding)
         val layoutHeight = contentTop + bottomContentPlaceable.height
@@ -1270,27 +1280,33 @@ private fun SmallTopAppBarLayout(
                 y = verticalCenter - navigationIconPlaceable.height / 2,
             )
 
-            // Title
-            var baseX = (constraints.maxWidth - titlePlaceable.width) / 2
-            if (baseX < navigationIconPlaceable.width) {
-                baseX += (navigationIconPlaceable.width - baseX)
-            } else if (baseX + titlePlaceable.width > constraints.maxWidth - actionIconsPlaceable.width) {
-                baseX += ((constraints.maxWidth - actionIconsPlaceable.width) - (baseX + titlePlaceable.width))
+            // Align the title/subtitle group between the side controls.
+            val titleGroupWidth = maxOf(titlePlaceable.width, subtitlePlaceable?.width ?: 0)
+            val leadingControlWidth = if (layoutDirection == LayoutDirection.Ltr) {
+                navigationIconPlaceable.width
+            } else {
+                actionIconsPlaceable.width
             }
-            titlePlaceable.placeRelative(
-                x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2,
+            val trailingControlWidth = if (layoutDirection == LayoutDirection.Ltr) {
+                actionIconsPlaceable.width
+            } else {
+                navigationIconPlaceable.width
+            }
+            var groupX = (constraints.maxWidth - titleGroupWidth) / 2
+            if (groupX < leadingControlWidth) {
+                groupX = leadingControlWidth
+            } else if (groupX + titleGroupWidth > constraints.maxWidth - trailingControlWidth) {
+                groupX = constraints.maxWidth - trailingControlWidth - titleGroupWidth
+            }
+
+            val titleX = groupX + (titleGroupWidth - titlePlaceable.width) / 2
+            titlePlaceable.place(
+                x = titleX,
+                y = titleGroupTop,
             )
 
-            // Action icons
-            actionIconsPlaceable.placeRelative(
-                x = constraints.maxWidth - actionIconsPlaceable.width,
-                y = verticalCenter - actionIconsPlaceable.height / 2,
-            )
-
-            // Subtitle (centered, right below title)
-            subtitlePlaceable?.placeRelative(
-                x = (constraints.maxWidth - subtitlePlaceable.width) / 2,
+            subtitlePlaceable?.place(
+                x = groupX + (titleGroupWidth - subtitlePlaceable.width) / 2,
                 y = subtitleY,
             )
 

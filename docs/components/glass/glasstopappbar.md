@@ -4,7 +4,7 @@
 
 With a scroll behavior or `visualContentOffset`, gradient-band opacity follows the live scroll distance during drawing, without a separate fade delay. Without either scroll source, the explicit overlap state retains its fade animation. `backgroundAlpha` still multiplies either mode.
 
-The default band follows the measured title, subtitle and `bottomContent` height. A smooth fade starts 12.dp inside the bottom edge and ends at `bandOverhang` (48.dp by default) below it. This keeps the lower subtitle area covered while providing a long fading tail without an opaque extension below the bar. The full fade fits inside the background layer even at partial opacity, so it does not suddenly appear when scrolling reaches full opacity. This does not increase foreground layout height. Custom brushes retain their existing stretched-band behavior.
+The default band follows the measured title, subtitle and `bottomContent` height. A smooth fade starts 12.dp inside the bottom edge and ends at `bandOverhang` below it. This keeps the lower subtitle area covered while providing a long fading tail without an opaque extension below the bar. The full fade fits inside the background layer even at partial opacity, so it does not suddenly appear when scrolling reaches full opacity. This does not increase foreground layout height. Custom brushes retain their existing stretched-band behavior.
 
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTopAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -123,7 +123,7 @@ The explicit-overlap overload adds one required parameter:
 | LargeTitleBlurRadius | Dp | Large-title blur radius | 12.dp |
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
-| BandOverhang | Dp | Band extension below the bar | 48.dp |
+| BandOverhang | Dp | Band extension below the bar | 28.dp |
 
 #### Methods
 

@@ -1,0 +1,352 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.icon.glass
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.group
+import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+
+val MiuixIcons.Glass.NotSusceptibleToCold: ImageVector
+    get() = MiuixIcons.Glass.Regular.NotSusceptibleToCold
+
+val MiuixIcons.Glass.Light.NotSusceptibleToCold: ImageVector
+    get() {
+        if (_notSusceptibleToColdLineLight != null) return _notSusceptibleToColdLineLight!!
+        _notSusceptibleToColdLineLight = buildHyperOSIcon(
+            name = "NotSusceptibleToCold.Glass.Light",
+            pathData = listOf(
+                PathNode.MoveTo(466.8f, 809.4f),
+                PathNode.LineTo(509f, 768.1f),
+                PathNode.QuadTo(542.8f, 796.6f, 581.8f, 809.6f),
+                PathNode.QuadTo(620.9f, 822.6f, 660f, 822.6f),
+                PathNode.QuadTo(723.6f, 822.6f, 777.4f, 792.7f),
+                PathNode.QuadTo(831.3f, 762.9f, 862.8f, 711.7f),
+                PathNode.QuadTo(894.3f, 660.6f, 894.3f, 599f),
+                PathNode.VerticalTo(382.3f),
+                PathNode.LineTo(952.7f, 323.4f),
+                PathNode.VerticalTo(599f),
+                PathNode.QuadTo(952.7f, 675f, 913.4f, 739.6f),
+                PathNode.QuadTo(874.2f, 804.2f, 806.8f, 841.9f),
+                PathNode.QuadTo(739.4f, 879.7f, 660f, 879.7f),
+                PathNode.QuadTo(609.2f, 879.7f, 559.6f, 862.9f),
+                PathNode.QuadTo(510f, 846.2f, 466.8f, 809.4f),
+                PathNode.Close,
+                PathNode.MoveTo(660f, -129.7f),
+                PathNode.QuadTo(745f, -129.7f, 816.9f, -85.8f),
+                PathNode.QuadTo(888.8f, -41.9f, 924.4f, 32.4f),
+                PathNode.LineTo(881f, 75.9f),
+                PathNode.QuadTo(855.1f, 6.7f, 794.1f, -32.9f),
+                PathNode.QuadTo(733f, -72.6f, 660f, -72.6f),
+                PathNode.QuadTo(594.7f, -72.6f, 541.3f, -42.7f),
+                PathNode.QuadTo(487.9f, -12.9f, 457.3f, 38.5f),
+                PathNode.QuadTo(426.7f, 89.9f, 426.7f, 153.2f),
+                PathNode.VerticalTo(345.6f),
+                PathNode.HorizontalTo(611.3f),
+                PathNode.LineTo(554.7f, 402.7f),
+                PathNode.HorizontalTo(426.7f),
+                PathNode.VerticalTo(530.7f),
+                PathNode.LineTo(367.3f, 590f),
+                PathNode.VerticalTo(151f),
+                PathNode.QuadTo(367.3f, 72.8f, 406.6f, 8.4f),
+                PathNode.QuadTo(445.8f, -56f, 512.9f, -92.8f),
+                PathNode.QuadTo(580.1f, -129.7f, 660f, -129.7f),
+                PathNode.Close,
+                PathNode.MoveTo(353f, 775.8f),
+                PathNode.LineTo(339.6f, 762.3f),
+                PathNode.QuadTo(333.1f, 755.9f, 332.9f, 748.9f),
+                PathNode.QuadTo(332.7f, 742f, 340.1f, 734.6f),
+                PathNode.LineTo(1008.6f, 66.1f),
+                PathNode.QuadTo(1015f, 59.7f, 1022.2f, 59.2f),
+                PathNode.QuadTo(1029.4f, 58.7f, 1036.3f, 65.6f),
+                PathNode.LineTo(1050.3f, 79.6f),
+                PathNode.QuadTo(1057.8f, 86.4f, 1057.3f, 93.9f),
+                PathNode.QuadTo(1056.9f, 101.4f, 1050.4f, 107.9f),
+                PathNode.LineTo(381.9f, 776.4f),
+                PathNode.QuadTo(375.4f, 782.9f, 368.3f, 783.4f),
+                PathNode.QuadTo(361.1f, 783.9f, 353f, 775.8f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = -28.4538f,
+            translationY = 1041.6667f,
+            autoMirror = false,
+        )
+        return _notSusceptibleToColdLineLight!!
+    }
+
+private var _notSusceptibleToColdLineLight: ImageVector? = null
+
+val MiuixIcons.Glass.Normal.NotSusceptibleToCold: ImageVector
+    get() {
+        if (_notSusceptibleToColdLineNormal != null) return _notSusceptibleToColdLineNormal!!
+        _notSusceptibleToColdLineNormal = buildHyperOSIcon(
+            name = "NotSusceptibleToCold.Glass.Normal",
+            pathData = listOf(
+                PathNode.MoveTo(468.3f, 822.9f),
+                PathNode.LineTo(522.7f, 768.7f),
+                PathNode.QuadTo(552.6f, 791.4f, 587.8f, 803f),
+                PathNode.QuadTo(623f, 814.6f, 660f, 814.6f),
+                PathNode.QuadTo(721.1f, 814.6f, 773f, 785.7f),
+                PathNode.QuadTo(824.9f, 756.8f, 855f, 707.4f),
+                PathNode.QuadTo(885.2f, 658.1f, 885.2f, 599f),
+                PathNode.VerticalTo(406.2f),
+                PathNode.LineTo(961.8f, 328.6f),
+                PathNode.VerticalTo(599f),
+                PathNode.QuadTo(961.8f, 677.7f, 921.4f, 744.3f),
+                PathNode.QuadTo(880.9f, 810.9f, 811.4f, 849.9f),
+                PathNode.QuadTo(741.9f, 888.8f, 660f, 888.8f),
+                PathNode.QuadTo(607.7f, 888.8f, 558.8f, 872.3f),
+                PathNode.QuadTo(510f, 855.7f, 468.3f, 822.9f),
+                PathNode.Close,
+                PathNode.MoveTo(660f, -138.8f),
+                PathNode.QuadTo(745f, -138.8f, 816.3f, -96.9f),
+                PathNode.QuadTo(887.6f, -55f, 926.9f, 15.6f),
+                PathNode.LineTo(870f, 72.5f),
+                PathNode.QuadTo(844.7f, 10.3f, 787.5f, -27.1f),
+                PathNode.QuadTo(730.3f, -64.6f, 660f, -64.6f),
+                PathNode.QuadTo(598.3f, -64.6f, 546.9f, -35.7f),
+                PathNode.QuadTo(495.5f, -6.8f, 465.7f, 42.6f),
+                PathNode.QuadTo(435.8f, 92f, 435.8f, 151.7f),
+                PathNode.VerticalTo(337.6f),
+                PathNode.HorizontalTo(604.9f),
+                PathNode.LineTo(530.8f, 411.8f),
+                PathNode.HorizontalTo(435.8f),
+                PathNode.VerticalTo(506.8f),
+                PathNode.LineTo(358.2f, 584.5f),
+                PathNode.VerticalTo(151f),
+                PathNode.QuadTo(358.2f, 71.6f, 398.6f, 5f),
+                PathNode.QuadTo(439.1f, -61.5f, 508.5f, -100.2f),
+                PathNode.QuadTo(578f, -138.8f, 660f, -138.8f),
+                PathNode.Close,
+                PathNode.MoveTo(347.5f, 782.8f),
+                PathNode.LineTo(331.6f, 766.9f),
+                PathNode.QuadTo(322.7f, 758f, 322.7f, 748.6f),
+                PathNode.QuadTo(322.6f, 739.3f, 332.5f, 729.4f),
+                PathNode.LineTo(1003.4f, 58.5f),
+                PathNode.QuadTo(1012.3f, 49.6f, 1022.1f, 49.1f),
+                PathNode.QuadTo(1031.9f, 48.6f, 1040.9f, 57.6f),
+                PathNode.LineTo(1057.7f, 74.4f),
+                PathNode.QuadTo(1067.6f, 83.4f, 1067.4f, 93.6f),
+                PathNode.QuadTo(1067.3f, 103.9f, 1058.4f, 112.8f),
+                PathNode.LineTo(386.8f, 784.4f),
+                PathNode.QuadTo(377.9f, 793.3f, 368.4f, 793.8f),
+                PathNode.QuadTo(359f, 794.3f, 347.5f, 782.8f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = -28.3688f,
+            translationY = 1041.6667f,
+            autoMirror = false,
+        )
+        return _notSusceptibleToColdLineNormal!!
+    }
+
+private var _notSusceptibleToColdLineNormal: ImageVector? = null
+
+val MiuixIcons.Glass.Regular.NotSusceptibleToCold: ImageVector
+    get() {
+        if (_notSusceptibleToColdLineRegular != null) return _notSusceptibleToColdLineRegular!!
+        _notSusceptibleToColdLineRegular = buildHyperOSIcon(
+            name = "NotSusceptibleToCold.Glass.Regular",
+            pathData = listOf(
+                PathNode.MoveTo(469f, 829f),
+                PathNode.LineTo(529f, 769f),
+                PathNode.QuadTo(557f, 789f, 590.5f, 800f),
+                PathNode.QuadTo(624f, 811f, 660f, 811f),
+                PathNode.QuadTo(720f, 811f, 771f, 782.5f),
+                PathNode.QuadTo(822f, 754f, 851.5f, 705.5f),
+                PathNode.QuadTo(881f, 657f, 881f, 599f),
+                PathNode.VerticalTo(417f),
+                PathNode.LineTo(966f, 331f),
+                PathNode.VerticalTo(599f),
+                PathNode.QuadTo(966f, 679f, 925f, 746.5f),
+                PathNode.QuadTo(884f, 814f, 813.5f, 853.5f),
+                PathNode.QuadTo(743f, 893f, 660f, 893f),
+                PathNode.QuadTo(607f, 893f, 558.5f, 876.5f),
+                PathNode.QuadTo(510f, 860f, 469f, 829f),
+                PathNode.Close,
+                PathNode.MoveTo(660f, -143f),
+                PathNode.QuadTo(745f, -143f, 816f, -102f),
+                PathNode.QuadTo(887f, -61f, 928f, 8f),
+                PathNode.LineTo(865f, 71f),
+                PathNode.QuadTo(840f, 12f, 784.5f, -24.5f),
+                PathNode.QuadTo(729f, -61f, 660f, -61f),
+                PathNode.QuadTo(600f, -61f, 549.5f, -32.5f),
+                PathNode.QuadTo(499f, -4f, 469.5f, 44.5f),
+                PathNode.QuadTo(440f, 93f, 440f, 151f),
+                PathNode.VerticalTo(334f),
+                PathNode.HorizontalTo(602f),
+                PathNode.LineTo(520f, 416f),
+                PathNode.HorizontalTo(440f),
+                PathNode.VerticalTo(496f),
+                PathNode.LineTo(354f, 582f),
+                PathNode.VerticalTo(151f),
+                PathNode.QuadTo(354f, 71f, 395f, 3.5f),
+                PathNode.QuadTo(436f, -64f, 506.5f, -103.5f),
+                PathNode.QuadTo(577f, -143f, 660f, -143f),
+                PathNode.Close,
+                PathNode.MoveTo(345f, 786f),
+                PathNode.LineTo(328f, 769f),
+                PathNode.QuadTo(318f, 759f, 318f, 748.5f),
+                PathNode.QuadTo(318f, 738f, 329f, 727f),
+                PathNode.LineTo(1001f, 55f),
+                PathNode.QuadTo(1011f, 45f, 1022f, 44.5f),
+                PathNode.QuadTo(1033f, 44f, 1043f, 54f),
+                PathNode.LineTo(1061f, 72f),
+                PathNode.QuadTo(1072f, 82f, 1072f, 93.5f),
+                PathNode.QuadTo(1072f, 105f, 1062f, 115f),
+                PathNode.LineTo(389f, 788f),
+                PathNode.QuadTo(379f, 798f, 368.5f, 798.5f),
+                PathNode.QuadTo(358f, 799f, 345f, 786f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = -28.3333f,
+            translationY = 1041.6667f,
+            autoMirror = false,
+        )
+        return _notSusceptibleToColdLineRegular!!
+    }
+
+private var _notSusceptibleToColdLineRegular: ImageVector? = null
+
+val MiuixIcons.Glass.Medium.NotSusceptibleToCold: ImageVector
+    get() {
+        if (_notSusceptibleToColdLineMedium != null) return _notSusceptibleToColdLineMedium!!
+        _notSusceptibleToColdLineMedium = buildHyperOSIcon(
+            name = "NotSusceptibleToCold.Glass.Medium",
+            pathData = listOf(
+                PathNode.MoveTo(467.9f, 838.2f),
+                PathNode.LineTo(539.8f, 766.3f),
+                PathNode.QuadTo(564.8f, 783.3f, 595.1f, 793.1f),
+                PathNode.QuadTo(625.4f, 802.9f, 660f, 802.9f),
+                PathNode.QuadTo(717.8f, 802.9f, 766.9f, 775.5f),
+                PathNode.QuadTo(816.1f, 748.1f, 844.5f, 701.3f),
+                PathNode.QuadTo(872.9f, 654.6f, 872.9f, 599f),
+                PathNode.VerticalTo(433.2f),
+                PathNode.LineTo(974.1f, 331.3f),
+                PathNode.VerticalTo(599f),
+                PathNode.QuadTo(974.1f, 681.2f, 931.9f, 750.6f),
+                PathNode.QuadTo(889.7f, 819.9f, 817.4f, 860.5f),
+                PathNode.QuadTo(745.2f, 901.1f, 660f, 901.1f),
+                PathNode.QuadTo(604.8f, 901.1f, 556.2f, 884.3f),
+                PathNode.QuadTo(507.6f, 867.6f, 467.9f, 838.2f),
+                PathNode.Close,
+                PathNode.MoveTo(660f, -151.1f),
+                PathNode.QuadTo(746.6f, -151.1f, 817.8f, -110.2f),
+                PathNode.QuadTo(888.9f, -69.4f, 931f, -2.5f),
+                PathNode.LineTo(856.6f, 71.8f),
+                PathNode.QuadTo(832.7f, 17.4f, 780.2f, -17.7f),
+                PathNode.QuadTo(727.6f, -52.9f, 660f, -52.9f),
+                PathNode.QuadTo(602.2f, -52.9f, 553.6f, -25.5f),
+                PathNode.QuadTo(504.9f, 1.9f, 476.5f, 48.7f),
+                PathNode.QuadTo(448.1f, 95.4f, 448.1f, 151f),
+                PathNode.VerticalTo(325.9f),
+                PathNode.HorizontalTo(602.5f),
+                PathNode.LineTo(504.3f, 423.8f),
+                PathNode.LineTo(445.4f, 424.4f),
+                PathNode.LineTo(444.3f, 483.8f),
+                PathNode.LineTo(345.9f, 582.3f),
+                PathNode.VerticalTo(151f),
+                PathNode.QuadTo(345.9f, 68.8f, 388.1f, -0.6f),
+                PathNode.QuadTo(430.3f, -69.9f, 502.6f, -110.5f),
+                PathNode.QuadTo(574.8f, -151.1f, 660f, -151.1f),
+                PathNode.Close,
+                PathNode.MoveTo(339.9f, 792.2f),
+                PathNode.LineTo(322.6f, 774.9f),
+                PathNode.QuadTo(309.9f, 762.2f, 309.9f, 748.6f),
+                PathNode.QuadTo(309.9f, 735f, 323.3f, 721.6f),
+                PathNode.LineTo(995.9f, 49.3f),
+                PathNode.QuadTo(1008.6f, 36.6f, 1022.5f, 36.3f),
+                PathNode.QuadTo(1036.5f, 35.9f, 1049.2f, 48.6f),
+                PathNode.LineTo(1067.2f, 66.6f),
+                PathNode.QuadTo(1080.6f, 79.3f, 1080.6f, 93.6f),
+                PathNode.QuadTo(1080.6f, 108f, 1067.9f, 120.7f),
+                PathNode.LineTo(394.7f, 793.7f),
+                PathNode.QuadTo(382f, 806.4f, 368.4f, 806.7f),
+                PathNode.QuadTo(354.8f, 807.1f, 339.9f, 792.2f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = -28.6036f,
+            translationY = 1041.6667f,
+            autoMirror = false,
+        )
+        return _notSusceptibleToColdLineMedium!!
+    }
+
+private var _notSusceptibleToColdLineMedium: ImageVector? = null
+
+val MiuixIcons.Glass.Demibold.NotSusceptibleToCold: ImageVector
+    get() {
+        if (_notSusceptibleToColdLineDemibold != null) return _notSusceptibleToColdLineDemibold!!
+        _notSusceptibleToColdLineDemibold = buildHyperOSIcon(
+            name = "NotSusceptibleToCold.Glass.Demibold",
+            pathData = listOf(
+                PathNode.MoveTo(467.2f, 844.6f),
+                PathNode.LineTo(547.4f, 764.4f),
+                PathNode.QuadTo(570.3f, 779.4f, 598.3f, 788.3f),
+                PathNode.QuadTo(626.3f, 797.2f, 660f, 797.2f),
+                PathNode.QuadTo(716.3f, 797.2f, 764.1f, 770.6f),
+                PathNode.QuadTo(811.9f, 743.9f, 839.6f, 698.4f),
+                PathNode.QuadTo(867.2f, 652.9f, 867.2f, 599f),
+                PathNode.VerticalTo(444.6f),
+                PathNode.LineTo(979.8f, 331.5f),
+                PathNode.VerticalTo(599f),
+                PathNode.QuadTo(979.8f, 682.7f, 936.7f, 753.4f),
+                PathNode.QuadTo(893.6f, 824.1f, 820.2f, 865.4f),
+                PathNode.QuadTo(746.7f, 906.8f, 660f, 906.8f),
+                PathNode.QuadTo(603.3f, 906.8f, 554.6f, 889.8f),
+                PathNode.QuadTo(505.9f, 872.9f, 467.2f, 844.6f),
+                PathNode.Close,
+                PathNode.MoveTo(660f, -156.8f),
+                PathNode.QuadTo(747.8f, -156.8f, 819f, -116f),
+                PathNode.QuadTo(890.2f, -75.2f, 933.1f, -9.9f),
+                PathNode.LineTo(850.8f, 72.4f),
+                PathNode.QuadTo(827.6f, 21.2f, 777.1f, -13f),
+                PathNode.QuadTo(726.7f, -47.2f, 660f, -47.2f),
+                PathNode.QuadTo(603.7f, -47.2f, 556.4f, -20.6f),
+                PathNode.QuadTo(509.1f, 6.1f, 481.4f, 51.6f),
+                PathNode.QuadTo(453.8f, 97.1f, 453.8f, 151f),
+                PathNode.VerticalTo(320.2f),
+                PathNode.HorizontalTo(602.9f),
+                PathNode.LineTo(493.4f, 429.3f),
+                PathNode.LineTo(449.2f, 430.2f),
+                PathNode.LineTo(447.4f, 475.3f),
+                PathNode.LineTo(340.2f, 582.5f),
+                PathNode.VerticalTo(151f),
+                PathNode.QuadTo(340.2f, 67.3f, 383.3f, -3.4f),
+                PathNode.QuadTo(426.4f, -74.1f, 499.8f, -115.4f),
+                PathNode.QuadTo(573.3f, -156.8f, 660f, -156.8f),
+                PathNode.Close,
+                PathNode.MoveTo(336.3f, 796.6f),
+                PathNode.LineTo(318.8f, 779.1f),
+                PathNode.QuadTo(304.2f, 764.5f, 304.2f, 748.7f),
+                PathNode.QuadTo(304.2f, 732.9f, 319.4f, 717.8f),
+                PathNode.LineTo(992.3f, 45.4f),
+                PathNode.QuadTo(1006.9f, 30.8f, 1022.9f, 30.5f),
+                PathNode.QuadTo(1039f, 30.2f, 1053.6f, 44.8f),
+                PathNode.LineTo(1071.6f, 62.8f),
+                PathNode.QuadTo(1086.7f, 77.4f, 1086.7f, 93.7f),
+                PathNode.QuadTo(1086.7f, 110.1f, 1072.1f, 124.6f),
+                PathNode.LineTo(398.6f, 797.6f),
+                PathNode.QuadTo(384.1f, 812.2f, 368.3f, 812.5f),
+                PathNode.QuadTo(352.5f, 812.8f, 336.3f, 796.6f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = -28.7928f,
+            translationY = 1041.6667f,
+            autoMirror = false,
+        )
+        return _notSusceptibleToColdLineDemibold!!
+    }
+
+private var _notSusceptibleToColdLineDemibold: ImageVector? = null
+

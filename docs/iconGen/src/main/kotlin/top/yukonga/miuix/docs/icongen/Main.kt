@@ -292,6 +292,52 @@ fun main(args: Array<String>) {
                     }
                 }
             }
+            // HyperOS glass icons delegate vector construction to a shared helper.
+            extractCallArguments(content, "buildHyperOSIcon").forEach { argsContent ->
+                val name = Regex("name\\s*=\\s*\"([^\"]+)\"").find(argsContent)?.groupValues?.getOrNull(1) ?: return@forEach
+                val pathStart = argsContent.indexOf("pathData = listOf(")
+                if (pathStart == -1) return@forEach
+                val pathContentStart = pathStart + "pathData = listOf(".length
+                var depth = 1
+                var pathEnd = pathContentStart
+                while (pathEnd < argsContent.length && depth > 0) {
+                    when (argsContent[pathEnd]) {
+                        '(' -> depth++
+                        ')' -> depth--
+                    }
+                    pathEnd++
+                }
+                if (depth != 0) return@forEach
+
+                val d = parsePathNodes(argsContent.substring(pathContentStart, pathEnd - 1))
+                val scale = Regex("scale\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 1f
+                val translationX = Regex("translationX\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+                val translationY = Regex("translationY\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+                val matchedWeight = WEIGHT_NAMES.firstOrNull { name.endsWith(".Glass.$it") } ?: return@forEach
+                val simpleName = name.removeSuffix(".Glass.$matchedWeight")
+                val svg = buildSvg(
+                    listOf(
+                        SvgPath(
+                            d = d,
+                            fill = "#000000",
+                            transform = " transform=\"matrix($scale 0 0 ${-scale} $translationX $translationY)\"",
+                        ),
+                    ),
+                    1333.3333f,
+                    1333.3333f,
+                    light,
+                    dark,
+                    preserveColors,
+                )
+                val relativeDir = file.relativeTo(src).parentFile
+                val outSubDir = File(dest, relativeDir.path)
+                outSubDir.mkdirs()
+                val fileName = "$simpleName.$matchedWeight.svg"
+                File(outSubDir, fileName).writeText(svg)
+                count++
+                val relativePath = File(relativeDir, fileName).path.replace("\\", "/")
+                glassIconsMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
+            }
         }
     }
 
@@ -329,7 +375,7 @@ fun main(args: Array<String>) {
             content.append(extendedTable).append("\n")
             if (glassIconsMap.isNotEmpty()) {
                 content.append("### Glass Icons\n\n")
-                content.append("Glass icons ship in the separate `miuix-glass-icons` artifact. They are reached through `MiuixIcons.Glass` and, like the other families, come in five weights. Below is the complete list:\n\n")
+                content.append("Glass icons ship in the separate `miuix-glass-icons` artifact. They are generated from the HyperOS symbol source and exposed through `MiuixIcons.Glass`. Below is the complete list:\n\n")
                 content.append(glassTable).append("\n")
             }
 
@@ -357,7 +403,7 @@ fun main(args: Array<String>) {
             content.append(extendedTable).append("\n")
             if (glassIconsMap.isNotEmpty()) {
                 content.append("### Glass 图标\n\n")
-                content.append("Glass 图标位于独立的 `miuix-glass-icons` 构件中，通过 `MiuixIcons.Glass` 访问，与其他图标族一样提供五种字重。以下是完整的列表：\n\n")
+                content.append("Glass 图标位于独立的 `miuix-glass-icons` 构件中，由 HyperOS 图标源生成，通过 `MiuixIcons.Glass` 访问。以下是完整的列表：\n\n")
                 content.append(glassTable).append("\n")
             }
 
@@ -381,6 +427,24 @@ fun updateDocFile(docFile: File, newContent: String, startHeader: String) {
         println("[iconGen] Documentation file not found at $docFile, creating new one.")
         docFile.writeText(newContent)
     }
+}
+
+fun extractCallArguments(content: String, functionName: String): List<String> {
+    val results = mutableListOf<String>()
+    val callRegex = Regex("\\b${Regex.escape(functionName)}\\s*\\(")
+    callRegex.findAll(content).forEach { match ->
+        var depth = 1
+        var index = match.range.last + 1
+        while (index < content.length && depth > 0) {
+            when (content[index]) {
+                '(' -> depth++
+                ')' -> depth--
+            }
+            index++
+        }
+        if (depth == 0) results += content.substring(match.range.last + 1, index - 1)
+    }
+    return results
 }
 
 fun parsePathNodes(content: String): String {
