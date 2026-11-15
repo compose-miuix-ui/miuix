@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
@@ -27,6 +29,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -37,7 +40,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, InternalComposeUiApi::class)
 class GlassNavigationRailInteractionTest {
     private val destinations = listOf(
         GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
@@ -46,13 +49,65 @@ class GlassNavigationRailInteractionTest {
     )
 
     @Test
+    fun expandedRowsUseIndicationWithoutMovingTheSelectionUntilRelease() = runComposeUiTest {
+        val state = GlassNavigationRailState(initialExpanded = true)
+        var selected by mutableIntStateOf(0)
+        val selections = mutableListOf<Int>()
+        setContent {
+            Scene(onSelect = {
+                selected = it
+                selections += it
+            }, state = state, selectedIndex = selected)
+        }
+        val home = onNodeWithContentDescription("Home").fetchSemanticsNode().boundsInRoot
+        val library = onNodeWithContentDescription("Library").fetchSemanticsNode().boundsInRoot
+        val before = onRoot().captureToImage().toPixelMap()
+        val sampleX = (library.right - 20f).toInt()
+        val sampleY = library.center.y.toInt()
+        mainClock.autoAdvance = false
+        onRoot().performTouchInput { down(library.center) }
+        mainClock.advanceTimeBy(500)
+        val held = onRoot().captureToImage()
+        val pixel = held.toPixelMap()[sampleX, sampleY]
+        assertTrue(pixel.red < before[sampleX, sampleY].red - 0.05f, "Expanded row must show the Miuix indication overlay")
+        assertEquals(0, countFill(held, library, Color.Blue), "Expanded press must not show the capsule feedback")
+        assertTrue(countFill(held, home, Color.Red) > 20, "Expanded selection must stay on the controlled destination")
+        assertTrue(selections.isEmpty())
+        saveImage("rail-expanded-row-indication", held)
+        onRoot().performTouchInput { up() }
+        mainClock.advanceTimeBy(600)
+        assertEquals(listOf(1), selections)
+        onNodeWithContentDescription("Library").assertIsSelected()
+    }
+
+    @Test
+    fun expandedHorizontalDragCancelsRatherThanSelectingAnotherRow() = runComposeUiTest {
+        val state = GlassNavigationRailState(initialExpanded = true)
+        val selections = mutableListOf<Int>()
+        setContent { Scene(onSelect = { selections += it }, state = state) }
+        val library = onNodeWithContentDescription("Library").fetchSemanticsNode().boundsInRoot
+        onRoot().performTouchInput {
+            down(library.center)
+            moveTo(Offset(library.right - 4f, library.center.y))
+            up()
+        }
+        waitForIdle()
+        assertTrue(selections.isEmpty())
+        onNodeWithContentDescription("Home").assertIsSelected()
+        assertEquals(0, countFill(onRoot().captureToImage(), library, Color.Blue))
+    }
+
+    @Test
     fun heldPressSurvivesTheEndOfCollapseAndKeepsItsFeedback() = runComposeUiTest {
         val state = GlassNavigationRailState(initialExpanded = true)
         var selected by mutableIntStateOf(0)
         val selections = mutableListOf<Int>()
         setContent {
             Scene(
-                onSelect = { selected = it; selections += it },
+                onSelect = {
+                    selected = it
+                    selections += it
+                },
                 state = state,
                 selectedIndex = selected,
             )
@@ -95,6 +150,9 @@ class GlassNavigationRailInteractionTest {
         assertTrue(countFill(onRoot().captureToImage(), slot, Color.Blue) > 20)
 
         onRoot().performTouchInput { cancel() }
+        // Skiko cancel() resets only the injector; cancel the scene's active pointer too.
+        runOnUiThread { (this as SkikoComposeUiTest).scene.cancelPointerInput() }
+        waitForIdle()
         mainClock.advanceTimeBy(600)
         assertTrue(selections.isEmpty())
         onNodeWithContentDescription("Home").assertIsSelected()
@@ -113,7 +171,10 @@ class GlassNavigationRailInteractionTest {
         val selections = mutableListOf<Int>()
         setContent {
             Scene(
-                onSelect = { selected = it; selections += it },
+                onSelect = {
+                    selected = it
+                    selections += it
+                },
                 state = state,
                 selectedIndex = selected,
                 direction = direction,

@@ -13,9 +13,13 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -35,9 +39,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -53,7 +59,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -503,6 +508,8 @@ private fun GlassNavigationRailPanel(
                             selected = position == selectedIndex,
                             position = position,
                             slot = interaction.slots[position],
+                            interactionSource = interaction.rowInteractions[position],
+                            expanded = expanded,
                             pressed = pressedIndex == position,
                             rowProgress = { rowProgress[position].value },
                             iconAlpha = iconAlpha,
@@ -578,6 +585,8 @@ private fun NavigationRailRow(
     selected: Boolean,
     position: Int,
     slot: NavigationRailSlot,
+    interactionSource: MutableInteractionSource,
+    expanded: Boolean,
     pressed: Boolean,
     rowProgress: () -> Float,
     iconAlpha: () -> Float,
@@ -636,7 +645,9 @@ private fun NavigationRailRow(
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(x, y) }
             }
-            .clipToBounds()
+            .clip(RoundedCornerShape(percent = 50))
+            .indication(interactionSource, LocalIndication.current)
+            .hoverable(interactionSource, enabled = expanded)
             .semantics(mergeDescendants = true) {
                 role = Role.Tab
                 this.selected = selected
@@ -654,7 +665,7 @@ private fun NavigationRailRow(
                     false
                 }
             }
-            .focusable()
+            .focusable(interactionSource = interactionSource)
             .graphicsLayer { alpha = pressAlpha.value },
     ) {
         Row(

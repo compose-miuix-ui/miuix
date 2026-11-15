@@ -7,6 +7,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,6 +40,7 @@ internal class NavigationRailInteraction(
     private val scope: CoroutineScope,
 ) {
     val slots = List(widths.size) { NavigationRailSlot() }
+    val rowInteractions = List(widths.size) { MutableInteractionSource() }
     private val starts = FloatArray(widths.size + 1).also { starts ->
         starts[0] = contentStart
         for (index in widths.indices) starts[index + 1] = starts[index] + widths[index]
@@ -141,7 +144,10 @@ internal fun Modifier.navigationRailGestures(
         var dragging = false
         var current = initial
         val grabOffset = position - interaction.start(initial)
-        interaction.press(initial)
+        val source = interaction.rowInteractions[initial]
+        val rowPress = if (horizontal) null else PressInteraction.Press(down.position)
+        var committed = false
+        if (horizontal) interaction.press(initial) else source.tryEmit(checkNotNull(rowPress))
         try {
             while (true) {
                 val event = awaitPointerEvent()
@@ -156,6 +162,7 @@ internal fun Modifier.navigationRailGestures(
                     if (change.changedToUp()) {
                         onSelect.value(if (horizontal) interaction.indexAt(position) else initial)
                         change.consume()
+                        committed = true
                     }
                     break
                 }
@@ -177,7 +184,11 @@ internal fun Modifier.navigationRailGestures(
                 }
             }
         } finally {
-            interaction.release()
+            if (horizontal) {
+                interaction.release()
+            } else if (rowPress != null) {
+                source.tryEmit(if (committed) PressInteraction.Release(rowPress) else PressInteraction.Cancel(rowPress))
+            }
         }
     }
 }

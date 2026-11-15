@@ -54,7 +54,7 @@ Box(Modifier.fillMaxSize()) {
 
 Collapsing is one continuous movement: each row flies from its place in the column into its slot in the bar's row while the icons dissolve, and the surface shrinks, rises and slides to the top centre with a short rebound. `railState.progress` is the morph's position from `0` (capsule) to `1` (panel). Read it in a layout or draw block, as above, so the page follows the panel without recomposing.
 
-Once collapsed and settled, the rail *is* a `GlassNavigationBar` showing labels only. Taps, horizontal drags, the selection indicator and the semantics are the bar's own: a drag previews the destination under the pointer and commits it on release.
+Expanded rows use the theme's `MiuixIndication` and scroll vertically. The collapsed capsule supports horizontal drag-to-select. Presses survive the morph without replacing the destination nodes.
 
 ## Component States
 
