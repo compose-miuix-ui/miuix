@@ -16,10 +16,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -62,9 +64,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -95,8 +101,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Sidebar
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
@@ -109,6 +113,83 @@ import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.ceil
 import kotlin.math.roundToInt
+
+private val RailTopBarIcon: ImageVector = ImageVector.Builder(
+    name = "RailTopBar",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+).apply {
+    path(
+        stroke = SolidColor(Color.White),
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+    ) {
+        moveTo(6f, 3f)
+        lineTo(18f, 3f)
+        curveTo(21f, 3f, 22f, 4f, 22f, 7f)
+        lineTo(22f, 17f)
+        curveTo(22f, 20f, 21f, 21f, 18f, 21f)
+        lineTo(6f, 21f)
+        curveTo(3f, 21f, 2f, 20f, 2f, 17f)
+        lineTo(2f, 7f)
+        curveTo(2f, 4f, 3f, 3f, 6f, 3f)
+        close()
+    }
+    path(
+        stroke = SolidColor(Color.White),
+        strokeLineWidth = 2.8f,
+        strokeLineCap = StrokeCap.Round,
+    ) {
+        moveTo(9f, 7f)
+        lineTo(15f, 7f)
+    }
+}.build()
+
+private val RailSideBarIcon: ImageVector = ImageVector.Builder(
+    name = "RailSideBar",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+).apply {
+    path(
+        stroke = SolidColor(Color.White),
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+    ) {
+        moveTo(6f, 3f)
+        lineTo(18f, 3f)
+        curveTo(21f, 3f, 22f, 4f, 22f, 7f)
+        lineTo(22f, 17f)
+        curveTo(22f, 20f, 21f, 21f, 18f, 21f)
+        lineTo(6f, 21f)
+        curveTo(3f, 21f, 2f, 20f, 2f, 17f)
+        lineTo(2f, 7f)
+        curveTo(2f, 4f, 3f, 3f, 6f, 3f)
+        close()
+    }
+    path(fill = SolidColor(Color.White)) {
+        moveTo(4f, 6.6f)
+        curveTo(4f, 6.03995f, 4f, 5.75992f, 4.10899f, 5.54601f)
+        curveTo(4.20487f, 5.35785f, 4.35785f, 5.20487f, 4.54601f, 5.10899f)
+        curveTo(4.75992f, 5f, 5.03995f, 5f, 5.6f, 5f)
+        lineTo(8.4f, 5f)
+        curveTo(8.96005f, 5f, 9.24008f, 5f, 9.45399f, 5.10899f)
+        curveTo(9.64215f, 5.20487f, 9.79513f, 5.35785f, 9.89101f, 5.54601f)
+        curveTo(10f, 5.75992f, 10f, 6.03995f, 10f, 6.6f)
+        lineTo(10f, 17.4f)
+        curveTo(10f, 17.9601f, 10f, 18.2401f, 9.89101f, 18.454f)
+        curveTo(9.79513f, 18.6422f, 9.64215f, 18.7951f, 9.45399f, 18.891f)
+        curveTo(9.24008f, 19f, 8.96005f, 19f, 8.4f, 19f)
+        lineTo(5.6f, 19f)
+        curveTo(5.03995f, 19f, 4.75992f, 19f, 4.54601f, 18.891f)
+        curveTo(4.35785f, 18.7951f, 4.20487f, 18.6422f, 4.10899f, 18.454f)
+        curveTo(4f, 18.2401f, 4f, 17.9601f, 4f, 17.4f)
+        close()
+    }
+}.build()
 
 /** Default values for [GlassNavigationRail]. */
 object GlassNavigationRailDefaults {
@@ -542,6 +623,7 @@ private fun GlassNavigationRailPanel(
             ) {
                 RailToggle(
                     onClick = { state.expanded = !expanded },
+                    expanded = expanded,
                     size = if (expanded) RailToggleBoxSize else RailCollapsedRowHeight,
                     tint = unselectedColor,
                     contentDescription = toggleContentDescription,
@@ -551,25 +633,94 @@ private fun GlassNavigationRailPanel(
     }
 }
 
-/** The expand/collapse toggle. Its surface is clear; only the icon and the press read. */
+/** The expand/collapse toggle with its embedded top-bar or sidebar glyph. */
 @Composable
 private fun RailToggle(
     onClick: () -> Unit,
+    expanded: Boolean,
     size: Dp,
     tint: Color,
     contentDescription: String,
 ) {
-    GlassIconButton(
-        onClick = onClick,
-        inheritTopBarMaterial = false,
-        size = size,
-        surfaceAlpha = 0f,
-        shadow = null,
-    ) {
+    val collapsedInteractionSource = remember { MutableInteractionSource() }
+    val collapsedPressed by collapsedInteractionSource.collectIsPressedAsState()
+    val collapsedContentAlpha by animateFloatAsState(
+        targetValue = if (collapsedPressed) GlassTopAppBarDefaults.PressedContentAlpha else 1f,
+        animationSpec = if (collapsedPressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
+        label = "railCollapsedToggleContentAlpha",
+    )
+    val topBarAlpha by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0f,
+        animationSpec = GlassMotion.navShowHide(),
+        label = "railTopBarIconAlpha",
+    )
+    val sideBarAlpha by animateFloatAsState(
+        targetValue = if (expanded) 0f else 1f,
+        animationSpec = GlassMotion.navShowHide(),
+        label = "railSideBarIconAlpha",
+    )
+    if (expanded) {
+        GlassIconButton(
+            onClick = onClick,
+            inheritTopBarMaterial = false,
+            size = size,
+            surfaceAlpha = 0f,
+            shadow = null,
+        ) {
+            RailToggleGlyph(
+                tint = tint,
+                topBarAlpha = topBarAlpha,
+                sideBarAlpha = sideBarAlpha,
+                contentAlpha = 1f,
+                contentDescription = contentDescription,
+            )
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .size(size)
+                .clickable(
+                    interactionSource = collapsedInteractionSource,
+                    indication = null,
+                    onClick = onClick,
+                )
+                .semantics { this.contentDescription = contentDescription },
+            contentAlignment = Alignment.Center,
+        ) {
+            RailToggleGlyph(
+                tint = tint,
+                topBarAlpha = topBarAlpha,
+                sideBarAlpha = sideBarAlpha,
+                contentAlpha = collapsedContentAlpha,
+                contentDescription = null,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RailToggleGlyph(
+    tint: Color,
+    topBarAlpha: Float,
+    sideBarAlpha: Float,
+    contentAlpha: Float,
+    contentDescription: String?,
+) {
+    Box(contentAlignment = Alignment.Center) {
         Icon(
-            imageVector = MiuixIcons.Basic.Sidebar,
+            imageVector = RailTopBarIcon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(RailIconSize),
+            modifier = Modifier
+                .size(RailIconSize)
+                .graphicsLayer { alpha = topBarAlpha * contentAlpha },
+            tint = tint,
+        )
+        Icon(
+            imageVector = RailSideBarIcon,
+            contentDescription = null,
+            modifier = Modifier
+                .size(RailIconSize)
+                .graphicsLayer { alpha = sideBarAlpha * contentAlpha },
             tint = tint,
         )
     }
@@ -848,8 +999,7 @@ private val RailExpandedCornerRadius = 20.dp
 /** The toggle's box: the bar's leading slot while collapsed, the header corner while expanded. */
 private val RailToggleBoxSize = GlassTopAppBarDefaults.ButtonSize
 private val RailLeadingActionWidth = RailToggleBoxSize + 4.dp
-private val RailCollapsedToggleBoxStart = GlassNavigationBarDefaults.ContentPaddingHorizontal +
-    (RailLeadingActionWidth - RailToggleBoxSize) / 2
+private val RailCollapsedToggleBoxStart = GlassNavigationBarDefaults.ContentPaddingHorizontal - 2.dp
 private val RailExpandedToggleStart = 16.dp
 private val RailExpandedToggleTop = 12.dp
 private val RailCollapsedEndPadding = 3.dp
