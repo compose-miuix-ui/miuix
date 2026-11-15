@@ -147,7 +147,7 @@ Create it with `rememberGlassNavigationRailState(initialExpanded = true)`; it su
 | ExpandedWidth | Dp | Panel width while expanded | 250.dp |
 | Margin | Dp | Distance between the panel and the window edges | 12.dp |
 | CollapsedHeight | Dp | Height of the collapsed capsule | 44.dp |
-| CollapsedTop | Dp | Capsule top that centres it on a top bar's centre line | 6.dp |
+| CollapsedTop | Dp | Capsule top offset, aligned with the top bar | 4.dp |
 | ExpandContentDescription | String | Default toggle description while collapsed | "Expand navigation rail" |
 | CollapseContentDescription | String | Default toggle description while expanded | "Collapse navigation rail" |
 

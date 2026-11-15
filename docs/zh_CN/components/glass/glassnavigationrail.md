@@ -147,7 +147,7 @@ GlassNavigationRail(
 | ExpandedWidth | Dp | 展开时的面板宽度 | 250.dp |
 | Margin | Dp | 面板与窗口边缘的距离 | 12.dp |
 | CollapsedHeight | Dp | 折叠胶囊高度 | 44.dp |
-| CollapsedTop | Dp | 使胶囊落在顶栏中线上的顶部位置 | 6.dp |
+| CollapsedTop | Dp | 折叠胶囊顶部偏移，与顶栏对齐 | 4.dp |
 | ExpandContentDescription | String | 折叠时开关的默认描述 | "Expand navigation rail" |
 | CollapseContentDescription | String | 展开时开关的默认描述 | "Collapse navigation rail" |
 
