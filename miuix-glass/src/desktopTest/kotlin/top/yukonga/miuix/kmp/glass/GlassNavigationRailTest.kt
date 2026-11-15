@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -23,7 +22,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -35,14 +33,12 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import kotlin.math.ceil
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -124,8 +120,7 @@ class GlassNavigationRailTest {
         mainClock.advanceTimeBy(2000)
         waitForIdle()
 
-        // Settled, the capsule is the navigation bar itself, so the destination is reachable by the
-        // bar's own semantics: a tab role with its name as the description.
+        // The destination retains its tab semantics when the morph reaches the capsule.
         onNodeWithContentDescription("Library").assertIsSelected()
     }
 
@@ -172,94 +167,9 @@ class GlassNavigationRailTest {
         }
         waitForIdle()
 
-        // The capsule is the bar, so dragging across it commits the destination under the pointer
-        // on release, exactly as the bar's own contract says.
+        // A horizontal drag commits the destination under the pointer only on release.
         assertEquals(listOf(2), selections)
         assertEquals(2, selected)
-    }
-
-    @Test
-    fun theCollapsedCapsuleLandsWhereTheMorphLeavesIt() = runComposeUiTest {
-        val state = GlassNavigationRailState(initialExpanded = true)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(800.dp, 600.dp)) {
-                    GlassNavigationRail(
-                        items = items,
-                        selectedIndex = 0,
-                        onSelect = {},
-                        backdrop = null,
-                        state = state,
-                        defaultWindowInsetsPadding = false,
-                    )
-                }
-            }
-        }
-        // Sample the label through the whole collapse: the panel hands the rail over to the bar at
-        // the very end, so any disagreement between their two geometries would leave the capsule
-        // slightly off where the morph put it.
-        val samples = mutableListOf<DpRect>()
-        mainClock.autoAdvance = false
-        runOnIdle { state.expanded = false }
-        repeat(100) {
-            mainClock.advanceTimeBy(16)
-            samples += onNodeWithText("Home", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        }
-        mainClock.autoAdvance = true
-        mainClock.advanceTimeBy(2000)
-        waitForIdle()
-        val settled = onNodeWithText("Home", useUnmergedTree = true).getUnclippedBoundsInRoot()
-
-        // Everything the morph settled on must survive the hand-off unchanged.
-        val lastMorphFrame = samples.last()
-        val dx = (lastMorphFrame.left - settled.left).value
-        val dy = (lastMorphFrame.top - settled.top).value
-        assertTrue(
-            (if (dx < 0) -dx else dx) < 0.5f && (if (dy < 0) -dy else dy) < 0.5f,
-            "the hand-off moved the capsule from $lastMorphFrame to $settled",
-        )
-    }
-
-    @Test
-    fun theToggleLandsWhereTheMorphLeavesIt() = runComposeUiTest {
-        val state = GlassNavigationRailState(initialExpanded = true)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(800.dp, 600.dp)) {
-                    GlassNavigationRail(
-                        items = items,
-                        selectedIndex = 0,
-                        onSelect = {},
-                        backdrop = null,
-                        state = state,
-                        defaultWindowInsetsPadding = false,
-                    )
-                }
-            }
-        }
-        // Collapsing, the panel's toggle already describes the next action, so the same node is
-        // found before and after the bar takes over.
-        val samples = mutableListOf<DpRect>()
-        mainClock.autoAdvance = false
-        runOnIdle { state.expanded = false }
-        repeat(100) {
-            mainClock.advanceTimeBy(16)
-            samples += onNodeWithContentDescription(GlassNavigationRailDefaults.ExpandContentDescription)
-                .getUnclippedBoundsInRoot()
-        }
-        mainClock.autoAdvance = true
-        mainClock.advanceTimeBy(2000)
-        waitForIdle()
-        val settled = onNodeWithContentDescription(GlassNavigationRailDefaults.ExpandContentDescription)
-            .getUnclippedBoundsInRoot()
-
-        val lastMorphFrame = samples.last()
-        val dx = (lastMorphFrame.left - settled.left).value
-        val dy = (lastMorphFrame.top - settled.top).value
-        assertTrue(
-            (if (dx < 0) -dx else dx) < 0.5f && (if (dy < 0) -dy else dy) < 0.5f,
-            "the hand-off moved the toggle from $lastMorphFrame to $settled",
-        )
     }
 
     @Test
@@ -331,46 +241,4 @@ class GlassNavigationRailTest {
         }
     }
 
-    @Test
-    fun theBarDrawsTheIndicatorOnTheFrameItTakesOver() = runComposeUiTest {
-        val state = GlassNavigationRailState(initialExpanded = true)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(800.dp, 500.dp)) {
-                    GlassNavigationRail(
-                        items = items,
-                        selectedIndex = 1,
-                        onSelect = {},
-                        backdrop = null,
-                        state = state,
-                        defaultWindowInsetsPadding = false,
-                    )
-                }
-            }
-        }
-        waitForIdle()
-        mainClock.autoAdvance = false
-        runOnIdle { state.expanded = false }
-        // The settled bar exposes its destinations by description; the panel's rows do not. The
-        // first frame one appears is the hand-off.
-        var handOff: ImageBitmap? = null
-        repeat(240) {
-            if (handOff != null) return@repeat
-            mainClock.advanceTimeByFrame()
-            if (onAllNodesWithContentDescription("Library").fetchSemanticsNodes().isNotEmpty()) {
-                handOff = onRoot().captureToImage()
-            }
-        }
-        val first = assertNotNull(handOff, "the bar never took over").toPixelMap()
-        mainClock.autoAdvance = true
-        mainClock.advanceTimeBy(2000)
-        waitForIdle()
-        val settled = onRoot().captureToImage().toPixelMap()
-
-        // Just inside the selected slot, beside its label: the indicator's fill, not the capsule's.
-        val label = onNodeWithText("Library", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
-        val x = (label.left - 4f).toInt()
-        val y = label.center.y.toInt()
-        assertEquals(settled[x, y], first[x, y], "the indicator was missing on the hand-off frame")
-    }
 }
