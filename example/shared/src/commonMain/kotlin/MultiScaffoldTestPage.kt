@@ -34,6 +34,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
+import utils.wideScreenContentPadding
 
 @Composable
 fun MultiScaffoldTestPage(
@@ -89,14 +90,19 @@ fun MultiScaffoldTestPage(
                 .then(if (appState.showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .verticalScroll(scrollState)
                 .padding(
-                    top = innerPadding.calculateTopPadding(),
-                    start = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-                    bottom = if (isWideScreen) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
-                    } else {
-                        padding.calculateBottomPadding() + 12.dp
-                    },
+                    wideScreenContentPadding(
+                        PaddingValues(
+                            top = innerPadding.calculateTopPadding(),
+                            start = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
+                            end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
+                            bottom = if (isWideScreen) {
+                                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
+                            } else {
+                                padding.calculateBottomPadding() + 12.dp
+                            },
+                        ),
+                        enabled = isWideScreen,
+                    ),
                 ),
         ) {
             Row(

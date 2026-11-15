@@ -113,7 +113,7 @@ Once the panel has settled, the destination column scrolls under the toggle head
 | state | GlassNavigationRailState | Expanded state and morph progress | rememberGlassNavigationRailState() | No |
 | showToggle | Boolean | Show the built-in expand/collapse toggle | true | No |
 | defaultWindowInsetsPadding | Boolean | Keep the surface inside the system bars, caption bar and display cutout | true | No |
-| collapsedTop | Dp | Top of the collapsed capsule, relative to the safe area | GlassNavigationRailDefaults.CollapsedTop | No |
+| collapsedTop | Dp | Capsule top offset, centered on the collapsed top bar | GlassNavigationRailDefaults.CollapsedTop | No |
 | expandedWidth | Dp | Panel width while expanded | GlassNavigationRailDefaults.ExpandedWidth | No |
 | style | GlassStyle | Rendering style | GlassDefaults.Style | No |
 | alpha | Float | Material opacity multiplier | 1f | No |
@@ -147,7 +147,7 @@ Create it with `rememberGlassNavigationRailState(initialExpanded = true)`; it su
 | ExpandedWidth | Dp | Panel width while expanded | 250.dp |
 | Margin | Dp | Distance between the panel and the window edges | 12.dp |
 | CollapsedHeight | Dp | Height of the collapsed capsule | 44.dp |
-| CollapsedTop | Dp | Capsule top offset, optically aligned with the top bar | 3.dp |
+| CollapsedTop | Dp | Capsule top offset, centered on the collapsed top bar | 4.dp |
 | ExpandContentDescription | String | Default toggle description while collapsed | "Expand navigation rail" |
 | CollapseContentDescription | String | Default toggle description while expanded | "Collapse navigation rail" |
 

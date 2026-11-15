@@ -4,14 +4,18 @@
 package utils
 
 import LocalAppState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -23,10 +27,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -45,6 +51,47 @@ private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
 
 /** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
+val LocalWideScreenContentInset = staticCompositionLocalOf<() -> Dp> { { 0.dp } }
+val LocalWideScreenContentEndInset = staticCompositionLocalOf<() -> Dp> { { 0.dp } }
+
+private class DynamicStartPaddingValues(
+    private val base: PaddingValues,
+    private val inset: () -> Dp,
+) : PaddingValues {
+    override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = base.calculateLeftPadding(layoutDirection) + if (layoutDirection == LayoutDirection.Ltr) inset() else 0.dp
+
+    override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = base.calculateRightPadding(layoutDirection) + if (layoutDirection == LayoutDirection.Rtl) inset() else 0.dp
+
+    override fun calculateTopPadding(): Dp = base.calculateTopPadding()
+
+    override fun calculateBottomPadding(): Dp = base.calculateBottomPadding()
+}
+private fun Modifier.wideScreenContentInset(
+    startInset: () -> Dp,
+    endInset: () -> Dp,
+): Modifier = layout { measurable, constraints ->
+    val startPx = startInset().roundToPx().coerceAtLeast(0)
+    val endPx = endInset().roundToPx().coerceAtLeast(0)
+    val availableWidth = (constraints.maxWidth - startPx - endPx).coerceAtLeast(0)
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = 0,
+            maxWidth = availableWidth,
+        ),
+    )
+    layout(constraints.maxWidth, placeable.height) {
+        placeable.placeRelative(startPx, 0)
+    }
+}
+
+@Composable
+fun Modifier.wideScreenContentInset(): Modifier = wideScreenContentInset(
+    startInset = LocalWideScreenContentInset.current,
+    endInset = LocalWideScreenContentEndInset.current,
+)
+
+@Composable
+fun wideScreenContentPadding(padding: PaddingValues, enabled: Boolean = true): PaddingValues = if (enabled) DynamicStartPaddingValues(padding, LocalWideScreenContentInset.current) else padding
 
 @Composable
 fun Modifier.pageScrollModifiers(
@@ -81,12 +128,20 @@ fun pageContentPadding(
         0.dp
     }
 
-    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom) {
-        PaddingValues(
-            top = topPadding,
-            start = extraStart,
-            end = extraEnd,
-            bottom = bottomPadding,
+    val contentInset = if (isWideScreen) {
+        LocalWideScreenContentInset.current
+    } else {
+        { 0.dp }
+    }
+    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom, isWideScreen, contentInset) {
+        DynamicStartPaddingValues(
+            base = PaddingValues(
+                top = topPadding,
+                start = extraStart,
+                end = extraEnd,
+                bottom = bottomPadding,
+            ),
+            inset = contentInset,
         )
     }
 }
@@ -110,6 +165,7 @@ fun AdaptiveTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
+    val contentInsetModifier = Modifier.wideScreenContentInset()
     if (!showTopAppBar) return
     val appState = LocalAppState.current
     val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
@@ -128,7 +184,7 @@ fun AdaptiveTopAppBar(
         GlassTopAppBar(
             title = title,
             isContentScrolled = contentScrolled,
-            contentModifier = contentModifier,
+            contentModifier = contentModifier.then(contentInsetModifier),
             expandable = !isWideScreen,
             subtitle = subtitle,
             backdrop = backdrop,
@@ -145,14 +201,16 @@ fun AdaptiveTopAppBar(
             bottomContent = bottomContent,
         )
     } else {
-        TopAppBar(
+        BlurTopAppBar(
             title = title,
-            modifier = contentModifier,
+            largeTitleBlurRadius = 0.dp,
+            modifier = contentInsetModifier,
             expandable = !isWideScreen,
             subtitle = subtitle,
             color = color,
-            titleColor = titleColor.copy(alpha = titleColor.alpha * if (isWideScreen) chromeTitleAlpha() else 1f),
+            titleColor = titleColor,
             scrollBehavior = scrollBehavior,
+            titleAlpha = { chromeTitleAlpha() },
             defaultWindowInsetsPadding = defaultWindowInsetsPadding,
             navigationIcon = navigationIcon,
             actions = actions,

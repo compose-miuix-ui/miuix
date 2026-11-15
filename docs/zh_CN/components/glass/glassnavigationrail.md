@@ -113,7 +113,7 @@ GlassNavigationRail(
 | state | GlassNavigationRailState | 展开状态与形变进度 | rememberGlassNavigationRailState() | 否 |
 | showToggle | Boolean | 是否显示内置展开/折叠开关 | true | 否 |
 | defaultWindowInsetsPadding | Boolean | 是否让表面避开系统栏、标题栏与刘海 | true | 否 |
-| collapsedTop | Dp | 折叠胶囊相对安全区域的顶部位置 | GlassNavigationRailDefaults.CollapsedTop | 否 |
+| collapsedTop | Dp | 胶囊顶部偏移，与折叠态顶栏居中对齐 | GlassNavigationRailDefaults.CollapsedTop | 否 |
 | expandedWidth | Dp | 展开时的面板宽度 | GlassNavigationRailDefaults.ExpandedWidth | 否 |
 | style | GlassStyle | 渲染风格 | GlassDefaults.Style | 否 |
 | alpha | Float | 材质不透明度系数 | 1f | 否 |
@@ -147,7 +147,7 @@ GlassNavigationRail(
 | ExpandedWidth | Dp | 展开时的面板宽度 | 250.dp |
 | Margin | Dp | 面板与窗口边缘的距离 | 12.dp |
 | CollapsedHeight | Dp | 折叠胶囊高度 | 44.dp |
-| CollapsedTop | Dp | 折叠胶囊顶部偏移，与顶栏视觉对齐 | 3.dp |
+| CollapsedTop | Dp | 胶囊顶部偏移，与折叠态顶栏居中对齐 | 4.dp |
 | ExpandContentDescription | String | 折叠时开关的默认描述 | "Expand navigation rail" |
 | CollapseContentDescription | String | 展开时开关的默认描述 | "Collapse navigation rail" |
 

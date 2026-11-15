@@ -95,6 +95,8 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.wideScreenContentInset
+import utils.wideScreenContentPadding
 
 private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Home, "Home"),
@@ -294,7 +296,8 @@ fun GlassPage(padding: PaddingValues) {
                 topBar = {
                     GlassTopAppBar(
                         title = "Glass Component",
-                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f },
+                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f }
+                            .wideScreenContentInset(),
                         isContentScrolled = contentUnderTopBar,
                         backdrop = backdrop,
                         scrollBehavior = scrollBehavior,
@@ -413,9 +416,12 @@ fun GlassPage(padding: PaddingValues) {
                         modifier = Modifier
                             .fillMaxSize()
                             .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = innerPadding.calculateBottomPadding(),
+                        contentPadding = wideScreenContentPadding(
+                            PaddingValues(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = innerPadding.calculateBottomPadding(),
+                            ),
+                            enabled = LocalIsWideScreen.current,
                         ),
                     ) {
                         if (!tabsInTopBar) {

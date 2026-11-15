@@ -203,11 +203,8 @@ object GlassNavigationRailDefaults {
     /** Height of the collapsed capsule. */
     val CollapsedHeight: Dp = GlassTopAppBarDefaults.ButtonSize
 
-    /**
-     * Top of the collapsed capsule relative to the safe area, optically aligned with top bar
-     * controls by shifting the wide capsule 1.dp above their geometric centre line.
-     */
-    val CollapsedTop: Dp = (TopAppBarDefaults.CollapsedHeight - CollapsedHeight) / 2 - 1.dp
+    /** Top offset of the collapsed capsule, centered on the collapsed top bar. */
+    val CollapsedTop: Dp = (TopAppBarDefaults.CollapsedHeight - CollapsedHeight) / 2
 
     /** The default content description of the built-in toggle while the rail is collapsed. */
     val ExpandContentDescription: String = "Expand navigation rail"
@@ -403,7 +400,7 @@ fun GlassNavigationRail(
         val collapsedHeight = GlassNavigationRailDefaults.CollapsedHeight
         val collapsedStart = (viewportWidth - capsuleWidth) / 2
         val expandedStart = GlassNavigationRailDefaults.Margin
-        val expandedTop = GlassNavigationRailDefaults.Margin
+        val expandedTop = GlassNavigationRailDefaults.CollapsedTop
         val expandedHeight = (viewportHeight - expandedTop - GlassNavigationRailDefaults.Margin)
             .coerceAtLeast(collapsedHeight)
 

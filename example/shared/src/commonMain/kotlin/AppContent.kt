@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -58,7 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Density
@@ -139,6 +140,8 @@ import ui.isInDarkTheme
 import utils.FPSMonitor
 import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
+import utils.LocalWideScreenContentEndInset
+import utils.LocalWideScreenContentInset
 import utils.TopLayerHost
 import utils.TopLayerState
 import utils.rememberBlurBackdrop
@@ -207,26 +210,52 @@ fun AppContent(
     val expandSidebar = shouldExpandNavigationRail()
     val layoutDirection = LocalLayoutDirection.current
     val displayCutout = WindowInsets.displayCutout
+    val systemBars = WindowInsets.systemBars
+    val captionBar = WindowInsets.captionBar
+    val railInsets = remember(systemBars, captionBar, displayCutout) {
+        systemBars.union(captionBar).union(displayCutout)
+    }
     val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
     LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
     // Reserve the cutout; the expanded rail width is added after it.
     val sidebarInset: Density.() -> Int = if (useGlassSidebar) {
         {
-            displayCutout.getLeft(this, layoutDirection) +
+            railInsets.getLeft(this, layoutDirection) +
                 ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress)
                     .roundToInt()
         }
     } else {
         { 0 }
     }
-    // The glass rail replaces the collapsed page-bar title.
-    val topAppBarTitleAlpha: () -> Float = if (useGlassSidebar) {
-        { sidebarState.progress }
+    val sidebarEndInset: Density.() -> Int = if (useGlassSidebar) {
+        { railInsets.getRight(this, layoutDirection) }
     } else {
-        { 1f }
+        { 0 }
     }
-    // Blur needs a recorded page layer; otherwise use the surface color.
+    val topAppBarTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
+        if (useGlassSidebar) {
+            { sidebarState.progress }
+        } else {
+            { 1f }
+        }
+    }
     val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
+    // Blur needs a recorded page layer; otherwise use the surface color.
+    val density = LocalDensity.current
+    val wideScreenContentInset = remember(useGlassSidebar, density, railInsets, layoutDirection) {
+        if (useGlassSidebar) {
+            { with(density) { sidebarInset().toDp() } }
+        } else {
+            { 0.dp }
+        }
+    }
+    val wideScreenContentEndInset = remember(useGlassSidebar, density, railInsets, layoutDirection) {
+        if (useGlassSidebar) {
+            { with(density) { sidebarEndInset().toDp() } }
+        } else {
+            { 0.dp }
+        }
+    }
     val topLayer = remember { TopLayerState() }
 
     CompositionLocalProvider(
@@ -234,6 +263,8 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
         LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
+        LocalWideScreenContentInset provides wideScreenContentInset,
+        LocalWideScreenContentEndInset provides wideScreenContentEndInset,
     ) {
         // Match platform screen corners; split panes have no outer corner.
         val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
@@ -295,7 +326,7 @@ fun AppContent(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                // Plain rails consume the inset; glass rails reserve it in sidebarInset.
+                                // Plain rails consume the inset; glass rails reserve it in page content.
                                 .then(
                                     if (hasNavigationRail && !useGlassSidebar) {
                                         Modifier.consumeWindowInsets(
@@ -307,7 +338,6 @@ fun AppContent(
                                         Modifier
                                     },
                                 )
-                                // Match the page background beneath the floating rail.
                                 .then(
                                     if (useGlassSidebar) {
                                         Modifier.background(MiuixTheme.colorScheme.surface)
@@ -315,7 +345,6 @@ fun AppContent(
                                         Modifier
                                     },
                                 )
-                                // Keep wide-screen transitions inside the page pane.
                                 .then(if (isWideScreen) Modifier.clipToBounds() else Modifier),
                         ) {
                             Box(
@@ -329,35 +358,17 @@ fun AppContent(
                                         },
                                     ),
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        // Animate page width with the rail.
-                                        .layout { measurable, constraints ->
-                                            val inset = sidebarInset().coerceIn(0, constraints.maxWidth)
-                                            val end = constraints.maxWidth
-                                            val placeable = measurable.measure(
-                                                constraints.copy(
-                                                    minWidth = (constraints.minWidth - inset).coerceAtLeast(0),
-                                                    maxWidth = end - inset,
-                                                ),
-                                            )
-                                            layout(end, constraints.maxHeight) {
-                                                placeable.place(inset, 0)
-                                            }
-                                        },
-                                ) {
-                                    AppNavHost(
-                                        backStack = backStack,
-                                        navigator = navigator,
-                                        transition = navTransition,
-                                        effects = effects,
-                                        swipeBackDirection = swipeBackDirection,
-                                        padding = padding,
-                                        navigationItems = navigationItems,
-                                        mainPagerState = mainPagerState,
-                                    )
-                                }
+                                AppNavHost(
+                                    modifier = Modifier.fillMaxSize(),
+                                    backStack = backStack,
+                                    navigator = navigator,
+                                    transition = navTransition,
+                                    effects = effects,
+                                    swipeBackDirection = swipeBackDirection,
+                                    padding = padding,
+                                    navigationItems = navigationItems,
+                                    mainPagerState = mainPagerState,
+                                )
                             }
                             if (useGlassSidebar) {
                                 PersistentGlassNavigationRail(
@@ -399,9 +410,11 @@ private fun AppNavHost(
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
+    modifier: Modifier = Modifier,
 ) {
     NavDisplay(
         backStack = backStack,
+        modifier = modifier,
         onBack = { navigator.pop() },
         transition = transition,
         effects = effects,

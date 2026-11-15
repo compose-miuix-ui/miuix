@@ -214,8 +214,6 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
  * @param visualContentOffset Content position in pixels, negative upward, including elastic displacement.
  *   Overrides band/shadow progress; pair with [isContentScrolled] for programmatic scrolling.
- * @param bandBrush Gradient that dims content passing beneath the bar.
- * @param bandOverhang Distance the gradient extends beyond the bar.
  * @param style Glass style forwarded to the renderer.
  * @param alpha Opacity multiplier for button colour layers and stroke.
  * @param buttonShape Button-pill silhouette.
@@ -508,7 +506,8 @@ private fun GlassTopAppBarLayout(
         val width = constraints.constrainWidth(foreground.width)
         val height = constraints.constrainHeight(foreground.height)
         val bandHeight = if (progressiveBlur) {
-            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight
+            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() +
+                measurements.bottomContentHeight
             ((coveredHeight + 20.dp.toPx()) * 1.2f).roundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
