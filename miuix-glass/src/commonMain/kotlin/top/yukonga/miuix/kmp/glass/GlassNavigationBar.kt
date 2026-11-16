@@ -305,7 +305,7 @@ fun GlassNavigationBar(
         val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
             .asPaddingValues().calculateBottomPadding()
         val floatingMargin = when {
-            platform() == Platform.IOS -> 36.dp
+            platform() == Platform.IOS -> 24.dp
             navigationBarBottom <= 16.dp -> 28.dp
             navigationBarBottom >= 28.dp -> navigationBarBottom
             else -> 12.dp + navigationBarBottom

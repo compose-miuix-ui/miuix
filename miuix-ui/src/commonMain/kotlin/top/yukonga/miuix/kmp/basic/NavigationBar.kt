@@ -107,16 +107,16 @@ fun NavigationBar(
             }
         }
         if (defaultWindowInsetsPadding) {
-            val navigationBarsPadding = if (platform() != Platform.IOS) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val navigationBarBottom = if (platform() != Platform.IOS) {
+                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
             } else {
-                20.dp
+                10.dp
             }
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .layout { measurable, constraints ->
-                        val totalHeight = (navigationBarsPadding + animatedCaptionBarHeight).roundToPx()
+                        val totalHeight = (navigationBarBottom + animatedCaptionBarHeight).roundToPx()
                         val fixedConstraints = constraints.copy(minHeight = totalHeight, maxHeight = totalHeight)
                         val placeable = measurable.measure(fixedConstraints)
                         layout(placeable.width, totalHeight) {
@@ -285,9 +285,9 @@ fun FloatingNavigationBar(
 ) {
     val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
     val floatingMargin = when {
-        platform() == Platform.IOS -> 36.dp
-        navigationBarBottom <= 16.dp -> 28.dp
-        navigationBarBottom >= 28.dp -> navigationBarBottom
+        platform() == Platform.IOS -> 28.dp
+        navigationBarBottom <= 16.dp -> 32.dp
+        navigationBarBottom >= 32.dp -> navigationBarBottom
         else -> 12.dp + navigationBarBottom
     }
 

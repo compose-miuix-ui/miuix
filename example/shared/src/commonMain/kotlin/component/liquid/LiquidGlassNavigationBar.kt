@@ -333,9 +333,9 @@ internal fun IosLiquidGlassNavigationBar(
 
     val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
     val floatingMargin = when {
-        platform() == Platform.IOS -> 36.dp
-        navigationBarBottom <= 16.dp -> 28.dp
-        navigationBarBottom >= 28.dp -> navigationBarBottom
+        platform() == Platform.IOS -> 22.dp
+        navigationBarBottom <= 16.dp -> 26.dp
+        navigationBarBottom >= 26.dp -> navigationBarBottom
         else -> 12.dp + navigationBarBottom
     }
     val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
