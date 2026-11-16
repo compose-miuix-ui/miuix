@@ -133,6 +133,53 @@ class GlassNavigationRailInteractionTest {
     }
 
     @Test
+    fun draggingOneSlotAfterHoldingThroughCollapseSelectsTheNextDestination() = assertDragAfterHoldingThroughCollapse(LayoutDirection.Ltr)
+
+    @Test
+    fun draggingOneSlotAfterHoldingThroughCollapseSelectsTheNextDestinationInRtl() = assertDragAfterHoldingThroughCollapse(LayoutDirection.Rtl)
+
+    private fun assertDragAfterHoldingThroughCollapse(direction: LayoutDirection) = runComposeUiTest {
+        val state = GlassNavigationRailState(initialExpanded = true)
+        var selected by mutableIntStateOf(0)
+        val selections = mutableListOf<Int>()
+        setContent {
+            Scene(
+                onSelect = {
+                    selected = it
+                    selections += it
+                },
+                state = state,
+                selectedIndex = selected,
+                direction = direction,
+            )
+        }
+        mainClock.autoAdvance = false
+        runOnIdle { state.expanded = false }
+        mainClock.advanceTimeBy(32)
+        val downPosition = onNodeWithText("Library", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.center
+        onRoot().performTouchInput { down(downPosition) }
+        mainClock.advanceTimeBy(2000)
+
+        val library = onNodeWithContentDescription("Library").fetchSemanticsNode().boundsInRoot
+        val settings = onNodeWithContentDescription("Settings").fetchSemanticsNode().boundsInRoot
+        assertTrue(countFill(onRoot().captureToImage(), library, Color.Blue) > 20, "The press must survive collapse before dragging")
+        assertTrue(selections.isEmpty(), "Holding through collapse must not commit a selection")
+
+        // Move one settled slot from the held pointer, not to the slot that moved beneath it.
+        val deltaX = settings.center.x - library.center.x
+        onRoot().performTouchInput { moveTo(downPosition + Offset(deltaX, 0f)) }
+        mainClock.advanceTimeBy(600)
+        assertTrue(selections.isEmpty(), "Dragging must not select before release")
+        onNodeWithContentDescription("Home").assertIsSelected()
+        assertTrue(countFill(onRoot().captureToImage(), settings, Color.Blue) > 20, "Drag distance must use the settled slot width")
+
+        onRoot().performTouchInput { up() }
+        mainClock.advanceTimeBy(600)
+        assertEquals(listOf(2), selections)
+        onNodeWithContentDescription("Settings").assertIsSelected()
+    }
+
+    @Test
     fun cancelAfterReversingTheMorphDoesNotSelectOrLeavePressedFeedback() = runComposeUiTest {
         val state = GlassNavigationRailState(initialExpanded = true)
         val selections = mutableListOf<Int>()

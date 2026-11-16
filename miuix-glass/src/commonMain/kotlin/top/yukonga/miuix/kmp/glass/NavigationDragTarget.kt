@@ -62,12 +62,6 @@ internal fun navigationIndicatorBounds(
     return Offset(start, right.coerceIn(start, max))
 }
 
-/** Converts a fractional destination index into its measured boundary coordinate. */
-internal fun navigationSlotPosition(slot: Float, widths: List<Float>): Float {
-    val index = slot.toInt().coerceIn(0, widths.lastIndex)
-    return widths.take(index).sum() + (slot - index) * widths[index]
-}
-
 /** Inverse mapping used by hit testing and drag spring targets for variable-width tabs. */
 internal fun navigationSlotAt(position: Float, widths: List<Float>): Float {
     var start = 0f

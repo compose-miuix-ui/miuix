@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import component.GlassBottomSheetDemo
 import component.GlassDemoDefaults
 import org.jetbrains.compose.resources.painterResource
@@ -95,6 +96,7 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.LocalWideScreenSearchTopInset
 import utils.wideScreenContentInset
 import utils.wideScreenContentPadding
 
@@ -126,6 +128,14 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
+    val searchTopInset = LocalWideScreenSearchTopInset.current
+    val searchModifier = Modifier.wideScreenContentInset().layout { measurable, constraints ->
+        val top = searchTopInset().roundToPx().coerceIn(0, constraints.maxHeight)
+        val placeable = measurable.measure(constraints.offset(vertical = -top))
+        layout(placeable.width, placeable.height + top) {
+            placeable.placeRelative(0, top)
+        }
+    }
     val isInDark = isInDarkTheme()
     val navigationBarInset = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val bottomBarMargin = maxOf(24.dp, navigationBarInset + 8.dp, padding.calculateBottomPadding() + 8.dp)
@@ -636,6 +646,7 @@ fun GlassPage(padding: PaddingValues) {
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
+            modifier = searchModifier,
         )
     }
 }

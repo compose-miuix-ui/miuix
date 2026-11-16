@@ -270,11 +270,9 @@ fun GlassNavigationBar(
         }
     }
 
-    val spans = List(items.size) {
-        ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
-    }
-    val targetLeft = contentStart - overhang + navigationSlotPosition(index.toFloat(), spans)
-    val targetRight = contentStart + overhang + navigationSlotPosition(index + 1f, spans)
+    val slotWidth = ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
+    val targetLeft = contentStart - overhang + index * slotWidth
+    val targetRight = contentStart + overhang + (index + 1) * slotWidth
     val hasSlots = barWidth > contentStart + contentInset
 
     val scope = rememberCoroutineScope()
@@ -393,12 +391,9 @@ fun GlassNavigationBar(
                                 val selectionWidth = size.width.toFloat()
                                 if (selectionWidth <= contentStart + contentInset) return@awaitEachGesture
                                 // Freeze hit regions until release; only the indicator previews selection.
-                                val selectionSpans = List(items.size) {
-                                    ((selectionWidth - contentStart - contentInset) / items.size)
-                                        .coerceAtLeast(0f)
-                                }
+                                val selectionSlotWidth = (selectionWidth - contentStart - contentInset) / items.size
                                 fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) size.width - x else x
-                                fun indexAt(x: Float): Int = navigationSlotAt(x - contentStart, selectionSpans)
+                                fun indexAt(x: Float): Int = ((x - contentStart) / selectionSlotWidth)
                                     .toInt()
                                     .coerceIn(0, items.lastIndex)
 
@@ -408,9 +403,8 @@ fun GlassNavigationBar(
                                 var current = indexAt(downX)
                                 pressedIndex = current
                                 dragging.value = true
-                                val pressedLeft = minLeft + navigationSlotPosition(current.toFloat(), selectionSpans)
-                                val pressedWidth = navigationDragWidth(downX - contentStart, selectionSpans)
-                                animateIndicator(pressedLeft, pressedLeft + pressedWidth + overhang * 2f)
+                                val pressedLeft = minLeft + current * selectionSlotWidth
+                                animateIndicator(pressedLeft, pressedLeft + selectionSlotWidth + overhang * 2f)
                                 var grabOffset = Float.NaN
                                 try {
                                     while (true) {
@@ -428,12 +422,8 @@ fun GlassNavigationBar(
                                         }
                                         // The layout can still resize externally while a pointer is held.
                                         val width = size.width.toFloat()
-                                        val currentSpans = List(items.size) {
-                                            ((width - contentStart - contentInset) / items.size)
-                                                .coerceAtLeast(0f)
-                                        }
-                                        val chipW = navigationDragWidth(selectionX - contentStart, currentSpans) +
-                                            overhang * 2f
+                                        val chipW = ((width - contentStart - contentInset) / items.size)
+                                            .coerceAtLeast(0f) + overhang * 2f
                                         // Overshoot the destinations slightly so the rendered edge squeezes.
                                         val travelStart = contentStart - contentInset
                                         val maxLeft = (width - chipW).coerceAtLeast(travelStart)

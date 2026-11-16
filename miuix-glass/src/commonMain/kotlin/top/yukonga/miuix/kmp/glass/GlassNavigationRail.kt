@@ -45,7 +45,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -641,17 +640,17 @@ private fun RailToggle(
 ) {
     val collapsedInteractionSource = remember { MutableInteractionSource() }
     val collapsedPressed by collapsedInteractionSource.collectIsPressedAsState()
-    val collapsedContentAlpha by animateFloatAsState(
+    val collapsedContentAlpha = animateFloatAsState(
         targetValue = if (collapsedPressed) GlassTopAppBarDefaults.PressedContentAlpha else 1f,
         animationSpec = if (collapsedPressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
         label = "railCollapsedToggleContentAlpha",
     )
-    val topBarAlpha by animateFloatAsState(
+    val topBarAlpha = animateFloatAsState(
         targetValue = if (expanded) 1f else 0f,
         animationSpec = GlassMotion.navShowHide(),
         label = "railTopBarIconAlpha",
     )
-    val sideBarAlpha by animateFloatAsState(
+    val sideBarAlpha = animateFloatAsState(
         targetValue = if (expanded) 0f else 1f,
         animationSpec = GlassMotion.navShowHide(),
         label = "railSideBarIconAlpha",
@@ -666,9 +665,9 @@ private fun RailToggle(
         ) {
             RailToggleGlyph(
                 tint = tint,
-                topBarAlpha = topBarAlpha,
-                sideBarAlpha = sideBarAlpha,
-                contentAlpha = 1f,
+                topBarAlpha = { topBarAlpha.value },
+                sideBarAlpha = { sideBarAlpha.value },
+                contentAlpha = { 1f },
                 contentDescription = contentDescription,
             )
         }
@@ -686,9 +685,9 @@ private fun RailToggle(
         ) {
             RailToggleGlyph(
                 tint = tint,
-                topBarAlpha = topBarAlpha,
-                sideBarAlpha = sideBarAlpha,
-                contentAlpha = collapsedContentAlpha,
+                topBarAlpha = { topBarAlpha.value },
+                sideBarAlpha = { sideBarAlpha.value },
+                contentAlpha = { collapsedContentAlpha.value },
                 contentDescription = null,
             )
         }
@@ -698,9 +697,9 @@ private fun RailToggle(
 @Composable
 private fun RailToggleGlyph(
     tint: Color,
-    topBarAlpha: Float,
-    sideBarAlpha: Float,
-    contentAlpha: Float,
+    topBarAlpha: () -> Float,
+    sideBarAlpha: () -> Float,
+    contentAlpha: () -> Float,
     contentDescription: String?,
 ) {
     Box(contentAlignment = Alignment.Center) {
@@ -709,7 +708,7 @@ private fun RailToggleGlyph(
             contentDescription = contentDescription,
             modifier = Modifier
                 .size(RailIconSize)
-                .graphicsLayer { alpha = topBarAlpha * contentAlpha },
+                .graphicsLayer { alpha = topBarAlpha() * contentAlpha() },
             tint = tint,
         )
         Icon(
@@ -717,7 +716,7 @@ private fun RailToggleGlyph(
             contentDescription = null,
             modifier = Modifier
                 .size(RailIconSize)
-                .graphicsLayer { alpha = sideBarAlpha * contentAlpha },
+                .graphicsLayer { alpha = sideBarAlpha() * contentAlpha() },
             tint = tint,
         )
     }
@@ -767,13 +766,14 @@ private fun NavigationRailRow(
             for (index in 0 until position) slotStart += tabWidths[index].roundToPx()
             val slotWidth = tabWidths[position].roundToPx()
             val labelPx = labelWidth.roundToPx().coerceAtMost(slotWidth)
+            val expandedLabelWidth = (itemWidth - RailItemContentPadding * 2 - RailIconColumnWidth).roundToPx()
             RailRowGeometry(
                 slotStart = slotStart.toFloat(),
                 slotWidth = slotWidth.toFloat(),
                 sourceStart = (slotStart + ((slotWidth - labelPx) / 2f).roundToInt() - labelStart).toFloat(),
                 sourceWidth = (labelStart + labelPx + padding).toFloat(),
                 expandedTop = (RailExpandedRowTop + RailRowPitch * position).toPx(),
-                labelMaxWidth = (itemWidth - RailItemContentPadding * 2 - RailIconColumnWidth).roundToPx(),
+                labelMinWidth = if (labelWidth.roundToPx() > slotWidth) minOf(labelPx, expandedLabelWidth) else expandedLabelWidth,
             )
         }
     }
@@ -785,7 +785,12 @@ private fun NavigationRailRow(
                 val width = lerp(geometry.slotWidth, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
                 val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
                 val x = lerp(geometry.slotStart, RailItemHorizontalMargin.toPx(), fraction).roundToInt()
-                val y = lerp(RailRowTop.toPx() + scrollOffset(), geometry.expandedTop, fraction).roundToInt()
+                // The scrolling parent places settled rows; only the morph needs scroll compensation.
+                val y = if (fraction == 1f) {
+                    geometry.expandedTop.roundToInt()
+                } else {
+                    lerp(RailRowTop.toPx() + scrollOffset(), geometry.expandedTop, fraction).roundToInt()
+                }
                 slot.left = x.toFloat()
                 slot.top = y.toFloat()
                 slot.width = width.toFloat()
@@ -847,7 +852,8 @@ private fun NavigationRailRow(
                     text = item.label,
                     modifier = Modifier.layout { measurable, constraints ->
                         val placeable = measurable.measure(
-                            constraints.copy(maxWidth = maxOf(constraints.maxWidth, geometry.labelMaxWidth)),
+                            // Keep rounding from truncating a fitting label, without exceeding either endpoint.
+                            constraints.copy(maxWidth = maxOf(constraints.maxWidth, geometry.labelMinWidth)),
                         )
                         layout(placeable.width.coerceAtMost(constraints.maxWidth), placeable.height) {
                             placeable.placeRelative(0, 0)
@@ -883,22 +889,29 @@ private fun NavigationRailIndicator(
         pressedColor = pressedColor,
         modifier = Modifier.layout { measurable, constraints ->
             val fraction = rowProgress().coerceIn(0f, 1f)
-            val bounds = navigationIndicatorBounds(
-                interaction.left.value,
-                interaction.right.value,
-                interaction.width,
-                interaction.contentStart,
-                interaction.endPadding,
-            )
-            val width = lerp(bounds.y - bounds.x, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+            val width: Int
+            val x: Float
+            val y: Float
+            val expandedY = RailExpandedRowTop.toPx() + RailRowPitch.toPx() * selectedIndex
+            if (fraction == 1f) {
+                // Collapsed springs and scroll compensation cannot affect the expanded indicator.
+                width = itemWidth.roundToPx().coerceAtLeast(0)
+                x = RailItemHorizontalMargin.toPx()
+                y = expandedY
+            } else {
+                val bounds = navigationIndicatorBounds(
+                    interaction.left.value,
+                    interaction.right.value,
+                    interaction.width,
+                    interaction.contentStart,
+                    interaction.endPadding,
+                )
+                width = lerp(bounds.y - bounds.x, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                x = lerp(bounds.x, RailItemHorizontalMargin.toPx(), fraction)
+                y = lerp(RailRowTop.toPx() + scrollOffset(), expandedY, fraction)
+            }
             val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
             val placeable = measurable.measure(Constraints.fixed(width, height))
-            val x = lerp(bounds.x, RailItemHorizontalMargin.toPx(), fraction)
-            val y = lerp(
-                RailRowTop.toPx() + scrollOffset(),
-                RailExpandedRowTop.toPx() + RailRowPitch.toPx() * selectedIndex,
-                fraction,
-            )
             layout(constraints.maxWidth, constraints.maxHeight) {
                 placeable.placeRelative(x.roundToInt(), y.roundToInt())
             }
@@ -913,7 +926,7 @@ private class RailRowGeometry(
     val sourceStart: Float,
     val sourceWidth: Float,
     val expandedTop: Float,
-    val labelMaxWidth: Int,
+    val labelMinWidth: Int,
 )
 
 /** A corner that eases from the capsule's half-height to the panel's radius as [progress] rises. */

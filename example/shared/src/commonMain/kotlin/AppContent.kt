@@ -222,7 +222,12 @@ fun AppContent(
     // Reserve the cutout; the expanded rail width is added after it.
     val sidebarInset: Density.() -> Int = if (useGlassSidebar) {
         {
-            railInsets.getLeft(this, layoutDirection) +
+            val startInset = if (layoutDirection == LayoutDirection.Ltr) {
+                railInsets.getLeft(this, layoutDirection)
+            } else {
+                railInsets.getRight(this, layoutDirection)
+            }
+            startInset +
                 ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress)
                     .roundToInt()
         }
@@ -230,7 +235,13 @@ fun AppContent(
         { 0 }
     }
     val sidebarEndInset: Density.() -> Int = if (useGlassSidebar) {
-        { railInsets.getRight(this, layoutDirection) }
+        {
+            if (layoutDirection == LayoutDirection.Ltr) {
+                railInsets.getRight(this, layoutDirection)
+            } else {
+                railInsets.getLeft(this, layoutDirection)
+            }
+        }
     } else {
         { 0 }
     }
@@ -579,6 +590,18 @@ private fun WideScreenContent(
     pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val appState = LocalAppState.current
+    val contentInset = LocalWideScreenContentInset.current
+    val sidebarInsets = remember(contentInset) {
+        object : WindowInsets {
+            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = if (layoutDirection == LayoutDirection.Ltr) with(density) { contentInset().roundToPx() } else 0
+
+            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = if (layoutDirection == LayoutDirection.Rtl) with(density) { contentInset().roundToPx() } else 0
+
+            override fun getTop(density: Density): Int = 0
+
+            override fun getBottom(density: Density): Int = 0
+        }
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -592,7 +615,7 @@ private fun WideScreenContent(
             } else {
                 WindowInsets.displayCutout
             },
-        ),
+        ).union(sidebarInsets),
         floatingActionButton = {
             FloatingActionButton(show = appState.showFloatingActionButton)
         },
@@ -605,11 +628,20 @@ private fun WideScreenContent(
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
     ) { padding ->
+        val pagePadding by remember(padding, layoutDirection) {
+            derivedStateOf {
+                PaddingValues(
+                    top = padding.calculateTopPadding(),
+                    end = padding.calculateEndPadding(layoutDirection),
+                )
+            }
+        }
+        // Only floating chrome consumes the sidebar start inset here; pages reserve it themselves.
         pagerContent(
-            PaddingValues(top = padding.calculateTopPadding()),
+            PaddingValues(top = pagePadding.calculateTopPadding()),
             Modifier
                 .imePadding()
-                .padding(end = padding.calculateEndPadding(layoutDirection)),
+                .padding(end = pagePadding.calculateEndPadding(layoutDirection)),
         )
     }
 }

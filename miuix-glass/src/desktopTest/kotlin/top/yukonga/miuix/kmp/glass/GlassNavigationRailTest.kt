@@ -32,8 +32,11 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import kotlin.math.ceil
@@ -196,6 +199,51 @@ class GlassNavigationRailTest {
 
         val bounds = last.getUnclippedBoundsInRoot()
         assertTrue(bounds.bottom <= 360.dp, "the last destination ended at ${bounds.bottom}")
+    }
+
+    @Test
+    fun compressedCollapsedLabelsKeepTextLayoutWithinTheirSlots() = runComposeUiTest {
+        val longItems = List(3) { GlassNavigationItem(MiuixIcons.Basic.Search, "Destination number $it") }
+        val state = GlassNavigationRailState(initialExpanded = false)
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f)) {
+                DialogTestHost {
+                    Box(Modifier.size(600.dp, 360.dp)) {
+                        GlassNavigationRail(
+                            items = longItems,
+                            selectedIndex = 0,
+                            onSelect = {},
+                            backdrop = null,
+                            state = state,
+                            defaultWindowInsetsPadding = false,
+                            labelStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 16.sp),
+                        )
+                    }
+                }
+            }
+        }
+        for (expanded in listOf(false, true, false)) {
+            runOnIdle { state.expanded = expanded }
+            waitForIdle()
+            saveImage("rail-compressed-labels-$expanded", onRoot().captureToImage())
+            longItems.forEach { item ->
+                val label = checkNotNull(item.label)
+                val textNode = onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+                val layouts = mutableListOf<TextLayoutResult>()
+                checkNotNull(textNode.config.getOrNull(SemanticsActions.GetTextLayoutResult)).action?.invoke(layouts)
+                val textLayout = layouts.single()
+                val slot = onNodeWithContentDescription(label).fetchSemanticsNode().boundsInRoot
+                assertTrue(
+                    textLayout.multiParagraph.intrinsics.maxIntrinsicWidth > textLayout.size.width,
+                    "$label must exercise overflow in its available text width",
+                )
+                assertTrue(
+                    textLayout.size.width <= slot.width,
+                    "$label was laid out beyond its visible slot: ${textLayout.size.width} > ${slot.width}",
+                )
+            }
+        }
+        saveImage("rail-compressed-labels", onRoot().captureToImage())
     }
 
     @Test

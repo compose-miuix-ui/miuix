@@ -138,7 +138,6 @@ internal fun Modifier.navigationRailGestures(
         // Lock the gesture policy at down, not at the end of an unrelated morph animation.
         val horizontal = !expanded.value
         var position = interaction.positionAt(initial, logicalX(down.position))
-        val dragScale = interaction.widths[initial] / interaction.slots[initial].width.coerceAtLeast(1f)
         var movementX = 0f
         var movementY = 0f
         var dragging = false
@@ -154,6 +153,8 @@ internal fun Modifier.navigationRailGestures(
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
                 if (change.isConsumed) break
                 val physicalDelta = change.position - change.previousPosition
+                // Keep the position anchored through morphs, but map motion using the current slot geometry.
+                val dragScale = interaction.widths[current] / interaction.slots[current].width.coerceAtLeast(1f)
                 val delta = (if (layoutDirection == LayoutDirection.Rtl) -physicalDelta.x else physicalDelta.x) * dragScale
                 movementX += physicalDelta.x
                 movementY += physicalDelta.y

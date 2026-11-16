@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -86,10 +87,23 @@ private fun Modifier.wideScreenContentInset(
 }
 
 @Composable
-fun Modifier.wideScreenContentInset(): Modifier = wideScreenContentInset(
-    startInset = LocalWideScreenContentInset.current,
-    endInset = LocalWideScreenContentEndInset.current,
-)
+fun Modifier.wideScreenContentInset(): Modifier {
+    val startInset = LocalWideScreenContentInset.current
+    val endInset = LocalWideScreenContentEndInset.current
+    val consumedPadding = remember(startInset, endInset) {
+        object : PaddingValues {
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = if (layoutDirection == LayoutDirection.Ltr) startInset() else endInset()
+
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = if (layoutDirection == LayoutDirection.Ltr) endInset() else startInset()
+
+            override fun calculateTopPadding(): Dp = 0.dp
+
+            override fun calculateBottomPadding(): Dp = 0.dp
+        }
+    }
+    // The reserved width already includes horizontal safe areas; descendants must not add them again.
+    return wideScreenContentInset(startInset, endInset).consumeWindowInsets(consumedPadding)
+}
 
 @Composable
 fun wideScreenContentPadding(padding: PaddingValues, enabled: Boolean = true): PaddingValues = if (enabled) DynamicStartPaddingValues(padding, LocalWideScreenContentInset.current) else padding
