@@ -3,10 +3,18 @@
 
 package top.yukonga.miuix.kmp.nav.transition
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import top.yukonga.miuix.kmp.nav.core.LiveNavTransitionScope
+import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
+import top.yukonga.miuix.kmp.nav.transition.internal.NavEntryRenderer
+import top.yukonga.miuix.kmp.nav.transition.internal.NavHostTransition
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostBinding
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostContext
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionReentry
 
 /**
  * Composes three [NavTransition]s into one that dispatches per drive direction, mirroring the
@@ -45,7 +53,14 @@ private class NavDirectionalTransition(
     private val push: NavTransition,
     private val pop: NavTransition,
     private val predictivePop: NavTransition,
-) : NavTransition {
+) : NavTransition,
+    NavHostTransition,
+    NavTransitionHostBinding,
+    NavTransitionReentry {
+    override val needsSource: Boolean = (push as? NavTransitionHostBinding)?.needsSource == true ||
+        (pop as? NavTransitionHostBinding)?.needsSource == true ||
+        (predictivePop as? NavTransitionHostBinding)?.needsSource == true
+
     override val opaqueDepth: Float =
         maxOf(push.opaqueDepth, pop.opaqueDepth, predictivePop.opaqueDepth)
 
@@ -57,11 +72,25 @@ private class NavDirectionalTransition(
         programmatic = pop.motion.programmatic,
     )
 
+    override fun bind(context: NavTransitionHostContext, entryKey: NavKey?): NavTransition {
+        val boundPush = context.resolve(push, entryKey)
+        val boundPop = context.resolve(pop, entryKey)
+        val boundPredictivePop = context.resolve(predictivePop, entryKey)
+        return if (boundPush === push && boundPop === pop && boundPredictivePop === predictivePop) {
+            this
+        } else {
+            NavDirectionalTransition(boundPush, boundPop, boundPredictivePop)
+        }
+    }
+
     private fun branchFor(scope: NavTransitionScope): NavTransition = when {
         scope.isGestureDriven() -> predictivePop
         scope.change is NavChange.Pop || scope.change is NavChange.MultiPop -> pop
         else -> push
     }
+
+    @Composable
+    override fun rememberRenderer(scope: NavTransitionScope): NavEntryRenderer? = (branchFor(scope) as? NavHostTransition)?.rememberRenderer(scope)
 
     override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier {
         val branch = branchFor(scope)
@@ -69,6 +98,14 @@ private class NavDirectionalTransition(
     }
 
     override fun scrimFraction(scope: NavTransitionScope): Float = branchFor(scope).scrimFraction(scope)
+
+    override fun Modifier.transformContent(scope: NavTransitionScope): Modifier = with(branchFor(scope)) { transformContent(scope) }
+
+    override fun handlesCornerClip(scope: NavTransitionScope): Boolean = branchFor(scope).handlesCornerClip(scope)
+
+    override fun reentryAt(key: NavKey, positionInWindow: Offset): (() -> Unit)? = (push as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
+        ?: (pop as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
+        ?: (predictivePop as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
 }
 
 /**

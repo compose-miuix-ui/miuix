@@ -55,7 +55,7 @@ fun App() {
 由于整栈由单个 float 驱动，一次性 push 或 pop 多个 entry 会作为一段连续的运动播放，而不会塌缩成单次顶层交叉淡入：
 
 ```kotlin
-// 一次 push 三个：animatedTop 经单一弹簧从 N 连续扫到 N+3。
+// 一次 push 三个：animatedTop 经同一段共享动画从 N 连续扫到 N+3。
 backStack.add(Route.Detail("1"))
 backStack.add(Route.Detail("2"))
 backStack.add(Route.Detail("3"))
@@ -74,9 +74,10 @@ reconciler 把每次变化分类为 `Push` / `Pop` / `MultiPush(n)` / `MultiPop(
 | :-- | :-- |
 | `MiuixDefault`（默认） | 全宽滑动 + 四分之一宽视差 + 被覆盖层轻微透明衰减 |
 | `Modal` | 上滑、下层保留可见 |
+| `Expansion` | 将绑定目标 route 的组件展开为页面 |
 | `None` | 瞬时无动画 |
 
-前缘平滑圆角裁剪与全屏调暗 scrim 不烘焙在任何预设内——它们由正交的 `NavDisplayEffects` 层提供（`enableCornerClip`、`dimAmount`，默认均开启）；转场本身只通过 `scrimFraction` 塑造调暗随运动的曲线。
+滑动预设的圆角裁剪由正交的 `NavDisplayEffects` 层提供，`Expansion` 自行控制动画裁剪。全屏调暗 scrim 仍由 `NavDisplayEffects.dimAmount` 提供，转场通过 `scrimFraction` 塑造调暗曲线。
 
 在 `NavDisplay(transition = ...)` 上设全局默认，并用 `entry(transition = ...)` 按路由覆盖：
 
@@ -86,6 +87,37 @@ NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
     entry<Route.Detail>(transition = NavTransitions.Modal) { DetailScreen(it.id) }
 }
 ```
+
+## 组件展开（Expansion）
+
+将 `NavTransitions.Expansion` 设为全局默认或指定 entry 的转场。来源组件绑定目标 route 后，沿用原来的导航调用。
+
+```kotlin
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
+
+NavDisplay(
+    backStack,
+    transition = NavTransitions.expansion(containerColor = MiuixTheme.colorScheme.surface),
+) {
+    entry<Route.Home> {
+        val destination = Route.Detail("1")
+        Card(
+            modifier = Modifier.navTransitionSource(destination, containerColor = MiuixTheme.colorScheme.surfaceContainer),
+            onClick = { if (destination !in backStack) backStack.add(destination) },
+        ) {
+            BasicComponent(title = "打开详情")
+        }
+    }
+    entry<Route.Detail> { route ->
+        DetailScreen(route.id, onBack = { backStack.removeLastOrNull() })
+    }
+}
+```
+
+- 将 `navTransitionSource` 放在 padding 之后、背景 / 裁剪之前。传入来源组件的 `containerColor` 和轮廓（`cornerRadius`、`corners` 或 `shape`）；自定义形状须为不含孔洞的单轮廓。
+- 目标页面应绘制与容器颜色一致的不透明背景。`Expansion` 依次使用 `expansion(containerColor = ...)`、`NavDisplayEffects.backdropColor`、来源 `containerColor` 中首个不透明颜色。`cornerClipRadius` 提供最后运动帧的圆角；稳定页面不保留转场裁剪。
+- 来源和目标须在同一窗口中。没有来源或不透明容器颜色时使用 `MiuixDefault`；同一 route 绑定多个来源时，以按下的组件为准。
 
 ## 滑动关闭方向
 
@@ -134,13 +166,13 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`isRunning`、`settle`、`layoutSize`、`layoutDirection`、`density`。
+`NavTransitionScope` 暴露 `relativeDepth`、`role`、`change`、`gesture`、`isRunning`、`settle`、`layoutSize`、`layoutDirection`、`density`、`entryKey`、`layoutPositionInWindow`。`entryKey` 标识当前层，退出期间仍有效。窗口坐标换算使用 `windowToLocal(position)`，同时处理父布局变换。
 
 entry 内容需要 Miuix 的实时导航状态时，可读取 `LocalNavTransitionScope.current`。
 使用 `isRunning` 判断转场生命周期；实现 entry 局部效果时，`relativeDepth`、`gesture` 或
 `settle` 应在 `graphicsLayer` 等延迟读取区中使用。
 
-通用样式（淡入淡出、缩放、共享轴等）刻意不作为预设内置——在这个 builder 上每种只需几行。例如交叉淡入淡出：
+其他样式（淡入淡出、共享轴等）可以通过 builder 实现。例如交叉淡入淡出：
 
 ```kotlin
 val fade = navGraphicsTransition { scope ->
@@ -254,7 +286,7 @@ val platformLike = navDirectionalTransition(
 
 | 属性 | 默认值 | 描述 |
 | :-- | :-- | :-- |
-| `enableCornerClip` | `true` | 顶层 entry 在下层之上运动期间，以平滑圆角裁剪它 |
+| `enableCornerClip` | `true` | 顶层 entry 运动期间以平滑圆角裁剪；转场自带动画裁剪（`Expansion`）时跳过 |
 | `cornerClipRadius` | `0.dp` | 裁剪半径；传 `rememberNavSystemCornerRadius()` 可跟随设备屏幕圆角（平台报告为 0 时同样不裁圆角） |
 | `cornerClipMode` | `Leading` | 裁哪些角：`Leading` —— 与屏幕边缘相接的前缘角，适合滑动类转场；`All` —— 四角全裁，适合整页缩放的卡片类转场 |
 | `dimAmount` | `0.5f` | 最顶层之下全屏调暗遮罩的最大 alpha；随运动的曲线归转场所有（`scrimFraction`），此处只封顶暗度。`0f` 关闭 |
@@ -371,7 +403,7 @@ v1 核心**不提供**内置结果通道（`NavController` 上没有 `navigateFo
 | 能力 | v1 状态 |
 | :-- | :-- |
 | Dialog / 底部表单 场景策略（覆盖型目的地） | 不支持 |
-| 跨目的地的共享元素转场（SharedTransition） | 不支持 |
+| 跨目的地的共享元素内容匹配（SharedTransition） | 不支持；`Expansion` 仅提供页面容器展开 |
 | KSP / 注解式路由注册 | 不支持（用 `entry<T> { }` DSL 注册 entry） |
 | `NavController` 内置结果通道 | 不支持（见上一节） |
 

@@ -23,13 +23,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -46,6 +52,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandlerWithSessions
 import top.yukonga.miuix.kmp.nav.gesture.drivePredictiveBack
+import top.yukonga.miuix.kmp.nav.gesture.navReentryInput
 import top.yukonga.miuix.kmp.nav.gesture.navSwipeDismissImpl
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.runtime.NavPresentation
@@ -75,6 +82,14 @@ import top.yukonga.miuix.kmp.nav.transition.NavSettlePhase
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
+import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavExpansionState
+import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavSourceRegistry
+import top.yukonga.miuix.kmp.nav.transition.internal.NavEntryRenderer
+import top.yukonga.miuix.kmp.nav.transition.internal.NavExpansionState
+import top.yukonga.miuix.kmp.nav.transition.internal.NavHostTransition
+import top.yukonga.miuix.kmp.nav.transition.internal.NavSourceRegistry
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostBinding
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostContext
 import top.yukonga.miuix.kmp.squircle.absoluteSquircleClip
 import kotlin.reflect.KClass
 
@@ -282,7 +297,7 @@ private fun rememberNavEntryDispatcherOwner(
 }
 
 /** Reads the per-route [NavTransition] override from an entry's metadata, or null to inherit. */
-private fun NavEntry<*>.transitionOrNull(): NavTransition? = metadata[NAV_TRANSITION_METADATA_KEY] as? NavTransition
+internal fun NavEntry<*>.transitionOrNull(): NavTransition? = metadata[NAV_TRANSITION_METADATA_KEY] as? NavTransition
 
 /** Reads the per-route [NavSwipeDirection] override from an entry's metadata, or null to inherit. */
 private fun NavEntry<*>.swipeDismissOrNull(): NavSwipeDirection? = metadata[NAV_SWIPE_DISMISS_METADATA_KEY] as? NavSwipeDirection
@@ -336,9 +351,12 @@ private fun NavDisplayLayout(
     onBack: () -> Unit,
     transition: NavTransition,
     effects: NavDisplayEffects,
+    hostContext: NavTransitionHostContext,
     modifier: Modifier = Modifier,
 ) {
     val presentation = rememberNavPresentation(backStack.lastIndex)
+    val sourceRegistry = remember { NavSourceRegistry() }
+    val entryRenderers = remember { mutableStateMapOf<Any, NavEntryRenderer>() }
     val stateHolder = rememberNavSaveableStateHolder()
     val viewModelStores = rememberNavEntryViewModelStores()
 
@@ -377,6 +395,7 @@ private fun NavDisplayLayout(
     // signal that re-evaluates the visible window and the entry hosts.
     val indexByContentKey = remember { mutableStateMapOf<Any, Int>() }
     remember(currentKeyList, entryProvider) {
+        hostContext.expansion.prepare(currentKeyList)
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
         // Content keys are the entry identity everywhere downstream (presentation reconcile,
@@ -425,10 +444,30 @@ private fun NavDisplayLayout(
                 }
             }
         }
+        // A stable contentKey can adopt different route arguments without an exit animation.
+        // Release the old route's transition resources before its registration is replaced.
+        presentation.presented.fastForEach { existing ->
+            val replacement = currentEntries.firstOrNull { it.contentKey == existing.contentKey }
+            if (replacement != null && replacement.key != existing.key) {
+                hostContext.onEntryRemoved(existing.key)
+            }
+        }
         presentation.reconcile(currentEntries, navReconcile(previousContentKeys[0] ?: emptyList(), newContentKeys))
         previousContentKeys[0] = newContentKeys
         currentEntries.forEachIndexed { index, e ->
             if (indexByContentKey[e.contentKey] != index) indexByContentKey[e.contentKey] = index
+        }
+    }
+
+    // A current entry immediately owns its stack position. Superseded leaving entries are
+    // cleaned up below, but must no longer influence drawing, neighbours or motion this frame.
+    val renderEntries by remember(presentation, indexByContentKey, backStack) {
+        derivedStateOf {
+            val currentSize = backStack.size
+            presentation.presented.filter { entry ->
+                val index = indexByContentKey[entry.contentKey]
+                index != null && (!entry.presentation.isRemoving || index >= currentSize)
+            }
         }
     }
 
@@ -440,7 +479,7 @@ private fun NavDisplayLayout(
         derivedStateOf {
             var topEntry: NavEntry<*>? = null
             var topIdx = -1
-            val presented = presentation.presented
+            val presented = renderEntries
             for (i in presented.indices) {
                 val idx = indexByContentKey[presented[i].contentKey] ?: continue
                 if (idx > topIdx) {
@@ -564,7 +603,7 @@ private fun NavDisplayLayout(
     // the saved state, clear the entry's ViewModelStore in the display registry, and remove from the
     // presentation set + index map. The registry — not the host composition — owns store lifetime, so
     // a depth-culled entry that is still on the back stack keeps its ViewModels.
-    val finishedLeaving by remember(presentation, indexByContentKey) {
+    val finishedLeaving by remember(presentation, indexByContentKey, entryRenderers) {
         derivedStateOf {
             val top = presentation.animatedTop.value
             val currentSize = backStack.size
@@ -577,7 +616,7 @@ private fun NavDisplayLayout(
                 val e = presented[i]
                 if (!e.presentation.isRemoving) continue
                 val index = indexByContentKey[e.contentKey]
-                if (index == null || top - index <= -1f || index < currentSize) {
+                if (index == null || index < currentSize || (top - index <= -1f && entryRenderers[e.contentKey]?.retainEntry != true)) {
                     (result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }).add(e)
                 }
             }
@@ -585,16 +624,23 @@ private fun NavDisplayLayout(
         }
     }
     if (finishedLeaving.isNotEmpty()) {
+        val leavingGesture = presentation.gesture
         SideEffect {
+            var unloaded = false
             finishedLeaving.fastForEach { e ->
+                // A click can revive this entry after the derived removal list was sampled.
+                // Never release a live entry's state or unload its newly reversed animation.
+                if (!e.presentation.isRemoving || e.key in backStack) return@fastForEach
+                hostContext.onEntryRemoved(e.key)
                 stateHolder.removeState(e.contentKey)
                 viewModelStores.clearStore(e.contentKey)
                 indexByContentKey.remove(e.contentKey)
                 presentation.unload(e)
+                unloaded = true
             }
             // A committed back gesture resolves here (its leaving entry just unloaded); release
             // the gesture context that was kept frozen through the settle.
-            presentation.gesture = null
+            if (unloaded && presentation.gesture === leavingGesture) presentation.gesture = null
         }
     }
 
@@ -612,6 +658,16 @@ private fun NavDisplayLayout(
     }
 
     var layoutSize by remember { mutableStateOf(IntSize.Zero) }
+    val layoutPositionState = remember { mutableStateOf(Offset.Zero) }
+    val layoutPosition = remember { { layoutPositionState.value } }
+    val layoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val hostCoordinates = remember { { layoutCoordinates.value } }
+    val windowPositionToLocal = remember {
+        { position: Offset ->
+            layoutCoordinates.value?.takeIf { it.isAttached }?.windowToLocal(position)
+                ?: (position - layoutPositionState.value)
+        }
+    }
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
@@ -626,6 +682,17 @@ private fun NavDisplayLayout(
         // slider or scroll gestures. At rest the settled top host was full-screen anyway.
         modifier = modifier
             .onSizeChanged { layoutSize = it }
+            .onGloballyPositioned {
+                layoutCoordinates.value = it
+                layoutPositionState.value = it.positionInWindow()
+            }
+            .then(
+                if (effects.blockInputDuringTransition) {
+                    Modifier
+                } else {
+                    Modifier.navReentryInput(presentation, indexByContentKey, transition) { layoutCoordinates.value }
+                },
+            )
             .navSwipeDismissImpl(
                 // Never on the root (nothing to pop); NavSwipeDirection.None keeps it disabled.
                 enabled = topIndex > 0,
@@ -659,10 +726,10 @@ private fun NavDisplayLayout(
         // graphicsLayer. Hand-rolled max/filter keeps the per-frame re-run free of closures,
         // iterators, and boxed floats; the only allocation left is the result list, emitted in
         // stack-index order (bottom first) so composition order matches draw order.
-        val visibleEntries by remember(presentation, transition, indexByContentKey) {
+        val visibleEntries by remember(presentation, transition, indexByContentKey, entryRenderers) {
             derivedStateOf {
                 val top = presentation.animatedTop.value
-                val presented = presentation.presented
+                val presented = renderEntries
                 var windowDepth = transition.opaqueDepth
                 for (i in presented.indices) {
                     val depth = (presented[i].transitionOrNull() ?: transition).opaqueDepth
@@ -672,7 +739,7 @@ private fun NavDisplayLayout(
                 for (i in presented.indices) {
                     val entry = presented[i]
                     val index = indexByContentKey[entry.contentKey] ?: continue
-                    if (isVisibleAt(relativeDepth(top, index), windowDepth)) {
+                    if (isVisibleAt(relativeDepth(top, index), windowDepth) || entryRenderers[entry.contentKey]?.retainEntry == true) {
                         val list = result ?: ArrayList<NavEntry<*>>(presented.size).also { result = it }
                         // Insertion-sorted by stack index: composition order is draw order, and a
                         // pure back-stack reorder leaves `presented` in its old order. Stable, so a
@@ -710,7 +777,7 @@ private fun NavDisplayLayout(
                     // (e.g. a bottom-up Modal) is popped, revert this covered layer to the global transition
                     // mid-dismiss — for a Modal over the horizontal-slide default that wrongly parallaxes the
                     // layer below sideways while the modal is still sliding down (§4.3 boundary ownership).
-                    val upperEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
+                    val upperEntry = renderEntries.firstOrNull { indexByContentKey[it.contentKey] == entryIndex + 1 }
                     val upperTransition = upperEntry?.transitionOrNull() ?: transition
 
                     if (effects.dimAmount > 0f && entryIndex == topMostVisibleIndex && entryIndex > 0) {
@@ -726,7 +793,7 @@ private fun NavDisplayLayout(
                         // 1 = covered). The effects layer only caps the darkness (dimAmount). The
                         // fraction is read inside the deferred graphicsLayer, so the per-frame float
                         // never recomposes this layout.
-                        val belowEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex - 1 }
+                        val belowEntry = renderEntries.firstOrNull { indexByContentKey[it.contentKey] == entryIndex - 1 }
                         val scrimScope = LiveNavTransitionScope(
                             presentation = presentation,
                             entryIndex = entryIndex - 1,
@@ -735,6 +802,9 @@ private fun NavDisplayLayout(
                             layoutSize = layoutSize,
                             layoutDirection = layoutDirection,
                             density = density,
+                            entryKey = belowEntry?.key,
+                            layoutPosition = layoutPosition,
+                            windowPositionToLocal = windowPositionToLocal,
                         )
                         Box(
                             modifier = Modifier
@@ -752,13 +822,19 @@ private fun NavDisplayLayout(
                         presentation = presentation,
                         stateHolder = stateHolder,
                         viewModelStores = viewModelStores,
+                        sourceRegistry = sourceRegistry,
+                        entryRenderers = entryRenderers,
                         ownTransition = ownTransition,
                         upperTransition = upperTransition,
+                        hasUpperEntry = upperEntry != null,
                         change = presentation.change,
                         effects = effects,
                         layoutSize = layoutSize,
                         layoutDirection = layoutDirection,
                         density = density,
+                        layoutPosition = layoutPosition,
+                        windowPositionToLocal = windowPositionToLocal,
+                        hostCoordinates = hostCoordinates,
                     )
                 }
             }
@@ -813,13 +889,19 @@ private fun NavEntryHost(
     presentation: NavPresentation,
     stateHolder: NavSaveableStateHolder,
     viewModelStores: NavEntryViewModelStores,
+    sourceRegistry: NavSourceRegistry,
+    entryRenderers: SnapshotStateMap<Any, NavEntryRenderer>,
     ownTransition: NavTransition,
     upperTransition: NavTransition,
+    hasUpperEntry: Boolean,
     change: NavChange,
     effects: NavDisplayEffects,
     layoutSize: IntSize,
     layoutDirection: LayoutDirection,
     density: Density,
+    layoutPosition: () -> Offset,
+    windowPositionToLocal: (Offset) -> Offset,
+    hostCoordinates: () -> LayoutCoordinates?,
 ) {
     // Cache a single movableContentOf per host so the entry's content keeps its state if the host is
     // moved within the call hierarchy across recompositions.
@@ -877,6 +959,11 @@ private fun NavEntryHost(
         layoutSize,
         layoutDirection,
         density,
+        entry.key,
+        hasUpperEntry,
+        layoutPosition,
+        windowPositionToLocal,
+        hostCoordinates,
     ) {
         LiveNavTransitionScope(
             presentation = presentation,
@@ -886,13 +973,32 @@ private fun NavEntryHost(
             layoutSize = layoutSize,
             layoutDirection = layoutDirection,
             density = density,
+            entryKey = entry.key,
+            hasUpperEntry = hasUpperEntry,
+            layoutPosition = layoutPosition,
+            windowPositionToLocal = windowPositionToLocal,
+            hostCoordinates = hostCoordinates,
         )
     }
     val entryModifier = with(activeTransition) {
         Modifier.transformEntry(transitionScope)
     }
+    val contentModifier = with(activeTransition) {
+        Modifier.transformContent(transitionScope)
+    }
+    val renderer = (ownTransition as? NavHostTransition)?.rememberRenderer(transitionScope)
+    DisposableEffect(entry.contentKey, renderer, entryRenderers) {
+        if (renderer != null) entryRenderers[entry.contentKey] = renderer
+        onDispose {
+            if (renderer != null) {
+                if (entryRenderers[entry.contentKey] === renderer) entryRenderers.remove(entry.contentKey)
+            }
+        }
+    }
+    LaunchedEffect(renderer) { renderer?.trackLifetime() }
+    val renderingModifier = if (renderer == null) Modifier else Modifier.drawWithContent { renderer.drawContent(this) }
 
-    val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0) {
+    val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0 && !activeTransition.handlesCornerClip(transitionScope)) {
         // Squircle-clip the transitioning top entry. The radius comes from the effects, so callers
         // can follow the platform screen corner (e.g. rememberNavSystemCornerRadius); the corner
         // set follows the effects' clip mode. absoluteSquircleClip uses physical corners (never
@@ -939,14 +1045,19 @@ private fun NavEntryHost(
     }
 
     Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier).then(opaqueInputModifier)) {
-        ProvideNavEntryBackScope(entryDispatcherOwner) {
-            stateHolder.EntryStateContent(entry.contentKey) {
-                val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
-                ProvideNavEntryViewModelStore(vmOwner) {
-                    ProvideNavEntryLifecycle(lifecycleOwner) {
-                        movableContent {
-                            CompositionLocalProvider(LocalNavTransitionScope provides transitionScope) {
-                                entry.Content()
+        Box(modifier = contentModifier.then(renderingModifier), propagateMinConstraints = true) {
+            ProvideNavEntryBackScope(entryDispatcherOwner) {
+                stateHolder.EntryStateContent(entry.contentKey) {
+                    val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
+                    ProvideNavEntryViewModelStore(vmOwner) {
+                        ProvideNavEntryLifecycle(lifecycleOwner) {
+                            movableContent {
+                                CompositionLocalProvider(
+                                    LocalNavTransitionScope provides transitionScope,
+                                    LocalNavSourceRegistry provides sourceRegistry,
+                                ) {
+                                    entry.Content()
+                                }
                             }
                         }
                     }
@@ -1043,12 +1154,31 @@ internal fun NavDisplay(
     effects: NavDisplayEffects = NavDisplayEffects(),
 ) {
     require(backStack.isNotEmpty()) { "NavDisplay back stack cannot be empty" }
-    NavDisplayLayout(
-        backStack = backStack,
-        entryProvider = entryProvider,
-        onBack = onBack,
-        transition = transition,
-        effects = effects,
-        modifier = modifier,
-    )
+    val currentProvider = rememberUpdatedState(entryProvider)
+    val currentTransition = rememberUpdatedState(transition)
+    val expansionState = remember(backStack) {
+        NavExpansionState(backStack) { key ->
+            val target = currentProvider.value(key).transitionOrNull() ?: currentTransition.value
+            (target as? NavTransitionHostBinding)?.needsSource == true
+        }
+    }
+    DisposableEffect(expansionState) {
+        onDispose { expansionState.dispose() }
+    }
+    val hostContext = remember(expansionState, effects) { NavTransitionHostContext(expansionState, effects) }
+    val boundProvider = remember(entryProvider, hostContext, transition) {
+        { key: NavKey -> entryProvider(key).bindTransition(hostContext, transition) }
+    }
+    val boundTransition = remember(transition, hostContext) { hostContext.resolve(transition) }
+    CompositionLocalProvider(LocalNavExpansionState provides expansionState) {
+        NavDisplayLayout(
+            backStack = backStack,
+            entryProvider = boundProvider,
+            onBack = onBack,
+            transition = boundTransition,
+            effects = effects,
+            hostContext = hostContext,
+            modifier = modifier,
+        )
+    }
 }

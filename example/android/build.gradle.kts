@@ -83,11 +83,6 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-    packaging {
-        jniLibs {
-            excludes += "lib/*/libandroidx.graphics.path.so"
-        }
-    }
     testOptions {
         unitTests {
             // Compose Preview needs the unit-test resource APK (b/572377862).

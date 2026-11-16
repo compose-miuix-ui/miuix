@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import top.yukonga.miuix.kmp.nav.transition.NavRole
+import top.yukonga.miuix.kmp.nav.transition.NavTransition
+import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostContext
 
 /**
  * Internal rendering unit of the navigation runtime.
@@ -60,6 +62,15 @@ internal class NavEntry<K : NavKey>(
 
     /** Arbitrary per-entry data (per-route transition / swipe overrides live here). */
     val metadata: Map<String, Any> get() = registration.metadata
+
+    /** Bind host-owned presets without wrapping or changing the page content's identity. */
+    fun bindTransition(context: NavTransitionHostContext, defaultTransition: NavTransition): NavEntry<K> {
+        val transition = transitionOrNull() ?: defaultTransition
+        val bound = context.resolve(transition, key)
+        if (bound === transition) return this
+        val current = registration
+        return NavEntry(current.key, contentKey, current.metadata + (NAV_TRANSITION_METADATA_KEY to bound), current.content)
+    }
 
     /**
      * Adopts the registration payload of a freshly built [other] entry with the same [contentKey],

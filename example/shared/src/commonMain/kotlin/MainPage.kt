@@ -43,6 +43,7 @@ import navigation.ComponentDemo
 import navigation.ComponentDemoGroup
 import navigation.Route
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
@@ -68,6 +69,8 @@ import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.menu.OverlayIconCascadingDropdownMenu
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
@@ -313,12 +316,16 @@ fun MainPage(
                                     if (group == ComponentDemoGroup.Ui) {
                                         ArrowPreference(
                                             title = "PullToRefresh",
+                                            modifier = Modifier.navTransitionSource(Route.PullToRefresh, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp)),
                                             onClick = { navigator.push(Route.PullToRefresh) },
                                         )
                                     }
-                                    demos.forEach { demo ->
+                                    demos.forEachIndexed { index, demo ->
+                                        val top = if (index == 0 && group != ComponentDemoGroup.Ui) CardDefaults.CornerRadius else 0.dp
+                                        val bottom = if (index == demos.lastIndex) CardDefaults.CornerRadius else 0.dp
                                         ArrowPreference(
                                             title = demo.title,
+                                            modifier = Modifier.navTransitionSource(Route.Component(demo), containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(top, top, bottom, bottom)),
                                             onClick = { navigator.push(Route.Component(demo)) },
                                         )
                                     }
@@ -331,6 +338,7 @@ fun MainPage(
                         Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                             ArrowPreference(
                                 title = "Glass Component",
+                                modifier = Modifier.navTransitionSource(Route.Glass, containerColor = MiuixTheme.colorScheme.surfaceContainer),
                                 onClick = { navigator.push(Route.Glass) },
                             )
                         }

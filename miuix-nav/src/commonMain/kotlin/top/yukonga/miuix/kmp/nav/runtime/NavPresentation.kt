@@ -186,6 +186,13 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
      */
     fun reconcile(currentEntries: List<NavEntry<*>>, change: NavChange) {
         if (change != NavChange.None) this.change = change
+        if (change == NavChange.Push || change is NavChange.MultiPush || change == NavChange.Replace || change == NavChange.ReplaceAll) {
+            // Forward navigation supersedes a committed back gesture, including revival of the
+            // very entry that was leaving. It now targets the current top from the same float;
+            // keeping the old gesture would leave isRunning/lifecycle stuck after it settles.
+            gesture = null
+            pendingSettleVelocity = 0f
+        }
         val currentKeys = currentEntries.mapTo(HashSet(currentEntries.size)) { it.contentKey }
         // Entries that fell off the back stack become "leaving" but stay rendered.
         _presented.forEach { e ->

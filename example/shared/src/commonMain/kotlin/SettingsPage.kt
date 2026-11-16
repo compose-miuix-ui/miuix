@@ -32,6 +32,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -52,7 +53,7 @@ private val FloatingToolbarPositionOptions =
 private val FloatingToolbarOrientationOptions = listOf("Horizontal", "Vertical")
 private val FabPositionOptions = listOf("Start", "Center", "End", "EndOverlay")
 private val ColorModeOptions = listOf("System", "Light", "Dark", "MonetSystem", "MonetLight", "MonetDark")
-private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
+private val NavTransitionStyleOptions = listOf("Miuix", "AOSP", "Expansion")
 private val TopAppBarStyleOptions = listOf("Original", "Glass")
 private val PaletteStyleOptions = ThemePaletteStyle.entries.map { it.name }
 private val ColorSpecOptions = ThemeColorSpec.entries.map { it.name }
@@ -381,6 +382,7 @@ private fun SettingsContent(
                     ArrowPreference(
                         title = "About",
                         summary = "About this example App",
+                        modifier = Modifier.navTransitionSource(Route.About, containerColor = MiuixTheme.colorScheme.surfaceContainer),
                         onClick = { navigator.push(Route.About) },
                     )
                 }

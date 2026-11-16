@@ -37,6 +37,9 @@ sealed interface Route : NavKey {
     data object NestedNav : Route
 
     @Serializable
+    data class ExpansionDetail(val origin: String, val id: Int) : Route
+
+    @Serializable
     data object OverscrollLoadMore : Route
 
     @Serializable

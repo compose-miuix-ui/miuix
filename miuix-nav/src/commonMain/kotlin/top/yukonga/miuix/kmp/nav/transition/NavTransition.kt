@@ -63,6 +63,20 @@ fun interface NavTransition {
     fun Modifier.transformEntry(scope: NavTransitionScope): Modifier
 
     /**
+     * Transforms page content inside the entry's container. The default leaves it unchanged.
+     * Container transitions can keep their surface opaque while revealing content separately.
+     * Read animated properties in deferred draw/layer blocks, just as in [transformEntry].
+     */
+    fun Modifier.transformContent(scope: NavTransitionScope): Modifier = this
+
+    /**
+     * Whether this transition supplies its own animated corner clip. The host omits its static
+     * [top.yukonga.miuix.kmp.nav.core.NavDisplayEffects] corner clip in that case to avoid clipping
+     * the entry twice. Read only coarse state here; this method is evaluated during composition.
+     */
+    fun handlesCornerClip(scope: NavTransitionScope): Boolean = false
+
+    /**
      * The relative depth beyond which the layer below this entry is considered fully occluded and may
      * be culled. Defaults to `1f` (opaque slide: only the top plus one covered layer renders). A
      * modal transition keeps lower layers visible by returning a larger value (for example `2f`).
