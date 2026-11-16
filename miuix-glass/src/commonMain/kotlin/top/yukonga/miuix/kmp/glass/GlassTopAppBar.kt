@@ -234,13 +234,12 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param backdrop Background sampled by the buttons. `null` uses [fill].
  * @param modifier Modifier applied to the bar.
  * @param largeTitle Large title shown before content scrolls. Defaults to [title].
+ * @param expandable Whether the large title can expand. `false` keeps the compact title visible.
  * @param subtitle Optional subtitle below the title.
  * @param largeTitleBlurRadius Blur applied as the large title collapses.
  * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
  * @param visualContentOffset Content position in pixels, negative upward, including elastic displacement.
  *   Overrides band/shadow progress; pair with [isContentScrolled] for programmatic scrolling.
- * @param bandBrush Gradient that dims content passing beneath the bar.
- * @param bandOverhang Distance the gradient extends beyond the bar.
  * @param style Glass style forwarded to the renderer.
  * @param alpha Opacity multiplier for button colour layers and stroke.
  * @param buttonShape Button-pill silhouette.
@@ -264,6 +263,7 @@ fun GlassTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier,
+    expandable: Boolean = true,
     progressiveBlur: Boolean = false,
     backdrop: Backdrop? = null,
     largeTitle: String = title,
@@ -299,6 +299,7 @@ fun GlassTopAppBar(
         title = title,
         isContentScrolled = isContentScrolled,
         modifier = modifier,
+        expandable = expandable,
         progressiveBlur = progressiveBlur,
         backdrop = backdrop,
         largeTitle = largeTitle,
@@ -341,6 +342,7 @@ fun GlassTopAppBar(
     isContentScrolled: Boolean,
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier,
+    expandable: Boolean = true,
     progressiveBlur: Boolean = false,
     backdrop: Backdrop? = null,
     largeTitle: String = title,
@@ -478,6 +480,7 @@ fun GlassTopAppBar(
                 title = title,
                 modifier = contentModifier,
                 titleAlpha = titleAlpha,
+                expandable = expandable,
                 largeTitle = largeTitle,
                 largeTitleBlurRadius = largeTitleBlurRadius,
                 subtitle = subtitle,
@@ -523,7 +526,8 @@ private fun GlassTopAppBarLayout(
         val width = constraints.constrainWidth(foreground.width)
         val height = constraints.constrainHeight(foreground.height)
         val bandHeight = if (progressiveBlur) {
-            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight
+            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() +
+                measurements.bottomContentHeight
             ((coveredHeight + 20.dp.toPx()) * 1.2f).roundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)

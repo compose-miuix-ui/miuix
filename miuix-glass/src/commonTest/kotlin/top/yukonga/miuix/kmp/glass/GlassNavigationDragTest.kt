@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 class GlassNavigationDragTest {
     @Test
     fun rightwardDragStretchesOnlyTheTrailingEdge() {
-        val target = navigationDragTarget(100f, 80f, 320f, 5f, false)
+        val target = navigationDragTarget(100f, 80f, 0f, 320f, 5f, false)
         assertEquals(80f, target.left)
         assertEquals(180f, target.right)
         assertEquals(GlassMotion.navDragFollow(), target.leftSpring)
@@ -21,31 +21,40 @@ class GlassNavigationDragTest {
 
     @Test
     fun reversalMovesTheTrailToTheOtherEdge() {
-        val target = navigationDragTarget(100f, 80f, 320f, -5f, false)
+        val target = navigationDragTarget(100f, 80f, 0f, 320f, -5f, false)
         assertEquals(100f, target.left)
         assertEquals(200f, target.right)
     }
 
     @Test
     fun trailIsCappedAtSixtyPixels() {
-        val target = navigationDragTarget(100f, 80f, 320f, 100f, false)
+        val target = navigationDragTarget(100f, 80f, 0f, 320f, 100f, false)
         assertEquals(40f, target.left)
         assertEquals(180f, target.right)
     }
 
     @Test
     fun leadingBoundarySuppressesStretch() {
-        val right = navigationDragTarget(300f, 80f, 320f, 20f, false)
+        val right = navigationDragTarget(300f, 80f, 0f, 320f, 20f, false)
         assertEquals(240f, right.left)
         assertEquals(320f, right.right)
-        val left = navigationDragTarget(-10f, 80f, 320f, -20f, false)
+        val left = navigationDragTarget(-10f, 80f, 0f, 320f, -20f, false)
         assertEquals(0f, left.left)
         assertEquals(80f, left.right)
     }
 
     @Test
+    fun travelStartsAfterALeadingAction() {
+        // A leading action moves the travel's start past its slot, so the chip overshoots the
+        // first destination by the same small amount as the last, not by the action's width.
+        val target = navigationDragTarget(-10f, 80f, 53f, 320f, -20f, false)
+        assertEquals(53f, target.left)
+        assertEquals(133f, target.right)
+    }
+
+    @Test
     fun rawTrailCanExceedContainerButRenderedEdgeIsLimited() {
-        val target = navigationDragTarget(10f, 80f, 320f, 10f, false)
+        val target = navigationDragTarget(10f, 80f, 0f, 320f, 10f, false)
         assertEquals(-30f, target.left)
         assertEquals(90f, target.right)
         val bounds = navigationIndicatorBounds(target.left, target.right, 320f, 3f)
@@ -98,19 +107,19 @@ class GlassNavigationDragTest {
 
     @Test
     fun crossingItemsUsesDirectionalSpringsWithoutExtraTrail() {
-        val right = navigationDragTarget(100f, 80f, 320f, 10f, true)
+        val right = navigationDragTarget(100f, 80f, 0f, 320f, 10f, true)
         assertEquals(100f, right.left)
         assertEquals(180f, right.right)
         assertEquals(GlassMotion.navIndicatorTrail(), right.leftSpring)
         assertEquals(GlassMotion.navIndicator(), right.rightSpring)
-        val left = navigationDragTarget(100f, 80f, 320f, -10f, true)
+        val left = navigationDragTarget(100f, 80f, 0f, 320f, -10f, true)
         assertEquals(GlassMotion.navIndicator(), left.leftSpring)
         assertEquals(GlassMotion.navIndicatorTrail(), left.rightSpring)
     }
 
     @Test
     fun zeroDeltaRestoresNominalTargetWidth() {
-        val target = navigationDragTarget(100f, 80f, 320f, 0f, false)
+        val target = navigationDragTarget(100f, 80f, 0f, 320f, 0f, false)
         assertEquals(100f, target.left)
         assertEquals(180f, target.right)
     }

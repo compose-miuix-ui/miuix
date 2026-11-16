@@ -138,6 +138,7 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ------------------------------ | --------------------------------- | -------- |
 | title                      | String                          | 顶部栏标题                     | -                                 | 是       |
 | modifier                   | Modifier                        | 应用于顶部栏的修饰符           | Modifier                          | 否       |
+| expandable                 | Boolean                         | 是否允许大标题展开，false 时固定折叠 | true                              | 否       |
 | color                      | Color                           | 顶部栏背景颜色                 | MiuixTheme.colorScheme.surface    | 否       |
 | titleColor                 | Color                           | 折叠时小标题文字颜色           | MiuixTheme.colorScheme.onSurface  | 否       |
 | largeTitle                 | String                          | 大标题文本                     | title                             | 否       |
@@ -181,6 +182,7 @@ TopAppBar(
 | title                      | String                          | 顶栏标题                                          | -                               | 是   |
 | largeTitleBlurRadius       | Dp                              | 大标题完全淡出时的模糊半径                         | -                               | 是   |
 | modifier                   | Modifier                        | 应用于顶栏的 Modifier                             | Modifier                        | 否   |
+| expandable                 | Boolean                         | 是否允许大标题展开，false 时固定折叠                | true                            | 否   |
 | color                      | Color                           | 顶栏背景色                                        | MiuixTheme.colorScheme.surface  | 否   |
 | titleColor                 | Color                           | 收起后小标题的文字颜色                             | MiuixTheme.colorScheme.onSurface | 否   |
 | largeTitle                 | String                          | 大标题文字                                        | title                           | 否   |

@@ -18,6 +18,7 @@ data class AppState(
     val topAppBarStyle: Int = 1,
     val glassTopBarProgressiveBlur: Boolean = true,
     val showNavigationBar: Boolean = true,
+    val navigationRailStyle: Int = 1,
     val showNavigationBarBadge: Boolean = false,
     val navigationBarMode: Int = 0,
     val useFloatingNavigationBar: Boolean = true,

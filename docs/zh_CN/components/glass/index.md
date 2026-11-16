@@ -1,6 +1,6 @@
 # Glass 组件
 
-`miuix-glass` 提供玻璃按钮、导航栏、标签栏、菜单、对话框与底部抽屉。
+`miuix-glass` 提供玻璃按钮、导航栏与侧边栏、标签栏、菜单、对话框与底部抽屉。
 
 ## 组件
 
@@ -9,6 +9,7 @@
 | [GlassIconButton](./glassiconbutton) | 圆形玻璃图标按钮 | 工具栏与悬浮操作 |
 | [GlassTopAppBar](./glasstopappbar) | 可折叠玻璃顶栏 | 页面标题与操作 |
 | [GlassNavigationBar](./glassnavigationbar) | 悬浮玻璃导航栏 | 主要页面切换 |
+| [GlassNavigationRail](./glassnavigationrail) | 折叠后并入导航栏的悬浮玻璃侧边栏 | 宽屏下的页面切换 |
 | [GlassTabRow](./glasstabrow) | 独立胶囊玻璃标签栏 | 内容分类 |
 | [GlassSegmentedTabRow](./glasstabrow#glasssegmentedtabrow) | 相连分段玻璃标签栏 | 互斥视图切换 |
 | [GlassTransformPopup](./glasstransformpopup) | 从按钮变换展开的菜单 | 工具栏更多操作 |

@@ -14,14 +14,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -72,6 +72,7 @@ import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import utils.LocalAppPageInsets
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -121,8 +122,8 @@ internal fun GlassSearchOverlay(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
-    val density = LocalDensity.current
-    val statusBarHeight = WindowInsets.statusBars.getTop(density)
+    val pageInsets = LocalAppPageInsets.current
+    val topInsets = remember(pageInsets) { pageInsets.safeInsets.only(WindowInsetsSides.Top) }
     val active = expanded || transition.currentState || transition.isRunning
     LaunchedEffect(expanded) {
         query = ""
@@ -163,14 +164,14 @@ internal fun GlassSearchOverlay(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = progress.value }
-                .windowInsetsPadding(WindowInsets.statusBars)
+                .windowInsetsPadding(topInsets)
                 .imePadding(),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
-                    .graphicsLayer { translationY = -statusBarHeight * (1f - progress.value) },
+                    .graphicsLayer { translationY = -topInsets.getTop(this) * (1f - progress.value) },
             ) {
                 BasicTextField(
                     value = query,

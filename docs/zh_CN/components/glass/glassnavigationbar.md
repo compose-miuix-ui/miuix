@@ -91,6 +91,7 @@ GlassNavigationBar(
 | icon | ImageVector | 目的地图标 | - | 是 |
 | label | String? | 图标下方的标签 | null | 否 |
 | contentDescription | String? | 无障碍描述，未指定时使用 label | null | 否 |
+| badge | (@Composable () -> Unit)? | 绘制在图标上的徽标，通常为 `Badge`；请保持导航项实例稳定 | null | 否 |
 
 ### GlassNavigationBarDefaults 对象 {#glassnavigationbardefaults}
 

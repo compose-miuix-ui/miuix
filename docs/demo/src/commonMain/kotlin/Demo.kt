@@ -96,6 +96,7 @@ private val availableComponents = listOf(
     AvailableComponent("GlassIconButton", "glassIconButton") { GlassIconButtonDemo() },
     AvailableComponent("GlassTopAppBar", "glassTopAppBar") { GlassTopAppBarDemo() },
     AvailableComponent("GlassNavigationBar", "glassNavigationBar") { GlassNavigationBarDemo() },
+    AvailableComponent("GlassNavigationRail", "glassNavigationRail") { GlassNavigationRailDemo() },
     AvailableComponent("GlassTabRow", "glassTabRow") { GlassTabRowDemo() },
     AvailableComponent("GlassTransformPopup", "glassTransformPopup") { GlassTransformPopupDemo() },
     AvailableComponent("GlassPopup", "glassPopup") { GlassPopupDemo() },

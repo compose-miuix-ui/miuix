@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,6 +39,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import component.GlassBottomSheetDemo
 import component.GlassDemoDefaults
 import org.jetbrains.compose.resources.painterResource
@@ -95,6 +95,11 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.appPageHorizontalInsets
+import utils.appPageSearchInsets
+import utils.appPageTopBarInsets
+import utils.pageContentPadding
+import utils.rememberAppSafePadding
 
 private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Glass.HomeOutline, "Home"),
@@ -124,9 +129,9 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
+    val searchModifier = Modifier.appPageSearchInsets()
     val isInDark = isInDarkTheme()
-    val navigationBarInset = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
-    val bottomBarMargin = maxOf(24.dp, navigationBarInset + 8.dp, padding.calculateBottomPadding() + 8.dp)
+    val safePadding = rememberAppSafePadding()
     val backdrop = rememberLayerBackdrop()
     val secondaryBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
@@ -240,7 +245,16 @@ fun GlassPage(padding: PaddingValues) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomBarMargin),
+                            .appPageHorizontalInsets()
+                            .padding(start = 24.dp, end = 24.dp, top = 20.dp)
+                            .layout { measurable, constraints ->
+                                val bottom = maxOf(24.dp, safePadding.calculateBottomPadding() + 8.dp, padding.calculateBottomPadding() + 8.dp)
+                                    .roundToPx().coerceIn(0, constraints.maxHeight)
+                                val placeable = measurable.measure(constraints.offset(vertical = -bottom))
+                                layout(placeable.width, placeable.height + bottom) {
+                                    placeable.placeRelative(0, 0)
+                                }
+                            },
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -294,7 +308,9 @@ fun GlassPage(padding: PaddingValues) {
                 topBar = {
                     GlassTopAppBar(
                         title = "Glass Component",
-                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f },
+                        contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f }
+                            .appPageTopBarInsets(),
+                        defaultWindowInsetsPadding = false,
                         isContentScrolled = contentUnderTopBar,
                         backdrop = backdrop,
                         scrollBehavior = scrollBehavior,
@@ -413,10 +429,7 @@ fun GlassPage(padding: PaddingValues) {
                         modifier = Modifier
                             .fillMaxSize()
                             .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = innerPadding.calculateBottomPadding(),
-                        ),
+                        contentPadding = pageContentPadding(innerPadding, padding),
                     ) {
                         if (!tabsInTopBar) {
                             item(key = "glass-tabs-title") { SmallTitle(text = "TabRow") }
@@ -630,6 +643,7 @@ fun GlassPage(padding: PaddingValues) {
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
+            modifier = searchModifier,
         )
     }
 }

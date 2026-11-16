@@ -138,6 +138,7 @@ TopAppBar(
 | -------------------------- | ------------------------------- | ---------------------------------------------- | ------------------------------- | -------- |
 | title                      | String                          | Top bar title                                  | -                               | Yes      |
 | modifier                   | Modifier                        | Modifier applied to the top bar                | Modifier                        | No       |
+| expandable                 | Boolean                         | Allow the large title to expand; false keeps the bar compact | true                         | No       |
 | color                      | Color                           | Top bar background color                       | MiuixTheme.colorScheme.surface  | No       |
 | titleColor                 | Color                           | Color of the collapsed small title text        | MiuixTheme.colorScheme.onSurface | No       |
 | largeTitle                 | String                          | Large title text                               | title                           | No       |
@@ -181,6 +182,7 @@ TopAppBar(
 | title                      | String                          | Top bar title                                           | -                               | Yes      |
 | largeTitleBlurRadius       | Dp                              | Blur radius of the large title once it has fully faded   | -                               | Yes      |
 | modifier                   | Modifier                        | Modifier applied to the top bar                         | Modifier                        | No       |
+| expandable                 | Boolean                         | Allow the large title to expand; false keeps the bar compact | true                         | No       |
 | color                      | Color                           | Top bar background color                                | MiuixTheme.colorScheme.surface  | No       |
 | titleColor                 | Color                           | Color of the collapsed small title text                 | MiuixTheme.colorScheme.onSurface | No       |
 | largeTitle                 | String                          | Large title text                                        | title                           | No       |

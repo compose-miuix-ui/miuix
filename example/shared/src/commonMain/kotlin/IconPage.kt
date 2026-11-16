@@ -77,7 +77,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.All
 import utils.BlurredBar
+import utils.LocalAppPageInsets
 import utils.SearchStatus
+import utils.appPageSearchInsets
+import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.time.Duration.Companion.milliseconds
@@ -100,6 +103,9 @@ fun IconsPage(
     val pageCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val searchCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val density = LocalDensity.current
+    val searchTopInset = LocalAppPageInsets.current.searchTop
+    val searchModifier = Modifier.appPageSearchInsets()
+    val searchResultPadding = pageBottomPadding(padding)
 
     val iconFamilies = remember { listOf("Glass", "Original") }
     var glass by remember { mutableStateOf(true) }
@@ -234,7 +240,7 @@ fun IconsPage(
                                             .graphicsLayer { alpha = if (legacySearchStatus?.isCollapsed() != false) 1f else 0f }
                                             .clickable {
                                                 val offset = checkNotNull(pageCoordinates.value).localPositionOf(checkNotNull(searchCoordinates.value), Offset.Zero)
-                                                legacySearchOffset = with(density) { offset.y.toDp() }
+                                                legacySearchOffset = with(density) { offset.y.toDp() } - searchTopInset()
                                                 legacySearchStatus = SearchStatus(
                                                     label = "Search icons",
                                                 )
@@ -264,7 +270,6 @@ fun IconsPage(
             val contentPadding = pageContentPadding(
                 innerPadding,
                 padding,
-                isWideScreen,
             )
             Box(modifier = if (blurActive) Modifier.layerBackdrop(backdrop) else Modifier) {
                 LazyColumn(
@@ -395,6 +400,7 @@ fun IconsPage(
             GlassSearchOverlay(
                 onDismissRequest = { searchExpanded = false },
                 expanded = searchExpanded,
+                modifier = searchModifier,
                 label = "Search icons",
             ) { query ->
                 val filteredIndices = remember(query, iconNames) {
@@ -402,7 +408,7 @@ fun IconsPage(
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = padding.calculateBottomPadding()),
+                    contentPadding = searchResultPadding,
                 ) {
                     searchResultItems(filteredIndices)
                 }
@@ -418,7 +424,7 @@ fun IconsPage(
                     if (status.searchText.isBlank()) emptyList() else iconNames.indices.filter { iconNames[it].contains(status.searchText, ignoreCase = true) }
                 }
                 Box(
-                    Modifier.fillMaxSize().onPreviewKeyEvent {
+                    Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {
                         if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
                             legacySearchStatus = status.copy(current = SearchStatus.Status.COLLAPSING)
                             true
@@ -436,7 +442,7 @@ fun IconsPage(
                         defaultResult = {},
                         result = {
                             searchResultItems(filteredIndices)
-                            item { Spacer(Modifier.height(padding.calculateBottomPadding())) }
+                            item { Spacer(Modifier.padding(searchResultPadding)) }
                         },
                     )
                 }

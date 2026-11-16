@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import top.yukonga.miuix.kmp.basic.Card
@@ -34,6 +31,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
+import utils.pageContentPadding
 
 @Composable
 fun MultiScaffoldTestPage(
@@ -81,6 +79,7 @@ fun MultiScaffoldTestPage(
         val bottomRightSelected = remember { mutableIntStateOf(0) }
 
         val scrollState = rememberScrollState()
+        val contentPadding = pageContentPadding(innerPadding, padding, extraBottom = 12.dp)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -88,17 +87,10 @@ fun MultiScaffoldTestPage(
                 .then(if (appState.enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
                 .then(if (appState.showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
                 .verticalScroll(scrollState)
-                .padding(
-                    top = innerPadding.calculateTopPadding(),
-                    start = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-                    end = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-                    bottom = if (isWideScreen) {
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + padding.calculateBottomPadding() + 12.dp
-                    } else {
-                        padding.calculateBottomPadding() + 12.dp
-                    },
-                ),
+                .padding(contentPadding)
+                .consumeWindowInsets(contentPadding),
         ) {
+            // Each pane owns its overlay host; the parent has already applied the page safe area.
             Row(
                 modifier = Modifier
                     .weight(1f),
@@ -107,6 +99,7 @@ fun MultiScaffoldTestPage(
                     modifier = Modifier
                         .weight(1f)
                         .background(MiuixTheme.colorScheme.surfaceVariant),
+                    contentWindowInsets = WindowInsets(0),
                 ) {
                     Column {
                         SmallTitle(text = "Top Left")
@@ -127,6 +120,7 @@ fun MultiScaffoldTestPage(
                     modifier = Modifier
                         .weight(1f)
                         .background(MiuixTheme.colorScheme.surfaceVariant),
+                    contentWindowInsets = WindowInsets(0),
                 ) {
                     Column {
                         SmallTitle(text = "Top Right")
@@ -152,6 +146,7 @@ fun MultiScaffoldTestPage(
                     modifier = Modifier
                         .weight(1f)
                         .background(MiuixTheme.colorScheme.surfaceVariant),
+                    contentWindowInsets = WindowInsets(0),
                 ) {
                     Column {
                         SmallTitle(text = "Bottom Left")
@@ -172,6 +167,7 @@ fun MultiScaffoldTestPage(
                     modifier = Modifier
                         .weight(1f)
                         .background(MiuixTheme.colorScheme.surfaceVariant),
+                    contentWindowInsets = WindowInsets(0),
                 ) {
                     Column {
                         SmallTitle(text = "Bottom Right")

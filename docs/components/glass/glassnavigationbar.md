@@ -91,6 +91,7 @@ Use `visible` to show or hide the group. `alpha` controls material opacity.
 | icon | ImageVector | Destination icon | - | Yes |
 | label | String? | Caption below the icon | null | No |
 | contentDescription | String? | Accessibility description; falls back to label | null | No |
+| badge | (@Composable () -> Unit)? | Badge drawn on the icon, typically a `Badge`; keep the item instance stable | null | No |
 
 ### GlassNavigationBarDefaults Object {#glassnavigationbardefaults}
 

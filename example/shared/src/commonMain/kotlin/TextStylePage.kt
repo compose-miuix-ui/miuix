@@ -98,7 +98,7 @@ fun TextStylePage(
         },
     ) { innerPadding ->
         val lazyListState = rememberLazyListState()
-        val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen)
+        val contentPadding = pageContentPadding(innerPadding, padding)
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
                 state = lazyListState,

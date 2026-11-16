@@ -4,16 +4,26 @@
 package utils
 
 import LocalAppState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,11 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
+import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -43,6 +56,119 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
+
+/** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
+val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
+
+/**
+ * Full-window safe areas and the remaining insets in the current page pane. A sibling rail has
+ * already reserved its start space; an overlaid rail is included in [contentInsets]. Backgrounds
+ * stay edge-to-edge. Animated providers are read by layout, not while publishing this contract.
+ */
+@Stable
+class AppPageInsets(
+    val windowInsets: WindowInsets,
+    val safeInsets: WindowInsets,
+    val contentInsets: WindowInsets,
+    val searchTop: () -> Dp,
+)
+
+val LocalAppPageInsets = staticCompositionLocalOf {
+    AppPageInsets(WindowInsets(0), WindowInsets(0), WindowInsets(0)) { 0.dp }
+}
+
+/** Only the app host combines platform safe areas, external host padding and navigation chrome. */
+@Composable
+fun rememberAppPageInsets(
+    hostPadding: PaddingValues,
+    startAlreadyReserved: Boolean,
+    overlayStart: () -> Dp,
+    searchTop: () -> Dp,
+): AppPageInsets {
+    val systemInsets = WindowInsets.systemBars.union(WindowInsets.captionBar).union(WindowInsets.displayCutout)
+    return remember(systemInsets, hostPadding, startAlreadyReserved, overlayStart, searchTop) {
+        val hostInsets = object : WindowInsets {
+            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = with(density) {
+                hostPadding.calculateLeftPadding(layoutDirection).roundToPx()
+            }
+
+            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = with(density) {
+                hostPadding.calculateRightPadding(layoutDirection).roundToPx()
+            }
+
+            override fun getTop(density: Density): Int = with(density) { hostPadding.calculateTopPadding().roundToPx() }
+
+            override fun getBottom(density: Density): Int = with(density) { hostPadding.calculateBottomPadding().roundToPx() }
+        }
+        val windowInsets = systemInsets.union(hostInsets)
+        val safeInsets = if (startAlreadyReserved) {
+            windowInsets.only(WindowInsetsSides.End + WindowInsetsSides.Vertical)
+        } else {
+            windowInsets
+        }
+        val contentInsets = object : WindowInsets {
+            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getLeft(density, layoutDirection) +
+                if (layoutDirection == LayoutDirection.Ltr) with(density) { overlayStart().roundToPx() } else 0
+
+            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getRight(density, layoutDirection) +
+                if (layoutDirection == LayoutDirection.Rtl) with(density) { overlayStart().roundToPx() } else 0
+
+            override fun getTop(density: Density): Int = safeInsets.getTop(density)
+
+            override fun getBottom(density: Density): Int = safeInsets.getBottom(density)
+        }
+        AppPageInsets(windowInsets, safeInsets, contentInsets, searchTop)
+    }
+}
+
+/** Apply and consume horizontal page space without moving its backdrop or vertical content. */
+@Composable
+fun Modifier.appPageHorizontalInsets(): Modifier = windowInsetsPadding(
+    LocalAppPageInsets.current.contentInsets.only(WindowInsetsSides.Horizontal),
+)
+
+/** Top bars own the remaining top safe area; internal inset modifiers see it consumed. */
+@Composable
+fun Modifier.appPageTopBarInsets(): Modifier = appPageHorizontalInsets().windowInsetsPadding(
+    LocalAppPageInsets.current.safeInsets.only(WindowInsetsSides.Top),
+)
+
+/** Search shares horizontal page clearance and moves below the collapsed navigation capsule. */
+@Composable
+fun Modifier.appPageSearchInsets(): Modifier {
+    val searchTop = LocalAppPageInsets.current.searchTop
+    return appPageHorizontalInsets().layout { measurable, constraints ->
+        val top = searchTop().roundToPx().coerceIn(0, constraints.maxHeight)
+        val placeable = measurable.measure(constraints.offset(vertical = -top))
+        layout(placeable.width, placeable.height + top) {
+            placeable.placeRelative(0, top)
+        }
+    }
+}
+
+/** System/host safe areas only, independent of the sidebar and collapsed search capsule. */
+@Composable
+fun rememberAppSafePadding(): PaddingValues = LocalAppPageInsets.current.safeInsets.asPaddingValues()
+
+/** Bottom-only clearance for search results and floating page controls. */
+@Composable
+fun pageBottomPadding(
+    outerPadding: PaddingValues = PaddingValues(0.dp),
+    extraBottom: Dp = 0.dp,
+): PaddingValues {
+    val safePadding = rememberAppSafePadding()
+    return remember(outerPadding, safePadding, extraBottom) {
+        object : PaddingValues {
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = 0.dp
+
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = 0.dp
+
+            override fun calculateTopPadding(): Dp = 0.dp
+
+            override fun calculateBottomPadding(): Dp = maxOf(outerPadding.calculateBottomPadding(), safePadding.calculateBottomPadding()) + extraBottom
+        }
+    }
+}
 
 @Composable
 fun Modifier.pageScrollModifiers(
@@ -64,28 +190,39 @@ fun Modifier.pageScrollModifiers(
 @Composable
 fun pageContentPadding(
     innerPadding: PaddingValues,
-    outerPadding: PaddingValues,
-    isWideScreen: Boolean,
+    outerPadding: PaddingValues = PaddingValues(0.dp),
     extraTop: Dp = 0.dp,
     extraStart: Dp = 0.dp,
     extraEnd: Dp = 0.dp,
     extraBottom: Dp = 0.dp,
 ): PaddingValues {
-    val topPadding = innerPadding.calculateTopPadding() + extraTop
-    val bottomPadding = outerPadding.calculateBottomPadding() + extraBottom + if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + WindowInsets.captionBar.asPaddingValues()
-            .calculateBottomPadding()
-    } else {
-        0.dp
-    }
+    val pagePadding = LocalAppPageInsets.current.contentInsets.asPaddingValues()
+    return remember(innerPadding, outerPadding, pagePadding, extraTop, extraStart, extraEnd, extraBottom) {
+        object : PaddingValues {
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = maxOf(
+                innerPadding.calculateLeftPadding(layoutDirection),
+                outerPadding.calculateLeftPadding(layoutDirection),
+                pagePadding.calculateLeftPadding(layoutDirection),
+            ) + if (layoutDirection == LayoutDirection.Ltr) extraStart else extraEnd
 
-    return remember(topPadding, bottomPadding, extraStart, extraEnd, extraBottom) {
-        PaddingValues(
-            top = topPadding,
-            start = extraStart,
-            end = extraEnd,
-            bottom = bottomPadding,
-        )
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = maxOf(
+                innerPadding.calculateRightPadding(layoutDirection),
+                outerPadding.calculateRightPadding(layoutDirection),
+                pagePadding.calculateRightPadding(layoutDirection),
+            ) + if (layoutDirection == LayoutDirection.Rtl) extraStart else extraEnd
+
+            override fun calculateTopPadding(): Dp = maxOf(
+                innerPadding.calculateTopPadding(),
+                outerPadding.calculateTopPadding(),
+                pagePadding.calculateTopPadding(),
+            ) + extraTop
+
+            override fun calculateBottomPadding(): Dp = maxOf(
+                innerPadding.calculateBottomPadding(),
+                outerPadding.calculateBottomPadding(),
+                pagePadding.calculateBottomPadding(),
+            ) + extraBottom
+        }
     }
 }
 
@@ -99,7 +236,6 @@ fun AdaptiveTopAppBar(
     subtitle: String = "",
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
-    defaultWindowInsetsPadding: Boolean = !isWideScreen,
     isContentScrolled: Boolean? = null,
     visualContentOffset: (() -> Float)? = null,
     titleAlpha: () -> Float = { titleColor.alpha },
@@ -108,8 +244,10 @@ fun AdaptiveTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
+    val contentInsetModifier = Modifier.appPageTopBarInsets()
     if (!showTopAppBar) return
     val appState = LocalAppState.current
+    val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val backgroundBlur = LocalTopAppBarBackgroundBlur.current
@@ -125,43 +263,34 @@ fun AdaptiveTopAppBar(
         GlassTopAppBar(
             title = title,
             isContentScrolled = contentScrolled,
-            contentModifier = contentModifier,
+            contentModifier = contentModifier.then(contentInsetModifier),
+            expandable = !isWideScreen,
             subtitle = subtitle,
             backdrop = backdrop,
             progressiveBlur = appState.glassTopBarProgressiveBlur && appState.enableBlur,
             scrollBehavior = scrollBehavior,
             visualContentOffset = visualContentOffset,
-            titleAlpha = titleAlpha,
+            titleAlpha = { titleAlpha() * chromeTitleAlpha() },
             backgroundAlpha = { if (backgroundBlur || !shaderSupported) backgroundAlpha() else 0f },
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            defaultWindowInsetsPadding = false,
             bandBrush = bandBrush,
             bandOverhang = if (appState.enableBlur || !shaderSupported) GlassTopAppBarDefaults.BandOverhang else 0.dp,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,
         )
-    } else if (isWideScreen) {
-        SmallTopAppBar(
-            title = title,
-            modifier = contentModifier,
-            subtitle = subtitle,
-            color = color,
-            titleColor = titleColor,
-            scrollBehavior = scrollBehavior,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            bottomContent = bottomContent,
-        )
     } else {
-        TopAppBar(
+        BlurTopAppBar(
             title = title,
-            modifier = contentModifier,
+            largeTitleBlurRadius = 0.dp,
+            modifier = contentModifier.then(contentInsetModifier),
+            expandable = !isWideScreen,
             subtitle = subtitle,
             color = color,
             titleColor = titleColor,
             scrollBehavior = scrollBehavior,
-            defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+            titleAlpha = { chromeTitleAlpha() },
+            defaultWindowInsetsPadding = false,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,

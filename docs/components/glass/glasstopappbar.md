@@ -83,6 +83,7 @@ These parameters are shared by both overloads:
 | title | String | Compact title | - | Yes |
 | modifier | Modifier | Modifier applied to the whole bar and background band | Modifier | No |
 | contentModifier | Modifier | Modifier applied only to the foreground bar | Modifier | No |
+| expandable | Boolean | Allow the large title to expand; false keeps the bar compact | true | No |
 | backdrop | Backdrop? | Background sampling source; null uses button fallback fills | null | No |
 | largeTitle | String | Expanded title | title | No |
 | subtitle | String | Subtitle | "" | No |
