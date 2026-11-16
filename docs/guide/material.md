@@ -30,10 +30,10 @@ dependencies {
 
 ### Runtime capability checks
 
-| Function | Meaning |
-| --- | --- |
+| Function                     | Meaning                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
 | `isRuntimeShaderSupported()` | AGSL/SkSL shaders can be compiled and drawn (Android 13+; always true on Skia backends) |
-| `isRenderEffectSupported()` | `RenderEffect` chains are available (Android 12+) |
+| `isRenderEffectSupported()`  | `RenderEffect` chains are available (Android 11+; always true on Skia backends)         |
 
 ### RuntimeShader
 
@@ -59,10 +59,10 @@ val shader = LocalRuntimeShaderCache.current.obtainRuntimeShader("MyShader", sou
 
 `MaterialAgsl` exposes the two AGSL fragments every material shader shares, written against a common uniform contract — `in_size`, `in_radii` (top-left, top-right, bottom-right, bottom-left) and `in_smoothing`:
 
-| Fragment | Provides |
-| --- | --- |
-| `SilhouetteSdf` | `roundedBoxSdf`, `supercircleSdf`, `pickRadius`, `sdfShape`, `silhouetteSdf` (negative inside the shape) |
-| `RimLighting` | `luma`, `smooth5Map`, `edgeCurve`, `edgeCurveSlope`, `sdfGradient`, `liftToward`, `dynamicAdd`, `lightFalloff`, `rimLighten` |
+| Fragment        | Provides                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `SilhouetteSdf` | `roundedBoxSdf`, `supercircleSdf`, `pickRadius`, `sdfShape`, `silhouetteSdf` (negative inside the shape)                     |
+| `RimLighting`   | `luma`, `smooth5Map`, `edgeCurve`, `edgeCurveSlope`, `sdfGradient`, `liftToward`, `dynamicAdd`, `lightFalloff`, `rimLighten` |
 
 Include them in your own shader source to stay geometrically consistent with the built-in materials.
 
@@ -76,23 +76,23 @@ Use `GlassDefaults.style(isDark)` for theme-aware refraction, reflection and lig
 
 `GlassMaterial` controls the blurred body and its color layers. A non-null material replaces the blur radius requested by `GlassStyle`.
 
-| Property Name | Type | Description | Default Value | Required |
-| --- | --- | --- | --- | --- |
-| blurRadius | Dp | Backdrop blur radius | - | Yes |
-| first | GlassColorLayer | First color layer, nearest the backdrop | - | Yes |
-| second | GlassColorLayer? | Second color layer | null | No |
-| third | GlassColorLayer? | Third color layer; requires a non-null second layer | null | No |
+| Property Name | Type             | Description                                         | Default Value | Required |
+| ------------- | ---------------- | --------------------------------------------------- | ------------- | -------- |
+| blurRadius    | Dp               | Backdrop blur radius                                | -             | Yes      |
+| first         | GlassColorLayer  | First color layer, nearest the backdrop             | -             | Yes      |
+| second        | GlassColorLayer? | Second color layer                                  | null          | No       |
+| third         | GlassColorLayer? | Third color layer; requires a non-null second layer | null          | No       |
 
 Each `GlassColorLayer` specifies a `Color` and `GlassColorBlendMode`; layers are applied in order.
 
 `GlassMaterials` provides theme-aware presets:
 
-| Function Name | Return Type | Description | Blur Radius |
-| --- | --- | --- | --- |
-| puredThinGlass(isDark) | GlassMaterial | Floating bar material | 20.dp |
-| popupViewGlass(isDark) | GlassMaterial | Expanded popup material | 60.dp |
-| dialogGlass(isDark) | GlassMaterial | Dialog and attached bottom-sheet material | 60.dp |
-| actionBarMask(isDark) | GlassMaterial | Top-bar masking band | 40.dp light / 60.dp dark |
+| Function Name          | Return Type   | Description                               | Blur Radius              |
+| ---------------------- | ------------- | ----------------------------------------- | ------------------------ |
+| puredThinGlass(isDark) | GlassMaterial | Floating bar material                     | 20.dp                    |
+| popupViewGlass(isDark) | GlassMaterial | Expanded popup material                   | 60.dp                    |
+| dialogGlass(isDark)    | GlassMaterial | Dialog and attached bottom-sheet material | 60.dp                    |
+| actionBarMask(isDark)  | GlassMaterial | Top-bar masking band                      | 40.dp light / 60.dp dark |
 
 Each preset also has corresponding `*Light` and `*Dark` values. To adjust a preset, use `copy`:
 
@@ -131,23 +131,23 @@ An edge stroke draws a lit rim along a shape's silhouette: a flat stroke band pl
 
 ### EdgeStroke
 
-| Property Name | Type | Description | Default Value | Required |
-| --- | --- | --- | --- | --- |
-| width | Dp | Width of the flat stroke band | - | Yes |
-| bevel | Dp | Inward halo depth | - | Yes |
-| color | Color | Flat stroke colour; its alpha controls strength | - | Yes |
-| primary | EdgeLightSource | First light | - | Yes |
-| secondary | EdgeLightSource | Second light | - | Yes |
-| blendMode | BlendMode | How the stroke composites over the content | BlendMode.Plus | No |
-| peak | EdgePeak | How each light is gated around the rim | EdgePeak.Vertical | No |
+| Property Name | Type            | Description                                     | Default Value     | Required |
+| ------------- | --------------- | ----------------------------------------------- | ----------------- | -------- |
+| width         | Dp              | Width of the flat stroke band                   | -                 | Yes      |
+| bevel         | Dp              | Inward halo depth                               | -                 | Yes      |
+| color         | Color           | Flat stroke colour; its alpha controls strength | -                 | Yes      |
+| primary       | EdgeLightSource | First light                                     | -                 | Yes      |
+| secondary     | EdgeLightSource | Second light                                    | -                 | Yes      |
+| blendMode     | BlendMode       | How the stroke composites over the content      | BlendMode.Plus    | No       |
+| peak          | EdgePeak        | How each light is gated around the rim          | EdgePeak.Vertical | No       |
 
 `EdgeLightSource` positions a light in normalized UV: the shader normalizes `(x - 0.5, y - 0.7, z)`, so `(0.5, 0.7)` is the reference origin and contributes nothing. A negative `z` places the light behind the surface plane and lights the inward-facing edge. `color` alpha and `intensity` both scale the contribution.
 
-| EdgePeak | Gate |
-| --- | --- |
+| EdgePeak   | Gate                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------ |
 | `Vertical` | Fixed vertical axes: the primary lights the upper half of the rim, the secondary the lower |
-| `Axial` | The gate follows each light's own XY direction, so the lit arc moves with the light |
-| `Dual` | `dot(n.xy, L.xy)²`: one light produces two peaks 180° apart |
+| `Axial`    | The gate follows each light's own XY direction, so the lit arc moves with the light        |
+| `Dual`     | `dot(n.xy, L.xy)²`: one light produces two peaks 180° apart                                |
 
 ### Modifier.edgeStroke
 
@@ -182,10 +182,10 @@ The modifier takes a plain shape; a `GlassShape` additionally contributes its `s
 
 ### Presets
 
-| Preset | Module family | Notes |
-| --- | --- | --- |
-| `EdgeStrokes` | OS3-style bloom | `BigLight` / `MiddleLight` / `SmallLight` / `BigDark` / `MiddleDark` / `SmallDark`, plus `Default` (aliases `MiddleLight`). All use `EdgePeak.Axial` |
-| `GlassEdgeStrokes` | Glass | Same six names plus `forTheme(isDark)`. All use `EdgePeak.Vertical` |
+| Preset             | Module family   | Notes                                                                                                                                                |
+| ------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EdgeStrokes`      | OS3-style bloom | `BigLight` / `MiddleLight` / `SmallLight` / `BigDark` / `MiddleDark` / `SmallDark`, plus `Default` (aliases `MiddleLight`). All use `EdgePeak.Axial` |
+| `GlassEdgeStrokes` | Glass           | Same six names plus `forTheme(isDark)`. All use `EdgePeak.Vertical`                                                                                  |
 
 Names read `{Big,Middle,Small}{Light,Dark}`: the size picks the halo depth, the suffix the theme. Both objects expose full `EdgeStroke` values, so `copy` is the way to adjust one.
 
@@ -214,22 +214,22 @@ val primary = rememberTiltLight(
 
 ### Constants
 
-| Constant Name | Type | Description | Default Value |
-| --- | --- | --- | --- |
-| CornerRadius | Dp | Default corner radius | 24.dp |
-| Smoothing | Float | Default corner smoothing | 1f |
-| SourceDensity | Float | Source density for pixel-based style and shadow tokens | 3f |
-| NoiseCoefficient | Float | Blur dithering coefficient | 0.0045f |
-| Overspill | Float | Material overspill before masking | 3f |
-| Style | GlassStyle | Default optical preset | GlassStyles.CommonMediumRegularLowLight |
+| Constant Name    | Type       | Description                                            | Default Value                           |
+| ---------------- | ---------- | ------------------------------------------------------ | --------------------------------------- |
+| CornerRadius     | Dp         | Default corner radius                                  | 24.dp                                   |
+| Smoothing        | Float      | Default corner smoothing                               | 1f                                      |
+| SourceDensity    | Float      | Source density for pixel-based style and shadow tokens | 3f                                      |
+| NoiseCoefficient | Float      | Blur dithering coefficient                             | 0.0045f                                 |
+| Overspill        | Float      | Material overspill before masking                      | 3f                                      |
+| Style            | GlassStyle | Default optical preset                                 | GlassStyles.CommonMediumRegularLowLight |
 
 Pixel-based style and shadow values scale by `density / SourceDensity`.
 
 ### Functions
 
-| Function Name | Return Type | Description |
-| --- | --- | --- |
-| style(isDark: Boolean) | GlassStyle | Selects CommonMediumRegularLowLight or CommonMediumRegularDark |
+| Function Name          | Return Type | Description                                                    |
+| ---------------------- | ----------- | -------------------------------------------------------------- |
+| style(isDark: Boolean) | GlassStyle  | Selects CommonMediumRegularLowLight or CommonMediumRegularDark |
 
 ## Related
 

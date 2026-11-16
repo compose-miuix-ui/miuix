@@ -55,6 +55,7 @@ import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Defines how to scroll the scrollable component and how to display a scrollbar for it.
@@ -296,7 +297,7 @@ private fun ScrollBar(
         } else if (opacity > 0f) {
             hideJob?.cancel()
             hideJob = coroutineScope.launch {
-                delay(ScrollBarDefaults.FadeDelayMillis.toLong())
+                delay(ScrollBarDefaults.FadeDelayMillis.milliseconds)
                 animate(
                     initialValue = 1f,
                     targetValue = 0f,
@@ -316,7 +317,7 @@ private fun ScrollBar(
                 if (!isHighlighted) {
                     hideJob?.cancel()
                     hideJob = coroutineScope.launch {
-                        delay(ScrollBarDefaults.FadeDelayMillis.toLong())
+                        delay(ScrollBarDefaults.FadeDelayMillis.milliseconds)
                         animate(
                             initialValue = 1f,
                             targetValue = 0f,
@@ -516,8 +517,6 @@ private class SliderAdapter(
 
     val position: Double
         get() = if (reverseLayout) trackSize - thumbSize - rawPosition else rawPosition
-
-    val bounds get() = position..position + thumbSize
 
     private var unscrolledDragDistance = 0.0
     private val dragMutex = Mutex()
@@ -753,17 +752,24 @@ private class LazyGridAdapter(
 
     override fun averageVisibleLineSize(): Double {
         val items = scrollState.layoutInfo.visibleItemsInfo
-        val firstKnownIdx = items.indexOfFirst { it.line() != unknownLine }
-        if (firstKnownIdx == -1) return 0.0
-        val realItems = items.subList(firstKnownIdx, items.size)
+        var firstKnownIdx = 0
+        while (firstKnownIdx < items.size && items[firstKnownIdx].line() == unknownLine) {
+            firstKnownIdx++
+        }
+        if (firstKnownIdx == items.size) return 0.0
 
-        val lastLine = realItems.last().line()
-        val lastLineSize = realItems.asReversed().asSequence()
-            .takeWhile { it.line() == lastLine }
-            .maxOf { it.mainAxisSize() }
-
-        val first = realItems.first()
-        val last = realItems.last()
+        val first = items[firstKnownIdx]
+        val last = items[items.lastIndex]
+        val lastLine = last.line()
+        var lastLineSize = last.mainAxisSize()
+        var index = items.lastIndex - 1
+        while (index >= firstKnownIdx) {
+            val item = items[index]
+            if (item.line() != lastLine) break
+            val size = item.mainAxisSize()
+            if (size > lastLineSize) lastLineSize = size
+            index--
+        }
         val lineCount = last.line() - first.line() + 1
         val spacingSum = (lineCount - 1) * lineSpacing
         return (last.mainAxisOffset() + lastLineSize - first.mainAxisOffset() - spacingSum).toDouble() / lineCount

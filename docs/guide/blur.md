@@ -38,14 +38,12 @@ macOS, Web) they always return `true`.
 import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
-// True on API 32+ (and all non-Android targets). Useful when you only need
-// the backdrop scaffold (e.g. a chained ColorFilter via `colorFilter(...)`).
-val backdropScaffoldSupported = isRenderEffectSupported()
+// True on API 31+ (and all non-Android targets).
+val renderEffectSupported = isRenderEffectSupported()
 
-// True on API 33+ (and all non-Android targets). Gate any code path that
-// applies `blur(...)`, `blendColors(...)`, `noiseDither(...)`,
-// `Modifier.textureBlur(...)`, or any `RuntimeShader` you build yourself.
-val blurAndBlendSupported = isRuntimeShaderSupported()
+// True on API 33+ (and all non-Android targets).
+// Required by drawBackdrop and all texture blur modifiers.
+val blurSupported = isRuntimeShaderSupported()
 ```
 
 ## Basic Usage

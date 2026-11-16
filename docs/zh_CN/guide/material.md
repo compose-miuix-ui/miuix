@@ -30,10 +30,10 @@ dependencies {
 
 ### 运行时能力检测
 
-| 函数 | 含义 |
-| --- | --- |
+| 函数                         | 含义                                                               |
+| ---------------------------- | ------------------------------------------------------------------ |
 | `isRuntimeShaderSupported()` | 可以编译并绘制 AGSL/SkSL 着色器（Android 13+；Skia 后端恒为 true） |
-| `isRenderEffectSupported()` | 可以使用 `RenderEffect` 链（Android 12+） |
+| `isRenderEffectSupported()`  | 可以使用 `RenderEffect` 链（Android 11+；Skia 后端恒为 true）      |
 
 ### RuntimeShader
 
@@ -59,10 +59,10 @@ val shader = LocalRuntimeShaderCache.current.obtainRuntimeShader("MyShader", sou
 
 `MaterialAgsl` 暴露所有材质着色器共享的两个 AGSL 片段，二者写在同一套 uniform 契约上——`in_size`、`in_radii`（左上、右上、右下、左下）与 `in_smoothing`：
 
-| 片段 | 提供 |
-| --- | --- |
-| `SilhouetteSdf` | `roundedBoxSdf`、`supercircleSdf`、`pickRadius`、`sdfShape`、`silhouetteSdf`（形状内部为负） |
-| `RimLighting` | `luma`、`smooth5Map`、`edgeCurve`、`edgeCurveSlope`、`sdfGradient`、`liftToward`、`dynamicAdd`、`lightFalloff`、`rimLighten` |
+| 片段            | 提供                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `SilhouetteSdf` | `roundedBoxSdf`、`supercircleSdf`、`pickRadius`、`sdfShape`、`silhouetteSdf`（形状内部为负）                                 |
+| `RimLighting`   | `luma`、`smooth5Map`、`edgeCurve`、`edgeCurveSlope`、`sdfGradient`、`liftToward`、`dynamicAdd`、`lightFalloff`、`rimLighten` |
 
 在自己的着色器里引入它们，即可与内置材质保持几何一致。
 
@@ -76,23 +76,23 @@ val shader = LocalRuntimeShaderCache.current.obtainRuntimeShader("MyShader", sou
 
 `GlassMaterial` 控制模糊体及其颜色层。非空材质会覆盖 `GlassStyle` 请求的模糊半径。
 
-| 属性名 | 类型 | 说明 | 默认值 | 必需 |
-| --- | --- | --- | --- | --- |
-| blurRadius | Dp | 背景模糊半径 | - | 是 |
-| first | GlassColorLayer | 第一层颜色，最贴近背景 | - | 是 |
-| second | GlassColorLayer? | 第二层颜色 | null | 否 |
-| third | GlassColorLayer? | 第三层颜色，需第二层非空 | null | 否 |
+| 属性名     | 类型             | 说明                     | 默认值 | 必需 |
+| ---------- | ---------------- | ------------------------ | ------ | ---- |
+| blurRadius | Dp               | 背景模糊半径             | -      | 是   |
+| first      | GlassColorLayer  | 第一层颜色，最贴近背景   | -      | 是   |
+| second     | GlassColorLayer? | 第二层颜色               | null   | 否   |
+| third      | GlassColorLayer? | 第三层颜色，需第二层非空 | null   | 否   |
 
 每个 `GlassColorLayer` 指定一个 `Color` 与 `GlassColorBlendMode`，各层按顺序叠加。
 
 `GlassMaterials` 提供随主题切换的预设：
 
-| 函数名 | 返回类型 | 说明 | 模糊半径 |
-| --- | --- | --- | --- |
-| puredThinGlass(isDark) | GlassMaterial | 悬浮栏材质 | 20.dp |
-| popupViewGlass(isDark) | GlassMaterial | 展开弹层材质 | 60.dp |
-| dialogGlass(isDark) | GlassMaterial | 对话框与挂载底部抽屉材质 | 60.dp |
-| actionBarMask(isDark) | GlassMaterial | 顶栏遮罩带 | 浅色 40.dp / 深色 60.dp |
+| 函数名                 | 返回类型      | 说明                     | 模糊半径                |
+| ---------------------- | ------------- | ------------------------ | ----------------------- |
+| puredThinGlass(isDark) | GlassMaterial | 悬浮栏材质               | 20.dp                   |
+| popupViewGlass(isDark) | GlassMaterial | 展开弹层材质             | 60.dp                   |
+| dialogGlass(isDark)    | GlassMaterial | 对话框与挂载底部抽屉材质 | 60.dp                   |
+| actionBarMask(isDark)  | GlassMaterial | 顶栏遮罩带               | 浅色 40.dp / 深色 60.dp |
 
 每个预设都有对应的 `*Light` 与 `*Dark` 值。调整预设时使用 `copy`：
 
@@ -131,23 +131,23 @@ val shape = GlassShape(
 
 ### EdgeStroke
 
-| 属性名 | 类型 | 说明 | 默认值 | 必需 |
-| --- | --- | --- | --- | --- |
-| width | Dp | 平直描边带宽度 | - | 是 |
-| bevel | Dp | 内侧光晕深度 | - | 是 |
-| color | Color | 平直描边颜色，alpha 控制强度 | - | 是 |
-| primary | EdgeLightSource | 第一路光 | - | 是 |
-| secondary | EdgeLightSource | 第二路光 | - | 是 |
-| blendMode | BlendMode | 描边合成到内容上的方式 | BlendMode.Plus | 否 |
-| peak | EdgePeak | 每路光在轮廓上的门控方式 | EdgePeak.Vertical | 否 |
+| 属性名    | 类型            | 说明                         | 默认值            | 必需 |
+| --------- | --------------- | ---------------------------- | ----------------- | ---- |
+| width     | Dp              | 平直描边带宽度               | -                 | 是   |
+| bevel     | Dp              | 内侧光晕深度                 | -                 | 是   |
+| color     | Color           | 平直描边颜色，alpha 控制强度 | -                 | 是   |
+| primary   | EdgeLightSource | 第一路光                     | -                 | 是   |
+| secondary | EdgeLightSource | 第二路光                     | -                 | 是   |
+| blendMode | BlendMode       | 描边合成到内容上的方式       | BlendMode.Plus    | 否   |
+| peak      | EdgePeak        | 每路光在轮廓上的门控方式     | EdgePeak.Vertical | 否   |
 
 `EdgeLightSource` 用归一化 UV 定位光源：着色器归一化 `(x - 0.5, y - 0.7, z)`，因此 `(0.5, 0.7)` 是参考原点、不产生贡献；负的 `z` 把光放在表面平面之后，照亮朝内的边缘。`color` 的 alpha 与 `intensity` 都会缩放贡献。
 
-| EdgePeak | 门控 |
-| --- | --- |
-| `Vertical` | 固定垂直轴：第一路光负责轮廓上半，第二路负责下半 |
-| `Axial` | 门控跟随每路光自身的 XY 方向，受光弧随光移动 |
-| `Dual` | `dot(n.xy, L.xy)²`：一路光产生两个相隔 180° 的峰值 |
+| EdgePeak   | 门控                                               |
+| ---------- | -------------------------------------------------- |
+| `Vertical` | 固定垂直轴：第一路光负责轮廓上半，第二路负责下半   |
+| `Axial`    | 门控跟随每路光自身的 XY 方向，受光弧随光移动       |
+| `Dual`     | `dot(n.xy, L.xy)²`：一路光产生两个相隔 180° 的峰值 |
 
 ### Modifier.edgeStroke
 
@@ -182,10 +182,10 @@ Box(
 
 ### 预设
 
-| 预设 | 所属系列 | 说明 |
-| --- | --- | --- |
-| `EdgeStrokes` | OS3 风格 bloom | `BigLight` / `MiddleLight` / `SmallLight` / `BigDark` / `MiddleDark` / `SmallDark`，另有 `Default`（等同 `MiddleLight`）。全部使用 `EdgePeak.Axial` |
-| `GlassEdgeStrokes` | 玻璃系列 | 同名六个，另有 `forTheme(isDark)`。全部使用 `EdgePeak.Vertical` |
+| 预设               | 所属系列       | 说明                                                                                                                                                |
+| ------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EdgeStrokes`      | OS3 风格 bloom | `BigLight` / `MiddleLight` / `SmallLight` / `BigDark` / `MiddleDark` / `SmallDark`，另有 `Default`（等同 `MiddleLight`）。全部使用 `EdgePeak.Axial` |
+| `GlassEdgeStrokes` | 玻璃系列       | 同名六个，另有 `forTheme(isDark)`。全部使用 `EdgePeak.Vertical`                                                                                     |
 
 命名读作 `{Big,Middle,Small}{Light,Dark}`：尺寸决定光晕深度，后缀决定主题。两个对象都直接给出完整的 `EdgeStroke`，调整时使用 `copy`。
 
@@ -214,21 +214,21 @@ val primary = rememberTiltLight(
 
 ### 常量
 
-| 常量名 | 类型 | 说明 | 默认值 |
-| --- | --- | --- | --- |
-| CornerRadius | Dp | 默认圆角半径 | 24.dp |
-| Smoothing | Float | 默认圆角平滑度 | 1f |
-| SourceDensity | Float | 像素样式与投影令牌的源密度 | 3f |
-| NoiseCoefficient | Float | 模糊抖动系数 | 0.0045f |
-| Overspill | Float | 遮罩裁切前的材质外扩 | 3f |
-| Style | GlassStyle | 默认光学预设 | GlassStyles.CommonMediumRegularLowLight |
+| 常量名           | 类型       | 说明                       | 默认值                                  |
+| ---------------- | ---------- | -------------------------- | --------------------------------------- |
+| CornerRadius     | Dp         | 默认圆角半径               | 24.dp                                   |
+| Smoothing        | Float      | 默认圆角平滑度             | 1f                                      |
+| SourceDensity    | Float      | 像素样式与投影令牌的源密度 | 3f                                      |
+| NoiseCoefficient | Float      | 模糊抖动系数               | 0.0045f                                 |
+| Overspill        | Float      | 遮罩裁切前的材质外扩       | 3f                                      |
+| Style            | GlassStyle | 默认光学预设               | GlassStyles.CommonMediumRegularLowLight |
 
 样式与投影中以像素定义的值按 `density / SourceDensity` 缩放。
 
 ### 方法
 
-| 方法名 | 返回类型 | 说明 |
-| --- | --- | --- |
+| 方法名                 | 返回类型   | 说明                                                        |
+| ---------------------- | ---------- | ----------------------------------------------------------- |
 | style(isDark: Boolean) | GlassStyle | 选择 CommonMediumRegularLowLight 或 CommonMediumRegularDark |
 
 ## 相关页面

@@ -37,14 +37,12 @@ dependencies {
 import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
-// API 32+（以及所有非 Android 目标）为 true。仅需要背景采样支架时（例如
-// 通过 `colorFilter(...)` 链一个 ColorFilter）适用。
-val backdropScaffoldSupported = isRenderEffectSupported()
+// API 31+（以及所有非 Android 目标）为 true。
+val renderEffectSupported = isRenderEffectSupported()
 
-// API 33+（以及所有非 Android 目标）为 true。任何调用 `blur(...)`、
-// `blendColors(...)`、`noiseDither(...)`、`Modifier.textureBlur(...)`、
-// 或自行构造 `RuntimeShader` 的路径都应被它门控。
-val blurAndBlendSupported = isRuntimeShaderSupported()
+// API 33+（以及所有非 Android 目标）为 true。
+// drawBackdrop 和所有纹理模糊修饰符均需要此能力。
+val blurSupported = isRuntimeShaderSupported()
 ```
 
 ## 基本用法

@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -54,14 +53,24 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.LayoutModifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.constrain
+import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import kotlinx.coroutines.CoroutineScope
@@ -719,7 +728,6 @@ private fun RefreshHeader(
     modifier: Modifier = Modifier,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
-    val density = LocalDensity.current
 
     LaunchedEffect(pullToRefreshState.refreshState) {
         if (pullToRefreshState.refreshState == RefreshState.ThresholdReached) {
@@ -767,45 +775,10 @@ private fun RefreshHeader(
         }
     }
 
-    // Distance (in Dp) past the fixed visual refreshThresholdOffset — negative during the scaling phase.
-    val stretchExtraDp by remember(pullToRefreshState, density) {
-        derivedStateOf {
-            with(density) { (pullToRefreshState.dragOffset - pullToRefreshState.refreshThresholdOffset).toDp() }
-        }
-    }
-
-    val indicatorHeight by remember(pullToRefreshState, circleSize, density) {
-        derivedStateOf {
-            when (pullToRefreshState.refreshState) {
-                RefreshState.Idle -> 0.dp
-
-                else -> if (stretchExtraDp <= 0.dp) {
-                    circleSize * pullToRefreshState.visualProgress
-                } else {
-                    circleSize + stretchExtraDp
-                }
-            }
-        }
-    }
-
-    val headerHeight by remember(pullToRefreshState, circleSize, density) {
-        derivedStateOf {
-            when (pullToRefreshState.refreshState) {
-                RefreshState.Idle -> 0.dp
-
-                else -> if (stretchExtraDp <= 0.dp) {
-                    (circleSize + 36.dp) * pullToRefreshState.visualProgress
-                } else {
-                    (circleSize + 36.dp) + stretchExtraDp
-                }
-            }
-        }
-    }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(headerHeight),
+            .then(RefreshHeightModifier(pullToRefreshState, circleSize + 36.dp)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
@@ -813,7 +786,7 @@ private fun RefreshHeader(
             pullToRefreshState = pullToRefreshState,
             circleSize = circleSize,
             color = color,
-            modifier = Modifier.height(indicatorHeight),
+            modifier = Modifier.then(RefreshHeightModifier(pullToRefreshState, circleSize)),
         )
         Text(
             text = refreshText,
@@ -821,6 +794,48 @@ private fun RefreshHeader(
             color = color,
             modifier = Modifier.padding(top = 6.dp).graphicsLayer { alpha = refreshTextAlpha },
         )
+    }
+}
+
+/** Applies the animated height during measurement, retaining height(Dp) constraint and intrinsic behavior. */
+private data class RefreshHeightModifier(
+    val state: PullToRefreshState,
+    val baseHeight: Dp,
+) : LayoutModifier {
+    private val Density.targetConstraints: Constraints
+        get() {
+            val height = if (state.refreshState == RefreshState.Idle) {
+                0.dp
+            } else {
+                val stretchExtraDp = (state.dragOffset - state.refreshThresholdOffset).toDp()
+                if (stretchExtraDp <= 0.dp) {
+                    baseHeight * state.visualProgress
+                } else {
+                    baseHeight + stretchExtraDp
+                }
+            }
+            val maxHeight = if (height.isSpecified) height.roundToPx().coerceAtLeast(0) else Constraints.Infinity
+            val minHeight = if (maxHeight == Constraints.Infinity) 0 else maxHeight
+            return Constraints(minHeight = minHeight, maxHeight = maxHeight)
+        }
+
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+        val placeable = measurable.measure(constraints.constrain(targetConstraints))
+        return layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+    }
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(measurable: IntrinsicMeasurable, height: Int): Int = measurable.minIntrinsicWidth(height).coerceAtLeast(0)
+
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(measurable: IntrinsicMeasurable, height: Int): Int = measurable.maxIntrinsicWidth(height).coerceAtLeast(0)
+
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(measurable: IntrinsicMeasurable, width: Int): Int {
+        val constraints = targetConstraints
+        return if (constraints.hasFixedHeight) constraints.maxHeight else constraints.constrainHeight(measurable.minIntrinsicHeight(width))
+    }
+
+    override fun IntrinsicMeasureScope.maxIntrinsicHeight(measurable: IntrinsicMeasurable, width: Int): Int {
+        val constraints = targetConstraints
+        return if (constraints.hasFixedHeight) constraints.maxHeight else constraints.constrainHeight(measurable.maxIntrinsicHeight(width))
     }
 }
 
