@@ -1,13 +1,13 @@
 # GlassNavigationRail
 
-`GlassNavigationRail` 是面向宽屏布局的悬浮玻璃侧边栏。展开时是位于起始边的一整块面板，按“图标 + 文字”列出目标；折叠后它移动到顶部居中位置，变成只显示文字的 `GlassNavigationBar`，展开开关占据它的前导槽位，因此胶囊的导航方式与悬浮底栏完全一致。
+`GlassNavigationRail` 是面向宽屏布局的悬浮玻璃侧边栏。展开时是位于起始边的面板，按“图标 + 文字”列出目标；折叠后变为顶部居中的纯文字胶囊，带有展开开关，并采用与 `GlassNavigationBar` 相同的拖拽选择交互。
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassNavigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 
 ::: warning 背景采样
-记录一层不含玻璃表面本身的不透明背景，详见[玻璃表面](/zh_CN/guide/glass#背景采样)。
+记录一层不含玻璃表面本身的不透明背景，详见[玻璃表面](/zh_CN/guide/glass#background-sampling)。
 :::
 
 ## 导入
@@ -21,22 +21,27 @@ import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 
 ## 基本用法
 
-侧边栏是一个浮层：它铺满被给定的空间，在其中绘制自身表面。请把它放在页面之上、背景录制之外。
+侧栏是覆盖页面的浮层。下例由父容器统一处理页面前景和侧栏的安全区，并关闭侧栏内部 padding；不透明背景单独铺满录制，不包含侧栏。下文偏移量均相对安全区内的可用区域。
 
 ```kotlin
 var selectedIndex by remember { mutableIntStateOf(0) }
 val railState = rememberGlassNavigationRailState(initialExpanded = true)
+val expandedWidth = GlassNavigationRailDefaults.ExpandedWidth
 val items = listOf(
     GlassNavigationItem(homeIcon, "Home"),
     GlassNavigationItem(libraryIcon, "Library"),
     GlassNavigationItem(settingsIcon, "Settings"),
 )
 
-Box(Modifier.fillMaxSize()) {
+Box(
+    Modifier.fillMaxSize().windowInsetsPadding(
+        WindowInsets.systemBars.union(WindowInsets.captionBar).union(WindowInsets.displayCutout),
+    ),
+) {
     PageContent(
-        // 在布局阶段按侧边栏自身的进度让出面板位置。
+        // 在布局阶段从起始边让出面板位置；背景仍保持铺满。
         Modifier.layout { measurable, constraints ->
-            val inset = ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() *
+            val inset = ((GlassNavigationRailDefaults.Margin + expandedWidth).toPx() *
                 railState.progress).roundToInt()
             val placeable = measurable.measure(constraints.offset(horizontal = -inset))
             layout(constraints.maxWidth, placeable.height) { placeable.placeRelative(inset, 0) }
@@ -48,11 +53,13 @@ Box(Modifier.fillMaxSize()) {
         onSelect = { selectedIndex = it },
         backdrop = backdrop,
         state = railState,
+        expandedWidth = expandedWidth,
+        defaultWindowInsetsPadding = false,
     )
 }
 ```
 
-折叠是一次连续的运动：每一行从所在列的位置飞向它在导航栏那一行中的槽位，图标同时淡出；表面收缩、上移并横移到顶部居中，末尾带一次轻微回弹。`railState.progress` 是形变位置，`0` 为胶囊、`1` 为面板。请像上例一样在布局或绘制阶段读取它，让页面跟随面板而不触发重组。
+`railState.progress` 的范围为 `0`（折叠）到 `1`（展开）。在布局或绘制阶段读取，可避免动画逐帧触发重组。
 
 展开态使用主题的 `MiuixIndication` 行反馈并支持纵向滚动；折叠态支持横向拖拽选择。形变不会替换目标节点或中断按压。
 
@@ -64,7 +71,7 @@ Box(Modifier.fillMaxSize()) {
 val railState = rememberGlassNavigationRailState(initialExpanded = false)
 ```
 
-折叠时侧边栏只占据顶栏中线上居中的胶囊，页面可以使用全部宽度。胶囊占据了顶栏折叠标题的位置，此时应隐藏该标题，`GlassTopAppBar` 可传入 `titleAlpha = { railState.progress }`。胶囊会在两侧为顶栏的导航图标和操作按钮留出空间，文字所需宽度超过可用空间时按比例压缩各槽位。
+折叠后页面恢复完整宽度，胶囊居于顶栏中央。为 `GlassTopAppBar` 设置 `titleAlpha = { railState.progress }` 可隐藏被覆盖的标题。两侧预留空间固定，窄容器或宽操作区可能重叠。
 
 ### 无开关
 
@@ -112,8 +119,8 @@ GlassNavigationRail(
 | modifier | Modifier | 应用于浮层容器的修饰符 | Modifier | 否 |
 | state | GlassNavigationRailState | 展开状态与形变进度 | rememberGlassNavigationRailState() | 否 |
 | showToggle | Boolean | 是否显示内置展开/折叠开关 | true | 否 |
-| defaultWindowInsetsPadding | Boolean | 是否让表面避开系统栏、标题栏与刘海 | true | 否 |
-| collapsedTop | Dp | 胶囊顶部偏移，与折叠态顶栏居中对齐 | GlassNavigationRailDefaults.CollapsedTop | 否 |
+| defaultWindowInsetsPadding | Boolean | 应用系统安全区间距；父容器已处理时关闭 | true | 否 |
+| collapsedTop | Dp | 胶囊相对可用区域的顶部偏移 | GlassNavigationRailDefaults.CollapsedTop | 否 |
 | expandedWidth | Dp | 展开时的面板宽度 | GlassNavigationRailDefaults.ExpandedWidth | 否 |
 | style | GlassStyle | 渲染风格 | GlassDefaults.Style | 否 |
 | alpha | Float | 材质不透明度系数 | 1f | 否 |
@@ -145,9 +152,9 @@ GlassNavigationRail(
 | 常量名 | 类型 | 说明 | 默认值 |
 | --- | --- | --- | --- |
 | ExpandedWidth | Dp | 展开时的面板宽度 | 250.dp |
-| Margin | Dp | 面板与窗口边缘的距离 | 12.dp |
+| Margin | Dp | 展开面板的起始边与底部间距 | 12.dp |
 | CollapsedHeight | Dp | 折叠胶囊高度 | 44.dp |
-| CollapsedTop | Dp | 胶囊顶部偏移，与折叠态顶栏居中对齐 | 4.dp |
+| CollapsedTop | Dp | 胶囊默认顶部偏移，也是展开面板的顶部间距 | 4.dp |
 | ExpandContentDescription | String | 折叠时开关的默认描述 | "Expand navigation rail" |
 | CollapseContentDescription | String | 展开时开关的默认描述 | "Collapse navigation rail" |
 

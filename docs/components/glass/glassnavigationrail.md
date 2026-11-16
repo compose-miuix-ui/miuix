@@ -1,6 +1,6 @@
 # GlassNavigationRail
 
-`GlassNavigationRail` is a floating glass sidebar for wide layouts. Expanded, it is a panel at the start edge listing destinations as icon and label. Collapsed, it travels to the top centre and becomes a `GlassNavigationBar` showing labels only, with the expand toggle in its leading slot, so the capsule navigates exactly like the bottom bar.
+`GlassNavigationRail` is a floating glass sidebar for wide layouts. Expanded, it is a panel at the start edge listing destinations as icon and label. Collapsed, it becomes a top-centred, labels-only capsule with an expand toggle and the same drag-to-select interaction as `GlassNavigationBar`.
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassNavigationRail" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -21,22 +21,27 @@ import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 
 ## Basic Usage
 
-The rail is an overlay: it fills the space it is given and draws the surface inside it. Place it over the page, outside the backdrop recording.
+The rail overlays the page. Here, the parent handles safe-area insets for the page foreground and rail, with the rail's own inset padding disabled. Record the opaque background separately, edge-to-edge, without the rail. Offsets below are relative to the inset area.
 
 ```kotlin
 var selectedIndex by remember { mutableIntStateOf(0) }
 val railState = rememberGlassNavigationRailState(initialExpanded = true)
+val expandedWidth = GlassNavigationRailDefaults.ExpandedWidth
 val items = listOf(
     GlassNavigationItem(homeIcon, "Home"),
     GlassNavigationItem(libraryIcon, "Library"),
     GlassNavigationItem(settingsIcon, "Settings"),
 )
 
-Box(Modifier.fillMaxSize()) {
+Box(
+    Modifier.fillMaxSize().windowInsetsPadding(
+        WindowInsets.systemBars.union(WindowInsets.captionBar).union(WindowInsets.displayCutout),
+    ),
+) {
     PageContent(
-        // Move the page clear of the panel in the layout phase, on the rail's own clock.
+        // Reserve start space for the panel during layout; keep the background edge-to-edge.
         Modifier.layout { measurable, constraints ->
-            val inset = ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() *
+            val inset = ((GlassNavigationRailDefaults.Margin + expandedWidth).toPx() *
                 railState.progress).roundToInt()
             val placeable = measurable.measure(constraints.offset(horizontal = -inset))
             layout(constraints.maxWidth, placeable.height) { placeable.placeRelative(inset, 0) }
@@ -48,11 +53,13 @@ Box(Modifier.fillMaxSize()) {
         onSelect = { selectedIndex = it },
         backdrop = backdrop,
         state = railState,
+        expandedWidth = expandedWidth,
+        defaultWindowInsetsPadding = false,
     )
 }
 ```
 
-Collapsing is one continuous movement: each row flies from its place in the column into its slot in the bar's row while the icons dissolve, and the surface shrinks, rises and slides to the top centre with a short rebound. `railState.progress` is the morph's position from `0` (capsule) to `1` (panel). Read it in a layout or draw block, as above, so the page follows the panel without recomposing.
+`railState.progress` ranges from `0` (collapsed) to `1` (expanded). Read it during layout or drawing to avoid recomposition on each animation frame.
 
 Expanded rows use the theme's `MiuixIndication` and scroll vertically. The collapsed capsule supports horizontal drag-to-select. Presses survive the morph without replacing the destination nodes.
 
@@ -64,7 +71,7 @@ Expanded rows use the theme's `MiuixIndication` and scroll vertically. The colla
 val railState = rememberGlassNavigationRailState(initialExpanded = false)
 ```
 
-Collapsed, the rail occupies only the centred capsule on a top bar's centre line, so the page can use the full width. The capsule takes the place of the bar's collapsed title, so hide that title while it is there. `GlassTopAppBar` accepts `titleAlpha = { railState.progress }`. The capsule leaves room on both sides for the bar's navigation icon and actions, and compresses its slots when the labels need more than that.
+Collapsed, the page regains its width and the capsule sits at the top bar's centre. Set the `GlassTopAppBar`'s `titleAlpha = { railState.progress }` to hide the covered title. Side reserves are fixed; narrow containers or wide action groups may cause overlap.
 
 ### No Toggle
 
@@ -112,8 +119,8 @@ Once the panel has settled, the destination column scrolls under the toggle head
 | modifier | Modifier | Modifier applied to the overlay box | Modifier | No |
 | state | GlassNavigationRailState | Expanded state and morph progress | rememberGlassNavigationRailState() | No |
 | showToggle | Boolean | Show the built-in expand/collapse toggle | true | No |
-| defaultWindowInsetsPadding | Boolean | Keep the surface inside the system bars, caption bar and display cutout | true | No |
-| collapsedTop | Dp | Capsule top offset, centered on the collapsed top bar | GlassNavigationRailDefaults.CollapsedTop | No |
+| defaultWindowInsetsPadding | Boolean | Apply system safe-area insets; disable when the parent handles them | true | No |
+| collapsedTop | Dp | Capsule top offset within the available area | GlassNavigationRailDefaults.CollapsedTop | No |
 | expandedWidth | Dp | Panel width while expanded | GlassNavigationRailDefaults.ExpandedWidth | No |
 | style | GlassStyle | Rendering style | GlassDefaults.Style | No |
 | alpha | Float | Material opacity multiplier | 1f | No |
@@ -145,9 +152,9 @@ Create it with `rememberGlassNavigationRailState(initialExpanded = true)`; it su
 | Constant Name | Type | Description | Default Value |
 | --- | --- | --- | --- |
 | ExpandedWidth | Dp | Panel width while expanded | 250.dp |
-| Margin | Dp | Distance between the panel and the window edges | 12.dp |
+| Margin | Dp | Expanded panel's start and bottom spacing | 12.dp |
 | CollapsedHeight | Dp | Height of the collapsed capsule | 44.dp |
-| CollapsedTop | Dp | Capsule top offset, centered on the collapsed top bar | 4.dp |
+| CollapsedTop | Dp | Default capsule top offset and expanded panel's top spacing | 4.dp |
 | ExpandContentDescription | String | Default toggle description while collapsed | "Expand navigation rail" |
 | CollapseContentDescription | String | Default toggle description while expanded | "Collapse navigation rail" |
 
