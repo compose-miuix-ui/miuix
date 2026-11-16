@@ -590,7 +590,6 @@ private fun CompactScreenLayout(
                 navigationItems = navigationItems,
                 mainPagerState = mainPagerState,
                 backdrop = backdrop,
-                modifier = Modifier.windowInsetsPadding(LocalAppPageInsets.current.safeInsets.only(WindowInsetsSides.Bottom)),
             )
         },
         floatingActionButton = {
@@ -619,7 +618,6 @@ private fun NavigationBar(
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
     backdrop: LayerBackdrop?,
-    modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
     val blurActive = appState.enableBlur && backdrop != null && isRuntimeShaderSupported()
@@ -659,8 +657,7 @@ private fun NavigationBar(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = {},
-                    )
-                    .then(modifier),
+                    ),
             ) {
                 NavigationBar(
                     modifier = Modifier,
@@ -686,7 +683,7 @@ private fun NavigationBar(
             val floatingStroke: EdgeStroke = remember(isDark) {
                 if (isDark) EdgeStrokes.MiddleDark else EdgeStrokes.MiddleLight
             }
-            Box(modifier = modifier) {
+            Box {
                 when (appState.floatingNavigationBarStyle) {
                     1 -> {
                         val glassItems = remember(navigationItems) {

@@ -283,15 +283,12 @@ fun FloatingNavigationBar(
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
-
-    val navBarBottomPadding = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val bottomPaddingValue = when (platform()) {
-        Platform.IOS -> 36.dp
-
-        else -> {
-            if (navBarBottomPadding != 0.dp) 16.dp + navBarBottomPadding else 32.dp
-        }
+    val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+    val floatingMargin = when {
+        platform() == Platform.IOS -> 36.dp
+        navigationBarBottom <= 16.dp -> 28.dp
+        navigationBarBottom >= 28.dp -> navigationBarBottom
+        else -> 12.dp + navigationBarBottom
     }
 
     val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
@@ -311,7 +308,7 @@ fun FloatingNavigationBar(
         Row(
             modifier = Modifier
                 .selectableGroup()
-                .padding(bottom = bottomPaddingValue)
+                .padding(bottom = floatingMargin)
                 .defaultMinSize(minHeight = 52.dp)
                 .then(
                     if (defaultWindowInsetsPadding) {
@@ -335,7 +332,7 @@ fun FloatingNavigationBar(
                 .then(
                     if (shadowElevation > 0.dp) {
                         Modifier.dropShadow(
-                            shape = shape,
+                            shape = RoundedCornerShape(cornerRadius),
                             shadow = Shadow(
                                 radius = 10.dp,
                                 color = Color.Black,

@@ -331,13 +331,12 @@ internal fun IosLiquidGlassNavigationBar(
 
     val combinedBackdrop = backdrop?.let { rememberCombinedBackdrop(it, tabsBackdrop) }
 
-    val navBarBottomPadding = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val bottomPaddingValue = when (platform()) {
-        Platform.IOS -> 36.dp
-
-        else -> {
-            if (navBarBottomPadding != 0.dp) 16.dp + navBarBottomPadding else 32.dp
-        }
+    val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+    val floatingMargin = when {
+        platform() == Platform.IOS -> 36.dp
+        navigationBarBottom <= 16.dp -> 28.dp
+        navigationBarBottom >= 28.dp -> navigationBarBottom
+        else -> 12.dp + navigationBarBottom
     }
     val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
         .asPaddingValues().calculateBottomPadding()
@@ -404,7 +403,7 @@ internal fun IosLiquidGlassNavigationBar(
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
-                .padding(bottom = bottomPaddingValue + animatedCaptionBarHeight, start = 24.dp, end = 24.dp)
+                .padding(bottom = floatingMargin + animatedCaptionBarHeight, start = 24.dp, end = 24.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {
