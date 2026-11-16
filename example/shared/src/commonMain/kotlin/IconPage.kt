@@ -41,14 +41,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.offset
 import component.SearchBarFake
 import component.SearchPager
 import kotlinx.coroutines.delay
@@ -79,11 +77,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.All
 import utils.BlurredBar
-import utils.LocalWideScreenSearchTopInset
+import utils.LocalAppPageInsets
 import utils.SearchStatus
+import utils.appPageSearchInsets
+import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
-import utils.wideScreenContentInset
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -104,14 +103,9 @@ fun IconsPage(
     val pageCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val searchCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val density = LocalDensity.current
-    val searchTopInset = LocalWideScreenSearchTopInset.current
-    val searchModifier = Modifier.wideScreenContentInset().layout { measurable, constraints ->
-        val top = searchTopInset().roundToPx().coerceIn(0, constraints.maxHeight)
-        val placeable = measurable.measure(constraints.offset(vertical = -top))
-        layout(placeable.width, placeable.height + top) {
-            placeable.placeRelative(0, top)
-        }
-    }
+    val searchTopInset = LocalAppPageInsets.current.searchTop
+    val searchModifier = Modifier.appPageSearchInsets()
+    val searchResultPadding = pageBottomPadding(padding)
 
     val iconFamilies = remember { listOf("Glass", "Original") }
     var glass by remember { mutableStateOf(true) }
@@ -276,7 +270,6 @@ fun IconsPage(
             val contentPadding = pageContentPadding(
                 innerPadding,
                 padding,
-                isWideScreen,
             )
             Box(modifier = if (blurActive) Modifier.layerBackdrop(backdrop) else Modifier) {
                 LazyColumn(
@@ -415,7 +408,7 @@ fun IconsPage(
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = padding.calculateBottomPadding()),
+                    contentPadding = searchResultPadding,
                 ) {
                     searchResultItems(filteredIndices)
                 }
@@ -449,7 +442,7 @@ fun IconsPage(
                         defaultResult = {},
                         result = {
                             searchResultItems(filteredIndices)
-                            item { Spacer(Modifier.height(padding.calculateBottomPadding())) }
+                            item { Spacer(Modifier.padding(searchResultPadding)) }
                         },
                     )
                 }

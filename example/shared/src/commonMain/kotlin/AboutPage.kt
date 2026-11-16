@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,7 +41,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
@@ -142,7 +140,6 @@ fun AboutPage(
                         color = barColor,
                         titleColor = titleColor,
                         titleAlpha = titleAlpha,
-                        defaultWindowInsetsPadding = false,
                         navigationIcon = {
                             BackNavigationIcon(
                                 onClick = { navigator.pop() },
@@ -155,10 +152,8 @@ fun AboutPage(
     ) { innerPadding ->
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             AboutContent(
-                padding = PaddingValues(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding(),
-                ),
+                scrollPadding = pageContentPadding(innerPadding, padding),
+                logoPadding = pageContentPadding(innerPadding, padding, extraTop = 40.dp),
                 topAppBarScrollBehavior = topAppBarScrollBehavior,
                 lazyListState = lazyListState,
                 scrollProgressProvider = { scrollProgress },
@@ -170,17 +165,28 @@ fun AboutPage(
 
 @Composable
 private fun AboutContent(
-    padding: PaddingValues,
+    scrollPadding: PaddingValues,
+    logoPadding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
     lazyListState: LazyListState,
     scrollProgressProvider: () -> Float,
     overlayBackdrop: Backdrop?,
 ) {
     val appState = LocalAppState.current
-    val isWideScreen = LocalIsWideScreen.current
     val shaderSupported = isRuntimeShaderSupported()
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
+    val logoContentPadding = remember(logoPadding) {
+        object : PaddingValues by logoPadding {
+            override fun calculateTopPadding() = logoPadding.calculateTopPadding() + 52.dp
+            override fun calculateBottomPadding() = 0.dp
+        }
+    }
+    val listContentPadding = remember(scrollPadding) {
+        object : PaddingValues by scrollPadding {
+            override fun calculateBottomPadding() = 0.dp
+        }
+    }
 
     val backdrop = rememberBlurBackdrop()
     var isOs3Effect by remember { mutableStateOf(true) }
@@ -190,21 +196,6 @@ private fun AboutContent(
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
-    val scrollPadding = pageContentPadding(
-        padding,
-        padding,
-        isWideScreen,
-        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-        extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-    )
-    val logoPadding = pageContentPadding(
-        padding,
-        padding,
-        isWideScreen,
-        extraTop = 40.dp,
-        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-        extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-    )
 
     val isInDark = isInDarkTheme()
     val dynamicBackground = remember { mutableStateOf(shaderSupported) }
@@ -241,11 +232,7 @@ private fun AboutContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = logoPadding.calculateTopPadding() + 52.dp,
-                    start = logoPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    end = logoPadding.calculateRightPadding(LayoutDirection.Ltr),
-                )
+                .padding(logoContentPadding)
                 .onSizeChanged { size ->
                     with(density) { logoHeightDp = size.height.toDp() }
                 },
@@ -324,11 +311,7 @@ private fun AboutContent(
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
             ),
-            contentPadding = PaddingValues(
-                top = scrollPadding.calculateTopPadding(),
-                start = scrollPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                end = scrollPadding.calculateRightPadding(LayoutDirection.Ltr),
-            ),
+            contentPadding = listContentPadding,
         ) {
             // Transparent spacer matching logo height
             item(key = "logoSpacer") {
@@ -505,6 +488,7 @@ private fun AboutContent(
                     },
                 )
             }
+            // This sheet is window-owned: reserve its navigation area, not the page sidebar.
             item { Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) }
         }
     }

@@ -18,23 +18,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
@@ -59,10 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
@@ -139,17 +131,15 @@ import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import ui.isInDarkTheme
 import utils.FPSMonitor
+import utils.LocalAppPageInsets
 import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
-import utils.LocalWideScreenContentEndInset
-import utils.LocalWideScreenContentInset
-import utils.LocalWideScreenSearchTopInset
 import utils.TopLayerHost
 import utils.TopLayerState
+import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
-import kotlin.math.roundToInt
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -210,41 +200,8 @@ fun AppContent(
     // Plain rails occupy a column; glass rails overlay the page.
     val useGlassSidebar = hasNavigationRail && appState.navigationRailStyle == 1
     val expandSidebar = shouldExpandNavigationRail()
-    val layoutDirection = LocalLayoutDirection.current
-    val displayCutout = WindowInsets.displayCutout
-    val systemBars = WindowInsets.systemBars
-    val captionBar = WindowInsets.captionBar
-    val railInsets = remember(systemBars, captionBar, displayCutout) {
-        systemBars.union(captionBar).union(displayCutout)
-    }
     val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
     LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
-    // Reserve the cutout; the expanded rail width is added after it.
-    val sidebarInset: Density.() -> Int = if (useGlassSidebar) {
-        {
-            val startInset = if (layoutDirection == LayoutDirection.Ltr) {
-                railInsets.getLeft(this, layoutDirection)
-            } else {
-                railInsets.getRight(this, layoutDirection)
-            }
-            startInset +
-                ((GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth).toPx() * sidebarState.progress)
-                    .roundToInt()
-        }
-    } else {
-        { 0 }
-    }
-    val sidebarEndInset: Density.() -> Int = if (useGlassSidebar) {
-        {
-            if (layoutDirection == LayoutDirection.Ltr) {
-                railInsets.getRight(this, layoutDirection)
-            } else {
-                railInsets.getLeft(this, layoutDirection)
-            }
-        }
-    } else {
-        { 0 }
-    }
     val topAppBarTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
         if (useGlassSidebar) {
             { sidebarState.progress }
@@ -254,28 +211,24 @@ fun AppContent(
     }
     val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
     // Blur needs a recorded page layer; otherwise use the surface color.
-    val density = LocalDensity.current
-    val wideScreenContentInset = remember(useGlassSidebar, density, railInsets, layoutDirection) {
-        if (useGlassSidebar) {
-            { with(density) { sidebarInset().toDp() } }
-        } else {
-            { 0.dp }
-        }
-    }
-    val wideScreenContentEndInset = remember(useGlassSidebar, density, railInsets, layoutDirection) {
-        if (useGlassSidebar) {
-            { with(density) { sidebarEndInset().toDp() } }
-        } else {
-            { 0.dp }
-        }
-    }
-    val wideScreenSearchTopInset = remember(useGlassSidebar, sidebarState) {
-        if (useGlassSidebar) {
-            { (GlassNavigationRailDefaults.CollapsedTop + GlassNavigationRailDefaults.CollapsedHeight + 4.dp) * (1f - sidebarState.progress) }
-        } else {
-            { 0.dp }
-        }
-    }
+    val pageInsets = rememberAppPageInsets(
+        hostPadding = padding,
+        startAlreadyReserved = hasNavigationRail && !useGlassSidebar,
+        overlayStart = {
+            if (useGlassSidebar) {
+                (GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth) * sidebarState.progress
+            } else {
+                0.dp
+            }
+        },
+        searchTop = {
+            if (useGlassSidebar) {
+                (GlassNavigationRailDefaults.CollapsedTop + GlassNavigationRailDefaults.CollapsedHeight + 4.dp) * (1f - sidebarState.progress)
+            } else {
+                0.dp
+            }
+        },
+    )
     val topLayer = remember { TopLayerState() }
 
     CompositionLocalProvider(
@@ -283,9 +236,7 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
         LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
-        LocalWideScreenContentInset provides wideScreenContentInset,
-        LocalWideScreenContentEndInset provides wideScreenContentEndInset,
-        LocalWideScreenSearchTopInset provides wideScreenSearchTopInset,
+        LocalAppPageInsets provides pageInsets,
     ) {
         // Match platform screen corners; split panes have no outer corner.
         val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
@@ -351,9 +302,7 @@ fun AppContent(
                                 .then(
                                     if (hasNavigationRail && !useGlassSidebar) {
                                         Modifier.consumeWindowInsets(
-                                            WindowInsets.displayCutout
-                                                .union(WindowInsets.navigationBars)
-                                                .only(WindowInsetsSides.Start),
+                                            pageInsets.windowInsets.only(WindowInsetsSides.Start),
                                         )
                                     } else {
                                         Modifier
@@ -386,7 +335,7 @@ fun AppContent(
                                     transition = navTransition,
                                     effects = effects,
                                     swipeBackDirection = swipeBackDirection,
-                                    padding = padding,
+                                    padding = pageInsets.safeInsets.asPaddingValues(),
                                     navigationItems = navigationItems,
                                     mainPagerState = mainPagerState,
                                 )
@@ -442,7 +391,6 @@ private fun AppNavHost(
     ) {
         entry<Route.Main>(swipeDismiss = swipeBackDirection) {
             Home(
-                padding = padding,
                 navigationItems = navigationItems,
                 mainPagerState = mainPagerState,
             )
@@ -498,6 +446,10 @@ private fun PersistentNavigationRail(
         if (expandRail) railState.expand() else railState.collapse()
     }
     NavigationRail(
+        modifier = Modifier
+            .background(MiuixTheme.colorScheme.surface)
+            .windowInsetsPadding(LocalAppPageInsets.current.windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical)),
+        defaultWindowInsetsPadding = false,
         state = railState,
     ) {
         navigationItems.forEachIndexed { index, item ->
@@ -545,19 +497,18 @@ private fun PersistentGlassNavigationRail(
             mainPagerState.animateToPage(it)
         },
         backdrop = backdrop,
-        modifier = modifier,
+        modifier = modifier.windowInsetsPadding(LocalAppPageInsets.current.windowInsets),
+        defaultWindowInsetsPadding = false,
         state = state,
     )
 }
 
 @Composable
 private fun Home(
-    padding: PaddingValues,
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
 ) {
     val isWideScreen = LocalIsWideScreen.current
-    val layoutDirection = LocalLayoutDirection.current
     val pagerContent = remember(mainPagerState.pagerState) {
         movableContentOf<PaddingValues, Modifier> { pagerPadding, pagerModifier ->
             AppPager(
@@ -570,13 +521,11 @@ private fun Home(
     Scaffold {
         if (isWideScreen) {
             WideScreenContent(
-                layoutDirection = layoutDirection,
                 pagerContent = pagerContent,
             )
         } else {
             CompactScreenLayout(
                 navigationItems = navigationItems,
-                padding = padding,
                 mainPagerState = mainPagerState,
                 pagerContent = pagerContent,
             )
@@ -586,36 +535,13 @@ private fun Home(
 
 @Composable
 private fun WideScreenContent(
-    layoutDirection: LayoutDirection,
     pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val appState = LocalAppState.current
-    val contentInset = LocalWideScreenContentInset.current
-    val sidebarInsets = remember(contentInset) {
-        object : WindowInsets {
-            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = if (layoutDirection == LayoutDirection.Ltr) with(density) { contentInset().roundToPx() } else 0
-
-            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = if (layoutDirection == LayoutDirection.Rtl) with(density) { contentInset().roundToPx() } else 0
-
-            override fun getTop(density: Density): Int = 0
-
-            override fun getBottom(density: Density): Int = 0
-        }
-    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        contentWindowInsets =
-        WindowInsets.systemBars.union(
-            // Plain rails consume the start cutout; glass rails leave it for the page pane.
-            if (appState.showNavigationBar && appState.navigationRailStyle == 0) {
-                WindowInsets.displayCutout.exclude(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Start),
-                )
-            } else {
-                WindowInsets.displayCutout
-            },
-        ).union(sidebarInsets),
+        contentWindowInsets = LocalAppPageInsets.current.contentInsets,
         floatingActionButton = {
             FloatingActionButton(show = appState.showFloatingActionButton)
         },
@@ -628,20 +554,18 @@ private fun WideScreenContent(
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
     ) { padding ->
-        val pagePadding by remember(padding, layoutDirection) {
+        val pagePadding by remember(padding) {
             derivedStateOf {
                 PaddingValues(
                     top = padding.calculateTopPadding(),
-                    end = padding.calculateEndPadding(layoutDirection),
+                    bottom = padding.calculateBottomPadding(),
                 )
             }
         }
-        // Only floating chrome consumes the sidebar start inset here; pages reserve it themselves.
+        // Pages own horizontal safe areas; the pager stays full width for backdrop recording.
         pagerContent(
-            PaddingValues(top = pagePadding.calculateTopPadding()),
-            Modifier
-                .imePadding()
-                .padding(end = pagePadding.calculateEndPadding(layoutDirection)),
+            pagePadding,
+            Modifier.imePadding(),
         )
     }
 }
@@ -649,7 +573,6 @@ private fun WideScreenContent(
 @Composable
 private fun CompactScreenLayout(
     navigationItems: List<NavigationItem>,
-    padding: PaddingValues,
     mainPagerState: MainPagerState,
     pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
@@ -661,12 +584,13 @@ private fun CompactScreenLayout(
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = LocalAppPageInsets.current.safeInsets,
         bottomBar = {
             NavigationBar(
                 navigationItems = navigationItems,
                 mainPagerState = mainPagerState,
                 backdrop = backdrop,
-                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+                modifier = Modifier.windowInsetsPadding(LocalAppPageInsets.current.safeInsets.only(WindowInsetsSides.Bottom)),
             )
         },
         floatingActionButton = {
@@ -684,13 +608,7 @@ private fun CompactScreenLayout(
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
             pagerContent(
                 innerPadding,
-                Modifier
-                    .padding(
-                        top = padding.calculateTopPadding(),
-                        start = padding.calculateStartPadding(LocalLayoutDirection.current),
-                        end = padding.calculateEndPadding(LocalLayoutDirection.current),
-                    )
-                    .imePadding(),
+                Modifier.imePadding(),
             )
         }
     }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -30,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import component.liquid.rememberCombinedBackdrop
@@ -147,10 +145,7 @@ fun PullToRefreshPage(
         val contentPadding = pageContentPadding(
             innerPadding,
             padding,
-            true,
             extraTop = 12.dp,
-            extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             extraBottom = 12.dp,
         )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
@@ -276,10 +271,13 @@ fun PullToRefreshPage(
                     keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
                 )
             }
+            // The window-owned sheet excludes page/sidebar padding; overlapping safe areas use max.
             Spacer(
                 Modifier.padding(
-                    bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                    bottom = 12.dp + maxOf(
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                         WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                    ),
                 ),
             )
         }

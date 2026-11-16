@@ -85,10 +85,7 @@ fun SettingsPage(
         },
     ) { innerPadding ->
         SettingsContent(
-            padding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding(),
-            ),
+            contentPadding = pageContentPadding(innerPadding, padding),
             topAppBarScrollBehavior = topAppBarScrollBehavior,
             backdrop = backdrop,
         )
@@ -97,7 +94,7 @@ fun SettingsPage(
 
 @Composable
 private fun SettingsContent(
-    padding: PaddingValues,
+    contentPadding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
     backdrop: LayerBackdrop?,
 ) {
@@ -107,7 +104,6 @@ private fun SettingsContent(
     val navigator = LocalNavigator.current
     val lazyListState = rememberLazyListState()
 
-    val contentPadding = pageContentPadding(padding, padding, isWideScreen)
     Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
         LazyColumn(
             state = lazyListState,
