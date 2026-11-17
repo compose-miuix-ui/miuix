@@ -1061,7 +1061,7 @@ private val RailIconSize = 24.dp
 private val RailSideIconSize = RailIconSize + 4.dp
 private val RailIconColumnWidth = RailIconSize + 12.dp
 private val RailBadgeSpacing = 4.dp
-private val RailItemContentPadding = 14.dp
+private val RailItemContentPadding = 12.dp
 private val RailItemHorizontalMargin = 12.dp
 private val RailCollapsedRowHeight = GlassNavigationRailDefaults.CollapsedHeight -
     GlassNavigationBarDefaults.IndicatorPaddingVertical * 2
