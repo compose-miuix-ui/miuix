@@ -7,6 +7,8 @@
 | Component | Description | Common Usage |
 | --- | --- | --- |
 | [GlassIconButton](./glassiconbutton) | Round glass icon action | Toolbar and floating actions |
+| [GlassFloatingActionButton](./glassfloatingactionbutton) | Round glass floating action button | Primary floating actions |
+| [GlassFloatingToolbar](./glassfloatingtoolbar) | Floating glass toolbar container | Floating action groups |
 | [GlassTopAppBar](./glasstopappbar) | Collapsing glass top bar | Page titles and actions |
 | [GlassNavigationBar](./glassnavigationbar) | Floating glass navigation bar | Top-level destinations |
 | [GlassNavigationRail](./glassnavigationrail) | Floating glass sidebar collapsing into the navigation bar | Wide-layout destination switching |

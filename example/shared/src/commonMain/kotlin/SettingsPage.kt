@@ -310,6 +310,13 @@ private fun SettingsContent(
                                 selectedIndex = appState.floatingToolbarOrientation,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
                             )
+                            GlassDropdownPreference(
+                                backdrop = backdrop,
+                                title = "FloatingToolbar Style",
+                                items = TopAppBarStyleOptions,
+                                selectedIndex = appState.floatingToolbarStyle,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarStyle = it) } },
+                            )
                         }
                     }
                     SwitchPreference(
@@ -318,13 +325,22 @@ private fun SettingsContent(
                         onCheckedChange = { updateAppState { state -> state.copy(showFloatingActionButton = it) } },
                     )
                     AnimatedVisibility(visible = appState.showFloatingActionButton) {
-                        GlassDropdownPreference(
-                            backdrop = backdrop,
-                            title = "FloatingActionButton Position",
-                            items = FabPositionOptions,
-                            selectedIndex = appState.floatingActionButtonPosition,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
-                        )
+                        Column {
+                            GlassDropdownPreference(
+                                backdrop = backdrop,
+                                title = "FloatingActionButton Position",
+                                items = FabPositionOptions,
+                                selectedIndex = appState.floatingActionButtonPosition,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
+                            )
+                            GlassDropdownPreference(
+                                backdrop = backdrop,
+                                title = "FloatingActionButton Style",
+                                items = TopAppBarStyleOptions,
+                                selectedIndex = appState.floatingActionButtonStyle,
+                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonStyle = it) } },
+                            )
+                        }
                     }
                 }
             }

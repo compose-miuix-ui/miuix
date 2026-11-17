@@ -88,12 +88,15 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
+import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassFloatingActionButton
+import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassNavigationRail
@@ -543,13 +546,17 @@ private fun WideScreenContent(
             .fillMaxSize(),
         contentWindowInsets = LocalAppPageInsets.current.contentInsets,
         floatingActionButton = {
-            FloatingActionButton(show = appState.showFloatingActionButton)
+            FloatingActionButton(
+                show = appState.showFloatingActionButton,
+                style = appState.floatingActionButtonStyle,
+            )
         },
         floatingActionButtonPosition = appState.floatingActionButtonPosition.toFabPosition(),
         floatingToolbar = {
             FloatingToolbar(
                 showFloatingToolbar = appState.showFloatingToolbar,
                 floatingToolbarOrientation = appState.floatingToolbarOrientation,
+                style = appState.floatingToolbarStyle,
             )
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
@@ -593,13 +600,19 @@ private fun CompactScreenLayout(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(show = appState.showFloatingActionButton)
+            FloatingActionButton(
+                show = appState.showFloatingActionButton,
+                style = appState.floatingActionButtonStyle,
+                backdrop = backdrop,
+            )
         },
         floatingActionButtonPosition = appState.floatingActionButtonPosition.toFabPosition(),
         floatingToolbar = {
             FloatingToolbar(
                 showFloatingToolbar = appState.showFloatingToolbar,
                 floatingToolbarOrientation = appState.floatingToolbarOrientation,
+                style = appState.floatingToolbarStyle,
+                backdrop = backdrop,
             )
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
@@ -762,19 +775,36 @@ private fun NavigationBar(
 @Composable
 private fun FloatingActionButton(
     show: Boolean,
+    style: Int,
+    backdrop: Backdrop? = null,
 ) {
     if (show) {
         val uriHandler = LocalUriHandler.current
-        FloatingActionButton(
-            onClick = {
-                uriHandler.openUri(UIConstants.GITHUB_URL)
-            },
-        ) {
-            Icon(
-                imageVector = MiuixIcons.Link,
-                tint = MiuixTheme.colorScheme.onPrimary,
-                contentDescription = "GitHub",
-            )
+        if (style == 1) {
+            GlassFloatingActionButton(
+                onClick = {
+                    uriHandler.openUri(UIConstants.GITHUB_URL)
+                },
+                backdrop = backdrop,
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Link,
+                    tint = MiuixTheme.colorScheme.onPrimary,
+                    contentDescription = "GitHub",
+                )
+            }
+        } else {
+            FloatingActionButton(
+                onClick = {
+                    uriHandler.openUri(UIConstants.GITHUB_URL)
+                },
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Link,
+                    tint = MiuixTheme.colorScheme.onPrimary,
+                    contentDescription = "GitHub",
+                )
+            }
         }
     }
 }
@@ -783,20 +813,23 @@ private fun FloatingActionButton(
 private fun FloatingToolbar(
     showFloatingToolbar: Boolean,
     floatingToolbarOrientation: Int,
+    style: Int,
+    backdrop: Backdrop? = null,
 ) {
     AnimatedVisibility(
         visible = showFloatingToolbar,
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
-        FloatingToolbar(
-            color = MiuixTheme.colorScheme.primary,
-            cornerRadius = 20.dp,
-        ) {
+        val toolbarContent: @Composable () -> Unit = {
             AnimatedContent(
                 targetState = floatingToolbarOrientation,
             ) { orientation ->
-                val iconTint = MiuixTheme.colorScheme.onPrimary
+                val iconTint = if (style == 1) {
+                    MiuixTheme.colorScheme.onSurface
+                } else {
+                    MiuixTheme.colorScheme.onPrimary
+                }
                 val content = @Composable {
                     IconButton(onClick = { /* Action 1 */ }) {
                         Icon(
@@ -831,6 +864,21 @@ private fun FloatingToolbar(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) { content() }
                 }
+            }
+        }
+        if (style == 1) {
+            GlassFloatingToolbar(
+                backdrop = backdrop,
+                cornerRadius = 20.dp,
+            ) {
+                toolbarContent()
+            }
+        } else {
+            FloatingToolbar(
+                color = MiuixTheme.colorScheme.primary,
+                cornerRadius = 20.dp,
+            ) {
+                toolbarContent()
             }
         }
     }

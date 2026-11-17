@@ -94,6 +94,8 @@ private val availableComponents = listOf(
     AvailableComponent("WindowBottomSheet", "windowBottomSheet") { WindowBottomSheetDemo() },
     AvailableComponent("WindowDialog", "windowDialog") { WindowDialogDemo() },
     AvailableComponent("GlassIconButton", "glassIconButton") { GlassIconButtonDemo() },
+    AvailableComponent("GlassFloatingActionButton", "glassFloatingActionButton") { GlassFloatingActionButtonDemo() },
+    AvailableComponent("GlassFloatingToolbar", "glassFloatingToolbar") { GlassFloatingToolbarDemo() },
     AvailableComponent("GlassTopAppBar", "glassTopAppBar") { GlassTopAppBarDemo() },
     AvailableComponent("GlassNavigationBar", "glassNavigationBar") { GlassNavigationBarDemo() },
     AvailableComponent("GlassNavigationRail", "glassNavigationRail") { GlassNavigationRailDemo() },
