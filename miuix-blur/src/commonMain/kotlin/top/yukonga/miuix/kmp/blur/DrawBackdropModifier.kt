@@ -664,7 +664,6 @@ private class DrawBackdropNode(
     private var sharpExp = -1
     private var sharpBandOffset = IntOffset.Zero
     private var sharpBandSize = IntSize.Zero
-    private var sharpDownscale = 1f
 
     private fun DrawScope.drawBlurredBackdrop() {
         renderBlurInto(primary)
@@ -678,37 +677,24 @@ private class DrawBackdropNode(
         val bandSize = sharpBandSize
         if (bandSize.width <= 0 || bandSize.height <= 0) return
         val bandOffset = sharpBandOffset
-        val ds = sharpDownscale
-        val texSize = if (ds > 1f) {
-            IntSize((bandSize.width / ds).roundToInt().coerceAtLeast(1), (bandSize.height / ds).roundToInt().coerceAtLeast(1))
-        } else {
-            bandSize
-        }
         val layer = sharpLayer ?: graphicsContext.createGraphicsLayer().also { sharpLayer = it }
-        recordLayer(layer, size = texSize) {
-            translate(-bandOffset.x / ds, -bandOffset.y / ds) {
+        recordLayer(layer, size = bandSize) {
+            translate(-bandOffset.x.toFloat(), -bandOffset.y.toFloat()) {
                 onDrawBackdrop {
                     with(backdrop) {
                         drawBackdrop(
                             density = effectScope,
                             coordinates = layoutCoordinates,
                             layerBlock = layerBlock,
-                            downscaleFactor = ds,
+                            downscaleFactor = 1f,
                         )
                     }
                 }
             }
         }
         layer.renderEffect = sharpOverlayEffect
-        if (ds > 1f) {
-            layer.topLeft = IntOffset.Zero
-            translate(bandOffset.x.toFloat(), bandOffset.y.toFloat()) {
-                scale(ds, ds, Offset.Zero) { drawLayer(layer) }
-            }
-        } else {
-            layer.topLeft = bandOffset
-            drawLayer(layer)
-        }
+        layer.topLeft = bandOffset
+        drawLayer(layer)
     }
 
     override fun ContentDrawScope.draw() {
@@ -914,10 +900,8 @@ private class DrawBackdropNode(
             // on rows/columns the ramp mask zeroes out; quantized to the loop's tap bound
             // (multiples of 4, ≥ the reach) so an animating radius doesn't resize the band and
             // reallocate the overlay layer's backing texture.
-            val ds = if (exp >= 2) 2f else 1f
-            sharpDownscale = ds
             val loopReach =
-                (progressiveLoopTapBound(maxOf(progressiveSharpLoopRadius(rX, exp, ds), progressiveSharpLoopRadius(rY, exp, ds))) * ds + 1f)
+                (progressiveLoopTapBound(maxOf(progressiveSharpLoopRadius(rX, exp), progressiveSharpLoopRadius(rY, exp))) + 1).toFloat()
             val band = progressiveSharpBandBounds(
                 sw,
                 sh,
@@ -932,13 +916,12 @@ private class DrawBackdropNode(
                 sharpBandOffset = IntOffset.Zero
                 sharpBandSize = IntSize.Zero
             } else {
-                val align = ds.toInt()
-                val left = (floor(band.left).toInt() / align) * align
-                val top = (floor(band.top).toInt() / align) * align
+                val left = floor(band.left).toInt()
+                val top = floor(band.top).toInt()
                 sharpBandOffset = IntOffset(left, top)
                 sharpBandSize = IntSize(
-                    (((ceil(band.right).toInt() - left + align - 1) / align) * align).coerceAtLeast(align),
-                    (((ceil(band.bottom).toInt() - top + align - 1) / align) * align).coerceAtLeast(align),
+                    (ceil(band.right).toInt() - left).coerceAtLeast(1),
+                    (ceil(band.bottom).toInt() - top).coerceAtLeast(1),
                 )
                 sharpOverlayEffect = createProgressiveSharpOverlayEffect(
                     rX,
@@ -954,7 +937,6 @@ private class DrawBackdropNode(
                     gradient.startFraction,
                     gradient.endFraction,
                     gradient.curve,
-                    ds,
                     scope,
                 )
             }
@@ -1131,7 +1113,6 @@ private class DrawBackdropNode(
         sharpBandOffset = IntOffset.Zero
         sharpBandSize = IntSize.Zero
         sharpOverlayPad = Float.NaN
-        sharpDownscale = 1f
     }
 
     fun releaseGraphicsLayers() {

@@ -55,7 +55,11 @@ internal const val PROGRESSIVE_BLUR_MAX_TAP = 20
  * With [masked], the sharp end's cross-fade weight is folded in, saving the separate
  * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments skip the kernel outright.
  */
-internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
+internal fun buildProgressiveBlurShader(
+    maxTap: Int,
+    masked: Boolean = false,
+    unpremul: Boolean = true,
+): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
     val maskUniforms = if (masked) {
         """
@@ -71,14 +75,62 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
         float mraw = clamp(p * in_maskScale + in_maskOffset, 0.0, 1.0);
         mraw = mraw * mraw * (3.0 - 2.0 * mraw);
         if (in_maskCurve != 1.0) mraw = pow(mraw, in_maskCurve);
-        half mw = half(clamp((mraw - 0.75) * 4.0, 0.0, 1.0));
+        half mw = half(clamp((mraw - 0.5) * 2.0, 0.0, 1.0));
         mw = mw * mw * (half(3.0) - half(2.0) * mw);
         if (mw <= half(0.004)) {
             return half4(0.0);
         }
 """
     } else {
-        "        float mw = 1.0;"
+        ""
+    }
+    val earlyReturn = when {
+        masked && unpremul ->
+            """
+            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
+            if (s.a > 0.0039) {
+                return half4(s.rgb / s.a, 1.0) * mw;
+            }
+            return s * mw;"""
+
+        masked ->
+            """
+            return child.eval(clamp(xy, float2(0.5), in_maxCoord)) * mw;"""
+
+        unpremul ->
+            """
+            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
+            if (s.a > 0.0039) {
+                return half4(s.rgb / s.a, 1.0);
+            }
+            return s;"""
+
+        else ->
+            """
+            return child.eval(clamp(xy, float2(0.5), in_maxCoord));"""
+    }
+    val finalReturn = when {
+        masked && unpremul ->
+            """
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0) * mw;
+        }
+        return color * mw;"""
+
+        masked ->
+            """
+        return color * mw;"""
+
+        unpremul ->
+            """
+        if (color.a > 0.0039) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;"""
+
+        else ->
+            """
+        return color;"""
     }
     return """
     uniform shader child;
@@ -97,48 +149,51 @@ $maskWeight
         float smoothRaw = raw * raw * (3.0 - 2.0 * raw);
         if (in_curve != 1.0) smoothRaw = pow(smoothRaw, in_curve);
         float radius = in_maxRadius * (1.0 - smoothRaw);
-        if (radius <= 0.004) {
-            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
-            if (s.a > 0.0039) {
-                return half4(s.rgb / s.a, 1.0) * mw;
-            }
-            return s * mw;
+        if (radius <= 0.004) {$earlyReturn
         }
-        float posInv2s2 = 1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
+        float halfR = radius * 0.5 + 0.5;
+        float posInv2s2 = 0.5 / (halfR * halfR);
+        float r1 = radius + 1.0;
         half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
-        half total = half(1.0);
+        half wAcc = half(0.0);
         for (int j = 0; j < ${maxTap / 2}; j++) {
             float a = float(2 * j + 1);
-            half ra = half(clamp(radius - a + 1.0, 0.0, 1.0));
+            half ra = half(clamp(r1 - a, 0.0, 1.0));
             if (ra <= half(0.0)) break;
             float b = a + 1.0;
             float xa = a * a * posInv2s2;
             float xb = b * b * posInv2s2;
             half wa = ra / half(1.0 + xa * (1.0 + xa * (0.5 + 0.235 * xa)));
-            half wb = half(clamp(radius - b + 1.0, 0.0, 1.0)) / half(1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
+            half wb = half(clamp(r1 - b, 0.0, 1.0)) / half(1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
             half wsum = wa + wb;
-            float2 o = ((a * float(wa) + b * float(wb)) / float(wsum)) * in_step;
+            if (wsum <= half(0.0001)) break;
+            float2 o = (a + float(wb / wsum)) * in_step;
             color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
                 child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * wsum;
-            total += half(2.0) * wsum;
+            wAcc += wsum;
         }
-        color = color / max(total, half(0.0001));
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0) * mw;
-        }
-        return color * mw;
+        color = color / (half(1.0) + half(2.0) * wAcc);$finalReturn
     }
 """
 }
 
-/** Lazily built progressive Blur shader sources, indexed by tap bound; second array = masked. */
+/** Lazily built progressive Blur shader sources, indexed by tap bound. */
 private val PROGRESSIVE_BLUR_SHADER_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+private val PROGRESSIVE_BLUR_SHADER_PREMUL_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
 private val PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
 
 /** The progressive Blur shader source with loop bound [tapBound] (from [progressiveLoopTapBound]). */
-internal fun progressiveBlurShaderForTap(tapBound: Int, masked: Boolean = false): String {
-    val cache = if (masked) PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP else PROGRESSIVE_BLUR_SHADER_BY_TAP
-    return cache[tapBound] ?: buildProgressiveBlurShader(tapBound, masked).also { cache[tapBound] = it }
+internal fun progressiveBlurShaderForTap(
+    tapBound: Int,
+    masked: Boolean = false,
+    unpremul: Boolean = true,
+): String {
+    val cache = when {
+        masked -> PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP
+        unpremul -> PROGRESSIVE_BLUR_SHADER_BY_TAP
+        else -> PROGRESSIVE_BLUR_SHADER_PREMUL_BY_TAP
+    }
+    return cache[tapBound] ?: buildProgressiveBlurShader(tapBound, masked, unpremul).also { cache[tapBound] = it }
 }
 
 /**
@@ -167,7 +222,21 @@ private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<String>>> = Array(2) { axis
     }
 }
 
-internal fun progressiveLoopShaderKey(axis: Int, downScale: Float, tap: Int): String = PROGRESSIVE_LOOP_KEYS[axis][levelBucket(downScale)][tap]
+internal fun progressiveLoopShaderKey(axis: Int, downScale: Float, tap: Int, unpremul: Boolean = true): String = if (!unpremul && axis == 0) {
+    PROGRESSIVE_LOOP_H_PREMUL_KEYS[levelBucket(downScale)][tap]
+} else {
+    PROGRESSIVE_LOOP_KEYS[axis][levelBucket(downScale)][tap]
+}
+
+private val PROGRESSIVE_LOOP_H_PREMUL_KEYS: Array<Array<String>> = Array(LEVEL_BUCKETS) { bucket ->
+    Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
+        if (tap > 0 && tap % 4 == 0) {
+            "LMPGaussLoop_H_b${bucket}_t${tap}_p"
+        } else {
+            ""
+        }
+    }
+}
 
 private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
     Array(2) { masked ->
@@ -202,9 +271,13 @@ internal fun buildProgressiveCompositeShader(nativeSharpEnd: Boolean): String {
     val clearUniform = if (nativeSharpEnd) "    uniform shader clearChild;\n" else ""
     val clearBranch = if (nativeSharpEnd) {
         """
-            half f = half((raw - 0.75) * 4.0);
-            f = f * f * (half(3.0) - half(2.0) * f);
-            color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
+            if (raw >= 1.0) {
+                color = clearChild.eval(xy);
+            } else {
+                half f = half((raw - 0.5) * 2.0);
+                f = f * f * (half(3.0) - half(2.0) * f);
+                color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
+            }
         """
     } else {
         "            color = lightBlur.eval(xy);"
@@ -223,8 +296,10 @@ $clearUniform    uniform shader fullBlur;
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [fullBlur -> lightBlur -> sharp] so blur strength decreases continuously.
         half4 color;
-        if (raw < 0.75) {
-            half f = half(raw * 1.3333334);
+        if (raw <= 0.0) {
+            color = fullBlur.eval(xy);
+        } else if (raw < 0.5) {
+            half f = half(raw * 2.0);
             f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(fullBlur.eval(xy), lightBlur.eval(xy), f);
         } else {
@@ -284,6 +359,9 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
         if (in_curve != 1.0) raw = pow(raw, in_curve);
         float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
         w = w * w * (3.0 - 2.0 * w);
+        if (w <= 0.001) {
+            return half4(0.0);
+        }
         half4 c = child.eval(xy);
         if (c.a > 0.0039) {
             c = half4(c.rgb / c.a, 1.0);

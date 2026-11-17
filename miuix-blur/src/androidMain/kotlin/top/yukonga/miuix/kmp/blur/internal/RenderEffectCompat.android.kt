@@ -90,9 +90,9 @@ internal actual fun progressiveStackEffect(
             return android.graphics.RenderEffect.createRuntimeShaderEffect(androidMask, "child")
         }
 
-        masks.full = bandMask(1f, 1f / 0.75f)
+        masks.full = bandMask(1f, 1f / 0.5f)
         masks.ramp = bandMask(1f, 1f)
-        masks.sharp = bandMask(-0.75f / 0.25f, -1f / 0.25f)
+        masks.sharp = bandMask(-0.5f / 0.5f, -1f / 0.5f)
         masks.gradVecX = gradVecX
         masks.gradVecY = gradVecY
         masks.gradOffset = gradOffset
