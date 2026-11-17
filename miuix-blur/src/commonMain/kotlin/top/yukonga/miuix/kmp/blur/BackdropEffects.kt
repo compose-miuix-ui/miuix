@@ -124,7 +124,7 @@ fun BackdropEffectScope.progressiveBlur(
         // box floor at common radii, and every stack pass runs on 1/scale² pixels. The sharp end
         // doesn't ride this layer, so it doesn't constrain the scale.
         val lightSigma = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LIGHT_FRACTION
-        val exp = downScaleExpFor(lightSigma * lightSigma)
+        val exp = downScaleExpFor(lightSigma * lightSigma * 2f)
         val scale = (1 shl exp).toFloat()
         val kernelPadding = BLUR_KERNEL_REACH * scale
         if (kernelPadding > padding) {

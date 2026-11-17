@@ -46,7 +46,7 @@ private class ProgressiveMaskCache {
     /** Continuous `1 − raw` ramp (in_level = in_slope = 1) masking the post-effect branch. */
     lateinit var ramp: android.graphics.RenderEffect
 
-    /** Rising `clamp((raw − 0.65) / 0.35)` ramp masking the native sharp end. */
+    /** Rising `clamp((raw − 0.75) / 0.25)` ramp masking the native sharp end. */
     lateinit var sharp: android.graphics.RenderEffect
 
     /** Uniform-free unpremul pass chained after the unmasked base blur; built once per scope. */
@@ -90,9 +90,9 @@ internal actual fun progressiveStackEffect(
             return android.graphics.RenderEffect.createRuntimeShaderEffect(androidMask, "child")
         }
 
-        masks.full = bandMask(1f, 1f / 0.65f)
+        masks.full = bandMask(1f, 1f / 0.75f)
         masks.ramp = bandMask(1f, 1f)
-        masks.sharp = bandMask(-0.65f / 0.35f, -1f / 0.35f)
+        masks.sharp = bandMask(-0.75f / 0.25f, -1f / 0.25f)
         masks.gradVecX = gradVecX
         masks.gradVecY = gradVecY
         masks.gradOffset = gradOffset

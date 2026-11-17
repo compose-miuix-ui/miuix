@@ -70,7 +70,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
         float mraw = clamp(p * in_maskScale + in_maskOffset, 0.0, 1.0);
         mraw = mraw * mraw * (3.0 - 2.0 * mraw);
         if (in_maskCurve != 1.0) mraw = pow(mraw, in_maskCurve);
-        half mw = half(clamp((mraw - 0.65) * 2.857143, 0.0, 1.0));
+        half mw = half(clamp((mraw - 0.75) * 4.0, 0.0, 1.0));
         mw = mw * mw * (half(3.0) - half(2.0) * mw);
         if (mw <= half(0.004)) {
             return half4(0.0);
@@ -201,7 +201,7 @@ internal fun buildProgressiveCompositeShader(nativeSharpEnd: Boolean): String {
     val clearUniform = if (nativeSharpEnd) "    uniform shader clearChild;\n" else ""
     val clearBranch = if (nativeSharpEnd) {
         """
-            half f = half((raw - 0.65) * 2.857143);
+            half f = half((raw - 0.75) * 4.0);
             f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
         """
@@ -222,8 +222,8 @@ $clearUniform    uniform shader fullBlur;
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [fullBlur -> lightBlur -> sharp] so blur strength decreases continuously.
         half4 color;
-        if (raw < 0.65) {
-            half f = half(raw * 1.5384615);
+        if (raw < 0.75) {
+            half f = half(raw * 1.3333334);
             f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(fullBlur.eval(xy), lightBlur.eval(xy), f);
         } else {
@@ -261,10 +261,10 @@ internal const val UNPREMUL_SHADER = """
 
 /**
  * Band mask for the progressive composite: `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 1 / 0.65`, `in_level = 1`: the Android stack DAG's level stop
+ * smoothstepped gradient. `in_slope = 1 / 0.75`, `in_level = 1`: the Android stack DAG's level stop
  * (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1`: the continuous
- * `1 − raw` ramp for the post chain; `in_level = −0.65 / 0.35`, `in_slope = −1 / 0.35`: the rising
- * `clamp((raw − 0.65) / 0.35, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
+ * `1 − raw` ramp for the post chain; `in_level = −0.75 / 0.25`, `in_slope = −1 / 0.25`: the rising
+ * `clamp((raw − 0.75) / 0.25, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
  * complementary to the mix chain (`s(1 − x) = 1 − s(x)`), so both platforms zero the walk's
  * derivative at the stops alike. The child is renormalized to opaque before weighting — the
  * unpremul terminator for the Android masked levels, folded in to save a pass and a no-op elsewhere.
