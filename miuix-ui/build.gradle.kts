@@ -110,6 +110,7 @@ val convertBaselineProfile =
         excludePackages.set(
             listOf(
                 "top/yukonga/miuix/kmp/icon/extended/",
+                "top/yukonga/miuix/kmp/icon/glass/",
                 "top/yukonga/miuix/kmp/shared/",
             ),
         )
@@ -120,6 +121,7 @@ val convertBaselineProfile =
         additionalOutputs.put("top/yukonga/miuix/kmp/nav/", baselineProfilePath("miuix-nav"))
         additionalOutputs.put("top/yukonga/miuix/kmp/material/", baselineProfilePath("miuix-material"))
         additionalOutputs.put("top/yukonga/miuix/kmp/squircle/", baselineProfilePath("miuix-squircle"))
+        additionalOutputs.put("top/yukonga/miuix/kmp/glass/", baselineProfilePath("miuix-glass"))
     }
 
 tasks.matching { it.name == "generateBaselineProfile" }.configureEach {

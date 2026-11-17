@@ -42,6 +42,7 @@ abstract class CentralPublisherUploadTask : DefaultTask() {
     abstract val centralTokenSecret: Property<String>
 
     @TaskAction
+    @Suppress("NewApi")
     fun publish() {
         val sourceDir = sonatypeRepoDir.get().asFile.toPath()
         val zipPath = bundleFile.get().asFile.toPath()
