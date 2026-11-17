@@ -46,7 +46,10 @@ internal actual fun progressiveStackEffect(
     nativeSharpEnd: Boolean,
     unpremulBase: Boolean,
 ): RenderEffect? {
-    val shader = scope.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
+    val shader = scope.obtainRuntimeShader(
+        if (nativeSharpEnd) "ProgCompositeSharp" else "ProgComposite",
+        if (nativeSharpEnd) PROGRESSIVE_COMPOSITE_SHARP_SHADER else PROGRESSIVE_COMPOSITE_SHADER,
+    ).apply {
         setFloatUniform("in_gradVec", gradVecX, gradVecY)
         setFloatUniform("in_gradOffset", gradOffset)
         setFloatUniform("in_curve", curve)
@@ -64,15 +67,26 @@ internal actual fun progressiveStackEffect(
     // caller's full-res overlay); with nativeSharpEnd the (pre-chained) source binds instead —
     // a null child samples the source. Skia evaluates the shared lightBlur instance once.
     val lightBlur = level(lightSigmaX, lightSigmaY)
-    var filter = ImageFilter.makeRuntimeShader(
-        shader.asSkikoRuntimeShader(),
-        arrayOf("clearChild", "fullBlur", "lightBlur"),
-        arrayOf(
-            if (nativeSharpEnd) pre else lightBlur,
-            level(fullSigmaX, fullSigmaY),
-            lightBlur,
-        ),
-    )
+    var filter = if (nativeSharpEnd) {
+        ImageFilter.makeRuntimeShader(
+            shader.asSkikoRuntimeShader(),
+            arrayOf("clearChild", "fullBlur", "lightBlur"),
+            arrayOf(
+                pre,
+                level(fullSigmaX, fullSigmaY),
+                lightBlur,
+            ),
+        )
+    } else {
+        ImageFilter.makeRuntimeShader(
+            shader.asSkikoRuntimeShader(),
+            arrayOf("fullBlur", "lightBlur"),
+            arrayOf(
+                level(fullSigmaX, fullSigmaY),
+                lightBlur,
+            ),
+        )
+    }
     if (postEffect != null) {
         val maskShader = scope.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
             setFloatUniform("in_gradVec", gradVecX, gradVecY)

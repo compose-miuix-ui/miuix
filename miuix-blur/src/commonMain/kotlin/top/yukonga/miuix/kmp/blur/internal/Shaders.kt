@@ -197,9 +197,19 @@ internal const val PROGRESSIVE_LIGHT_FRACTION = 0.20f
  * without it the walk's derivative kinks at the stops read as Mach-band stripes. Keep in lockstep
  * with [PROGRESSIVE_LEVEL_MASK_SHADER]'s smoothstep (`s(1 − x) = 1 − s(x)`).
  */
-internal const val PROGRESSIVE_COMPOSITE_SHADER = """
-    uniform shader clearChild;
-    uniform shader fullBlur;
+internal fun buildProgressiveCompositeShader(nativeSharpEnd: Boolean): String {
+    val clearUniform = if (nativeSharpEnd) "    uniform shader clearChild;\n" else ""
+    val clearBranch = if (nativeSharpEnd) {
+        """
+            half f = half((raw - 0.65) * 2.857143);
+            f = f * f * (half(3.0) - half(2.0) * f);
+            color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
+        """
+    } else {
+        "            color = lightBlur.eval(xy);"
+    }
+    return """
+$clearUniform    uniform shader fullBlur;
     uniform shader lightBlur;
     uniform float2 in_gradVec;
     uniform float in_gradOffset;
@@ -217,9 +227,7 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
             f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(fullBlur.eval(xy), lightBlur.eval(xy), f);
         } else {
-            half f = half((raw - 0.65) * 2.857143);
-            f = f * f * (half(3.0) - half(2.0) * f);
-            color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
+$clearBranch
         }
         // the padding ring's transparency into the edges; without renormalizing to opaque, the
         // sharp content below bleeds through the semi-transparent rim.
@@ -229,6 +237,10 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
         return color;
     }
 """
+}
+
+internal val PROGRESSIVE_COMPOSITE_SHADER: String = buildProgressiveCompositeShader(nativeSharpEnd = false)
+internal val PROGRESSIVE_COMPOSITE_SHARP_SHADER: String = buildProgressiveCompositeShader(nativeSharpEnd = true)
 
 /**
  * Renormalizes a premultiplied blur to opaque — [buildBlurShader]'s terminator as its own pass, for
