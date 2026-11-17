@@ -277,10 +277,13 @@ fun AdaptiveTopAppBar(
     } else {
         TopAppBar(
             title = title,
-            modifier = contentModifier.then(contentInsetModifier),
+            modifier = Modifier
+                .background(color)
+                .then(contentModifier)
+                .then(contentInsetModifier),
             expandable = expandable,
             subtitle = subtitle,
-            color = color,
+            color = Color.Transparent,
             titleColor = titleColor,
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = false,
