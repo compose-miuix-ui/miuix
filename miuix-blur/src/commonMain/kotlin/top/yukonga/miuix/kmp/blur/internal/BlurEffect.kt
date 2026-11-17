@@ -174,8 +174,12 @@ internal fun createProgressiveBlurEffect(
     val padProj = padding * (ax + ay)
     val projFull = (projFullComp + padProj) / downScale
     var projZero = (projZeroComp + padProj) / downScale
-    // Degenerate band (start == end, or a zero-extent axis) would divide by zero in the shader.
+    // Degenerate band (start == end, or a zero-extent axis) would divide by zero when normalizing.
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+    val invGradSpan = 1f / (projZero - projFull)
+    val gradVecX = ax * invGradSpan
+    val gradVecY = ay * invGradSpan
+    val gradOffset = -projFull * invGradSpan
 
     // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
     val maxCap = PROGRESSIVE_BLUR_MAX_TAP.toFloat()
@@ -195,8 +199,8 @@ internal fun createProgressiveBlurEffect(
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 1f, 0f)
             setFloatUniform("in_maxRadius", maxRadiusX)
-            setFloatUniform("in_gradAxis", ax, ay)
-            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_gradVec", gradVecX, gradVecY)
+            setFloatUniform("in_gradOffset", gradOffset)
             setFloatUniform("in_curve", clampedCurve)
         }
         effect = runtimeShaderEffect(hShader, "child")
@@ -211,8 +215,8 @@ internal fun createProgressiveBlurEffect(
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_step", 0f, 1f)
             setFloatUniform("in_maxRadius", maxRadiusY)
-            setFloatUniform("in_gradAxis", ax, ay)
-            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_gradVec", gradVecX, gradVecY)
+            setFloatUniform("in_gradOffset", gradOffset)
             setFloatUniform("in_curve", clampedCurve)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
@@ -261,6 +265,10 @@ internal fun createProgressiveStackEffect(
     val projFull = (projMin + startFraction * span + padProj) / downScale
     var projZero = (projMin + endFraction * span + padProj) / downScale
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+    val invGradSpan = 1f / (projZero - projFull)
+    val gradVecX = ax * invGradSpan
+    val gradVecY = ay * invGradSpan
+    val gradOffset = -projFull * invGradSpan
 
     // Downscaled-space sigma supplying the variance the downscale cascade's box prefilter doesn't
     // already cover; 0 (skip the blur) when the prefilter alone reaches the level's target.
@@ -278,17 +286,16 @@ internal fun createProgressiveStackEffect(
         levelSigma(sigmaY, PROGRESSIVE_FULL_FRACTION),
         levelSigma(sigmaX, PROGRESSIVE_LIGHT_FRACTION),
         levelSigma(sigmaY, PROGRESSIVE_LIGHT_FRACTION),
-        ax,
-        ay,
-        projFull,
-        projZero,
+        gradVecX,
+        gradVecY,
+        gradOffset,
         clampedCurve,
         preEffect,
         postEffect,
         nativeSharpEnd = exp == 0,
     ) ?: return null
     return if (postBlend != null) {
-        stack.chain(buildRampBlendColorsEffect(scope, postBlend, ax, ay, projFull, projZero, clampedCurve))
+        stack.chain(buildRampBlendColorsEffect(scope, postBlend, gradVecX, gradVecY, gradOffset, clampedCurve))
     } else {
         stack
     }
@@ -355,6 +362,17 @@ internal fun createProgressiveSharpOverlayEffect(
     val loopFull = pThr - originProj
     var loopZero = projZero - originProj
     if (abs(loopZero - loopFull) < 1e-3f) loopZero = loopFull + 1e-3f
+    val maskSpan = projZero - projFull
+    val loopSpan = loopZero - loopFull
+    val invLoopSpan = 1f / loopSpan
+    val loopGradVecX = ax * invLoopSpan
+    val loopGradVecY = ay * invLoopSpan
+    val loopGradOffset = -loopFull * invLoopSpan
+    val maskScale = loopSpan / maskSpan
+    val maskOffset = -(projFull - originProj) / maskSpan
+    val invMaskSpan = 1f / maskSpan
+    val maskGradVecX = ax * invMaskSpan
+    val maskGradVecY = ay * invMaskSpan
 
     val maxRadiusX = progressiveSharpLoopRadius(radiusX, exp)
     val maxRadiusY = progressiveSharpLoopRadius(radiusY, exp)
@@ -371,11 +389,12 @@ internal fun createProgressiveSharpOverlayEffect(
             setFloatUniform("in_maxCoord", bandW - 0.5f, bandH - 0.5f)
             setFloatUniform("in_step", stepX, stepY)
             setFloatUniform("in_maxRadius", maxRadius)
-            setFloatUniform("in_gradAxis", ax, ay)
-            setFloatUniform("in_gradBand", loopFull, loopZero)
+            setFloatUniform("in_gradVec", loopGradVecX, loopGradVecY)
+            setFloatUniform("in_gradOffset", loopGradOffset)
             setFloatUniform("in_curve", 1f)
             if (masked) {
-                setFloatUniform("in_maskBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_maskScale", maskScale)
+                setFloatUniform("in_maskOffset", maskOffset)
                 setFloatUniform("in_maskCurve", clampedCurve)
             }
         }
@@ -394,8 +413,8 @@ internal fun createProgressiveSharpOverlayEffect(
 
         else -> {
             val mask = scope.obtainRuntimeShader("ProgSharpRamp", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
-                setFloatUniform("in_gradAxis", ax, ay)
-                setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
+                setFloatUniform("in_gradVec", maskGradVecX, maskGradVecY)
+                setFloatUniform("in_gradOffset", maskOffset)
                 setFloatUniform("in_curve", clampedCurve)
                 setFloatUniform("in_level", -0.65f / 0.35f)
                 setFloatUniform("in_slope", -1f / 0.35f)

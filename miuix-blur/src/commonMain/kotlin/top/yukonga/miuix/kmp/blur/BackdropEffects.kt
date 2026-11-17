@@ -282,10 +282,9 @@ internal fun obtainBlendColorsEffect(scope: BackdropEffectScopeImpl, colors: Blu
 internal fun buildRampBlendColorsEffect(
     scope: BackdropEffectScopeImpl,
     colors: BlurColors,
-    ax: Float,
-    ay: Float,
-    projFull: Float,
-    projZero: Float,
+    gradVecX: Float,
+    gradVecY: Float,
+    gradOffset: Float,
     curve: Float,
 ): RenderEffect {
     val needsExtended = colors.needsExtendedBlend()
@@ -294,8 +293,8 @@ internal fun buildRampBlendColorsEffect(
         if (needsExtended) BLEND_MODE_SHADER_EXTENDED_RAMP else BLEND_MODE_SHADER_STANDARD_RAMP,
     )
     shader.setBlendLayerUniforms(scope, colors, needsExtended)
-    shader.setFloatUniform("in_gradAxis", ax, ay)
-    shader.setFloatUniform("in_gradBand", projFull, projZero)
+    shader.setFloatUniform("in_gradVec", gradVecX, gradVecY)
+    shader.setFloatUniform("in_gradOffset", gradOffset)
     shader.setFloatUniform("in_curve", curve)
     return createRuntimeShaderEffect(shader, "child")
 }

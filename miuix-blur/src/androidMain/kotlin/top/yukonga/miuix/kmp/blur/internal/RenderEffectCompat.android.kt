@@ -37,10 +37,9 @@ private fun sigmaToBlurRadius(sigma: Float): Float = ((sigma - 0.5f) / 0.57735f)
  * the stack rebuild.
  */
 private class ProgressiveMaskCache {
-    var ax = Float.NaN
-    var ay = Float.NaN
-    var projFull = Float.NaN
-    var projZero = Float.NaN
+    var gradVecX = Float.NaN
+    var gradVecY = Float.NaN
+    var gradOffset = Float.NaN
     var curve = Float.NaN
     lateinit var full: android.graphics.RenderEffect
 
@@ -64,10 +63,9 @@ internal actual fun progressiveStackEffect(
     fullSigmaY: Float,
     lightSigmaX: Float,
     lightSigmaY: Float,
-    ax: Float,
-    ay: Float,
-    projFull: Float,
-    projZero: Float,
+    gradVecX: Float,
+    gradVecY: Float,
+    gradOffset: Float,
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
@@ -75,12 +73,12 @@ internal actual fun progressiveStackEffect(
 ): RenderEffect? {
     val masks = scope.progressiveMaskScratch as? ProgressiveMaskCache
         ?: ProgressiveMaskCache().also { scope.progressiveMaskScratch = it }
-    if (masks.ax != ax || masks.ay != ay || masks.projFull != projFull ||
-        masks.projZero != projZero || masks.curve != curve
+    if (masks.gradVecX != gradVecX || masks.gradVecY != gradVecY ||
+        masks.gradOffset != gradOffset || masks.curve != curve
     ) {
         val mask = scope.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER)
-        mask.setFloatUniform("in_gradAxis", ax, ay)
-        mask.setFloatUniform("in_gradBand", projFull, projZero)
+        mask.setFloatUniform("in_gradVec", gradVecX, gradVecY)
+        mask.setFloatUniform("in_gradOffset", gradOffset)
         mask.setFloatUniform("in_curve", curve)
         val androidMask = mask.asAndroidRuntimeShader()
 
@@ -94,10 +92,9 @@ internal actual fun progressiveStackEffect(
         masks.full = bandMask(1f, 1f / 0.65f)
         masks.ramp = bandMask(1f, 1f)
         masks.sharp = bandMask(-0.65f / 0.35f, -1f / 0.35f)
-        masks.ax = ax
-        masks.ay = ay
-        masks.projFull = projFull
-        masks.projZero = projZero
+        masks.gradVecX = gradVecX
+        masks.gradVecY = gradVecY
+        masks.gradOffset = gradOffset
         masks.curve = curve
     }
     val pre = preEffect?.asAndroidRenderEffect()

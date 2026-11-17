@@ -37,18 +37,17 @@ internal actual fun progressiveStackEffect(
     fullSigmaY: Float,
     lightSigmaX: Float,
     lightSigmaY: Float,
-    ax: Float,
-    ay: Float,
-    projFull: Float,
-    projZero: Float,
+    gradVecX: Float,
+    gradVecY: Float,
+    gradOffset: Float,
     curve: Float,
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
     nativeSharpEnd: Boolean,
 ): RenderEffect? {
     val shader = scope.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
-        setFloatUniform("in_gradAxis", ax, ay)
-        setFloatUniform("in_gradBand", projFull, projZero)
+        setFloatUniform("in_gradVec", gradVecX, gradVecY)
+        setFloatUniform("in_gradOffset", gradOffset)
         setFloatUniform("in_curve", curve)
     }
     val pre = preEffect?.skiaImageFilter
@@ -75,8 +74,8 @@ internal actual fun progressiveStackEffect(
     )
     if (postEffect != null) {
         val maskShader = scope.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
-            setFloatUniform("in_gradAxis", ax, ay)
-            setFloatUniform("in_gradBand", projFull, projZero)
+            setFloatUniform("in_gradVec", gradVecX, gradVecY)
+            setFloatUniform("in_gradOffset", gradOffset)
             setFloatUniform("in_curve", curve)
             setFloatUniform("in_level", 1f)
             setFloatUniform("in_slope", 1f)

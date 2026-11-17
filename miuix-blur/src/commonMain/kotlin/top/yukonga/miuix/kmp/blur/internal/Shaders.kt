@@ -58,7 +58,8 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
     val maskUniforms = if (masked) {
         """
-    uniform float2 in_maskBand;
+    uniform float in_maskScale;
+    uniform float in_maskOffset;
     uniform float in_maskCurve;
 """
     } else {
@@ -66,7 +67,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
     }
     val maskWeight = if (masked) {
         """
-        float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
+        float mraw = clamp(p * in_maskScale + in_maskOffset, 0.0, 1.0);
         mraw = mraw * mraw * (3.0 - 2.0 * mraw);
         if (in_maskCurve != 1.0) mraw = pow(mraw, in_maskCurve);
         half mw = half(clamp((mraw - 0.65) * 2.857143, 0.0, 1.0));
@@ -83,15 +84,15 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
     uniform float2 in_maxCoord;
     uniform float2 in_step;
     uniform float in_maxRadius;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;
     uniform float in_curve;
 $maskUniforms
 
     half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
+        float p = dot(xy, in_gradVec);
 $maskWeight
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float raw = clamp(p + in_gradOffset, 0.0, 1.0);
         float smoothRaw = raw * raw * (3.0 - 2.0 * raw);
         if (in_curve != 1.0) smoothRaw = pow(smoothRaw, in_curve);
         float radius = in_maxRadius * (1.0 - smoothRaw);
@@ -200,13 +201,12 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader clearChild;
     uniform shader fullBlur;
     uniform shader lightBlur;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;
     uniform float in_curve;
 
     half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
         raw = raw * raw * (3.0 - 2.0 * raw);
         if (in_curve != 1.0) raw = pow(raw, in_curve);
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
@@ -259,15 +259,14 @@ internal const val UNPREMUL_SHADER = """
  */
 internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     uniform shader child;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;
     uniform float in_curve;
     uniform float in_level;
     uniform float in_slope;
 
     half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
         raw = raw * raw * (3.0 - 2.0 * raw);
         if (in_curve != 1.0) raw = pow(raw, in_curve);
         float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
@@ -863,13 +862,12 @@ private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
 
 /** Ramp band uniforms + weight for the progressive composite's folded post pass. */
 private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;
     uniform float in_curve;
 
     float rampWeight(float2 fragCoord) {
-        float p = dot(fragCoord, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
+        float raw = clamp(dot(fragCoord, in_gradVec) + in_gradOffset, 0.0, 1.0);
         raw = raw * raw * (3.0 - 2.0 * raw);
         if (in_curve != 1.0) raw = pow(raw, in_curve);
         float w = 1.0 - raw;
