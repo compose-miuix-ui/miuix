@@ -69,7 +69,7 @@ GlassSegmentedTabRow(
 )
 ```
 
-请提供有界宽度和互不相同的标签。标签通过点击选择，等宽排列，长文本显示省略号。
+请提供有界宽度和互不相同的标签。标签支持点击或横向拖动选择，等宽排列，长文本显示省略号。
 
 ## 组件状态
 
@@ -175,6 +175,7 @@ GlassSegmentedTabRow(
 | stroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.MiddleLight`，深色模式为 `MiddleDark` |
 | restingTrackColor() | Color | 浅色模式为白色；深色模式为透明度 0.133 的白色叠加到 surface |
 | indicatorColor() | Color | 浅色模式为透明度 0.06 的黑色，深色模式为透明度 0.133 的白色 |
+| indicatorPressedColor() | Color | 浅色模式为透明度 0.14 的黑色，深色模式为透明度 0.26 的白色 |
 
 ## 进阶用法
 

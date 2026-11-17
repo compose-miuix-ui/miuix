@@ -69,7 +69,7 @@ GlassSegmentedTabRow(
 )
 ```
 
-Provide bounded width and distinct labels. Tabs select on click, share the available width and truncate long labels.
+Provide bounded width and distinct labels. Tabs select on click or horizontal drag, share the available width and truncate long labels.
 
 ## Component States
 
@@ -175,6 +175,7 @@ All constructor fields are required. Use a defaults factory and `copy` when cust
 | stroke() | EdgeStroke | `GlassEdgeStrokes.MiddleLight` in light mode; `MiddleDark` in dark mode |
 | restingTrackColor() | Color | White in light mode; white at 0.133 alpha composited over surface in dark mode |
 | indicatorColor() | Color | Black at 0.06 alpha in light mode; white at 0.133 alpha in dark mode |
+| indicatorPressedColor() | Color | Black at 0.14 alpha in light mode; white at 0.26 alpha in dark mode |
 
 ## Advanced Usage
 

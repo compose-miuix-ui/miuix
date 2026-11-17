@@ -19,9 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +77,7 @@ import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import utils.AdaptiveTopAppBar
 import utils.All
 import utils.BlurredBar
@@ -84,6 +88,12 @@ import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.time.Duration.Companion.milliseconds
+
+private data class IconFamilyCatalog(
+    val regularIcons: List<ImageVector>,
+    val weightVariants: List<Pair<String, List<ImageVector>>>,
+    val iconNames: List<String>,
+)
 
 @Composable
 fun IconsPage(
@@ -108,19 +118,26 @@ fun IconsPage(
     val searchResultPadding = pageBottomPadding(padding)
 
     val iconFamilies = remember { listOf("Glass", "Original") }
-    var glass by remember { mutableStateOf(true) }
-    val allIcons = remember(glass) { if (glass) MiuixIcons.Glass.All else MiuixIcons.All }
-    val regularIcons = remember(allIcons) { allIcons["Regular"] ?: emptyList() }
-    val weightVariants: List<Pair<String, List<ImageVector>>> = remember(allIcons) {
-        listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
-            name to (allIcons[name] ?: emptyList())
+    val iconCatalogs = remember {
+        listOf(MiuixIcons.Glass.All, MiuixIcons.All).map { allIcons ->
+            val regular = allIcons["Regular"] ?: emptyList()
+            val weights = listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
+                name to (allIcons[name] ?: emptyList())
+            }
+            val names = regular.map { it.name.substringBefore(".") }
+            IconFamilyCatalog(
+                regularIcons = regular,
+                weightVariants = weights,
+                iconNames = names,
+            )
         }
     }
-    val iconNames = remember(regularIcons) { regularIcons.map { it.name.substringBefore(".") } }
-
-    // Accordion state — only one row may be expanded at a time. -1 = none.
-    var expandedIndex by remember { mutableIntStateOf(-1) }
-
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { iconFamilies.size })
+    val currentPage by remember { derivedStateOf { pagerState.currentPage } }
+    val searchIsGlass = currentPage == 0
+    val searchCatalog = iconCatalogs[currentPage]
+    val searchRegularIcons = searchCatalog.regularIcons
+    val searchIconNames = searchCatalog.iconNames
     val surfaceColor = colorScheme.surface
     val backdrop = rememberLayerBackdrop {
         drawRect(surfaceColor)
@@ -129,25 +146,26 @@ fun IconsPage(
     val blurActive = appState.enableBlur && isRuntimeShaderSupported()
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 
-    val lazyListState = rememberLazyListState()
-    val scrollBarAdapter = rememberScrollBarAdapter(lazyListState)
-    val headerHeight = remember { mutableIntStateOf(0) }
+    val listStates = remember { List(2) { LazyListState() } }
+    val headerHeights = remember { List(2) { mutableIntStateOf(0) } }
+    val activeListState = listStates[currentPage]
+    val activeHeaderHeight = headerHeights[currentPage]
     val saturatedScrollDistance = with(density) {
         maxOf(
             GlassTopAppBarDefaults.RampStart + GlassTopAppBarDefaults.RampDistance,
             GlassTopAppBarDefaults.ProgressiveBlurRampDistance,
         ).toPx()
     }
-    val visualContentOffset: () -> Float = remember(lazyListState, headerHeight, topAppBarScrollBehavior, saturatedScrollDistance) {
+    val visualContentOffset: () -> Float = remember(activeListState, activeHeaderHeight, topAppBarScrollBehavior, saturatedScrollDistance) {
         {
             // Keep progress continuous through the first icon row, then saturate.
-            when (lazyListState.firstVisibleItemIndex) {
-                0 -> -lazyListState.firstVisibleItemScrollOffset.toFloat() + topAppBarScrollBehavior.state.overscrollOffset
+            when (activeListState.firstVisibleItemIndex) {
+                0 -> -activeListState.firstVisibleItemScrollOffset.toFloat() + topAppBarScrollBehavior.state.overscrollOffset
 
                 1 -> {
-                    val measuredHeaderHeight = headerHeight.intValue
+                    val measuredHeaderHeight = activeHeaderHeight.intValue
                     if (measuredHeaderHeight > 0) {
-                        -(measuredHeaderHeight + lazyListState.firstVisibleItemScrollOffset.toFloat()) + topAppBarScrollBehavior.state.overscrollOffset
+                        -(measuredHeaderHeight + activeListState.firstVisibleItemScrollOffset.toFloat()) + topAppBarScrollBehavior.state.overscrollOffset
                     } else {
                         // Restored lists may skip measuring the header.
                         -saturatedScrollDistance
@@ -168,13 +186,13 @@ fun IconsPage(
             val index = filteredIndices[i]
             Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
                 BasicComponent(
-                    title = iconNames[index],
+                    title = searchIconNames[index],
                     startAction = {
                         Icon(
-                            imageVector = regularIcons[index],
-                            contentDescription = iconNames[index],
+                            imageVector = searchRegularIcons[index],
+                            contentDescription = searchIconNames[index],
                             tint = colorScheme.onBackground,
-                            modifier = Modifier.size(if (glass) 28.dp else 24.dp),
+                            modifier = Modifier.size(if (searchIsGlass) 28.dp else 24.dp),
                         )
                     },
                     onClick = {
@@ -183,7 +201,7 @@ fun IconsPage(
                         coroutineScope.launch {
                             delay(400.milliseconds)
                             // The header is the only list item before icon rows.
-                            lazyListState.animateScrollToItem(index + 1)
+                            activeListState.animateScrollToItem(index + 1)
                         }
                     },
                 )
@@ -203,7 +221,7 @@ fun IconsPage(
                         showTopAppBar = appState.showTopAppBar,
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
-                        isContentScrolled = lazyListState.canScrollBackward,
+                        isContentScrolled = activeListState.canScrollBackward,
                         visualContentOffset = visualContentOffset,
                         contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded) { 1f } else Modifier,
                         color = barColor,
@@ -223,10 +241,9 @@ fun IconsPage(
                             if (glassTopBar) {
                                 GlassSegmentedTabRow(
                                     tabs = iconFamilies,
-                                    selectedIndex = if (glass) 0 else 1,
+                                    selectedIndex = pagerState.targetPage,
                                     onSelect = { index ->
-                                        glass = index == 0
-                                        expandedIndex = -1
+                                        coroutineScope.launch { pagerState.springAnimateToPage(index) }
                                     },
                                     backdrop = backdrop,
                                     surfaceAlpha = if (blurActive) 1f else 0f,
@@ -253,10 +270,9 @@ fun IconsPage(
                                     }
                                     TabRow(
                                         tabs = iconFamilies,
-                                        selectedTabIndex = if (glass) 0 else 1,
+                                        selectedTabIndex = pagerState.targetPage,
                                         onTabSelected = { index ->
-                                            glass = index == 0
-                                            expandedIndex = -1
+                                            coroutineScope.launch { pagerState.springAnimateToPage(index) }
                                         },
                                         modifier = Modifier.padding(horizontal = 12.dp).padding(top = 6.dp, bottom = 12.dp),
                                     )
@@ -272,128 +288,149 @@ fun IconsPage(
                 padding,
             )
             Box(modifier = if (blurActive) Modifier.layerBackdrop(backdrop) else Modifier) {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.pageScrollModifiers(
-                        appState.enableScrollEndHaptic,
-                        appState.showTopAppBar,
-                        topAppBarScrollBehavior,
-                    ),
-                    contentPadding = contentPadding,
-                ) {
-                    item(key = "iconsHeader") {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onSizeChanged { headerHeight.intValue = it.height }
-                                .padding(horizontal = 12.dp)
-                                .squircleClip(
-                                    topStart = 16.dp,
-                                    topEnd = 16.dp,
-                                    bottomEnd = 0.dp,
-                                    bottomStart = 0.dp,
-                                )
-                                .background(colorScheme.surfaceContainer)
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 12.dp, bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = false,
+                    beyondViewportPageCount = 1,
+                    key = { it },
+                ) { page ->
+                    val isPageGlass = page == 0
+                    val pageListState = listStates[page]
+                    val pageHeaderHeight = headerHeights[page]
+                    val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
+                    val catalog = iconCatalogs[page]
+                    val regularIcons = catalog.regularIcons
+                    val weightVariants = catalog.weightVariants
+                    val iconNames = catalog.iconNames
+                    // Accordion state — only one row may be expanded at a time. -1 = none.
+                    var expandedIndex by remember { mutableIntStateOf(-1) }
+
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            state = pageListState,
+                            modifier = Modifier.pageScrollModifiers(
+                                appState.enableScrollEndHaptic,
+                                appState.showTopAppBar,
+                                topAppBarScrollBehavior,
+                            ),
+                            contentPadding = contentPadding,
                         ) {
-                            Text(
-                                text = "Name",
-                                modifier = Modifier.weight(1f),
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = colorScheme.onSurfaceVariantActions,
-                            )
-                            Text(
-                                text = "Tap to compare weights",
-                                style = MiuixTheme.textStyles.footnote2,
-                                color = colorScheme.onSurfaceVariantActions,
-                            )
-                        }
-                    }
-                    items(
-                        count = regularIcons.size,
-                        key = { "icon_$it" },
-                    ) { index ->
-                        val isLast = index == regularIcons.lastIndex
-                        val bottomPadding = if (isLast) 6.dp else 0.dp
-                        val expanded = expandedIndex == index
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                                .squircleClip(
-                                    topStart = 0.dp,
-                                    topEnd = 0.dp,
-                                    bottomEnd = if (isLast) 16.dp else 0.dp,
-                                    bottomStart = if (isLast) 16.dp else 0.dp,
-                                )
-                                .background(colorScheme.surfaceContainer)
-                                .clickable { expandedIndex = if (expanded) -1 else index }
-                                .padding(horizontal = 16.dp)
-                                .padding(vertical = 6.dp)
-                                .padding(bottom = bottomPadding),
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = iconNames[index],
-                                    modifier = Modifier.weight(1f),
-                                    style = MiuixTheme.textStyles.body2,
-                                    color = colorScheme.onSurface,
-                                )
-                                Icon(
-                                    imageVector = regularIcons[index],
-                                    contentDescription = iconNames[index],
-                                    tint = colorScheme.onBackground,
-                                    modifier = Modifier.size(if (glass) 28.dp else 24.dp),
-                                )
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Icon(
-                                    imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
-                                    contentDescription = if (expanded) "Collapse" else "Expand",
-                                    tint = colorScheme.onSurfaceVariantActions,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
-                            AnimatedVisibility(visible = expanded) {
+                            item(key = "iconsHeader") {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 10.dp, bottom = 4.dp),
-                                    verticalAlignment = Alignment.Top,
+                                        .onSizeChanged { pageHeaderHeight.intValue = it.height }
+                                        .padding(horizontal = 12.dp)
+                                        .squircleClip(
+                                            topStart = 16.dp,
+                                            topEnd = 16.dp,
+                                            bottomEnd = 0.dp,
+                                            bottomStart = 0.dp,
+                                        )
+                                        .background(colorScheme.surfaceContainer)
+                                        .padding(horizontal = 16.dp)
+                                        .padding(top = 12.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    weightVariants.forEach { (label, icons) ->
-                                        Column(
+                                    Text(
+                                        text = "Name",
+                                        modifier = Modifier.weight(1f),
+                                        style = MiuixTheme.textStyles.footnote1,
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                    Text(
+                                        text = "Tap to compare weights",
+                                        style = MiuixTheme.textStyles.footnote2,
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                }
+                            }
+                            items(
+                                count = regularIcons.size,
+                                key = { "icon_$it" },
+                            ) { index ->
+                                val isLast = index == regularIcons.lastIndex
+                                val bottomPadding = if (isLast) 6.dp else 0.dp
+                                val expanded = expandedIndex == index
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                        .squircleClip(
+                                            topStart = 0.dp,
+                                            topEnd = 0.dp,
+                                            bottomEnd = if (isLast) 16.dp else 0.dp,
+                                            bottomStart = if (isLast) 16.dp else 0.dp,
+                                        )
+                                        .background(colorScheme.surfaceContainer)
+                                        .clickable { expandedIndex = if (expanded) -1 else index }
+                                        .padding(horizontal = 16.dp)
+                                        .padding(vertical = 6.dp)
+                                        .padding(bottom = bottomPadding),
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = iconNames[index],
                                             modifier = Modifier.weight(1f),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            style = MiuixTheme.textStyles.body2,
+                                            color = colorScheme.onSurface,
+                                        )
+                                        Icon(
+                                            imageVector = regularIcons[index],
+                                            contentDescription = iconNames[index],
+                                            tint = colorScheme.onBackground,
+                                            modifier = Modifier.size(if (isPageGlass) 28.dp else 24.dp),
+                                        )
+                                        Spacer(modifier = Modifier.size(8.dp))
+                                        Icon(
+                                            imageVector = if (expanded) MiuixIcons.ExpandLess else MiuixIcons.ExpandMore,
+                                            contentDescription = if (expanded) "Collapse" else "Expand",
+                                            tint = colorScheme.onSurfaceVariantActions,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
+                                    AnimatedVisibility(visible = expanded) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 10.dp, bottom = 4.dp),
+                                            verticalAlignment = Alignment.Top,
                                         ) {
-                                            Icon(
-                                                imageVector = icons[index],
-                                                contentDescription = "${iconNames[index]} ($label)",
-                                                tint = colorScheme.onBackground,
-                                                modifier = Modifier.size(if (glass) 28.dp * (7f / 6f) else 28.dp),
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = label,
-                                                style = MiuixTheme.textStyles.footnote2,
-                                                color = colorScheme.onSurfaceVariantActions,
-                                                textAlign = TextAlign.Center,
-                                                maxLines = 1,
-                                            )
+                                            weightVariants.forEach { (label, icons) ->
+                                                Column(
+                                                    modifier = Modifier.weight(1f),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                ) {
+                                                    Icon(
+                                                        imageVector = icons[index],
+                                                        contentDescription = "${iconNames[index]} ($label)",
+                                                        tint = colorScheme.onBackground,
+                                                        modifier = Modifier.size(if (isPageGlass) 28.dp * (7f / 6f) else 28.dp),
+                                                    )
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Text(
+                                                        text = label,
+                                                        style = MiuixTheme.textStyles.footnote2,
+                                                        color = colorScheme.onSurfaceVariantActions,
+                                                        textAlign = TextAlign.Center,
+                                                        maxLines = 1,
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
+                            item { Spacer(modifier = Modifier.height(12.dp)) }
                         }
+                        VerticalScrollBar(
+                            adapter = scrollBarAdapter,
+                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                            trackPadding = contentPadding,
+                        )
                     }
-                    item { Spacer(modifier = Modifier.height(12.dp)) }
                 }
-                VerticalScrollBar(
-                    adapter = scrollBarAdapter,
-                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                    trackPadding = contentPadding,
-                )
             }
         }
         if (glassTopBar) {
@@ -403,8 +440,8 @@ fun IconsPage(
                 modifier = searchModifier,
                 label = "Search icons",
             ) { query ->
-                val filteredIndices = remember(query, iconNames) {
-                    if (query.isBlank()) emptyList() else iconNames.indices.filter { iconNames[it].contains(query, ignoreCase = true) }
+                val filteredIndices = remember(query, searchIconNames) {
+                    if (query.isBlank()) emptyList() else searchIconNames.indices.filter { searchIconNames[it].contains(query, ignoreCase = true) }
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -420,8 +457,8 @@ fun IconsPage(
                     withFrameNanos { }
                     legacySearchStatus = status.copy(current = SearchStatus.Status.EXPANDING)
                 }
-                val filteredIndices = remember(status.searchText, iconNames) {
-                    if (status.searchText.isBlank()) emptyList() else iconNames.indices.filter { iconNames[it].contains(status.searchText, ignoreCase = true) }
+                val filteredIndices = remember(status.searchText, searchIconNames) {
+                    if (status.searchText.isBlank()) emptyList() else searchIconNames.indices.filter { searchIconNames[it].contains(status.searchText, ignoreCase = true) }
                 }
                 Box(
                     Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {
