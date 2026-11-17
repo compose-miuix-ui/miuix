@@ -3,6 +3,7 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -63,8 +64,10 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import component.liquid.IosLiquidGlassNavigationBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import navigation.ComponentDemo
 import navigation.CrossActivityTransition
 import navigation.Navigator
 import navigation.Route
@@ -108,7 +111,9 @@ import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.DoodlePen
 import top.yukonga.miuix.kmp.icon.glass.EditSubtitle
+import top.yukonga.miuix.kmp.icon.glass.Hd
 import top.yukonga.miuix.kmp.icon.glass.HomeOutline
 import top.yukonga.miuix.kmp.icon.glass.ImageOutline
 import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
@@ -123,9 +128,12 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
+import top.yukonga.miuix.kmp.nav.transition.NavMotion
+import top.yukonga.miuix.kmp.nav.transition.NavSettleSpec
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
+import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
 import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
@@ -143,6 +151,7 @@ import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
+import kotlin.time.Duration.Companion.milliseconds
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -212,6 +221,9 @@ fun AppContent(
             { 1f }
         }
     }
+    LaunchedEffect(useGlassSidebar, sidebarState.expanded) {
+        mainPagerState.snapTransitions = useGlassSidebar && sidebarState.expanded
+    }
     val sidebarBackdrop = if (useGlassSidebar) rememberBlurBackdrop() else null
     // Blur needs a recorded page layer; otherwise use the surface color.
     val pageInsets = rememberAppPageInsets(
@@ -279,8 +291,18 @@ fun AppContent(
             else -> NavSwipeDirection.LeftToRight
         }
 
-        // Select the configured transition.
-        val navTransition = if (isCrossActivityStyle) CrossActivityTransition else NavTransitions.MiuixDefault
+        var suppressNavTransition by remember { mutableStateOf(false) }
+        LaunchedEffect(navigator.backStack.size, navigator.backStack.lastOrNull()) {
+            if (suppressNavTransition) {
+                delay(50.milliseconds)
+                suppressNavTransition = false
+            }
+        }
+        val navTransition = when {
+            suppressNavTransition -> InstantNavTransition
+            isCrossActivityStyle -> CrossActivityTransition
+            else -> NavTransitions.MiuixDefault
+        }
 
         // Keep overlays above page content and the glass rail.
         Scaffold(
@@ -289,7 +311,6 @@ fun AppContent(
         ) {
             CompositionLocalProvider(LocalTopLayer provides topLayer) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Keep NavDisplay at one site across chrome changes.
                     Row(modifier = Modifier.fillMaxSize()) {
                         if (hasNavigationRail && !useGlassSidebar) {
                             PersistentNavigationRail(
@@ -349,6 +370,7 @@ fun AppContent(
                                     mainPagerState = mainPagerState,
                                     backdrop = sidebarBackdrop,
                                     state = sidebarState,
+                                    onBeforeNavigate = { suppressNavTransition = true },
                                 )
                             }
                         }
@@ -477,10 +499,12 @@ private fun PersistentGlassNavigationRail(
     mainPagerState: MainPagerState,
     backdrop: LayerBackdrop?,
     state: GlassNavigationRailState,
+    onBeforeNavigate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
     val navigator = LocalNavigator.current
+    val currentRoute = navigator.backStack.lastOrNull()
     val page = mainPagerState.selectedPage
     val items = remember(navigationItems, appState.showNavigationBarBadge) {
         navigationItems.mapIndexed { index, item ->
@@ -491,18 +515,50 @@ private fun PersistentGlassNavigationRail(
             )
         }
     }
+    val secondaryRoutes = remember {
+        listOf(
+            Route.Component(ComponentDemo.Preferences),
+            Route.Glass,
+        )
+    }
+    val secondaryItems = remember {
+        listOf(
+            GlassNavigationItem(icon = MiuixIcons.Glass.DoodlePen, label = "Preferences"),
+            GlassNavigationItem(icon = MiuixIcons.Glass.Hd, label = "Glass"),
+        )
+    }
+    val selectedIndex = when (currentRoute) {
+        is Route.Main -> page
+
+        else -> {
+            val secondaryIndex = secondaryRoutes.indexOf(currentRoute)
+            if (secondaryIndex >= 0) items.size + secondaryIndex else -1
+        }
+    }
     GlassNavigationRail(
         items = items,
-        selectedIndex = page,
-        onSelect = {
-            // Return to the main route before changing the page.
-            navigator.popUntil { route -> route is Route.Main }
-            mainPagerState.animateToPage(it)
+        selectedIndex = selectedIndex,
+        onSelect = { index ->
+            if (index < items.size) {
+                if (currentRoute !is Route.Main) {
+                    onBeforeNavigate()
+                    navigator.popUntil { route -> route is Route.Main }
+                }
+                mainPagerState.animateToPage(index)
+            } else {
+                val targetRoute = secondaryRoutes[index - items.size]
+                if (currentRoute != targetRoute) {
+                    onBeforeNavigate()
+                    navigator.popUntil { route -> route is Route.Main }
+                    navigator.push(targetRoute)
+                }
+            }
         },
         backdrop = backdrop,
         modifier = modifier.windowInsetsPadding(LocalAppPageInsets.current.windowInsets),
-        defaultWindowInsetsPadding = false,
         state = state,
+        secondaryItems = secondaryItems,
+        defaultWindowInsetsPadding = false,
     )
 }
 
@@ -992,6 +1048,7 @@ class MainPagerState(
 
     var isNavigating by mutableStateOf(false)
         private set
+    var snapTransitions by mutableStateOf(false)
 
     private var navJob: Job? = null
 
@@ -1006,7 +1063,11 @@ class MainPagerState(
         navJob = coroutineScope.launch {
             val myJob = coroutineContext.job
             try {
-                pagerState.springAnimateToPage(targetIndex)
+                if (snapTransitions) {
+                    pagerState.scrollToPage(targetIndex)
+                } else {
+                    pagerState.springAnimateToPage(targetIndex)
+                }
             } finally {
                 if (navJob == myJob) {
                     isNavigating = false
@@ -1032,3 +1093,11 @@ fun rememberMainPagerState(
 ): MainPagerState = remember(pagerState, coroutineScope) {
     MainPagerState(pagerState, coroutineScope)
 }
+
+private val InstantNavTransition: NavTransition = navGraphicsTransition(
+    opaqueDepth = 1f,
+    dismissDirection = NavSwipeDirection.None,
+    motion = NavMotion(
+        programmatic = NavSettleSpec.Tween(durationMillis = 0, easing = LinearEasing),
+    ),
+) {}

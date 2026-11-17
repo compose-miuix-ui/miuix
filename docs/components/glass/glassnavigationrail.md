@@ -118,6 +118,7 @@ Once the panel has settled, the destination column scrolls under the toggle head
 | backdrop | Backdrop? | Background sampling source; null uses a solid theme fill | - | Yes |
 | modifier | Modifier | Modifier applied to the overlay box | Modifier | No |
 | state | GlassNavigationRailState | Expanded state and morph progress | rememberGlassNavigationRailState() | No |
+| secondaryItems | List&lt;GlassNavigationItem&gt; | Optional secondary destinations shown below a divider while expanded | emptyList() | No |
 | showToggle | Boolean | Show the built-in expand/collapse toggle | true | No |
 | defaultWindowInsetsPadding | Boolean | Apply system safe-area insets; disable when the parent handles them | true | No |
 | collapsedTop | Dp | Capsule top offset within the available area | GlassNavigationRailDefaults.CollapsedTop | No |

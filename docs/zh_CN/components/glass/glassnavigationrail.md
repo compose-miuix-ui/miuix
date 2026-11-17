@@ -118,6 +118,7 @@ GlassNavigationRail(
 | backdrop | Backdrop? | 背景采样源；null 时使用主题纯色填充 | - | 是 |
 | modifier | Modifier | 应用于浮层容器的修饰符 | Modifier | 否 |
 | state | GlassNavigationRailState | 展开状态与形变进度 | rememberGlassNavigationRailState() | 否 |
+| secondaryItems | List&lt;GlassNavigationItem&gt; | 展开态下显示在分割线下方的次级目标列表（折叠态隐藏） | emptyList() | 否 |
 | showToggle | Boolean | 是否显示内置展开/折叠开关 | true | 否 |
 | defaultWindowInsetsPadding | Boolean | 应用系统安全区间距；父容器已处理时关闭 | true | 否 |
 | collapsedTop | Dp | 胶囊相对可用区域的顶部偏移 | GlassNavigationRailDefaults.CollapsedTop | 否 |
