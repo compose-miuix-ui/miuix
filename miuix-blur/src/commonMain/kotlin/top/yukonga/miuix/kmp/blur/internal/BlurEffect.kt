@@ -305,16 +305,16 @@ internal fun progressiveSharpLoopRadius(radius: Float, exp: Int): Float {
     return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
 }
 
-/** Linear-raw position of the sharp band's onset (`pow(smoothstep(raw), curve) = 0.5`). */
+/** Linear-raw position of the sharp band's onset (`pow(smoothstep(raw), curve) = 0.65`). */
 private fun progressiveSharpRawThreshold(curve: Float): Float {
-    val ssThr = (0.5).pow(1.0 / curve.coerceIn(0.05f, 20f))
+    val ssThr = (0.65).pow(1.0 / curve.coerceIn(0.05f, 20f))
     // Analytic smoothstep inverse: t = 0.5 − sin(asin(1 − 2y) / 3).
     return (0.5 - sin(asin(1.0 - 2.0 * ssThr) / 3.0)).toFloat()
 }
 
 /**
  * Full-resolution sharp overlay: an optional variable loop blur (H then V) with the ramp's clear-end
- * mask (`clamp(2·raw − 1, 0, 1)`) folded into the last pass. The radius ramps from
+ * mask (`clamp((raw − 0.65) / 0.35, 0, 1)`) folded into the last pass. The radius ramps from
  * [progressiveSharpLoopRadius] at the band's onset to zero at the clear end, so the handoff reads as
  * one continuous blur instead of sharp content alpha-faded over a still-blurred base.
  *
@@ -397,8 +397,8 @@ internal fun createProgressiveSharpOverlayEffect(
                 setFloatUniform("in_gradAxis", ax, ay)
                 setFloatUniform("in_gradBand", projFull - originProj, projZero - originProj)
                 setFloatUniform("in_curve", clampedCurve)
-                setFloatUniform("in_level", -1f)
-                setFloatUniform("in_slope", -2f)
+                setFloatUniform("in_level", -0.65f / 0.35f)
+                setFloatUniform("in_slope", -1f / 0.35f)
             }
             runtimeShaderEffect(mask, "child")
         }
@@ -407,7 +407,7 @@ internal fun createProgressiveSharpOverlayEffect(
 
 /**
  * Component-space bbox of the region where the overlay mask is non-zero (`smoothstep(raw)^curve >
- * 0.5`, inverted to a threshold line on the gradient, clipped with a [margin] for rounding and tap
+ * 0.65`, inverted to a threshold line on the gradient, clipped with a [margin] for rounding and tap
  * reach). Only this sub-rect is recorded; null means the band misses the component.
  */
 internal fun progressiveSharpBandBounds(

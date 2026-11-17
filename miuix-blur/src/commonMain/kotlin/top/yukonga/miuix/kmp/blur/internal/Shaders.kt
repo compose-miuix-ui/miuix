@@ -69,9 +69,9 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
         float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
         mraw = mraw * mraw * (3.0 - 2.0 * mraw);
         if (in_maskCurve != 1.0) mraw = pow(mraw, in_maskCurve);
-        float mw = clamp(mraw * 2.0 - 1.0, 0.0, 1.0);
-        mw = mw * mw * (3.0 - 2.0 * mw);
-        if (mw <= 0.004) {
+        half mw = half(clamp((mraw - 0.65) * 2.857143, 0.0, 1.0));
+        mw = mw * mw * (half(3.0) - half(2.0) * mw);
+        if (mw <= half(0.004)) {
             return half4(0.0);
         }
 """
@@ -98,33 +98,33 @@ $maskWeight
         if (radius <= 0.004) {
             half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
             if (s.a > 0.0039) {
-                return half4(s.rgb / s.a, 1.0) * half(mw);
+                return half4(s.rgb / s.a, 1.0) * mw;
             }
-            return s * half(mw);
+            return s * mw;
         }
         float posInv2s2 = 1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
         half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
-        float total = 1.0;
+        half total = half(1.0);
         for (int j = 0; j < ${maxTap / 2}; j++) {
             float a = float(2 * j + 1);
-            float ra = clamp(radius - a + 1.0, 0.0, 1.0);
-            if (ra <= 0.0) break;
+            half ra = half(clamp(radius - a + 1.0, 0.0, 1.0));
+            if (ra <= half(0.0)) break;
             float b = a + 1.0;
             float xa = a * a * posInv2s2;
             float xb = b * b * posInv2s2;
-            float wa = ra / (1.0 + xa * (1.0 + xa * (0.5 + 0.235 * xa)));
-            float wb = clamp(radius - b + 1.0, 0.0, 1.0) / (1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
-            float wsum = wa + wb;
-            float2 o = ((a * wa + b * wb) / wsum) * in_step;
+            half wa = ra / half(1.0 + xa * (1.0 + xa * (0.5 + 0.235 * xa)));
+            half wb = half(clamp(radius - b + 1.0, 0.0, 1.0)) / half(1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
+            half wsum = wa + wb;
+            float2 o = ((a * float(wa) + b * float(wb)) / float(wsum)) * in_step;
             color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
-                child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * half(wsum);
-            total += 2.0 * wsum;
+                child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * wsum;
+            total += half(2.0) * wsum;
         }
-        color = color / half(max(total, 0.0001));
+        color = color / max(total, half(0.0001));
         if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0) * half(mw);
+            return half4(color.rgb / color.a, 1.0) * mw;
         }
-        return color * half(mw);
+        return color * mw;
     }
 """
 }
@@ -211,14 +211,14 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
         if (in_curve != 1.0) raw = pow(raw, in_curve);
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [fullBlur -> lightBlur -> sharp] so blur strength decreases continuously.
-        float pos = raw * 2.0;
         half4 color;
-        if (pos < 1.0) {
-            float f = pos * pos * (3.0 - 2.0 * pos);
+        if (raw < 0.65) {
+            half f = half(raw * 1.5384615);
+            f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(fullBlur.eval(xy), lightBlur.eval(xy), f);
         } else {
-            float f = pos - 1.0;
-            f = f * f * (3.0 - 2.0 * f);
+            half f = half((raw - 0.65) * 2.857143);
+            f = f * f * (half(3.0) - half(2.0) * f);
             color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
         }
         // the padding ring's transparency into the edges; without renormalizing to opaque, the
@@ -249,10 +249,10 @@ internal const val UNPREMUL_SHADER = """
 
 /**
  * Band mask for the progressive composite: `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 2`, `in_level = 1`: the Android stack DAG's level stop
+ * smoothstepped gradient. `in_slope = 1 / 0.65`, `in_level = 1`: the Android stack DAG's level stop
  * (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1`: the continuous
- * `1 − raw` ramp for the post chain; `in_level = −1`, `in_slope = −2`: the rising
- * `clamp(2·raw − 1, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
+ * `1 − raw` ramp for the post chain; `in_level = −0.65 / 0.35`, `in_slope = −1 / 0.35`: the rising
+ * `clamp((raw − 0.65) / 0.35, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
  * complementary to the mix chain (`s(1 − x) = 1 − s(x)`), so both platforms zero the walk's
  * derivative at the stops alike. The child is renormalized to opaque before weighting — the
  * unpremul terminator for the Android masked levels, folded in to save a pass and a no-op elsewhere.
