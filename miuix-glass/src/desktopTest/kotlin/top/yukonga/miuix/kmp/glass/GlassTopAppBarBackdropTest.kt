@@ -68,16 +68,15 @@ class GlassTopAppBarBackdropTest {
         fun assertCoverage() {
             val bottom = onNodeWithTag("gradient-bar").fetchSemanticsNode().boundsInRoot.bottom.roundToInt()
             val overhang = with(density) { GlassTopAppBarDefaults.BandOverhang.roundToPx() }
-            val fadeInset = with(density) { 12.dp.roundToPx() }
+            val fadeInset = with(density) { 36.dp.roundToPx() }
             runOnIdle { opacity.floatValue = 1f }
             val pixels = onRoot().captureToImage().toPixelMap()
-            assertColorNear(Color.White, pixels[5, bottom - fadeInset - 2])
+            val top = pixels[5, 2].red
             val inside = pixels[5, bottom - fadeInset / 2].red
             val edge = pixels[5, bottom].red
             val outside = pixels[5, bottom + overhang / 2].red
-            assertTrue(inside > edge && edge > outside && outside > 0f, "The fade must span both sides of the bar edge")
-            assertTrue(inside > 0.95f, "The lower subtitle and bottom-content area must remain covered")
-            assertTrue(edge in 0.8f..0.98f, "The fade must protect the bar edge without extending an opaque shelf")
+            assertTrue(top in 0.87f..0.93f, "Top edge must remain translucent without an opaque shelf ($top)")
+            assertTrue(top > inside && inside > edge && edge > outside && outside > 0f, "The fade must span smoothly across the bar and overhang")
             assertColorNear(Color.Blue, pixels[5, bottom + overhang + 2])
             runOnIdle { opacity.floatValue = 0.99f }
             val almostOpaque = onRoot().captureToImage().toPixelMap()
@@ -129,10 +128,12 @@ class GlassTopAppBarBackdropTest {
             state.heightOffset = state.heightOffsetLimit
         }
         mainClock.advanceTimeByFrame()
-        assertColorNear(Color.White, onRoot().captureToImage().toPixelMap()[5, 5])
+        val fullRed = onRoot().captureToImage().toPixelMap()[5, 5].red
+        assertTrue(fullRed in 0.87f..0.93f, "Scrolled band should appear immediately ($fullRed)")
         runOnIdle { opacity.floatValue = 0.5f }
         mainClock.advanceTimeByFrame()
-        assertColorNear(Color(0.5f, 0.5f, 1f), onRoot().captureToImage().toPixelMap()[5, 5])
+        val halfRed = onRoot().captureToImage().toPixelMap()[5, 5].red
+        assertTrue(abs(halfRed - fullRed * 0.5f) < 0.02f, "Half opacity should halve the band contribution")
         runOnIdle {
             offset.floatValue = 0f
             state.contentOffset = 0f

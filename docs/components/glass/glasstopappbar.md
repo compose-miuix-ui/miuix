@@ -123,7 +123,7 @@ The explicit-overlap overload adds one required parameter:
 | TitleBlurRadius | Dp | Title transition blur radius | 8.dp |
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
-| BandOverhang | Dp | Band extension below the bar | 28.dp |
+| BandOverhang | Dp | Band extension below the bar | 36.dp |
 
 #### Methods
 
@@ -134,7 +134,7 @@ The explicit-overlap overload adds one required parameter:
 | buttonMaterial() | GlassMaterial | Theme-selected `GlassMaterials.puredThinGlass` |
 | buttonStroke() | EdgeStroke | `GlassEdgeStrokes.SmallLight` in light mode; `SmallDark` in dark mode |
 | buttonPressedOverlay() | Color | Black at 0.10 alpha in light mode; white at 0.14 alpha in dark mode |
-| bandBrush(color: Color) | Brush | Vertical page-color gradient, solid at the top and transparent at the bottom |
+| bandBrush(color: Color) | Brush | Vertical page-color gradient, smoothly fading from translucent near the top to transparent at the bottom |
 
 ## Advanced Usage
 

@@ -55,7 +55,6 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
-private val LocalTopAppBarBackgroundBlur = staticCompositionLocalOf { false }
 
 /** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
@@ -250,13 +249,8 @@ fun AdaptiveTopAppBar(
     val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
-        val backgroundBlur = LocalTopAppBarBackgroundBlur.current
-        val shaderSupported = isRuntimeShaderSupported()
-        val useBandBrush = !shaderSupported || (backdrop != null && backgroundBlur)
         val surfaceColor = MiuixTheme.colorScheme.surface
-        val bandBrush = remember(useBandBrush, surfaceColor, color) {
-            if (useBandBrush) GlassTopAppBarDefaults.bandBrush(surfaceColor) else SolidColor(color)
-        }
+        val bandBrush = remember(surfaceColor) { GlassTopAppBarDefaults.bandBrush(surfaceColor) }
         val contentScrolled by remember(scrollBehavior, isContentScrolled) {
             derivedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < 0f) }
         }
@@ -267,14 +261,14 @@ fun AdaptiveTopAppBar(
             expandable = !isWideScreen,
             subtitle = subtitle,
             backdrop = backdrop,
-            progressiveBlur = appState.glassTopBarProgressiveBlur && appState.enableBlur,
+            progressiveBlur = appState.enableBlur,
             scrollBehavior = scrollBehavior,
             visualContentOffset = visualContentOffset,
             titleAlpha = { titleAlpha() * chromeTitleAlpha() },
-            backgroundAlpha = { if (backgroundBlur || !shaderSupported) backgroundAlpha() else 0f },
+            backgroundAlpha = backgroundAlpha,
             defaultWindowInsetsPadding = false,
             bandBrush = bandBrush,
-            bandOverhang = if (appState.enableBlur || !shaderSupported) GlassTopAppBarDefaults.BandOverhang else 0.dp,
+            bandOverhang = GlassTopAppBarDefaults.BandOverhang,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,
@@ -330,7 +324,6 @@ fun BlurredBar(
         }
         CompositionLocalProvider(
             LocalTopAppBarBackdrop provides backdrop,
-            LocalTopAppBarBackgroundBlur provides blurActive,
         ) {
             content()
         }

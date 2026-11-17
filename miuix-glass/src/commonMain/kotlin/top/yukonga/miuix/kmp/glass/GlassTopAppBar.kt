@@ -155,24 +155,18 @@ object GlassTopAppBarDefaults {
     fun bandBrush(color: Color): Brush = TopAppBarBandBrush(color)
 
     /** How far the band reaches past the bottom of the bar. */
-    val BandOverhang: Dp = 28.dp
+    val BandOverhang: Dp = 36.dp
 
     @Composable
     private fun isDarkTheme(): Boolean = MiuixTheme.colorScheme.background.luminance() < 0.5f
 }
 
-/** Starts fading inside the measured bar so its trailing edge does not form an opaque shelf. */
+/** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
 private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     private val colors = opacities.map { color.copy(alpha = color.alpha * it) }
 
-    override fun createShader(size: Size): Shader = createShader(0f, size.height)
+    override fun createShader(size: Size): Shader = createBandShader(size, 0f, size.height)
 
-    fun createShader(fadeStart: Float, fadeHeight: Float): Shader = LinearGradientShader(
-        from = Offset(0f, fadeStart),
-        to = Offset(0f, fadeStart + fadeHeight.coerceAtLeast(1f)),
-        colors = colors,
-        colorStops = stops,
-    )
     fun createBandShader(size: Size, fadeStart: Float, fadeHeight: Float): Shader {
         val height = size.height.coerceAtLeast(1f)
         val start = fadeStart.coerceIn(0f, height)
@@ -180,10 +174,11 @@ private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
         val fadeStops = stops.drop(1).map { stop ->
             (start + actualFadeHeight * stop).coerceAtMost(height) / height
         }
+        val topColor = colors.first()
         val colorStops = if (start > 0f) listOf(0f, start / height) + fadeStops else listOf(0f) + fadeStops
-        val gradientColors = if (start > 0f) listOf(color, color) + colors.drop(1) else listOf(color) + colors.drop(1)
+        val gradientColors = if (start > 0f) listOf(topColor, topColor) + colors.drop(1) else colors
         return LinearGradientShader(
-            from = Offset(0f, 0f),
+            from = Offset.Zero,
             to = Offset(0f, height),
             colors = gradientColors,
             colorStops = colorStops,
@@ -191,13 +186,15 @@ private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     }
 
     private companion object {
+        const val MAX_ALPHA = 0.90f
         val stops = List(17) { it / 16f }
         val opacities = stops.map { t ->
             val fade = t * t * t * (t * (t * 6f - 15f) + 10f)
-            1f - fade
+            MAX_ALPHA * (1f - fade)
         }
     }
 }
+
 private data class TopAppBarFadeBrush(
     val band: TopAppBarBandBrush,
     val fadeHeight: Float,
@@ -438,7 +435,7 @@ fun GlassTopAppBar(
             )
         } else {
             val overhangPx = with(LocalDensity.current) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
-            val fadeHeight = overhangPx + with(LocalDensity.current) { 12.dp.toPx() }
+            val fadeHeight = overhangPx + with(LocalDensity.current) { 36.dp.toPx() }
             val fadeBrush = remember(bandBrush, fadeHeight) {
                 if (bandBrush is TopAppBarBandBrush) TopAppBarFadeBrush(bandBrush, fadeHeight) else null
             }

@@ -16,7 +16,6 @@ data class AppState(
     val showFPSMonitor: Boolean = false,
     val showTopAppBar: Boolean = true,
     val topAppBarStyle: Int = 1,
-    val glassTopBarProgressiveBlur: Boolean = true,
     val showNavigationBar: Boolean = true,
     val navigationRailStyle: Int = 1,
     val showNavigationBarBadge: Boolean = false,

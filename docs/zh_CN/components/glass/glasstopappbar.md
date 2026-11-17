@@ -123,7 +123,7 @@ Scaffold(
 | TitleBlurRadius | Dp | 标题过渡模糊半径 | 8.dp |
 | ButtonSize | Dp | 按钮直径 | 44.dp |
 | PressedContentAlpha | Float | 按下时的内容透明度 | 0.6f |
-| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 28.dp |
+| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 36.dp |
 
 #### 方法
 
@@ -134,7 +134,7 @@ Scaffold(
 | buttonMaterial() | GlassMaterial | 随主题选择的 `GlassMaterials.puredThinGlass` |
 | buttonStroke() | EdgeStroke | 浅色模式为 `GlassEdgeStrokes.SmallLight`，深色模式为 `SmallDark` |
 | buttonPressedOverlay() | Color | 浅色模式为透明度 0.10 的黑色，深色模式为透明度 0.14 的白色 |
-| bandBrush(color: Color) | Brush | 使用页面颜色创建纵向渐变，顶部不透明，底部透明 |
+| bandBrush(color: Color) | Brush | 使用页面颜色创建纵向渐变，顶部半透明并平滑过渡至底部透明 |
 
 ## 进阶用法
 
