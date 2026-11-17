@@ -136,6 +136,7 @@ fun AboutPage(
                         title = "About",
                         showTopAppBar = true,
                         isWideScreen = LocalIsWideScreen.current,
+                        expandable = false,
                         scrollBehavior = topAppBarScrollBehavior,
                         color = barColor,
                         titleColor = titleColor,
