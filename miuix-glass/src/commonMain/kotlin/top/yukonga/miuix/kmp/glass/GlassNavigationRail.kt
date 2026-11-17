@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -10,9 +11,13 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -24,7 +29,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
@@ -40,8 +44,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,6 +79,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -92,10 +97,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.BadgedBox
+import top.yukonga.miuix.kmp.basic.BadgeDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
@@ -347,7 +353,11 @@ fun GlassNavigationRail(
             item.label?.let { with(density) { ceil(textMeasurer.measure(it, labelStyle).size.width.toFloat()).toDp() } } ?: 0.dp
         }
     }
-    val sourceWidths = remember(labelWidths) { labelWidths.map { it + RailSlotPadding } }
+    val sourceWidths = remember(items, labelWidths) {
+        labelWidths.mapIndexed { index, width ->
+            width + RailSlotPadding + if (items[index].badge != null) BadgeDefaults.LargeSize * 2 else 0.dp
+        }
+    }
 
     // One clock for the surface's width, top and corner; each row and the panel's height and start
     // edge settle on their own springs, as in the reference motion.
@@ -396,6 +406,7 @@ fun GlassNavigationRail(
             1f
         }
         val tabWidths = remember(sourceWidths, widthRatio) { sourceWidths.map { it * widthRatio } }
+        val animatedCapsuleWidth = animateDpAsState(capsuleWidth, RailMorphDpMotion, label = "railCapsuleWidth")
         val collapsedHeight = GlassNavigationRailDefaults.CollapsedHeight
         val collapsedStart = (viewportWidth - capsuleWidth) / 2
         val expandedStart = GlassNavigationRailDefaults.Margin
@@ -410,6 +421,7 @@ fun GlassNavigationRail(
         val panelStart = rememberRailMotion(
             target = if (expanded) expandedStart else collapsedStart,
             expanded = expanded,
+            targetChangeSpec = RailMorphDpMotion,
         ) { expanding -> if (expanding) RailMorphDpMotion else RailReboundMotion }
 
         GlassNavigationRailPanel(
@@ -422,7 +434,7 @@ fun GlassNavigationRail(
             tabWidths = tabWidths,
             labelWidths = labelWidths,
             contentStart = contentStart,
-            collapsedWidth = capsuleWidth,
+            collapsedWidth = { animatedCapsuleWidth.value },
             expandedWidth = expandedWidth,
             panelStart = { panelStart.value },
             collapsedTop = collapsedTop,
@@ -458,7 +470,7 @@ private fun GlassNavigationRailPanel(
     tabWidths: List<Dp>,
     labelWidths: List<Dp>,
     contentStart: Dp,
-    collapsedWidth: Dp,
+    collapsedWidth: () -> Dp,
     expandedWidth: Dp,
     panelStart: () -> Dp,
     collapsedTop: Dp,
@@ -501,7 +513,7 @@ private fun GlassNavigationRailPanel(
     val startPx = with(density) { contentStart.roundToPx().toFloat() }
     val endPx = with(density) { RailCollapsedEndPadding.toPx() }
     val headerHeightPx = with(density) { RailHeaderHeight.toPx() }
-    val interaction = remember(widths, startPx, endPx, scope) {
+    val interaction = remember(widths.size, startPx, endPx, scope) {
         NavigationRailInteraction(widths, startPx, endPx, selectedIndex, scope)
     }
     val currentOnSelect = rememberUpdatedState(onSelect)
@@ -510,7 +522,8 @@ private fun GlassNavigationRailPanel(
     val pressedIndex = interaction.pressedIndex
     val pressed = pressedIndex >= 0
     val indicatorIndex = if (pressed) pressedIndex else selectedIndex
-    LaunchedEffect(interaction, selectedIndex, pressed, interaction.releaseGeneration) {
+    LaunchedEffect(interaction, widths, selectedIndex, pressed, interaction.releaseGeneration) {
+        interaction.updateWidths(widths)
         if (!pressed) interaction.settle(selectedIndex)
     }
 
@@ -518,7 +531,7 @@ private fun GlassNavigationRailPanel(
         Modifier
             .layout { measurable, _ ->
                 val fraction = state.progress.coerceIn(0f, 1f)
-                val width = lerp(collapsedWidth.toPx(), expandedWidth.toPx(), fraction).roundToInt()
+                val width = lerp(collapsedWidth().toPx(), expandedWidth.toPx(), fraction).roundToInt()
                 val height = panelHeight().roundToPx().coerceAtLeast(0)
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(width, height) { placeable.place(0, 0) }
@@ -579,7 +592,7 @@ private fun GlassNavigationRailPanel(
                     pressedColor = indicatorPressedColor,
                 )
                 items.forEachIndexed { position, item ->
-                    key(position, item) {
+                    key(position) {
                         NavigationRailRow(
                             item = item,
                             selected = position == selectedIndex,
@@ -610,8 +623,8 @@ private fun GlassNavigationRailPanel(
                     .offset {
                         val fraction = state.progress
                         IntOffset(
-                            x = lerp(RailCollapsedToggleBoxStart.toPx(), RailExpandedToggleStart.toPx(), fraction).roundToInt(),
-                            y = lerp(0f, RailExpandedToggleTop.toPx(), fraction).roundToInt(),
+                            x = lerp(RailCollapsedToggleBoxStart.toPx(), RailExpandedToggleStart.toPx(), fraction).fastRoundToInt(),
+                            y = lerp(0f, RailExpandedToggleTop.toPx(), fraction).fastRoundToInt(),
                         )
                     }
                     .size(RailToggleBoxSize),
@@ -752,6 +765,11 @@ private fun NavigationRailRow(
         animationSpec = GlassMotion.navContent(),
         label = "glassNavigationRailTint",
     )
+    val badgeVisibility = animateFloatAsState(
+        targetValue = if (item.badge != null) 1f else 0f,
+        animationSpec = RailMorphMotion,
+        label = "railBadgeVisibility",
+    )
     val pressAlpha = animateFloatAsState(
         targetValue = if (pressed) GlassNavigationBarDefaults.PressedAlpha else 1f,
         animationSpec = GlassMotion.navContentFloat(),
@@ -777,14 +795,18 @@ private fun NavigationRailRow(
             )
         }
     }
+    val slotStart = animateFloatAsState(geometry.slotStart, RailMorphMotion, label = "railSlotStart")
+    val slotWidth = animateFloatAsState(geometry.slotWidth, RailMorphMotion, label = "railSlotWidth")
+    val sourceStart = animateFloatAsState(geometry.sourceStart, RailMorphMotion, label = "railSourceStart")
+    val sourceWidth = animateFloatAsState(geometry.sourceWidth, RailMorphMotion, label = "railSourceWidth")
     // This box is the actual slot, not the wider row retaining its invisible icon column.
     Box(
         modifier = Modifier
             .layout { measurable, constraints ->
                 val fraction = rowProgress().coerceIn(0f, 1f)
-                val width = lerp(geometry.slotWidth, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                val width = lerp(slotWidth.value, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
                 val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
-                val x = lerp(geometry.slotStart, RailItemHorizontalMargin.toPx(), fraction).roundToInt()
+                val x = lerp(slotStart.value, RailItemHorizontalMargin.toPx(), fraction).roundToInt()
                 // The scrolling parent places settled rows; only the morph needs scroll compensation.
                 val y = if (fraction == 1f) {
                     geometry.expandedTop.roundToInt()
@@ -798,7 +820,7 @@ private fun NavigationRailRow(
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(x, y) }
             }
-            .clip(RoundedCornerShape(percent = 50))
+            .clip(CircleShape)
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource, enabled = expanded)
             .semantics(mergeDescendants = true) {
@@ -821,50 +843,94 @@ private fun NavigationRailRow(
             .focusable(interactionSource = interactionSource)
             .graphicsLayer { alpha = pressAlpha.value },
     ) {
-        Row(
+        Layout(
             modifier = Modifier
                 .layout { measurable, constraints ->
                     val fraction = rowProgress().coerceIn(0f, 1f)
-                    val width = lerp(geometry.sourceWidth, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                    val width = lerp(sourceWidth.value, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
                     val placeable = measurable.measure(Constraints.fixed(width, constraints.maxHeight))
-                    val x = lerp(geometry.sourceStart - geometry.slotStart, 0f, fraction).roundToInt()
+                    val x = lerp(sourceStart.value - slotStart.value, 0f, fraction).roundToInt()
                     layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(x, 0) }
                 }
                 .padding(horizontal = RailItemContentPadding),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(RailIconColumnWidth)
-                    .graphicsLayer { this.alpha = iconAlpha() },
-            ) {
-                BadgedBox(badge = { item.badge?.invoke() }) {
+            content = {
+                Box(
+                    modifier = Modifier
+                        .width(RailIconColumnWidth)
+                        .graphicsLayer { this.alpha = iconAlpha() },
+                ) {
                     Icon(
                         imageVector = item.icon,
                         contentDescription = null,
-                        modifier = Modifier.size(RailIconSize),
+                        modifier = Modifier.size(RailSideIconSize),
                         tint = tint,
                     )
                 }
-            }
-            if (item.label != null) {
-                Text(
-                    text = item.label,
-                    modifier = Modifier.layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            // Keep rounding from truncating a fitting label, without exceeding either endpoint.
-                            constraints.copy(maxWidth = maxOf(constraints.maxWidth, geometry.labelMinWidth)),
-                        )
-                        layout(placeable.width.coerceAtMost(constraints.maxWidth), placeable.height) {
-                            placeable.placeRelative(0, 0)
-                        }
+                if (item.label != null) {
+                    Text(
+                        text = item.label,
+                        modifier = Modifier.layout { measurable, constraints ->
+                            val placeable = measurable.measure(
+                                // Keep rounding from truncating a fitting label, without exceeding either endpoint.
+                                constraints.copy(maxWidth = maxOf(constraints.maxWidth, geometry.labelMinWidth)),
+                            )
+                            layout(placeable.width.coerceAtMost(constraints.maxWidth), placeable.height) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        },
+                        color = tint,
+                        style = labelStyle,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                AnimatedContent(
+                    targetState = item.badge,
+                    contentKey = { it != null },
+                    contentAlignment = Alignment.Center,
+                    transitionSpec = {
+                        (fadeIn(RailMorphMotion) togetherWith fadeOut(RailMorphMotion)).using(null)
                     },
-                    color = tint,
-                    style = labelStyle,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                    label = "railBadge",
+                ) { badge ->
+                    Box { badge?.invoke() }
+                }
+            },
+        ) { measurables, constraints ->
+            val icon = measurables[0].measure(constraints.copy(minWidth = 0, minHeight = 0))
+            val label = if (item.label != null) {
+                measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0, maxWidth = (constraints.maxWidth - icon.width).coerceAtLeast(0)))
+            } else {
+                null
+            }
+            val badge = measurables.last().measure(constraints.copy(minWidth = 0, minHeight = 0))
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                val fraction = rowProgress().coerceIn(0f, 1f)
+                icon.placeRelative(0, (constraints.maxHeight - icon.height) / 2)
+                val visibility = badgeVisibility.value
+                val badgeGap = RailBadgeSpacing.toPx() * visibility
+                val badgeWidth = badge.width * visibility
+                val badgeSpace = badgeWidth + badgeGap
+                val labelShift = -badgeSpace / 2 * (1f - fraction)
+                label?.placeRelative((icon.width + labelShift).roundToInt(), (constraints.maxHeight - label.height) / 2)
+                val hasContent = badge.width > BadgeDefaults.Size.roundToPx()
+                val horizontalOverlap = if (hasContent) 12.dp.roundToPx() else 6.dp.roundToPx()
+                val verticalOverlap = if (hasContent) 14.dp.roundToPx() else 6.dp.roundToPx()
+                val anchorEnd = RailSideIconSize.toPx()
+                val anchorHeight = icon.height.toFloat()
+                // Clamp to the actual animated slot, not the wider row retaining its icon column.
+                val rowOffset = lerp(sourceStart.value - slotStart.value, 0f, fraction) + RailItemContentPadding.toPx()
+                val currentSlotWidth = lerp(slotWidth.value, itemWidth.toPx(), fraction)
+                val end = (currentSlotWidth - rowOffset - badge.width - RailBadgeSpacing.toPx()).roundToInt()
+                val start = (RailBadgeSpacing.toPx() - rowOffset).roundToInt()
+                val collapsedX = icon.width + (label?.width ?: 0) + labelShift + badgeGap - (badge.width - badgeWidth) / 2
+                val expandedX = anchorEnd - horizontalOverlap
+                val x = lerp(collapsedX, expandedX, fraction).roundToInt().coerceIn(start, maxOf(start, end))
+                val collapsedY = (constraints.maxHeight - badge.height) / 2f
+                val expandedY = (constraints.maxHeight - anchorHeight) / 2 - badge.height + verticalOverlap
+                val y = lerp(collapsedY, expandedY, fraction).roundToInt().coerceAtLeast(0)
+                badge.placeRelative(x, y)
             }
         }
     }
@@ -937,20 +1003,19 @@ private class RailMorphCorner(private val progress: () -> Float) : CornerSize {
     }
 }
 
-/**
- * Keeps a geometry value on [target]. Flipping [expanded] animates to it with [spec]; a target that
- * moves on its own, as a window resize does, is followed at once unless a flip is still settling.
- */
+/** Animates expand/collapse; other geometry changes snap unless [targetChangeSpec] is supplied. */
 @Composable
 private fun rememberRailMotion(
     target: Dp,
     expanded: Boolean,
+    targetChangeSpec: AnimationSpec<Dp>? = null,
     spec: (expanding: Boolean) -> AnimationSpec<Dp>,
 ): Animatable<Dp, AnimationVector1D> {
     val animatable = remember { Animatable(target, Dp.VectorConverter) }
     val currentTarget by rememberUpdatedState(target)
     val currentExpanded by rememberUpdatedState(expanded)
     val currentSpec by rememberUpdatedState(spec)
+    val currentTargetChangeSpec by rememberUpdatedState(targetChangeSpec)
     LaunchedEffect(animatable) {
         var settledExpanded = currentExpanded
         var animating = false
@@ -961,7 +1026,8 @@ private fun rememberRailMotion(
                 animatable.animateTo(value, currentSpec(expanding))
                 animating = false
             } else {
-                animatable.snapTo(value)
+                val targetSpec = currentTargetChangeSpec
+                if (targetSpec != null) animatable.animateTo(value, targetSpec) else animatable.snapTo(value)
             }
         }
     }
@@ -992,7 +1058,9 @@ private val RailIconEnterMotion = tween<Float>(durationMillis = 200, easing = Ra
 private val RailIconExitMotion = tween<Float>(durationMillis = 120, easing = RailMorphEasing)
 
 private val RailIconSize = 24.dp
+private val RailSideIconSize = RailIconSize + 4.dp
 private val RailIconColumnWidth = RailIconSize + 12.dp
+private val RailBadgeSpacing = 4.dp
 private val RailItemContentPadding = 14.dp
 private val RailItemHorizontalMargin = 12.dp
 private val RailCollapsedRowHeight = GlassNavigationRailDefaults.CollapsedHeight -

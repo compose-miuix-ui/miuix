@@ -136,6 +136,15 @@ GlassNavigationRail(
 | collapseContentDescription | String | 展开时开关的无障碍描述 | GlassNavigationRailDefaults.CollapseContentDescription | 否 |
 | scrollState | ScrollState | 展开列表的滚动状态 | rememberScrollState() | 否 |
 
+### GlassNavigationItem 属性
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| icon | ImageVector | 目的地图标 | - | 是 |
+| label | String? | 导航项标签 | null | 否 |
+| contentDescription | String? | 无障碍描述，未指定时使用 label | null | 否 |
+| badge | (@Composable () -> Unit)? | 显示在该项图标上的可选徽章，通常是一个 `Badge` | null | 否 |
+
 ### GlassNavigationRailState {#glassnavigationrailstate}
 
 通过 `rememberGlassNavigationRailState(initialExpanded = true)` 创建，可在配置变更后保留。

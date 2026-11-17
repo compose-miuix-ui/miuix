@@ -136,6 +136,15 @@ Once the panel has settled, the destination column scrolls under the toggle head
 | collapseContentDescription | String | Toggle description while expanded | GlassNavigationRailDefaults.CollapseContentDescription | No |
 | scrollState | ScrollState | Scroll state of the expanded column | rememberScrollState() | No |
 
+### GlassNavigationItem Properties
+
+| Property Name | Type | Description | Default Value | Required |
+| --- | --- | --- | --- | --- |
+| icon | ImageVector | Destination icon | - | Yes |
+| label | String? | Label of the item | null | No |
+| contentDescription | String? | Accessibility description; falls back to label | null | No |
+| badge | (@Composable () -> Unit)? | Optional badge shown on the item's icon, e.g. a `Badge` | null | No |
+
 ### GlassNavigationRailState {#glassnavigationrailstate}
 
 Create it with `rememberGlassNavigationRailState(initialExpanded = true)`; it survives configuration changes.

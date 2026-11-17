@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -37,8 +38,8 @@ fun GlassNavigationRailDemo() {
     val items = remember {
         listOf(
             GlassNavigationItem(MiuixIcons.Glass.VerticalSplit, "Home", "Home"),
-            GlassNavigationItem(MiuixIcons.Glass.Contacts, "Contacts", "Contacts"),
-            GlassNavigationItem(MiuixIcons.Glass.SettingsOutline, "Settings", "Settings"),
+            GlassNavigationItem(MiuixIcons.Glass.Contacts, "Contacts", "Contacts", badge = { Badge { Text("8") } }),
+            GlassNavigationItem(MiuixIcons.Glass.SettingsOutline, "Settings", "Settings", badge = { Badge() }),
         )
     }
     val descriptions = remember {

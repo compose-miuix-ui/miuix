@@ -33,12 +33,14 @@ internal class NavigationRailSlot {
 
 /** One press and one pair of indicator springs for the entire panel/capsule lifetime. */
 internal class NavigationRailInteraction(
-    val widths: List<Float>,
+    widths: List<Float>,
     val contentStart: Float,
     val endPadding: Float,
     selectedIndex: Int,
     private val scope: CoroutineScope,
 ) {
+    var widths: List<Float> = widths
+        private set
     val slots = List(widths.size) { NavigationRailSlot() }
     val rowInteractions = List(widths.size) { MutableInteractionSource() }
     private val starts = FloatArray(widths.size + 1).also { starts ->
@@ -52,6 +54,12 @@ internal class NavigationRailInteraction(
         private set
     var releaseGeneration by mutableIntStateOf(0)
         private set
+
+    fun updateWidths(widths: List<Float>) {
+        if (this.widths === widths) return
+        this.widths = widths
+        for (index in widths.indices) starts[index + 1] = starts[index] + widths[index]
+    }
 
     fun indexAt(x: Float, y: Float): Int {
         var nearest = -1

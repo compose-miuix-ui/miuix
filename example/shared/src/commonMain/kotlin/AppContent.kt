@@ -686,8 +686,14 @@ private fun NavigationBar(
             Box {
                 when (appState.floatingNavigationBarStyle) {
                     1 -> {
-                        val glassItems = remember(navigationItems) {
-                            navigationItems.map { GlassNavigationItem(icon = it.icon, label = it.label) }
+                        val glassItems = remember(navigationItems, appState.showNavigationBarBadge) {
+                            navigationItems.mapIndexed { index, item ->
+                                GlassNavigationItem(
+                                    icon = item.icon,
+                                    label = item.label,
+                                    badge = navigationItemBadge(index, appState.showNavigationBarBadge),
+                                )
+                            }
                         }
                         GlassNavigationBar(
                             items = glassItems,
