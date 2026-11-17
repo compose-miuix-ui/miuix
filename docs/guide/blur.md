@@ -439,7 +439,7 @@ Presets: `ProgressiveBlur.Top` / `Bottom` / `Left` / `Right` cover the four edge
 | --- | --- | --- | --- |
 | BlurRadius | Float | Default blur radius in dp | 20f |
 | NoiseCoefficient | Float | Default noise dithering coefficient | 0.0045f |
-| MaxBlurRadius | Float | Maximum allowed blur radius in dp | 150f |
+| MaxBlurRadius | Float | Maximum allowed blur radius in dp | 100f |
 
 | Method | Return Type | Description |
 | --- | --- | --- |

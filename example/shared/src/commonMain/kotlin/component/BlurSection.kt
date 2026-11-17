@@ -359,10 +359,10 @@ private fun BlurDemo() {
             SliderPreference(
                 title = "Blur Radius",
                 valueText = "${blurRadiusX.toInt()}",
-                value = blurRadiusX / 200f,
+                value = blurRadiusX / 100f,
                 onValueChange = {
-                    blurRadiusX = it * 200f
-                    blurRadiusY = it * 200f
+                    blurRadiusX = it * 100f
+                    blurRadiusY = it * 100f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
@@ -403,8 +403,8 @@ private fun BlurDemo() {
 
 @Composable
 private fun ForegroundBlurDemo() {
-    var blurRadiusX by remember { mutableFloatStateOf(200f) }
-    var blurRadiusY by remember { mutableFloatStateOf(200f) }
+    var blurRadiusX by remember { mutableFloatStateOf(100f) }
+    var blurRadiusY by remember { mutableFloatStateOf(100f) }
     var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
@@ -517,10 +517,10 @@ private fun ForegroundBlurDemo() {
             SliderPreference(
                 title = "Blur Radius",
                 valueText = "${blurRadiusX.toInt()}",
-                value = blurRadiusX / 200f,
+                value = blurRadiusX / 100f,
                 onValueChange = {
-                    blurRadiusX = it * 200f
-                    blurRadiusY = it * 200f
+                    blurRadiusX = it * 100f
+                    blurRadiusY = it * 100f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )

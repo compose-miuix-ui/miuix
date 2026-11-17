@@ -438,7 +438,7 @@ Box(
 | --- | --- | --- | --- |
 | BlurRadius | Float | 默认模糊半径（dp） | 20f |
 | NoiseCoefficient | Float | 默认噪声抖动系数 | 0.0045f |
-| MaxBlurRadius | Float | 最大允许模糊半径（dp） | 150f |
+| MaxBlurRadius | Float | 最大允许模糊半径（dp） | 100f |
 
 | 方法 | 返回类型 | 说明 |
 | --- | --- | --- |

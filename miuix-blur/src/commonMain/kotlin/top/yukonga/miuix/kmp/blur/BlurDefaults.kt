@@ -152,7 +152,7 @@ object BlurDefaults {
     val ProgressiveNoiseCoefficient: Float = 0f
 
     /** Maximum allowed blur radius in dp. */
-    val MaxBlurRadius: Float = 150f
+    val MaxBlurRadius: Float = 100f
 
     /**
      * Remembers a [BlurColors] (see the type's doc for why the factory).
