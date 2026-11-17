@@ -76,13 +76,13 @@ import top.yukonga.miuix.kmp.icon.glass.BurstShot
 import top.yukonga.miuix.kmp.icon.glass.Calculator
 import top.yukonga.miuix.kmp.icon.glass.CallRecording
 import top.yukonga.miuix.kmp.icon.glass.CameraFill
+import top.yukonga.miuix.kmp.icon.glass.CameraOutline
 import top.yukonga.miuix.kmp.icon.glass.CameraPhone
 import top.yukonga.miuix.kmp.icon.glass.Car
 import top.yukonga.miuix.kmp.icon.glass.Card1Dash2
 import top.yukonga.miuix.kmp.icon.glass.Card1DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Card2Dash2
 import top.yukonga.miuix.kmp.icon.glass.Card2DashselectedPlus
-import top.yukonga.miuix.kmp.icon.glass.CaremaOutline
 import top.yukonga.miuix.kmp.icon.glass.Carrier
 import top.yukonga.miuix.kmp.icon.glass.CeditSelection
 import top.yukonga.miuix.kmp.icon.glass.ChargingCase
@@ -134,7 +134,6 @@ import top.yukonga.miuix.kmp.icon.glass.DisplayBrightness
 import top.yukonga.miuix.kmp.icon.glass.Document
 import top.yukonga.miuix.kmp.icon.glass.DoodlePen
 import top.yukonga.miuix.kmp.icon.glass.Download
-import top.yukonga.miuix.kmp.icon.glass.DrawerListHandle
 import top.yukonga.miuix.kmp.icon.glass.Earphones
 import top.yukonga.miuix.kmp.icon.glass.EarphonesDisabled
 import top.yukonga.miuix.kmp.icon.glass.EarphonesWithMicrophone
@@ -477,6 +476,7 @@ import top.yukonga.miuix.kmp.icon.glass.UmbrellaNeeded
 import top.yukonga.miuix.kmp.icon.glass.UmbrellaNotNeeded
 import top.yukonga.miuix.kmp.icon.glass.Underline
 import top.yukonga.miuix.kmp.icon.glass.Undo
+import top.yukonga.miuix.kmp.icon.glass.UnfoldMore
 import top.yukonga.miuix.kmp.icon.glass.UniversalRemote
 import top.yukonga.miuix.kmp.icon.glass.UnlockFill
 import top.yukonga.miuix.kmp.icon.glass.UnlockOutline
@@ -597,7 +597,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.Card1DashselectedPlus,
             MiuixIcons.Glass.Light.Card2Dash2,
             MiuixIcons.Glass.Light.Card2DashselectedPlus,
-            MiuixIcons.Glass.Light.CaremaOutline,
+            MiuixIcons.Glass.Light.CameraOutline,
             MiuixIcons.Glass.Light.Carrier,
             MiuixIcons.Glass.Light.CeditSelection,
             MiuixIcons.Glass.Light.ChargingCase,
@@ -649,7 +649,6 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.Document,
             MiuixIcons.Glass.Light.DoodlePen,
             MiuixIcons.Glass.Light.Download,
-            MiuixIcons.Glass.Light.DrawerListHandle,
             MiuixIcons.Glass.Light.Earphones,
             MiuixIcons.Glass.Light.EarphonesDisabled,
             MiuixIcons.Glass.Light.EarphonesWithMicrophone,
@@ -991,6 +990,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.UmbrellaNeeded,
             MiuixIcons.Glass.Light.UmbrellaNotNeeded,
             MiuixIcons.Glass.Light.Underline,
+            MiuixIcons.Glass.Light.UnfoldMore,
             MiuixIcons.Glass.Light.Undo,
             MiuixIcons.Glass.Light.UniversalRemote,
             MiuixIcons.Glass.Light.UnlockFill,
@@ -1110,7 +1110,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.Card1DashselectedPlus,
             MiuixIcons.Glass.Normal.Card2Dash2,
             MiuixIcons.Glass.Normal.Card2DashselectedPlus,
-            MiuixIcons.Glass.Normal.CaremaOutline,
+            MiuixIcons.Glass.Normal.CameraOutline,
             MiuixIcons.Glass.Normal.Carrier,
             MiuixIcons.Glass.Normal.CeditSelection,
             MiuixIcons.Glass.Normal.ChargingCase,
@@ -1162,7 +1162,6 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.Document,
             MiuixIcons.Glass.Normal.DoodlePen,
             MiuixIcons.Glass.Normal.Download,
-            MiuixIcons.Glass.Normal.DrawerListHandle,
             MiuixIcons.Glass.Normal.Earphones,
             MiuixIcons.Glass.Normal.EarphonesDisabled,
             MiuixIcons.Glass.Normal.EarphonesWithMicrophone,
@@ -1504,6 +1503,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.UmbrellaNeeded,
             MiuixIcons.Glass.Normal.UmbrellaNotNeeded,
             MiuixIcons.Glass.Normal.Underline,
+            MiuixIcons.Glass.Normal.UnfoldMore,
             MiuixIcons.Glass.Normal.Undo,
             MiuixIcons.Glass.Normal.UniversalRemote,
             MiuixIcons.Glass.Normal.UnlockFill,
@@ -1623,7 +1623,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.Card1DashselectedPlus,
             MiuixIcons.Glass.Regular.Card2Dash2,
             MiuixIcons.Glass.Regular.Card2DashselectedPlus,
-            MiuixIcons.Glass.Regular.CaremaOutline,
+            MiuixIcons.Glass.Regular.CameraOutline,
             MiuixIcons.Glass.Regular.Carrier,
             MiuixIcons.Glass.Regular.CeditSelection,
             MiuixIcons.Glass.Regular.ChargingCase,
@@ -1675,7 +1675,6 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.Document,
             MiuixIcons.Glass.Regular.DoodlePen,
             MiuixIcons.Glass.Regular.Download,
-            MiuixIcons.Glass.Regular.DrawerListHandle,
             MiuixIcons.Glass.Regular.Earphones,
             MiuixIcons.Glass.Regular.EarphonesDisabled,
             MiuixIcons.Glass.Regular.EarphonesWithMicrophone,
@@ -2017,6 +2016,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.UmbrellaNeeded,
             MiuixIcons.Glass.Regular.UmbrellaNotNeeded,
             MiuixIcons.Glass.Regular.Underline,
+            MiuixIcons.Glass.Regular.UnfoldMore,
             MiuixIcons.Glass.Regular.Undo,
             MiuixIcons.Glass.Regular.UniversalRemote,
             MiuixIcons.Glass.Regular.UnlockFill,
@@ -2136,7 +2136,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.Card1DashselectedPlus,
             MiuixIcons.Glass.Medium.Card2Dash2,
             MiuixIcons.Glass.Medium.Card2DashselectedPlus,
-            MiuixIcons.Glass.Medium.CaremaOutline,
+            MiuixIcons.Glass.Medium.CameraOutline,
             MiuixIcons.Glass.Medium.Carrier,
             MiuixIcons.Glass.Medium.CeditSelection,
             MiuixIcons.Glass.Medium.ChargingCase,
@@ -2188,7 +2188,6 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.Document,
             MiuixIcons.Glass.Medium.DoodlePen,
             MiuixIcons.Glass.Medium.Download,
-            MiuixIcons.Glass.Medium.DrawerListHandle,
             MiuixIcons.Glass.Medium.Earphones,
             MiuixIcons.Glass.Medium.EarphonesDisabled,
             MiuixIcons.Glass.Medium.EarphonesWithMicrophone,
@@ -2530,6 +2529,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.UmbrellaNeeded,
             MiuixIcons.Glass.Medium.UmbrellaNotNeeded,
             MiuixIcons.Glass.Medium.Underline,
+            MiuixIcons.Glass.Medium.UnfoldMore,
             MiuixIcons.Glass.Medium.Undo,
             MiuixIcons.Glass.Medium.UniversalRemote,
             MiuixIcons.Glass.Medium.UnlockFill,
@@ -2649,7 +2649,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.Card1DashselectedPlus,
             MiuixIcons.Glass.Demibold.Card2Dash2,
             MiuixIcons.Glass.Demibold.Card2DashselectedPlus,
-            MiuixIcons.Glass.Demibold.CaremaOutline,
+            MiuixIcons.Glass.Demibold.CameraOutline,
             MiuixIcons.Glass.Demibold.Carrier,
             MiuixIcons.Glass.Demibold.CeditSelection,
             MiuixIcons.Glass.Demibold.ChargingCase,
@@ -2701,7 +2701,6 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.Document,
             MiuixIcons.Glass.Demibold.DoodlePen,
             MiuixIcons.Glass.Demibold.Download,
-            MiuixIcons.Glass.Demibold.DrawerListHandle,
             MiuixIcons.Glass.Demibold.Earphones,
             MiuixIcons.Glass.Demibold.EarphonesDisabled,
             MiuixIcons.Glass.Demibold.EarphonesWithMicrophone,
@@ -3043,6 +3042,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.UmbrellaNeeded,
             MiuixIcons.Glass.Demibold.UmbrellaNotNeeded,
             MiuixIcons.Glass.Demibold.Underline,
+            MiuixIcons.Glass.Demibold.UnfoldMore,
             MiuixIcons.Glass.Demibold.Undo,
             MiuixIcons.Glass.Demibold.UniversalRemote,
             MiuixIcons.Glass.Demibold.UnlockFill,

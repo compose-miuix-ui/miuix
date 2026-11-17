@@ -12,14 +12,14 @@ import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 
-val MiuixIcons.Glass.CaremaOutline: ImageVector
-    get() = MiuixIcons.Glass.Regular.CaremaOutline
+val MiuixIcons.Glass.CameraOutline: ImageVector
+    get() = MiuixIcons.Glass.Regular.CameraOutline
 
-val MiuixIcons.Glass.Light.CaremaOutline: ImageVector
+val MiuixIcons.Glass.Light.CameraOutline: ImageVector
     get() {
         if (_takePhotoLineLight != null) return _takePhotoLineLight!!
         _takePhotoLineLight = buildHyperOSIcon(
-            name = "CaremaOutline.Glass.Light",
+            name = "CameraOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(817.7f, 729.6f),
                 PathNode.QuadTo(827.3f, 723.8f, 839.7f, 708f),
@@ -134,11 +134,11 @@ val MiuixIcons.Glass.Light.CaremaOutline: ImageVector
 
 private var _takePhotoLineLight: ImageVector? = null
 
-val MiuixIcons.Glass.Normal.CaremaOutline: ImageVector
+val MiuixIcons.Glass.Normal.CameraOutline: ImageVector
     get() {
         if (_takePhotoLineNormal != null) return _takePhotoLineNormal!!
         _takePhotoLineNormal = buildHyperOSIcon(
-            name = "CaremaOutline.Glass.Normal",
+            name = "CameraOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(813.1f, 721.6f),
                 PathNode.QuadTo(820.9f, 717.1f, 832.3f, 702.5f),
@@ -253,11 +253,11 @@ val MiuixIcons.Glass.Normal.CaremaOutline: ImageVector
 
 private var _takePhotoLineNormal: ImageVector? = null
 
-val MiuixIcons.Glass.Regular.CaremaOutline: ImageVector
+val MiuixIcons.Glass.Regular.CameraOutline: ImageVector
     get() {
         if (_takePhotoLineRegular != null) return _takePhotoLineRegular!!
         _takePhotoLineRegular = buildHyperOSIcon(
-            name = "CaremaOutline.Glass.Regular",
+            name = "CameraOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(811f, 718f),
                 PathNode.QuadTo(818f, 714f, 829f, 700f),
@@ -372,11 +372,11 @@ val MiuixIcons.Glass.Regular.CaremaOutline: ImageVector
 
 private var _takePhotoLineRegular: ImageVector? = null
 
-val MiuixIcons.Glass.Medium.CaremaOutline: ImageVector
+val MiuixIcons.Glass.Medium.CameraOutline: ImageVector
     get() {
         if (_takePhotoLineMedium != null) return _takePhotoLineMedium!!
         _takePhotoLineMedium = buildHyperOSIcon(
-            name = "CaremaOutline.Glass.Medium",
+            name = "CameraOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(804.8f, 711f),
                 PathNode.QuadTo(812.6f, 707f, 821.7f, 695.7f),
@@ -491,11 +491,11 @@ val MiuixIcons.Glass.Medium.CaremaOutline: ImageVector
 
 private var _takePhotoLineMedium: ImageVector? = null
 
-val MiuixIcons.Glass.Demibold.CaremaOutline: ImageVector
+val MiuixIcons.Glass.Demibold.CameraOutline: ImageVector
     get() {
         if (_takePhotoLineDemibold != null) return _takePhotoLineDemibold!!
         _takePhotoLineDemibold = buildHyperOSIcon(
-            name = "CaremaOutline.Glass.Demibold",
+            name = "CameraOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(800.4f, 706.1f),
                 PathNode.QuadTo(808.8f, 702.1f, 816.6f, 692.6f),
