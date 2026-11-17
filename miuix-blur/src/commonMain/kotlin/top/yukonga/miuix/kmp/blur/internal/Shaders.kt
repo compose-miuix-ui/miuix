@@ -68,7 +68,7 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
         """
         float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
         mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
-        float mw = clamp(mraw * 3.0 - 2.0, 0.0, 1.0);
+        float mw = clamp(mraw * 2.0 - 1.0, 0.0, 1.0);
         mw = mw * mw * (3.0 - 2.0 * mw);
         if (mw <= 0.0) {
             return half4(0.0);
@@ -177,14 +177,13 @@ private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<String>>> = Array(2) { axi
 
 internal fun progressiveSharpShaderKey(axis: Int, tap: Int, masked: Boolean): String = PROGRESSIVE_SHARP_KEYS[axis][if (masked) 1 else 0][tap]
 
-/** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
-internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
-internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
-internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
+/** Gaussian sigma fractions of the two graduated composite levels (`fullBlur` and `lightBlur`). */
+internal const val PROGRESSIVE_FULL_FRACTION = 1.0f
+internal const val PROGRESSIVE_LIGHT_FRACTION = 0.25f
 
 /**
- * Multi-level progressive composite (Skiko multi-child shader): three graduated Gaussian levels
- * ([blur0] strongest … [blur2] lightest) interpolated along the gradient, so the blur strength
+ * Two-level progressive composite (Skiko multi-child shader): two graduated Gaussian levels
+ * ([fullBlur] strongest, [lightBlur] lightest) interpolated along the gradient, so the blur strength
  * itself ramps — that is what reads as progressive rather than one blur cross-faded with sharp.
  * Runs on the downscaled layer with [clearChild] bound to the lightest level, degenerating the last
  * mix segment (the sharp end is a separate full-resolution overlay) — except at exp 0, where
@@ -195,9 +194,8 @@ internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
  */
 internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     uniform shader clearChild;
-    uniform shader blur0;
-    uniform shader blur1;
-    uniform shader blur2;
+    uniform shader fullBlur;
+    uniform shader lightBlur;
     uniform float2 in_gradAxis;
     uniform float2 in_gradBand;
     uniform float in_curve;
@@ -207,22 +205,17 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
         raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
-        // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
-        float pos = raw * 3.0;
+        // [fullBlur -> lightBlur -> sharp] so blur strength decreases continuously.
+        float pos = raw * 2.0;
         half4 color;
         if (pos < 1.0) {
             float f = pos * pos * (3.0 - 2.0 * pos);
-            color = mix(blur0.eval(xy), blur1.eval(xy), f);
-        } else if (pos < 2.0) {
+            color = mix(fullBlur.eval(xy), lightBlur.eval(xy), f);
+        } else {
             float f = pos - 1.0;
             f = f * f * (3.0 - 2.0 * f);
-            color = mix(blur1.eval(xy), blur2.eval(xy), f);
-        } else {
-            float f = pos - 2.0;
-            f = f * f * (3.0 - 2.0 * f);
-            color = mix(blur2.eval(xy), clearChild.eval(xy), f);
+            color = mix(lightBlur.eval(xy), clearChild.eval(xy), f);
         }
-        // Unpremul terminator (same rationale as buildBlurShader): the native level blurs mix
         // the padding ring's transparency into the edges; without renormalizing to opaque, the
         // sharp content below bleeds through the semi-transparent rim.
         if (color.a > 0.0039) {
@@ -251,10 +244,10 @@ internal const val UNPREMUL_SHADER = """
 
 /**
  * Band mask for the progressive composite: `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2}: the Android stack DAG's level stops
+ * smoothstepped gradient. `in_slope = 2`, `in_level = 1`: the Android stack DAG's level stop
  * (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1`: the continuous
- * `1 − raw` ramp for the post chain; `in_level = −2`, `in_slope = −3`: the rising
- * `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
+ * `1 − raw` ramp for the post chain; `in_level = −1`, `in_slope = −2`: the rising
+ * `clamp(2·raw − 1, 0, 1)` ramp masking the sharp end. The smoothstepped weight keeps the masks
  * complementary to the mix chain (`s(1 − x) = 1 − s(x)`), so both platforms zero the walk's
  * derivative at the stops alike. The child is renormalized to opaque before weighting — the
  * unpremul terminator for the Android masked levels, folded in to save a pass and a no-op elsewhere.

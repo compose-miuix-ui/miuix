@@ -13,7 +13,7 @@ import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
-import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LEVEL_FRACTION_1
+import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LIGHT_FRACTION
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForScale
 import top.yukonga.miuix.kmp.blur.internal.chain
@@ -123,8 +123,8 @@ fun BackdropEffectScope.progressiveBlur(
         // Sized for the middle level: the lightest level's variance then stays above the pyramid's
         // box floor at common radii, and every stack pass runs on 1/scale² pixels. The sharp end
         // doesn't ride this layer, so it doesn't constrain the scale.
-        val sigma1 = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LEVEL_FRACTION_1
-        val exp = downScaleExpFor(sigma1 * sigma1)
+        val lightSigma = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LIGHT_FRACTION
+        val exp = downScaleExpFor(lightSigma * lightSigma)
         val scale = (1 shl exp).toFloat()
         val kernelPadding = BLUR_KERNEL_REACH * scale
         if (kernelPadding > padding) {

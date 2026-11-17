@@ -33,12 +33,10 @@ internal actual fun runtimeShaderEffect(
 
 internal actual fun progressiveStackEffect(
     scope: BackdropEffectScopeImpl,
-    sigma0X: Float,
-    sigma0Y: Float,
-    sigma1X: Float,
-    sigma1Y: Float,
-    sigma2X: Float,
-    sigma2Y: Float,
+    fullSigmaX: Float,
+    fullSigmaY: Float,
+    lightSigmaX: Float,
+    lightSigmaY: Float,
     ax: Float,
     ay: Float,
     projFull: Float,
@@ -62,18 +60,17 @@ internal actual fun progressiveStackEffect(
         ImageFilter.makeBlur(sigmaX, sigmaY, FilterTileMode.CLAMP, pre, null)
     }
 
-    // clearChild := blur2 by default, degenerating the last mix segment (the sharp end is the
+    // clearChild := lightBlur by default, degenerating the last mix segment (the sharp end is the
     // caller's full-res overlay); with nativeSharpEnd the (pre-chained) source binds instead —
-    // a null child samples the source. Skia evaluates the shared blur2 instance once.
-    val blur2 = level(sigma2X, sigma2Y)
+    // a null child samples the source. Skia evaluates the shared lightBlur instance once.
+    val lightBlur = level(lightSigmaX, lightSigmaY)
     var filter = ImageFilter.makeRuntimeShader(
         shader.asSkikoRuntimeShader(),
-        arrayOf("clearChild", "blur0", "blur1", "blur2"),
+        arrayOf("clearChild", "fullBlur", "lightBlur"),
         arrayOf(
-            if (nativeSharpEnd) pre else blur2,
-            level(sigma0X, sigma0Y),
-            level(sigma1X, sigma1Y),
-            blur2,
+            if (nativeSharpEnd) pre else lightBlur,
+            level(fullSigmaX, fullSigmaY),
+            lightBlur,
         ),
     )
     if (postEffect != null) {
