@@ -809,7 +809,6 @@ private class DrawBackdropNode(
         val rX = scope.cachedProgRadiusX
         val rY = scope.cachedProgRadiusY
         if (gradient == null || rX.isNaN() || rY.isNaN()) {
-            // No progressiveBlur call in the effects block: draw uniformly, gradient ignored.
             chainFullResNoiseIfNeeded()
             sharpOverlayActive = false
             stackDitherChained = false
@@ -1131,6 +1130,8 @@ private class DrawBackdropNode(
         sharpExp = -1
         sharpBandOffset = IntOffset.Zero
         sharpBandSize = IntSize.Zero
+        sharpOverlayPad = Float.NaN
+        sharpDownscale = 1f
     }
 
     fun releaseGraphicsLayers() {

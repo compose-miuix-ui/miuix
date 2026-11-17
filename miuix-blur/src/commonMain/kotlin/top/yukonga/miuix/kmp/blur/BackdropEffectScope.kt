@@ -52,8 +52,8 @@ sealed interface BackdropEffectScope :
 }
 
 /**
- * Applies brightness, contrast and saturation. Brightness works in linear (gamma 2.2) space via a
- * runtime shader — a linear `ColorMatrix` offset would shift hue.
+ * Applies brightness, contrast and saturation. Brightness works in approximate linear (gamma 2.0)
+ * space via a runtime shader — a linear `ColorMatrix` offset would shift hue.
  *
  * @param brightness Brightness in linear space; 0 leaves it unchanged.
  * @param contrast Contrast multiplier; 1 leaves it unchanged.

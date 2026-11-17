@@ -93,10 +93,12 @@ internal fun createBlurEffect(
         if (n > 0) {
             val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
             val shaderWeights = scope.obtainShaderWeightsBuffer(n)
+            var pairWeightSum = 0f
             for (i in 0 until n) {
                 shaderOffsets[i * 2] = paramOffsets[i]
                 shaderOffsets[i * 2 + 1] = 0f
                 shaderWeights[i] = paramWeights[i]
+                pairWeightSum += paramWeights[i]
             }
             val hShader = scope.obtainRuntimeShader(
                 BLUR_H_KEYS[n][bucket],
@@ -104,6 +106,7 @@ internal fun createBlurEffect(
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
                 setFloatUniform("in_blurWeight", shaderWeights)
+                setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
                 setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             }
             effect = runtimeShaderEffect(hShader, "child")
@@ -115,10 +118,12 @@ internal fun createBlurEffect(
         if (n > 0) {
             val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
             val shaderWeights = scope.obtainShaderWeightsBuffer(n)
+            var pairWeightSum = 0f
             for (i in 0 until n) {
                 shaderOffsets[i * 2] = 0f
                 shaderOffsets[i * 2 + 1] = paramOffsets[i]
                 shaderWeights[i] = paramWeights[i]
+                pairWeightSum += paramWeights[i]
             }
             val vShader = scope.obtainRuntimeShader(
                 BLUR_V_KEYS[n][bucket],
@@ -126,6 +131,7 @@ internal fun createBlurEffect(
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
                 setFloatUniform("in_blurWeight", shaderWeights)
+                setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
                 setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             }
             effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
@@ -532,10 +538,11 @@ internal fun adjustedVarianceForScale(sigmaSquared: Float, scale: Float): Float 
 internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float = adjustedVarianceForScale(sigmaSquared, (1 shl exp).toFloat())
 
 /**
- * Generates a 27-tap discrete kernel (-13..+13) from [variance], normalizes it, and merges adjacent
- * pairs into [outOffsets]/[outWeights] (first [MAX_BLUR_TAPS] slots), returning the tap count.
- * Returns 0 when the variance is too small or no pair survives the weight threshold. Scratch arrays
- * keep the observe-driven path allocation-free.
+ * Generates a 27-tap discrete kernel (-13..+13) from [variance], normalizes it, and merges
+ * symmetric side pairs into [outOffsets]/[outWeights] (first [MAX_BLUR_TAPS] slots), returning the
+ * pair count (center tap 0 is sampled once outside the loop). Returns 0 when the variance is too
+ * small or no pair survives the weight threshold. Scratch arrays keep the observe-driven path
+ * allocation-free.
  */
 internal fun computeBlurParamsInto(
     variance: Float,
@@ -557,40 +564,21 @@ internal fun computeBlurParamsInto(
     for (i in 1..13) total += rawScratch[i] * 2.0
     for (i in 0..13) rawScratch[i] /= total
 
+    // Pairs 0..6: merge (1,2), (3,4), ..., (11,12), (13); center (0) is sampled once outside the loop.
     var tapCount = 0
-
-    // Pair 0: the center is sampled twice (±ε), so its per-sample weight is halved.
-    val halfCenter = rawScratch[0] * 0.5
-    val w1 = rawScratch[1]
-    if (halfCenter + w1 > 1e-6) {
-        outOffsets[0] = (w1 / (halfCenter + w1)).toFloat()
-        tapCount = 1
-    }
-
-    // 4. Pairs 1-6: merge (2,3), (4,5), ..., (12,13)
-    var i = 2
+    var i = 1
     while (i < 14 && tapCount < MAX_BLUR_TAPS) {
         val wa = rawScratch[i]
         val wb = if (i + 1 < 14) rawScratch[i + 1] else 0.0
         val combined = wa + wb
         if (combined < WEIGHT_THRESHOLD) break
-        outOffsets[tapCount] = ((wa * i + wb * (i + 1)) / combined).toFloat()
-        outWeights[tapCount] = combined.toFloat()
-        tapCount++
-        i += 2
-    }
-
-    // 5. Center weight = residual ensuring sum(weights) = 0.5
-    //    (each weight is counted twice due to symmetric sampling, so 2×0.5 = 1.0)
-    var pairWeightSum = 0f
-    for (j in 1 until tapCount) pairWeightSum += outWeights[j]
-    outWeights[0] = (0.5f - pairWeightSum).coerceAtLeast(0f)
-
-    // 6. Validity check: zero out weights outside (0, 1)
-    for (j in 0 until tapCount) {
-        if (outWeights[j] <= 0f || outWeights[j] >= 1f) {
-            outWeights[j] = 0f
+        val w = combined.toFloat()
+        if (w > 0f && w < 1f) {
+            outOffsets[tapCount] = ((wa * i + wb * (i + 1)) / combined).toFloat()
+            outWeights[tapCount] = w
+            tapCount++
         }
+        i += 2
     }
 
     return tapCount

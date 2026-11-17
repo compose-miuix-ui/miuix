@@ -10,10 +10,11 @@ internal fun buildBlurShader(tapCount: Int): String {
     uniform shader child;
     uniform float2 in_blurOffset[$tapCount];
     uniform float in_blurWeight[$tapCount];
+    uniform float in_centerWeight;
     uniform float2 in_maxCoord;
 
     half4 main(float2 xy) {
-        half4 color = half4(0);
+        half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord)) * half(in_centerWeight);
         for (int i = 0; i < $tapCount; i++) {
             float2 offset = in_blurOffset[i];
             float2 c1 = clamp(xy + offset, float2(0.5), in_maxCoord);
@@ -294,7 +295,7 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
 /**
  * Brightness / contrast / saturation adjustment.
  *
- * Brightness is applied in linear (gamma 2.2) space to avoid sRGB hue shift;
+ * Brightness is applied in approximate linear (gamma 2.0) space to avoid sRGB hue shift;
  * contrast and saturation are applied in sRGB space.
  *
  * Uniforms: `in_brightness ∈ [-1, +1]`, `in_contrast ∈ [0, +∞)`, `in_saturation ∈ [0, +∞)`.
@@ -313,13 +314,14 @@ internal const val COLOR_CONTROLS_SHADER = """
         half3 c = src.rgb / a;
 
         if (in_brightness != 0.0) {
-            c = pow(c, half3(2.2));
+            c = max(c, half3(0.0));
+            c = c * c;
             if (in_brightness > 0.0) {
                 c = mix(c, half3(1.0), half(in_brightness));
             } else {
                 c = c * half(1.0 + in_brightness);
             }
-            c = pow(c, half3(0.45454545));
+            c = sqrt(c);
         }
 
         if (in_contrast != 1.0) {
@@ -336,18 +338,15 @@ internal const val COLOR_CONTROLS_SHADER = """
     }
 """
 
-/** Noise dithering shader — 3-channel pseudo-random anti-banding. */
+/** Noise dithering shader — 3-channel sin-free hash anti-banding. */
 internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
     uniform float noise_coeff;
 
     half4 main(float2 xy) {
-        float3 d = float3(
-            dot(xy, float2(6.9898, 78.233)),
-            dot(xy, float2(7.9898, 78.233)),
-            dot(xy, float2(8.9898, 78.233))
-        );
-        float3 n = (fract(sin(d) * float3(43734.5453, 43745.5453, 43767.5453)) - 0.5) * noise_coeff;
+        float3 p3 = fract(float3(xy.xyx) * float3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yxz + 33.33);
+        float3 n = (fract((p3.xxy + p3.yzz) * p3.zyx) - 0.5) * noise_coeff;
         half4 color = child.eval(xy);
         color.rg += half2(n.x);
         color.rb += half2(n.y);
