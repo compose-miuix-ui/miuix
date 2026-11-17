@@ -4,8 +4,6 @@
 
 This component is typically used in conjunction with the `Scaffold` component to maintain consistent layout and behavior across different pages in the application.
 
-`TopAppBar` and `BlurTopAppBar` clip their titles to the bar viewport while allowing shadows from navigation controls, actions and `bottomContent` to extend beyond it. This does not increase the bar's layout height. If a fading or offscreen `graphicsLayer` wraps the bar, give that layer enough `outsets` for the shadows and any blur.
-
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=topAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -15,7 +13,6 @@ This component is typically used in conjunction with the `Scaffold` component to
 ```kotlin
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 ```
@@ -172,33 +169,6 @@ TopAppBar(
 | navigationIconPadding      | Dp                              | Start padding of the navigation icon           | TopAppBarDefaults.NavigationIconPadding | No       |
 | actionIconPadding          | Dp                              | End padding of the action icons                | TopAppBarDefaults.ActionIconPadding | No       |
 | bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area | {} | No |
-
-### BlurTopAppBar Properties
-
-`BlurTopAppBar` is `TopAppBar` with a large title that blurs as it collapses. `largeTitleBlurRadius` is required.
-
-| Property Name              | Type                            | Description                                             | Default Value                   | Required |
-| -------------------------- | ------------------------------- | ------------------------------------------------------- | ------------------------------- | -------- |
-| title                      | String                          | Top bar title                                           | -                               | Yes      |
-| largeTitleBlurRadius       | Dp                              | Blur radius of the large title once it has fully faded   | -                               | Yes      |
-| modifier                   | Modifier                        | Modifier applied to the top bar                         | Modifier                        | No       |
-| expandable                 | Boolean                         | Allow the large title to expand; false keeps the bar compact | true                         | No       |
-| color                      | Color                           | Top bar background color                                | MiuixTheme.colorScheme.surface  | No       |
-| titleColor                 | Color                           | Color of the collapsed small title text                 | MiuixTheme.colorScheme.onSurface | No       |
-| largeTitle                 | String                          | Large title text                                        | title                           | No       |
-| largeTitleColor            | Color                           | Color of the expanded large title text                  | MiuixTheme.colorScheme.onSurface | No       |
-| subtitle                   | String                          | Subtitle text displayed below the title bar             | ""                              | No       |
-| subtitleColor              | Color                           | Color of the subtitle text                              | MiuixTheme.colorScheme.onSurfaceVariantSummary | No       |
-| navigationIcon             | @Composable () -> Unit          | Composable function for navigation icon area            | {}                              | No       |
-| actions                    | @Composable RowScope.() -> Unit | Composable function for action buttons area             | {}                              | No       |
-| scrollBehavior             | ScrollBehavior?                 | Controls top bar scroll behavior                        | null                            | No       |
-| defaultWindowInsetsPadding | Boolean                         | Whether to apply default window insets padding          | true                            | No       |
-| titlePadding               | Dp                              | Horizontal content padding                              | TopAppBarDefaults.TitlePadding  | No       |
-| navigationIconPadding      | Dp                              | Start padding of the navigation icon                    | TopAppBarDefaults.NavigationIconPadding | No       |
-| actionIconPadding          | Dp                              | End padding of the action icons                         | TopAppBarDefaults.ActionIconPadding | No       |
-| titleAlpha                 | () -> Float                     | Draw-phase opacity applied to both title containers     | { 1f }                          | No       |
-| bottomContent              | @Composable () -> Unit          | Composable content displayed below the title bar area   | {}                              | No       |
-
 ### TopAppBarDefaults Object
 
 The TopAppBarDefaults object provides default values for TopAppBar and SmallTopAppBar components.
@@ -305,17 +275,3 @@ Box(modifier = Modifier.fillMaxSize()) {
     }
 }
 ```
-
-### BlurTopAppBar
-
-`BlurTopAppBar` adds a large title that blurs out as it collapses. It is provided by `miuix-ui`.
-
-```kotlin
-BlurTopAppBar(
-    title = "Settings",
-    largeTitleBlurRadius = 8.dp,
-    scrollBehavior = scrollBehavior,
-)
-```
-
-`largeTitleBlurRadius` is how far the title blurs at the point it has fully faded, so `0.dp` reproduces `TopAppBar`. It also accepts `titleAlpha`.

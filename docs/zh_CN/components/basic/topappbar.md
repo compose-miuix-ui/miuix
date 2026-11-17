@@ -4,8 +4,6 @@
 
 此组件通常与 `Scaffold` 组件结合使用，以便在应用程序的不同页面中保持一致的布局和行为。
 
-`TopAppBar` 与 `BlurTopAppBar` 将标题裁剪在顶部栏视口内，同时允许导航按钮、操作按钮和 `bottomContent` 的阴影向外延伸，不增加顶部栏的布局高度。若在整个顶部栏外包裹淡出或离屏绘制的 `graphicsLayer`，需通过 `outsets` 为阴影和模糊预留足够空间。
-
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=topAppBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -15,7 +13,6 @@
 ```kotlin
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 ```
@@ -172,33 +169,6 @@ TopAppBar(
 | navigationIconPadding      | Dp                              | 导航图标的起始边距       | TopAppBarDefaults.NavigationIconPadding | 否       |
 | actionIconPadding          | Dp                              | 操作图标的末尾边距       | TopAppBarDefaults.ActionIconPadding | 否       |
 | bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的可组合内容 | {}                                | 否       |
-
-### BlurTopAppBar 属性
-
-`BlurTopAppBar` 即带有“大标题折叠时模糊”能力的 `TopAppBar`，`largeTitleBlurRadius` 为必填参数。
-
-| 属性名                     | 类型                            | 说明                                             | 默认值                          | 必填 |
-| -------------------------- | ------------------------------- | ------------------------------------------------ | ------------------------------- | ---- |
-| title                      | String                          | 顶栏标题                                          | -                               | 是   |
-| largeTitleBlurRadius       | Dp                              | 大标题完全淡出时的模糊半径                         | -                               | 是   |
-| modifier                   | Modifier                        | 应用于顶栏的 Modifier                             | Modifier                        | 否   |
-| expandable                 | Boolean                         | 是否允许大标题展开，false 时固定折叠                | true                            | 否   |
-| color                      | Color                           | 顶栏背景色                                        | MiuixTheme.colorScheme.surface  | 否   |
-| titleColor                 | Color                           | 收起后小标题的文字颜色                             | MiuixTheme.colorScheme.onSurface | 否   |
-| largeTitle                 | String                          | 大标题文字                                        | title                           | 否   |
-| largeTitleColor            | Color                           | 展开后大标题的文字颜色                             | MiuixTheme.colorScheme.onSurface | 否   |
-| subtitle                   | String                          | 显示在标题栏下方的副标题                           | ""                              | 否   |
-| subtitleColor              | Color                           | 副标题的文字颜色                                   | MiuixTheme.colorScheme.onSurfaceVariantSummary | 否   |
-| navigationIcon             | @Composable () -> Unit          | 导航图标区域的 Composable                          | {}                              | 否   |
-| actions                    | @Composable RowScope.() -> Unit | 操作按钮区域的 Composable                          | {}                              | 否   |
-| scrollBehavior             | ScrollBehavior?                 | 控制顶栏滚动行为                                   | null                            | 否   |
-| defaultWindowInsetsPadding | Boolean                         | 是否应用默认的窗口边距                             | true                            | 否   |
-| titlePadding               | Dp                              | 水平内容边距                                      | TopAppBarDefaults.TitlePadding  | 否   |
-| navigationIconPadding      | Dp                              | 导航图标的起始边距                                 | TopAppBarDefaults.NavigationIconPadding | 否   |
-| actionIconPadding          | Dp                              | 操作图标的结束边距                                 | TopAppBarDefaults.ActionIconPadding | 否   |
-| titleAlpha                 | () -> Float                     | 绘制阶段作用于两个标题容器的透明度                  | { 1f }                          | 否   |
-| bottomContent              | @Composable () -> Unit          | 显示在标题栏下方的内容                             | {}                              | 否   |
-
 ### TopAppBarDefaults 对象
 
 TopAppBarDefaults 对象提供了 TopAppBar 和 SmallTopAppBar 组件的默认值。
@@ -305,17 +275,3 @@ Box(modifier = Modifier.fillMaxSize()) {
     }
 }
 ```
-
-### BlurTopAppBar
-
-`BlurTopAppBar` 在大标题折叠时增加模糊淡出效果，由 `miuix-ui` 提供。
-
-```kotlin
-BlurTopAppBar(
-    title = "设置",
-    largeTitleBlurRadius = 8.dp,
-    scrollBehavior = scrollBehavior,
-)
-```
-
-`largeTitleBlurRadius` 表示标题完全淡出时的模糊半径，取 `0.dp` 即等价于 `TopAppBar`。它同样支持 `titleAlpha`。

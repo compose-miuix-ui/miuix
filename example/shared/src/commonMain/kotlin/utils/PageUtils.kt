@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -280,16 +280,14 @@ fun AdaptiveTopAppBar(
             bottomContent = bottomContent,
         )
     } else {
-        BlurTopAppBar(
+        TopAppBar(
             title = title,
-            largeTitleBlurRadius = 0.dp,
             modifier = contentModifier.then(contentInsetModifier),
             expandable = !isWideScreen,
             subtitle = subtitle,
             color = color,
             titleColor = titleColor,
             scrollBehavior = scrollBehavior,
-            titleAlpha = { chromeTitleAlpha() },
             defaultWindowInsetsPadding = false,
             navigationIcon = navigationIcon,
             actions = actions,

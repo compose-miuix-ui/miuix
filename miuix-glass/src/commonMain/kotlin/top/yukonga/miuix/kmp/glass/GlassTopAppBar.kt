@@ -6,7 +6,9 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
@@ -21,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -44,9 +47,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
+import top.yukonga.miuix.kmp.basic.TopAppBarLayout
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -80,8 +83,8 @@ object GlassTopAppBarDefaults {
 /** Scroll distance for the retained shadow ramp. Material transitions use their own timing. */
     val RampDistance: Dp = 32.dp
 
-    /** How far the large title blurs out as it collapses. */
-    val LargeTitleBlurRadius: Dp = 12.dp
+    /** Maximum blur radius applied to titles during collapse/expand transitions. */
+    val TitleBlurRadius: Dp = 8.dp
 
     /** Diameter of the glass pill behind a bar button. */
     val ButtonSize: Dp = 44.dp
@@ -236,7 +239,7 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param largeTitle Large title shown before content scrolls. Defaults to [title].
  * @param expandable Whether the large title can expand. `false` keeps the compact title visible.
  * @param subtitle Optional subtitle below the title.
- * @param largeTitleBlurRadius Blur applied as the large title collapses.
+ * @param titleBlurRadius Maximum blur radius applied to titles during collapse/expand transitions.
  * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
  * @param visualContentOffset Content position in pixels, negative upward, including elastic displacement.
  *   Overrides band/shadow progress; pair with [isContentScrolled] for programmatic scrolling.
@@ -272,7 +275,7 @@ fun GlassTopAppBar(
     visualContentOffset: (() -> Float)? = null,
     bandBrush: Brush = GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface),
     bandOverhang: Dp = GlassTopAppBarDefaults.BandOverhang,
-    largeTitleBlurRadius: Dp = GlassTopAppBarDefaults.LargeTitleBlurRadius,
+    titleBlurRadius: Dp = GlassTopAppBarDefaults.TitleBlurRadius,
     style: GlassStyle = GlassDefaults.Style,
     material: GlassMaterial = GlassTopAppBarDefaults.buttonMaterial(),
     alpha: Float = 1f,
@@ -308,7 +311,7 @@ fun GlassTopAppBar(
         visualContentOffset = visualContentOffset,
         bandBrush = bandBrush,
         bandOverhang = bandOverhang,
-        largeTitleBlurRadius = largeTitleBlurRadius,
+        titleBlurRadius = titleBlurRadius,
         style = style,
         material = material,
         alpha = alpha,
@@ -351,7 +354,7 @@ fun GlassTopAppBar(
     visualContentOffset: (() -> Float)? = null,
     bandBrush: Brush = GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface),
     bandOverhang: Dp = GlassTopAppBarDefaults.BandOverhang,
-    largeTitleBlurRadius: Dp = GlassTopAppBarDefaults.LargeTitleBlurRadius,
+    titleBlurRadius: Dp = GlassTopAppBarDefaults.TitleBlurRadius,
     style: GlassStyle = GlassDefaults.Style,
     material: GlassMaterial = GlassTopAppBarDefaults.buttonMaterial(),
     alpha: Float = 1f,
@@ -409,9 +412,11 @@ fun GlassTopAppBar(
         gradientOverhang = if (bandBrush is TopAppBarBandBrush) bandOverhang else 0.dp,
     ) {
         if (progressiveBackdrop != null && rawBackdrop != null) {
-            val blurColors = BlurDefaults.blurColors(
-                blendColors = listOf(BlendColorEntry(MiuixTheme.colorScheme.surface.copy(alpha = 0.3f))),
-            )
+            val surfaceColor = MiuixTheme.colorScheme.surface
+            val blendColors = remember(surfaceColor) {
+                listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.3f)))
+            }
+            val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
             Box(
                 modifier = Modifier
                     .onGloballyPositioned { backgroundCoordinates = it }
@@ -482,7 +487,7 @@ fun GlassTopAppBar(
                 titleAlpha = titleAlpha,
                 expandable = expandable,
                 largeTitle = largeTitle,
-                largeTitleBlurRadius = largeTitleBlurRadius,
+                titleBlurRadius = titleBlurRadius,
                 subtitle = subtitle,
                 color = Color.Transparent,
                 scrollBehavior = scrollBehavior,
@@ -538,4 +543,58 @@ private fun GlassTopAppBarLayout(
             foreground.placeRelative(0, 0)
         }
     }
+}
+
+@Composable
+internal fun BlurTopAppBar(
+    title: String,
+    titleBlurRadius: Dp,
+    modifier: Modifier = Modifier,
+    expandable: Boolean = true,
+    color: Color = MiuixTheme.colorScheme.surface,
+    titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    largeTitle: String = title,
+    largeTitleColor: Color = MiuixTheme.colorScheme.onSurface,
+    subtitle: String = "",
+    subtitleColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+    navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
+    scrollBehavior: ScrollBehavior? = null,
+    defaultWindowInsetsPadding: Boolean = true,
+    titlePadding: Dp = TopAppBarDefaults.TitlePadding,
+    navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
+    actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
+    titleAlpha: () -> Float = { 1f },
+    bottomContent: @Composable () -> Unit = {},
+) {
+    val actionsRow =
+        @Composable {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+                content = actions,
+            )
+        }
+
+    TopAppBarLayout(
+        title = title,
+        titleAlpha = titleAlpha,
+        expandable = expandable,
+        color = color,
+        titleColor = titleColor,
+        largeTitle = largeTitle,
+        largeTitleColor = largeTitleColor,
+        titleBlurRadius = titleBlurRadius,
+        subtitle = subtitle,
+        subtitleColor = subtitleColor,
+        navigationIcon = navigationIcon,
+        actions = actionsRow,
+        titlePadding = titlePadding,
+        navigationIconPadding = navigationIconPadding,
+        actionIconPadding = actionIconPadding,
+        scrollBehavior = scrollBehavior,
+        modifier = modifier,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        bottomContent = bottomContent,
+    )
 }

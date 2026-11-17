@@ -91,7 +91,7 @@ These parameters are shared by both overloads:
 | visualContentOffset | (() -> Float)? | Live signed content position in pixels, overriding the behavior's offset for visual effects | null | No |
 | bandBrush | Brush | Background band gradient | GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) | No |
 | bandOverhang | Dp | Band extension below the bar | GlassTopAppBarDefaults.BandOverhang | No |
-| largeTitleBlurRadius | Dp | Blur radius as the large title fades out | GlassTopAppBarDefaults.LargeTitleBlurRadius | No |
+| titleBlurRadius | Dp | Maximum blur radius during title collapse/expand transitions | GlassTopAppBarDefaults.TitleBlurRadius | No |
 | style | GlassStyle | Rendering style; does not replace the default button material | GlassDefaults.Style | No |
 | alpha | Float | Additional button surface opacity multiplier | 1f | No |
 | buttonSize | Dp | Default diameter for nested glass buttons | GlassTopAppBarDefaults.ButtonSize | No |
@@ -120,7 +120,7 @@ The explicit-overlap overload adds one required parameter:
 | HorizontalPadding | Dp | Leading and trailing control inset | 12.dp |
 | RampStart | Dp | Shadow ramp start offset | 0.dp |
 | RampDistance | Dp | Scroll distance for the shadow ramp | 32.dp |
-| LargeTitleBlurRadius | Dp | Large-title blur radius | 12.dp |
+| TitleBlurRadius | Dp | Title transition blur radius | 8.dp |
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
 | BandOverhang | Dp | Band extension below the bar | 28.dp |

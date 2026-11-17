@@ -140,90 +140,7 @@ fun TopAppBar(
         titleColor = titleColor,
         largeTitle = largeTitle,
         largeTitleColor = largeTitleColor,
-        largeTitleBlurRadius = 0.dp,
-        subtitle = subtitle,
-        subtitleColor = subtitleColor,
-        navigationIcon = navigationIcon,
-        actions = actionsRow,
-        titlePadding = titlePadding,
-        navigationIconPadding = navigationIconPadding,
-        actionIconPadding = actionIconPadding,
-        scrollBehavior = scrollBehavior,
-        modifier = modifier,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        bottomContent = bottomContent,
-    )
-}
-
-/**
- * A [BlurTopAppBar] whose large title blurs as it collapses.
- *
- * @param title The title of the [BlurTopAppBar].
- * @param largeTitleBlurRadius How far the large title blurs out as it collapses. It reaches this
- *   radius at the point the title has fully faded.
- * @param modifier The modifier to be applied to the [BlurTopAppBar].
- * @param expandable Whether the large title can expand. `false` keeps the compact title visible.
- * @param color The background color of the [BlurTopAppBar].
- * @param titleColor The color of the collapsed small title text.
- * @param largeTitle The large title of the [BlurTopAppBar].
- * @param largeTitleColor The color of the expanded large title text.
- * @param subtitle The subtitle displayed below the title bar area.
- * @param subtitleColor The color of the subtitle text.
- * @param navigationIcon The content that represents the navigation icon.
- * @param actions The content that represents the action icons.
- * @param scrollBehavior The behavior that controls the [BlurTopAppBar].
- * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
- * @param titlePadding The horizontal padding of the title and large title.
- * @param navigationIconPadding The start padding of the navigation icon.
- * @param actionIconPadding The end padding of the action icons.
- * @param titleAlpha Draw-phase opacity applied to both title containers.
- * @param bottomContent Content displayed below the title bar area.
- */
-@Composable
-fun BlurTopAppBar(
-    title: String,
-    largeTitleBlurRadius: Dp,
-    modifier: Modifier = Modifier,
-    expandable: Boolean = true,
-    color: Color = MiuixTheme.colorScheme.surface,
-    titleColor: Color = MiuixTheme.colorScheme.onSurface,
-    largeTitle: String = title,
-    largeTitleColor: Color = MiuixTheme.colorScheme.onSurface,
-    subtitle: String = "",
-    subtitleColor: Color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-    navigationIcon: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {},
-    scrollBehavior: ScrollBehavior? = null,
-    defaultWindowInsetsPadding: Boolean = true,
-    titlePadding: Dp = TopAppBarDefaults.TitlePadding,
-    navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
-    actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
-    titleAlpha: () -> Float = { 1f },
-    bottomContent: @Composable () -> Unit = {},
-) {
-    // Wrap the given actions in a Row.
-    val actionsRow =
-        @Composable {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-                content = actions,
-            )
-        }
-
-    // Compose a Surface with a TopAppBarLayout content.
-    // The surface's background color is animated as specified above.
-    // The height of the app bar is determined by subtracting the bar's height offset from the
-    // app bar's defined constant height value (i.e. the ContainerHeight token).
-    TopAppBarLayout(
-        title = title,
-        titleAlpha = titleAlpha,
-        expandable = expandable,
-        color = color,
-        titleColor = titleColor,
-        largeTitle = largeTitle,
-        largeTitleColor = largeTitleColor,
-        largeTitleBlurRadius = largeTitleBlurRadius,
+        titleBlurRadius = 0.dp,
         subtitle = subtitle,
         subtitleColor = subtitleColor,
         navigationIcon = navigationIcon,
@@ -718,12 +635,12 @@ private suspend fun settleAppBar(
  *   and writes the matching `heightOffsetLimit` from the large title's measured height.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
- * @param largeTitleBlurRadius how far the large title blurs out as it collapses.
+ * @param titleBlurRadius maximum blur radius applied during title collapse/expand transitions.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
  * @param bottomContent the composable content displayed below the title bar area.
  */
 @Composable
-private fun TopAppBarLayout(
+fun TopAppBarLayout(
     title: String,
     color: Color,
     titleColor: Color,
@@ -739,7 +656,7 @@ private fun TopAppBarLayout(
     modifier: Modifier = Modifier,
     expandable: Boolean = true,
     largeTitle: String = title,
-    largeTitleBlurRadius: Dp = 0.dp,
+    titleBlurRadius: Dp = 0.dp,
     defaultWindowInsetsPadding: Boolean = true,
     titleAlpha: () -> Float = { 1f },
     bottomContent: @Composable () -> Unit = {},
@@ -846,8 +763,19 @@ private fun TopAppBarLayout(
                     .clipTopAppBarTitle(titleClip) { titleClip.titleOrigin }
                     .padding(horizontal = titlePadding)
                     .graphicsLayer {
-                        alpha = smallTitleAlpha.value * titleAlpha()
+                        val currentAlpha = smallTitleAlpha.value
+                        alpha = currentAlpha * titleAlpha()
                         translationY = smallTitleTranslationY.value
+                        val radius = if (titleBlurRadius > 0.dp) {
+                            titleBlurRadius.toPx() * 0.5f * (1f - currentAlpha).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        }
+                        renderEffect = if (radius > 0.1f) {
+                            BlurEffect(radius, radius, TileMode.Decal)
+                        } else {
+                            null
+                        }
                     },
             ) {
                 Text(
@@ -877,8 +805,8 @@ private fun TopAppBarLayout(
                         // Assigned on every path, including the disabled one: the layer keeps
                         // whatever it was last given, so a radius that drops back to zero would
                         // otherwise leave the last blur on the title for good.
-                        val radius = if (largeTitleBlurRadius > 0.dp) {
-                            largeTitleBlurRadius.toPx() * largeTitleFade()
+                        val radius = if (titleBlurRadius > 0.dp) {
+                            titleBlurRadius.toPx() * largeTitleFade()
                         } else {
                             0f
                         }
@@ -920,8 +848,19 @@ private fun TopAppBarLayout(
                         .layoutId("smallSubtitle")
                         .clipTopAppBarTitle(titleClip) { titleClip.subtitleOrigin }
                         .graphicsLayer {
-                            alpha = smallTitleAlpha.value * titleAlpha()
+                            val currentAlpha = smallTitleAlpha.value
+                            alpha = currentAlpha * titleAlpha()
                             translationY = smallTitleTranslationY.value
+                            val radius = if (titleBlurRadius > 0.dp) {
+                                titleBlurRadius.toPx() * 0.5f * (1f - currentAlpha).coerceIn(0f, 1f)
+                            } else {
+                                0f
+                            }
+                            renderEffect = if (radius > 0.1f) {
+                                BlurEffect(radius, radius, TileMode.Decal)
+                            } else {
+                                null
+                            }
                         },
                 ) {
                     Text(

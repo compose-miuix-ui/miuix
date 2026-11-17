@@ -21,7 +21,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarState
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -57,7 +56,7 @@ class GlassTopAppBarShadowTest {
                             title = "",
                             largeTitle = "MMMMMMMM",
                             largeTitleColor = Color.Magenta,
-                            largeTitleBlurRadius = 40.dp,
+                            titleBlurRadius = 40.dp,
                             color = Color.Transparent,
                             modifier = Modifier.testTag("bar"),
                             scrollBehavior = MiuixScrollBehavior(scrollState),
