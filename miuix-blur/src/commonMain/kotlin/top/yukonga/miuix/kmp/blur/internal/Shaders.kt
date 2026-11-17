@@ -896,6 +896,9 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
 private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
     half4 main(float2 fragCoord) {
         half4 src = child.eval(fragCoord);
+        if (src.a > 0.0039) {
+            src = half4(src.rgb / src.a, 1.0);
+        }
         half4 currentColor = src;
         int count = int(layerCount);
 
@@ -913,6 +916,9 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
 private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
     half4 main(float2 fragCoord) {
         half4 src = child.eval(fragCoord);
+        if (src.a > 0.0039) {
+            src = half4(src.rgb / src.a, 1.0);
+        }
         float4 currentColor = float4(src);
         int count = int(layerCount);
 

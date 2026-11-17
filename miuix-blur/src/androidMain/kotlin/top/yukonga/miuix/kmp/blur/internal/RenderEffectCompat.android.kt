@@ -70,6 +70,7 @@ internal actual fun progressiveStackEffect(
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
     nativeSharpEnd: Boolean,
+    unpremulBase: Boolean,
 ): RenderEffect? {
     val masks = scope.progressiveMaskScratch as? ProgressiveMaskCache
         ?: ProgressiveMaskCache().also { scope.progressiveMaskScratch = it }
@@ -123,7 +124,7 @@ internal actual fun progressiveStackEffect(
     var stack = when {
         base == null -> android.graphics.RenderEffect.createOffsetEffect(0f, 0f)
 
-        base === pre -> base
+        base === pre || !unpremulBase -> base
 
         else -> {
             val unpremul = masks.unpremul ?: android.graphics.RenderEffect.createRuntimeShaderEffect(

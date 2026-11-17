@@ -52,4 +52,5 @@ internal expect fun progressiveStackEffect(
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
     nativeSharpEnd: Boolean,
+    unpremulBase: Boolean = true,
 ): RenderEffect?

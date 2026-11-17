@@ -293,6 +293,7 @@ internal fun createProgressiveStackEffect(
         preEffect,
         postEffect,
         nativeSharpEnd = exp == 0,
+        unpremulBase = postBlend == null,
     ) ?: return null
     return if (postBlend != null) {
         stack.chain(buildRampBlendColorsEffect(scope, postBlend, gradVecX, gradVecY, gradOffset, clampedCurve))

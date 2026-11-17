@@ -44,6 +44,7 @@ internal actual fun progressiveStackEffect(
     preEffect: RenderEffect?,
     postEffect: RenderEffect?,
     nativeSharpEnd: Boolean,
+    unpremulBase: Boolean,
 ): RenderEffect? {
     val shader = scope.obtainRuntimeShader("ProgComposite", PROGRESSIVE_COMPOSITE_SHADER).apply {
         setFloatUniform("in_gradVec", gradVecX, gradVecY)
