@@ -37,7 +37,7 @@ internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
 }
 
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
-internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
+internal const val PROGRESSIVE_BLUR_MAX_TAP = 20
 
 /**
  * Builds the separable **progressive** Blur shader: each fragment derives its radius from the
@@ -67,10 +67,11 @@ internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): S
     val maskWeight = if (masked) {
         """
         float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
-        mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
+        mraw = mraw * mraw * (3.0 - 2.0 * mraw);
+        if (in_maskCurve != 1.0) mraw = pow(mraw, in_maskCurve);
         float mw = clamp(mraw * 2.0 - 1.0, 0.0, 1.0);
         mw = mw * mw * (3.0 - 2.0 * mw);
-        if (mw <= 0.0) {
+        if (mw <= 0.004) {
             return half4(0.0);
         }
 """
@@ -91,25 +92,28 @@ $maskUniforms
         float p = dot(xy, in_gradAxis);
 $maskWeight
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        float radius = in_maxRadius * intensity;
-        if (radius <= 0.0) {
+        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);
+        if (in_curve != 1.0) smoothRaw = pow(smoothRaw, in_curve);
+        float radius = in_maxRadius * (1.0 - smoothRaw);
+        if (radius <= 0.004) {
             half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
             if (s.a > 0.0039) {
                 return half4(s.rgb / s.a, 1.0) * half(mw);
             }
             return s * half(mw);
         }
-        float inv2s2 = -1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
+        float posInv2s2 = 1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
         half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
         float total = 1.0;
         for (int j = 0; j < ${maxTap / 2}; j++) {
             float a = float(2 * j + 1);
             float ra = clamp(radius - a + 1.0, 0.0, 1.0);
-            if (ra <= 0.0) continue;
+            if (ra <= 0.0) break;
             float b = a + 1.0;
-            float wa = exp(a * a * inv2s2) * ra;
-            float wb = exp(b * b * inv2s2) * clamp(radius - b + 1.0, 0.0, 1.0);
+            float xa = a * a * posInv2s2;
+            float xb = b * b * posInv2s2;
+            float wa = ra / (1.0 + xa * (1.0 + xa * (0.5 + 0.235 * xa)));
+            float wb = clamp(radius - b + 1.0, 0.0, 1.0) / (1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
             float wsum = wa + wb;
             float2 o = ((a * wa + b * wb) / wsum) * in_step;
             color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
@@ -179,7 +183,7 @@ internal fun progressiveSharpShaderKey(axis: Int, tap: Int, masked: Boolean): St
 
 /** Gaussian sigma fractions of the two graduated composite levels (`fullBlur` and `lightBlur`). */
 internal const val PROGRESSIVE_FULL_FRACTION = 1.0f
-internal const val PROGRESSIVE_LIGHT_FRACTION = 0.25f
+internal const val PROGRESSIVE_LIGHT_FRACTION = 0.20f
 
 /**
  * Two-level progressive composite (Skiko multi-child shader): two graduated Gaussian levels
@@ -203,7 +207,8 @@ internal const val PROGRESSIVE_COMPOSITE_SHADER = """
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        raw = raw * raw * (3.0 - 2.0 * raw);
+        if (in_curve != 1.0) raw = pow(raw, in_curve);
         // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
         // [fullBlur -> lightBlur -> sharp] so blur strength decreases continuously.
         float pos = raw * 2.0;
@@ -263,7 +268,8 @@ internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
     half4 main(float2 xy) {
         float p = dot(xy, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        raw = raw * raw * (3.0 - 2.0 * raw);
+        if (in_curve != 1.0) raw = pow(raw, in_curve);
         float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
         w = w * w * (3.0 - 2.0 * w);
         half4 c = child.eval(xy);
@@ -864,7 +870,8 @@ private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
     float rampWeight(float2 fragCoord) {
         float p = dot(fragCoord, in_gradAxis);
         float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
+        raw = raw * raw * (3.0 - 2.0 * raw);
+        if (in_curve != 1.0) raw = pow(raw, in_curve);
         float w = 1.0 - raw;
         return w * w * (3.0 - 2.0 * w);
     }
