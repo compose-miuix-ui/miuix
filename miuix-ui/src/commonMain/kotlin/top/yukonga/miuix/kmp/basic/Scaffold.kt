@@ -90,7 +90,15 @@ fun Scaffold(
     contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val safeInsets = remember(contentWindowInsets) { MutableWindowInsets(contentWindowInsets) }
+    val consumedInsets = remember { MutableWindowInsets() }
+    val safeInsets = remember(contentWindowInsets) {
+        contentWindowInsets.exclude(consumedInsets)
+    }
+    // Keep the callback stable across inset changes: movable content updates modifiers before
+    // reattachment, but Compose's insets observer traverses descendants when its callback changes.
+    val onConsumedInsetsChanged = remember {
+        { insets: WindowInsets -> consumedInsets.insets = insets }
+    }
     val popupStates = remember { mutableStateListOf<MiuixPopupUtils.PopupState>() }
     val dialogStates = remember { mutableStateListOf<MiuixPopupUtils.DialogState>() }
     val parentRootDialogStates = LocalRootDialogStates.current
@@ -98,10 +106,7 @@ fun Scaffold(
     val parentRootPopupStates = LocalRootPopupStates.current
     val rootPopupStates = parentRootPopupStates ?: popupStates
     Surface(
-        modifier = modifier.onConsumedWindowInsetsChanged { consumedWindowInsets ->
-            // Exclude currently consumed window insets from user provided contentWindowInsets
-            safeInsets.insets = contentWindowInsets.exclude(consumedWindowInsets)
-        },
+        modifier = modifier.onConsumedWindowInsetsChanged(onConsumedInsetsChanged),
         color = containerColor,
     ) {
         CompositionLocalProvider(
