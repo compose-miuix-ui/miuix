@@ -34,9 +34,9 @@ jobs:
           ./gradlew dokkaGenerate -Prelease
           mkdir -p ./docs/public/dokka
           mv ./build/dokka/html/* ./docs/public/dokka
-          ./gradlew :docs:demo:jsBrowserDistribution
+          ./gradlew :docs:demo:wasmJsBrowserDistribution
           mkdir -p ./docs/public/compose
-          mv ./docs/demo/build/dist/js/productionExecutable/* ./docs/public/compose
+          mv ./docs/demo/build/dist/wasmJs/productionExecutable/* ./docs/public/compose
           ./gradlew :docs:iconGen:generateIcons
           cd ./docs
           yarn install
