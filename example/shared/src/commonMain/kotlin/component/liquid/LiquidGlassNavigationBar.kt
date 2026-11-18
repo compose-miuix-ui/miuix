@@ -332,12 +332,6 @@ internal fun IosLiquidGlassNavigationBar(
     val combinedBackdrop = backdrop?.let { rememberCombinedBackdrop(it, tabsBackdrop) }
 
     val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val floatingMargin = when {
-        platform() == Platform.IOS -> 22.dp
-        navigationBarBottom <= 16.dp -> 26.dp
-        navigationBarBottom >= 26.dp -> navigationBarBottom
-        else -> 12.dp + navigationBarBottom
-    }
     val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
         .asPaddingValues().calculateBottomPadding()
     val animatedCaptionBarHeight by animateDpAsState(
@@ -345,6 +339,13 @@ internal fun IosLiquidGlassNavigationBar(
         animationSpec = tween(durationMillis = 300),
         label = "iosLiquidNavigationCaptionBarHeight",
     )
+    val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
+    val floatingMargin = when {
+        platform() == Platform.IOS -> 22.dp
+        systemBottom <= 16.dp -> 26.dp
+        systemBottom >= 26.dp -> systemBottom
+        else -> 12.dp + systemBottom
+    }
 
     val tabsContent: @Composable RowScope.() -> Unit = {
         val tabScale = LocalIosTabScale.current
@@ -403,7 +404,7 @@ internal fun IosLiquidGlassNavigationBar(
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
-                .padding(bottom = floatingMargin + animatedCaptionBarHeight, start = 24.dp, end = 24.dp)
+                .padding(bottom = floatingMargin, start = 24.dp, end = 24.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {

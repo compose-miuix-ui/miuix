@@ -283,19 +283,23 @@ fun FloatingNavigationBar(
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val floatingMargin = when {
-        platform() == Platform.IOS -> 28.dp
-        navigationBarBottom <= 16.dp -> 32.dp
-        navigationBarBottom >= 32.dp -> navigationBarBottom
-        else -> 12.dp + navigationBarBottom
+    val bottomPadding = if (defaultWindowInsetsPadding) {
+        val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+        val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+        val animatedCaptionBarHeight by animateDpAsState(
+            targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
+            animationSpec = tween(durationMillis = 300),
+        )
+        val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
+        when {
+            platform() == Platform.IOS -> 28.dp
+            systemBottom <= 16.dp -> 32.dp
+            systemBottom >= 32.dp -> systemBottom
+            else -> 12.dp + systemBottom
+        }
+    } else {
+        0.dp
     }
-
-    val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val animatedCaptionBarHeight by animateDpAsState(
-        targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
-        animationSpec = tween(durationMillis = 300),
-    )
 
     Column(
         modifier = Modifier
@@ -308,15 +312,8 @@ fun FloatingNavigationBar(
         Row(
             modifier = Modifier
                 .selectableGroup()
-                .padding(bottom = floatingMargin)
+                .padding(bottom = bottomPadding)
                 .defaultMinSize(minHeight = 52.dp)
-                .then(
-                    if (defaultWindowInsetsPadding) {
-                        Modifier.padding(bottom = animatedCaptionBarHeight)
-                    } else {
-                        Modifier
-                    },
-                )
                 .then(
                     if (showDivider) {
                         Modifier

@@ -304,12 +304,6 @@ fun GlassNavigationBar(
     val bottomPadding = if (defaultWindowInsetsPadding) {
         val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
             .asPaddingValues().calculateBottomPadding()
-        val floatingMargin = when {
-            platform() == Platform.IOS -> 24.dp
-            navigationBarBottom <= 16.dp -> 28.dp
-            navigationBarBottom >= 28.dp -> navigationBarBottom
-            else -> 12.dp + navigationBarBottom
-        }
         val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
             .asPaddingValues().calculateBottomPadding()
         val animatedCaptionBarHeight by animateDpAsState(
@@ -317,7 +311,13 @@ fun GlassNavigationBar(
             animationSpec = tween(durationMillis = 300),
             label = "glassNavigationCaptionBarHeight",
         )
-        floatingMargin + animatedCaptionBarHeight
+        val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
+        when {
+            platform() == Platform.IOS -> 24.dp
+            systemBottom <= 16.dp -> 28.dp
+            systemBottom >= 28.dp -> systemBottom
+            else -> 12.dp + systemBottom
+        }
     } else {
         0.dp
     }
