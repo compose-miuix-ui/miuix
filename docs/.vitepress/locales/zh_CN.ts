@@ -136,6 +136,7 @@ export default defineConfig({
                     items: [
                         { text: "总览", link: "/zh_CN/components/glass/" },
                         { text: "GlassIconButton", link: "/zh_CN/components/glass/glassiconbutton" },
+                        { text: "GlassTextField", link: "/zh_CN/components/glass/glasstextfield" },
                         { text: "GlassTopAppBar", link: "/zh_CN/components/glass/glasstopappbar" },
                         { text: "GlassNavigationBar", link: "/zh_CN/components/glass/glassnavigationbar" },
                         { text: "GlassTabRow", link: "/zh_CN/components/glass/glasstabrow" },

@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
+import top.yukonga.miuix.kmp.glass.GlassTextField
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassTransformPopup
@@ -404,6 +405,14 @@ fun GlassPage(padding: PaddingValues) {
                 material = material ?: GlassDialogDefaults.material(),
                 stroke = stroke,
             ) {
+                var dialogText by remember { mutableStateOf("") }
+                GlassTextField(
+                    value = dialogText,
+                    onValueChange = { dialogText = it },
+                    label = "Input something...",
+                    useLabelAsPlaceholder = true,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     GlassDialogButton(
                         onClick = { overlayIndex = OVERLAY_NONE },

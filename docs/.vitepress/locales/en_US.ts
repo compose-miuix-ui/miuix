@@ -127,6 +127,7 @@ export default defineConfig({
                     items: [
                         { text: "Overview", link: "/components/glass/" },
                         { text: "GlassIconButton", link: "/components/glass/glassiconbutton" },
+                        { text: "GlassTextField", link: "/components/glass/glasstextfield" },
                         { text: "GlassTopAppBar", link: "/components/glass/glasstopappbar" },
                         { text: "GlassNavigationBar", link: "/components/glass/glassnavigationbar" },
                         { text: "GlassTabRow", link: "/components/glass/glasstabrow" },
