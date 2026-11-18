@@ -1,6 +1,6 @@
 # GlassFloatingActionButton
 
-`GlassFloatingActionButton` is a round glass floating action button with the same glass stroke, shadow, and press feedback as [GlassIconButton](./glassiconbutton), tinted with the primary theme color by default.
+`GlassFloatingActionButton` is a round floating action button with a primary-coloured glass surface. It scales to 90% on press and springs back on release or cancellation.
 
 <div style="position: relative; height: 240px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassFloatingActionButton" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -18,7 +18,7 @@ import top.yukonga.miuix.kmp.glass.GlassFloatingActionButton
 
 ## Basic Usage
 
-When no backdrop is available, the button uses `fill` (`MiuixTheme.colorScheme.primary` by default).
+With a backdrop, the button blends a translucent primary layer over the blurred glass. When backdrop rendering is unavailable, it uses the theme's primary colour as the fallback fill.
 
 ```kotlin
 GlassFloatingActionButton(
@@ -47,7 +47,7 @@ GlassFloatingActionButton(
 | material | GlassMaterial | Glass material applied when `backdrop` is provided | GlassFloatingActionButtonDefaults.material() | No |
 | size | Dp | Button diameter | GlassFloatingActionButtonDefaults.Size | No |
 | shape | GlassShape | Button shape | GlassShape(size / 2) | No |
-| fill | Color | Fill used without a backdrop | GlassFloatingActionButtonDefaults.fill() | No |
+| fill | Color | Fill used when backdrop rendering is unavailable | GlassFloatingActionButtonDefaults.fill() | No |
 | stroke | EdgeStroke? | Surface stroke; null removes it | GlassFloatingActionButtonDefaults.stroke() | No |
 | shadow | GlassShadow? | Button shadow; null removes it | GlassShadows.Regular | No |
 | content | @Composable () -> Unit | Centered button content | - | Yes |
@@ -58,12 +58,12 @@ GlassFloatingActionButton(
 
 | Name | Type | Description | Default Value |
 | --- | --- | --- | --- |
-| Size | Dp | Button diameter | 60.dp |
+| Size | Dp | Button diameter | 56.dp |
 
 #### Functions
 
 | Name | Return Type | Description |
 | --- | --- | --- |
-| material() | GlassMaterial | Primary-tinted glass material (`SrcOver`, `0.92f` alpha) |
+| material() | GlassMaterial | Glass with 20.dp blur, two PuredThin layers, and a primary colour layer at 92% opacity |
 | fill() | Color | Fallback fill (`MiuixTheme.colorScheme.primary`) |
 | stroke() | EdgeStroke | Bloom stroke matching `GlassTopAppBarDefaults.buttonStroke()` |
