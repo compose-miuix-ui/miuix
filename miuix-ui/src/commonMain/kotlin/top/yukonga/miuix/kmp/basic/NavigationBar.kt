@@ -293,7 +293,7 @@ fun FloatingNavigationBar(
         val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
         when {
             platform() == Platform.IOS -> 28.dp
-            systemBottom <= 16.dp -> 32.dp
+            systemBottom <= 16.dp -> 24.dp
             systemBottom >= 32.dp -> systemBottom
             else -> 12.dp + systemBottom
         }

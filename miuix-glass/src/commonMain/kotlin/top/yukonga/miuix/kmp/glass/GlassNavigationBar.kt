@@ -314,7 +314,7 @@ fun GlassNavigationBar(
         val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
         when {
             platform() == Platform.IOS -> 24.dp
-            systemBottom <= 16.dp -> 28.dp
+            systemBottom <= 16.dp -> 20.dp
             systemBottom >= 28.dp -> systemBottom
             else -> 12.dp + systemBottom
         }

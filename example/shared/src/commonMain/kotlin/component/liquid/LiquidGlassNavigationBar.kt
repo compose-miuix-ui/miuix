@@ -342,7 +342,7 @@ internal fun IosLiquidGlassNavigationBar(
     val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
     val floatingMargin = when {
         platform() == Platform.IOS -> 22.dp
-        systemBottom <= 16.dp -> 26.dp
+        systemBottom <= 16.dp -> 18.dp
         systemBottom >= 26.dp -> systemBottom
         else -> 12.dp + systemBottom
     }
