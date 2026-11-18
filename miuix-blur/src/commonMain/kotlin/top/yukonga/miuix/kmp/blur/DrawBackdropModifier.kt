@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
@@ -35,7 +34,9 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.invalidateMeasurement
+import androidx.compose.ui.node.invalidatePlacement
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
@@ -48,10 +49,12 @@ import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpOverlayEffect
-import top.yukonga.miuix.kmp.blur.internal.createProgressiveStackEffect
 import top.yukonga.miuix.kmp.blur.internal.progressiveLoopTapBound
+import top.yukonga.miuix.kmp.blur.internal.progressiveMidSharpLoopRadius
+import top.yukonga.miuix.kmp.blur.internal.progressiveMidSharpThreshold
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
+import top.yukonga.miuix.kmp.blur.internal.progressiveSharpThreshold
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
@@ -201,18 +204,13 @@ private class BackdropPipelineElement(
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
-        val nextGradient = pipeline.progressiveGradient
-        val gradientCleared = node.progressiveGradient != null && nextGradient == null
         node.backdrop = backdrop
         node.updateShape { pipeline.shape }
         node.effects = { pipeline.configureEffects(this) }
         node.onDrawFront = { pipeline.drawFront(this) }
         node.contentBlendMode = contentBlendMode
-        node.progressiveGradient = nextGradient
+        node.progressiveGradient = pipeline.progressiveGradient
         node.enabled = enabled
-        if (gradientCleared) {
-            node.releaseCompositeResources()
-        }
         if (enabledChanged) {
             if (!enabled) {
                 node.releaseGraphicsLayers()
@@ -278,7 +276,6 @@ private class DrawBackdropElement(
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
-        val gradientCleared = node.progressiveGradient != null && progressiveGradient == null
         node.backdrop = backdrop
         node.updateShape(shape)
         node.effects = effects
@@ -290,9 +287,6 @@ private class DrawBackdropElement(
         node.contentBlendMode = contentBlendMode
         node.progressiveGradient = progressiveGradient
         node.enabled = enabled
-        if (gradientCleared) {
-            node.releaseCompositeResources()
-        }
         if (enabledChanged) {
             if (!enabled) {
                 node.releaseGraphicsLayers()
@@ -453,8 +447,146 @@ private class DrawBackdropNode(
         }
     }
 
-    private val primary = LevelTarget()
+    private inner class SharpBandOverlay(private val downScale: Int) {
+        var layer: GraphicsLayer? = null
+        var active = false
+        private var effect: RenderEffect? = null
+        private var cachedGradient: ProgressiveBlur? = null
+        private var cachedW = Float.NaN
+        private var cachedH = Float.NaN
+        private var cachedPre: RenderEffect? = null
+        private var cachedRadiusX = Float.NaN
+        private var cachedRadiusY = Float.NaN
+        private var cachedExp = -1
+        private var bandOffset = IntOffset.Zero
+        private var bandTexSize = IntSize.Zero
 
+        fun update(
+            scope: BackdropEffectScopeImpl,
+            gradient: ProgressiveBlur,
+            sw: Float,
+            sh: Float,
+            maxRX: Float,
+            maxRY: Float,
+            exp: Int,
+            threshold: Float,
+            midDecay: Boolean,
+            pre: RenderEffect?,
+        ) {
+            if (maxRX < 0.5f && maxRY < 0.5f) {
+                active = false
+                return
+            }
+            if (cachedGradient != gradient || cachedW != sw || cachedH != sh ||
+                cachedPre !== pre || cachedRadiusX != maxRX || cachedRadiusY != maxRY || cachedExp != exp
+            ) {
+                val dsFloat = downScale.toFloat()
+                val loopReach = (progressiveLoopTapBound(maxOf(maxRX, maxRY)) + 1) * dsFloat
+                val band = progressiveSharpBandBounds(
+                    threshold = threshold,
+                    compW = sw,
+                    compH = sh,
+                    angleDeg = gradient.angle,
+                    startFraction = gradient.startFraction,
+                    endFraction = gradient.endFraction,
+                    curve = gradient.curve,
+                    margin = loopReach,
+                )
+                if (band == null || band.width < 1f || band.height < 1f) {
+                    effect = null
+                    bandOffset = IntOffset.Zero
+                    bandTexSize = IntSize.Zero
+                } else {
+                    val left = (floor(band.left).toInt() / downScale) * downScale
+                    val top = (floor(band.top).toInt() / downScale) * downScale
+                    val texW = ((ceil(band.right).toInt() - left + downScale - 1) / downScale).coerceAtLeast(1)
+                    val texH = ((ceil(band.bottom).toInt() - top + downScale - 1) / downScale).coerceAtLeast(1)
+                    bandOffset = IntOffset(left, top)
+                    bandTexSize = IntSize(texW, texH)
+                    effect = createProgressiveSharpOverlayEffect(
+                        maxRadiusX = maxRX,
+                        maxRadiusY = maxRY,
+                        downScale = dsFloat,
+                        threshold = threshold,
+                        midDecay = midDecay,
+                        compW = sw,
+                        compH = sh,
+                        originX = left.toFloat(),
+                        originY = top.toFloat(),
+                        bandW = texW.toFloat(),
+                        bandH = texH.toFloat(),
+                        angleDeg = gradient.angle,
+                        startFraction = gradient.startFraction,
+                        endFraction = gradient.endFraction,
+                        curve = gradient.curve,
+                        preEffect = pre,
+                        scope = scope,
+                    )
+                }
+                cachedGradient = gradient
+                cachedW = sw
+                cachedH = sh
+                cachedPre = pre
+                cachedRadiusX = maxRX
+                cachedRadiusY = maxRY
+                cachedExp = exp
+            }
+            active = effect != null
+        }
+
+        fun DrawScope.draw() {
+            if (!active) return
+            val texSize = bandTexSize
+            if (texSize.width <= 0 || texSize.height <= 0) return
+            val offset = bandOffset
+            val dsFloat = downScale.toFloat()
+            val targetLayer = layer ?: graphicsContext.createGraphicsLayer().also { layer = it }
+            recordLayer(targetLayer, size = texSize) {
+                translate(-offset.x / dsFloat, -offset.y / dsFloat) {
+                    onDrawBackdrop {
+                        with(backdrop) {
+                            drawBackdrop(
+                                density = effectScope,
+                                coordinates = layoutCoordinates,
+                                layerBlock = layerBlock,
+                                downscaleFactor = dsFloat,
+                            )
+                        }
+                    }
+                }
+            }
+            targetLayer.renderEffect = effect
+            if (downScale == 1) {
+                targetLayer.topLeft = offset
+                drawLayer(targetLayer)
+            } else {
+                targetLayer.topLeft = IntOffset.Zero
+                translate(offset.x.toFloat(), offset.y.toFloat()) {
+                    scale(dsFloat, dsFloat, Offset.Zero) { drawLayer(targetLayer) }
+                }
+            }
+        }
+
+        fun release() {
+            layer?.let { graphicsContext.releaseGraphicsLayer(it) }
+            layer = null
+            active = false
+            effect = null
+            cachedGradient = null
+            cachedPre = null
+            cachedW = Float.NaN
+            cachedH = Float.NaN
+            cachedRadiusX = Float.NaN
+            cachedRadiusY = Float.NaN
+            cachedExp = -1
+            bandOffset = IntOffset.Zero
+            bandTexSize = IntSize.Zero
+        }
+    }
+
+    private val midSharpOverlay = SharpBandOverlay(downScale = 2)
+    private val sharpOverlay = SharpBandOverlay(downScale = 1)
+    private val primary = LevelTarget()
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
@@ -612,42 +744,15 @@ private class DrawBackdropNode(
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
     private var contentBoundsRect: Rect? = null
 
-    // Progressive blur split by resolution: the level stack runs through the downscaled [primary]
-    // machinery, [sharpLayer] overlays the ramp's clear end at full resolution (skipped while the
-    // stack renders it natively). Flags gate platforms without a stack effect.
-    private var sharpLayer: GraphicsLayer? = null
-    private var compositeAttempted = false
-    private var compositeSupported = false
-
     // Set once updateEffects() has run with a measured size, i.e. the effect observer is live.
     private var effectsSized = false
-    private var sharpOverlayActive = false
 
-    // Level-stack effect cached on its inputs: chains by identity, the recorded blend by value.
-    private var cachedStackEffect: RenderEffect? = null
-    private var cachedStackRadiusX = Float.NaN
-    private var cachedStackRadiusY = Float.NaN
-    private var cachedStackW = Float.NaN
-    private var cachedStackH = Float.NaN
-    private var cachedStackPad = Float.NaN
-    private var cachedStackCompW = Float.NaN
-    private var cachedStackCompH = Float.NaN
-    private var cachedStackGradient: ProgressiveBlur? = null
-    private var cachedStackPre: RenderEffect? = null
-    private var cachedStackPost: RenderEffect? = null
-    private var cachedStackPostBlend: BlurColors? = null
-    private var cachedStackDither = Float.NaN
-
-    // Dither chained after the assembled stack, cached on its coefficient. exp > 0: dither before
-    // the 8-bit write at min(2 × coefficient, [STACK_DITHER_MAX]) — dithering after it only masks
-    // the staircase, and the default alone is ~±0.6 LSB against the ~1 LSB it needs. exp == 0: the
-    // same pass carries the full coefficient, already per screen pixel.
+    // Dither chained after the assembled ramp, cached on its coefficient.
     private var stackDitherEffect: RenderEffect? = null
     private var stackDitherCoeff = Float.NaN
 
-    // True while the stack dither covers the noise duty (coefficient ≤ [NOISE_GRAIN_THRESHOLD]):
-    // the full-resolution noise round-trip is skipped. Deliberate grain keeps that pass, so grain
-    // size stays one screen pixel.
+    // True while the downscaled dither covers the noise duty (coefficient ≤ [NOISE_GRAIN_THRESHOLD]):
+    // the full-resolution noise round-trip is skipped.
     private var stackDitherChained = false
 
     private fun obtainStackDitherEffect(coeff: Float): RenderEffect {
@@ -661,51 +766,9 @@ private class DrawBackdropNode(
         }
     }
 
-    // Sharp overlay effect + band bbox (the only full-resolution region), cached on gradient, size
-    // and radii/exp. A null effect with matching keys means the band misses the component.
-    private var sharpOverlayEffect: RenderEffect? = null
-    private var sharpOverlayGradient: ProgressiveBlur? = null
-    private var sharpOverlayW = Float.NaN
-    private var sharpOverlayH = Float.NaN
-    private var sharpOverlayPad = Float.NaN
-    private var sharpRadiusX = Float.NaN
-    private var sharpRadiusY = Float.NaN
-    private var sharpExp = -1
-    private var sharpBandOffset = IntOffset.Zero
-    private var sharpBandSize = IntSize.Zero
-
     private fun DrawScope.drawBlurredBackdrop() {
         renderBlurInto(primary)
     }
-
-    /**
-     * Records the backdrop's ramp band into [sharpLayer] at full resolution and draws the overlay
-     * over the level stack: a loop blur ramping to zero, so the composite ends genuinely sharp.
-     */
-    private fun DrawScope.drawSharpOverlay() {
-        val bandSize = sharpBandSize
-        if (bandSize.width <= 0 || bandSize.height <= 0) return
-        val bandOffset = sharpBandOffset
-        val layer = sharpLayer ?: graphicsContext.createGraphicsLayer().also { sharpLayer = it }
-        recordLayer(layer, size = bandSize) {
-            translate(-bandOffset.x.toFloat(), -bandOffset.y.toFloat()) {
-                onDrawBackdrop {
-                    with(backdrop) {
-                        drawBackdrop(
-                            density = effectScope,
-                            coordinates = layoutCoordinates,
-                            layerBlock = layerBlock,
-                            downscaleFactor = 1f,
-                        )
-                    }
-                }
-            }
-        }
-        layer.renderEffect = sharpOverlayEffect
-        layer.topLeft = bandOffset
-        drawLayer(layer)
-    }
-
     override fun ContentDrawScope.draw() {
         if (!enabled) {
             drawContent()
@@ -718,12 +781,10 @@ private class DrawBackdropNode(
         onDrawBehind?.invoke(this)
 
         drawBlurredBackdrop()
-        if (sharpOverlayActive) {
-            drawSharpOverlay()
-        }
+        with(midSharpOverlay) { draw() }
+        with(sharpOverlay) { draw() }
 
         onDrawSurface?.invoke(this)
-
         if (contentBlendMode == BlendMode.SrcOver) {
             drawContent()
         } else {
@@ -757,6 +818,13 @@ private class DrawBackdropNode(
 
     fun invalidateDrawCache() {
         observeEffects()
+        if (isAttached && effectsSized) {
+            // placeWithLayer inside an ancestor GraphicsLayer (e.g. squircleSurface) can skip
+            // re-recording draw() on invalidateDraw() alone, leaving stale padding/downscale in
+            // mainLayer paired with the updated renderEffect.
+            invalidateDraw()
+            invalidatePlacement()
+        }
     }
 
     private fun observeEffects() {
@@ -772,20 +840,14 @@ private class DrawBackdropNode(
         if (!enabled) return
         primary.ensureMain()
 
-        // Gradient mode: progressiveBlur() records radii + downscale and splits the chain; the
-        // stack is assembled below once the post chain is known. Re-derives as false once a
-        // platform reports the stack unsupported.
-        effectScope.progressiveCompositeActive =
-            progressiveGradient != null && !(compositeAttempted && !compositeSupported)
-
+        effectScope.progressiveRampActive = progressiveGradient != null
         effectScope.apply(effects)
-        if (effectScope.progressiveCompositeActive) {
-            // Noise is finalize's duty here — chained after the assembled stack, not into the
-            // post chain (which the composite ramp-weights).
-            finalizeProgressiveComposite()
+        if (effectScope.progressiveRampActive) {
+            finalizeProgressiveRamp()
         } else {
             chainFullResNoiseIfNeeded()
-            sharpOverlayActive = false
+            midSharpOverlay.active = false
+            sharpOverlay.active = false
             stackDitherChained = false
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
@@ -794,171 +856,103 @@ private class DrawBackdropNode(
     }
 
     /**
-     * Composite mode: progressiveBlur() recorded the radii + downscale and split the chain; this
-     * assembles the level-stack effect for [primary] and the full-res overlay for [sharpLayer].
-     * Falls back to running the effects uniformly when the platform can't express the stack.
+     * Progressive mode: chains pre-blur effects, the separable H/V progressive loop blur, folded
+     * ramp blend colors, and dither on [primary]; when `exp > 0` and safe to overlay, drives a
+     * narrow 1× clear-end band in [sharpLayer] for a ghost-free pixel-sharp transition.
      */
-    private fun finalizeProgressiveComposite() {
+    private fun finalizeProgressiveRamp() {
         val scope = effectScope
         val gradient = progressiveGradient
-        val rX = scope.cachedProgRadiusX
-        val rY = scope.cachedProgRadiusY
-        if (gradient == null || rX.isNaN() || rY.isNaN()) {
+        val rX = scope.progRecordedRadiusX
+        val rY = scope.progRecordedRadiusY
+        val exp = scope.progRecordedExp
+        if (gradient == null || rX.isNaN() || rY.isNaN() || exp < 0) {
             chainFullResNoiseIfNeeded()
-            sharpOverlayActive = false
+            midSharpOverlay.active = false
+            sharpOverlay.active = false
             stackDitherChained = false
             return
         }
-        val paddedW = scope.cachedProgSizeW
-        val paddedH = scope.cachedProgSizeH
         val pre = scope.progressivePreEffect
         var post = scope.renderEffect
         var postBlend = scope.progressivePostBlend
         if (postBlend != null && post != null) {
-            // Mixed post chain (effects chained after the recorded blend): restore the blend at
-            // the chain head and take the general branch form for the whole chain.
             post = obtainBlendColorsEffect(scope, postBlend).chain(post)
             postBlend = null
         }
-        // exp > 0: pre-quantization dither capped at the anti-banding amplitude (the aesthetic
-        // remainder renders per screen pixel via the upscale noise pass); exp == 0: the layer is
-        // already full resolution, so this slot carries the full coefficient.
+        val blurEffect = obtainProgressiveBlurEffect(
+            scope = scope,
+            radiusX = rX,
+            radiusY = rY,
+            exp = exp,
+            gradient = gradient,
+        )
+        var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
+        if (postBlend != null) {
+            val rampBlend = buildRampBlendColorsEffect(
+                scope = scope,
+                colors = postBlend,
+                gradVecX = scope.progGradVecX,
+                gradVecY = scope.progGradVecY,
+                gradOffset = scope.progGradOffset,
+                curve = scope.progClampedCurve,
+            )
+            chain = chain?.chain(rampBlend) ?: rampBlend
+        } else if (post != null) {
+            chain = chain?.chain(post) ?: post
+        }
+        scope.renderEffect = chain
         val noiseCoeff = scope.noiseCoefficient
-        val ditherCoeff = when {
-            noiseCoeff <= 0f -> 0f
-            scope.cachedProgExp > 0 -> minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
-            else -> noiseCoeff
-        }
-        val stack = if (cachedStackEffect != null &&
-            cachedStackRadiusX == rX &&
-            cachedStackRadiusY == rY &&
-            cachedStackW == paddedW &&
-            cachedStackH == paddedH &&
-            cachedStackPad == scope.padding &&
-            cachedStackCompW == scope.size.width &&
-            cachedStackCompH == scope.size.height &&
-            cachedStackGradient == gradient &&
-            cachedStackPre === pre &&
-            cachedStackPost === post &&
-            cachedStackPostBlend == postBlend &&
-            cachedStackDither == ditherCoeff
-        ) {
-            cachedStackEffect
-        } else {
-            createProgressiveStackEffect(
-                rX,
-                rY,
-                scope.cachedProgExp,
-                scope.padding,
-                scope.size.width,
-                scope.size.height,
-                gradient.angle,
-                gradient.startFraction,
-                gradient.endFraction,
-                gradient.curve,
-                pre,
-                post,
-                postBlend,
-                scope,
-            )?.let { built ->
-                if (ditherCoeff > 0f) built.chain(obtainStackDitherEffect(ditherCoeff)) else built
-            }?.also {
-                cachedStackEffect = it
-                cachedStackRadiusX = rX
-                cachedStackRadiusY = rY
-                cachedStackW = paddedW
-                cachedStackH = paddedH
-                cachedStackPad = scope.padding
-                cachedStackCompW = scope.size.width
-                cachedStackCompH = scope.size.height
-                cachedStackGradient = gradient
-                cachedStackPre = pre
-                cachedStackPost = post
-                cachedStackPostBlend = postBlend
-                cachedStackDither = ditherCoeff
-            }
-        }
-        compositeAttempted = true
-        compositeSupported = stack != null
-        if (stack == null) {
-            // Unsupported: rebuild the whole chain with the flag re-derived as false, so
-            // progressiveBlur() falls back to its uniform loop-shader build.
-            scope.progressiveCompositeActive = false
-            scope.apply(effects)
+        if (exp == 0) {
             chainFullResNoiseIfNeeded()
-            sharpOverlayActive = false
             stackDitherChained = false
+            midSharpOverlay.active = false
+            sharpOverlay.active = false
             return
         }
-        scope.renderEffect = stack
-        stackDitherChained = ditherCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD
+        if (noiseCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD) {
+            val ditherCoeff = minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
+            scope.renderEffect = scope.renderEffect?.chain(obtainStackDitherEffect(ditherCoeff))
+            stackDitherChained = true
+        } else {
+            stackDitherChained = false
+        }
 
+        if (post != null || contentBlendMode != BlendMode.SrcOver) {
+            midSharpOverlay.active = false
+            sharpOverlay.active = false
+            return
+        }
         val sw = scope.size.width
         val sh = scope.size.height
-        val exp = scope.cachedProgExp
-        if (exp == 0) {
-            // nativeSharpEnd already bound the clear end to the native source — no overlay needed.
-            sharpOverlayActive = false
-            return
-        }
-        val maxRX = progressiveSharpLoopRadius(rX, exp)
-        val maxRY = progressiveSharpLoopRadius(rY, exp)
-        if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
-            sharpOverlayPad != scope.padding ||
-            sharpRadiusX != maxRX || sharpRadiusY != maxRY || sharpExp != exp
-        ) {
-            // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
-            // on rows/columns the ramp mask zeroes out; quantized to the loop's tap bound
-            // (multiples of 4, ≥ the reach) so an animating radius doesn't resize the band and
-            // reallocate the overlay layer's backing texture.
-            val loopReach = (progressiveLoopTapBound(maxOf(maxRX, maxRY)) + 1).toFloat()
-            val band = progressiveSharpBandBounds(
-                sw,
-                sh,
-                gradient.angle,
-                gradient.startFraction,
-                gradient.endFraction,
-                gradient.curve,
-                margin = loopReach,
+        if (exp >= 3) {
+            midSharpOverlay.update(
+                scope = scope,
+                gradient = gradient,
+                sw = sw,
+                sh = sh,
+                maxRX = progressiveMidSharpLoopRadius(rX, exp),
+                maxRY = progressiveMidSharpLoopRadius(rY, exp),
+                exp = exp,
+                threshold = progressiveMidSharpThreshold(exp),
+                midDecay = true,
+                pre = pre,
             )
-            if (band == null || band.width < 1f || band.height < 1f) {
-                sharpOverlayEffect = null
-                sharpBandOffset = IntOffset.Zero
-                sharpBandSize = IntSize.Zero
-            } else {
-                val left = floor(band.left).toInt()
-                val top = floor(band.top).toInt()
-                sharpBandOffset = IntOffset(left, top)
-                sharpBandSize = IntSize(
-                    (ceil(band.right).toInt() - left).coerceAtLeast(1),
-                    (ceil(band.bottom).toInt() - top).coerceAtLeast(1),
-                )
-                sharpOverlayEffect = createProgressiveSharpOverlayEffect(
-                    rX,
-                    rY,
-                    exp,
-                    sw,
-                    sh,
-                    left.toFloat(),
-                    top.toFloat(),
-                    sharpBandSize.width.toFloat(),
-                    sharpBandSize.height.toFloat(),
-                    gradient.angle,
-                    gradient.startFraction,
-                    gradient.endFraction,
-                    gradient.curve,
-                    scope,
-                )
-            }
-            sharpOverlayGradient = gradient
-            sharpOverlayW = sw
-            sharpOverlayH = sh
-            sharpOverlayPad = scope.padding
-            sharpRadiusX = maxRX
-            sharpRadiusY = maxRY
-            sharpExp = exp
+        } else {
+            midSharpOverlay.active = false
         }
-        sharpOverlayActive = sharpOverlayEffect != null
+        sharpOverlay.update(
+            scope = scope,
+            gradient = gradient,
+            sw = sw,
+            sh = sh,
+            maxRX = progressiveSharpLoopRadius(rX, exp),
+            maxRY = progressiveSharpLoopRadius(rY, exp),
+            exp = exp,
+            threshold = progressiveSharpThreshold(exp),
+            midDecay = false,
+            pre = pre,
+        )
     }
 
     /**
@@ -1089,45 +1083,13 @@ private class DrawBackdropNode(
         }
     }
 
-    /**
-     * Drops the composite layer and its caches when [progressiveGradient] is cleared, so the
-     * full-resolution offscreen layer doesn't outlive the gradient mode.
-     */
-    fun releaseCompositeResources() {
-        sharpLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
-        sharpLayer = null
-        sharpOverlayActive = false
-        cachedStackEffect = null
-        cachedStackRadiusX = Float.NaN
-        cachedStackRadiusY = Float.NaN
-        cachedStackW = Float.NaN
-        cachedStackH = Float.NaN
-        cachedStackPad = Float.NaN
-        cachedStackCompW = Float.NaN
-        cachedStackCompH = Float.NaN
-        cachedStackGradient = null
-        cachedStackPre = null
-        cachedStackPost = null
-        cachedStackPostBlend = null
-        cachedStackDither = Float.NaN
+    fun releaseGraphicsLayers() {
+        primary.release()
+        midSharpOverlay.release()
+        sharpOverlay.release()
         stackDitherEffect = null
         stackDitherCoeff = Float.NaN
         stackDitherChained = false
-        sharpOverlayEffect = null
-        sharpOverlayGradient = null
-        sharpOverlayW = Float.NaN
-        sharpOverlayH = Float.NaN
-        sharpRadiusX = Float.NaN
-        sharpRadiusY = Float.NaN
-        sharpExp = -1
-        sharpBandOffset = IntOffset.Zero
-        sharpBandSize = IntSize.Zero
-        sharpOverlayPad = Float.NaN
-    }
-
-    fun releaseGraphicsLayers() {
-        primary.release()
-        releaseCompositeResources()
         effectScope.reset()
     }
 

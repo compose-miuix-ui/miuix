@@ -185,15 +185,11 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedRampBlendCurve: Float = Float.NaN
     internal var cachedRampBlendResult: RenderEffect? = null
 
-    // progressiveBlur() builds a gradient-scaled variant; cache it on the same inputs plus the
-    // gradient (angle/start/end) so an animating radius over a fixed gradient rebuilds once per size.
+    // progressiveBlur() builds a gradient-scaled variant; cache it on the same inputs.
     internal var cachedProgRadiusX: Float = Float.NaN
     internal var cachedProgRadiusY: Float = Float.NaN
     internal var cachedProgSizeW: Float = Float.NaN
     internal var cachedProgSizeH: Float = Float.NaN
-
-    // Builders also read raw padding and component size; padded dimensions alone cannot tell them
-    // apart when a custom effects block changes padding independently of the radius.
     internal var cachedProgPad: Float = Float.NaN
     internal var cachedProgCompW: Float = Float.NaN
     internal var cachedProgCompH: Float = Float.NaN
@@ -204,25 +200,28 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgCurve: Float = Float.NaN
     internal var cachedProgResult: RenderEffect? = null
 
-    /**
-     * True while the draw path renders the ramp as a multi-level composite: [progressiveBlur] then
-     * only records radii and skips its (never drawn) effect. Cleared when the composite is
-     * unsupported, so the fallback builds fully.
-     */
-    internal var progressiveCompositeActive: Boolean = false
+    /** True while the draw path runs the single-layer progressive ramp with folded post blend/fade. */
+    internal var progressiveRampActive: Boolean = false
 
-    /** Effects chained before [progressiveBlur] in composite mode; later ones stay post-blur. */
+    /** Recorded progressive inputs for [progressiveRampActive], cleared before each [apply]. */
+    internal var progRecordedRadiusX: Float = Float.NaN
+    internal var progRecordedRadiusY: Float = Float.NaN
+    internal var progRecordedExp: Int = -1
+
+    /** Normalized gradient uniforms computed for the current progressive pass. */
+    internal var progGradVecX: Float = 0f
+    internal var progGradVecY: Float = 0f
+    internal var progGradOffset: Float = 0f
+    internal var progClampedCurve: Float = 1f
+
+    /** Effects chained before [progressiveBlur] in ramp mode; later ones stay post-blur. */
     internal var progressivePreEffect: RenderEffect? = null
 
     /**
-     * A [blendColors] call directly after [progressiveBlur] in composite mode, recorded instead of
-     * built: the composite folds it into the stack's single ramp-weighted pass, where the SrcOver
-     * branch form would evaluate the level stack twice.
+     * A [blendColors] call directly after [progressiveBlur] in ramp mode, recorded instead of
+     * built so the ramp pass blends and fades clear pixels in one pass.
      */
     internal var progressivePostBlend: BlurColors? = null
-
-    /** Platform scratch for the composite's radius-independent caches; dropped on [reset]. */
-    internal var progressiveMaskScratch: Any? = null
 
     // Full-res noise pass cache, keyed on chain input identity + coefficient: keeps the chained
     // result stable across updateEffects() runs so the composite's post-chain identity check hits.
@@ -263,12 +262,9 @@ internal abstract class BackdropEffectScopeImpl :
         // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
         progressivePreEffect = null
         progressivePostBlend = null
-        // Composite mode: clear the recorded radii so a stale ramp can't outlive an effects block
-        // that stops calling progressiveBlur; standalone mode keeps them (loop-effect cache key).
-        if (progressiveCompositeActive) {
-            cachedProgRadiusX = Float.NaN
-            cachedProgRadiusY = Float.NaN
-        }
+        progRecordedRadiusX = Float.NaN
+        progRecordedRadiusY = Float.NaN
+        progRecordedExp = -1
         effects()
         // blur() bakes its sampling clamp from the padding at its call site. If a later effect
         // raised the padding, re-run once (padding only grows, so one pass converges) — otherwise
@@ -284,10 +280,9 @@ internal abstract class BackdropEffectScopeImpl :
             blurBuiltPaddedH = Float.NaN
             progressivePreEffect = null
             progressivePostBlend = null
-            if (progressiveCompositeActive) {
-                cachedProgRadiusX = Float.NaN
-                cachedProgRadiusY = Float.NaN
-            }
+            progRecordedRadiusX = Float.NaN
+            progRecordedRadiusY = Float.NaN
+            progRecordedExp = -1
             padding = finalPadding
             effects()
         }
@@ -335,12 +330,17 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgEnd = Float.NaN
         cachedProgCurve = Float.NaN
         cachedProgResult = null
-        progressiveCompositeActive = false
+        progressiveRampActive = false
+        progRecordedRadiusX = Float.NaN
+        progRecordedRadiusY = Float.NaN
+        progRecordedExp = -1
+        progGradVecX = 0f
+        progGradVecY = 0f
+        progGradOffset = 0f
+        progClampedCurve = 1f
         progressivePreEffect = null
         progressivePostBlend = null
-        progressiveMaskScratch = null
         cachedNoiseChainInput = null
-        cachedNoiseChainCoeff = Float.NaN
         cachedNoiseChainResult = null
     }
 }
