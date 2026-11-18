@@ -542,6 +542,16 @@ private fun GlassNavigationRailPanel(
     }
     val hasSecondarySelection = selectedIndex >= items.size && selectedIndex < items.size + secondaryItems.size
     val collapsedTargetIndex = if (primarySelectedIndex >= 0) primarySelectedIndex else lastPrimaryIndex
+    val lastSlotGeometry = remember(density, tabWidths, contentStart) {
+        with(density) {
+            var slotStart = contentStart.roundToPx()
+            for (index in 0 until tabWidths.lastIndex) slotStart += tabWidths[index].roundToPx()
+            val slotWidth = tabWidths.last().roundToPx()
+            slotStart.toFloat() to slotWidth.toFloat()
+        }
+    }
+    val lastSlotStart = animateFloatAsState(lastSlotGeometry.first, RailMorphMotion, label = "railLastSlotStart")
+    val lastSlotWidth = animateFloatAsState(lastSlotGeometry.second, RailMorphMotion, label = "railLastSlotWidth")
     val interaction = remember(widths.size, startPx, endPx, scope) {
         NavigationRailInteraction(widths, startPx, endPx, collapsedTargetIndex, scope)
     }
@@ -636,12 +646,7 @@ private fun GlassNavigationRailPanel(
                             (RailExpandedRowTop + RailRowPitch * indicatorSlotIndex).toPx()
                         }
                     }
-                    val animatedExpandedY = animateFloatAsState(
-                        targetValue = targetExpandedY,
-                        animationSpec = RailMorphMotion,
-                        label = "railIndicatorExpandedY",
-                    )
-                    val expandedYProvider = remember(animatedExpandedY) { { animatedExpandedY.value } }
+                    val expandedYProvider = remember(targetExpandedY) { { targetExpandedY } }
                     NavigationRailIndicator(
                         rowProgress = indicatorRowProgress,
                         expandedY = expandedYProvider,
@@ -681,20 +686,20 @@ private fun GlassNavigationRailPanel(
                 }
                 if (secondaryItems.isNotEmpty() && showSecondary) {
                     val dividerProgress = remember(rowProgress, items.size) { { rowProgress[items.size].value } }
+                    val lastSlotStartProvider = remember(lastSlotStart) { { lastSlotStart.value } }
+                    val lastSlotWidthProvider = remember(lastSlotWidth) { { lastSlotWidth.value } }
                     HorizontalDivider(
                         modifier = Modifier
                             .layout { measurable, constraints ->
                                 val fraction = dividerProgress().coerceIn(0f, 1f)
-                                val collapsedDividerWidth =
-                                    (collapsedWidth() - contentStart - RailCollapsedEndPadding - RailItemContentPadding * 2)
-                                        .coerceAtLeast(0.dp)
-                                        .toPx()
+                                val paddingPx = RailItemContentPadding.toPx()
+                                val collapsedDividerWidth = (lastSlotWidthProvider() - paddingPx * 2).coerceAtLeast(0f)
                                 val expandedDividerWidth = (itemWidth - RailItemContentPadding * 2).toPx()
                                 val width = lerp(collapsedDividerWidth, expandedDividerWidth, fraction)
                                     .roundToInt()
                                     .coerceAtLeast(0)
                                 val x = lerp(
-                                    (contentStart + RailItemContentPadding).toPx(),
+                                    lastSlotStartProvider() + paddingPx,
                                     (RailItemHorizontalMargin + RailItemContentPadding).toPx(),
                                     fraction,
                                 ).roundToInt()
@@ -739,8 +744,8 @@ private fun GlassNavigationRailPanel(
                                 expanded = expanded,
                                 rowProgress = secondaryProgress,
                                 scrollOffset = scrollOffsetProvider,
-                                collapsedWidth = collapsedWidth,
-                                contentStart = contentStart,
+                                lastSlotStart = lastSlotStartProvider,
+                                lastSlotWidth = lastSlotWidthProvider,
                                 itemWidth = itemWidth,
                                 secondaryTop = secondaryTop,
                                 selectedColor = selectedColor,
@@ -1086,8 +1091,8 @@ private fun SecondaryNavigationRailRow(
     expanded: Boolean,
     rowProgress: () -> Float,
     scrollOffset: () -> Int,
-    collapsedWidth: () -> Dp,
-    contentStart: Dp,
+    lastSlotStart: () -> Float,
+    lastSlotWidth: () -> Float,
     itemWidth: Dp,
     secondaryTop: Dp,
     selectedColor: Color,
@@ -1104,16 +1109,12 @@ private fun SecondaryNavigationRailRow(
         modifier = Modifier
             .layout { measurable, constraints ->
                 val fraction = rowProgress().coerceIn(0f, 1f)
-                val collapsedRowWidth =
-                    (collapsedWidth() - contentStart - RailCollapsedEndPadding)
-                        .coerceAtLeast(0.dp)
-                        .toPx()
-                val width = lerp(collapsedRowWidth, itemWidth.toPx(), fraction)
+                val width = lerp(lastSlotWidth(), itemWidth.toPx(), fraction)
                     .roundToInt()
                     .coerceAtLeast(0)
                 val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
                 val x = lerp(
-                    contentStart.toPx(),
+                    lastSlotStart(),
                     RailItemHorizontalMargin.toPx(),
                     fraction,
                 ).roundToInt()
@@ -1137,17 +1138,34 @@ private fun SecondaryNavigationRailRow(
                 this.alpha = ((fraction - 0.35f) / 0.65f).coerceIn(0f, 1f)
             }
             .clip(CircleShape)
-            .clickable(enabled = expanded, onClick = onClick)
+            .clickable(
+                enabled = expanded,
+                role = Role.Tab,
+                onClick = onClick,
+            )
+            .semantics(mergeDescendants = true) {
+                this.selected = selected
+                (item.contentDescription ?: item.label)?.let { contentDescription = it }
+            }
             .padding(horizontal = RailItemContentPadding),
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(
+            modifier = Modifier.layout { measurable, constraints ->
+                val expandedInnerWidth = (itemWidth - RailItemContentPadding * 2).roundToPx().coerceAtLeast(0)
+                val placeable = measurable.measure(
+                    constraints.copy(minWidth = 0, maxWidth = maxOf(constraints.maxWidth, expandedInnerWidth)),
+                )
+                layout(placeable.width.coerceAtMost(constraints.maxWidth), placeable.height) {
+                    placeable.placeRelative(0, 0)
+                }
+            },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(RailIconColumnWidth - RailSideIconSize),
         ) {
             Icon(
                 imageVector = item.icon,
-                contentDescription = item.label,
+                contentDescription = null,
                 modifier = Modifier.size(RailSideIconSize),
                 tint = tint,
             )
@@ -1159,7 +1177,6 @@ private fun SecondaryNavigationRailRow(
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
             }
         }
