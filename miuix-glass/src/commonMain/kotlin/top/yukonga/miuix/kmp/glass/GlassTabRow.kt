@@ -137,8 +137,10 @@ object GlassTabRowDefaults {
 
     /** `filter-sort-view2-*-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 
     /** Bloom stroke for selected and unselected tabs. */
@@ -148,8 +150,9 @@ object GlassTabRowDefaults {
     )
 
     /**
-     * The accented set: the selected tab carries the theme's own colour, the same in both themes.
-     * Material is applied to every tab; unselected tabs clear their background so it stays visible.
+     * The accented set: the selected tab carries the theme's own colour, paired with its on-primary
+     * label colour. Material is applied to every tab; unselected tabs clear their background so it
+     * stays visible.
      */
     @Composable
     fun primaryColors(
@@ -157,22 +160,41 @@ object GlassTabRowDefaults {
         containerColor: Color = Color.Transparent,
     ): GlassTabColors {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        val isDynamic = MiuixTheme.isDynamicColor
         val surface = MiuixTheme.colorScheme.surface
-        return remember(isDark, selectedContainerColor, containerColor, surface) {
+        val surfaceContainer = MiuixTheme.colorScheme.surfaceContainer
+        val onPrimary = MiuixTheme.colorScheme.onPrimary
+        val onSurface = MiuixTheme.colorScheme.onSurface
+        val unselectedContent = MiuixTheme.colorScheme.onSurfaceVariantSummary
+        return remember(
+            isDark,
+            isDynamic,
+            selectedContainerColor,
+            containerColor,
+            surface,
+            surfaceContainer,
+            onPrimary,
+            onSurface,
+            unselectedContent,
+        ) {
             GlassTabColors(
                 selectedContainerColor = selectedContainerColor,
-                selectedContentColor = if (isDark) Color.White.copy(alpha = 0.8f) else Color.White,
+                selectedContentColor = if (!isDynamic && isDark && onPrimary == Color.White) {
+                    onPrimary.copy(alpha = 0.8f)
+                } else {
+                    onPrimary
+                },
                 restingContainerColor = if (isDark) {
-                    Color.White.copy(alpha = RestingAlpha).compositeOver(surface)
+                    (if (isDynamic) onSurface else Color.White)
+                        .copy(alpha = RestingAlpha)
+                        .compositeOver(surface)
+                } else if (isDynamic) {
+                    surfaceContainer
                 } else {
                     Color.White
                 },
                 containerColor = containerColor,
-                contentColor = if (isDark) {
-                    Color.White.copy(alpha = 0.5f)
-                } else {
-                    Color.Black.copy(alpha = 0.6f)
-                },
+                contentColor = unselectedContent,
                 pressedOverlayColor = if (isDark) {
                     Color.White.copy(alpha = 0.16f)
                 } else {
@@ -194,13 +216,36 @@ object GlassTabRowDefaults {
     @Composable
     fun neutralColors(): GlassTabColors {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        val isDynamic = MiuixTheme.isDynamicColor
         val page = MiuixTheme.colorScheme.surface
         val onSurface = MiuixTheme.colorScheme.onSurface
-        return remember(isDark, page, onSurface) {
-            val fill = (if (isDark) Color.White else Color.Black).copy(alpha = 0.06f).compositeOver(page)
+        return remember(isDark, isDynamic, page, onSurface) {
+            val fill = (
+                if (isDynamic) {
+                    onSurface
+                } else if (isDark) {
+                    Color.White
+                } else {
+                    Color.Black
+                }
+                )
+                .copy(alpha = 0.06f)
+                .compositeOver(page)
             GlassTabColors(
-                selectedContainerColor = if (isDark) Color(0xFFE6E6E6) else Color(0xFF383838),
-                selectedContentColor = if (isDark) Color.Black else Color.White,
+                selectedContainerColor = if (isDynamic) {
+                    onSurface
+                } else if (isDark) {
+                    Color(0xFFE6E6E6)
+                } else {
+                    Color(0xFF383838)
+                },
+                selectedContentColor = if (isDynamic) {
+                    page
+                } else if (isDark) {
+                    Color.Black
+                } else {
+                    Color.White
+                },
                 restingContainerColor = fill,
                 containerColor = Color.Transparent,
                 contentColor = onSurface,
@@ -408,8 +453,10 @@ object GlassSegmentedTabRowDefaults {
 
     /** `filter-sort-view-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 
     /** Bloom stroke for the track. */
@@ -420,32 +467,40 @@ object GlassSegmentedTabRowDefaults {
 
     /**
      * Fill the track wears before the material comes up. Opaque, so nothing shows through the
-     * control at rest: one layer of [IndicatorAlpha] over the page.
+     * control at rest.
      */
     @Composable
-    fun restingTrackColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = IndicatorAlpha).compositeOver(MiuixTheme.colorScheme.surface)
-    } else {
-        Color.White
+    fun restingTrackColor(): Color {
+        val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        return when {
+            isDark -> {
+                val tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onSurface else Color.White
+                tint.copy(alpha = IndicatorAlpha).compositeOver(MiuixTheme.colorScheme.surface)
+            }
+
+            MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainer
+
+            else -> Color.White
+        }
     }
 
-    /**
-     * Fill of the indicator behind the current tab: the same layer again, over the track. Both must
-     * be the one figure or the indicator stops separating from the track.
-     */
+    /** Fill of the indicator behind the current tab. */
     @Composable
-    fun indicatorColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = IndicatorAlpha)
-    } else {
-        Color.Black.copy(alpha = 0.06f)
-    }
+    fun indicatorColor(): Color = indicatorTint().copy(
+        alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) IndicatorAlpha else 0.06f,
+    )
 
     /** Pressed indicator fill, using a higher opacity for touch feedback. */
     @Composable
-    fun indicatorPressedColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = PressedIndicatorAlpha)
-    } else {
-        Color.Black.copy(alpha = 0.14f)
+    fun indicatorPressedColor(): Color = indicatorTint().copy(
+        alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) PressedIndicatorAlpha else 0.14f,
+    )
+
+    @Composable
+    private fun indicatorTint(): Color = when {
+        MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.primary
+        MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color.White
+        else -> Color.Black
     }
 
     /**
@@ -495,7 +550,7 @@ fun GlassSegmentedTabRow(
     height: Dp = GlassSegmentedTabRowDefaults.Height,
     trackColor: Color = GlassSegmentedTabRowDefaults.restingTrackColor(),
     indicatorColor: Color = GlassSegmentedTabRowDefaults.indicatorColor(),
-    selectedContentColor: Color = MiuixTheme.colorScheme.onSurface,
+    selectedContentColor: Color = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
     contentColor: Color = MiuixTheme.colorScheme.onSurface,
 ) {
     if (tabs.isEmpty()) return

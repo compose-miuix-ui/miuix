@@ -124,7 +124,15 @@ object GlassDialogButtonDefaults {
         }
         val disabledContentColor = when (role) {
             GlassDialogButtonRole.Normal -> scheme.onBackground.copy(alpha = 0.38f)
-            GlassDialogButtonRole.Primary -> scheme.onPrimary.copy(alpha = if (isDark) 77f / 255f else 1f)
+
+            GlassDialogButtonRole.Primary -> scheme.onPrimary.copy(
+                alpha = when {
+                    !isDark -> 1f
+                    MiuixTheme.isDynamicColor -> 0.6f
+                    else -> 77f / 255f
+                },
+            )
+
             GlassDialogButtonRole.Destructive -> scheme.error.copy(alpha = 0.3f)
         }
         return remember(color, disabledColor, contentColor, disabledContentColor) {

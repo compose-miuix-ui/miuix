@@ -41,7 +41,7 @@ object GlassFloatingToolbarDefaults {
 
     /** Default glass material for [GlassFloatingToolbar]. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
+    fun material(): GlassMaterial = dynamicGlassMaterial(GlassMaterials.puredThinGlass(isDarkTheme()))
 
     /** Default bloom stroke for [GlassFloatingToolbar]. */
     @Composable

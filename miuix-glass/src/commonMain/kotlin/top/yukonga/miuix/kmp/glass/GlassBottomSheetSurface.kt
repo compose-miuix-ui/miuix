@@ -28,8 +28,12 @@ object GlassBottomSheetDefaults {
 
     /** Bottom-sheet material for the current theme. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.dialogGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.dialogGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
+        tint = MiuixTheme.colorScheme.surfaceContainer,
+        alpha = 0.72f,
     )
 
     /** Bottom-sheet bloom stroke for the current theme. */

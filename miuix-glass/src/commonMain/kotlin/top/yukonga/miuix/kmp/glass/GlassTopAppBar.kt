@@ -121,11 +121,15 @@ object GlassTopAppBarDefaults {
 
     /** Fallback button fill when backdrop material is unavailable. */
     @Composable
-    fun buttonFill(): Color = if (isDarkTheme()) Color(0xFF2C2C2C) else Color.White
+    fun buttonFill(): Color = when {
+        MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainerHigh
+        isDarkTheme() -> Color(0xFF2C2C2C)
+        else -> Color.White
+    }
 
     /** Default material for action-bar buttons. */
     @Composable
-    fun buttonMaterial(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
+    fun buttonMaterial(): GlassMaterial = dynamicGlassMaterial(GlassMaterials.puredThinGlass(isDarkTheme()))
 
     /** Material applied beneath child buttons and tabs. */
     @Composable

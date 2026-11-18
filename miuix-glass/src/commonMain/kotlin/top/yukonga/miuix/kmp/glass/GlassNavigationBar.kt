@@ -156,11 +156,13 @@ object GlassNavigationBarDefaults {
 
     /** The bar's own body. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 
-    /** Resting indicator fill, using the primary colour only in dynamic colour themes. */
+    /** Resting indicator fill. */
     @Composable
     fun indicatorColor(): Color = indicatorTint().copy(
         alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) 0.12f else 0.06f,
@@ -206,8 +208,7 @@ object GlassNavigationBarDefaults {
  *   layers; it does not disable sampling. Ignored when [backdrop] is `null`.
  * @param indicatorPressedColor Fill of the capsule while a finger is on it.
  * @param indicatorColor Fill of the capsule behind the selected destination.
- * @param selectedColor Tint of the selected icon and label. Dynamic colour themes use primary;
- *   other themes use onBackground.
+ * @param selectedColor Tint of the selected icon and label.
  * @param unselectedColor Tint of the unselected icons and labels, without additional dimming.
  * @param trailingAction Optional independent action outside the glass capsule. It owns its size
  *   and material, and shares the bar's show/hide transition. Adding or removing it animates its

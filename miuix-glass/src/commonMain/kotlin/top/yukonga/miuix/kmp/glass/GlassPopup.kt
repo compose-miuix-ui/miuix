@@ -150,8 +150,12 @@ object GlassPopupDefaults {
 
     /** Default popup material for the current theme. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.popupViewGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.popupViewGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
+        tint = MiuixTheme.colorScheme.surfaceContainer,
+        alpha = 0.72f,
     )
 
     /** Default popup bloom stroke for the current theme. */
@@ -164,10 +168,10 @@ object GlassPopupDefaults {
 
     /** Opaque fallback color for the current theme. */
     @Composable
-    fun containerColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color(0xFF2C2C2C)
-    } else {
-        Color.White
+    fun containerColor(): Color = when {
+        MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainer
+        MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color(0xFF2C2C2C)
+        else -> Color.White
     }
 }
 

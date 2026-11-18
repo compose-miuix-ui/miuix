@@ -190,6 +190,7 @@ fun GlassSearchOverlay(
         onBackCompleted = onDismissRequest,
     )
     val colors = MiuixTheme.colorScheme
+    val mutedColor = if (MiuixTheme.isDynamicColor) colors.onSurfaceVariantSummary else colors.disabledOnSurface
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -346,10 +347,10 @@ fun GlassSearchOverlay(
                                 searchIcon,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
-                                tint = colors.disabledOnSurface,
+                                tint = mutedColor,
                             )
                             Box(Modifier.weight(1f)) {
-                                if (query.isEmpty()) Text(label, color = colors.disabledOnSurface, style = MiuixTheme.textStyles.body1)
+                                if (query.isEmpty()) Text(label, color = mutedColor, style = MiuixTheme.textStyles.body1)
                                 field()
                             }
                             if (query.isNotEmpty()) {
@@ -364,7 +365,7 @@ fun GlassSearchOverlay(
                                         closeIcon,
                                         contentDescription = "Clear",
                                         modifier = Modifier.size(16.dp * (7f / 6f)),
-                                        tint = colors.disabledOnSurface,
+                                        tint = mutedColor,
                                     )
                                 }
                             }

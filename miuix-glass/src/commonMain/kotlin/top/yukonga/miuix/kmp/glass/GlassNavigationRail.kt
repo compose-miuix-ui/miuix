@@ -229,8 +229,10 @@ object GlassNavigationRailDefaults {
 
     /** The panel's body. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 }
 
@@ -308,8 +310,7 @@ fun rememberGlassNavigationRailState(initialExpanded: Boolean = true): GlassNavi
  *   layers; it does not disable sampling. Ignored when [backdrop] is `null`.
  * @param stroke Optional bloom stroke along the rim.
  * @param shadow The shadow the floating surface casts. `null` removes it.
- * @param selectedColor Tint of the selected icon and label. Dynamic colour themes use primary;
- *   other themes use onSurface.
+ * @param selectedColor Tint of the selected icon and label.
  * @param unselectedColor Tint of the unselected icons and labels.
  * @param indicatorColor Fill behind the selected destination.
  * @param indicatorPressedColor Fill behind the destination held down in the collapsed capsule.

@@ -128,7 +128,7 @@ Once the panel has settled, the destination column scrolls under the toggle head
 | material | GlassMaterial? | Surface body; null omits explicit material layers | GlassNavigationRailDefaults.material() | No |
 | stroke | EdgeStroke? | Surface stroke; null removes it | GlassNavigationRailDefaults.stroke() | No |
 | shadow | GlassShadow? | Surface shadow; null removes it | GlassShadows.Float | No |
-| selectedColor | Color | Selected icon and label tint | MiuixTheme.colorScheme.primary in dynamic colour themes, otherwise onSurface | No |
+| selectedColor | Color | Selected icon and label tint | MiuixTheme.colorScheme.onSurface | No |
 | unselectedColor | Color | Unselected icon and label tint | MiuixTheme.colorScheme.onSurface | No |
 | indicatorColor | Color | Resting indicator fill | GlassNavigationBarDefaults.indicatorColor() | No |
 | indicatorPressedColor | Color | Pressed indicator fill in the collapsed capsule | GlassNavigationBarDefaults.indicatorPressedColor() | No |
