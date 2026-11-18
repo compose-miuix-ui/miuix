@@ -97,6 +97,12 @@ jobs:
           path: ~/.konan
           key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-konan-
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v6
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-deriveddata-${{ hashFiles('example/ios/**', 'gradle/libs.versions.toml') }}
+          restore-keys: ${{ runner.os }}-xcode-deriveddata-
       - name: Build unsigned iOS IPA
         shell: bash
         run: |
