@@ -1036,7 +1036,13 @@ private fun NavigationRailRow(
         ) { measurables, constraints ->
             val icon = measurables[0].measure(constraints.copy(minWidth = 0, minHeight = 0))
             val label = if (item.label != null) {
-                measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0, maxWidth = (constraints.maxWidth - icon.width).coerceAtLeast(0)))
+                measurables[1].measure(
+                    constraints.copy(
+                        minWidth = 0,
+                        minHeight = 0,
+                        maxWidth = (constraints.maxWidth - icon.width).coerceAtLeast(0),
+                    ),
+                )
             } else {
                 null
             }

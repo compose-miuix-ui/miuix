@@ -182,7 +182,8 @@ fun Slider(
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val fraction = (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val fraction =
+                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
                                     val thumbX = thumbRadius + effectiveFraction * availableWidth
 
@@ -551,7 +552,8 @@ fun RangeSlider(
         if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
         ThumbScaleAnimationSpec,
     )
-    val endThumbScaleState = animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val endThumbScaleState =
+        animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -605,8 +607,10 @@ fun RangeSlider(
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val startFraction = (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val endFraction = (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val startFraction =
+                                        (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val endFraction =
+                                        (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
                                     val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
                                     val startThumbX = thumbRadius + effectiveStartFraction * availableWidth

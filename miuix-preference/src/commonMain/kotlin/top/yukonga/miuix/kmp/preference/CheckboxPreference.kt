@@ -45,7 +45,6 @@ import top.yukonga.miuix.kmp.preference.internal.StartActionSlot
  * @param enabled Whether the [CheckboxPreference] is clickable.
  */
 @Composable
-@NonRestartableComposable
 fun CheckboxPreference(
     title: String,
     checked: Boolean,
@@ -120,8 +119,10 @@ fun CheckboxPreference(
             }
         },
         bottomAction = bottomAction,
-        onClick = {
-            currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
+        onClick = if (onCheckedChange != null) {
+            { currentOnCheckedChange.takeIf { enabled }?.invoke(!checked) }
+        } else {
+            null
         },
         role = Role.Checkbox,
         holdDownState = holdDownState,

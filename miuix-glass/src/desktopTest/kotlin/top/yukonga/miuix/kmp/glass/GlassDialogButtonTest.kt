@@ -62,7 +62,16 @@ class GlassDialogButtonTest {
         val error = Color(0xFFD02040)
         val parent = Color(0xFF8090A0)
         setContent {
-            MiuixTheme(colors = if (isDark) darkColorScheme(primary = primary, error = error) else lightColorScheme(primary = primary, error = error)) {
+            MiuixTheme(
+                colors = if (isDark) {
+                    darkColorScheme(primary = primary, error = error)
+                } else {
+                    lightColorScheme(
+                        primary = primary,
+                        error = error,
+                    )
+                },
+            ) {
                 Column(Modifier.background(parent).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     for (role in GlassDialogButtonRole.entries) {
                         GlassDialogButton(
@@ -99,7 +108,8 @@ class GlassDialogButtonTest {
 
         runOnIdle { enabled.value = false }
         val disabledFills = listOf(tonal, primary.copy(alpha = 0.3f).compositeOver(parent), tonal)
-        val disabledContent = listOf(ink.copy(alpha = 0.38f), Color.White.copy(alpha = if (isDark) 77f / 255f else 1f), error.copy(alpha = 0.3f))
+        val disabledContent =
+            listOf(ink.copy(alpha = 0.38f), Color.White.copy(alpha = if (isDark) 77f / 255f else 1f), error.copy(alpha = 0.3f))
         for ((i, role) in GlassDialogButtonRole.entries.withIndex()) {
             val node = onNodeWithTag(role.name)
             node.assertIsNotEnabled()

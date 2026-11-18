@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults.IndicatorAlpha
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
@@ -296,8 +297,17 @@ fun GlassTabRow(
 
                 fun containerColor(): Color {
                     val settled = target.value
-                    return if (selected) settled else lerp(colors.restingContainerColor, settled, if (resolvedBackdrop != null) ramp else 0f)
+                    return if (selected) {
+                        settled
+                    } else {
+                        lerp(
+                            colors.restingContainerColor,
+                            settled,
+                            if (resolvedBackdrop != null) ramp else 0f,
+                        )
+                    }
                 }
+
                 val materialSurface = if (resolvedBackdrop == null) {
                     Modifier
                         .glassShadow(shape, shadow, alpha)

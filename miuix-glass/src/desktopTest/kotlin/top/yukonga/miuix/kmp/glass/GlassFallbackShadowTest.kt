@@ -62,6 +62,7 @@ class GlassFallbackShadowTest {
             assertEquals(Color.Green, pixels[55, 115], "The shadow modifier must not clip overflowing content")
             return total
         }
+
         val visible = darkness()
         assertTrue(visible > 0f, "Fallback shadow must extend outside the surface")
         runOnIdle { opacity.floatValue = 0.5f }

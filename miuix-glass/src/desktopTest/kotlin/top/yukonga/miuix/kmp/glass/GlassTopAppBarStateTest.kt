@@ -322,6 +322,9 @@ class GlassTopAppBarStateTest {
         }
         runOnIdle { bottomHeight.floatValue = 80f }
         val taller = onRoot().captureToImage().toPixelMap()
-        assertTrue((0 until taller.height).any { y -> abs(taller[5, y].red - collapsed[5, y].red) > 0.02f }, "Changing bottom content must update the blur coverage")
+        assertTrue(
+            (0 until taller.height).any { y -> abs(taller[5, y].red - collapsed[5, y].red) > 0.02f },
+            "Changing bottom content must update the blur coverage",
+        )
     }
 }

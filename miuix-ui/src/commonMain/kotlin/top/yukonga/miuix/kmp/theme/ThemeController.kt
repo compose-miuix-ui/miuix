@@ -256,19 +256,40 @@ class ThemeController(
         ColorSchemeMode.MonetSystem -> {
             val dark = isDark ?: isSystemInDarkTheme()
             keyColor?.let {
-                remember(keyColor, dark, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = dark) }
+                remember(keyColor, dark, colorSpec, paletteStyle) {
+                    colorsFromSeed(
+                        seed = it,
+                        colorSpec = colorSpec,
+                        paletteStyle = paletteStyle,
+                        dark = dark,
+                    )
+                }
             } ?: platformDynamicColors(dark = dark)
         }
 
         ColorSchemeMode.MonetLight -> {
             keyColor?.let {
-                remember(keyColor, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = false) }
+                remember(keyColor, colorSpec, paletteStyle) {
+                    colorsFromSeed(
+                        seed = it,
+                        colorSpec = colorSpec,
+                        paletteStyle = paletteStyle,
+                        dark = false,
+                    )
+                }
             } ?: platformDynamicColors(dark = false)
         }
 
         ColorSchemeMode.MonetDark -> {
             keyColor?.let {
-                remember(keyColor, colorSpec, paletteStyle) { colorsFromSeed(seed = it, colorSpec = colorSpec, paletteStyle = paletteStyle, dark = true) }
+                remember(keyColor, colorSpec, paletteStyle) {
+                    colorsFromSeed(
+                        seed = it,
+                        colorSpec = colorSpec,
+                        paletteStyle = paletteStyle,
+                        dark = true,
+                    )
+                }
             } ?: platformDynamicColors(dark = true)
         }
     }

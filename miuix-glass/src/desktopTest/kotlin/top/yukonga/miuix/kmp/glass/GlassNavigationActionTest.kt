@@ -80,6 +80,7 @@ class GlassNavigationActionTest {
         }
         fun width() = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
             .fetchSemanticsNode().boundsInRoot.width
+
         val initial = width()
         mainClock.autoAdvance = false
         runOnIdle { showSearch.value = false }
@@ -560,7 +561,12 @@ class GlassNavigationActionTest {
                 color.red > 0.9f && color.blue > 0.9f && color.green < 0.1f
             }
             assertTrue(indicatorPixels.isNotEmpty(), "The released indicator must remain visible")
-            assertEquals(destination.center.x, (indicatorPixels.first() + indicatorPixels.last()) / 2f, 2f, "Release must not pull the indicator toward the old selection")
+            assertEquals(
+                destination.center.x,
+                (indicatorPixels.first() + indicatorPixels.last()) / 2f,
+                2f,
+                "Release must not pull the indicator toward the old selection",
+            )
         }
         saveImage("navigation-release", onRoot().captureToImage())
     }

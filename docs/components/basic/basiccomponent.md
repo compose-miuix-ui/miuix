@@ -130,7 +130,7 @@ BasicComponent(
 | onClick           | (() -> Unit)?                      | Callback triggered when the component is clicked      | null                                  | No       |
 | onClickLabel      | String?                            | Accessibility label describing the click action       | null                                  | No       |
 | role              | Role?                              | Semantic role for accessibility services              | null                                  | No       |
-| holdDownState     | Boolean                            | Whether the component is in the pressed state         | false                                 | No       |
+| holdDownState     | Boolean                            | Shows pressed feedback even without `onClick`        | false                                 | No       |
 | enabled           | Boolean                            | Whether the component is enabled                      | true                                  | No       |
 | interactionSource | MutableInteractionSource?          | Interaction source of the component                   | null                                  | No       |
 
@@ -146,7 +146,7 @@ BasicComponent(
 | onClick           | (() -> Unit)?                      | Callback triggered when the component is clicked      | null                                | No       |
 | onClickLabel      | String?                            | Accessibility label describing the click action       | null                                | No       |
 | role              | Role?                              | Semantic role for accessibility services              | null                                | No       |
-| holdDownState     | Boolean                            | Whether the component is in the pressed state         | false                               | No       |
+| holdDownState     | Boolean                            | Shows pressed feedback even without `onClick`        | false                               | No       |
 | enabled           | Boolean                            | Whether the component is enabled                      | true                                | No       |
 | interactionSource | MutableInteractionSource?          | Interaction source of the component                   | null                                | No       |
 | content           | @Composable ColumnScope.() -> Unit | Composable content of the component                   | -                                   | Yes      |

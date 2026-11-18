@@ -51,17 +51,26 @@ class GlassPopupMeasurementTest {
                             Layout(
                                 content = {},
                                 measurePolicy = object : MeasurePolicy {
-                                    override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): androidx.compose.ui.layout.MeasureResult {
+                                    override fun MeasureScope.measure(
+                                        measurables: List<Measurable>,
+                                        constraints: Constraints,
+                                    ): androidx.compose.ui.layout.MeasureResult {
                                         measured[index] = true
                                         return layout(constraints.maxWidth, 44.dp.roundToPx()) {}
                                     }
 
-                                    override fun IntrinsicMeasureScope.maxIntrinsicWidth(measurables: List<IntrinsicMeasurable>, height: Int): Int {
+                                    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+                                        measurables: List<IntrinsicMeasurable>,
+                                        height: Int,
+                                    ): Int {
                                         widths[index]++
                                         return 160.dp.roundToPx()
                                     }
 
-                                    override fun IntrinsicMeasureScope.minIntrinsicHeight(measurables: List<IntrinsicMeasurable>, width: Int): Int {
+                                    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+                                        measurables: List<IntrinsicMeasurable>,
+                                        width: Int,
+                                    ): Int {
                                         heights[index]++
                                         return 44.dp.roundToPx()
                                     }

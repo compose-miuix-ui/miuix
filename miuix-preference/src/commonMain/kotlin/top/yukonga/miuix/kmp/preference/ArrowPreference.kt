@@ -45,7 +45,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param enabled Whether the [ArrowPreference] is clickable.
  */
 @Composable
-@NonRestartableComposable
 fun ArrowPreference(
     title: String,
     modifier: Modifier = Modifier,

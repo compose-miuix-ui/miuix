@@ -87,6 +87,8 @@ Scaffold {
 
 Use `DropdownEntry` and `DropdownItem` when individual dropdown items need extra state, such as selection, callbacks, or disabling a specific option.
 
+To update `entries` or a group's `items` in place, use `mutableStateListOf`. For ordinary lists, replace them through Compose state.
+
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val entry = DropdownEntry(

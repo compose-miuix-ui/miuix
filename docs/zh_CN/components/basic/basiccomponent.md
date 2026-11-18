@@ -130,7 +130,7 @@ BasicComponent(
 | onClick           | (() -> Unit)?                      | 点击组件时触发的回调 | null                                  | 否       |
 | onClickLabel      | String?                            | 无障碍点击操作描述   | null                                  | 否       |
 | role              | Role?                              | 无障碍语义角色       | null                                  | 否       |
-| holdDownState     | Boolean                            | 组件是否处于按下状态 | false                                 | 否       |
+| holdDownState     | Boolean                            | 显示按下反馈，无需 `onClick` | false                                 | 否       |
 | enabled           | Boolean                            | 组件是否可用         | true                                  | 否       |
 | interactionSource | MutableInteractionSource?          | 组件的交互源         | null                                  | 否       |
 
@@ -146,7 +146,7 @@ BasicComponent(
 | onClick           | (() -> Unit)?                      | 点击组件时触发的回调 | null                                | 否       |
 | onClickLabel      | String?                            | 无障碍点击操作描述   | null                                | 否       |
 | role              | Role?                              | 无障碍语义角色       | null                                | 否       |
-| holdDownState     | Boolean                            | 组件是否处于按下状态 | false                               | 否       |
+| holdDownState     | Boolean                            | 显示按下反馈，无需 `onClick` | false                               | 否       |
 | enabled           | Boolean                            | 组件是否可用         | true                                | 否       |
 | interactionSource | MutableInteractionSource?          | 组件的交互源         | null                                | 否       |
 | content           | @Composable ColumnScope.() -> Unit | 组件内部的可组合内容 | -                                   | 是       |

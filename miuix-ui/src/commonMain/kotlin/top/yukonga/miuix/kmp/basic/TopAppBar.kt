@@ -964,7 +964,8 @@ fun TopAppBarLayout(
         val verticalCenter = collapsedHeight / 2
         val smallSubtitleHeight = smallSubtitlePlaceable?.height ?: 0
         val smallTitleGroupHeight = titlePlaceable.height + smallSubtitleHeight
-        val smallTitleGroupTop = verticalCenter - if (smallSubtitlePlaceable != null) smallTitleGroupHeight / 2 else titlePlaceable.height / 2
+        val smallTitleGroupTop =
+            verticalCenter - if (smallSubtitlePlaceable != null) smallTitleGroupHeight / 2 else titlePlaceable.height / 2
         val smallSubtitleBottom = smallTitleGroupTop + smallTitleGroupHeight
         val expandedBottomPadding = if (smallSubtitlePlaceable != null) {
             TopAppBarDefaults.SubtitleBottomPadding.roundToPx()

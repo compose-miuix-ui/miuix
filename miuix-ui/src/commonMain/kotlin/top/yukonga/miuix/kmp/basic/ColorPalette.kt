@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
@@ -199,7 +199,7 @@ private fun PaletteCanvas(
     Box(
         modifier = Modifier
             .squircleClip(cornerRadius)
-            .onGloballyPositioned { sizePx = it.size }
+            .onSizeChanged { sizePx = it }
             .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown()

@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.utils
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -11,13 +12,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.overscroll
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -27,6 +34,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
@@ -47,6 +55,36 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class OverscrollContractTest {
+    @Test
+    fun factoryClipsOverflowAtRestAndAfterTranslation() = runComposeUiTest {
+        lateinit var effect: MiuixOverscrollEffect
+        setContent {
+            effect = remember { MiuixOverscrollEffect() }
+            Box(Modifier.size(120.dp).background(Color.White).testTag("viewport"), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier.size(40.dp).overscroll(effect).drawBehind {
+                        drawRect(Color.Red, Offset(-size.width, 0f), Size(size.width * 2f, size.height))
+                    },
+                )
+            }
+        }
+        fun assertClipped(shift: Int) {
+            val image = onNodeWithTag("viewport").captureToImage().toPixelMap()
+            val left = image.width / 3 + shift
+            assertEquals(Color.White, image[left - 2, image.height / 2])
+            assertEquals(Color.Red, image[left + 2, image.height / 2])
+        }
+        assertClipped(0)
+        val shift = runOnIdle {
+            effect.applyToScroll(Offset(24f, 0f), NestedScrollSource.UserInput) { Offset.Zero }
+            kotlin.math.round(effect.offsetX).toInt()
+        }
+        assertTrue(shift > 2)
+        assertClipped(shift)
+        runOnIdle { effect.resetAll() }
+        assertClipped(0)
+    }
+
     @Test
     fun ancestorConsumptionIsAccountedOnceDuringTouchDrag() = assertAncestorAccounting(wheel = false)
 
@@ -111,13 +149,23 @@ class OverscrollContractTest {
         }
         runOnIdle {
             assertTrue(abs(childPreAvailable) > 1f, "Input must reach the real scrollable")
-            assertEquals(childPreAvailable / 3f, ancestorPreConsumed, 0.01f, "An ancestor takes one quarter, leaving three quarters for the child")
+            assertEquals(
+                childPreAvailable / 3f,
+                ancestorPreConsumed,
+                0.01f,
+                "An ancestor takes one quarter, leaving three quarters for the child",
+            )
             if (wheel) {
                 assertEquals(childPostAvailable / 2f, ancestorPostConsumed, 0.01f, "Wheel leftovers must reach the parent exactly once")
                 assertEquals(0f, offset, 0f, "Wheel input must never stretch the content")
             } else {
                 assertEquals(0f, ancestorPostConsumed, 0.01f, "Overscroll consumes the remainder before the ancestor post pass")
-                assertEquals(damping(childPostAvailable, 800f), offset, 0.01f, "The content stretches only by the actual remaining distance")
+                assertEquals(
+                    damping(childPostAvailable, 800f),
+                    offset,
+                    0.01f,
+                    "The content stretches only by the actual remaining distance",
+                )
             }
         }
         if (!wheel) onNodeWithTag("drag").performTouchInput { up() }
@@ -323,7 +371,14 @@ class OverscrollContractTest {
                 val range = (if (vertical) 800f else 400f) * (pass + 1)
                 assertTrue(rawDistance > 1f)
                 assertEquals(damping(rawDistance, range), actual, 0.01f)
-                if (pass == 0) initialOffset = actual else assertTrue(actual > initialOffset, "The larger window must change the visible damping")
+                if (pass == 0) {
+                    initialOffset = actual
+                } else {
+                    assertTrue(
+                        actual > initialOffset,
+                        "The larger window must change the visible damping",
+                    )
+                }
             }
             onNodeWithTag("drag").performTouchInput { up() }
             waitForIdle()

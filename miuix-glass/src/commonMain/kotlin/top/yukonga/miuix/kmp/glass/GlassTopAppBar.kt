@@ -77,10 +77,10 @@ object GlassTopAppBarDefaults {
     /** Start/end inset of the glass controls, aligned with the page's cards and tabs. */
     val HorizontalPadding: Dp = 12.dp
 
-/** Scroll threshold for the retained shadow ramp. */
+    /** Scroll threshold for the retained shadow ramp. */
     val RampStart: Dp = 0.dp
 
-/** Scroll distance for the retained shadow ramp. Material transitions use their own timing. */
+    /** Scroll distance for the retained shadow ramp. Material transitions use their own timing. */
     val RampDistance: Dp = 32.dp
 
     /** Maximum blur radius applied to titles during collapse/expand transitions. */
@@ -119,15 +119,15 @@ object GlassTopAppBarDefaults {
         }
     }
 
-/** Fallback button fill when backdrop material is unavailable. */
+    /** Fallback button fill when backdrop material is unavailable. */
     @Composable
     fun buttonFill(): Color = if (isDarkTheme()) Color(0xFF2C2C2C) else Color.White
 
-/** Default material for action-bar buttons. */
+    /** Default material for action-bar buttons. */
     @Composable
     fun buttonMaterial(): GlassMaterial = GlassMaterials.puredThinGlass(isDarkTheme())
 
-/** Material applied beneath child buttons and tabs. */
+    /** Material applied beneath child buttons and tabs. */
     @Composable
     internal fun actionBarUnderlayMaterial(): GlassMaterial = GlassMaterials.actionBarMask(isDarkTheme())
 
@@ -147,7 +147,7 @@ object GlassTopAppBarDefaults {
         Color.Black.copy(alpha = 0.10f)
     }
 
-/** Gradient that dims content passing beneath the bar.
+    /** Gradient that dims content passing beneath the bar.
      *
      * @param color Page background colour.
      */

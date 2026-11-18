@@ -1,8 +1,6 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import kotlin.js.ExperimentalWasmJsInterop
-
 @OptIn(ExperimentalWasmJsInterop::class)
 @JsFun(
     """

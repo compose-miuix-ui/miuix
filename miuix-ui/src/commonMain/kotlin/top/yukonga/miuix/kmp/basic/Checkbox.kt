@@ -10,7 +10,6 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -172,7 +171,7 @@ fun Checkbox(
             .wrapContentSize(Alignment.Center)
             .requiredSize(26.dp)
             .pressable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = null,
                 indication = sinkFeedback,
                 enabled = enabled,
                 delay = null,

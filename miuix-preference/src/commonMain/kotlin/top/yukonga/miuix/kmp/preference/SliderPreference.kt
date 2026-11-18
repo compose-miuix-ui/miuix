@@ -79,7 +79,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param insideMargin The margin inside the [SliderPreference].
  */
 @Composable
-@NonRestartableComposable
 fun SliderPreference(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -208,7 +207,6 @@ fun SliderPreference(
  * @param insideMargin The margin inside the [RangeSliderPreference].
  */
 @Composable
-@NonRestartableComposable
 fun RangeSliderPreference(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,

@@ -126,7 +126,12 @@ class PagerGestureContractTest {
             onNodeWithTag("pager").performTouchInput { moveBy(Offset(width * 0.12f, 0f), delayMillis = 16) }
             finishAnimations()
             assertFalse(inner.isScrollInProgress, "The inner drag must stop as soon as Initial is consumed")
-            assertEquals(0f, inner.currentPageOffsetFraction, 0.001f, "The cancelled partial inner drag must snap while the outer finger is still held")
+            assertEquals(
+                0f,
+                inner.currentPageOffsetFraction,
+                0.001f,
+                "The cancelled partial inner drag must snap while the outer finger is still held",
+            )
             assertTrue(outer.isScrollInProgress)
             onNodeWithTag("pager").performTouchInput {
                 repeat(4) { moveBy(Offset(width * 0.12f, 0f), delayMillis = 16) }
@@ -445,7 +450,12 @@ class PagerGestureContractTest {
         mainClock.advanceTimeBy(64)
         waitForIdle()
         assertTrue(pager.isScrollInProgress, "The remaining finger must keep the drag mutation alive")
-        assertEquals(beforeHandoff, pager.currentPage + pager.currentPageOffsetFraction, 0.001f, "Handoff must neither jump nor start a snap")
+        assertEquals(
+            beforeHandoff,
+            pager.currentPage + pager.currentPageOffsetFraction,
+            0.001f,
+            "Handoff must neither jump nor start a snap",
+        )
         onNodeWithTag("pager").performTouchInput {
             repeat(4) { moveBy(1, Offset(-width * 0.12f, 0f), delayMillis = 16) }
             up(1)
@@ -610,7 +620,12 @@ class PagerGestureContractTest {
         val detachedPosition = pager.currentPage + pager.currentPageOffsetFraction
         cancelTouch(tag = "host")
         finishAnimations()
-        assertEquals(detachedPosition, pager.currentPage + pager.currentPageOffsetFraction, 0.001f, "A detached node must not launch a cleanup snap")
+        assertEquals(
+            detachedPosition,
+            pager.currentPage + pager.currentPageOffsetFraction,
+            0.001f,
+            "A detached node must not launch a cleanup snap",
+        )
     }
 
     @Test

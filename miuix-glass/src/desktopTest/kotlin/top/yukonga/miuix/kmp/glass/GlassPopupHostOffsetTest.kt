@@ -43,7 +43,12 @@ class GlassPopupHostOffsetTest {
                             contentPadding = PaddingValues(0.dp),
                             panelLayer = {},
                             overlay = {},
-                            frame = { end, _ -> GlassPopupFrame(Rect(windowLeft, windowTop, windowLeft + end.width, windowTop + end.height), 0.dp) },
+                            frame = { end, _ ->
+                                GlassPopupFrame(
+                                    Rect(windowLeft, windowTop, windowLeft + end.width, windowTop + end.height),
+                                    0.dp,
+                                )
+                            },
                             contentLayer = { _, _ -> },
                         ) {
                             Box(Modifier.fillMaxWidth().height(80.dp).testTag("content"))

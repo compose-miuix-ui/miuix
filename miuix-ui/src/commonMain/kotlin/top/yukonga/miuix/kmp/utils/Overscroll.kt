@@ -298,10 +298,15 @@ private class OverscrollNode(
         updateScrollRange()
         val placeable = measurable.measure(constraints)
         return layout(placeable.width, placeable.height) {
-            placeable.placeWithLayer(0, 0) {
-                translationY = if (isVertical) round(offset) else 0f
-                translationX = if (isVertical) 0f else round(offset)
-                clip = true
+            val roundedOffset = round(offset)
+            if (roundedOffset == 0f) {
+                placeable.place(0, 0)
+            } else {
+                placeable.placeWithLayer(0, 0) {
+                    translationY = if (isVertical) roundedOffset else 0f
+                    translationX = if (isVertical) 0f else roundedOffset
+                    clip = true
+                }
             }
         }
     }
@@ -345,8 +350,12 @@ private class OverscrollNode(
             overScrollState.isOverScrollActive = isActive
         }
 
+        val delta = if (isVertical) available.y else available.x
+        val consumedDelta = if (isVertical) consumed.y else consumed.x
+        if (delta == 0f && !isActive) return Offset.Zero
+
         // Yield before consuming a delta the ancestor can handle.
-        val handOff = isVertical && (
+        val handOff = isVertical && delta != 0f && (
             pullToRefreshState?.canPullDown(available.y, source) == true ||
                 currentValueOf(LocalBottomSheetNestedScrollConnection)?.canConsumePostScroll(consumed, available, source) == true
             )
@@ -358,8 +367,6 @@ private class OverscrollNode(
             return Offset.Zero
         }
 
-        val delta = if (isVertical) available.y else available.x
-        val consumedDelta = if (isVertical) consumed.y else consumed.x
         if (delta == 0f && consumedDelta == 0f) return Offset.Zero
         if (animationJob?.isActive == true) syncRawAccumulationFromOffset()
         animationJob?.cancel()

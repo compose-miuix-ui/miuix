@@ -180,19 +180,26 @@ fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.
 fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.containerBounds = it.boundsInWindow() }
 
 /**
- * Reports a row's value bounds for dropdown positioning and fades it out while its choices are open.
+ * Anchors the dropdown to the selected value and fades that value while the popup is open.
+ * Apply to the value and chevron, not the whole row.
  *
- * Apply to the value and chevron, not the whole row. After predictive Back completes, the value
- * keeps its restored opacity through popup disposal until its fade reaches full opacity.
- *
- * @param anchor The anchor the row reported itself to.
+ * @param anchor The dropdown's anchor.
  */
 @Stable
-fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
-    .onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
-    .graphicsLayer {
+fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = glassPopupAnchorValue(anchor, trackBounds = true)
+
+@Stable
+internal fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor, trackBounds: Boolean): Modifier {
+    val positioned = if (trackBounds) {
+        onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
+    } else {
+        this
+    }
+    // The value can still fade after bounds tracking stops.
+    return positioned.graphicsLayer {
         alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
     }
+}
 
 /**
  * A glass menu that expands from an anchored control with a content crossfade.
@@ -328,6 +335,7 @@ fun BoxScope.GlassTransformPopup(
         geometryProgress = geometryProgress(),
         iconMaterial = iconProgress(),
     )
+
     val travel = remember { TransformTravel() }
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
 

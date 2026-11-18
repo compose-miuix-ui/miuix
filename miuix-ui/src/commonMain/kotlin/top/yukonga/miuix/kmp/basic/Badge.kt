@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -186,11 +187,15 @@ object BadgeDefaults {
 
     /** Default container color for a badge. */
     val containerColor: Color
-        @Composable get() = MiuixTheme.colorScheme.error
+        @Composable
+        @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.error
 
     /** Default content color for a badge. */
     val contentColor: Color
-        @Composable get() = MiuixTheme.colorScheme.onError
+        @Composable
+        @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.onError
 }
 
 /**

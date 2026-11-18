@@ -76,14 +76,23 @@ class GlassTopAppBarBackdropTest {
             val edge = pixels[5, bottom].red
             val outside = pixels[5, bottom + overhang / 2].red
             assertTrue(top in 0.87f..0.93f, "Top edge must remain translucent without an opaque shelf ($top)")
-            assertTrue(top > inside && inside > edge && edge > outside && outside > 0f, "The fade must span smoothly across the bar and overhang")
+            assertTrue(
+                top > inside && inside > edge && edge > outside && outside > 0f,
+                "The fade must span smoothly across the bar and overhang",
+            )
             assertColorNear(Color.Blue, pixels[5, bottom + overhang + 2])
             runOnIdle { opacity.floatValue = 0.99f }
             val almostOpaque = onRoot().captureToImage().toPixelMap()
-            assertTrue(abs(almostOpaque[5, bottom + overhang / 2].red - outside) < 0.02f, "The fade must not pop in when the alpha layer becomes opaque")
+            assertTrue(
+                abs(almostOpaque[5, bottom + overhang / 2].red - outside) < 0.02f,
+                "The fade must not pop in when the alpha layer becomes opaque",
+            )
             runOnIdle { opacity.floatValue = 0.5f }
             val halfOpaque = onRoot().captureToImage().toPixelMap()
-            assertTrue(abs(halfOpaque[5, bottom + overhang / 2].red - outside * 0.5f) < 0.015f, "Offscreen compositing must retain the fade outside the foreground bounds")
+            assertTrue(
+                abs(halfOpaque[5, bottom + overhang / 2].red - outside * 0.5f) < 0.015f,
+                "Offscreen compositing must retain the fade outside the foreground bounds",
+            )
         }
         assertCoverage()
         runOnIdle { state.heightOffset = state.heightOffsetLimit }
@@ -234,10 +243,13 @@ class GlassTopAppBarBackdropTest {
             val center = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot.center
             return onRoot().captureToImage().toPixelMap()[center.x.roundToInt(), center.y.roundToInt()]
         }
+
         fun tabColor(): Color {
             val bounds = onNodeWithTag("tabs").fetchSemanticsNode().boundsInRoot
-            return onRoot().captureToImage().toPixelMap()[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
+            return onRoot().captureToImage()
+                .toPixelMap()[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
         }
+
         val button = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot
         val pixels = onRoot().captureToImage().toPixelMap()
         val band = pixels[(button.right + button.width).roundToInt(), button.center.y.roundToInt()]
@@ -299,6 +311,7 @@ class GlassTopAppBarBackdropTest {
             val center = onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.center
             return image[center.x.roundToInt(), center.y.roundToInt()]
         }
+
         val actual = centerColor("scene-button")
         val reference = centerColor("reference-button")
         assertColorNear(reference, actual)

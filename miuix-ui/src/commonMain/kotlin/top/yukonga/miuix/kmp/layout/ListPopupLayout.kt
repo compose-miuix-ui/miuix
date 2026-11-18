@@ -79,6 +79,11 @@ internal fun ListPopupLayout(
     minWidth: Dp = ListPopupDefaults.MinWidth,
     content: @Composable () -> Unit,
 ) {
+    val internalVisible = remember { mutableStateOf(false) }
+    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
+    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
+    if (!show && !internalVisible.value) return
+
     val fractionProgress = remember { Animatable(0f) }
     val alphaProgress = remember { Animatable(0f) }
     val dimProgress = remember { Animatable(0f) }
@@ -86,9 +91,6 @@ internal fun ListPopupLayout(
     val currentOnDismiss by rememberUpdatedState(onDismissRequest)
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
-    val internalVisible = remember { mutableStateOf(false) }
-    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
-    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(show) {
         if (show) {
@@ -116,9 +118,6 @@ internal fun ListPopupLayout(
             currentOnDismissFinished?.invoke()
         }
     }
-
-    if (!show && !internalVisible.value) return
-
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
 
     Spacer(

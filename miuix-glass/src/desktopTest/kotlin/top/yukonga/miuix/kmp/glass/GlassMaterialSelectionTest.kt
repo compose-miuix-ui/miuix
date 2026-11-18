@@ -134,6 +134,7 @@ class GlassMaterialSelectionTest {
             val pixels = onNodeWithTag("button").captureToImage().toPixelMap()
             return pixels[pixels.width / 2, pixels.height / 2]
         }
+
         val initial = centerColor()
         runOnIdle { material.value = GlassMaterial(0.dp, GlassColorLayer(Color.Red, GlassColorBlendMode.SrcOver)) }
         assertColorNear(Color.Red, centerColor())
@@ -206,6 +207,7 @@ class GlassMaterialSelectionTest {
             val pixels = onRoot().captureToImage().toPixelMap()
             return pixels[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
         }
+
         val before = stripeColor()
         runOnIdle { radius.value = 80.dp }
         val after = stripeColor()

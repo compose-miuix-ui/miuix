@@ -96,12 +96,17 @@ fun Card(
     onLongPress: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val hasOnClick = onClick != null
+    val hasLongPress = onLongPress != null
+    val isClickable = hasOnClick || hasLongPress
+    val needsInteractionSource = isClickable || pressFeedbackType != PressFeedbackType.None || holdDownState
+    val interactionSource = if (needsInteractionSource) remember { MutableInteractionSource() } else null
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongPress by rememberUpdatedState(onLongPress)
 
-    HoldDownObserver(holdDownState, interactionSource)
-
+    if (interactionSource != null) {
+        HoldDownObserver(holdDownState, interactionSource)
+    }
     val pressFeedback = remember(pressFeedbackType) {
         when (pressFeedbackType) {
             PressFeedbackType.None -> null
@@ -113,11 +118,8 @@ fun Card(
     val usedInteractionSource = if (pressFeedback != null) interactionSource else null
     val indicationToUse = if (showIndication) LocalIndication.current else null
 
-    val hasOnClick = onClick != null
-    val hasLongPress = onLongPress != null
-    val isClickable = hasOnClick || hasLongPress
     val clickableModifier = remember(isClickable, hasLongPress, interactionSource, indicationToUse) {
-        if (isClickable) {
+        if (isClickable && interactionSource != null) {
             Modifier.combinedClickable(
                 interactionSource = interactionSource,
                 indication = indicationToUse,

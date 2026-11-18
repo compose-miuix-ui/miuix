@@ -192,7 +192,10 @@ fun InputField(
             exit = fadeOut(),
         ) {
             Box(
-                modifier = Modifier.padding(start = SearchBarDefaults.TrailingIconStartPadding, end = SearchBarDefaults.TrailingIconEndPadding),
+                modifier = Modifier.padding(
+                    start = SearchBarDefaults.TrailingIconStartPadding,
+                    end = SearchBarDefaults.TrailingIconEndPadding,
+                ),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Icon(
@@ -275,7 +278,8 @@ fun InputField(
                     ) {
                         val baseLabelStyle = MiuixTheme.textStyles.main
                         val mergedLabelStyle = remember(baseLabelStyle, textStyle) {
-                            baseLabelStyle.copy(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
+                            baseLabelStyle.copy(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium)
+                                .merge(textStyle)
                         }
                         Text(
                             text = labelText,

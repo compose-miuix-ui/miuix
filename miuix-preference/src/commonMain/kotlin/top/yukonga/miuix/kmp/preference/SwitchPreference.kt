@@ -41,7 +41,6 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param enabled Whether the [SwitchPreference] is clickable.
  */
 @Composable
-@NonRestartableComposable
 fun SwitchPreference(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,

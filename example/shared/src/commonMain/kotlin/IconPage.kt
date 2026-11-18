@@ -256,7 +256,10 @@ fun IconsPage(
                                             .onGloballyPositioned { searchCoordinates.value = it }
                                             .graphicsLayer { alpha = if (legacySearchStatus?.isCollapsed() != false) 1f else 0f }
                                             .clickable {
-                                                val offset = checkNotNull(pageCoordinates.value).localPositionOf(checkNotNull(searchCoordinates.value), Offset.Zero)
+                                                val offset = checkNotNull(pageCoordinates.value).localPositionOf(
+                                                    checkNotNull(searchCoordinates.value),
+                                                    Offset.Zero,
+                                                )
                                                 legacySearchOffset = with(density) { offset.y.toDp() } - searchTopInset()
                                                 legacySearchStatus = SearchStatus(
                                                     label = "Search icons",
@@ -441,7 +444,16 @@ fun IconsPage(
                 label = "Search icons",
             ) { query ->
                 val filteredIndices = remember(query, searchIconNames) {
-                    if (query.isBlank()) emptyList() else searchIconNames.indices.filter { searchIconNames[it].contains(query, ignoreCase = true) }
+                    if (query.isBlank()) {
+                        emptyList()
+                    } else {
+                        searchIconNames.indices.filter {
+                            searchIconNames[it].contains(
+                                query,
+                                ignoreCase = true,
+                            )
+                        }
+                    }
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -458,7 +470,16 @@ fun IconsPage(
                     legacySearchStatus = status.copy(current = SearchStatus.Status.EXPANDING)
                 }
                 val filteredIndices = remember(status.searchText, searchIconNames) {
-                    if (status.searchText.isBlank()) emptyList() else searchIconNames.indices.filter { searchIconNames[it].contains(status.searchText, ignoreCase = true) }
+                    if (status.searchText.isBlank()) {
+                        emptyList()
+                    } else {
+                        searchIconNames.indices.filter {
+                            searchIconNames[it].contains(
+                                status.searchText,
+                                ignoreCase = true,
+                            )
+                        }
+                    }
                 }
                 Box(
                     Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {

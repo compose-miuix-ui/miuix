@@ -48,7 +48,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param enabled Whether the [RadioButtonPreference] is clickable.
  */
 @Composable
-@NonRestartableComposable
 fun RadioButtonPreference(
     title: String,
     selected: Boolean,
@@ -125,13 +124,17 @@ fun RadioButtonPreference(
             }
         },
         bottomAction = bottomAction,
-        onClick = {
-            currentOnClick.takeIf { enabled }?.let { onClick ->
-                onClick()
-                currentHapticFeedback.performHapticFeedback(
-                    if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
-                )
+        onClick = if (onClick != null) {
+            {
+                currentOnClick.takeIf { enabled }?.let { onClick ->
+                    onClick()
+                    currentHapticFeedback.performHapticFeedback(
+                        if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
+                    )
+                }
             }
+        } else {
+            null
         },
         role = Role.RadioButton,
         holdDownState = holdDownState,
