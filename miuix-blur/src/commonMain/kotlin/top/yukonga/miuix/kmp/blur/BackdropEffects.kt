@@ -287,6 +287,16 @@ internal fun buildRampBlendColorsEffect(
     gradOffset: Float,
     curve: Float,
 ): RenderEffect {
+    val cached = scope.cachedRampBlendResult
+    if (cached != null &&
+        scope.cachedRampBlendColors == colors &&
+        scope.cachedRampBlendGradVecX == gradVecX &&
+        scope.cachedRampBlendGradVecY == gradVecY &&
+        scope.cachedRampBlendGradOffset == gradOffset &&
+        scope.cachedRampBlendCurve == curve
+    ) {
+        return cached
+    }
     val needsExtended = colors.needsExtendedBlend()
     val shader = scope.obtainRuntimeShader(
         if (needsExtended) "MiBlendModesExtRamp" else "MiBlendModesStdRamp",
@@ -296,7 +306,14 @@ internal fun buildRampBlendColorsEffect(
     shader.setFloatUniform("in_gradVec", gradVecX, gradVecY)
     shader.setFloatUniform("in_gradOffset", gradOffset)
     shader.setFloatUniform("in_curve", curve)
-    return createRuntimeShaderEffect(shader, "child")
+    return createRuntimeShaderEffect(shader, "child").also {
+        scope.cachedRampBlendColors = colors
+        scope.cachedRampBlendGradVecX = gradVecX
+        scope.cachedRampBlendGradVecY = gradVecY
+        scope.cachedRampBlendGradOffset = gradOffset
+        scope.cachedRampBlendCurve = curve
+        scope.cachedRampBlendResult = it
+    }
 }
 
 private fun BlurColors.needsExtendedBlend(): Boolean {

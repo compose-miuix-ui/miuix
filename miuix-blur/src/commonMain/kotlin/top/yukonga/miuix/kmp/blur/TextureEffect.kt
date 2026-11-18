@@ -221,17 +221,33 @@ fun Modifier.progressiveTextureBlur(
     enabled: Boolean = true,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
-    shape = { shape },
-    effects = {
-        progressiveTextureBlurEffect(
+    pipeline = ProgressiveTextureBlurPipeline(
+        shape = shape,
+        blurRadiusX = blurRadiusX,
+        blurRadiusY = blurRadiusY,
+        progressiveGradient = gradient,
+        noiseCoefficient = noiseCoefficient,
+        colors = colors,
+    ),
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+)
+
+private data class ProgressiveTextureBlurPipeline(
+    override val shape: Shape,
+    val blurRadiusX: Float,
+    val blurRadiusY: Float,
+    override val progressiveGradient: ProgressiveBlur,
+    val noiseCoefficient: Float,
+    val colors: BlurColors,
+) : BackdropPipeline {
+    override fun configureEffects(scope: BackdropEffectScope) {
+        scope.progressiveTextureBlurEffect(
             blurRadiusX = blurRadiusX,
             blurRadiusY = blurRadiusY,
-            gradient = gradient,
+            gradient = progressiveGradient,
             noiseCoefficient = noiseCoefficient,
             colors = colors,
         )
-    },
-    contentBlendMode = contentBlendMode,
-    progressiveGradient = gradient,
-    enabled = enabled,
-)
+    }
+}

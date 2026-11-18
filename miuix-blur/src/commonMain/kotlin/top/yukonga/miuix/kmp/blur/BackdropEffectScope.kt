@@ -178,6 +178,12 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedColorContrast: Float = Float.NaN
     internal var cachedColorSaturation: Float = Float.NaN
     internal var cachedColorResult: RenderEffect? = null
+    internal var cachedRampBlendColors: BlurColors? = null
+    internal var cachedRampBlendGradVecX: Float = Float.NaN
+    internal var cachedRampBlendGradVecY: Float = Float.NaN
+    internal var cachedRampBlendGradOffset: Float = Float.NaN
+    internal var cachedRampBlendCurve: Float = Float.NaN
+    internal var cachedRampBlendResult: RenderEffect? = null
 
     // progressiveBlur() builds a gradient-scaled variant; cache it on the same inputs plus the
     // gradient (angle/start/end) so an animating radius over a fixed gradient rebuilds once per size.
@@ -310,6 +316,12 @@ internal abstract class BackdropEffectScopeImpl :
         cachedColorContrast = Float.NaN
         cachedColorSaturation = Float.NaN
         cachedColorResult = null
+        cachedRampBlendColors = null
+        cachedRampBlendGradVecX = Float.NaN
+        cachedRampBlendGradVecY = Float.NaN
+        cachedRampBlendGradOffset = Float.NaN
+        cachedRampBlendCurve = Float.NaN
+        cachedRampBlendResult = null
         cachedProgRadiusX = Float.NaN
         cachedProgRadiusY = Float.NaN
         cachedProgSizeW = Float.NaN

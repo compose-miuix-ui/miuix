@@ -473,18 +473,19 @@ internal fun progressiveSharpBandBounds(
         if (y > maxY) maxY = y
     }
 
-    val xs = floatArrayOf(0f, compW, compW, 0f)
-    val ys = floatArrayOf(0f, 0f, compH, compH)
-    for (i in 0..3) {
-        val j = (i + 1) and 3
-        val di = (xs[i] * ax + ys[i] * ay - pThr) * sign
-        val dj = (xs[j] * ax + ys[j] * ay - pThr) * sign
-        if (di >= 0f) include(xs[i], ys[i])
-        if ((di < 0f) != (dj < 0f)) {
-            val t = di / (di - dj)
-            include(xs[i] + (xs[j] - xs[i]) * t, ys[i] + (ys[j] - ys[i]) * t)
+    fun edge(x0: Float, y0: Float, x1: Float, y1: Float) {
+        val d0 = (x0 * ax + y0 * ay - pThr) * sign
+        val d1 = (x1 * ax + y1 * ay - pThr) * sign
+        if (d0 >= 0f) include(x0, y0)
+        if ((d0 < 0f) != (d1 < 0f)) {
+            val t = d0 / (d0 - d1)
+            include(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)
         }
     }
+    edge(0f, 0f, compW, 0f)
+    edge(compW, 0f, compW, compH)
+    edge(compW, compH, 0f, compH)
+    edge(0f, compH, 0f, 0f)
     if (minX > maxX || minY > maxY) return null
 
     return Rect(

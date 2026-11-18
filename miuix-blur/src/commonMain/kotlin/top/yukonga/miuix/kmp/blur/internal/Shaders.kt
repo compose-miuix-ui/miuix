@@ -151,22 +151,21 @@ $maskWeight
         float radius = in_maxRadius * (1.0 - smoothRaw);
         if (radius <= 0.004) {$earlyReturn
         }
-        float halfR = radius * 0.5 + 0.5;
-        float posInv2s2 = 0.5 / (halfR * halfR);
+        half halfR = half(radius * 0.5 + 0.5);
+        half posInv2s2 = half(0.5) / (halfR * halfR);
         float r1 = radius + 1.0;
         half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
         half wAcc = half(0.0);
         for (int j = 0; j < ${maxTap / 2}; j++) {
             float a = float(2 * j + 1);
             half ra = half(clamp(r1 - a, 0.0, 1.0));
-            if (ra <= half(0.0)) break;
+            if (ra <= half(0.001)) break;
             float b = a + 1.0;
-            float xa = a * a * posInv2s2;
-            float xb = b * b * posInv2s2;
-            half wa = ra / half(1.0 + xa * (1.0 + xa * (0.5 + 0.235 * xa)));
-            half wb = half(clamp(r1 - b, 0.0, 1.0)) / half(1.0 + xb * (1.0 + xb * (0.5 + 0.235 * xb)));
+            half xa = half(a * a) * posInv2s2;
+            half xb = half(b * b) * posInv2s2;
+            half wa = ra / (half(1.0) + xa * (half(1.0) + xa * (half(0.5) + half(0.235) * xa)));
+            half wb = half(clamp(r1 - b, 0.0, 1.0)) / (half(1.0) + xb * (half(1.0) + xb * (half(0.5) + half(0.235) * xb)));
             half wsum = wa + wb;
-            if (wsum <= half(0.0001)) break;
             float2 o = (a + float(wb / wsum)) * in_step;
             color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
                 child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * wsum;
@@ -988,6 +987,10 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
         if (src.a > 0.0039) {
             src = half4(src.rgb / src.a, 1.0);
         }
+        half rw = half(rampWeight(fragCoord));
+        if (rw <= half(0.001)) {
+            return src;
+        }
         half4 currentColor = src;
         int count = int(layerCount);
 
@@ -997,7 +1000,7 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
             int mode = int(blendModes[i]);
             currentColor = doBlend(mode, layerColor, currentColor);
         }
-        return mix(src, currentColor, half(rampWeight(fragCoord)));
+        return mix(src, currentColor, rw);
     }
 """
 
@@ -1007,6 +1010,10 @@ private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
         half4 src = child.eval(fragCoord);
         if (src.a > 0.0039) {
             src = half4(src.rgb / src.a, 1.0);
+        }
+        half rw = half(rampWeight(fragCoord));
+        if (rw <= half(0.001)) {
+            return src;
         }
         float4 currentColor = float4(src);
         int count = int(layerCount);
@@ -1036,7 +1043,7 @@ private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
                 currentColor = float4(float3(blended.rgb) * outA, outA);
             }
         }
-        return mix(src, half4(currentColor), half(rampWeight(fragCoord)));
+        return mix(src, half4(currentColor), rw);
     }
 """
 

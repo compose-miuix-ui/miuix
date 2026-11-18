@@ -155,6 +155,9 @@ interface BackdropPipeline {
 
     /** Draws above the content, such as a rim or mask. */
     fun drawFront(scope: DrawScope) {}
+
+    /** Optional progressive gradient for multi-level composite rendering. */
+    val progressiveGradient: ProgressiveBlur? get() = null
 }
 
 /** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
@@ -192,18 +195,24 @@ private class BackdropPipelineElement(
         onDrawSurface = null,
         onDrawFront = { pipeline.drawFront(this) },
         contentBlendMode = contentBlendMode,
-        progressiveGradient = null,
+        progressiveGradient = pipeline.progressiveGradient,
         enabled = enabled,
     )
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
+        val nextGradient = pipeline.progressiveGradient
+        val gradientCleared = node.progressiveGradient != null && nextGradient == null
         node.backdrop = backdrop
         node.updateShape { pipeline.shape }
         node.effects = { pipeline.configureEffects(this) }
         node.onDrawFront = { pipeline.drawFront(this) }
         node.contentBlendMode = contentBlendMode
+        node.progressiveGradient = nextGradient
         node.enabled = enabled
+        if (gradientCleared) {
+            node.releaseCompositeResources()
+        }
         if (enabledChanged) {
             if (!enabled) {
                 node.releaseGraphicsLayers()
@@ -372,7 +381,7 @@ private class DrawBackdropNode(
         val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
         var noiseLayer: GraphicsLayer? = null
         var downscaleFactor: Float = 1f
-        var padding: Float by mutableFloatStateOf(0f)
+        var padding: Float = 0f
 
         /** Scale of the first (bilinear) record step: the level, or 2 for the ½ cascade below it. */
         var cascadeFirstStepScale: Float = 1f
@@ -892,16 +901,17 @@ private class DrawBackdropNode(
             sharpOverlayActive = false
             return
         }
+        val maxRX = progressiveSharpLoopRadius(rX, exp)
+        val maxRY = progressiveSharpLoopRadius(rY, exp)
         if (sharpOverlayGradient != gradient || sharpOverlayW != sw || sharpOverlayH != sh ||
             sharpOverlayPad != scope.padding ||
-            sharpRadiusX != rX || sharpRadiusY != rY || sharpExp != exp
+            sharpRadiusX != maxRX || sharpRadiusY != maxRY || sharpExp != exp
         ) {
             // The bbox margin covers the overlay loop blur's tap reach so edge-clamp smear stays
             // on rows/columns the ramp mask zeroes out; quantized to the loop's tap bound
             // (multiples of 4, ≥ the reach) so an animating radius doesn't resize the band and
             // reallocate the overlay layer's backing texture.
-            val loopReach =
-                (progressiveLoopTapBound(maxOf(progressiveSharpLoopRadius(rX, exp), progressiveSharpLoopRadius(rY, exp))) + 1).toFloat()
+            val loopReach = (progressiveLoopTapBound(maxOf(maxRX, maxRY)) + 1).toFloat()
             val band = progressiveSharpBandBounds(
                 sw,
                 sh,
@@ -944,8 +954,8 @@ private class DrawBackdropNode(
             sharpOverlayW = sw
             sharpOverlayH = sh
             sharpOverlayPad = scope.padding
-            sharpRadiusX = rX
-            sharpRadiusY = rY
+            sharpRadiusX = maxRX
+            sharpRadiusY = maxRY
             sharpExp = exp
         }
         sharpOverlayActive = sharpOverlayEffect != null
