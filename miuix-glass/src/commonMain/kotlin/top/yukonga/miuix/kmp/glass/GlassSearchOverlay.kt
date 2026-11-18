@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+package top.yukonga.miuix.kmp.glass
+
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
@@ -14,14 +16,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -36,15 +38,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -56,23 +63,36 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.ProgressiveBlur
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Close
-import top.yukonga.miuix.kmp.icon.glass.Search
+import top.yukonga.miuix.kmp.icon.basic.Close
+import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.drawGlassShadow
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import utils.LocalAppPageInsets
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -99,13 +119,43 @@ private val SearchModeEasing: Easing = run {
     }
 }
 
-/** Example search mode, kept composed through its exit so Cancel can reverse the entrance. */
+/** Default values for [GlassSearchOverlay]. */
+object GlassSearchOverlayDefaults {
+    val BarHeight = 44.dp
+    val HorizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
+    val VerticalPadding = 4.dp
+    val ProgressiveBlurOverhang = 24.dp
+
+    @Composable
+    fun material(): GlassMaterial = GlassNavigationRailDefaults.material()
+
+    @Composable
+    fun stroke(): EdgeStroke = GlassNavigationRailDefaults.stroke()
+
+    fun shadow(): GlassShadow = GlassShadows.Float
+}
+
+/**
+ * A full-screen glass search overlay with a progressive blur header band and
+ * glassmorphic search bar + cancel button.
+ */
 @Composable
-internal fun GlassSearchOverlay(
+fun GlassSearchOverlay(
+    expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    expanded: Boolean = false,
+    horizontalInsetsModifier: Modifier = Modifier,
     label: String = "Search",
+    scrollOffset: () -> Float = { 0f },
+    topInsets: WindowInsets = WindowInsets.statusBars,
+    searchTopPadding: () -> Dp = { 0.dp },
+    blurEnabled: Boolean = true,
+    style: GlassStyle = GlassDefaults.Style,
+    material: GlassMaterial = GlassSearchOverlayDefaults.material(),
+    stroke: EdgeStroke? = GlassSearchOverlayDefaults.stroke(),
+    shadow: GlassShadow? = GlassSearchOverlayDefaults.shadow(),
+    searchIcon: ImageVector = MiuixIcons.Basic.Search,
+    closeIcon: ImageVector = MiuixIcons.Basic.Close,
     content: @Composable ColumnScope.(String) -> Unit = {},
 ) {
     val transition = updateTransition(expanded, label = "glassSearch")
@@ -122,8 +172,6 @@ internal fun GlassSearchOverlay(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
-    val pageInsets = LocalAppPageInsets.current
-    val topInsets = remember(pageInsets) { pageInsets.safeInsets.only(WindowInsetsSides.Top) }
     val active = expanded || transition.currentState || transition.isRunning
     LaunchedEffect(expanded) {
         query = ""
@@ -158,19 +206,110 @@ internal fun GlassSearchOverlay(
         Box(
             modifier = Modifier
                 .matchParentSize()
+                .drawBehind { drawRect(colors.surface.copy(alpha = progress.value.coerceIn(0f, 1f))) }
                 .clickable(interactionSource = null, indication = null) { keyboard?.hide() },
         )
-        Column(
+        val blurActive = blurEnabled && isRuntimeShaderSupported()
+        val contentBackdrop = if (blurActive) rememberLayerBackdrop() else null
+        val baseBandHeight = GlassSearchOverlayDefaults.BarHeight +
+            GlassSearchOverlayDefaults.VerticalPadding * 2 + GlassSearchOverlayDefaults.ProgressiveBlurOverhang
+        val bandLayoutModifier = Modifier.layout { measurable, constraints ->
+            val bandHeightPx = (topInsets.getTop(this) + (searchTopPadding() + baseBandHeight).roundToPx())
+                .coerceIn(0, constraints.maxHeight)
+            val placeable = measurable.measure(constraints.copy(minHeight = bandHeightPx, maxHeight = bandHeightPx))
+            layout(placeable.width, bandHeightPx) { placeable.placeRelative(0, 0) }
+        }
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = progress.value }
-                .windowInsetsPadding(topInsets)
                 .imePadding(),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (contentBackdrop != null) Modifier.layerBackdrop(contentBackdrop) else Modifier)
+                    .background(colors.surface),
+            ) {
+                content(query)
+            }
+            if (contentBackdrop != null) {
+                val blendColors = remember(colors.surface) {
+                    listOf(BlendColorEntry(colors.surface.copy(alpha = 0.3f)))
+                }
+                val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(bandLayoutModifier)
+                        .graphicsLayer {
+                            alpha = (scrollOffset() / GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx()).coerceIn(0f, 1f)
+                        }
+                        .progressiveTextureBlur(
+                            backdrop = contentBackdrop,
+                            shape = RectangleShape,
+                            gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
+                            blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
+                            colors = blurColors,
+                        ),
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(bandLayoutModifier)
+                        .graphicsLayer {
+                            alpha = (scrollOffset() / GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx()).coerceIn(0f, 1f)
+                        }
+                        .drawWithCache {
+                            val insetFraction = (topInsets.getTop(this).toFloat() / size.height.coerceAtLeast(1f)).coerceIn(0f, 0.8f)
+                            val fadeBrush = Brush.verticalGradient(
+                                0f to colors.surface,
+                                insetFraction to colors.surface,
+                                0.82f to colors.surface.copy(alpha = 0.85f),
+                                1f to Color.Transparent,
+                            )
+                            onDrawBehind { drawRect(fadeBrush) }
+                        },
+                )
+            }
+            val pillShape = remember { GlassShape(GlassSearchOverlayDefaults.BarHeight / 2) }
+            val glassPillModifier = if (contentBackdrop != null) {
+                Modifier
+                    .then(
+                        if (shadow != null) {
+                            Modifier.drawBehind { drawGlassShadow(pillShape, shadow, 1f) }
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .glass(
+                        backdrop = contentBackdrop,
+                        shape = pillShape,
+                        style = style,
+                        material = material,
+                        stroke = stroke,
+                        shading = false,
+                    )
+            } else {
+                Modifier.background(colors.surfaceContainerHigh, CircleShape)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = GlassTopAppBarDefaults.HorizontalPadding, vertical = 4.dp)
+                    .then(horizontalInsetsModifier)
+                    .windowInsetsPadding(topInsets)
+                    .layout { measurable, constraints ->
+                        val top = searchTopPadding().roundToPx().coerceIn(0, constraints.maxHeight)
+                        val placeable = measurable.measure(constraints.offset(vertical = -top))
+                        layout(placeable.width, placeable.height + top) {
+                            placeable.placeRelative(0, top)
+                        }
+                    }
+                    .padding(
+                        horizontal = GlassSearchOverlayDefaults.HorizontalPadding,
+                        vertical = GlassSearchOverlayDefaults.VerticalPadding,
+                    )
                     .graphicsLayer { translationY = -topInsets.getTop(this) * (1f - progress.value) },
             ) {
                 BasicTextField(
@@ -192,19 +331,19 @@ internal fun GlassSearchOverlay(
                                 placeable.placeRelative(0, 0)
                             }
                         }
-                        .height(44.dp)
+                        .height(GlassSearchOverlayDefaults.BarHeight)
                         .focusRequester(focusRequester),
                     decorationBox = { field ->
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(colors.surfaceContainerHigh, CircleShape)
+                                .then(glassPillModifier)
                                 .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(
-                                MiuixIcons.Glass.Search,
+                                searchIcon,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
                                 tint = colors.disabledOnSurface,
@@ -214,12 +353,15 @@ internal fun GlassSearchOverlay(
                                 field()
                             }
                             if (query.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    query = ""
-                                    focusRequester.requestFocus()
-                                }, modifier = Modifier.size(24.dp)) {
+                                IconButton(
+                                    onClick = {
+                                        query = ""
+                                        focusRequester.requestFocus()
+                                    },
+                                    modifier = Modifier.size(24.dp),
+                                ) {
                                     Icon(
-                                        MiuixIcons.Glass.Close,
+                                        closeIcon,
                                         contentDescription = "Clear",
                                         modifier = Modifier.size(16.dp * (7f / 6f)),
                                         tint = colors.disabledOnSurface,
@@ -239,16 +381,16 @@ internal fun GlassSearchOverlay(
                             scaleY = fraction
                             alpha = cancelAlpha.value
                             val blur = 50f * (1f - cancelAlpha.value)
-                            renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
+                            renderEffect = if (blurActive && blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
                         },
                 ) {
                     IconButton(
                         onClick = onDismissRequest,
                         enabled = expanded,
-                        modifier = Modifier.size(44.dp).background(colors.surfaceContainerHigh, CircleShape),
+                        modifier = Modifier.size(GlassSearchOverlayDefaults.BarHeight).then(glassPillModifier),
                     ) {
                         Icon(
-                            MiuixIcons.Glass.Close,
+                            closeIcon,
                             contentDescription = "Cancel",
                             modifier = Modifier.size(28.dp),
                             tint = colors.onSurface,
@@ -256,14 +398,13 @@ internal fun GlassSearchOverlay(
                     }
                 }
             }
-            content(query)
         }
     }
 }
 
 /** Shared page opacity keeps content and its sampled top-bar background in sync. */
 @Composable
-internal fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
+fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
     val transition = updateTransition(expanded, label = "glassSearchTopBarOpacity")
     return transition.animateFloat(
         transitionSpec = {
@@ -275,7 +416,7 @@ internal fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
 
 /** ActionBarView fades, shrinks to 0.9, and blurs while entering search mode. */
 @Composable
-internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -> Float): Modifier {
+fun Modifier.glassSearchBarTransition(expanded: Boolean, blurEnabled: Boolean = true, barAlpha: () -> Float): Modifier {
     val density = LocalDensity.current
     val layerOutset = remember(density) {
         val shadow = GlassShadows.Regular
@@ -288,10 +429,11 @@ internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -
         transitionSpec = { tween(400, easing = SearchModeEasing) },
         label = "glassSearchTopBarScale",
     ) { if (it) 0.9f else 1f }
+    val blurActive = blurEnabled && isRuntimeShaderSupported()
     val blur = transition.animateFloat(
         transitionSpec = { tween(if (targetState) 150 else 120, easing = LinearEasing) },
         label = "glassSearchTopBarBlur",
-    ) { if (it) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
+    ) { if (it && blurActive) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
     return drawWithCache {
         val layer = obtainGraphicsLayer()
         val halo = ceil(layerOutset).toInt()
@@ -312,7 +454,7 @@ internal fun Modifier.glassSearchBarTransition(expanded: Boolean, barAlpha: () -
                     layer.alpha = opacity
                     layer.scaleX = currentScale
                     layer.scaleY = currentScale
-                    layer.renderEffect = if (currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
+                    layer.renderEffect = if (blurActive && currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
                     translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
                 }
             }

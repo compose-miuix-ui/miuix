@@ -17,11 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.GlassTextField
-import top.yukonga.miuix.kmp.glass.glassPanel
-import top.yukonga.miuix.kmp.material.GlassShadows
-import top.yukonga.miuix.kmp.material.GlassShape
 
 @Composable
 fun GlassTextFieldDemo() {
@@ -42,43 +38,17 @@ fun GlassTextFieldDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    GlassDemoBackground(backdrop) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(20.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .widthIn(max = 400.dp)
-                                    .fillMaxWidth()
-                                    .glassPanel(
-                                        backdrop = backdrop,
-                                        shape = GlassShape(24.dp),
-                                        material = GlassDialogDefaults.material(),
-                                        shadow = GlassShadows.Float,
-                                    )
-                                    .padding(20.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                GlassTextField(
-                                    value = text,
-                                    onValueChange = { text = it },
-                                    label = "Input something...",
-                                    useLabelAsPlaceholder = true,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            GlassTextField(
+                value = text1,
+                onValueChange = { text1 = it },
+                label = "Username",
+            )
+            GlassTextField(
+                value = text2,
+                onValueChange = { text2 = it },
+                label = "Input something...",
+                useLabelAsPlaceholder = true,
+            )
         }
     }
 }

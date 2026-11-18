@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -70,6 +72,7 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
+import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
@@ -81,10 +84,13 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassTransformPopup
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
+import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
+import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Add
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Edit
 import top.yukonga.miuix.kmp.icon.glass.HomeOutline
 import top.yukonga.miuix.kmp.icon.glass.ImageOutline
@@ -101,9 +107,9 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.LocalAppPageInsets
 import utils.TopLayer
 import utils.appPageHorizontalInsets
-import utils.appPageSearchInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
 import utils.rememberAppSafePadding
@@ -137,7 +143,6 @@ fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
     val appState = LocalAppState.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
-    val searchModifier = Modifier.appPageSearchInsets()
     val isInDark = isInDarkTheme()
     val safePadding = rememberAppSafePadding()
     val backdrop = rememberLayerBackdrop()
@@ -675,11 +680,16 @@ fun GlassPage(padding: PaddingValues) {
                 }
             }
         }
+        val pageInsets = LocalAppPageInsets.current
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
-            modifier = searchModifier,
+            topInsets = pageInsets.safeInsets.only(WindowInsetsSides.Top),
+            searchTopPadding = pageInsets.searchTop,
             blurEnabled = appState.enableBlur,
+            horizontalInsetsModifier = Modifier.appPageHorizontalInsets(),
+            searchIcon = MiuixIcons.Glass.Search,
+            closeIcon = MiuixIcons.Glass.Close,
         )
     }
 }

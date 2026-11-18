@@ -12,6 +12,7 @@
 | [GlassTopAppBar](./glasstopappbar) | 可折叠玻璃顶栏 | 页面标题与操作 |
 | [GlassNavigationBar](./glassnavigationbar) | 悬浮玻璃导航栏 | 主要页面切换 |
 | [GlassNavigationRail](./glassnavigationrail) | 折叠后并入导航栏的悬浮玻璃侧边栏 | 宽屏下的页面切换 |
+| [GlassSearchOverlay](./glasssearchoverlay) | 带顶部渐进模糊的全屏液态玻璃搜索浮层 | 页内搜索模式 |
 | [GlassTabRow](./glasstabrow) | 独立胶囊玻璃标签栏 | 内容分类 |
 | [GlassTransformPopup](./glasstransformpopup) | 从按钮变换展开的菜单 | 工具栏更多操作 |
 | [GlassPopup](./glasspopup) | 锚定式玻璃菜单 | 操作选择 |

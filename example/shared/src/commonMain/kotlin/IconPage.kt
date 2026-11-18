@@ -11,15 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -66,11 +70,15 @@ import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
+import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
+import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
+import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
+import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
@@ -83,6 +91,7 @@ import utils.All
 import utils.BlurredBar
 import utils.LocalAppPageInsets
 import utils.SearchStatus
+import utils.appPageHorizontalInsets
 import utils.appPageSearchInsets
 import utils.pageBottomPadding
 import utils.pageContentPadding
@@ -437,12 +446,25 @@ fun IconsPage(
             }
         }
         if (glassTopBar) {
+            val searchListState = rememberLazyListState()
+            val pageInsets = LocalAppPageInsets.current
             GlassSearchOverlay(
                 onDismissRequest = { searchExpanded = false },
                 expanded = searchExpanded,
-                modifier = searchModifier,
                 label = "Search icons",
+                scrollOffset = {
+                    if (searchListState.firstVisibleItemIndex > 0) {
+                        Float.MAX_VALUE
+                    } else {
+                        searchListState.firstVisibleItemScrollOffset.toFloat()
+                    }
+                },
+                topInsets = pageInsets.safeInsets.only(WindowInsetsSides.Top),
+                searchTopPadding = pageInsets.searchTop,
                 blurEnabled = appState.enableBlur,
+                horizontalInsetsModifier = Modifier.appPageHorizontalInsets(),
+                searchIcon = MiuixIcons.Glass.Search,
+                closeIcon = MiuixIcons.Glass.Close,
             ) { query ->
                 val filteredIndices = remember(query, searchIconNames) {
                     if (query.isBlank()) {
@@ -457,8 +479,12 @@ fun IconsPage(
                     }
                 }
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = searchResultPadding,
+                    state = searchListState,
+                    modifier = Modifier.fillMaxSize().appPageHorizontalInsets(),
+                    contentPadding = PaddingValues(
+                        top = LocalAppPageInsets.current.safeInsets.asPaddingValues().calculateTopPadding() + LocalAppPageInsets.current.searchTop() + 52.dp,
+                        bottom = searchResultPadding.calculateBottomPadding(),
+                    ),
                 ) {
                     searchResultItems(filteredIndices)
                 }

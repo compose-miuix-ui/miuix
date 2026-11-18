@@ -88,6 +88,7 @@ Independent glass components provided by `miuix-glass`. See the [Glass overview]
 | [GlassTopAppBar](./glass/glasstopappbar) | Collapsing glass top bar | Page titles and actions |
 | [GlassNavigationBar](./glass/glassnavigationbar) | Floating glass navigation bar | Top-level destinations |
 | [GlassNavigationRail](./glass/glassnavigationrail) | Floating glass sidebar collapsing into the navigation bar | Wide-layout destination switching |
+| [GlassSearchOverlay](./glass/glasssearchoverlay) | Full-screen glass search overlay with progressive blur header | In-page search mode |
 | [GlassTabRow](./glass/glasstabrow) | Independent glass tab pills | Content categories |
 | [GlassTransformPopup](./glass/glasstransformpopup) | Menu transforming from its button | Toolbar overflow actions |
 | [GlassPopup](./glass/glasspopup) | Anchored glass menu | Action selection |

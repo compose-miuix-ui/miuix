@@ -25,6 +25,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassPopup
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
+import top.yukonga.miuix.kmp.glass.glass
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
