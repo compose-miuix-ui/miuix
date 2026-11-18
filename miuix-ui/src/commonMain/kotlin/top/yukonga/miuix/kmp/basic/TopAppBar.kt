@@ -1249,6 +1249,12 @@ private fun SmallTopAppBarLayout(
                 y = subtitleY,
             )
 
+            // Action icons
+            actionIconsPlaceable.placeRelative(
+                x = constraints.maxWidth - actionIconsPlaceable.width,
+                y = verticalCenter - actionIconsPlaceable.height / 2,
+            )
+
             // Bottom content (below subtitle)
             bottomContentPlaceable.placeRelative(x = 0, y = contentTop)
         }
