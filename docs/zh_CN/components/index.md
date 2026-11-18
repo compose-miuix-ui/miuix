@@ -82,10 +82,13 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Over
 | 组件 | 描述 | 常见用途 |
 | --- | --- | --- |
 | [GlassIconButton](./glass/glassiconbutton) | 圆形玻璃图标按钮 | 工具栏与悬浮操作 |
+| [GlassFloatingActionButton](./glass/glassfloatingactionbutton) | 圆形玻璃悬浮操作按钮 | 主要悬浮操作 |
+| [GlassFloatingToolbar](./glass/glassfloatingtoolbar) | 悬浮玻璃工具栏容器 | 悬浮操作组 |
+| [GlassTextField](./glass/glasstextfield) | 适配半透明玻璃表面的文本输入框 | 对话框与抽屉输入 |
 | [GlassTopAppBar](./glass/glasstopappbar) | 可折叠玻璃顶栏 | 页面标题与操作 |
 | [GlassNavigationBar](./glass/glassnavigationbar) | 悬浮玻璃导航栏 | 主要页面切换 |
+| [GlassNavigationRail](./glass/glassnavigationrail) | 折叠后并入导航栏的悬浮玻璃侧边栏 | 宽屏下的页面切换 |
 | [GlassTabRow](./glass/glasstabrow) | 独立胶囊玻璃标签栏 | 内容分类 |
-| [GlassSegmentedTabRow](./glass/glasstabrow#glasssegmentedtabrow) | 相连分段玻璃标签栏 | 互斥视图切换 |
 | [GlassTransformPopup](./glass/glasstransformpopup) | 从按钮变换展开的菜单 | 工具栏更多操作 |
 | [GlassPopup](./glass/glasspopup) | 锚定式玻璃菜单 | 操作选择 |
 | [GlassSecondaryPopup](./glass/glasssecondarypopup) | 一级菜单旁的二级菜单 | 级联菜单 |

@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -18,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -34,61 +30,36 @@ fun GlassFloatingActionButtonDemo() {
     var count by remember { mutableIntStateOf(0) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(demoBackground()),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .layerBackdrop(backdrop)
+                .background(demoBackground()),
+        )
         Column(
-            Modifier
-                .padding(16.dp)
-                .widthIn(max = 600.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+            GlassFloatingActionButton(
+                onClick = { count++ },
+                backdrop = backdrop,
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.surface),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .layerBackdrop(backdrop)
-                            .background(MiuixTheme.colorScheme.surface),
-                    )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        GlassFloatingActionButton(
-                            onClick = { count++ },
-                            backdrop = backdrop,
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Glass.Create,
-                                tint = MiuixTheme.colorScheme.onPrimary,
-                                contentDescription = "Create",
-                            )
-                        }
-                        Text(
-                            text = "Clicked $count times",
-                            style = MiuixTheme.textStyles.body2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            modifier = Modifier.padding(top = 12.dp),
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = MiuixIcons.Glass.Create,
+                    tint = MiuixTheme.colorScheme.onPrimary,
+                    contentDescription = "Create",
+                )
             }
+            Text(
+                text = "Clicked $count times",
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
     }
 }

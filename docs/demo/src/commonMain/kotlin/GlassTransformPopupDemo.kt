@@ -2,15 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,9 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
@@ -42,56 +36,29 @@ fun GlassTransformPopupDemo() {
     var view by remember { mutableStateOf("List") }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(demoBackground()),
-        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .widthIn(max = 600.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .layerBackdrop(backdrop)
+                .background(demoBackground()),
+        )
+        GlassIconButton(
+            onClick = { show = true },
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .glassPopupAnchor(anchor, cornerRadius = 24.dp, floating = true),
+            backdrop = backdrop,
+            size = 48.dp,
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.surface),
-                ) {
-                    GlassDemoBackground(backdrop) {
-                        Text(
-                            text = "Current view: $view",
-                            style = MiuixTheme.textStyles.title3,
-                            color = MiuixTheme.colorScheme.onBackground,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 24.dp),
-                        )
-                    }
-                    GlassIconButton(
-                        onClick = { show = true },
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .glassPopupAnchor(anchor, cornerRadius = 24.dp, floating = true),
-                        backdrop = backdrop,
-                        size = 48.dp,
-                    ) {
-                        Icon(
-                            imageVector = MiuixIcons.Glass.More,
-                            contentDescription = "Change library view",
-                            modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
-                            tint = MiuixTheme.colorScheme.onBackground,
-                        )
-                    }
-                }
-            }
+            Icon(
+                imageVector = MiuixIcons.Glass.More,
+                contentDescription = "Change library view",
+                modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
+                tint = MiuixTheme.colorScheme.onBackground,
+            )
         }
         GlassTransformPopup(
             show = show,

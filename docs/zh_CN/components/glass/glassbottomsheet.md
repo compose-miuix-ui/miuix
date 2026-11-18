@@ -13,7 +13,7 @@ popupHost: MiuixPopupHost
 
 `GlassBottomSheet` 是从屏幕边缘滑入的玻璃底部抽屉。它支持标题栏、关闭手势、预测性返回和嵌套滚动。
 
-<div style="position: relative; height: 480px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

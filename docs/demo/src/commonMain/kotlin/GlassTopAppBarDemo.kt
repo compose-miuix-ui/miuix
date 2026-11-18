@@ -80,6 +80,7 @@ fun GlassTopAppBarDemo() {
                             scrollBehavior = scrollBehavior,
                             bandBrush = GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface),
                             defaultWindowInsetsPadding = false,
+                            contentModifier = Modifier.padding(top = 12.dp),
                             navigationIcon = {
                                 GlassIconButton(onClick = { showAlbums = !showAlbums }) {
                                     Icon(

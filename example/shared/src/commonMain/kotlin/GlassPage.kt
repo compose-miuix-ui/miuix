@@ -135,6 +135,7 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 @Composable
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
+    val appState = LocalAppState.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
     val searchModifier = Modifier.appPageSearchInsets()
     val isInDark = isInDarkTheme()
@@ -330,7 +331,7 @@ fun GlassPage(padding: PaddingValues) {
             topBar = {
                 GlassTopAppBar(
                     title = "Glass Component",
-                    contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f }
+                    contentModifier = Modifier.glassSearchBarTransition(searchExpanded, appState.enableBlur) { 1f }
                         .appPageTopBarInsets(),
                     defaultWindowInsetsPadding = false,
                     isContentScrolled = contentUnderTopBar,
@@ -678,6 +679,7 @@ fun GlassPage(padding: PaddingValues) {
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
             modifier = searchModifier,
+            blurEnabled = appState.enableBlur,
         )
     }
 }

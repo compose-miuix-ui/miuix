@@ -2,7 +2,7 @@
 
 `GlassTabRow` 提供 primary 和 neutral 配色的等宽玻璃标签。`GlassSegmentedTabRow` 使用相连轨道和滑动指示器，两者的选中状态均由调用方管理。
 
-<div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTabRow" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

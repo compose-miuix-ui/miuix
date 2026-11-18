@@ -223,7 +223,7 @@ fun IconsPage(
                         scrollBehavior = topAppBarScrollBehavior,
                         isContentScrolled = activeListState.canScrollBackward,
                         visualContentOffset = visualContentOffset,
-                        contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded) { 1f } else Modifier,
+                        contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded, blurEnabled = appState.enableBlur) { 1f } else Modifier,
                         color = barColor,
                         actions = {
                             if (glassTopBar) {
@@ -442,6 +442,7 @@ fun IconsPage(
                 expanded = searchExpanded,
                 modifier = searchModifier,
                 label = "Search icons",
+                blurEnabled = appState.enableBlur,
             ) { query ->
                 val filteredIndices = remember(query, searchIconNames) {
                     if (query.isBlank()) {

@@ -136,9 +136,13 @@ export default defineConfig({
                     items: [
                         { text: "总览", link: "/zh_CN/components/glass/" },
                         { text: "GlassIconButton", link: "/zh_CN/components/glass/glassiconbutton" },
+                        { text: "GlassFloatingActionButton", link: "/zh_CN/components/glass/glassfloatingactionbutton" },
+                        { text: "GlassFloatingToolbar", link: "/zh_CN/components/glass/glassfloatingtoolbar" },
                         { text: "GlassTextField", link: "/zh_CN/components/glass/glasstextfield" },
                         { text: "GlassTopAppBar", link: "/zh_CN/components/glass/glasstopappbar" },
                         { text: "GlassNavigationBar", link: "/zh_CN/components/glass/glassnavigationbar" },
+                        { text: "GlassNavigationRail", link: "/zh_CN/components/glass/glassnavigationrail" },
+                        { text: "GlassSearchOverlay", link: "/zh_CN/components/glass/glasssearchoverlay" },
                         { text: "GlassTabRow", link: "/zh_CN/components/glass/glasstabrow" },
                         { text: "GlassTransformPopup", link: "/zh_CN/components/glass/glasstransformpopup" },
                         { text: "GlassPopup", link: "/zh_CN/components/glass/glasspopup" },

@@ -82,10 +82,13 @@ Independent glass components provided by `miuix-glass`. See the [Glass overview]
 | Component | Description | Common Usage |
 | --- | --- | --- |
 | [GlassIconButton](./glass/glassiconbutton) | Round glass icon action | Toolbar and floating actions |
+| [GlassFloatingActionButton](./glass/glassfloatingactionbutton) | Round glass floating action button | Primary floating actions |
+| [GlassFloatingToolbar](./glass/glassfloatingtoolbar) | Floating glass toolbar container | Floating action groups |
+| [GlassTextField](./glass/glasstextfield) | Text input field for translucent glass surfaces | Dialog and sheet input |
 | [GlassTopAppBar](./glass/glasstopappbar) | Collapsing glass top bar | Page titles and actions |
 | [GlassNavigationBar](./glass/glassnavigationbar) | Floating glass navigation bar | Top-level destinations |
+| [GlassNavigationRail](./glass/glassnavigationrail) | Floating glass sidebar collapsing into the navigation bar | Wide-layout destination switching |
 | [GlassTabRow](./glass/glasstabrow) | Independent glass tab pills | Content categories |
-| [GlassSegmentedTabRow](./glass/glasstabrow#glasssegmentedtabrow) | Joined glass segmented track | Exclusive view switching |
 | [GlassTransformPopup](./glass/glasstransformpopup) | Menu transforming from its button | Toolbar overflow actions |
 | [GlassPopup](./glass/glasspopup) | Anchored glass menu | Action selection |
 | [GlassSecondaryPopup](./glass/glasssecondarypopup) | Submenu beside a primary menu | Cascading menus |

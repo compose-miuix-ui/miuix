@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,17 +14,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassPopup
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
+import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -39,67 +36,35 @@ fun GlassPopupDemo() {
     var show by remember { mutableStateOf(false) }
     var anchorBounds by remember { mutableStateOf(Rect.Zero) }
     var sortOrder by remember { mutableStateOf("Newest first") }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(demoBackground()),
-        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .widthIn(max = 600.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .layerBackdrop(backdrop)
+                .background(demoBackground()),
+        )
+        Box(
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .glass(backdrop = backdrop, shape = GlassShape(24.dp))
+                .clip(CircleShape)
+                .clickable { show = true }
+                .onGloballyPositioned {
+                    val b = it.boundsInWindow()
+                    val gapPx = with(density) { 6.dp.toPx() }
+                    anchorBounds = Rect(b.left, b.bottom + gapPx, b.right, b.bottom + gapPx)
+                },
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(340.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.surface),
-                ) {
-                    GlassDemoBackground(backdrop) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = "Sort photos",
-                                    style = MiuixTheme.textStyles.title2,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                )
-                                Card {
-                                    TextButton(
-                                        text = sortOrder,
-                                        onClick = { show = true },
-                                        modifier = Modifier.onGloballyPositioned {
-                                            val b = it.boundsInWindow()
-                                            val gapPx = with(density) { 6.dp.toPx() }
-                                            anchorBounds = Rect(b.left, b.bottom + gapPx, b.right, b.bottom + gapPx)
-                                        },
-                                    )
-                                }
-                            }
-                            Text(
-                                text = "A glass popup menu anchored below the trigger button.",
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            )
-                        }
-                    }
-                }
-            }
+            Text(
+                text = sortOrder,
+                style = MiuixTheme.textStyles.button,
+                color = MiuixTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+            )
         }
         GlassPopup(
             show = show,
