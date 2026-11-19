@@ -944,6 +944,13 @@ private class DrawBackdropNode(
         val post = progPostEffect
         val postBlend = progRampBlend
         val inlineTint = postBlend.singleSrcOverColorOrUnspecified()
+        val noiseCoeff = scope.noiseCoefficient
+        val ditherCoeff = if (exp > 0 && noiseCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD) {
+            minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
+        } else {
+            0f
+        }
+        val inlineDitherCoeff = if (post == null && (postBlend == null || inlineTint != Color.Unspecified)) ditherCoeff else 0f
         val blurEffect = obtainProgressiveBlurEffect(
             scope = scope,
             radiusX = rX,
@@ -955,6 +962,7 @@ private class DrawBackdropNode(
             padRight = padRight,
             padBottom = padBottom,
             tintColor = inlineTint,
+            ditherCoeff = inlineDitherCoeff,
         )
         var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
         if (postBlend != null && (blurEffect == null || inlineTint == Color.Unspecified)) {
@@ -970,8 +978,7 @@ private class DrawBackdropNode(
         } else if (post != null) {
             chain = chain?.chain(post) ?: post
         }
-        if (exp > 0 && stackDitherChained) {
-            val ditherCoeff = minOf(scope.noiseCoefficient * 2f, STACK_DITHER_MAX)
+        if (ditherCoeff > 0f && (blurEffect == null || inlineDitherCoeff == 0f)) {
             chain = chain?.chain(obtainStackDitherEffect(ditherCoeff))
         }
         scope.renderEffect = chain
@@ -1043,6 +1050,13 @@ private class DrawBackdropNode(
         primary.padBottom = progBasePadBottom
 
         val inlineTint = postBlend.singleSrcOverColorOrUnspecified()
+        val noiseCoeff = scope.noiseCoefficient
+        val ditherCoeff = if (exp > 0 && noiseCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD) {
+            minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
+        } else {
+            0f
+        }
+        val inlineDitherCoeff = if (post == null && (postBlend == null || inlineTint != Color.Unspecified)) ditherCoeff else 0f
         val blurEffect = obtainProgressiveBlurEffect(
             scope = scope,
             radiusX = rX,
@@ -1054,6 +1068,7 @@ private class DrawBackdropNode(
             padRight = progBasePadRight,
             padBottom = progBasePadBottom,
             tintColor = inlineTint,
+            ditherCoeff = inlineDitherCoeff,
         )
         var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
         if (postBlend != null && (blurEffect == null || inlineTint == Color.Unspecified)) {
@@ -1070,7 +1085,6 @@ private class DrawBackdropNode(
             chain = chain?.chain(post) ?: post
         }
         scope.renderEffect = chain
-        val noiseCoeff = scope.noiseCoefficient
         if (exp == 0) {
             chainFullResNoiseIfNeeded()
             stackDitherChained = false
@@ -1078,9 +1092,10 @@ private class DrawBackdropNode(
             sharpOverlay.active = false
             return
         }
-        if (noiseCoeff > 0f && noiseCoeff <= NOISE_GRAIN_THRESHOLD) {
-            val ditherCoeff = minOf(noiseCoeff * 2f, STACK_DITHER_MAX)
-            scope.renderEffect = scope.renderEffect?.chain(obtainStackDitherEffect(ditherCoeff))
+        if (ditherCoeff > 0f) {
+            if (blurEffect == null || inlineDitherCoeff == 0f) {
+                scope.renderEffect = scope.renderEffect?.chain(obtainStackDitherEffect(ditherCoeff))
+            }
             stackDitherChained = true
         } else {
             stackDitherChained = false

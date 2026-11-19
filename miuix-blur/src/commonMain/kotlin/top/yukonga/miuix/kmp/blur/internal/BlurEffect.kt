@@ -198,6 +198,7 @@ internal fun createProgressiveBlurEffect(
     curve: Float,
     scope: BackdropEffectScopeImpl,
     tintColor: Color = Color.Unspecified,
+    ditherCoeff: Float = 0f,
 ): RenderEffect? {
     computeProgressiveGradient(
         downScale = downScale,
@@ -245,30 +246,64 @@ internal fun createProgressiveBlurEffect(
         val tap = progressiveLoopTapBound(maxRadiusX)
         val hUnpremul = !hasV
         val hInlineTint = hasInlineTint && !hasV
+        val hInlineNoise = ditherCoeff > 0f && !hasV
         val hShader = scope.obtainRuntimeShader(
-            progressiveLoopShaderKey(axis = 0, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = hUnpremul, inlineTint = hInlineTint),
-            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = hUnpremul, axis = 0, inlineTint = hInlineTint),
+            progressiveLoopShaderKey(
+                axis = 0,
+                downScale = downScale,
+                tap = tap,
+                curveKind = curveKind,
+                unpremul = hUnpremul,
+                inlineTint = hInlineTint,
+                inlineNoise = hInlineNoise,
+            ),
+            progressiveBlurShaderForTap(
+                tap,
+                curveKind = curveKind,
+                unpremul = hUnpremul,
+                axis = 0,
+                inlineTint = hInlineTint,
+                inlineNoise = hInlineNoise,
+            ),
         ).apply {
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
             if (curveKind == 3) setFloatUniform("in_curve", clampedCurve)
             if (hInlineTint) setFloatUniform("in_tintColor", tintR, tintG, tintB, tintA)
+            if (hInlineNoise) setFloatUniform("noise_coeff", ditherCoeff)
         }
         effect = runtimeShaderEffect(hShader, "child")
     }
 
     if (hasV) {
         val tap = progressiveLoopTapBound(maxRadiusY)
+        val vInlineNoise = ditherCoeff > 0f
         val vShader = scope.obtainRuntimeShader(
-            progressiveLoopShaderKey(axis = 1, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = true, inlineTint = hasInlineTint),
-            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = true, axis = 1, inlineTint = hasInlineTint),
+            progressiveLoopShaderKey(
+                axis = 1,
+                downScale = downScale,
+                tap = tap,
+                curveKind = curveKind,
+                unpremul = true,
+                inlineTint = hasInlineTint,
+                inlineNoise = vInlineNoise,
+            ),
+            progressiveBlurShaderForTap(
+                tap,
+                curveKind = curveKind,
+                unpremul = true,
+                axis = 1,
+                inlineTint = hasInlineTint,
+                inlineNoise = vInlineNoise,
+            ),
         ).apply {
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
             if (curveKind == 3) setFloatUniform("in_curve", clampedCurve)
             if (hasInlineTint) setFloatUniform("in_tintColor", tintR, tintG, tintB, tintA)
+            if (vInlineNoise) setFloatUniform("noise_coeff", ditherCoeff)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
             ?: runtimeShaderEffect(vShader, "child")

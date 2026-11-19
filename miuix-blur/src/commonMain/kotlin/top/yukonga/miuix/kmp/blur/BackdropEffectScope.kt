@@ -200,6 +200,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgStart: Float = Float.NaN
     internal var cachedProgEnd: Float = Float.NaN
     internal var cachedProgCurve: Float = Float.NaN
+    internal var cachedProgDitherCoeff: Float = Float.NaN
     internal var cachedProgTintColor: Color = Color.Unspecified
     internal var cachedProgResult: RenderEffect? = null
 
@@ -334,6 +335,7 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgStart = Float.NaN
         cachedProgEnd = Float.NaN
         cachedProgCurve = Float.NaN
+        cachedProgDitherCoeff = Float.NaN
         cachedProgTintColor = Color.Unspecified
         cachedProgResult = null
         progressiveRampActive = false

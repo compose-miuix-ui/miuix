@@ -71,6 +71,7 @@ internal fun buildProgressiveBlurShader(
     unpremul: Boolean = true,
     axis: Int = 0,
     inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
 ): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
     val maxCoordUniform = if (sharpBand) {
@@ -133,26 +134,40 @@ internal fun buildProgressiveBlurShader(
         else -> "float2(xy.x, xy.y $sign o)"
     }
     val tintUniform = if (inlineTint) "\n    uniform float4 in_tintColor;" else ""
+    val noiseUniform = if (inlineNoise) "\n    uniform float noise_coeff;" else ""
     val maskSuffix = if (sharpMask) " * mw" else ""
+    fun ditherBlock(varName: String, indent: String): String = if (!inlineNoise) {
+        ""
+    } else {
+        """
+${indent}if ($varName.a > 0.001) {
+$indent    float3 p3 = fract(float3(xy.xyx) * float3(0.1031, 0.1030, 0.0973));
+$indent    p3 += dot(p3, p3.yxz + 33.33);
+$indent    float3 n = (fract((p3.xxy + p3.yzz) * p3.zyx) - 0.5) * noise_coeff * float($varName.a);
+$indent    $varName.rg += half2(n.x);
+$indent    $varName.rb += half2(n.y);
+$indent    $varName.gb += half2(n.z);
+$indent    $varName.rgb = clamp($varName.rgb, half3(0.0), half3($varName.a));
+$indent}"""
+    }
     fun finishExpr(varName: String, indent: String): String = when {
         inlineTint ->
             """
 ${indent}half4 src = ($varName.a > 0.0039 && $varName.a < 0.996) ? half4($varName.rgb / $varName.a, 1.0) : $varName;
 ${indent}float rwF = 1.0 - smoothRaw;
 ${indent}half rw = half(rwF * rwF * (3.0 - 2.0 * rwF));
+${indent}half4 outColor = src;
 ${indent}if (rw > half(0.001)) {
 $indent    half4 tint = half4(in_tintColor);
 $indent    half4 tinted = tint + (half(1.0) - tint.a) * src;
-$indent    return mix(src, tinted, rw);
-$indent}
-${indent}return src;"""
+$indent    outColor = mix(src, tinted, rw);
+$indent}${ditherBlock("outColor", indent)}
+${indent}return outColor;"""
 
         unpremul ->
             """
-${indent}if ($varName.a > 0.0039 && $varName.a < 0.996) {
-$indent    return half4($varName.rgb / $varName.a, 1.0)$maskSuffix;
-$indent}
-${indent}return $varName$maskSuffix;"""
+${indent}half4 outColor = ($varName.a > 0.0039 && $varName.a < 0.996) ? half4($varName.rgb / $varName.a, 1.0)$maskSuffix : $varName$maskSuffix;${ditherBlock("outColor", indent)}
+${indent}return outColor;"""
 
         else -> "\n${indent}return $varName$maskSuffix;"
     }
@@ -166,7 +181,7 @@ ${indent}return $varName$maskSuffix;"""
     uniform shader child;$maxCoordUniform
     uniform float in_maxRadius;
     uniform float2 in_gradVec;
-    uniform float in_gradOffset;$tintUniform
+    uniform float in_gradOffset;$tintUniform$noiseUniform
 $curveUniform$sharpUniforms
     half4 main(float2 xy) {
         float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
@@ -206,7 +221,7 @@ $curveUniform$sharpUniforms
 }
 
 // 6 tap bounds (4..24 step 4) × 4 curveKinds × 7 variants × 2 axes = 336 cached shader strings.
-private val PROGRESSIVE_SHADER_CACHE = arrayOfNulls<String>(6 * 4 * 7 * 2)
+private val PROGRESSIVE_SHADER_CACHE = arrayOfNulls<String>(6 * 4 * 9 * 2)
 
 /** The progressive Blur shader source for [tapBound], [curveKind], [axis], and band/unpremul flags. */
 internal fun progressiveBlurShaderForTap(
@@ -218,10 +233,13 @@ internal fun progressiveBlurShaderForTap(
     unpremul: Boolean = true,
     axis: Int = 0,
     inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
 ): String {
-    require(!sharpBand || !inlineTint) { "inlineTint cannot be combined with sharpBand" }
+    require(!sharpBand || (!inlineTint && !inlineNoise)) { "inlineTint/inlineNoise cannot be combined with sharpBand" }
     val tapIdx = ((tapBound / 4) - 1).coerceIn(0, 5)
     val variant = when {
+        inlineTint && inlineNoise -> 8
+        unpremul && inlineNoise -> 7
         inlineTint -> 6
         sharpBand && midDecay && sharpMask -> 5
         sharpBand && midDecay -> 4
@@ -230,7 +248,7 @@ internal fun progressiveBlurShaderForTap(
         unpremul -> 1
         else -> 0
     }
-    val slot = ((tapIdx * 4 + curveKind) * 7 + variant) * 2 + (axis and 1)
+    val slot = ((tapIdx * 4 + curveKind) * 9 + variant) * 2 + (axis and 1)
     return PROGRESSIVE_SHADER_CACHE[slot] ?: buildProgressiveBlurShader(
         maxTap = tapBound,
         curveKind = curveKind,
@@ -240,6 +258,7 @@ internal fun progressiveBlurShaderForTap(
         unpremul = unpremul,
         axis = axis,
         inlineTint = inlineTint,
+        inlineNoise = inlineNoise,
     ).also { PROGRESSIVE_SHADER_CACHE[slot] = it }
 }
 
@@ -253,7 +272,7 @@ internal fun progressiveLoopTapBound(maxRadius: Float): Int {
 }
 
 private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<Array<Array<String>>>>> = Array(2) { axis ->
-    Array(3) { unpremulMode ->
+    Array(5) { unpremulMode ->
         Array(4) { curveKind ->
             Array(LEVEL_BUCKETS) { bucket ->
                 Array(6) { tapIdx ->
@@ -285,13 +304,14 @@ internal fun progressiveLoopShaderKey(
     curveKind: Int,
     unpremul: Boolean = true,
     inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
 ): String {
-    val mode = if (inlineTint) {
-        2
-    } else if (unpremul) {
-        1
-    } else {
-        0
+    val mode = when {
+        inlineTint && inlineNoise -> 4
+        unpremul && inlineNoise -> 3
+        inlineTint -> 2
+        unpremul -> 1
+        else -> 0
     }
     return PROGRESSIVE_LOOP_KEYS[axis][mode][curveKind][levelBucket(downScale)][((tap / 4) - 1).coerceIn(0, 5)]
 }

@@ -178,6 +178,7 @@ internal fun obtainProgressiveBlurEffect(
     padTop: Float = scope.padding,
     padRight: Float = scope.padding,
     padBottom: Float = scope.padding,
+    ditherCoeff: Float = 0f,
     tintColor: Color = Color.Unspecified,
 ): RenderEffect? {
     val scale = (1 shl exp).toFloat()
@@ -215,7 +216,8 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgStart == gradient.startFraction &&
         scope.cachedProgEnd == gradient.endFraction &&
         scope.cachedProgCurve == gradient.curve &&
-        scope.cachedProgTintColor == tintColor
+        scope.cachedProgTintColor == tintColor &&
+        scope.cachedProgDitherCoeff == ditherCoeff
     ) {
         return cached
     }
@@ -237,6 +239,7 @@ internal fun obtainProgressiveBlurEffect(
         gradient.curve,
         scope,
         tintColor = tintColor,
+        ditherCoeff = ditherCoeff,
     ).also {
         scope.cachedProgRadiusX = radiusX
         scope.cachedProgRadiusY = radiusY
@@ -252,6 +255,7 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgEnd = gradient.endFraction
         scope.cachedProgCurve = gradient.curve
         scope.cachedProgTintColor = tintColor
+        scope.cachedProgDitherCoeff = ditherCoeff
         scope.cachedProgResult = it
     }
 }
