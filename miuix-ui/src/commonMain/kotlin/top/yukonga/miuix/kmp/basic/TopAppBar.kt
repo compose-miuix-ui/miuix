@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -263,13 +264,17 @@ fun MiuixScrollBehavior(
     canScroll: () -> Boolean = { true },
     snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = 2500f),
     flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
-): ScrollBehavior = remember(state, canScroll, snapAnimationSpec, flingAnimationSpec) {
-    ExitUntilCollapsedScrollBehavior(
-        state = state,
-        snapAnimationSpec = snapAnimationSpec,
-        flingAnimationSpec = flingAnimationSpec,
-        canScroll = canScroll,
-    )
+): ScrollBehavior {
+    val coroutineScope = rememberCoroutineScope()
+    return remember(state, canScroll, snapAnimationSpec, flingAnimationSpec, coroutineScope) {
+        ExitUntilCollapsedScrollBehavior(
+            state = state,
+            snapAnimationSpec = snapAnimationSpec,
+            flingAnimationSpec = flingAnimationSpec,
+            canScroll = canScroll,
+            coroutineScope = coroutineScope,
+        )
+    }
 }
 
 /**
@@ -501,8 +506,24 @@ private class ExitUntilCollapsedScrollBehavior(
     override val snapAnimationSpec: AnimationSpec<Float>?,
     override val flingAnimationSpec: DecayAnimationSpec<Float>?,
     val canScroll: () -> Boolean = { true },
+    private val coroutineScope: CoroutineScope? = null,
 ) : ScrollBehavior {
     override val isPinned: Boolean = false
+    private var idleSettleJob: Job? = null
+
+    private fun scheduleIdleSettle() {
+        if (snapAnimationSpec == null || coroutineScope == null) return
+        if (state.collapsedFraction < 0.01f || state.collapsedFraction > 0.99f) {
+            idleSettleJob?.cancel()
+            return
+        }
+        idleSettleJob?.cancel()
+        idleSettleJob = coroutineScope.launch {
+            delay(180L)
+            settleAppBar(state, 0f, flingAnimationSpec, snapAnimationSpec)
+        }
+    }
+
     override var nestedScrollConnection =
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -511,6 +532,7 @@ private class ExitUntilCollapsedScrollBehavior(
                 val prevHeightOffset = state.heightOffset
                 state.heightOffset += available.y
                 return if (prevHeightOffset != state.heightOffset) {
+                    scheduleIdleSettle()
                     // We're in the middle of top app bar collapse or expand.
                     // Consume only the scroll on the Y axis.
                     available.copy(x = 0f)
@@ -531,6 +553,9 @@ private class ExitUntilCollapsedScrollBehavior(
                     // When scrolling up, just update the state's height offset.
                     val oldHeightOffset = state.heightOffset
                     state.heightOffset += consumed.y
+                    if (oldHeightOffset != state.heightOffset) {
+                        scheduleIdleSettle()
+                    }
                     return Offset(0f, state.heightOffset - oldHeightOffset)
                 }
 
@@ -539,12 +564,16 @@ private class ExitUntilCollapsedScrollBehavior(
                     // recorded as available delta Y in the pre-scroll.
                     val oldHeightOffset = state.heightOffset
                     state.heightOffset += available.y
+                    if (oldHeightOffset != state.heightOffset) {
+                        scheduleIdleSettle()
+                    }
                     return Offset(0f, state.heightOffset - oldHeightOffset)
                 }
                 return Offset.Zero
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                idleSettleJob?.cancel()
                 if (available.y > 0) {
                     // Reset the total content offset to zero when scrolling all the way down. This
                     // will eliminate some float precision inaccuracies.
