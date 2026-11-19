@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,8 +25,8 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 fun LazyListScope.progressIndicatorSection() {
     item(key = "progressIndicator") {
         SmallTitle(text = "ProgressIndicator")
-        val progressValues = listOf(0.0f, 0.25f, 0.5f, 0.75f, 1.0f, null)
-        val animatedProgressValue by rememberInfiniteTransition().animateFloat(
+        val progressValues = remember { listOf(0.0f, 0.25f, 0.5f, 0.75f, 1.0f, null) }
+        val animatedProgress = rememberInfiniteTransition().animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
@@ -36,7 +36,7 @@ fun LazyListScope.progressIndicatorSection() {
         )
 
         LinearProgressIndicator(
-            progress = animatedProgressValue,
+            progress = { animatedProgress.value },
             modifier = Modifier
                 .padding(horizontal = 15.dp)
                 .padding(bottom = 12.dp),
@@ -57,7 +57,7 @@ fun LazyListScope.progressIndicatorSection() {
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             CircularProgressIndicator(
-                progress = animatedProgressValue,
+                progress = { animatedProgress.value },
             )
             progressValues.forEach { progressValue ->
                 CircularProgressIndicator(

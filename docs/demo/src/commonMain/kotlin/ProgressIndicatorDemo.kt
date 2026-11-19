@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -40,8 +40,8 @@ fun ProgressIndicatorDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val progressValues = listOf(0.0f, 0.25f, 0.5f, 0.75f, 1.0f, null)
-            val animatedProgressValue by rememberInfiniteTransition().animateFloat(
+            val progressValues = remember { listOf(0.0f, 0.25f, 0.5f, 0.75f, 1.0f, null) }
+            val animatedProgress = rememberInfiniteTransition().animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,
                 animationSpec = infiniteRepeatable(
@@ -50,7 +50,7 @@ fun ProgressIndicatorDemo() {
                 ),
             )
             LinearProgressIndicator(
-                progress = animatedProgressValue,
+                progress = { animatedProgress.value },
                 modifier = Modifier,
             )
             progressValues.forEach { progressValue ->
@@ -64,7 +64,7 @@ fun ProgressIndicatorDemo() {
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 CircularProgressIndicator(
-                    progress = animatedProgressValue,
+                    progress = { animatedProgress.value },
                 )
                 progressValues.forEach { progressValue ->
                     CircularProgressIndicator(
