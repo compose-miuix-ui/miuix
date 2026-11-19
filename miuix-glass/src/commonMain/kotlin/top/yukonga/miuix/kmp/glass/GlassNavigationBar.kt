@@ -510,6 +510,8 @@ fun GlassNavigationBar(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
+                                .heightIn(min = height)
+                                .graphicsLayer { this.alpha = pressAlpha.value }
                                 .padding(
                                     horizontal = GlassNavigationBarDefaults.IndicatorOverhang,
                                     vertical = GlassNavigationBarDefaults.ContentPaddingVertical,
@@ -543,8 +545,7 @@ fun GlassNavigationBar(
                                     } else {
                                         Modifier.clearAndSetSemantics { }
                                     },
-                                )
-                                .graphicsLayer { this.alpha = pressAlpha.value },
+                                ),
                             contentAlignment = Alignment.Center,
                         ) {
                             androidx.compose.foundation.layout.Column(
