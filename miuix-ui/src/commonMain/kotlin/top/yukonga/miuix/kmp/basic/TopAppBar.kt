@@ -44,6 +44,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -73,7 +74,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.TopAppBarState.Companion.Saver
@@ -510,8 +514,13 @@ private class ExitUntilCollapsedScrollBehavior(
 ) : ScrollBehavior {
     override val isPinned: Boolean = false
     private var idleSettleJob: Job? = null
+    internal var inputTracker: TopAppBarInputTracker? = null
 
     private fun scheduleIdleSettle() {
+        if (inputTracker?.allowIdleSettle != true) {
+            idleSettleJob?.cancel()
+            return
+        }
         if (snapAnimationSpec == null || coroutineScope == null) return
         if (state.collapsedFraction < 0.01f || state.collapsedFraction > 0.99f) {
             idleSettleJob?.cancel()
@@ -700,6 +709,10 @@ fun TopAppBarLayout(
     bottomContent: @Composable () -> Unit = {},
 ) {
     val titleClip = remember { TopAppBarTitleClip() }
+    val inputTracker = LocalTopAppBarInputTracker.current
+    SideEffect {
+        (scrollBehavior as? ExitUntilCollapsedScrollBehavior)?.inputTracker = inputTracker
+    }
     // Producer lambdas — reads stay in layout/draw phases so scroll never recomposes this subtree.
     val scrolledOffset = remember(scrollBehavior) {
         { scrollBehavior?.state?.heightOffset ?: 0f }
@@ -1483,3 +1496,9 @@ private fun rememberTitleObstructionTransitionState(): TitleObstructionTransitio
     }
     return state
 }
+
+internal class TopAppBarInputTracker {
+    var allowIdleSettle: Boolean = false
+}
+
+internal val LocalTopAppBarInputTracker = staticCompositionLocalOf<TopAppBarInputTracker?> { null }
