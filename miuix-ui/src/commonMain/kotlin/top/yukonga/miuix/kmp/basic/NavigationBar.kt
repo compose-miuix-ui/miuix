@@ -21,12 +21,15 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,6 +101,16 @@ fun NavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier.windowInsetsPadding(
+                            WindowInsets.displayCutout.union(WindowInsets.navigationBars)
+                                .only(WindowInsetsSides.Horizontal),
+                        )
+                    } else {
+                        Modifier
+                    },
+                )
                 .selectableGroup(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -304,6 +317,16 @@ fun FloatingNavigationBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (defaultWindowInsetsPadding) {
+                    Modifier.windowInsetsPadding(
+                        WindowInsets.displayCutout.union(WindowInsets.navigationBars)
+                            .only(WindowInsetsSides.Horizontal),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(
                 start = if (horizontalAlignment == Alignment.Start) horizontalOutSidePadding else 0.dp,
                 end = if (horizontalAlignment == Alignment.End) horizontalOutSidePadding else 0.dp,
