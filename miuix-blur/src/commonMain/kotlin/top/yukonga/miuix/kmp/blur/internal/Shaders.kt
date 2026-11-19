@@ -69,6 +69,8 @@ internal fun buildProgressiveBlurShader(
     sharpMask: Boolean = false,
     midDecay: Boolean = false,
     unpremul: Boolean = true,
+    axis: Int = 0,
+    inlineTint: Boolean = false,
 ): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
     val maxCoordUniform = if (sharpBand) {
@@ -123,77 +125,90 @@ internal fun buildProgressiveBlurShader(
         """
         float radius = in_maxRadius * (1.0 - smoothRaw);"""
     }
-    fun sampleCoord(expr: String): String = if (sharpBand) "clamp($expr, float2(0.5), in_maxCoord)" else expr
+    val centerCoord = if (sharpBand) "clamp(xy, float2(0.5), in_maxCoord)" else "xy"
+    fun axisSampleCoord(sign: String): String = when {
+        axis == 0 && sharpBand -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
+        axis == 0 -> "float2(xy.x $sign o, xy.y)"
+        sharpBand -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
+        else -> "float2(xy.x, xy.y $sign o)"
+    }
+    val tintUniform = if (inlineTint) "\n    uniform float4 in_tintColor;" else ""
     val maskSuffix = if (sharpMask) " * mw" else ""
-    val earlyReturn = if (unpremul) {
-        """
-            half4 s = child.eval(${sampleCoord("xy")});
-            if (s.a > 0.0039) {
-                return half4(s.rgb / s.a, 1.0)$maskSuffix;
-            }
-            return s$maskSuffix;"""
-    } else {
-        """
-            return child.eval(${sampleCoord("xy")})$maskSuffix;"""
+    fun finishExpr(varName: String, indent: String): String = when {
+        inlineTint ->
+            """
+${indent}half4 src = ($varName.a > 0.0039 && $varName.a < 0.996) ? half4($varName.rgb / $varName.a, 1.0) : $varName;
+${indent}float rwF = 1.0 - smoothRaw;
+${indent}half rw = half(rwF * rwF * (3.0 - 2.0 * rwF));
+${indent}if (rw > half(0.001)) {
+$indent    half4 tint = half4(in_tintColor);
+$indent    half4 tinted = tint + (half(1.0) - tint.a) * src;
+$indent    return mix(src, tinted, rw);
+$indent}
+${indent}return src;"""
+
+        unpremul ->
+            """
+${indent}if ($varName.a > 0.0039 && $varName.a < 0.996) {
+$indent    return half4($varName.rgb / $varName.a, 1.0)$maskSuffix;
+$indent}
+${indent}return $varName$maskSuffix;"""
+
+        else -> "\n${indent}return $varName$maskSuffix;"
     }
-    val finalReturn = if (unpremul) {
-        """
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0)$maskSuffix;
-        }
-        return color$maskSuffix;"""
+    val earlyReturn = if (unpremul || inlineTint) {
+        "\n            half4 s = child.eval($centerCoord);${finishExpr("s", "            ")}"
     } else {
-        """
-        return color$maskSuffix;"""
+        "\n            return child.eval($centerCoord)$maskSuffix;"
     }
+    val finalReturn = finishExpr("color", "        ")
     return """
     uniform shader child;$maxCoordUniform
-    uniform float2 in_step;
     uniform float in_maxRadius;
     uniform float2 in_gradVec;
-    uniform float in_gradOffset;
+    uniform float in_gradOffset;$tintUniform
 $curveUniform$sharpUniforms
     half4 main(float2 xy) {
         float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
         float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr$bandRamp
         if (radius <= 0.004) {$earlyReturn
         }
-        half halfR = half(radius * 0.5 + 0.5);
-        float posNegInv2s2Ln2 = -0.7213475 / (float(halfR) * float(halfR));
+        float sigma = radius * 0.5 + 0.5;
+        float posNegInv2s2Ln2 = -0.7213475 / (sigma * sigma);
         float q = exp2(posNegInv2s2Ln2);
         float q2 = q * q;
         float gStep = q;
         float g = 1.0;
         float r1 = radius + 1.0;
-        half4 color = child.eval(${sampleCoord("xy")});
+        half4 color = child.eval($centerCoord);
         half wAcc = half(0.0);
+        float a = 1.0;
         for (int j = 0; j < ${maxTap / 2}; j++) {
-            float a = float(2 * j + 1);
             half ra = half(clamp(r1 - a, 0.0, 1.0));
             if (ra <= half(0.001)) break;
             g *= gStep;
             gStep *= q2;
             half wa = ra * half(g);
-            float b = a + 1.0;
-            half rb = half(clamp(r1 - b, 0.0, 1.0));
+            half rb = half(clamp(r1 - (a + 1.0), 0.0, 1.0));
             g *= gStep;
             gStep *= q2;
             half wb = rb * half(g);
             half wsum = wa + wb;
-            float2 o = (a + float(wb / wsum)) * in_step;
-            color += (child.eval(${sampleCoord("xy + o")}) +
-                child.eval(${sampleCoord("xy - o")})) * wsum;
+            float o = a + float(wb / wsum);
+            color += (child.eval(${axisSampleCoord("+")}) +
+                child.eval(${axisSampleCoord("-")})) * wsum;
             wAcc += wsum;
+            a += 2.0;
         }
         color = color / (half(1.0) + half(2.0) * wAcc);$finalReturn
     }
 """
 }
 
-// 6 tap bounds (4..24 step 4) × 4 curveKinds × 6 variants = 144 cached shader strings.
-private val PROGRESSIVE_SHADER_CACHE = arrayOfNulls<String>(6 * 4 * 6)
+// 6 tap bounds (4..24 step 4) × 4 curveKinds × 7 variants × 2 axes = 336 cached shader strings.
+private val PROGRESSIVE_SHADER_CACHE = arrayOfNulls<String>(6 * 4 * 7 * 2)
 
-/** The progressive Blur shader source for [tapBound], [curveKind], and band/unpremul flags. */
+/** The progressive Blur shader source for [tapBound], [curveKind], [axis], and band/unpremul flags. */
 internal fun progressiveBlurShaderForTap(
     tapBound: Int,
     curveKind: Int = 3,
@@ -201,9 +216,13 @@ internal fun progressiveBlurShaderForTap(
     sharpMask: Boolean = false,
     midDecay: Boolean = false,
     unpremul: Boolean = true,
+    axis: Int = 0,
+    inlineTint: Boolean = false,
 ): String {
+    require(!sharpBand || !inlineTint) { "inlineTint cannot be combined with sharpBand" }
     val tapIdx = ((tapBound / 4) - 1).coerceIn(0, 5)
     val variant = when {
+        inlineTint -> 6
         sharpBand && midDecay && sharpMask -> 5
         sharpBand && midDecay -> 4
         sharpBand && sharpMask -> 3
@@ -211,7 +230,7 @@ internal fun progressiveBlurShaderForTap(
         unpremul -> 1
         else -> 0
     }
-    val slot = (tapIdx * 4 + curveKind) * 6 + variant
+    val slot = ((tapIdx * 4 + curveKind) * 7 + variant) * 2 + (axis and 1)
     return PROGRESSIVE_SHADER_CACHE[slot] ?: buildProgressiveBlurShader(
         maxTap = tapBound,
         curveKind = curveKind,
@@ -219,6 +238,8 @@ internal fun progressiveBlurShaderForTap(
         sharpMask = sharpMask,
         midDecay = midDecay,
         unpremul = unpremul,
+        axis = axis,
+        inlineTint = inlineTint,
     ).also { PROGRESSIVE_SHADER_CACHE[slot] = it }
 }
 
@@ -232,12 +253,12 @@ internal fun progressiveLoopTapBound(maxRadius: Float): Int {
 }
 
 private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<Array<Array<String>>>>> = Array(2) { axis ->
-    Array(2) { unpremul ->
+    Array(3) { unpremulMode ->
         Array(4) { curveKind ->
             Array(LEVEL_BUCKETS) { bucket ->
                 Array(6) { tapIdx ->
                     val tap = (tapIdx + 1) * 4
-                    "LMPGL_${axis}_${unpremul}_c${curveKind}_b${bucket}_t$tap"
+                    "LMPGL_${axis}_${unpremulMode}_c${curveKind}_b${bucket}_t$tap"
                 }
             }
         }
@@ -263,7 +284,17 @@ internal fun progressiveLoopShaderKey(
     tap: Int,
     curveKind: Int,
     unpremul: Boolean = true,
-): String = PROGRESSIVE_LOOP_KEYS[axis][if (unpremul) 1 else 0][curveKind][levelBucket(downScale)][((tap / 4) - 1).coerceIn(0, 5)]
+    inlineTint: Boolean = false,
+): String {
+    val mode = if (inlineTint) {
+        2
+    } else if (unpremul) {
+        1
+    } else {
+        0
+    }
+    return PROGRESSIVE_LOOP_KEYS[axis][mode][curveKind][levelBucket(downScale)][((tap / 4) - 1).coerceIn(0, 5)]
+}
 
 internal fun progressiveSharpShaderKey(
     axis: Int,
@@ -316,7 +347,7 @@ private fun buildProgressiveSharpMaskShader(curveKind: Int): String {
             return half4(0.0);
         }
         half4 s = child.eval(xy);
-        if (s.a > 0.0039) {
+        if (s.a > 0.0039 && s.a < 0.996) {
             return half4(s.rgb / s.a, 1.0) * mw;
         }
         return s * mw;
@@ -431,10 +462,14 @@ internal const val DOWNSAMPLE_4X_SHADER = """
  * - `rampMix = true`: the progressive composite's folded post pass — one child eval, ramp-mixed over
  *   the untouched source instead of the SrcOver branch form that evaluates the stack twice.
  */
-internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = false): String = buildString {
+internal fun buildBlendModeShader(
+    includeExtended: Boolean,
+    rampMix: Boolean = false,
+    curveKind: Int = 3,
+): String = buildString {
     append(BLEND_MODE_SHADER_HEADER)
     if (includeExtended) append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
-    if (rampMix) append(BLEND_MODE_SHADER_RAMP_UNIFORMS)
+    if (rampMix) append(buildBlendModeRampUniforms(curveKind))
     append(
         when {
             rampMix && includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP
@@ -447,8 +482,15 @@ internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = f
 
 internal val BLEND_MODE_SHADER_STANDARD: String = buildBlendModeShader(includeExtended = false)
 internal val BLEND_MODE_SHADER_EXTENDED: String = buildBlendModeShader(includeExtended = true)
-internal val BLEND_MODE_SHADER_STANDARD_RAMP: String = buildBlendModeShader(includeExtended = false, rampMix = true)
-internal val BLEND_MODE_SHADER_EXTENDED_RAMP: String = buildBlendModeShader(includeExtended = true, rampMix = true)
+
+private val BLEND_MODE_RAMP_SHADERS = arrayOfNulls<String>(8)
+
+internal fun rampBlendModeShader(includeExtended: Boolean, curveKind: Int): String {
+    val slot = (if (includeExtended) 4 else 0) + curveKind
+    return BLEND_MODE_RAMP_SHADERS[slot]
+        ?: buildBlendModeShader(includeExtended = includeExtended, rampMix = true, curveKind = curveKind)
+            .also { BLEND_MODE_RAMP_SHADERS[slot] = it }
+}
 
 /** Uniforms, standard mode helpers (0-28), and `doBlend` dispatch — shared by both families. */
 private const val BLEND_MODE_SHADER_HEADER = """
@@ -905,19 +947,26 @@ private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
 """
 
 /** Ramp band uniforms + weight for the progressive composite's folded post pass. */
-private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
+private fun buildBlendModeRampUniforms(curveKind: Int): String {
+    val curveUniform = if (curveKind == 3) "\n    uniform float in_curve;" else ""
+    val curveExpr = when (curveKind) {
+        0 -> ""
+        1 -> "\n        raw = sqrt(raw);"
+        2 -> "\n        raw = sqrt(sqrt(raw));"
+        else -> "\n        raw = pow(raw, in_curve);"
+    }
+    return """
     uniform float2 in_gradVec;
-    uniform float in_gradOffset;
-    uniform float in_curve;
+    uniform float in_gradOffset;$curveUniform
 
     float evalRampRaw(float2 fragCoord) {
         float raw = clamp(dot(fragCoord, in_gradVec) + in_gradOffset, 0.0, 1.0);
-        raw = raw * raw * (3.0 - 2.0 * raw);
-        if (in_curve != 1.0) raw = pow(raw, in_curve);
+        raw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
         return raw;
     }
 
 """
+}
 
 /** Flat `main` — standard family only, no unpremul/premul roundtrip. */
 private const val BLEND_MODE_SHADER_MAIN_STANDARD = """

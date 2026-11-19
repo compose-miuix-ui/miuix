@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Paint
@@ -488,11 +489,14 @@ private class DrawBackdropNode(
                 active = false
                 return
             }
+            val isMaskMode = !midDecay && downScale == 1 && maxRX < 5.5f && maxRY < 5.5f
+            val keyRX = if (isMaskMode) -1f else maxRX
+            val keyRY = if (isMaskMode) -1f else maxRY
             if (cachedGradient != gradient || cachedW != sw || cachedH != sh ||
-                cachedPre !== pre || cachedRadiusX != maxRX || cachedRadiusY != maxRY || cachedExp != exp
+                cachedPre !== pre || cachedRadiusX != keyRX || cachedRadiusY != keyRY || cachedExp != exp
             ) {
                 val dsFloat = downScale.toFloat()
-                val loopReach = if (!midDecay && downScale == 1 && maxRX < 5.5f && maxRY < 5.5f) {
+                val loopReach = if (isMaskMode) {
                     1f
                 } else {
                     (ceil(maxOf(maxRX, maxRY)).toInt() + 1) * dsFloat
@@ -542,8 +546,8 @@ private class DrawBackdropNode(
                 cachedW = sw
                 cachedH = sh
                 cachedPre = pre
-                cachedRadiusX = maxRX
-                cachedRadiusY = maxRY
+                cachedRadiusX = keyRX
+                cachedRadiusY = keyRY
                 cachedExp = exp
             }
             active = effect != null
@@ -687,11 +691,16 @@ private class DrawBackdropNode(
         target.cascadeFirstStepScale = 2f
         var source = target.obtainCascade(0)
         var sourceSize = recordedSize(2f)
-        if (midSharpOverlay.active) {
+        val shareBase2x = midSharpOverlay.active && backdrop !is LayerBackdrop
+        if (shareBase2x) {
             val base2x = target.ensureBase2x()
             recordLayer(base2x, size = sourceSize) { recordBackdrop(target) }
             recordLayer(source, size = sourceSize) { drawLayer(base2x) }
         } else {
+            target.base2xLayer?.let {
+                graphicsContext.releaseGraphicsLayer(it)
+                target.base2xLayer = null
+            }
             recordLayer(source, size = sourceSize) { recordBackdrop(target) }
         }
 
@@ -855,7 +864,7 @@ private class DrawBackdropNode(
         onDrawBehind?.invoke(this)
 
         drawBlurredBackdrop()
-        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f) primary.base2xLayer else null
+        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f && backdrop !is LayerBackdrop) primary.base2xLayer else null
         with(midSharpOverlay) { draw(shared2x, primary.padLeft, primary.padTop) }
         with(sharpOverlay) { draw() }
         onDrawSurface?.invoke(this)
@@ -947,6 +956,7 @@ private class DrawBackdropNode(
         val pre = scope.progressivePreEffect
         val post = progPostEffect
         val postBlend = progRampBlend
+        val inlineTint = postBlend.singleSrcOverColorOrUnspecified()
         val blurEffect = obtainProgressiveBlurEffect(
             scope = scope,
             radiusX = rX,
@@ -957,9 +967,10 @@ private class DrawBackdropNode(
             padTop = padTop,
             padRight = padRight,
             padBottom = padBottom,
+            tintColor = inlineTint,
         )
         var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
-        if (postBlend != null) {
+        if (postBlend != null && (blurEffect == null || inlineTint == Color.Unspecified)) {
             val rampBlend = buildRampBlendColorsEffect(
                 scope = scope,
                 colors = postBlend,
@@ -1044,6 +1055,7 @@ private class DrawBackdropNode(
         primary.padRight = progBasePadRight
         primary.padBottom = progBasePadBottom
 
+        val inlineTint = postBlend.singleSrcOverColorOrUnspecified()
         val blurEffect = obtainProgressiveBlurEffect(
             scope = scope,
             radiusX = rX,
@@ -1054,9 +1066,10 @@ private class DrawBackdropNode(
             padTop = progBasePadTop,
             padRight = progBasePadRight,
             padBottom = progBasePadBottom,
+            tintColor = inlineTint,
         )
         var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
-        if (postBlend != null) {
+        if (postBlend != null && (blurEffect == null || inlineTint == Color.Unspecified)) {
             val rampBlend = buildRampBlendColorsEffect(
                 scope = scope,
                 colors = postBlend,
@@ -1093,7 +1106,7 @@ private class DrawBackdropNode(
         }
         val sw = scope.size.width
         val sh = scope.size.height
-        if (exp >= 3) {
+        if (exp >= 2) {
             midSharpOverlay.update(
                 scope = scope,
                 gradient = gradient,
@@ -1276,4 +1289,11 @@ private class DrawBackdropNode(
         layoutCoordinates = null
         effectsSized = false
     }
+}
+
+private fun BlurColors?.singleSrcOverColorOrUnspecified(): Color {
+    if (this == null || blendColors.size != 1) return Color.Unspecified
+    val entry = blendColors[0]
+    if (entry.mode != BlurBlendMode.SrcOver) return Color.Unspecified
+    return entry.color
 }

@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -199,6 +200,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgStart: Float = Float.NaN
     internal var cachedProgEnd: Float = Float.NaN
     internal var cachedProgCurve: Float = Float.NaN
+    internal var cachedProgTintColor: Color = Color.Unspecified
     internal var cachedProgResult: RenderEffect? = null
 
     /** True while the draw path runs the single-layer progressive ramp with folded post blend/fade. */
@@ -332,6 +334,7 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgStart = Float.NaN
         cachedProgEnd = Float.NaN
         cachedProgCurve = Float.NaN
+        cachedProgTintColor = Color.Unspecified
         cachedProgResult = null
         progressiveRampActive = false
         progRecordedRadiusX = Float.NaN

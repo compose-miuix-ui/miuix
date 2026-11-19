@@ -5,7 +5,9 @@ package top.yukonga.miuix.kmp.blur.internal
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import kotlin.math.PI
 import kotlin.math.abs
@@ -195,6 +197,7 @@ internal fun createProgressiveBlurEffect(
     endFraction: Float,
     curve: Float,
     scope: BackdropEffectScopeImpl,
+    tintColor: Color = Color.Unspecified,
 ): RenderEffect? {
     computeProgressiveGradient(
         downScale = downScale,
@@ -225,19 +228,32 @@ internal fun createProgressiveBlurEffect(
 
     val hasH = radiusX > 0f && maxRadiusX >= 0.5f
     val hasV = radiusY > 0f && maxRadiusY >= 0.5f
+    val hasInlineTint = tintColor != Color.Unspecified
+    var tintR = 0f
+    var tintG = 0f
+    var tintB = 0f
+    var tintA = 0f
+    if (hasInlineTint && (hasH || hasV)) {
+        val srgb = tintColor.convert(ColorSpaces.Srgb)
+        tintA = srgb.alpha
+        tintR = srgb.red * tintA
+        tintG = srgb.green * tintA
+        tintB = srgb.blue * tintA
+    }
 
     if (hasH) {
         val tap = progressiveLoopTapBound(maxRadiusX)
         val hUnpremul = !hasV
+        val hInlineTint = hasInlineTint && !hasV
         val hShader = scope.obtainRuntimeShader(
-            progressiveLoopShaderKey(axis = 0, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = hUnpremul),
-            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = hUnpremul),
+            progressiveLoopShaderKey(axis = 0, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = hUnpremul, inlineTint = hInlineTint),
+            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = hUnpremul, axis = 0, inlineTint = hInlineTint),
         ).apply {
-            setFloatUniform("in_step", 1f, 0f)
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
             if (curveKind == 3) setFloatUniform("in_curve", clampedCurve)
+            if (hInlineTint) setFloatUniform("in_tintColor", tintR, tintG, tintB, tintA)
         }
         effect = runtimeShaderEffect(hShader, "child")
     }
@@ -245,14 +261,14 @@ internal fun createProgressiveBlurEffect(
     if (hasV) {
         val tap = progressiveLoopTapBound(maxRadiusY)
         val vShader = scope.obtainRuntimeShader(
-            progressiveLoopShaderKey(axis = 1, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = true),
-            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = true),
+            progressiveLoopShaderKey(axis = 1, downScale = downScale, tap = tap, curveKind = curveKind, unpremul = true, inlineTint = hasInlineTint),
+            progressiveBlurShaderForTap(tap, curveKind = curveKind, unpremul = true, axis = 1, inlineTint = hasInlineTint),
         ).apply {
-            setFloatUniform("in_step", 0f, 1f)
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
             if (curveKind == 3) setFloatUniform("in_curve", clampedCurve)
+            if (hasInlineTint) setFloatUniform("in_tintColor", tintR, tintG, tintB, tintA)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
             ?: runtimeShaderEffect(vShader, "child")
@@ -263,16 +279,20 @@ internal fun createProgressiveBlurEffect(
 
 /**
  * Normalized `smoothRaw` threshold where the 2× intermediate sharp band takes over from
- * [primary] when `exp >= 3`, bridging 8×/16× down to a narrow 1× sharp end.
+ * [primary] when `exp >= 2`, bridging 4×/8×/16× down to a narrow 1× sharp end.
  */
-internal fun progressiveMidSharpThreshold(exp: Int): Float = if (exp <= 3) 0.76f else 0.80f
+internal fun progressiveMidSharpThreshold(exp: Int): Float = when {
+    exp <= 2 -> 0.72f
+    exp == 3 -> 0.83f
+    else -> 0.80f
+}
 
 /** Normalized `smoothRaw` threshold where the 1× sharp band takes over for [exp]. */
 internal fun progressiveSharpThreshold(exp: Int): Float = when (exp) {
-    1 -> 0.80f
-    2 -> 0.85f
-    3 -> 0.94f
-    else -> 0.95f
+    1 -> 0.84f
+    2 -> 0.92f
+    3 -> 0.972f
+    else -> 0.967f
 }
 
 private fun progressivePrimarySigmaAt(radius: Float, exp: Int, threshold: Float): Float {
@@ -288,22 +308,22 @@ private fun progressivePrimarySigmaAt(radius: Float, exp: Int, threshold: Float)
 
 /**
  * 2× loop-shader radius matching the downscaled primary pass at [progressiveMidSharpThreshold]
- * when `exp >= 3`; 0 for lower levels that bridge straight to 1×.
+ * when `exp >= 2`; 0 for `exp <= 1` that bridge straight to 1×.
  */
 internal fun progressiveMidSharpLoopRadius(radius: Float, exp: Int): Float {
-    if (radius <= 0f || exp < 3) return 0f
+    if (radius <= 0f || exp < 2) return 0f
     val effSigma = progressivePrimarySigmaAt(radius, exp, progressiveMidSharpThreshold(exp))
     val adjVar2x = adjustedVarianceForExp(effSigma * effSigma, 1)
     return (2f * sqrt(adjVar2x) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
 }
 
 /**
- * 1× loop-shader radius (`2σ_eff − 1`) matching the underlying tier (`primary` for `exp <= 2`,
- * `2×` mid-sharp for `exp >= 3`) at [progressiveSharpThreshold].
+ * 1× loop-shader radius (`2σ_eff − 1`) matching the underlying tier (`primary` for `exp == 1`,
+ * `2×` mid-sharp for `exp >= 2`) at [progressiveSharpThreshold].
  */
 internal fun progressiveSharpLoopRadius(radius: Float, exp: Int): Float {
     if (radius <= 0f || exp <= 0) return 0f
-    if (exp < 3) {
+    if (exp < 2) {
         val effSigma = progressivePrimarySigmaAt(radius, exp, progressiveSharpThreshold(exp))
         return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
     }
@@ -386,14 +406,21 @@ internal fun createProgressiveSharpOverlayEffect(
         return preEffect?.chain(maskEffect) ?: maskEffect
     }
 
-    fun loopPass(axis: Int, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean, unpremul: Boolean): RenderEffect {
+    fun loopPass(axis: Int, maxRadius: Float, masked: Boolean, unpremul: Boolean): RenderEffect {
         val tap = progressiveLoopTapBound(maxRadius)
         val shader = scope.obtainRuntimeShader(
             progressiveSharpShaderKey(axis = axis, tap = tap, curveKind = curveKind, masked = masked, midDecay = midDecay),
-            progressiveBlurShaderForTap(tap, curveKind = curveKind, sharpBand = true, sharpMask = masked, midDecay = midDecay, unpremul = unpremul),
+            progressiveBlurShaderForTap(
+                tap,
+                curveKind = curveKind,
+                sharpBand = true,
+                sharpMask = masked,
+                midDecay = midDecay,
+                unpremul = unpremul,
+                axis = axis,
+            ),
         ).apply {
             setFloatUniform("in_maxCoord", bandW - 0.5f, bandH - 0.5f)
-            setFloatUniform("in_step", stepX, stepY)
             setFloatUniform("in_maxRadius", maxRadius)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
@@ -405,12 +432,12 @@ internal fun createProgressiveSharpOverlayEffect(
     }
 
     val blurEffect = when {
-        hasH && hasV -> loopPass(0, maxRadiusX, 1f, 0f, masked = false, unpremul = false)
-            .chain(loopPass(1, maxRadiusY, 0f, 1f, masked = true, unpremul = true))
+        hasH && hasV -> loopPass(0, maxRadiusX, masked = false, unpremul = false)
+            .chain(loopPass(1, maxRadiusY, masked = true, unpremul = true))
 
-        hasH -> loopPass(0, maxRadiusX, 1f, 0f, masked = true, unpremul = true)
+        hasH -> loopPass(0, maxRadiusX, masked = true, unpremul = true)
 
-        else -> loopPass(1, maxRadiusY, 0f, 1f, masked = true, unpremul = true)
+        else -> loopPass(1, maxRadiusY, masked = true, unpremul = true)
     }
     return preEffect?.chain(blurEffect) ?: blurEffect
 }

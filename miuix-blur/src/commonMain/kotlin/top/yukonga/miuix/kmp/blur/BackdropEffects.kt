@@ -5,12 +5,11 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
-import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
-import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
 import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_BLUR_MAX_TAP
@@ -20,7 +19,9 @@ import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeProgressiveGradient
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
+import top.yukonga.miuix.kmp.blur.internal.progressiveCurveKind
 import top.yukonga.miuix.kmp.blur.internal.quantizedLevelScale
+import top.yukonga.miuix.kmp.blur.internal.rampBlendModeShader
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.ceil
@@ -177,6 +178,7 @@ internal fun obtainProgressiveBlurEffect(
     padTop: Float = scope.padding,
     padRight: Float = scope.padding,
     padBottom: Float = scope.padding,
+    tintColor: Color = Color.Unspecified,
 ): RenderEffect? {
     val scale = (1 shl exp).toFloat()
     val compW = scope.size.width
@@ -212,7 +214,8 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgAngle == gradient.angle &&
         scope.cachedProgStart == gradient.startFraction &&
         scope.cachedProgEnd == gradient.endFraction &&
-        scope.cachedProgCurve == gradient.curve
+        scope.cachedProgCurve == gradient.curve &&
+        scope.cachedProgTintColor == tintColor
     ) {
         return cached
     }
@@ -233,6 +236,7 @@ internal fun obtainProgressiveBlurEffect(
         gradient.endFraction,
         gradient.curve,
         scope,
+        tintColor = tintColor,
     ).also {
         scope.cachedProgRadiusX = radiusX
         scope.cachedProgRadiusY = radiusY
@@ -247,6 +251,7 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgStart = gradient.startFraction
         scope.cachedProgEnd = gradient.endFraction
         scope.cachedProgCurve = gradient.curve
+        scope.cachedProgTintColor = tintColor
         scope.cachedProgResult = it
     }
 }
@@ -325,14 +330,15 @@ internal fun buildRampBlendColorsEffect(
         return cached
     }
     val needsExtended = colors.needsExtendedBlend()
+    val curveKind = progressiveCurveKind(curve)
     val shader = scope.obtainRuntimeShader(
-        if (needsExtended) "MiBlendModesExtRamp" else "MiBlendModesStdRamp",
-        if (needsExtended) BLEND_MODE_SHADER_EXTENDED_RAMP else BLEND_MODE_SHADER_STANDARD_RAMP,
+        if (needsExtended) "MiBlendModesExtRamp_c$curveKind" else "MiBlendModesStdRamp_c$curveKind",
+        rampBlendModeShader(includeExtended = needsExtended, curveKind = curveKind),
     )
     shader.setBlendLayerUniforms(scope, colors, needsExtended)
     shader.setFloatUniform("in_gradVec", gradVecX, gradVecY)
     shader.setFloatUniform("in_gradOffset", gradOffset)
-    shader.setFloatUniform("in_curve", curve)
+    if (curveKind == 3) shader.setFloatUniform("in_curve", curve)
     return createRuntimeShaderEffect(shader, "child").also {
         scope.cachedRampBlendColors = colors
         scope.cachedRampBlendGradVecX = gradVecX
