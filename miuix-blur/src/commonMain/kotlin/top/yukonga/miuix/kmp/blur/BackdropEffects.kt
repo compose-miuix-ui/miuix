@@ -20,10 +20,10 @@ import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeProgressiveGradient
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
-import top.yukonga.miuix.kmp.blur.internal.progressiveLoopTapBound
 import top.yukonga.miuix.kmp.blur.internal.quantizedLevelScale
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import kotlin.math.ceil
 import kotlin.math.sqrt
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
@@ -127,7 +127,7 @@ fun BackdropEffectScope.progressiveBlur(
         sigma < 4.5f -> 0
         sigma < 12f -> 1
         sigma < 32f -> 2
-        sigma < 96f -> 3
+        sigma < 115f -> 3
         else -> 4
     }
     val scale = (1 shl exp).toFloat()
@@ -136,7 +136,7 @@ fun BackdropEffectScope.progressiveBlur(
         val maxAdjVar = adjustedVarianceForExp(sigma * sigma, exp)
         val maxLoopR = (2f * sqrt(maxAdjVar) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
         if (maxLoopR >= 0.5f) {
-            val kernelPadding = (progressiveLoopTapBound(maxLoopR) + 1) * scale
+            val kernelPadding = (ceil(maxLoopR).toInt() + 1) * scale
             if (kernelPadding > padding) {
                 padding = kernelPadding
             }
@@ -173,17 +173,21 @@ internal fun obtainProgressiveBlurEffect(
     radiusY: Float,
     exp: Int,
     gradient: ProgressiveBlur,
+    padLeft: Float = scope.padding,
+    padTop: Float = scope.padding,
+    padRight: Float = scope.padding,
+    padBottom: Float = scope.padding,
 ): RenderEffect? {
     val scale = (1 shl exp).toFloat()
-    val padding = scope.padding
     val compW = scope.size.width
     val compH = scope.size.height
-    val paddedW = compW + padding * 2f
-    val paddedH = compH + padding * 2f
+    val paddedW = compW + padLeft + padRight
+    val paddedH = compH + padTop + padBottom
     if (radiusX <= 0f && radiusY <= 0f) {
         computeProgressiveGradient(
             downScale = scale,
-            padding = padding,
+            padLeft = padLeft,
+            padTop = padTop,
             compW = compW,
             compH = compH,
             angleDeg = gradient.angle,
@@ -200,7 +204,8 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgRadiusY == radiusY &&
         scope.cachedProgSizeW == paddedW &&
         scope.cachedProgSizeH == paddedH &&
-        scope.cachedProgPad == padding &&
+        scope.cachedProgPadLeft == padLeft &&
+        scope.cachedProgPadTop == padTop &&
         scope.cachedProgCompW == compW &&
         scope.cachedProgCompH == compH &&
         scope.cachedProgExp == exp &&
@@ -219,7 +224,8 @@ internal fun obtainProgressiveBlurEffect(
         scale,
         adjustedVarianceForExp(sigmaX * sigmaX, exp),
         adjustedVarianceForExp(sigmaY * sigmaY, exp),
-        padding,
+        padLeft,
+        padTop,
         compW,
         compH,
         gradient.angle,
@@ -232,7 +238,8 @@ internal fun obtainProgressiveBlurEffect(
         scope.cachedProgRadiusY = radiusY
         scope.cachedProgSizeW = paddedW
         scope.cachedProgSizeH = paddedH
-        scope.cachedProgPad = padding
+        scope.cachedProgPadLeft = padLeft
+        scope.cachedProgPadTop = padTop
         scope.cachedProgCompW = compW
         scope.cachedProgCompH = compH
         scope.cachedProgExp = exp

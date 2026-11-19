@@ -48,8 +48,8 @@ import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.chain
+import top.yukonga.miuix.kmp.blur.internal.computeProgressiveEdgePadding
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveSharpOverlayEffect
-import top.yukonga.miuix.kmp.blur.internal.progressiveLoopTapBound
 import top.yukonga.miuix.kmp.blur.internal.progressiveMidSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.progressiveMidSharpThreshold
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
@@ -63,6 +63,7 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositingStrategy
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 
@@ -372,10 +373,14 @@ private class DrawBackdropNode(
     /** Layers + level parameters for rendering one downscale level. */
     private inner class LevelTarget {
         var mainLayer: GraphicsLayer? = null
+        var base2xLayer: GraphicsLayer? = null
         val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
         var noiseLayer: GraphicsLayer? = null
         var downscaleFactor: Float = 1f
-        var padding: Float = 0f
+        var padLeft: Float = 0f
+        var padTop: Float = 0f
+        var padRight: Float = 0f
+        var padBottom: Float = 0f
 
         /** Scale of the first (bilinear) record step: the level, or 2 for the ½ cascade below it. */
         var cascadeFirstStepScale: Float = 1f
@@ -391,6 +396,10 @@ private class DrawBackdropNode(
         var noiseEffectCoeff: Float = Float.NaN
 
         fun ensureMain(): GraphicsLayer = mainLayer ?: graphicsContext.createGraphicsLayer().also { mainLayer = it }
+
+        fun ensureBase2x(): GraphicsLayer = base2xLayer ?: graphicsContext.createGraphicsLayer().apply {
+            compositingStrategy = LayerCompositingStrategy.Offscreen
+        }.also { base2xLayer = it }
 
         fun obtainCascade(index: Int): GraphicsLayer {
             val ctx = graphicsContext
@@ -434,6 +443,8 @@ private class DrawBackdropNode(
             val ctx = graphicsContext
             mainLayer?.let { ctx.releaseGraphicsLayer(it) }
             mainLayer = null
+            base2xLayer?.let { ctx.releaseGraphicsLayer(it) }
+            base2xLayer = null
             for (cascade in cascadeLayers) ctx.releaseGraphicsLayer(cascade)
             cascadeLayers.clear()
             noiseLayer?.let { ctx.releaseGraphicsLayer(it) }
@@ -481,7 +492,11 @@ private class DrawBackdropNode(
                 cachedPre !== pre || cachedRadiusX != maxRX || cachedRadiusY != maxRY || cachedExp != exp
             ) {
                 val dsFloat = downScale.toFloat()
-                val loopReach = (progressiveLoopTapBound(maxOf(maxRX, maxRY)) + 1) * dsFloat
+                val loopReach = if (!midDecay && downScale == 1 && maxRX < 5.5f && maxRY < 5.5f) {
+                    1f
+                } else {
+                    (ceil(maxOf(maxRX, maxRY)).toInt() + 1) * dsFloat
+                }
                 val band = progressiveSharpBandBounds(
                     threshold = threshold,
                     compW = sw,
@@ -534,23 +549,35 @@ private class DrawBackdropNode(
             active = effect != null
         }
 
-        fun DrawScope.draw() {
+        fun DrawScope.draw(
+            shared2xSource: GraphicsLayer? = null,
+            sharedPadLeft: Float = 0f,
+            sharedPadTop: Float = 0f,
+        ) {
             if (!active) return
             val texSize = bandTexSize
             if (texSize.width <= 0 || texSize.height <= 0) return
             val offset = bandOffset
             val dsFloat = downScale.toFloat()
             val targetLayer = layer ?: graphicsContext.createGraphicsLayer().also { layer = it }
-            recordLayer(targetLayer, size = texSize) {
-                translate(-offset.x / dsFloat, -offset.y / dsFloat) {
-                    onDrawBackdrop {
-                        with(backdrop) {
-                            drawBackdrop(
-                                density = effectScope,
-                                coordinates = layoutCoordinates,
-                                layerBlock = layerBlock,
-                                downscaleFactor = dsFloat,
-                            )
+            if (downScale == 2 && shared2xSource != null) {
+                recordLayer(targetLayer, size = texSize) {
+                    translate(-(sharedPadLeft + offset.x) / 2f, -(sharedPadTop + offset.y) / 2f) {
+                        drawLayer(shared2xSource)
+                    }
+                }
+            } else {
+                recordLayer(targetLayer, size = texSize) {
+                    translate(-offset.x / dsFloat, -offset.y / dsFloat) {
+                        onDrawBackdrop {
+                            with(backdrop) {
+                                drawBackdrop(
+                                    density = effectScope,
+                                    coordinates = layoutCoordinates,
+                                    layerBlock = layerBlock,
+                                    downscaleFactor = dsFloat,
+                                )
+                            }
                         }
                     }
                 }
@@ -590,18 +617,22 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        compositingStrategy = CompositingStrategy.Offscreen
+        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || onDrawFront != null) {
+            CompositingStrategy.Offscreen
+        } else {
+            CompositingStrategy.Auto
+        }
     }
 
     private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
 
     private fun DrawScope.recordBackdrop(target: LevelTarget) {
-        val currentPadding = target.padding
         val scaleFactor = target.cascadeFirstStepScale
         // Exact (fractional) padding: snapping it shifts the recording by up to a texel whenever
         // `reach × level` crosses an integer.
-        val scaledPadding = if (currentPadding == 0f) 0f else currentPadding / scaleFactor
-        translate(scaledPadding, scaledPadding) {
+        val scaledPadX = if (target.padLeft == 0f) 0f else target.padLeft / scaleFactor
+        val scaledPadY = if (target.padTop == 0f) 0f else target.padTop / scaleFactor
+        translate(scaledPadX, scaledPadY) {
             onDrawBackdrop {
                 with(backdrop) {
                     drawBackdrop(
@@ -621,10 +652,11 @@ private class DrawBackdropNode(
      */
     private fun DrawScope.renderBlurInto(target: LevelTarget) {
         val layer = target.mainLayer ?: return
-        val currentPadding = target.padding
+        val padL = target.padLeft
+        val padT = target.padTop
         val level = target.downscaleFactor
-        val fullWidth = (size.width + currentPadding * 2).toInt()
-        val fullHeight = (size.height + currentPadding * 2).toInt()
+        val fullWidth = (size.width + padL + target.padRight).toInt()
+        val fullHeight = (size.height + padT + target.padBottom).toInt()
 
         // Texel size of the padded region recorded at [scale].
         fun recordedSize(scale: Float): IntSize = IntSize(
@@ -639,7 +671,7 @@ private class DrawBackdropNode(
         if (level <= 1.001f) {
             target.cascadeFirstStepScale = 1f
             recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
-            drawShiftedLayer(layer, currentPadding, 1f)
+            drawShiftedLayer(layer, padL, padT, 1f)
             return
         }
 
@@ -647,7 +679,7 @@ private class DrawBackdropNode(
             // Half or finer: a single bilinear record straight to the level.
             target.cascadeFirstStepScale = level
             recordLayer(layer, size = recordedSize(level)) { recordBackdrop(target) }
-            drawUpscaledLayer(target, layer, level, currentPadding, fullWidth, fullHeight)
+            drawUpscaledLayer(target, layer, level, padL, padT, fullWidth, fullHeight)
             return
         }
 
@@ -655,7 +687,13 @@ private class DrawBackdropNode(
         target.cascadeFirstStepScale = 2f
         var source = target.obtainCascade(0)
         var sourceSize = recordedSize(2f)
-        recordLayer(source, size = sourceSize) { recordBackdrop(target) }
+        if (midSharpOverlay.active) {
+            val base2x = target.ensureBase2x()
+            recordLayer(base2x, size = sourceSize) { recordBackdrop(target) }
+            recordLayer(source, size = sourceSize) { drawLayer(base2x) }
+        } else {
+            recordLayer(source, size = sourceSize) { recordBackdrop(target) }
+        }
 
         var covered = 2f
         var step = 0
@@ -721,7 +759,7 @@ private class DrawBackdropNode(
             )
         }
 
-        drawUpscaledLayer(target, layer, level, currentPadding, fullWidth, fullHeight)
+        drawUpscaledLayer(target, layer, level, padL, padT, fullWidth, fullHeight)
     }
 
     override fun MeasureScope.measure(
@@ -766,9 +804,45 @@ private class DrawBackdropNode(
         }
     }
 
+    private var progBasePadLeft = 0f
+    private var progBasePadTop = 0f
+    private var progBasePadRight = 0f
+    private var progBasePadBottom = 0f
+
+    private fun DrawScope.clampProgressivePaddingToBackdrop() {
+        if (!effectScope.progressiveRampActive || effectScope.progressivePreEffect != null || layerBlock != null) return
+        val layerBackdrop = backdrop as? LayerBackdrop ?: return
+        val layerCoords = layerBackdrop.layerCoordinates?.takeIf { it.isAttached } ?: return
+        val coords = layoutCoordinates?.takeIf { it.isAttached } ?: return
+        val pos = try {
+            layerCoords.localPositionOf(coords)
+        } catch (_: Exception) {
+            return
+        }
+        val layerW = layerCoords.size.width.toFloat()
+        val layerH = layerCoords.size.height.toFloat()
+        val availL = pos.x.coerceAtLeast(0f)
+        val availT = pos.y.coerceAtLeast(0f)
+        val availR = (layerW - (pos.x + size.width)).coerceAtLeast(0f)
+        val availB = (layerH - (pos.y + size.height)).coerceAtLeast(0f)
+        val nextL = minOf(progBasePadLeft, availL)
+        val nextT = minOf(progBasePadTop, availT)
+        val nextR = minOf(progBasePadRight, availR)
+        val nextB = minOf(progBasePadBottom, availB)
+        if (nextL != primary.padLeft || nextT != primary.padTop || nextR != primary.padRight || nextB != primary.padBottom) {
+            primary.padLeft = nextL
+            primary.padTop = nextT
+            primary.padRight = nextR
+            primary.padBottom = nextB
+            rebuildPrimaryProgressiveEffect(nextL, nextT, nextR, nextB)
+        }
+    }
+
     private fun DrawScope.drawBlurredBackdrop() {
+        clampProgressivePaddingToBackdrop()
         renderBlurInto(primary)
     }
+
     override fun ContentDrawScope.draw() {
         if (!enabled) {
             drawContent()
@@ -781,9 +855,9 @@ private class DrawBackdropNode(
         onDrawBehind?.invoke(this)
 
         drawBlurredBackdrop()
-        with(midSharpOverlay) { draw() }
+        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f) primary.base2xLayer else null
+        with(midSharpOverlay) { draw(shared2x, primary.padLeft, primary.padTop) }
         with(sharpOverlay) { draw() }
-
         onDrawSurface?.invoke(this)
         if (contentBlendMode == BlendMode.SrcOver) {
             drawContent()
@@ -849,11 +923,65 @@ private class DrawBackdropNode(
             midSharpOverlay.active = false
             sharpOverlay.active = false
             stackDitherChained = false
+            primary.padLeft = effectScope.padding
+            primary.padTop = effectScope.padding
+            primary.padRight = effectScope.padding
+            primary.padBottom = effectScope.padding
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
-        primary.padding = effectScope.padding
         primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1f)
     }
+
+    private fun rebuildPrimaryProgressiveEffect(
+        padLeft: Float,
+        padTop: Float,
+        padRight: Float,
+        padBottom: Float,
+    ) {
+        val scope = effectScope
+        val gradient = progressiveGradient ?: return
+        val rX = scope.progRecordedRadiusX
+        val rY = scope.progRecordedRadiusY
+        val exp = scope.progRecordedExp
+        if (rX.isNaN() || rY.isNaN() || exp < 0) return
+        val pre = scope.progressivePreEffect
+        val post = progPostEffect
+        val postBlend = progRampBlend
+        val blurEffect = obtainProgressiveBlurEffect(
+            scope = scope,
+            radiusX = rX,
+            radiusY = rY,
+            exp = exp,
+            gradient = gradient,
+            padLeft = padLeft,
+            padTop = padTop,
+            padRight = padRight,
+            padBottom = padBottom,
+        )
+        var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
+        if (postBlend != null) {
+            val rampBlend = buildRampBlendColorsEffect(
+                scope = scope,
+                colors = postBlend,
+                gradVecX = scope.progGradVecX,
+                gradVecY = scope.progGradVecY,
+                gradOffset = scope.progGradOffset,
+                curve = scope.progClampedCurve,
+            )
+            chain = chain?.chain(rampBlend) ?: rampBlend
+        } else if (post != null) {
+            chain = chain?.chain(post) ?: post
+        }
+        if (exp > 0 && stackDitherChained) {
+            val ditherCoeff = minOf(scope.noiseCoefficient * 2f, STACK_DITHER_MAX)
+            chain = chain?.chain(obtainStackDitherEffect(ditherCoeff))
+        }
+        scope.renderEffect = chain
+        primary.mainLayer?.renderEffect = chain
+    }
+
+    private var progPostEffect: RenderEffect? = null
+    private var progRampBlend: BlurColors? = null
 
     /**
      * Progressive mode: chains pre-blur effects, the separable H/V progressive loop blur, folded
@@ -871,6 +999,12 @@ private class DrawBackdropNode(
             midSharpOverlay.active = false
             sharpOverlay.active = false
             stackDitherChained = false
+            progPostEffect = null
+            progRampBlend = null
+            primary.padLeft = scope.padding
+            primary.padTop = scope.padding
+            primary.padRight = scope.padding
+            primary.padBottom = scope.padding
             return
         }
         val pre = scope.progressivePreEffect
@@ -880,12 +1014,46 @@ private class DrawBackdropNode(
             post = obtainBlendColorsEffect(scope, postBlend).chain(post)
             postBlend = null
         }
+        progPostEffect = post
+        progRampBlend = postBlend
+
+        if (pre == null) {
+            computeProgressiveEdgePadding(
+                compW = scope.size.width,
+                compH = scope.size.height,
+                reachX = if (rX > 0f) scope.padding else 0f,
+                reachY = if (rY > 0f) scope.padding else 0f,
+                angleDeg = gradient.angle,
+                startFraction = gradient.startFraction,
+                endFraction = gradient.endFraction,
+                curve = gradient.curve,
+                outPadding = scope.progEdgePadding,
+            )
+            progBasePadLeft = scope.progEdgePadding[0]
+            progBasePadTop = scope.progEdgePadding[1]
+            progBasePadRight = scope.progEdgePadding[2]
+            progBasePadBottom = scope.progEdgePadding[3]
+        } else {
+            progBasePadLeft = scope.padding
+            progBasePadTop = scope.padding
+            progBasePadRight = scope.padding
+            progBasePadBottom = scope.padding
+        }
+        primary.padLeft = progBasePadLeft
+        primary.padTop = progBasePadTop
+        primary.padRight = progBasePadRight
+        primary.padBottom = progBasePadBottom
+
         val blurEffect = obtainProgressiveBlurEffect(
             scope = scope,
             radiusX = rX,
             radiusY = rY,
             exp = exp,
             gradient = gradient,
+            padLeft = progBasePadLeft,
+            padTop = progBasePadTop,
+            padRight = progBasePadRight,
+            padBottom = progBasePadBottom,
         )
         var chain = pre?.let { if (blurEffect != null) it.chain(blurEffect) else it } ?: blurEffect
         if (postBlend != null) {
@@ -1031,7 +1199,8 @@ private class DrawBackdropNode(
         target: LevelTarget,
         layer: GraphicsLayer,
         texelScale: Float,
-        currentPadding: Float,
+        padLeft: Float,
+        padTop: Float,
         fullWidth: Int,
         fullHeight: Int,
     ) {
@@ -1050,35 +1219,38 @@ private class DrawBackdropNode(
                 noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
                 runtimeShaderEffect(noiseShader, "child")
             }
-            drawShiftedLayer(noiseL, currentPadding, 1f, residualX, residualY)
+            drawShiftedLayer(noiseL, padLeft, padTop, 1f, residualX, residualY)
             noiseL.renderEffect = null
         } else {
-            drawShiftedLayer(layer, currentPadding / texelScale, texelScale, residualX, residualY)
+            drawShiftedLayer(layer, padLeft / texelScale, padTop / texelScale, texelScale, residualX, residualY)
         }
     }
 
     /**
-     * Draws [layer] with its content origin exactly [padding] layer-texels before this surface's
-     * origin: the integral part via [GraphicsLayer.topLeft], the fraction via a draw-time
+     * Draws [layer] with its content origin exactly [padLeft]/[padTop] layer-texels before this
+     * surface's origin: the integral part via [GraphicsLayer.topLeft], the fraction via a draw-time
      * translate. Snapping the fraction moved the picture a pixel every time the padding's integer
      * part changed — a stepping shimmer during a radius sweep.
      */
     private fun DrawScope.drawShiftedLayer(
         layer: GraphicsLayer,
-        padding: Float,
+        padLeft: Float,
+        padTop: Float,
         texelScale: Float,
         residualX: Float = 0f,
         residualY: Float = 0f,
     ) {
-        val whole = floor(padding)
+        val wholeX = floor(padLeft)
+        val wholeY = floor(padTop)
         layer.topLeft =
-            if (padding != 0f) {
-                IntOffset(-whole.toInt(), -whole.toInt())
+            if (padLeft != 0f || padTop != 0f) {
+                IntOffset(-wholeX.toInt(), -wholeY.toInt())
             } else {
                 IntOffset.Zero
             }
-        val fraction = (padding - whole) * texelScale
-        translate(-residualX - fraction, -residualY - fraction) {
+        val fracX = (padLeft - wholeX) * texelScale
+        val fracY = (padTop - wholeY) * texelScale
+        translate(-residualX - fracX, -residualY - fracY) {
             scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
         }
     }
@@ -1090,6 +1262,12 @@ private class DrawBackdropNode(
         stackDitherEffect = null
         stackDitherCoeff = Float.NaN
         stackDitherChained = false
+        progPostEffect = null
+        progRampBlend = null
+        progBasePadLeft = 0f
+        progBasePadTop = 0f
+        progBasePadRight = 0f
+        progBasePadBottom = 0f
         effectScope.reset()
     }
 

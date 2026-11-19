@@ -32,9 +32,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -239,6 +241,11 @@ fun GlassSearchOverlay(
                     listOf(BlendColorEntry(colors.surface.copy(alpha = 0.3f)))
                 }
                 val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
+                val currentScrollOffset by rememberUpdatedState(scrollOffset)
+                val rampDistancePx = with(LocalDensity.current) { GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx() }
+                val bandActive by remember(rampDistancePx) {
+                    derivedStateOf { (currentScrollOffset() / rampDistancePx).coerceIn(0f, 1f) > 0.001f }
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -252,6 +259,7 @@ fun GlassSearchOverlay(
                             gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
                             blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
                             colors = blurColors,
+                            enabled = bandActive,
                         ),
                 )
             } else {

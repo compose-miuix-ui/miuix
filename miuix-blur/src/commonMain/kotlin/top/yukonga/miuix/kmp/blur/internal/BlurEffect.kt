@@ -146,7 +146,8 @@ internal fun createBlurEffect(
  */
 internal fun computeProgressiveGradient(
     downScale: Float,
-    padding: Float,
+    padLeft: Float,
+    padTop: Float,
     compW: Float,
     compH: Float,
     angleDeg: Float,
@@ -163,7 +164,7 @@ internal fun computeProgressiveGradient(
     val span = projMax - projMin
     val projFullComp = projMin + startFraction * span
     val projZeroComp = projMin + endFraction * span
-    val padProj = padding * (ax + ay)
+    val padProj = padLeft * ax + padTop * ay
     val projFull = (projFullComp + padProj) / downScale
     var projZero = (projZeroComp + padProj) / downScale
     // Degenerate band (start == end, or a zero-extent axis) would divide by zero when normalizing.
@@ -185,7 +186,8 @@ internal fun createProgressiveBlurEffect(
     downScale: Float,
     adjustedVarianceX: Float,
     adjustedVarianceY: Float,
-    padding: Float,
+    padLeft: Float,
+    padTop: Float,
     compW: Float,
     compH: Float,
     angleDeg: Float,
@@ -196,7 +198,8 @@ internal fun createProgressiveBlurEffect(
 ): RenderEffect? {
     computeProgressiveGradient(
         downScale = downScale,
-        padding = padding,
+        padLeft = padLeft,
+        padTop = padTop,
         compW = compW,
         compH = compH,
         angleDeg = angleDeg,
@@ -266,10 +269,10 @@ internal fun progressiveMidSharpThreshold(exp: Int): Float = if (exp <= 3) 0.76f
 
 /** Normalized `smoothRaw` threshold where the 1× sharp band takes over for [exp]. */
 internal fun progressiveSharpThreshold(exp: Int): Float = when (exp) {
-    1 -> 0.74f
-    2 -> 0.78f
-    3 -> 0.90f
-    else -> 0.92f
+    1 -> 0.80f
+    2 -> 0.85f
+    3 -> 0.94f
+    else -> 0.95f
 }
 
 private fun progressivePrimarySigmaAt(radius: Float, exp: Int, threshold: Float): Float {
@@ -368,6 +371,21 @@ internal fun createProgressiveSharpOverlayEffect(
     val hasV = maxRadiusY >= 0.5f
     if (!hasH && !hasV) return null
 
+    if (!midDecay && downScale == 1f && maxRadiusX < 5.5f && maxRadiusY < 5.5f) {
+        val shader = scope.obtainRuntimeShader(
+            progressiveSharpMaskShaderKey(curveKind),
+            progressiveSharpMaskShader(curveKind),
+        ).apply {
+            setFloatUniform("in_gradVec", gradVecX, gradVecY)
+            setFloatUniform("in_gradOffset", gradOffset)
+            if (curveKind == 3) setFloatUniform("in_curve", clampedCurve)
+            setFloatUniform("in_sharpThreshold", threshold)
+            setFloatUniform("in_invSharpSpan", invSharpSpan)
+        }
+        val maskEffect = runtimeShaderEffect(shader, "child")
+        return preEffect?.chain(maskEffect) ?: maskEffect
+    }
+
     fun loopPass(axis: Int, maxRadius: Float, stepX: Float, stepY: Float, masked: Boolean, unpremul: Boolean): RenderEffect {
         val tap = progressiveLoopTapBound(maxRadius)
         val shader = scope.obtainRuntimeShader(
@@ -456,6 +474,75 @@ internal fun progressiveSharpBandBounds(
         (maxX + margin).coerceAtMost(compW),
         (maxY + margin).coerceAtMost(compH),
     )
+}
+
+/**
+ * Computes the minimum per-edge padding `[left, top, right, bottom]` required so the progressive
+ * blur kernel does not sample outside the recorded region along non-clear edges, while keeping
+ * zero padding on clear edges whose blur reach stays inside the component.
+ */
+internal fun computeProgressiveEdgePadding(
+    compW: Float,
+    compH: Float,
+    reachX: Float,
+    reachY: Float,
+    angleDeg: Float,
+    startFraction: Float,
+    endFraction: Float,
+    curve: Float,
+    outPadding: FloatArray,
+) {
+    if (compW <= 0f || compH <= 0f || (reachX <= 0f && reachY <= 0f)) {
+        outPadding[0] = 0f
+        outPadding[1] = 0f
+        outPadding[2] = 0f
+        outPadding[3] = 0f
+        return
+    }
+    val rad = angleDeg * (PI / 180.0)
+    val ax = cos(rad).toFloat()
+    val ay = sin(rad).toFloat()
+    val projMin = (if (ax > 0f) 0f else ax * compW) + (if (ay > 0f) 0f else ay * compH)
+    val projMax = (if (ax > 0f) ax * compW else 0f) + (if (ay > 0f) ay * compH else 0f)
+    val span = projMax - projMin
+    val projFull = projMin + startFraction * span
+    var projZero = projMin + endFraction * span
+    if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
+    val invSpan = 1f / (projZero - projFull)
+    val clampedCurve = curve.coerceIn(0.05f, 20f)
+
+    var pLeft = 0f
+    var pTop = 0f
+    var pRight = 0f
+    var pBottom = 0f
+
+    val steps = 8
+    for (iy in 0..steps) {
+        val y = compH * iy / steps
+        for (ix in 0..steps) {
+            val x = compW * ix / steps
+            val raw = ((x * ax + y * ay - projFull) * invSpan).coerceIn(0f, 1f)
+            val s = raw * raw * (3f - 2f * raw)
+            val smoothRaw = if (clampedCurve == 1f) s else s.pow(clampedCurve)
+            val strength = 1f - smoothRaw
+            if (strength > 0f) {
+                val rx = reachX * strength
+                val ry = reachY * strength
+                val outL = rx - x
+                if (outL > pLeft) pLeft = outL
+                val outR = x + rx - compW
+                if (outR > pRight) pRight = outR
+                val outT = ry - y
+                if (outT > pTop) pTop = outT
+                val outB = y + ry - compH
+                if (outB > pBottom) pBottom = outB
+            }
+        }
+    }
+    outPadding[0] = pLeft.coerceIn(0f, reachX)
+    outPadding[1] = pTop.coerceIn(0f, reachY)
+    outPadding[2] = pRight.coerceIn(0f, reachX)
+    outPadding[3] = pBottom.coerceIn(0f, reachY)
 }
 
 /**

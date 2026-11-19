@@ -159,7 +159,11 @@ $curveUniform$sharpUniforms
         if (radius <= 0.004) {$earlyReturn
         }
         half halfR = half(radius * 0.5 + 0.5);
-        half posNegInv2s2Ln2 = half(-0.7213475) / (halfR * halfR);
+        float posNegInv2s2Ln2 = -0.7213475 / (float(halfR) * float(halfR));
+        float q = exp2(posNegInv2s2Ln2);
+        float q2 = q * q;
+        float gStep = q;
+        float g = 1.0;
         float r1 = radius + 1.0;
         half4 color = child.eval(${sampleCoord("xy")});
         half wAcc = half(0.0);
@@ -167,10 +171,14 @@ $curveUniform$sharpUniforms
             float a = float(2 * j + 1);
             half ra = half(clamp(r1 - a, 0.0, 1.0));
             if (ra <= half(0.001)) break;
+            g *= gStep;
+            gStep *= q2;
+            half wa = ra * half(g);
             float b = a + 1.0;
             half rb = half(clamp(r1 - b, 0.0, 1.0));
-            half wa = ra * exp2(half(a * a) * posNegInv2s2Ln2);
-            half wb = rb * exp2(half(b * b) * posNegInv2s2Ln2);
+            g *= gStep;
+            gStep *= q2;
+            half wb = rb * half(g);
             half wsum = wa + wb;
             float2 o = (a + float(wb / wsum)) * in_step;
             color += (child.eval(${sampleCoord("xy + o")}) +
@@ -266,6 +274,57 @@ internal fun progressiveSharpShaderKey(
 ): String = PROGRESSIVE_SHARP_KEYS[if (midDecay) 1 else 0][axis][if (masked) 1 else 0][curveKind][((tap / 4) - 1).coerceIn(0, 5)]
 
 /**
+ * Single-pass 1-tap alpha-ramp mask for the `1×` clear-end overlay when the underlying `2×`
+ * layer is already near-sharp (`σ_1x <= ~3.2px`), avoiding 2 full-res blur passes.
+ */
+internal fun progressiveSharpMaskShader(curveKind: Int): String = SHARP_MASK_SHADERS[curveKind]
+    ?: buildProgressiveSharpMaskShader(curveKind).also { SHARP_MASK_SHADERS[curveKind] = it }
+
+private val SHARP_MASK_SHADERS = arrayOfNulls<String>(4)
+
+private val SHARP_MASK_KEYS = arrayOf(
+    "LMPSM_c0",
+    "LMPSM_c1",
+    "LMPSM_c2",
+    "LMPSM_c3",
+)
+
+internal fun progressiveSharpMaskShaderKey(curveKind: Int): String = SHARP_MASK_KEYS[curveKind]
+
+private fun buildProgressiveSharpMaskShader(curveKind: Int): String {
+    val curveUniform = if (curveKind == 3) "\n    uniform float in_curve;" else ""
+    val curveExpr = when (curveKind) {
+        0 -> ""
+        1 -> "\n        smoothRaw = sqrt(smoothRaw);"
+        2 -> "\n        smoothRaw = sqrt(sqrt(smoothRaw));"
+        else -> "\n        smoothRaw = pow(smoothRaw, in_curve);"
+    }
+    return """
+    uniform shader child;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;$curveUniform
+    uniform float in_sharpThreshold;
+    uniform float in_invSharpSpan;
+
+    half4 main(float2 xy) {
+        float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
+        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
+        float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
+        half mw = half(clamp(m * 1.5384615, 0.0, 1.0));
+        mw = mw * mw * (half(3.0) - half(2.0) * mw);
+        if (mw <= half(0.004)) {
+            return half4(0.0);
+        }
+        half4 s = child.eval(xy);
+        if (s.a > 0.0039) {
+            return half4(s.rgb / s.a, 1.0) * mw;
+        }
+        return s * mw;
+    }
+"""
+}
+
+/**
  * Brightness / contrast / saturation adjustment.
  *
  * Brightness is applied in approximate linear (gamma 2.0) space to avoid sRGB hue shift;
@@ -350,14 +409,13 @@ internal const val DOWNSAMPLE_4X_SHADER = """
     uniform shader child;
     uniform float2 maxCoord;
     half4 main(float2 xy) {
+        float2 minCoord = float2(0.5);
         half4 color = half4(0);
-        for (int y = 0; y < 4; y++) {
-            for (int x = 0; x < 4; x++) {
-                float2 offset = float2(float(x), float(y)) - 1.5;
-                color += child.eval(clamp(xy + offset, float2(0.5), maxCoord));
-            }
-        }
-        return color * 0.0625;
+        color += child.eval(clamp(xy + float2(-1.0, -1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 1.0, -1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2(-1.0,  1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 1.0,  1.0), minCoord, maxCoord));
+        return color * 0.25;
     }
 """
 

@@ -5,6 +5,9 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableFloatStateOf
@@ -318,5 +321,57 @@ class GlassTopAppBarBackdropTest {
         assertTrue(actual.blue > actual.red + 0.05f, "Scene buttons must sample blue, not the original red page: $actual")
         val inherited = centerColor("inherited-button")
         assertTrue(inherited.red > inherited.blue + 0.05f, "Default buttons must retain the bar's red backdrop and material: $inherited")
+    }
+
+    @Test
+    fun progressiveBandWithoutButtonsBlursSmoothlyWhenScrolledAndSkipsAtTop() = runComposeUiTest {
+        val offset = mutableFloatStateOf(0f)
+        val scrollState = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    Box(Modifier.size(400.dp, 300.dp)) {
+                        Column(Modifier.matchParentSize().layerBackdrop(backdrop)) {
+                            repeat(6) { index ->
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(30.dp)
+                                        .background(if (index % 2 == 0) Color.Red else Color.Blue),
+                                )
+                            }
+                        }
+                        GlassTopAppBar(
+                            title = "",
+                            isContentScrolled = offset.floatValue < 0f,
+                            progressiveBlur = true,
+                            backdrop = backdrop,
+                            scrollBehavior = MiuixScrollBehavior(scrollState),
+                            visualContentOffset = { offset.floatValue },
+                            defaultWindowInsetsPadding = false,
+                        )
+                    }
+                }
+            }
+        }
+        // At rest (offset == 0f), the progressive band is gated off and shows crisp stripes.
+        val atTop = onRoot().captureToImage().toPixelMap()
+        val stripe1Y = with(density) { 15.dp.roundToPx() }
+        val stripe2Y = with(density) { 45.dp.roundToPx() }
+        assertColorNear(Color.Red, atTop[20, stripe1Y], tolerance = 3f / 255f)
+        assertColorNear(Color.Blue, atTop[20, stripe2Y], tolerance = 3f / 255f)
+
+        // Scrolled: strong top blur mixes red + blue stripes with surface scrim, while far below stays crisp.
+        runOnIdle {
+            offset.floatValue = -1000f
+            scrollState.contentOffset = -1000f
+            scrollState.heightOffset = scrollState.heightOffsetLimit
+        }
+        val scrolled = onRoot().captureToImage().toPixelMap()
+        val topBlurred = scrolled[20, stripe1Y]
+        assertTrue(topBlurred.blue > 0.1f && topBlurred.red > 0.1f, "Top progressive blur must blend stripes: $topBlurred")
+        val belowBarY = with(density) { 165.dp.roundToPx() }
+        assertColorNear(Color.Blue, scrolled[20, belowBarY], tolerance = 3f / 255f)
     }
 }

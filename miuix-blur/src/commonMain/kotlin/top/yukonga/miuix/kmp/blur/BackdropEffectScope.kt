@@ -190,7 +190,8 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedProgRadiusY: Float = Float.NaN
     internal var cachedProgSizeW: Float = Float.NaN
     internal var cachedProgSizeH: Float = Float.NaN
-    internal var cachedProgPad: Float = Float.NaN
+    internal var cachedProgPadLeft: Float = Float.NaN
+    internal var cachedProgPadTop: Float = Float.NaN
     internal var cachedProgCompW: Float = Float.NaN
     internal var cachedProgCompH: Float = Float.NaN
     internal var cachedProgExp: Int = -1
@@ -207,6 +208,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var progRecordedRadiusX: Float = Float.NaN
     internal var progRecordedRadiusY: Float = Float.NaN
     internal var progRecordedExp: Int = -1
+    internal val progEdgePadding: FloatArray = FloatArray(4)
 
     /** Normalized gradient uniforms computed for the current progressive pass. */
     internal var progGradVecX: Float = 0f
@@ -321,7 +323,8 @@ internal abstract class BackdropEffectScopeImpl :
         cachedProgRadiusY = Float.NaN
         cachedProgSizeW = Float.NaN
         cachedProgSizeH = Float.NaN
-        cachedProgPad = Float.NaN
+        cachedProgPadLeft = Float.NaN
+        cachedProgPadTop = Float.NaN
         cachedProgCompW = Float.NaN
         cachedProgCompH = Float.NaN
         cachedProgExp = -1

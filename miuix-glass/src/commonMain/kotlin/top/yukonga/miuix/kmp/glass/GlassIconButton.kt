@@ -79,6 +79,13 @@ fun GlassIconButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val topBarContext = LocalGlassTopAppBarContext.current
+    val usesTopBarButtonBackdrop = topBarContext?.onButtonBackdropConsumerChange != null &&
+        (inheritTopBarMaterial || backdrop == null)
+    DisposableEffect(topBarContext, usesTopBarButtonBackdrop) {
+        val callback = if (usesTopBarButtonBackdrop) topBarContext.onButtonBackdropConsumerChange else null
+        callback?.invoke(1)
+        onDispose { callback?.invoke(-1) }
+    }
     val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
     val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
     val topBarRamp = topBarContext?.ramp
