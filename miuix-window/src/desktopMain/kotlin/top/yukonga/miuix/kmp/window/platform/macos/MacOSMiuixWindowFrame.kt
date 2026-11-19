@@ -22,7 +22,7 @@ import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 
 @Composable
 internal fun FrameWindowScope.MacOSMiuixWindowFrame(
-    properties: MiuixWindowProperties<ComposeWindow>,
+    properties: MiuixWindowProperties,
     content: @Composable FrameWindowScope.() -> Unit,
 ) {
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }

@@ -17,7 +17,7 @@ import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 
 @Composable
 internal fun DialogWindowScope.MacOSMiuixDialogWindowFrame(
-    properties: MiuixWindowProperties<ComposeDialog>,
+    properties: MiuixWindowProperties,
     content: @Composable DialogWindowScope.() -> Unit,
 ) {
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }

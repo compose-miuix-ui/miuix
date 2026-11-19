@@ -37,6 +37,7 @@ import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.LocalWindowState
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowGestures
@@ -54,7 +55,8 @@ import java.awt.event.WindowEvent
 internal fun FrameWindowScope.LinuxMiuixWindowFrame(
     resizable: Boolean,
     decoration: WindowDecoration,
-    properties: MiuixWindowProperties<ComposeWindow>,
+    properties: MiuixWindowProperties,
+    onResizeEdgeChange: (ComposeWindow, WindowResizeEdge) -> Unit,
     content: @Composable FrameWindowScope.() -> Unit,
 ) {
     val backend = LinuxWindowBackend.current
@@ -68,14 +70,14 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
         return
     }
 
-    val currentProperties by rememberUpdatedState(properties)
+    val currentOnResizeEdgeChange by rememberUpdatedState(onResizeEdgeChange)
     val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
         UndecoratedWindowResizer(
             onResizeEdgeChange = { edge ->
-                currentProperties.onResizeEdgeChange(window, edge)
+                currentOnResizeEdgeChange(window, edge)
             },
         )
     }
@@ -106,15 +108,19 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
     }
 
     CompositionLocalProvider(
-        LocalMiuixWindowInfo provides MiuixWindowInfo(
-            captionBarHeight = effectiveCaptionBarHeight,
-            captionButtonsAlign = systemDecoration.alignment,
-            captionButtonsFullWidth = effectiveButtonsWidth,
-        ),
-        LocalMiuixWindowContentDecoration provides MiuixWindowContentDecoration(
-            inset = shadowMargin,
-            cornerRadius = if (shadowMargin > 0.dp) LinuxClientShadow.cornerRadius else 0.dp,
-        ),
+        LocalMiuixWindowInfo provides remember(effectiveCaptionBarHeight, systemDecoration.alignment, effectiveButtonsWidth) {
+            MiuixWindowInfo(
+                captionBarHeight = effectiveCaptionBarHeight,
+                captionButtonsAlign = systemDecoration.alignment,
+                captionButtonsFullWidth = effectiveButtonsWidth,
+            )
+        },
+        LocalMiuixWindowContentDecoration provides remember(shadowMargin) {
+            MiuixWindowContentDecoration(
+                inset = shadowMargin,
+                cornerRadius = if (shadowMargin > 0.dp) LinuxClientShadow.cornerRadius else 0.dp,
+            )
+        },
         LocalLinuxCaptionBarHitTest provides captionBarHitTest,
         LocalLinuxWindowGestures provides windowGestures,
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,

@@ -40,7 +40,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultValues() {
-        val properties = MiuixWindowProperties<java.awt.Window>(
+        val properties = MiuixWindowProperties(
             captionBarHeight = 44.dp,
             captionButtonHeight = 44.dp,
             captionButtonsVisible = true,
@@ -57,7 +57,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultNullDarkTheme() {
-        val properties = MiuixWindowProperties<java.awt.Window>()
+        val properties = MiuixWindowProperties()
         kotlin.test.assertNull(properties.captionButtonIsDarkTheme)
         kotlin.test.assertNull(properties.backgroundIsDarkTheme)
     }
