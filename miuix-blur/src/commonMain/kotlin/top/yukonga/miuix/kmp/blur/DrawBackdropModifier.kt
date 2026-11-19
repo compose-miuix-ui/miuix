@@ -374,7 +374,6 @@ private class DrawBackdropNode(
     /** Layers + level parameters for rendering one downscale level. */
     private inner class LevelTarget {
         var mainLayer: GraphicsLayer? = null
-        var base2xLayer: GraphicsLayer? = null
         val cascadeLayers: MutableList<GraphicsLayer> = mutableListOf()
         var noiseLayer: GraphicsLayer? = null
         var downscaleFactor: Float = 1f
@@ -397,10 +396,6 @@ private class DrawBackdropNode(
         var noiseEffectCoeff: Float = Float.NaN
 
         fun ensureMain(): GraphicsLayer = mainLayer ?: graphicsContext.createGraphicsLayer().also { mainLayer = it }
-
-        fun ensureBase2x(): GraphicsLayer = base2xLayer ?: graphicsContext.createGraphicsLayer().apply {
-            compositingStrategy = LayerCompositingStrategy.Offscreen
-        }.also { base2xLayer = it }
 
         fun obtainCascade(index: Int): GraphicsLayer {
             val ctx = graphicsContext
@@ -444,8 +439,6 @@ private class DrawBackdropNode(
             val ctx = graphicsContext
             mainLayer?.let { ctx.releaseGraphicsLayer(it) }
             mainLayer = null
-            base2xLayer?.let { ctx.releaseGraphicsLayer(it) }
-            base2xLayer = null
             for (cascade in cascadeLayers) ctx.releaseGraphicsLayer(cascade)
             cascadeLayers.clear()
             noiseLayer?.let { ctx.releaseGraphicsLayer(it) }
@@ -691,18 +684,12 @@ private class DrawBackdropNode(
         target.cascadeFirstStepScale = 2f
         var source = target.obtainCascade(0)
         var sourceSize = recordedSize(2f)
-        val shareBase2x = midSharpOverlay.active && backdrop !is LayerBackdrop
-        if (shareBase2x) {
-            val base2x = target.ensureBase2x()
-            recordLayer(base2x, size = sourceSize) { recordBackdrop(target) }
-            recordLayer(source, size = sourceSize) { drawLayer(base2x) }
+        source.compositingStrategy = if (midSharpOverlay.active) {
+            LayerCompositingStrategy.Offscreen
         } else {
-            target.base2xLayer?.let {
-                graphicsContext.releaseGraphicsLayer(it)
-                target.base2xLayer = null
-            }
-            recordLayer(source, size = sourceSize) { recordBackdrop(target) }
+            LayerCompositingStrategy.Auto
         }
+        recordLayer(source, size = sourceSize) { recordBackdrop(target) }
 
         var covered = 2f
         var step = 0
@@ -864,7 +851,7 @@ private class DrawBackdropNode(
         onDrawBehind?.invoke(this)
 
         drawBlurredBackdrop()
-        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f && backdrop !is LayerBackdrop) primary.base2xLayer else null
+        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f) primary.cascadeLayers.firstOrNull() else null
         with(midSharpOverlay) { draw(shared2x, primary.padLeft, primary.padTop) }
         with(sharpOverlay) { draw() }
         onDrawSurface?.invoke(this)
