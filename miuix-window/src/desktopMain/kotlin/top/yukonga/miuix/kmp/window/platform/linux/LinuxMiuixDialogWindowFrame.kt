@@ -134,7 +134,9 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
                 modifier = Modifier
                     .fillMaxSize()
                     .thenIf(clientShadow) {
-                        linuxClientShadow()
+                        linuxClientShadow(
+                            isBackgroundOpaque = backgroundColor.alpha == 1f,
+                        )
                             .clipToBounds()
                             .background(backgroundColor)
                     },

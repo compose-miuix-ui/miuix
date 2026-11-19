@@ -155,7 +155,9 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
                 modifier = Modifier
                     .fillMaxSize()
                     .thenIf(shadowMargin > 0.dp) {
-                        linuxClientShadow()
+                        linuxClientShadow(
+                            isBackgroundOpaque = backgroundColor.alpha == 1f,
+                        )
                     }
                     .thenIf(clientShadow) {
                         clipToBounds().background(backgroundColor)

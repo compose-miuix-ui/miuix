@@ -39,6 +39,8 @@ import java.awt.GraphicsEnvironment
 import java.awt.Window
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -250,10 +252,14 @@ private val shadowBaseColor = androidx.compose.ui.graphics.Color.Black
  * Draws the client-drawn window shadow (see [LinuxClientShadow]): layered rounded rectangles
  * with a quadratic alpha falloff, extending into the transparent shadow margin.
  *
- * Must be applied before the background in the modifier chain.
+ * Must be applied before the background is drawn in the modifier chain. When [isBackgroundOpaque]
+ * is true, the background hides the interior shadow, so only the band containing the rounded
+ * corners and margin is drawn.
  */
 
-internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
+internal fun Modifier.linuxClientShadow(
+    isBackgroundOpaque: Boolean,
+): Modifier = drawWithCache {
     val cornerRadiusPx = LinuxClientShadow.cornerRadius.toPx()
     val contentRadiusPx = cornerRadiusPx.coerceAtMost(minOf(size.width, size.height) / 2)
     val contentBounds = Rect(Offset.Zero, size)
@@ -265,6 +271,47 @@ internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
     val offsetYPx = LinuxClientShadow.shadowOffsetY.toPx()
     val maxGrowPx = (LinuxClientShadow.margin - 2.dp).toPx().coerceAtLeast(1f)
     val maxAlpha = LinuxClientShadow.shadowAlpha
+    // Include the antialiased outer edge and the vertical shadow offset in every clip.
+    val shadowBounds = contentBounds.inflate(maxGrowPx + offsetYPx + 1f)
+    // Align shared clip edges to pixels so fractional density cannot blend a seam twice.
+    val opaqueBounds = Rect(
+        left = ceil(contentRadiusPx),
+        top = ceil(contentRadiusPx),
+        right = floor(size.width - contentRadiusPx),
+        bottom = floor(size.height - contentRadiusPx),
+    )
+    val shadowDrawBounds = if (isBackgroundOpaque && !opaqueBounds.isEmpty) {
+        // Disjoint rectangular clips let the GPU scissor away the opaque interior before shading.
+        // Keep a full corner-radius band so the existing rounded-edge blending remains unchanged.
+        listOf(
+            Rect(
+                left = shadowBounds.left,
+                top = shadowBounds.top,
+                right = shadowBounds.right,
+                bottom = opaqueBounds.top,
+            ),
+            Rect(
+                left = shadowBounds.left,
+                top = opaqueBounds.top,
+                right = opaqueBounds.left,
+                bottom = opaqueBounds.bottom,
+            ),
+            Rect(
+                left = opaqueBounds.right,
+                top = opaqueBounds.top,
+                right = shadowBounds.right,
+                bottom = opaqueBounds.bottom,
+            ),
+            Rect(
+                left = shadowBounds.left,
+                top = opaqueBounds.bottom,
+                right = shadowBounds.right,
+                bottom = shadowBounds.bottom,
+            ),
+        )
+    } else {
+        listOf(shadowBounds)
+    }
 
     onDrawWithContent {
         clipRect {
@@ -272,22 +319,31 @@ internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
             drawPath(cornerCutout, shadowBaseColor, blendMode = BlendMode.DstOut)
         }
 
-        // Layered from outside in; per-layer alpha chosen so the cumulative alpha at normalized
-        // distance t from the content edge is maxAlpha * (1 - t)^2
-        val layers = 24
-        for (i in layers downTo 1) {
-            val t = i.toFloat() / layers
-            val tInner = (i - 1).toFloat() / layers
-            val alpha = maxAlpha * ((1 - tInner) * (1 - tInner) - (1 - t) * (1 - t))
-            val grow = maxGrowPx * t
-            drawRoundRect(
-                color = shadowBaseColor,
-                topLeft = Offset(-grow, -grow + offsetYPx),
-                size = Size(size.width + 2 * grow, size.height + 2 * grow),
-                cornerRadius = CornerRadius(cornerRadiusPx + grow),
-                alpha = alpha,
-                blendMode = BlendMode.DstOver,
-            )
+        for (bounds in shadowDrawBounds) {
+            clipRect(
+                left = bounds.left,
+                top = bounds.top,
+                right = bounds.right,
+                bottom = bounds.bottom,
+            ) {
+                // Layered from outside in; per-layer alpha chosen so the cumulative alpha at normalized
+                // distance t from the content edge is maxAlpha * (1 - t)^2
+                val layers = 24
+                for (i in layers downTo 1) {
+                    val t = i.toFloat() / layers
+                    val tInner = (i - 1).toFloat() / layers
+                    val alpha = maxAlpha * ((1 - tInner) * (1 - tInner) - (1 - t) * (1 - t))
+                    val grow = maxGrowPx * t
+                    drawRoundRect(
+                        color = shadowBaseColor,
+                        topLeft = Offset(-grow, -grow + offsetYPx),
+                        size = Size(size.width + 2 * grow, size.height + 2 * grow),
+                        cornerRadius = CornerRadius(cornerRadiusPx + grow),
+                        alpha = alpha,
+                        blendMode = BlendMode.DstOver,
+                    )
+                }
+            }
         }
     }
 }
