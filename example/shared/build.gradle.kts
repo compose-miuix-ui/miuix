@@ -42,8 +42,6 @@ kotlin {
         it.binaries.framework {
             baseName = "shared"
             isStatic = true
-            binaryOption("smallBinary", "true")
-            binaryOption("preCodegenInlineThreshold", "40")
         }
     }
 
