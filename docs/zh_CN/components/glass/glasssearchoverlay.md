@@ -72,10 +72,11 @@ Box(Modifier.fillMaxSize()) {
 | :--- | :--- | :--- | :--- |
 | expanded | Boolean | - | 搜索浮层是否展开 |
 | onDismissRequest | () -> Unit | - | 点击取消或按下返回/Escape 键时的回调 |
+| scrollMaterialThreshold | Dp | 省略时为 `Dp.Unspecified` | 传入搜索框底部与首条结果之间的初始间距。结果跨过这段间距时，搜索框和关闭按钮在 450 ms 内切换纯色和玻璃材质 |
 | modifier | Modifier | Modifier | 应用于根容器的修饰符 |
 | horizontalInsetsModifier | Modifier | Modifier | 应用于搜索栏行的水平安全区修饰符 |
 | label | String | "Search" | 输入为空时显示的占位文本 |
-| scrollOffset | () -> Float | `{ 0f }` | 结果列表的垂直滚动偏移量，用于驱动顶部渐进模糊显现 |
+| scrollOffset | () -> Float | `{ 0f }` | 结果列表的垂直滚动偏移量，单位为像素，列表为空时返回零。用于驱动顶部渐进模糊和可选的材质过渡 |
 | topInsets | WindowInsets | WindowInsets.statusBars | 应用于搜索栏的顶部安全区 |
 | searchTopPadding | () -> Dp | `{ 0.dp }` | 搜索栏额外的顶部偏移（例如位于折叠导航胶囊下方时） |
 | blurEnabled | Boolean | true | 是否启用模糊与玻璃效果（不支持 RuntimeShader 时自动回退） |

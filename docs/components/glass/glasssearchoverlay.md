@@ -72,10 +72,11 @@ Box(Modifier.fillMaxSize()) {
 | :--- | :--- | :--- | :--- |
 | expanded | Boolean | - | Whether the search overlay is expanded |
 | onDismissRequest | () -> Unit | - | Callback invoked when the user cancels or presses Back/Escape |
+| scrollMaterialThreshold | Dp | `Dp.Unspecified` when omitted | Pass the initial gap from the input to the first result. The input and cancel button fade between a solid fill and glass over 450 ms as results cross that gap |
 | modifier | Modifier | Modifier | Modifier applied to the root overlay container |
 | horizontalInsetsModifier | Modifier | Modifier | Optional horizontal inset modifier applied to the search bar row |
 | label | String | "Search" | Placeholder text shown when the query is empty |
-| scrollOffset | () -> Float | `{ 0f }` | Current vertical scroll offset of the result list for ramping the progressive blur band |
+| scrollOffset | () -> Float | `{ 0f }` | Vertical scroll offset of the result list in pixels, or zero if it is empty. Drives the progressive blur band and the optional material transition |
 | topInsets | WindowInsets | WindowInsets.statusBars | Top safe-area insets applied to the search bar |
 | searchTopPadding | () -> Dp | `{ 0.dp }` | Additional top offset for the search bar (e.g. below a collapsed navigation capsule) |
 | blurEnabled | Boolean | true | Whether blur and glass effects are enabled (automatically falls back when RuntimeShader is unsupported) |

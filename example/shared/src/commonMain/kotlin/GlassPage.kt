@@ -684,6 +684,7 @@ fun GlassPage(padding: PaddingValues) {
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
+            scrollMaterialThreshold = 0.dp,
             topInsets = pageInsets.safeInsets.only(WindowInsetsSides.Top),
             searchTopPadding = pageInsets.searchTop,
             blurEnabled = appState.enableBlur,

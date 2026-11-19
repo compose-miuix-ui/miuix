@@ -7,6 +7,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
@@ -31,6 +32,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -69,6 +71,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.offset
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -76,6 +79,7 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
@@ -142,9 +146,57 @@ object GlassSearchOverlayDefaults {
  * glassmorphic search bar + cancel button.
  */
 @Composable
+@NonRestartableComposable
 fun GlassSearchOverlay(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    horizontalInsetsModifier: Modifier = Modifier,
+    label: String = "Search",
+    scrollOffset: () -> Float = { 0f },
+    topInsets: WindowInsets = WindowInsets.statusBars,
+    searchTopPadding: () -> Dp = { 0.dp },
+    blurEnabled: Boolean = true,
+    style: GlassStyle = GlassDefaults.Style,
+    material: GlassMaterial = GlassSearchOverlayDefaults.material(),
+    stroke: EdgeStroke? = GlassSearchOverlayDefaults.stroke(),
+    shadow: GlassShadow? = GlassSearchOverlayDefaults.shadow(),
+    searchIcon: ImageVector = MiuixIcons.Basic.Search,
+    closeIcon: ImageVector = MiuixIcons.Basic.Close,
+    content: @Composable ColumnScope.(String) -> Unit = {},
+) = GlassSearchOverlay(
+    expanded = expanded,
+    onDismissRequest = onDismissRequest,
+    scrollMaterialThreshold = Dp.Unspecified,
+    modifier = modifier,
+    horizontalInsetsModifier = horizontalInsetsModifier,
+    label = label,
+    scrollOffset = scrollOffset,
+    topInsets = topInsets,
+    searchTopPadding = searchTopPadding,
+    blurEnabled = blurEnabled,
+    style = style,
+    material = material,
+    stroke = stroke,
+    shadow = shadow,
+    searchIcon = searchIcon,
+    closeIcon = closeIcon,
+    content = content,
+)
+
+/**
+ * A full-screen search overlay that transitions the input and cancel button from a solid fill to glass
+ * as results scroll under it.
+ *
+ * @param scrollMaterialThreshold The result-list scroll distance before the input and cancel button gain glass.
+ *   [Dp.Unspecified] keeps both glass at all scroll positions.
+ * @param scrollOffset The result-list scroll offset in pixels, or zero when there are no results.
+ */
+@Composable
+fun GlassSearchOverlay(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    scrollMaterialThreshold: Dp,
     modifier: Modifier = Modifier,
     horizontalInsetsModifier: Modifier = Modifier,
     label: String = "Search",
@@ -214,6 +266,18 @@ fun GlassSearchOverlay(
         )
         val blurActive = blurEnabled && isRuntimeShaderSupported()
         val contentBackdrop = if (blurActive) rememberLayerBackdrop() else null
+        val currentScrollOffset by rememberUpdatedState(scrollOffset)
+        val pillMaterialProgress = if (contentBackdrop != null && scrollMaterialThreshold.isSpecified) {
+            val thresholdPx = with(LocalDensity.current) { scrollMaterialThreshold.toPx() }
+            val hasOverlap by remember(thresholdPx) { derivedStateOf { currentScrollOffset() > thresholdPx } }
+            animateFloatAsState(
+                targetValue = if (expanded && hasOverlap) 1f else 0f,
+                animationSpec = tween(450, easing = LinearEasing),
+                label = "glassSearchPillMaterial",
+            )
+        } else {
+            null
+        }
         val baseBandHeight = GlassSearchOverlayDefaults.BarHeight +
             GlassSearchOverlayDefaults.VerticalPadding * 2 + GlassSearchOverlayDefaults.ProgressiveBlurOverhang
         val bandLayoutModifier = Modifier.layout { measurable, constraints ->
@@ -241,7 +305,6 @@ fun GlassSearchOverlay(
                     listOf(BlendColorEntry(colors.surface.copy(alpha = 0.3f)))
                 }
                 val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
-                val currentScrollOffset by rememberUpdatedState(scrollOffset)
                 val rampDistancePx = with(LocalDensity.current) { GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx() }
                 val bandActive by remember(rampDistancePx) {
                     derivedStateOf { (currentScrollOffset() / rampDistancePx).coerceIn(0f, 1f) > 0.001f }
@@ -343,38 +406,56 @@ fun GlassSearchOverlay(
                         .height(GlassSearchOverlayDefaults.BarHeight)
                         .focusRequester(focusRequester),
                     decorationBox = { field ->
-                        Row(
+                        Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .then(glassPillModifier)
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                .then(if (pillMaterialProgress == null) glassPillModifier else Modifier),
                         ) {
-                            Icon(
-                                searchIcon,
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp),
-                                tint = mutedColor,
-                            )
-                            Box(Modifier.weight(1f)) {
-                                if (query.isEmpty()) Text(label, color = mutedColor, style = MiuixTheme.textStyles.body1)
-                                field()
+                            if (pillMaterialProgress != null && contentBackdrop != null) {
+                                ScrollSearchPillBackground(
+                                    backdrop = contentBackdrop,
+                                    shape = pillShape,
+                                    fill = colors.surfaceContainerHigh,
+                                    style = style,
+                                    material = material,
+                                    stroke = stroke,
+                                    shadow = shadow,
+                                    progress = { pillMaterialProgress.value },
+                                    modifier = Modifier.matchParentSize(),
+                                )
                             }
-                            if (query.isNotEmpty()) {
-                                IconButton(
-                                    onClick = {
-                                        query = ""
-                                        focusRequester.requestFocus()
-                                    },
-                                    modifier = Modifier.size(24.dp),
-                                ) {
-                                    Icon(
-                                        closeIcon,
-                                        contentDescription = "Clear",
-                                        modifier = Modifier.size(16.dp * (7f / 6f)),
-                                        tint = mutedColor,
-                                    )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    searchIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp),
+                                    tint = mutedColor,
+                                )
+                                Box(Modifier.weight(1f)) {
+                                    if (query.isEmpty()) Text(label, color = mutedColor, style = MiuixTheme.textStyles.body1)
+                                    field()
+                                }
+                                if (query.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            query = ""
+                                            focusRequester.requestFocus()
+                                        },
+                                        modifier = Modifier.size(24.dp),
+                                    ) {
+                                        Icon(
+                                            closeIcon,
+                                            contentDescription = "Clear",
+                                            modifier = Modifier.size(16.dp * (7f / 6f)),
+                                            tint = mutedColor,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -393,10 +474,25 @@ fun GlassSearchOverlay(
                             renderEffect = if (blurActive && blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
                         },
                 ) {
+                    if (pillMaterialProgress != null && contentBackdrop != null) {
+                        ScrollSearchPillBackground(
+                            backdrop = contentBackdrop,
+                            shape = pillShape,
+                            fill = colors.surfaceContainerHigh,
+                            style = style,
+                            material = material,
+                            stroke = stroke,
+                            shadow = shadow,
+                            progress = { pillMaterialProgress.value },
+                            modifier = Modifier.matchParentSize(),
+                        )
+                    }
                     IconButton(
                         onClick = onDismissRequest,
                         enabled = expanded,
-                        modifier = Modifier.size(GlassSearchOverlayDefaults.BarHeight).then(glassPillModifier),
+                        modifier = Modifier
+                            .size(GlassSearchOverlayDefaults.BarHeight)
+                            .then(if (pillMaterialProgress == null) glassPillModifier else Modifier),
                     ) {
                         Icon(
                             closeIcon,
@@ -407,6 +503,42 @@ fun GlassSearchOverlay(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ScrollSearchPillBackground(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    fill: Color,
+    style: GlassStyle,
+    material: GlassMaterial,
+    stroke: EdgeStroke?,
+    shadow: GlassShadow?,
+    progress: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val fraction = progress()
+    Box(
+        modifier = modifier
+            .then(if (shadow != null) Modifier.drawBehind { drawGlassShadow(shape, shadow, progress()) } else Modifier)
+            .background(fill, shape),
+    ) {
+        if (fraction > 0f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { alpha = progress() }
+                    .glass(
+                        backdrop = backdrop,
+                        shape = shape,
+                        style = style,
+                        material = material.copy(blurRadius = material.blurRadius * fraction),
+                        stroke = stroke,
+                        shading = false,
+                    ),
+            )
         }
     }
 }

@@ -55,6 +55,8 @@ fun GlassSearchOverlayDemo() {
     val searchBarAlpha = rememberGlassSearchBarAlpha(expanded)
     val topInset = 36.dp
     val topInsets = remember(topInset) { WindowInsets(top = topInset) }
+    val searchResultTopPadding = 12.dp
+    val searchBarPadding = GlassSearchOverlayDefaults.VerticalPadding
     val sampleItems = remember {
         listOf(
             "AccessControl",
@@ -161,23 +163,23 @@ fun GlassSearchOverlayDemo() {
                     GlassSearchOverlay(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
+                        scrollMaterialThreshold = searchBarPadding + searchResultTopPadding,
                         label = "Search items",
                         topInsets = topInsets,
                         searchIcon = MiuixIcons.Glass.Search,
                         closeIcon = MiuixIcons.Glass.Close,
                         scrollOffset = {
-                            if (searchListState.firstVisibleItemIndex > 0) {
-                                Float.MAX_VALUE
-                            } else {
-                                searchListState.firstVisibleItemScrollOffset.toFloat()
+                            when {
+                                searchListState.layoutInfo.totalItemsCount == 0 -> 0f
+                                searchListState.firstVisibleItemIndex > 0 -> Float.MAX_VALUE
+                                else -> searchListState.firstVisibleItemScrollOffset.toFloat()
                             }
                         },
                     ) { query ->
                         val filtered = remember(query) {
                             if (query.isBlank()) emptyList() else sampleItems.filter { it.contains(query, ignoreCase = true) }
                         }
-                        val searchContentTop =
-                            topInset + GlassSearchOverlayDefaults.BarHeight + GlassSearchOverlayDefaults.VerticalPadding * 2 + 12.dp
+                        val searchContentTop = topInset + GlassSearchOverlayDefaults.BarHeight + searchBarPadding * 2 + searchResultTopPadding
                         LazyColumn(
                             state = searchListState,
                             modifier = Modifier.fillMaxSize(),

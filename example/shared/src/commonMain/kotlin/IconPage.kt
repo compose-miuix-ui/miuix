@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
+import top.yukonga.miuix.kmp.glass.GlassSearchOverlayDefaults
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
@@ -99,6 +100,8 @@ import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import kotlin.time.Duration.Companion.milliseconds
+
+private val SearchResultVerticalPadding = 4.dp
 
 private data class IconSection(
     val title: String,
@@ -212,7 +215,7 @@ fun IconsPage(
             key = { filteredIndices[it] },
         ) { i ->
             val index = filteredIndices[i]
-            Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+            Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = SearchResultVerticalPadding)) {
                 BasicComponent(
                     title = searchIconNames[index],
                     startAction = {
@@ -493,15 +496,17 @@ fun IconsPage(
         if (glassTopBar) {
             val searchListState = rememberLazyListState()
             val pageInsets = LocalAppPageInsets.current
+            val searchBarSpace = GlassSearchOverlayDefaults.BarHeight + GlassSearchOverlayDefaults.VerticalPadding * 2
             GlassSearchOverlay(
                 onDismissRequest = { searchExpanded = false },
                 expanded = searchExpanded,
+                scrollMaterialThreshold = GlassSearchOverlayDefaults.VerticalPadding + SearchResultVerticalPadding,
                 label = "Search icons",
                 scrollOffset = {
-                    if (searchListState.firstVisibleItemIndex > 0) {
-                        Float.MAX_VALUE
-                    } else {
-                        searchListState.firstVisibleItemScrollOffset.toFloat()
+                    when {
+                        searchListState.layoutInfo.totalItemsCount == 0 -> 0f
+                        searchListState.firstVisibleItemIndex > 0 -> Float.MAX_VALUE
+                        else -> searchListState.firstVisibleItemScrollOffset.toFloat()
                     }
                 },
                 topInsets = pageInsets.safeInsets.only(WindowInsetsSides.Top),
@@ -527,7 +532,7 @@ fun IconsPage(
                     state = searchListState,
                     modifier = Modifier.fillMaxSize().appPageHorizontalInsets(),
                     contentPadding = PaddingValues(
-                        top = LocalAppPageInsets.current.safeInsets.asPaddingValues().calculateTopPadding() + LocalAppPageInsets.current.searchTop() + 52.dp,
+                        top = pageInsets.safeInsets.asPaddingValues().calculateTopPadding() + pageInsets.searchTop() + searchBarSpace,
                         bottom = searchResultPadding.calculateBottomPadding(),
                     ),
                 ) {
