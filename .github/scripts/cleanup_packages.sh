@@ -36,8 +36,19 @@ TOKEN = os.environ["TOKEN"]
 OWNER = os.environ["OWNER"]
 REPO_NAME = os.environ["REPO_NAME"]
 MODE = os.environ["MODE"]
+if MODE not in ("failed", "prune"):
+    print(f"Unknown mode: {MODE}")
+    raise SystemExit(1)
 SHORT_HASH = os.environ.get("SHORT_HASH", "")
 KEEP_SNAPSHOTS = int(os.environ.get("KEEP_SNAPSHOTS", "10"))
+HEADERS = {
+    "Accept": "application/vnd.github+json",
+    "Authorization": f"Bearer {TOKEN}",
+    "X-GitHub-Api-Version": "2026-03-10",
+    "User-Agent": "miuix-package-cleanup",
+}
+
+
 def request(method, path, payload=None):
     url = f"{API}{path}"
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
@@ -52,6 +63,8 @@ def request(method, path, payload=None):
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")
         return e.code, body
+    except (urllib.error.URLError, TimeoutError) as e:
+        return 0, str(e)
 
 
 def paginate(base_path):
@@ -105,9 +118,6 @@ for pkg_name in repo_package_names:
         snapshots = [v for v in versions if v.get("name", "").endswith("-SNAPSHOT")]
         snapshots.sort(key=lambda v: v.get("created_at", ""), reverse=True)
         targets = snapshots[KEEP_SNAPSHOTS:]
-    else:
-        print(f"Unknown mode: {MODE}")
-        raise SystemExit(1)
 
     for v in targets:
         vid = v["id"]
