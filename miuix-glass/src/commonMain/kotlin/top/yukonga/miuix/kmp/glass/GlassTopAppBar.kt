@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
@@ -553,7 +553,7 @@ private fun GlassTopAppBarLayout(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val topInsets = WindowInsets.statusBars
+    val topInsets = WindowInsets.systemBars
     Layout(content = content, modifier = modifier) { measurables, constraints ->
         // Measure the foreground first: its bottom slot and the band share this measure pass.
         val foreground = measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0))
