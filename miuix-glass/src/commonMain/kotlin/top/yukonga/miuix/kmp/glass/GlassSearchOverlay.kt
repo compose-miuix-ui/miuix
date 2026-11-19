@@ -519,22 +519,23 @@ private fun ScrollSearchPillBackground(
     progress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    val fraction = progress()
+    val currentProgress by rememberUpdatedState(progress)
+    val showGlass by remember { derivedStateOf { currentProgress() > 0.001f } }
     Box(
         modifier = modifier
-            .then(if (shadow != null) Modifier.drawBehind { drawGlassShadow(shape, shadow, progress()) } else Modifier)
+            .then(if (shadow != null) Modifier.drawBehind { drawGlassShadow(shape, shadow, currentProgress()) } else Modifier)
             .background(fill, shape),
     ) {
-        if (fraction > 0f) {
+        if (showGlass) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer { alpha = progress() }
+                    .graphicsLayer { alpha = currentProgress() }
                     .glass(
                         backdrop = backdrop,
                         shape = shape,
                         style = style,
-                        material = material.copy(blurRadius = material.blurRadius * fraction),
+                        material = material,
                         stroke = stroke,
                         shading = false,
                     ),

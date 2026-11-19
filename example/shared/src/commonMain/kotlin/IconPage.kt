@@ -180,6 +180,9 @@ fun IconsPage(
     val listStates = remember { List(2) { LazyListState() } }
     val headerHeights = remember { List(2) { mutableIntStateOf(0) } }
     val activeListState = listStates[currentPage]
+    val contentUnderTopBar by remember(activeListState) {
+        derivedStateOf { activeListState.canScrollBackward }
+    }
     val activeHeaderHeight = headerHeights[currentPage]
     val saturatedScrollDistance = with(density) {
         maxOf(
@@ -252,7 +255,7 @@ fun IconsPage(
                         showTopAppBar = appState.showTopAppBar,
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
-                        isContentScrolled = activeListState.canScrollBackward,
+                        isContentScrolled = contentUnderTopBar,
                         visualContentOffset = visualContentOffset,
                         contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded, blurEnabled = appState.enableBlur) { 1f } else Modifier,
                         color = barColor,
@@ -277,7 +280,7 @@ fun IconsPage(
                                         coroutineScope.launch { pagerState.springAnimateToPage(index) }
                                     },
                                     backdrop = backdrop,
-                                    surfaceAlpha = if (blurActive) 1f else 0f,
+                                    surfaceAlpha = if (blurActive && contentUnderTopBar) 1f else 0f,
                                     modifier = Modifier.padding(horizontal = 12.dp).padding(top = 6.dp, bottom = 12.dp),
                                 )
                             } else {
