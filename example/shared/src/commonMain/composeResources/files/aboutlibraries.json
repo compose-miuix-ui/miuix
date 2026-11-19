@@ -18,7 +18,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.activity:activity-ktx",
@@ -38,7 +40,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.annotation:annotation",
@@ -61,7 +65,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.annotation:annotation-experimental",
@@ -84,7 +90,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.arch.core:core-common",
@@ -104,7 +112,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.arch.core:core-runtime",
@@ -124,7 +134,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.autofill:autofill",
@@ -144,7 +156,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.collection:collection",
@@ -167,7 +181,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.collection:collection-ktx",
@@ -190,7 +206,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.animation:animation",
@@ -213,7 +231,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.animation:animation-core",
@@ -236,7 +256,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.foundation:foundation",
@@ -259,7 +281,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.foundation:foundation-layout",
@@ -282,7 +306,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.material3:material3-window-size-class",
@@ -305,7 +331,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.runtime:runtime",
@@ -328,7 +356,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.runtime:runtime-annotation",
@@ -351,7 +381,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.runtime:runtime-retain",
@@ -374,7 +406,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.runtime:runtime-saveable",
@@ -397,7 +431,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui",
@@ -420,7 +456,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui-geometry",
@@ -443,7 +481,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui-graphics",
@@ -466,7 +506,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui-text",
@@ -489,7 +531,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui-unit",
@@ -512,7 +556,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.compose.ui:ui-util",
@@ -535,7 +581,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.concurrent:concurrent-futures",
@@ -555,7 +603,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.core:core",
@@ -578,7 +628,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.core:core-ktx",
@@ -601,7 +653,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.core:core-viewtree",
@@ -624,7 +678,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.customview:customview-poolingcontainer",
@@ -644,7 +700,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.emoji2:emoji2",
@@ -664,7 +722,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.graphics:graphics-path",
@@ -687,7 +747,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.interpolator:interpolator",
@@ -707,7 +769,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-common",
@@ -730,7 +794,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-livedata-core",
@@ -753,7 +819,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-process",
@@ -776,7 +844,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-runtime",
@@ -799,7 +869,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-runtime-compose",
@@ -822,7 +894,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-runtime-ktx",
@@ -845,7 +919,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-viewmodel",
@@ -868,7 +944,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-viewmodel-compose",
@@ -891,7 +969,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-viewmodel-ktx",
@@ -914,7 +994,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.lifecycle:lifecycle-viewmodel-savedstate",
@@ -937,7 +1019,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.navigationevent:navigationevent",
@@ -960,7 +1044,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.navigationevent:navigationevent-compose",
@@ -983,7 +1069,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.profileinstaller:profileinstaller",
@@ -1006,7 +1094,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.savedstate:savedstate",
@@ -1029,7 +1119,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.savedstate:savedstate-compose",
@@ -1052,7 +1144,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.savedstate:savedstate-ktx",
@@ -1075,7 +1169,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.startup:startup-runtime",
@@ -1095,7 +1191,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.tracing:tracing",
@@ -1115,7 +1213,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.versionedparcelable:versionedparcelable",
@@ -1135,7 +1235,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.window:window",
@@ -1158,7 +1260,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "androidx.window:window-core",
@@ -1181,7 +1285,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "com.google.guava:listenablefuture",
@@ -1203,7 +1309,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "com.materialkolor:material-color-utilities",
@@ -1225,7 +1333,9 @@
                 "MIT",
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "com.mikepenz:aboutlibraries-core",
@@ -1246,7 +1356,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "dev.drewhamilton.poko:poko-annotations",
@@ -1267,7 +1379,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-common",
@@ -1289,7 +1403,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-runtime",
@@ -1311,7 +1427,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose",
@@ -1333,7 +1451,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel",
@@ -1355,7 +1475,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose",
@@ -1377,7 +1499,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-savedstate",
@@ -1399,7 +1523,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.navigationevent:navigationevent-compose",
@@ -1421,7 +1547,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.savedstate:savedstate",
@@ -1443,7 +1571,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.androidx.savedstate:savedstate-compose",
@@ -1465,7 +1595,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.animation:animation",
@@ -1487,7 +1619,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.animation:animation-core",
@@ -1509,7 +1643,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.annotation-internal:annotation",
@@ -1531,7 +1667,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.collection-internal:collection",
@@ -1553,7 +1691,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.components:components-resources",
@@ -1575,7 +1715,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.desktop:desktop",
@@ -1597,7 +1739,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.desktop:desktop-jvm-linux-x64",
@@ -1619,7 +1763,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.foundation:foundation",
@@ -1641,7 +1787,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.foundation:foundation-layout",
@@ -1663,7 +1811,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-annotations",
@@ -1683,7 +1833,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-core",
@@ -1703,7 +1855,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-devtools-api",
@@ -1723,7 +1877,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-orchestration",
@@ -1743,7 +1899,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-runtime-api",
@@ -1763,7 +1921,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.hot-reload:hot-reload-runtime-jvm",
@@ -1783,7 +1943,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.material3:material3-window-size-class",
@@ -1805,7 +1967,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.material:material",
@@ -1827,7 +1991,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.material:material-ripple",
@@ -1849,7 +2015,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.runtime:runtime",
@@ -1871,7 +2039,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.runtime:runtime-saveable",
@@ -1893,7 +2063,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui",
@@ -1915,7 +2087,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-backhandler",
@@ -1937,7 +2111,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-geometry",
@@ -1959,7 +2135,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-graphics",
@@ -1981,7 +2159,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-text",
@@ -2003,7 +2183,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-tooling-preview",
@@ -2025,7 +2207,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-uikit",
@@ -2047,7 +2231,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-unit",
@@ -2069,7 +2255,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-util",
@@ -2091,7 +2279,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-dom-api-compat",
@@ -2113,7 +2303,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib",
@@ -2135,7 +2327,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-js",
@@ -2157,7 +2351,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-wasm-js",
@@ -2179,7 +2375,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlinx-atomicfu-runtime",
@@ -2201,7 +2399,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:atomicfu",
@@ -2221,7 +2421,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-browser",
@@ -2241,7 +2443,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-collections-immutable",
@@ -2261,7 +2465,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
@@ -2281,7 +2487,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
@@ -2301,7 +2509,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-coroutines-core",
@@ -2321,11 +2531,13 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-serialization-bom",
-            "artifactVersion": "1.11.0",
+            "artifactVersion": "1.13.0",
             "name": "kotlinx-serialization-bom",
             "description": "Kotlin multiplatform serialization runtime library",
             "website": "https://github.com/Kotlin/kotlinx.serialization",
@@ -2341,11 +2553,13 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-serialization-core",
-            "artifactVersion": "1.11.0",
+            "artifactVersion": "1.13.0",
             "name": "kotlinx-serialization-core",
             "description": "Kotlin multiplatform serialization runtime library",
             "website": "https://github.com/Kotlin/kotlinx.serialization",
@@ -2361,11 +2575,13 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.kotlinx:kotlinx-serialization-json",
-            "artifactVersion": "1.11.0",
+            "artifactVersion": "1.13.0",
             "name": "kotlinx-serialization-json",
             "description": "Kotlin multiplatform serialization runtime library",
             "website": "https://github.com/Kotlin/kotlinx.serialization",
@@ -2381,7 +2597,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.runtime:jbr-api",
@@ -2402,7 +2620,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko",
@@ -2424,7 +2644,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko-awt",
@@ -2446,7 +2668,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko-awt-runtime-linux-x64",
@@ -2468,7 +2692,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko-js",
@@ -2490,7 +2716,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko-js-wasm-runtime",
@@ -2512,7 +2740,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko-wasm-js",
@@ -2534,7 +2764,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jetbrains:annotations",
@@ -2556,7 +2788,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         },
         {
             "uniqueId": "org.jspecify:jspecify",
@@ -2577,7 +2811,9 @@
             "licenses": [
                 "Apache-2.0"
             ],
-            "funding": []
+            "funding": [
+                
+            ]
         }
     ],
     "licenses": {

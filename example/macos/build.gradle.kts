@@ -4,6 +4,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
@@ -42,5 +43,20 @@ compose.desktop {
 
             macOS.iconFile = project.file("resources/Miuix.icns")
         }
+    }
+}
+
+compose.resources {
+    generateResClass = always
+}
+
+aboutLibraries {
+    collect {
+        all = true
+        filterVariants.add("macosArm64CompileKlibraries")
+    }
+    export {
+        outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json")
+        prettyPrint = true
     }
 }

@@ -8,6 +8,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.composeMultiplatform)
@@ -28,6 +29,13 @@ kotlin {
                 implementation(libs.nucleus.darkmode.detector)
             }
         }
+    }
+}
+
+aboutLibraries {
+    export {
+        outputFile = file("src/desktopMain/resources/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 

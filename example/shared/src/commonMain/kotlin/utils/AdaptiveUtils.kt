@@ -3,6 +3,7 @@
 
 package utils
 
+import LocalPlatformDensity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -11,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun shouldShowSplitPane(): Boolean {
     val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
         val widthDp = windowInfo.containerSize.width.toDp()
         val heightDp = windowInfo.containerSize.height.toDp()
@@ -23,7 +24,7 @@ fun shouldShowSplitPane(): Boolean {
 @Composable
 fun shouldShowThreePanes(): Boolean {
     val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
         val widthDp = windowInfo.containerSize.width.toDp()
         widthDp >= 1200.dp
@@ -33,7 +34,7 @@ fun shouldShowThreePanes(): Boolean {
 @Composable
 fun shouldExpandNavigationRail(): Boolean {
     val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
         val widthDp = windowInfo.containerSize.width.toDp()
         widthDp >= 1200.dp

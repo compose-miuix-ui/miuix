@@ -4,6 +4,7 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinMultiplatform)
@@ -38,5 +39,16 @@ kotlin {
         wasmJsMain {
             dependsOn(webMain)
         }
+    }
+}
+
+compose.resources {
+    generateResClass = always
+}
+
+aboutLibraries {
+    export {
+        outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json")
+        prettyPrint = true
     }
 }

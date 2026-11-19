@@ -32,14 +32,15 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.Library
+import utils.LocalAboutLibrariesJsonLoader
 import utils.SimpleJsonParser
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.rememberAboutLibrariesJsonLoader
 
 @Composable
 fun LicensePage(
@@ -62,9 +63,11 @@ fun LicensePage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
 
-    val libraries by produceState<List<Library>?>(initialValue = null) {
+    val fallbackLoader = rememberAboutLibrariesJsonLoader()
+    val loadAboutLibrariesJson = LocalAboutLibrariesJsonLoader.current ?: fallbackLoader
+    val libraries by produceState<List<Library>?>(initialValue = null, loadAboutLibrariesJson) {
         try {
-            val jsonString = Res.readBytes("files/aboutlibraries.json").decodeToString()
+            val jsonString = loadAboutLibrariesJson()
             val libs = SimpleJsonParser(jsonString).parseLibs()
             value = libs.libraries
         } catch (e: CancellationException) {

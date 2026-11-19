@@ -5,6 +5,7 @@ import com.android.build.api.variant.HostTestBuilder
 import java.util.Properties
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.composeCompiler)
@@ -16,6 +17,7 @@ dependencies {
     implementation(projects.example.shared)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.hiddenapibypass)
     "baselineProfile"(projects.baselineprofile)
 }
 
@@ -105,6 +107,14 @@ androidComponents {
     onVariants(selector().withBuildType("release")) {
         it.packaging.resources.excludes
             .add("**")
+    }
+}
+
+aboutLibraries {
+    export {
+        variant = "release"
+        outputFile = file("src/main/assets/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 
