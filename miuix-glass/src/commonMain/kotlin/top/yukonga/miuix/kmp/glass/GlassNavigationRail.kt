@@ -51,6 +51,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -256,6 +257,14 @@ class GlassNavigationRailState(initialExpanded: Boolean) {
      */
     val progress: Float get() = morph.value
 
+    /** Start offset of the collapsed capsule within the rail's viewport. */
+    var collapsedStart: Dp by mutableStateOf(0.dp)
+        internal set
+
+    /** Width of the collapsed capsule. */
+    var collapsedWidth: Dp by mutableStateOf(0.dp)
+        internal set
+
     companion object {
         /** The default [Saver], keeping [expanded]. */
         val Saver: Saver<GlassNavigationRailState, Boolean> = Saver(
@@ -420,6 +429,10 @@ fun GlassNavigationRail(
         val animatedCapsuleWidth = animateDpAsState(capsuleWidth, RailMorphDpMotion, label = "railCapsuleWidth")
         val collapsedHeight = GlassNavigationRailDefaults.CollapsedHeight
         val collapsedStart = (viewportWidth - capsuleWidth) / 2
+        SideEffect {
+            state.collapsedStart = collapsedStart
+            state.collapsedWidth = capsuleWidth
+        }
         val expandedStart = GlassNavigationRailDefaults.Margin
         val expandedTop = GlassNavigationRailDefaults.CollapsedTop
         val expandedHeight = (viewportHeight - expandedTop - GlassNavigationRailDefaults.Margin)

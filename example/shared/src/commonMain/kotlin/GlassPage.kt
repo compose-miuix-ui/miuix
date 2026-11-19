@@ -108,6 +108,7 @@ import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import utils.LocalAppPageInsets
+import utils.LocalTopAppBarCenterObstructionStart
 import utils.TopLayer
 import utils.appPageHorizontalInsets
 import utils.appPageTopBarInsets
@@ -142,6 +143,7 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
     val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
     val isInDark = isInDarkTheme()
     val safePadding = rememberAppSafePadding()
@@ -338,8 +340,10 @@ fun GlassPage(padding: PaddingValues) {
                     title = "Glass Component",
                     contentModifier = Modifier.glassSearchBarTransition(searchExpanded, appState.enableBlur) { 1f }
                         .appPageTopBarInsets(),
+                    expandable = !isWideScreen,
                     defaultWindowInsetsPadding = false,
                     isContentScrolled = contentUnderTopBar,
+                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current,
                     backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     progressiveBlur = topAppBarProgressiveBlur,

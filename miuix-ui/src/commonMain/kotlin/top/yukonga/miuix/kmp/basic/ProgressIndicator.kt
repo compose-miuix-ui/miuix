@@ -134,7 +134,7 @@ fun LinearProgressIndicator(
         )
     } else {
         val currentProgress = rememberUpdatedState(progress)
-        val progressProvider = remember<() -> Float>(currentProgress) { { currentProgress.value } }
+        val progressProvider = remember(currentProgress) { { currentProgress.value } }
         LinearProgressIndicator(
             progress = progressProvider,
             modifier = modifier,
@@ -278,7 +278,7 @@ fun CircularProgressIndicator(
         )
     } else {
         val currentProgress = rememberUpdatedState(progress)
-        val progressProvider = remember<() -> Float>(currentProgress) { { currentProgress.value } }
+        val progressProvider = remember(currentProgress) { { currentProgress.value } }
         CircularProgressIndicator(
             progress = progressProvider,
             modifier = modifier,

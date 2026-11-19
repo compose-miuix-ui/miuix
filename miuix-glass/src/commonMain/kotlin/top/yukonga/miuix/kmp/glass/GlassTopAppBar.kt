@@ -290,6 +290,7 @@ fun GlassTopAppBar(
     defaultWindowInsetsPadding: Boolean = true,
     titleAlpha: () -> Float = { 1f },
     backgroundAlpha: () -> Float = { 1f },
+    centerObstructionStart: Dp = Dp.Unspecified,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
@@ -327,6 +328,7 @@ fun GlassTopAppBar(
         contentModifier = contentModifier,
         titleAlpha = titleAlpha,
         backgroundAlpha = backgroundAlpha,
+        centerObstructionStart = centerObstructionStart,
         navigationIcon = navigationIcon,
         actions = actions,
         bottomContent = bottomContent,
@@ -369,6 +371,7 @@ fun GlassTopAppBar(
     defaultWindowInsetsPadding: Boolean = true,
     titleAlpha: () -> Float = { 1f },
     backgroundAlpha: () -> Float = { 1f },
+    centerObstructionStart: Dp = Dp.Unspecified,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
@@ -519,6 +522,7 @@ fun GlassTopAppBar(
                 defaultWindowInsetsPadding = defaultWindowInsetsPadding,
                 navigationIconPadding = GlassTopAppBarDefaults.HorizontalPadding,
                 actionIconPadding = GlassTopAppBarDefaults.HorizontalPadding,
+                centerObstructionStart = centerObstructionStart,
                 navigationIcon = navigationIcon,
                 actions = actions,
                 bottomContent = {
@@ -590,6 +594,7 @@ internal fun BlurTopAppBar(
     navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
     titleAlpha: () -> Float = { 1f },
+    centerObstructionStart: Dp = Dp.Unspecified,
     bottomContent: @Composable () -> Unit = {},
 ) {
     val actionsRow =
@@ -620,6 +625,7 @@ internal fun BlurTopAppBar(
         scrollBehavior = scrollBehavior,
         modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        centerObstructionStart = centerObstructionStart,
         bottomContent = bottomContent,
     )
 }

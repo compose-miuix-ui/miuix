@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
@@ -143,6 +144,7 @@ import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import ui.isInDarkTheme
 import utils.FPSMonitor
 import utils.LocalAppPageInsets
+import utils.LocalTopAppBarCenterObstructionStart
 import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
 import utils.TopLayerHost
@@ -214,12 +216,19 @@ fun AppContent(
     val expandSidebar = shouldExpandNavigationRail()
     val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
     LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
-    val topAppBarTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
+    val primaryTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
         if (useGlassSidebar) {
             { sidebarState.progress }
         } else {
             { 1f }
         }
+    }
+    val topAppBarCenterObstructionStart = if (
+        useGlassSidebar && !sidebarState.expanded && sidebarState.collapsedWidth > 0.dp
+    ) {
+        sidebarState.collapsedStart
+    } else {
+        Dp.Unspecified
     }
     LaunchedEffect(useGlassSidebar, sidebarState.expanded) {
         mainPagerState.snapTransitions = useGlassSidebar && sidebarState.expanded
@@ -250,7 +259,8 @@ fun AppContent(
         LocalNavigator provides navigator,
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
-        LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
+        LocalTopAppBarTitleAlpha provides { 1f },
+        LocalTopAppBarCenterObstructionStart provides topAppBarCenterObstructionStart,
         LocalAppPageInsets provides pageInsets,
     ) {
         // Match platform screen corners; split panes have no outer corner.
@@ -362,6 +372,7 @@ fun AppContent(
                                     padding = pageInsets.safeInsets.asPaddingValues(),
                                     navigationItems = navigationItems,
                                     mainPagerState = mainPagerState,
+                                    primaryTitleAlpha = primaryTitleAlpha,
                                 )
                             }
                             if (useGlassSidebar) {
@@ -405,6 +416,7 @@ private fun AppNavHost(
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
+    primaryTitleAlpha: () -> Float,
     modifier: Modifier = Modifier,
 ) {
     NavDisplay(
@@ -415,10 +427,15 @@ private fun AppNavHost(
         effects = effects,
     ) {
         entry<Route.Main>(swipeDismiss = swipeBackDirection) {
-            Home(
-                navigationItems = navigationItems,
-                mainPagerState = mainPagerState,
-            )
+            CompositionLocalProvider(
+                LocalTopAppBarTitleAlpha provides primaryTitleAlpha,
+                LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
+            ) {
+                Home(
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
+            }
         }
         entry<Route.Component>(swipeDismiss = swipeBackDirection) { route ->
             ComponentPage(demo = route.demo, padding = padding)

@@ -178,6 +178,7 @@ The TopAppBarDefaults object provides default values for TopAppBar and SmallTopA
 | Constant Name             | Type | Description                                        | Default Value |
 | ------------------------- | ---- | -------------------------------------------------- | ------------- |
 | TitlePadding    | Dp   | Horizontal padding of the title and large title    | 26.dp         |
+| TitleControlSpacing | Dp   | Spacing between title and side controls            | 12.dp         |
 | NavigationIconPadding      | Dp   | Start padding of the navigation icon              | 16.dp         |
 | ActionIconPadding          | Dp   | End padding of the action icons                   | 16.dp         |
 | CollapsedHeight            | Dp   | Collapsed height of the TopAppBar                 | 52.dp         |

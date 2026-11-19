@@ -55,6 +55,9 @@ val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 /** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
 
+/** Start offset of centered chrome (such as a collapsed glass sidebar) obstructing the top bar center. */
+val LocalTopAppBarCenterObstructionStart = staticCompositionLocalOf { Dp.Unspecified }
+
 /**
  * Full-window safe areas and the remaining insets in the current page pane. A sibling rail has
  * already reserved its start space; an overlaid rail is included in [contentInsets]. Backgrounds
@@ -244,6 +247,7 @@ fun AdaptiveTopAppBar(
     if (!showTopAppBar) return
     val appState = LocalAppState.current
     val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
+    val centerObstructionStart = LocalTopAppBarCenterObstructionStart.current
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val surfaceColor = MiuixTheme.colorScheme.surface
@@ -263,6 +267,7 @@ fun AdaptiveTopAppBar(
             visualContentOffset = visualContentOffset,
             titleAlpha = { titleAlpha() * chromeTitleAlpha() },
             backgroundAlpha = backgroundAlpha,
+            centerObstructionStart = centerObstructionStart,
             defaultWindowInsetsPadding = false,
             bandBrush = bandBrush,
             bandOverhang = GlassTopAppBarDefaults.BandOverhang,
@@ -283,6 +288,7 @@ fun AdaptiveTopAppBar(
             titleColor = titleColor,
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = false,
+            centerObstructionStart = centerObstructionStart,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,
