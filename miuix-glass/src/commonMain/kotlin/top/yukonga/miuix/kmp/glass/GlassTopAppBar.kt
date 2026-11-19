@@ -438,7 +438,7 @@ fun GlassTopAppBar(
                     rampVal * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
                 }
             }
-            val backdropCaptureModifier = if (hasButtonBackdropConsumers) {
+            val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
                 Modifier
                     .onGloballyPositioned { backgroundCoordinates = it }
                     .layerBackdrop(progressiveBackdrop)
