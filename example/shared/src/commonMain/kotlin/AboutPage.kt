@@ -448,6 +448,7 @@ private fun AboutContent(
             adapter = rememberScrollBarAdapter(lazyListState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             trackPadding = scrollPadding,
+            topAppBarScrollBehavior = topAppBarScrollBehavior,
         )
     }
 

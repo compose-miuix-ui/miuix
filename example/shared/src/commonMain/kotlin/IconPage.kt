@@ -440,6 +440,7 @@ fun IconsPage(
                             adapter = scrollBarAdapter,
                             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                             trackPadding = contentPadding,
+                            topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
                         )
                     }
 

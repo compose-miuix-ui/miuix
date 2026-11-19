@@ -159,6 +159,7 @@ fun NestedNavTestPage(padding: PaddingValues) {
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 trackPadding = contentPadding,
+                topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
             )
         }
     }
