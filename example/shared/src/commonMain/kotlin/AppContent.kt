@@ -155,6 +155,7 @@ import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 private object UIConstants {
@@ -1024,15 +1025,33 @@ fun AppPager(
         flingBehavior = flingBehavior,
         beyondViewportPageCount = 4,
         pageContent = { page ->
-            when (page) {
-                UIConstants.MAIN_PAGE_INDEX -> MainPage(padding = padding)
-                UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
-                UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
-                UIConstants.TEXT_STYLE_PAGE_INDEX -> TextStylePage(padding = padding)
-                else -> SettingsPage(padding = padding)
+            // All pages stay composed; only those in view follow the sidebar's morph frame by frame.
+            val insets = LocalAppPageInsets.current
+            val pageInsets = remember(insets, pagerState, page) {
+                val hidden = computedStateOf {
+                    abs(page - pagerState.currentPage - pagerState.currentPageOffsetFraction) >= 1f
+                }
+                insets.whenHidden { hidden.value }
+            }
+            CompositionLocalProvider(LocalAppPageInsets provides pageInsets) {
+                AppPage(page = page, padding = padding)
             }
         },
     )
+}
+
+@Composable
+private fun AppPage(
+    page: Int,
+    padding: PaddingValues,
+) {
+    when (page) {
+        UIConstants.MAIN_PAGE_INDEX -> MainPage(padding = padding)
+        UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
+        UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
+        UIConstants.TEXT_STYLE_PAGE_INDEX -> TextStylePage(padding = padding)
+        else -> SettingsPage(padding = padding)
+    }
 }
 
 @Composable
