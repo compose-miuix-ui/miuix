@@ -423,14 +423,10 @@ fun GlassTopAppBar(
                 listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.3f)))
             }
             val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
-            val currentVisualOffset by rememberUpdatedState(visualContentOffset)
             val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
-            val rampDistancePx = with(LocalDensity.current) { GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx() }
-            val bandActive by remember(scrollBehavior, maskProgress, rampDistancePx) {
+            val bandActive by remember(maskProgress) {
                 computedStateOf {
-                    val offset = currentVisualOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
-                    val rampVal = offset?.let { (-it / rampDistancePx).coerceIn(0f, 1f) } ?: maskProgress.value
-                    rampVal * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
+                    maskProgress.value * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
                 }
             }
             val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
@@ -443,11 +439,7 @@ fun GlassTopAppBar(
             Box(
                 modifier = backdropCaptureModifier
                     .graphicsLayer {
-                        val offset = visualContentOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
-                        val ramp = offset?.let {
-                            (-it / GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx()).coerceIn(0f, 1f)
-                        } ?: maskProgress.value
-                        this.alpha = ramp * backgroundAlpha().coerceIn(0f, 1f)
+                        this.alpha = maskProgress.value * backgroundAlpha().coerceIn(0f, 1f)
                     }
                     .progressiveTextureBlur(
                         backdrop = rawBackdrop,
