@@ -3,7 +3,9 @@
 
 package top.yukonga.miuix.kmp.glass
 
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -381,6 +383,16 @@ fun GlassTopAppBar(
         }
     }
     val transition = updateTransition(contentScrolled, label = "glassTopBarFloat")
+    val maskProgress = transition.animateFloat(
+        transitionSpec = { tween(durationMillis = 100, easing = LinearEasing) },
+        label = "glassTopBarMask",
+    ) { if (it) 1f else 0f }
+    val useCollapseProgress = expandable && scrollBehavior != null
+    val bandProgress: () -> Float = if (useCollapseProgress) {
+        { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
+    } else {
+        { maskProgress.value }
+    }
     val materialProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
@@ -421,9 +433,9 @@ fun GlassTopAppBar(
             }
             val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
             val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
-            val bandActive by remember(contentScrolled) {
+            val bandActive by remember(useCollapseProgress, scrollBehavior, maskProgress) {
                 computedStateOf {
-                    contentScrolled && currentBgAlpha().coerceIn(0f, 1f) > 0.001f
+                    bandProgress() * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
                 }
             }
             val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
@@ -436,7 +448,7 @@ fun GlassTopAppBar(
             Box(
                 modifier = backdropCaptureModifier
                     .graphicsLayer {
-                        this.alpha = if (contentScrolled) backgroundAlpha().coerceIn(0f, 1f) else 0f
+                        this.alpha = bandProgress() * backgroundAlpha().coerceIn(0f, 1f)
                     }
                     .progressiveTextureBlur(
                         backdrop = rawBackdrop,
@@ -457,7 +469,7 @@ fun GlassTopAppBar(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        this.alpha = if (contentScrolled) backgroundAlpha().coerceIn(0f, 1f) else 0f
+                        this.alpha = bandProgress() * backgroundAlpha().coerceIn(0f, 1f)
                         transformOrigin = TransformOrigin(0.5f, 0f)
                         scaleY = if (bandBrush !is TopAppBarBandBrush && size.height > 0f) (size.height + overhangPx) / size.height else 1f
                     }

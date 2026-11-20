@@ -350,41 +350,4 @@ class GlassTopAppBarStateTest {
         runOnIdle { state.overscrollOffset = 0f }
         assertButton(Color.Blue)
     }
-
-    @Test
-    fun progressiveBandStaysFixedDuringCollapseButTracksBottomContent() = runComposeUiTest {
-        val state = TopAppBarState(-1000f, 0f, -1000f)
-        val bottomHeight = mutableFloatStateOf(40f)
-        setContent {
-            DialogTestHost {
-                val backdrop = rememberLayerBackdrop()
-                Box(Modifier.size(400.dp, 400.dp)) {
-                    Box(Modifier.matchParentSize().layerBackdrop(backdrop).background(Color.Blue))
-                    GlassTopAppBar(
-                        title = "Title",
-                        modifier = Modifier.testTag("bar"),
-                        scrollBehavior = MiuixScrollBehavior(state),
-                        progressiveBlur = true,
-                        backdrop = backdrop,
-                        bottomContent = { Box(Modifier.size(200.dp, bottomHeight.floatValue.dp)) },
-                    )
-                }
-            }
-        }
-        val expandedHeight = onNodeWithTag("bar").fetchSemanticsNode().boundsInRoot.height
-        val expanded = onRoot().captureToImage().toPixelMap()
-        runOnIdle { state.heightOffset = state.heightOffsetLimit }
-        val collapsedHeight = onNodeWithTag("bar").fetchSemanticsNode().boundsInRoot.height
-        val collapsed = onRoot().captureToImage().toPixelMap()
-        assertTrue(collapsedHeight < expandedHeight, "The foreground must still collapse")
-        for (y in 0 until expanded.height) {
-            assertColorNear(expanded[5, y], collapsed[5, y], tolerance = 2f / 255f)
-        }
-        runOnIdle { bottomHeight.floatValue = 80f }
-        val taller = onRoot().captureToImage().toPixelMap()
-        assertTrue(
-            (0 until taller.height).any { y -> abs(taller[5, y].red - collapsed[5, y].red) > 0.02f },
-            "Changing bottom content must update the blur coverage",
-        )
-    }
 }
