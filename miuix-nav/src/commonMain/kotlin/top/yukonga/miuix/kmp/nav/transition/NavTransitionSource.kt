@@ -128,8 +128,10 @@ internal class NavTransitionSource(internal val graphicsContext: GraphicsContext
         }
     }
 
-    internal fun contains(positionInWindow: Offset, corners: NavTransitionCorners): Boolean {
+    internal fun containsVisiblePoint(host: LayoutCoordinates, positionInWindow: Offset, corners: NavTransitionCorners): Boolean {
         val coordinates = coordinates?.takeIf { it.isAttached } ?: return false
+        val visible = host.navVisibleBoundsOf(coordinates) ?: return false
+        if (!visible.contains(host.windowToLocal(positionInWindow))) return false
         val position = coordinates.windowToLocal(positionInWindow)
         val size = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
         return outline.update(sourceShape(corners), size, layoutDirection, density) && outline.contains(position)
@@ -174,6 +176,15 @@ internal class NavTransitionSource(internal val graphicsContext: GraphicsContext
             it.retain()
         }
     }
+}
+
+/** Bounds left after ancestor clipping and intersection with the navigation viewport. */
+internal fun LayoutCoordinates.navVisibleBoundsOf(source: LayoutCoordinates): Rect? {
+    if (!isAttached || !source.isAttached) return null
+    val clipped = localBoundingBoxOf(source, clipBounds = true)
+    if (!clipped.isFinite || clipped.isEmpty) return null
+    val viewport = Rect(0f, 0f, size.width.toFloat(), size.height.toFloat())
+    return clipped.intersect(viewport).takeUnless { it.isEmpty }
 }
 
 /**

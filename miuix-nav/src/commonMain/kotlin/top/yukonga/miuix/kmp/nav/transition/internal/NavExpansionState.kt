@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.nav.core.NavBackStack
 import top.yukonga.miuix.kmp.nav.core.NavKey
@@ -63,7 +64,7 @@ internal class NavExpansionState(private val backStack: NavBackStack, private va
                     it.origin in previousKeys && it.destination == destination && it.source.hasLivePlacement
                 } ?: bindings.singleOrNull { it.origin == origin && it.destination == destination && it.source.hasLivePlacement }
                 if (binding != null) {
-                    binding.source.capture(binding.cornerRadius, binding.containerColor, binding.corners)?.let {
+                    binding.captureAnchor()?.let {
                         anchorState(destination).value = it
                     }
                 }
@@ -85,17 +86,26 @@ internal class NavExpansionState(private val backStack: NavBackStack, private va
         }
     }
 
-    fun reentryAt(key: NavKey, positionInWindow: Offset): (() -> Unit)? {
-        val slot = anchors[key] ?: return null
-        val anchor = slot.value ?: return null
-        val bounds = anchor.source?.currentBounds ?: return null
-        if (key in backStack || !bounds.contains(positionInWindow) || anchor.source?.contains(positionInWindow, anchor.corners) != true) return null
-        val origin = backStack.lastOrNull()
-        return {
-            if (slot.value === anchor && backStack.lastOrNull() == origin && key !in backStack && anchor.source?.hasLivePlacement == true) {
-                anchor.updateOrigin()
-                backStack.add(key)
+    fun reentryAt(key: NavKey, host: LayoutCoordinates, positionInWindow: Offset): ((Offset) -> Unit)? {
+        val anchor = anchors[key]?.value ?: return null
+        val source = anchor.source ?: return null
+        val originStack = backStack.toList()
+        val origin = originStack.lastOrNull() ?: return null
+        if (key in originStack) return null
+        val binding = bindings.firstOrNull { it.source === source && it.origin == origin && it.destination == key } ?: return null
+        if (!source.containsVisiblePoint(host, positionInWindow, binding.corners)) return null
+        return reopen@{ releaseInWindow ->
+            if (binding !in bindings || backStack.toList() != originStack || !source.containsVisiblePoint(host, releaseInWindow, binding.corners)) {
+                return@reopen
             }
+            // A valid press can outlive the exiting entry and its retained drawing.
+            val current = anchors[key]?.value
+            when {
+                current === anchor -> anchor.updateOrigin()
+                current == null -> binding.captureAnchor()?.let { anchorState(key).value = it }
+                else -> return@reopen
+            }
+            backStack.add(key)
         }
     }
 
@@ -114,4 +124,6 @@ internal class NavExpansionBinding(
     var cornerRadius: Dp,
     var containerColor: Color,
     var corners: NavTransitionCorners,
-)
+) {
+    fun captureAnchor(): NavTransitionAnchor? = source.capture(cornerRadius, containerColor, corners)
+}

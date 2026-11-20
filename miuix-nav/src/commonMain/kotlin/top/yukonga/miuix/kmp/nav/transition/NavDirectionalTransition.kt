@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
 import top.yukonga.miuix.kmp.nav.core.LiveNavTransitionScope
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
@@ -107,9 +108,9 @@ private class NavDirectionalTransition(
 
     override fun handlesCornerClip(scope: NavTransitionScope): Boolean = branchFor(scope).handlesCornerClip(scope)
 
-    override fun reentryAt(key: NavKey, positionInWindow: Offset): (() -> Unit)? = (push as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
-        ?: (pop as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
-        ?: (predictivePop as? NavTransitionReentry)?.reentryAt(key, positionInWindow)
+    override fun reentryAt(key: NavKey, host: LayoutCoordinates, positionInWindow: Offset): ((Offset) -> Unit)? = (push as? NavTransitionReentry)?.reentryAt(key, host, positionInWindow)
+        ?: (pop as? NavTransitionReentry)?.reentryAt(key, host, positionInWindow)
+        ?: (predictivePop as? NavTransitionReentry)?.reentryAt(key, host, positionInWindow)
 }
 
 /**

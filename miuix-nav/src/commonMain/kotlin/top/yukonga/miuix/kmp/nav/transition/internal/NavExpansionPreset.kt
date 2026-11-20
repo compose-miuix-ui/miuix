@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
@@ -72,7 +73,7 @@ private class NavExpansionTransition(
     @Composable
     override fun rememberRenderer(scope: NavTransitionScope): NavEntryRenderer? = (transition() as? NavHostTransition)?.rememberRenderer(scope)
 
-    override fun reentryAt(key: NavKey, positionInWindow: Offset): (() -> Unit)? = state.reentryAt(key, positionInWindow)
+    override fun reentryAt(key: NavKey, host: LayoutCoordinates, positionInWindow: Offset): ((Offset) -> Unit)? = state.reentryAt(key, host, positionInWindow)
 }
 
 /** A fading page needs an opaque surface underneath it throughout the handoff. */

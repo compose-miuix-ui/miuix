@@ -88,9 +88,7 @@ internal class NavTransitionAnchor(
     internal fun visibleSourceBounds(scope: LiveNavTransitionScope): NavExpandSourceBounds? {
         val coordinates = source?.coordinates ?: return null
         val bounds = scope.boundsInHost(coordinates) ?: return null
-        val viewport = Rect(0f, 0f, scope.layoutSize.width.toFloat(), scope.layoutSize.height.toFloat())
-        val visible = scope.boundsInHost(coordinates, clipBounds = true)?.intersect(viewport)
-            ?.takeUnless { it.isEmpty } ?: return null
+        val visible = scope.visibleBoundsInHost(coordinates) ?: return null
         return NavExpandSourceBounds(bounds, visible)
     }
 

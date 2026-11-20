@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.layout.LayoutCoordinates
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
@@ -45,7 +46,7 @@ internal class NavTransitionHostContext(val expansion: NavExpansionState, privat
 
 /** Resolves source taps while the destination is exiting. */
 internal interface NavTransitionReentry {
-    fun reentryAt(key: NavKey, positionInWindow: Offset): (() -> Unit)?
+    fun reentryAt(key: NavKey, host: LayoutCoordinates, positionInWindow: Offset): ((Offset) -> Unit)?
 }
 
 /** Internal entry rendering contract. Public navigation calls do not manage drawing or recordings. */

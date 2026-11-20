@@ -42,7 +42,7 @@ internal fun Modifier.navReentryInput(
             ?: return@awaitEachGesture
         val layout = coordinates()?.takeIf { it.isAttached } ?: return@awaitEachGesture
         val start = layout.localToWindow(down.position)
-        val reopen = reentry.reentryAt(topEntry.key, start) ?: return@awaitEachGesture
+        val reopen = reentry.reentryAt(topEntry.key, layout, start) ?: return@awaitEachGesture
         down.consume()
         do {
             val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -50,13 +50,15 @@ internal fun Modifier.navReentryInput(
             val currentLayout = coordinates()?.takeIf { it.isAttached }
             if (change == null || currentLayout == null || event.changes.any { it.id != down.id && it.pressed }) {
                 return@awaitEachGesture
-            } else if ((currentLayout.localToWindow(change.position) - start).getDistance() > viewConfiguration.touchSlop || change.isConsumed) {
+            }
+            val positionInWindow = currentLayout.localToWindow(change.position)
+            if ((positionInWindow - start).getDistance() > viewConfiguration.touchSlop || change.isConsumed) {
                 // Leave this move unconsumed so scroll/drag recognizers can take ownership.
                 return@awaitEachGesture
             }
             if (!change.pressed) {
                 change.consume()
-                reopen()
+                reopen(positionInWindow)
                 break
             }
         } while (true)

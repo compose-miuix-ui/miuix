@@ -24,6 +24,7 @@ import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandFrame
 import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandSourceBounds
 import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandTransition
 import top.yukonga.miuix.kmp.nav.transition.internal.NavOutlineMorph
+import top.yukonga.miuix.kmp.nav.transition.navVisibleBoundsOf
 
 /**
  * A [NavTransitionScope] whose [relativeDepth] (and derived [role]) are **deferred reads** of the
@@ -92,11 +93,13 @@ internal class LiveNavTransitionScope(
 
     override fun windowToLocal(position: Offset): Offset = windowPositionToLocal?.invoke(position) ?: super.windowToLocal(position)
 
-    internal fun boundsInHost(source: LayoutCoordinates, clipBounds: Boolean = false): Rect? {
+    internal fun boundsInHost(source: LayoutCoordinates): Rect? {
         val host = hostCoordinates?.invoke() ?: return null
         if (!host.isAttached || !source.isAttached) return null
-        return host.localBoundingBoxOf(source, clipBounds = clipBounds).takeIf { it.isFinite && !it.isEmpty }
+        return host.localBoundingBoxOf(source, clipBounds = false).takeIf { it.isFinite && !it.isEmpty }
     }
+
+    internal fun visibleBoundsInHost(source: LayoutCoordinates): Rect? = hostCoordinates?.invoke()?.navVisibleBoundsOf(source)
 
     override val relativeDepth: Float
         get() = relativeDepth(presentation.animatedTop.value, entryIndex)

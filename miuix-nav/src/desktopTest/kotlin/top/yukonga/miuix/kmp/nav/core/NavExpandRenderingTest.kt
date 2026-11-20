@@ -384,6 +384,133 @@ class NavExpandRenderingTest {
     }
 
     @Test
+    fun reentryTapReopensFromThePressedSourceAfterTheExitIsDisposed() = runComposeUiTest {
+        val stack = navBackStackOf(ExpandRoot)
+        val detail = ExpandDetail(1)
+        var expansion: NavExpansionState? = null
+        var scope: LiveNavTransitionScope? = null
+        var owner: LifecycleOwner? = null
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f)) {
+                NavDisplay(stack, modifier = Modifier.size(320.dp), effects = NavDisplayEffects.None, transition = NavTransitions.expansion(Color.Blue)) {
+                    entry<ExpandRoot> {
+                        expansion = LocalNavExpansionState.current
+                        Row {
+                            for ((tag, color) in listOf("first-source" to Color.Red, "pressed-source" to Color.Green)) {
+                                Box(
+                                    Modifier.size(80.dp).testTag(tag)
+                                        .navTransitionSource(detail, containerColor = color)
+                                        .background(color)
+                                        .clickable { stack.add(detail) },
+                                )
+                            }
+                        }
+                    }
+                    entry<ExpandDetail> {
+                        scope = LocalNavTransitionScope.current as LiveNavTransitionScope
+                        owner = LocalLifecycleOwner.current
+                        Box(Modifier.fillMaxSize().background(Color.Blue))
+                    }
+                }
+            }
+        }
+        onNodeWithTag("pressed-source").performTouchInput { click() }
+        waitForIdle()
+        val state = assertNotNull(expansion)
+        val originalSlot = state.anchorState(detail)
+        val originalAnchor = assertNotNull(originalSlot.value)
+        val originalOwner = assertNotNull(owner)
+        assertEquals(Color.Green, originalAnchor.containerColor)
+
+        mainClock.autoAdvance = false
+        runOnIdle { stack.removeLastOrNull() }
+        mainClock.advanceTimeUntil(600) { assertNotNull(scope).relativeDepth <= -0.75f }
+        waitForIdle()
+        assertSame(originalAnchor, originalSlot.value)
+        onRoot().performTouchInput { down(Offset(120f, 40f)) }
+
+        mainClock.advanceTimeBy(600)
+        waitForIdle()
+        assertEquals(Lifecycle.State.DESTROYED, originalOwner.lifecycle.currentState)
+        assertNull(originalSlot.value)
+        assertEquals(listOf<NavKey>(ExpandRoot), stack.toList())
+
+        onRoot().performTouchInput { up() }
+        mainClock.autoAdvance = true
+        waitForIdle()
+        assertEquals(listOf(ExpandRoot, detail), stack.toList())
+        assertNotSame(originalOwner, owner)
+        val reopenedAnchor = assertNotNull(state.anchorState(detail).value)
+        assertNotSame(originalAnchor, reopenedAnchor)
+        assertSame(originalAnchor.source, reopenedAnchor.source)
+    }
+
+    @Test
+    fun reentryTapPassesThroughTheClippedAreaAndReopensFromTheVisibleArea() = runComposeUiTest {
+        val stack = navBackStackOf(ExpandRoot)
+        val detail = ExpandDetail(1)
+        val sourceClipped = mutableStateOf(false)
+        var expansion: NavExpansionState? = null
+        var scope: LiveNavTransitionScope? = null
+        var neighborClicks = 0
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f)) {
+                NavDisplay(stack, modifier = Modifier.size(320.dp), effects = NavDisplayEffects.None, transition = NavTransitions.expansion(Color.Blue)) {
+                    entry<ExpandRoot> {
+                        expansion = LocalNavExpansionState.current
+                        Box(Modifier.fillMaxSize()) {
+                            Box(Modifier.size(80.dp, 100.dp).clipToBounds()) {
+                                Box(
+                                    Modifier.offset(y = if (sourceClipped.value) 80.dp else 0.dp)
+                                        .size(80.dp).testTag("clippable-source")
+                                        .navTransitionSource(detail, containerColor = Color.Green)
+                                        .background(Color.Green)
+                                        .clickable { stack.add(detail) },
+                                )
+                            }
+                            Box(
+                                Modifier.offset(y = 130.dp).size(80.dp, 40.dp).testTag("clipped-area-neighbor")
+                                    .background(Color.Red)
+                                    .clickable { neighborClicks++ },
+                            )
+                        }
+                    }
+                    entry<ExpandDetail> {
+                        scope = LocalNavTransitionScope.current as LiveNavTransitionScope
+                        Box(Modifier.fillMaxSize().background(Color.Blue))
+                    }
+                }
+            }
+        }
+        onNodeWithTag("clippable-source").performTouchInput { click() }
+        waitForIdle()
+        val state = assertNotNull(expansion)
+        val anchor = assertNotNull(state.anchorState(detail).value)
+        runOnIdle { sourceClipped.value = true }
+        waitForIdle()
+
+        mainClock.autoAdvance = false
+        runOnIdle { stack.removeLastOrNull() }
+        mainClock.advanceTimeUntil(600) { assertNotNull(scope).relativeDepth <= -0.9f }
+        waitForIdle()
+        runOnIdle {
+            val bounds = assertNotNull(anchor.visibleSourceBounds(assertNotNull(scope)))
+            assertTrue(bounds.full.contains(Offset(40f, 150f)))
+            assertFalse(bounds.visible.contains(Offset(40f, 150f)))
+            assertTrue(bounds.visible.contains(Offset(40f, 90f)))
+        }
+        onNodeWithTag("clipped-area-neighbor").performTouchInput { click() }
+        assertEquals(1, neighborClicks)
+        assertEquals(listOf<NavKey>(ExpandRoot), stack.toList())
+
+        onRoot().performTouchInput { click(Offset(40f, 90f)) }
+        mainClock.autoAdvance = true
+        waitForIdle()
+        assertEquals(listOf(ExpandRoot, detail), stack.toList())
+        assertSame(anchor, state.anchorState(detail).value)
+    }
+
+    @Test
     fun scaledPaneConvertsWindowAnchorsInsteadOfOnlySubtractingTheOrigin() = runComposeUiTest {
         val stack = navBackStackOf(ExpandRoot)
         val source = NavTransitionAnchor(Rect(100f, 316f, 310f, 412f), 0.dp)
