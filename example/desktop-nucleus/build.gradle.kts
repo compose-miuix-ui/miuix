@@ -23,7 +23,7 @@ kotlin {
         named("desktopMain") {
             dependencies {
                 implementation(projects.example.shared)
-                implementation(compose.desktop.currentOs)
+                implementation(libs.jetbrains.compose.foundation)
                 implementation(libs.nucleus.application)
                 implementation(libs.nucleus.decorated.window.tao)
             }

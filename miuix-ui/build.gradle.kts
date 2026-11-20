@@ -59,7 +59,6 @@ kotlin {
 
         named("desktopTest") {
             dependencies {
-                implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)
             }
         }

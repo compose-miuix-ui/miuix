@@ -298,8 +298,9 @@ fun GlassTopAppBar(
     val currentOffset by rememberUpdatedState(visualContentOffset)
     val isContentScrolled by remember(scrollBehavior) {
         computedStateOf {
-            val offset = scrollBehavior?.state?.contentOffset ?: currentOffset?.invoke()
-            offset?.let { it < -1f } ?: true
+            scrollBehavior?.state?.let { it.contentOffset < -1f || it.overscrollOffset < -1f }
+                ?: currentOffset?.invoke()?.let { it < -1f }
+                ?: true
         }
     }
     GlassTopAppBar(

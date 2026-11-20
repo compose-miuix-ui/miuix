@@ -25,7 +25,7 @@ kotlin {
             dependencies {
                 implementation(projects.miuixWindow)
                 implementation(projects.example.shared)
-                implementation(compose.desktop.currentOs)
+                implementation(libs.jetbrains.compose.foundation)
                 implementation(libs.nucleus.darkmode.detector)
             }
         }
