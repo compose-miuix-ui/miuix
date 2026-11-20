@@ -407,8 +407,9 @@ fun GlassNavigationRail(
                 },
             ),
     ) {
-        val viewportWidth = maxWidth
-        val viewportHeight = maxHeight
+        // maxWidth/maxHeight go stale when only the density changes; the pixels don't.
+        val viewportWidth = with(density) { constraints.maxWidth.toDp() }
+        val viewportHeight = with(density) { constraints.maxHeight.toDp() }
         val totalSlots = sourceWidths.fold(0.dp) { sum, width -> sum + width }
         // The bar lays out its first destination after its content padding and the toggle's slot.
         val leadingActionWidth = if (showToggle) RailLeadingActionWidth else 0.dp
