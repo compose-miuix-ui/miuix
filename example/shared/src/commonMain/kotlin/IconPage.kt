@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -353,6 +354,7 @@ fun IconsPage(
                         }
                         LazyColumn(
                             state = pageListState,
+                            cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .pageScrollModifiers(
@@ -534,6 +536,7 @@ fun IconsPage(
                 }
                 LazyColumn(
                     state = searchListState,
+                    cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
                     modifier = Modifier.fillMaxSize().appPageHorizontalInsets(),
                     contentPadding = PaddingValues(
                         top = pageInsets.safeInsets.asPaddingValues().calculateTopPadding() + pageInsets.searchTop() + searchBarSpace,
