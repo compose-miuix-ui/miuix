@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -60,6 +61,30 @@ class TabRowResizeTest {
         width = 360.dp
         waitForIdle()
         assertCentered("Tab 4")
+    }
+
+    @Test
+    fun selectionChangedWithAResizeStillAnimates() = runComposeUiTest {
+        var width by mutableStateOf(300.dp)
+        var selected by mutableIntStateOf(3)
+        setContent {
+            MiuixTheme {
+                Box(Modifier.layoutWidth { width }.testTag("row")) {
+                    TabRowWithContour(tabs = tabs, selectedTabIndex = selected, onTabSelected = {})
+                }
+            }
+        }
+        waitForIdle()
+        assertCentered("Tab 3")
+        mainClock.autoAdvance = false
+        width = 310.dp
+        selected = 5
+        mainClock.advanceTimeByFrame()
+        // The resize re-centers the settled tab; the new one is still being scrolled to.
+        assertCentered("Tab 3")
+        mainClock.autoAdvance = true
+        waitForIdle()
+        assertCentered("Tab 5")
     }
 
     // (width - 2 * spacing) / 3: wider than the max, but three max-width tabs fit.

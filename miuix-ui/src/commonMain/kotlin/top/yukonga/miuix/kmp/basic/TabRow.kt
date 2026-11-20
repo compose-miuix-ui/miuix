@@ -27,7 +27,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -103,7 +102,6 @@ fun TabRow(
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val config = rememberTabRowConfig(
         tabs = tabs,
-        selectedTabIndex = selectedTabIndex,
         minWidth = minWidth,
         maxWidth = maxWidth,
         cornerRadius = cornerRadius,
@@ -217,7 +215,6 @@ fun TabRowWithContour(
     val outerCornerRadius = cornerRadius + contourPadding
     val config = rememberTabRowConfig(
         tabs = tabs,
-        selectedTabIndex = selectedTabIndex,
         minWidth = minWidth,
         maxWidth = maxWidth,
         cornerRadius = cornerRadius,
@@ -441,14 +438,12 @@ private class TabRowConfig(
     /** The LazyRow's width, written during layout. */
     private var availableWidth by mutableIntStateOf(0)
 
-    var selectedTabIndex = 0
-
     var lastSettledSelectedTabIndex = -1
         private set
 
     private var animatingScroll = false
 
-    /** Records the width and re-centers the selected tab. */
+    /** Records the width and re-centers the settled tab; a new selection is left to [scrollToSelected]. */
     val availableWidthModifier: Modifier = Modifier.layout { measurable, constraints ->
         val width = constraints.maxWidth
         // Don't observe our own write.
@@ -456,7 +451,7 @@ private class TabRowConfig(
             if (width != availableWidth) {
                 availableWidth = width
                 if (!animatingScroll && lastSettledSelectedTabIndex >= 0) {
-                    listState.requestScrollToItem(selectedTabIndex, centerOffset())
+                    listState.requestScrollToItem(lastSettledSelectedTabIndex, centerOffset())
                 }
             }
         }
@@ -474,7 +469,6 @@ private class TabRowConfig(
     private fun centerOffset(): Int = -((availableWidth - tabWidth()) / 2)
 
     suspend fun scrollToSelected(index: Int) {
-        selectedTabIndex = index
         if (availableWidth == 0) {
             // Not measured yet: the first layout centers the selected tab.
             lastSettledSelectedTabIndex = index
@@ -502,7 +496,6 @@ private class TabRowConfig(
 @Composable
 private fun rememberTabRowConfig(
     tabs: List<String>,
-    selectedTabIndex: Int,
     minWidth: Dp,
     maxWidth: Dp,
     cornerRadius: Dp,
@@ -511,7 +504,7 @@ private fun rememberTabRowConfig(
 ): TabRowConfig {
     val resolvedListState = listState ?: rememberLazyListState()
     val density = LocalDensity.current
-    val config = remember(resolvedListState, cornerRadius, tabs.size, minWidth, maxWidth, spacing, density) {
+    return remember(resolvedListState, cornerRadius, tabs.size, minWidth, maxWidth, spacing, density) {
         with(density) {
             TabRowConfig(
                 cornerRadius = cornerRadius,
@@ -523,8 +516,6 @@ private fun rememberTabRowConfig(
             )
         }
     }
-    SideEffect { config.selectedTabIndex = selectedTabIndex }
-    return config
 }
 
 private fun Modifier.tabWidth(width: () -> Int): Modifier = layout { measurable, constraints ->
