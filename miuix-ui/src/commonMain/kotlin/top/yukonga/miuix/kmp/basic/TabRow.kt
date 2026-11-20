@@ -13,14 +13,12 @@ import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -29,6 +27,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.CollectionInfo
@@ -57,7 +58,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleBorder
@@ -101,105 +101,77 @@ fun TabRow(
     indication: Indication? = null,
 ) {
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
+    val config = rememberTabRowConfig(
+        tabs = tabs,
+        selectedTabIndex = selectedTabIndex,
+        minWidth = minWidth,
+        maxWidth = maxWidth,
+        cornerRadius = cornerRadius,
+        spacing = itemSpacing,
+        listState = listState,
+    )
+    LaunchedEffect(config, selectedTabIndex) { config.scrollToSelected(selectedTabIndex) }
 
-    BoxWithConstraints(
+    val scrollOffset by remember(config) { computedStateOf { config.scrollOffset() } }
+    val hasScrollRange by remember(config.listState) {
+        computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+    }
+    val reverseScrolling by remember(config.listState) {
+        computedStateOf { config.listState.layoutInfo.reverseLayout }
+    }
+    val reverseDirection = ScrollableDefaults.reverseDirection(
+        layoutDirection = LocalLayoutDirection.current,
+        orientation = Orientation.Horizontal,
+        reverseScrolling = reverseScrolling,
+    )
+    val nestedScrollConnection = remember(config.listState, reverseDirection) {
+        TabRowNestedScrollConnection(config.listState, reverseDirection)
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
             .height(height)
-            .background(color = colors.backgroundColor(false)),
+            .background(color = colors.backgroundColor(false))
+            .then(config.availableWidthModifier)
+            .nestedScroll(nestedScrollConnection)
+            .overScrollHorizontal(
+                isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+            ),
     ) {
-        val config = rememberTabRowConfig(
-            tabs = tabs,
-            minWidth = minWidth,
-            maxWidth = maxWidth,
-            cornerRadius = cornerRadius,
-            spacing = itemSpacing,
-            lazyRowAvailableWidth = this.maxWidth,
-            listState = listState,
-        )
-        val density = LocalDensity.current
-        val tabWidthPx = with(density) { config.tabWidth.toPx() }
-        val spacingPx = with(density) { itemSpacing.toPx() }
-        val availableWidth = this.maxWidth
-        var lastSettledSelectedTabIndex by remember(config.listState) { mutableIntStateOf(-1) }
-
-        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
-            val centerOffset = (availableWidth - config.tabWidth) / 2
-            val offsetPx = with(density) { -centerOffset.toPx() }.fastRoundToInt()
-            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
-                config.listState.scrollToItem(selectedTabIndex, offsetPx)
-            } else {
-                config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
-            }
-            lastSettledSelectedTabIndex = selectedTabIndex
-        }
-
-        val scrollOffset by remember {
-            computedStateOf {
-                val state = config.listState
-                val firstIndex = state.firstVisibleItemIndex
-                val firstOffset = state.firstVisibleItemScrollOffset
-                firstIndex * (tabWidthPx + spacingPx) + firstOffset
-            }
-        }
-
-        val hasScrollRange by remember(config.listState) {
-            computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
-        }
-        val reverseScrolling by remember(config.listState) {
-            computedStateOf { config.listState.layoutInfo.reverseLayout }
-        }
-        val reverseDirection = ScrollableDefaults.reverseDirection(
-            layoutDirection = LocalLayoutDirection.current,
-            orientation = Orientation.Horizontal,
-            reverseScrolling = reverseScrolling,
-        )
-        val nestedScrollConnection = remember(config.listState, reverseDirection) {
-            TabRowNestedScrollConnection(config.listState, reverseDirection)
-        }
-
         Box(
+            Modifier
+                .offset { IntOffset((config.tabPosition(selectedTabIndex.toFloat()) - scrollOffset).fastRoundToInt(), 0) }
+                .tabWidth(config::tabWidth)
+                .fillMaxHeight()
+                .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
+        )
+        LazyRow(
+            state = config.listState,
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(nestedScrollConnection)
-                .overScrollHorizontal(
-                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
-                ),
+                // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
+                // collectionInfo (the leftmost semantics in the chain wins the property).
+                .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(itemSpacing),
+            overscrollEffect = null,
+            userScrollEnabled = hasScrollRange,
         ) {
-            Box(
-                Modifier
-                    .offset { IntOffset(((selectedTabIndex * (tabWidthPx + spacingPx)) - scrollOffset).fastRoundToInt(), 0) }
-                    .width(config.tabWidth)
-                    .fillMaxHeight()
-                    .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
-            )
-            LazyRow(
-                state = config.listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
-                    // collectionInfo (the leftmost semantics in the chain wins the property).
-                    .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-                overscrollEffect = null,
-                userScrollEnabled = hasScrollRange,
-            ) {
-                itemsIndexed(tabs) { index, tabText ->
-                    TabItem(
-                        text = tabText,
-                        index = index,
-                        isSelected = selectedTabIndex == index,
-                        onClick = { currentOnTabSelected.invoke(index) },
-                        cornerRadius = config.cornerRadius,
-                        width = config.tabWidth,
-                        color = colors.contentColor(selectedTabIndex == index),
-                        contentAlignment = contentAlignment,
-                        interactionSource = interactionSource,
-                        indication = indication,
-                    )
-                }
+            itemsIndexed(tabs) { index, tabText ->
+                TabItem(
+                    text = tabText,
+                    index = index,
+                    isSelected = selectedTabIndex == index,
+                    onClick = { currentOnTabSelected.invoke(index) },
+                    cornerRadius = config.cornerRadius,
+                    width = config::tabWidth,
+                    color = colors.contentColor(selectedTabIndex == index),
+                    contentAlignment = contentAlignment,
+                    interactionSource = interactionSource,
+                    indication = indication,
+                )
             }
         }
     }
@@ -243,117 +215,88 @@ fun TabRowWithContour(
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
     val contourPadding = 5.dp
     val outerCornerRadius = cornerRadius + contourPadding
+    val config = rememberTabRowConfig(
+        tabs = tabs,
+        selectedTabIndex = selectedTabIndex,
+        minWidth = minWidth,
+        maxWidth = maxWidth,
+        cornerRadius = cornerRadius,
+        spacing = itemSpacing,
+        listState = listState,
+    )
+    // The indicator moves in tab positions rather than pixels.
+    val indicatorPosition = remember { Animatable(selectedTabIndex.toFloat()) }
+    LaunchedEffect(config, selectedTabIndex) {
+        val target = selectedTabIndex.toFloat()
+        if (config.lastSettledSelectedTabIndex < 0 || config.lastSettledSelectedTabIndex == selectedTabIndex) {
+            indicatorPosition.snapTo(target)
+        } else {
+            indicatorPosition.animateTo(target, tween(200, easing = LinearEasing))
+        }
+    }
+    LaunchedEffect(config, selectedTabIndex) { config.scrollToSelected(selectedTabIndex) }
 
-    BoxWithConstraints(
+    val scrollOffset by remember(config) { computedStateOf { config.scrollOffset() } }
+    val hasScrollRange by remember(config.listState) {
+        computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+    }
+    val reverseScrolling by remember(config.listState) {
+        computedStateOf { config.listState.layoutInfo.reverseLayout }
+    }
+    val reverseDirection = ScrollableDefaults.reverseDirection(
+        layoutDirection = LocalLayoutDirection.current,
+        orientation = Orientation.Horizontal,
+        reverseScrolling = reverseScrolling,
+    )
+    val nestedScrollConnection = remember(config.listState, reverseDirection) {
+        TabRowNestedScrollConnection(config.listState, reverseDirection)
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
-            .height(height),
+            .height(height)
+            .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
+            .padding(contourPadding)
+            .then(config.availableWidthModifier)
+            .nestedScroll(nestedScrollConnection)
+            .overScrollHorizontal(
+                isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
+            ),
     ) {
-        val lazyRowAvailableWidth = this.maxWidth - (contourPadding * 2)
-        val config = rememberTabRowConfig(
-            tabs = tabs,
-            minWidth = minWidth,
-            maxWidth = maxWidth,
-            cornerRadius = cornerRadius,
-            spacing = itemSpacing,
-            lazyRowAvailableWidth = lazyRowAvailableWidth,
-            listState = listState,
-        )
-        val density = LocalDensity.current
-        val tabWidthPx = with(density) { config.tabWidth.toPx() }
-        val spacingPx = with(density) { itemSpacing.toPx() }
-        val indicatorOffset = remember { Animatable(0f) }
-        val availableWidth = this.maxWidth
-        var lastSettledSelectedTabIndex by remember(config.listState) { mutableIntStateOf(-1) }
-
-        LaunchedEffect(selectedTabIndex, tabWidthPx, spacingPx) {
-            val target = selectedTabIndex * (tabWidthPx + spacingPx)
-            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
-                indicatorOffset.snapTo(target)
-            } else {
-                indicatorOffset.animateTo(target, tween(200, easing = LinearEasing))
-            }
-        }
-
-        LaunchedEffect(selectedTabIndex, availableWidth, config.listState, config.tabWidth) {
-            val centerOffset = (availableWidth - (contourPadding * 2) - config.tabWidth) / 2
-            val offsetPx = with(density) { -centerOffset.toPx() }.fastRoundToInt()
-            if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == selectedTabIndex) {
-                config.listState.scrollToItem(selectedTabIndex, offsetPx)
-            } else {
-                config.listState.animateScrollToItem(selectedTabIndex, offsetPx)
-            }
-            lastSettledSelectedTabIndex = selectedTabIndex
-        }
-
-        val scrollOffset by remember {
-            computedStateOf {
-                val state = config.listState
-                val firstIndex = state.firstVisibleItemIndex
-                val firstOffset = state.firstVisibleItemScrollOffset
-                firstIndex * (tabWidthPx + spacingPx) + firstOffset
-            }
-        }
-
-        val hasScrollRange by remember(config.listState) {
-            computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
-        }
-        val reverseScrolling by remember(config.listState) {
-            computedStateOf { config.listState.layoutInfo.reverseLayout }
-        }
-        val reverseDirection = ScrollableDefaults.reverseDirection(
-            layoutDirection = LocalLayoutDirection.current,
-            orientation = Orientation.Horizontal,
-            reverseScrolling = reverseScrolling,
-        )
-        val nestedScrollConnection = remember(config.listState, reverseDirection) {
-            TabRowNestedScrollConnection(config.listState, reverseDirection)
-        }
-
         Box(
+            Modifier
+                .offset { IntOffset((config.tabPosition(indicatorPosition.value) - scrollOffset).fastRoundToInt(), 0) }
+                .tabWidth(config::tabWidth)
+                .fillMaxHeight()
+                .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
+        )
+        LazyRow(
+            state = config.listState,
             modifier = Modifier
                 .fillMaxSize()
-                .squircleBackground(color = colors.backgroundColor(false), cornerRadius = outerCornerRadius)
-                .padding(contourPadding)
-                .nestedScroll(nestedScrollConnection)
-                .overScrollHorizontal(
-                    isEnabled = { config.listState.canScrollBackward || config.listState.canScrollForward },
-                ),
+                // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
+                // collectionInfo (the leftmost semantics in the chain wins the property).
+                .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(itemSpacing),
+            overscrollEffect = null,
+            userScrollEnabled = hasScrollRange,
         ) {
-            Box(
-                Modifier
-                    .offset { IntOffset((indicatorOffset.value - scrollOffset).fastRoundToInt(), 0) }
-                    .width(config.tabWidth)
-                    .fillMaxHeight()
-                    .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
-            )
-            LazyRow(
-                state = config.listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    // Announce "tab X of Y": this explicit count overrides LazyRow's auto-derived
-                    // collectionInfo (the leftmost semantics in the chain wins the property).
-                    .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-                overscrollEffect = null,
-                userScrollEnabled = hasScrollRange,
-            ) {
-                itemsIndexed(tabs) { index, tabText ->
-                    TabItemWithContour(
-                        text = tabText,
-                        index = index,
-                        isSelected = selectedTabIndex == index,
-                        onClick = { currentOnTabSelected.invoke(index) },
-                        cornerRadius = config.cornerRadius,
-                        width = config.tabWidth,
-                        color = colors.contentColor(selectedTabIndex == index),
-                        contentAlignment = contentAlignment,
-                        interactionSource = interactionSource,
-                        indication = indication,
-                    )
-                }
+            itemsIndexed(tabs) { index, tabText ->
+                TabItemWithContour(
+                    text = tabText,
+                    index = index,
+                    isSelected = selectedTabIndex == index,
+                    onClick = { currentOnTabSelected.invoke(index) },
+                    cornerRadius = config.cornerRadius,
+                    width = config::tabWidth,
+                    color = colors.contentColor(selectedTabIndex == index),
+                    contentAlignment = contentAlignment,
+                    interactionSource = interactionSource,
+                    indication = indication,
+                )
             }
         }
     }
@@ -391,7 +334,7 @@ private fun TabItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
-    width: Dp,
+    width: () -> Int,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
     interactionSource: MutableInteractionSource? = null,
@@ -401,7 +344,7 @@ private fun TabItem(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .width(width)
+            .tabWidth(width)
             .squircleBorder(
                 width = { if (isSelected) 0.dp else 1.dp },
                 color = { outlineColor },
@@ -445,7 +388,7 @@ private fun TabItemWithContour(
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
-    width: Dp,
+    width: () -> Int,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
     interactionSource: MutableInteractionSource? = null,
@@ -454,7 +397,7 @@ private fun TabItemWithContour(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .width(width)
+            .tabWidth(width)
             // Clip only when an indication is supplied, to skip squircleClip's offscreen layer by default.
             .then(if (indication != null) Modifier.squircleClip(cornerRadius) else Modifier)
             .selectable(
@@ -485,49 +428,124 @@ private fun TabItemWithContour(
     }
 }
 
-/**
- * Base configuration for TabRow implementations.
- */
-private data class TabRowConfig(
-    val tabWidth: Dp,
+/** Shared state of the TabRow implementations; the tab width is resolved during layout. */
+@Stable
+private class TabRowConfig(
     val cornerRadius: Dp,
     val listState: LazyListState,
-)
+    private val tabCount: Int,
+    private val minWidthPx: Float,
+    private val maxWidthPx: Float,
+    private val spacingPx: Float,
+) {
+    /** The LazyRow's width, written during layout. */
+    private var availableWidth by mutableIntStateOf(0)
+
+    var selectedTabIndex = 0
+
+    var lastSettledSelectedTabIndex = -1
+        private set
+
+    private var animatingScroll = false
+
+    /** Records the width and re-centers the selected tab. */
+    val availableWidthModifier: Modifier = Modifier.layout { measurable, constraints ->
+        val width = constraints.maxWidth
+        // Don't observe our own write.
+        Snapshot.withoutReadObservation {
+            if (width != availableWidth) {
+                availableWidth = width
+                if (!animatingScroll && lastSettledSelectedTabIndex >= 0) {
+                    listState.requestScrollToItem(selectedTabIndex, centerOffset())
+                }
+            }
+        }
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
+
+    fun tabWidth(): Int = calculateTabWidth(tabCount, minWidthPx, maxWidthPx, spacingPx, availableWidth.toFloat()).fastRoundToInt()
+
+    /** [position] may be fractional. */
+    fun tabPosition(position: Float): Float = position * (tabWidth() + spacingPx)
+
+    fun scrollOffset(): Float = tabPosition(listState.firstVisibleItemIndex.toFloat()) + listState.firstVisibleItemScrollOffset
+
+    private fun centerOffset(): Int = -((availableWidth - tabWidth()) / 2)
+
+    suspend fun scrollToSelected(index: Int) {
+        selectedTabIndex = index
+        if (availableWidth == 0) {
+            // Not measured yet: the first layout centers the selected tab.
+            lastSettledSelectedTabIndex = index
+            return
+        }
+        if (lastSettledSelectedTabIndex < 0 || lastSettledSelectedTabIndex == index) {
+            listState.scrollToItem(index, centerOffset())
+        } else {
+            animatingScroll = true
+            try {
+                listState.animateScrollToItem(index, centerOffset())
+            } finally {
+                animatingScroll = false
+            }
+            // The width may have changed during the animation.
+            listState.scrollToItem(index, centerOffset())
+        }
+        lastSettledSelectedTabIndex = index
+    }
+}
 
 /**
  * Prepare common TabRow configuration.
- * @param lazyRowAvailableWidth The actual width available for the LazyRow's content (tabs + inter-tab spacing).
  */
 @Composable
 private fun rememberTabRowConfig(
     tabs: List<String>,
+    selectedTabIndex: Int,
     minWidth: Dp,
     maxWidth: Dp,
     cornerRadius: Dp,
     spacing: Dp,
-    lazyRowAvailableWidth: Dp,
     listState: LazyListState? = null,
 ): TabRowConfig {
     val resolvedListState = listState ?: rememberLazyListState()
-    val tabWidth = remember(tabs.size, minWidth, maxWidth, lazyRowAvailableWidth, spacing) {
-        calculateTabWidth(tabs.size, minWidth, maxWidth, spacing, lazyRowAvailableWidth)
+    val density = LocalDensity.current
+    val config = remember(resolvedListState, cornerRadius, tabs.size, minWidth, maxWidth, spacing, density) {
+        with(density) {
+            TabRowConfig(
+                cornerRadius = cornerRadius,
+                listState = resolvedListState,
+                tabCount = tabs.size,
+                minWidthPx = minWidth.toPx(),
+                maxWidthPx = maxWidth.toPx(),
+                spacingPx = spacing.toPx(),
+            )
+        }
     }
-    return TabRowConfig(tabWidth, cornerRadius, resolvedListState)
+    SideEffect { config.selectedTabIndex = selectedTabIndex }
+    return config
+}
+
+private fun Modifier.tabWidth(width: () -> Int): Modifier = layout { measurable, constraints ->
+    val tabWidth = width().coerceAtLeast(0)
+    val placeable = measurable.measure(constraints.copy(minWidth = tabWidth, maxWidth = tabWidth))
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }
 
 private fun calculateTabWidth(
     tabCount: Int,
-    minWidth: Dp,
-    maxWidth: Dp,
-    spacing: Dp,
-    availableWidth: Dp,
-): Dp {
+    minWidth: Float,
+    maxWidth: Float,
+    spacing: Float,
+    availableWidth: Float,
+): Float {
     if (tabCount == 0) return minWidth
 
-    val totalSpacing = if (tabCount > 1) (tabCount - 1) * spacing else 0.dp
+    val totalSpacing = if (tabCount > 1) (tabCount - 1) * spacing else 0f
     val contentWidth = availableWidth - totalSpacing
 
-    return if (contentWidth <= 0.dp) {
+    return if (contentWidth <= 0f) {
         minWidth
     } else {
         val idealWidth = contentWidth / tabCount
