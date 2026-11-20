@@ -6,4 +6,5 @@ package top.yukonga.miuix.kmp.theme
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun ProvideDisplayCutoutFix() {}
+actual fun ProvideDisplayCutoutFix() {
+}

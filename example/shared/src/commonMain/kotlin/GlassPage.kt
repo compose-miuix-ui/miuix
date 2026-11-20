@@ -11,14 +11,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -70,6 +74,7 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
+import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRowDefaults
@@ -81,10 +86,13 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassTransformPopup
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
+import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
+import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Add
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Edit
 import top.yukonga.miuix.kmp.icon.glass.HomeOutline
 import top.yukonga.miuix.kmp.icon.glass.ImageOutline
@@ -101,9 +109,10 @@ import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.blur_test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.LocalAppPageInsets
+import utils.LocalTopAppBarCenterObstructionStart
 import utils.TopLayer
 import utils.appPageHorizontalInsets
-import utils.appPageSearchInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
 import utils.rememberAppSafePadding
@@ -135,8 +144,9 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 @Composable
 fun GlassPage(padding: PaddingValues) {
     val navigator = LocalNavigator.current
+    val appState = LocalAppState.current
+    val isWideScreen = LocalIsWideScreen.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
-    val searchModifier = Modifier.appPageSearchInsets()
     val isInDark = isInDarkTheme()
     val safePadding = rememberAppSafePadding()
     val backdrop = rememberLayerBackdrop()
@@ -162,9 +172,8 @@ fun GlassPage(padding: PaddingValues) {
     }
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
-    val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
-    val contentUnderTopBar by remember {
-        derivedStateOf { listState.canScrollBackward }
+    val contentUnderTopBar by remember(listState, scrollBehavior) {
+        computedStateOf { listState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
     }
     val tabSurfaceAlpha = if (contentUnderTopBar) 1f else 0f
 
@@ -199,6 +208,11 @@ fun GlassPage(padding: PaddingValues) {
     var submenu by remember { mutableStateOf(false) }
     var submenuPresent by remember { mutableStateOf(false) }
     var submenuAnchor by remember { mutableStateOf(Rect.Zero) }
+    val latestSubmenuAnchor = remember {
+        object {
+            var rect = Rect.Zero
+        }
+    }
     var menuWidth by remember { mutableStateOf(0.dp) }
     var sortOrder by remember { mutableIntStateOf(0) }
     val openSearch: () -> Unit = {
@@ -208,11 +222,19 @@ fun GlassPage(padding: PaddingValues) {
     }
     val density = LocalDensity.current
     val arrowTurn = CascadingPopupDefaults.arrowRotation(LocalLayoutDirection.current)
-    val submenuArrow by animateFloatAsState(
+    val submenuArrowState = animateFloatAsState(
         targetValue = if (submenu) arrowTurn else 0f,
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
     val tabsInTopBar = tabRowPlacement == TABS_IN_TOP_BAR
+    var previousTabsInTopBar by remember { mutableStateOf(tabsInTopBar) }
+    LaunchedEffect(tabsInTopBar) {
+        if (previousTabsInTopBar == tabsInTopBar) return@LaunchedEffect
+        previousTabsInTopBar = tabsInTopBar
+        listState.scrollToItem(0)
+        scrollBehavior.state.heightOffset = 0f
+        scrollBehavior.state.contentOffset = 0f
+    }
     // List tabs sample the wallpaper to avoid sampling their own recording layer.
     val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
     val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
@@ -224,7 +246,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassTabRowDefaults.material(),
             )
@@ -235,7 +257,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassTabRowDefaults.material(),
                 height = GlassTabRowDefaults.NeutralHeight,
@@ -248,7 +270,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassSegmentedTabRowDefaults.material(),
             )
@@ -330,10 +352,12 @@ fun GlassPage(padding: PaddingValues) {
             topBar = {
                 GlassTopAppBar(
                     title = "Glass Component",
-                    contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f }
+                    contentModifier = Modifier.glassSearchBarTransition(searchExpanded, appState.enableBlur) { 1f }
                         .appPageTopBarInsets(),
+                    expandable = !isWideScreen,
                     defaultWindowInsetsPadding = false,
                     isContentScrolled = contentUnderTopBar,
+                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current,
                     backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     progressiveBlur = topAppBarProgressiveBlur,
@@ -405,10 +429,9 @@ fun GlassPage(padding: PaddingValues) {
                 material = material ?: GlassDialogDefaults.material(),
                 stroke = stroke,
             ) {
-                var dialogText by remember { mutableStateOf("") }
+                val dialogTextState = rememberTextFieldState()
                 GlassTextField(
-                    value = dialogText,
-                    onValueChange = { dialogText = it },
+                    state = dialogTextState,
                     label = "Input something...",
                     useLabelAsPlaceholder = true,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
@@ -602,7 +625,6 @@ fun GlassPage(padding: PaddingValues) {
                     },
                     stacked = submenu,
                     visuals = popupVisuals,
-                    anchorAlpha = collapseRamp,
                     gap = 0.dp,
                     onMeasured = { menuWidth = with(density) { it.width.toDp() } },
                 ) {
@@ -617,17 +639,18 @@ fun GlassPage(padding: PaddingValues) {
                         text = "Sort by",
                         onClick = {
                             if (overlayIndex == OVERLAY_POPUP) {
+                                submenuAnchor = latestSubmenuAnchor.rect
                                 submenuPresent = true
                                 submenu = true
                             }
                         },
                         modifier = Modifier.onGloballyPositioned {
-                            if (!submenuPresent) submenuAnchor = it.boundsInWindow()
+                            if (!submenuPresent) latestSubmenuAnchor.rect = it.boundsInWindow()
                         },
                         icon = MiuixIcons.Glass.Edit,
                         summary = SortOrders[sortOrder],
                         showArrow = true,
-                        arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },
+                        arrowRotation = { submenuArrowState.value * (1f - menuAnchor.secondaryBackProgress) },
                     )
                     GlassPopupItem(
                         text = "Settings",
@@ -653,7 +676,7 @@ fun GlassPage(padding: PaddingValues) {
                     icon = MiuixIcons.Glass.Edit,
                     summary = SortOrders[sortOrder],
                     showArrow = true,
-                    arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },
+                    arrowRotation = { submenuArrowState.value * (1f - menuAnchor.secondaryBackProgress) },
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(
@@ -674,10 +697,17 @@ fun GlassPage(padding: PaddingValues) {
                 }
             }
         }
+        val pageInsets = LocalAppPageInsets.current
         GlassSearchOverlay(
             expanded = searchExpanded,
             onDismissRequest = { searchExpanded = false },
-            modifier = searchModifier,
+            scrollMaterialThreshold = 0.dp,
+            topInsets = pageInsets.safeInsets.only(WindowInsetsSides.Top),
+            searchTopPadding = pageInsets.searchTop,
+            blurEnabled = appState.enableBlur,
+            horizontalInsetsModifier = Modifier.appPageHorizontalInsets(),
+            searchIcon = MiuixIcons.Glass.Search,
+            closeIcon = MiuixIcons.Glass.Close,
         )
     }
 }

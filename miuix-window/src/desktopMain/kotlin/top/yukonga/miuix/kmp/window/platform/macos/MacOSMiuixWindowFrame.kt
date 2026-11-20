@@ -9,7 +9,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowPlacement
@@ -22,7 +21,7 @@ import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 
 @Composable
 internal fun FrameWindowScope.MacOSMiuixWindowFrame(
-    properties: MiuixWindowProperties<ComposeWindow>,
+    properties: MiuixWindowProperties,
     content: @Composable FrameWindowScope.() -> Unit,
 ) {
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }

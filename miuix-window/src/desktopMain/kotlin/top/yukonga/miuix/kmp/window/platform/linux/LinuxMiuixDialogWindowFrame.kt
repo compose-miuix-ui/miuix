@@ -35,6 +35,7 @@ import top.yukonga.miuix.kmp.window.LocalIsHitTestInCaptionBarState
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
@@ -53,7 +54,8 @@ import java.awt.event.WindowEvent
 internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
     resizable: Boolean,
     decoration: WindowDecoration,
-    properties: MiuixWindowProperties<ComposeDialog>,
+    properties: MiuixWindowProperties,
+    onResizeEdgeChange: (ComposeDialog, WindowResizeEdge) -> Unit,
     content: @Composable DialogWindowScope.() -> Unit,
 ) {
     val backend = LinuxWindowBackend.current
@@ -62,14 +64,14 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
         return
     }
 
-    val currentProperties by rememberUpdatedState(properties)
+    val currentOnResizeEdgeChange by rememberUpdatedState(onResizeEdgeChange)
     val systemDecoration = rememberLinuxSystemDecoration()
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val captionBarHitTest = remember { LinuxCaptionBarHitTest() }
     val undecoratedWindowResizer = remember {
         UndecoratedWindowResizer(
             onResizeEdgeChange = { edge ->
-                currentProperties.onResizeEdgeChange(window, edge)
+                currentOnResizeEdgeChange(window, edge)
             },
         )
     }
@@ -87,15 +89,23 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
     }
 
     CompositionLocalProvider(
-        LocalMiuixWindowInfo provides MiuixWindowInfo(
-            captionBarHeight = properties.captionBarHeight,
-            captionButtonsAlign = systemDecoration.alignment,
-            captionButtonsFullWidth = if (properties.captionButtonsVisible) MiuixCaptionButtonWidth else 0.dp,
-        ),
-        LocalMiuixWindowContentDecoration provides MiuixWindowContentDecoration(
-            inset = shadowMargin,
-            cornerRadius = if (clientShadow) LinuxClientShadow.cornerRadius else 0.dp,
-        ),
+        LocalMiuixWindowInfo provides remember(
+            properties.captionBarHeight,
+            systemDecoration.alignment,
+            properties.captionButtonsVisible,
+        ) {
+            MiuixWindowInfo(
+                captionBarHeight = properties.captionBarHeight,
+                captionButtonsAlign = systemDecoration.alignment,
+                captionButtonsFullWidth = if (properties.captionButtonsVisible) MiuixCaptionButtonWidth else 0.dp,
+            )
+        },
+        LocalMiuixWindowContentDecoration provides remember(shadowMargin, clientShadow) {
+            MiuixWindowContentDecoration(
+                inset = shadowMargin,
+                cornerRadius = if (clientShadow) LinuxClientShadow.cornerRadius else 0.dp,
+            )
+        },
         LocalLinuxCaptionBarHitTest provides captionBarHitTest,
         LocalLinuxWindowGestures provides windowGestures,
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,
@@ -134,7 +144,9 @@ internal fun DialogWindowScope.LinuxMiuixDialogWindowFrame(
                 modifier = Modifier
                     .fillMaxSize()
                     .thenIf(clientShadow) {
-                        linuxClientShadow()
+                        linuxClientShadow(
+                            isBackgroundOpaque = backgroundColor.alpha == 1f,
+                        )
                             .clipToBounds()
                             .background(backgroundColor)
                     },

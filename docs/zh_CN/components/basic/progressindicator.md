@@ -27,6 +27,9 @@ import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator // 无限旋转指�
 var progress by remember { mutableStateOf(0.3f) }
 
 LinearProgressIndicator(progress = progress)
+
+// 或传入 lambda 延迟至绘制阶段读取，避免帧率更新时触发重组
+LinearProgressIndicator(progress = { progress })
 ```
 
 ```kotlin
@@ -44,6 +47,9 @@ LinearProgressIndicator()
 var progress by remember { mutableStateOf(0.7f) }
 
 CircularProgressIndicator(progress = progress)
+
+// 或传入 lambda 延迟至绘制阶段读取，避免帧率更新时触发重组
+CircularProgressIndicator(progress = { progress })
 ```
 
 ```kotlin
@@ -94,6 +100,15 @@ CircularProgressIndicator(progress = null)
 | colors   | ProgressIndicatorColors | 进度条的颜色配置               | ProgressIndicatorDefaults.progressIndicatorColors()            | 否       |
 | height   | Dp                      | 进度条的高度                   | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | 否       |
 
+### LinearProgressIndicator（lambda-based）属性
+
+| 属性名   | 类型                    | 说明                                  | 默认值                                                         | 是否必须 |
+| -------- | ----------------------- | ------------------------------------- | -------------------------------------------------------------- | -------- |
+| progress | () -> Float             | 进度提供函数（0.0-1.0），绘制阶段读取 | -                                                              | 是       |
+| modifier | Modifier                | 应用于进度条的修饰符                  | Modifier                                                       | 否       |
+| colors   | ProgressIndicatorColors | 进度条的颜色配置                      | ProgressIndicatorDefaults.progressIndicatorColors()            | 否       |
+| height   | Dp                      | 进度条的高度                          | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | 否       |
+
 ### CircularProgressIndicator 属性
 
 | 属性名      | 类型                    | 说明                           | 默认值                                                                | 是否必须 |
@@ -103,6 +118,16 @@ CircularProgressIndicator(progress = null)
 | colors      | ProgressIndicatorColors | 进度条的颜色配置               | ProgressIndicatorDefaults.progressIndicatorColors()                   | 否       |
 | strokeWidth | Dp                      | 环形进度条的描边宽度           | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | 否       |
 | size        | Dp                      | 环形进度条的大小               | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | 否       |
+
+### CircularProgressIndicator（lambda-based）属性
+
+| 属性名      | 类型                    | 说明                                  | 默认值                                                                | 是否必须 |
+| ----------- | ----------------------- | ------------------------------------- | --------------------------------------------------------------------- | -------- |
+| progress    | () -> Float             | 进度提供函数（0.0-1.0），绘制阶段读取 | -                                                                     | 是       |
+| modifier    | Modifier                | 应用于进度条的修饰符                  | Modifier                                                              | 否       |
+| colors      | ProgressIndicatorColors | 进度条的颜色配置                      | ProgressIndicatorDefaults.progressIndicatorColors()                   | 否       |
+| strokeWidth | Dp                      | 环形进度条的描边宽度                  | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | 否       |
+| size        | Dp                      | 环形进度条的大小                      | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | 否       |
 
 ### InfiniteProgressIndicator 属性
 

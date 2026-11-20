@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +125,15 @@ object GlassDialogButtonDefaults {
         }
         val disabledContentColor = when (role) {
             GlassDialogButtonRole.Normal -> scheme.onBackground.copy(alpha = 0.38f)
-            GlassDialogButtonRole.Primary -> scheme.onPrimary.copy(alpha = if (isDark) 77f / 255f else 1f)
+
+            GlassDialogButtonRole.Primary -> scheme.onPrimary.copy(
+                alpha = when {
+                    !isDark -> 1f
+                    MiuixTheme.isDynamicColor -> 0.6f
+                    else -> 77f / 255f
+                },
+            )
+
             GlassDialogButtonRole.Destructive -> scheme.error.copy(alpha = 0.3f)
         }
         return remember(color, disabledColor, contentColor, disabledContentColor) {
@@ -134,6 +143,7 @@ object GlassDialogButtonDefaults {
 
     /** Press overlay color for the current theme. */
     @Composable
+    @ReadOnlyComposable
     fun pressedColor(): Color {
         val scheme = MiuixTheme.colorScheme
         return scheme.onBackground.copy(alpha = if (scheme.background.luminance() < 0.5f) 36f / 255f else 31f / 255f)

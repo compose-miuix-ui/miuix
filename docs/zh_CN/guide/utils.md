@@ -94,7 +94,7 @@ LazyColumn(
 }
 ```
 
-将顶栏连接放在越界修饰符之后：`contentOffset` 记录列表实际滚动，`overscrollOffset` 跟踪拖动及弹簧回弹过程中的阻尼位移。Glass 顶栏使用两者之和 `visualContentOffset` 驱动渐进模糊、色带进度和阴影进度。不要将越界消耗量累加进 `contentOffset`：弹簧回弹不会产生反向滚动事件。列表已绑定顶栏连接时，不要再将同一个滚动行为传给外层 `PullToRefresh`。
+将顶栏连接放在越界修饰符之后：`contentOffset` 记录列表实际滚动，`overscrollOffset` 跟踪拖动及弹簧回弹过程中的阻尼位移。Glass 顶栏会结合 `overscrollOffset` 与 `isContentScrolled` 在弹性回弹时激活渐进模糊与按钮材质。不要将越界消耗量累加进 `contentOffset`：弹簧回弹不会产生反向滚动事件。列表已绑定顶栏连接时，不要再将同一个滚动行为传给外层 `PullToRefresh`。
 
 ### 水平越界回弹
 

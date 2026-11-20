@@ -214,10 +214,15 @@ internal fun GlassPopupSurface(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val windowRect = rememberGlassWindowBounds().run {
-        Rect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+    val windowBounds = rememberGlassWindowBounds()
+    val windowRect = remember(windowBounds) {
+        Rect(
+            windowBounds.left.toFloat(),
+            windowBounds.top.toFloat(),
+            windowBounds.right.toFloat(),
+            windowBounds.bottom.toFloat(),
+        )
     }
-    // Window-coordinate placement must be shifted into this host's space, like ListPopupLayout.
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier = Modifier

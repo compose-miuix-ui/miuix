@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -92,6 +93,19 @@ fun GlassTextField(
  * A [TextField] styled for translucent glass surfaces such as [GlassDialog] and
  * [GlassBottomSheet].
  */
+@Deprecated(
+    "Use the GlassTextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun GlassTextField(
     value: String,
@@ -147,6 +161,19 @@ fun GlassTextField(
  * A [TextField] styled for translucent glass surfaces such as [GlassDialog] and
  * [GlassBottomSheet].
  */
+@Deprecated(
+    "Use the GlassTextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun GlassTextField(
     value: TextFieldValue,
@@ -227,6 +254,7 @@ object GlassTextFieldDefaults {
     }
 
     @Composable
+    @ReadOnlyComposable
     private fun defaultBackgroundColor(): Color {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f
@@ -234,6 +262,7 @@ object GlassTextFieldDefaults {
     }
 
     @Composable
+    @ReadOnlyComposable
     private fun defaultLabelColor(): Color {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f

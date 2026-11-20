@@ -88,8 +88,16 @@ class GlassIconDropdownMenuTest {
                                         DropdownItem(
                                             "View mode",
                                             children = listOf(
-                                                DropdownItem("Group by date", selected = selection.intValue == 0, onClick = { selection.intValue = 0 }),
-                                                DropdownItem("Compact", selected = selection.intValue == 1, onClick = { selection.intValue = 1 }),
+                                                DropdownItem(
+                                                    "Group by date",
+                                                    selected = selection.intValue == 0,
+                                                    onClick = { selection.intValue = 0 },
+                                                ),
+                                                DropdownItem(
+                                                    "Compact",
+                                                    selected = selection.intValue == 1,
+                                                    onClick = { selection.intValue = 1 },
+                                                ),
                                             ),
                                         ),
                                         DropdownItem("Filter", children = listOf(DropdownItem("Camera album"))),

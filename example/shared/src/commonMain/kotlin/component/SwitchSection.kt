@@ -3,7 +3,7 @@
 
 package component
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -88,7 +88,7 @@ fun LazyListScope.switchPreferenceSection() {
                 },
             )
 
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = superSwitchAnimState.value,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),

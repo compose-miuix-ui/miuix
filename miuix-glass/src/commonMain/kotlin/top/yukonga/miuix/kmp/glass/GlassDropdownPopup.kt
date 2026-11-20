@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -112,21 +112,20 @@ internal fun BoxScope.GlassDropdownPopupContent(
         transitionSpec = { GlassMotion.popupProgressSpring(GlassMotion.arcBounds(targetState)) },
         label = "glassDropdownSize",
     ) { if (it) 1f else 0f }
-    val position by transition.animateFloat(
+    val position = transition.animateFloat(
         transitionSpec = { GlassMotion.popupProgressSpring(GlassMotion.arcPosition(targetState)) },
         label = "glassDropdownPosition",
     ) { if (it) 1f else 0f }
-    val fade by transition.animateFloat(
+    val fade = transition.animateFloat(
         transitionSpec = { GlassMotion.arcFade(targetState) },
         label = "glassDropdownFade",
     ) { if (it) 1f else 0f }
-    val sharpness by transition.animateFloat(
+    val sharpness = transition.animateFloat(
         transitionSpec = { GlassMotion.arcBlur(targetState) },
         label = "glassDropdownBlur",
     ) { if (it) 1f else 0f }
-
     val active by remember(show, size) {
-        derivedStateOf { show || size.value > 0.0001f }
+        computedStateOf { show || size.value > 0.0001f }
     }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     LaunchedEffect(show, active) {
@@ -153,9 +152,9 @@ internal fun BoxScope.GlassDropdownPopupContent(
         }
     }
     fun geometryProgress() = popupFractionWithBack(size.value, backProgress.value)
-    fun positionProgress() = popupFractionWithBack(position, backProgress.value)
-    fun fadeProgress() = fade * (1f - backProgress.value.coerceIn(0f, 1f))
-    fun sharpnessProgress() = sharpness * (1f - backProgress.value.coerceIn(0f, 1f))
+    fun positionProgress() = popupFractionWithBack(position.value, backProgress.value)
+    fun fadeProgress() = fade.value * (1f - backProgress.value.coerceIn(0f, 1f))
+    fun sharpnessProgress() = sharpness.value * (1f - backProgress.value.coerceIn(0f, 1f))
     val standingDown = active
     DisposableEffect(anchor, standingDown) {
         anchor?.contentHidden = standingDown

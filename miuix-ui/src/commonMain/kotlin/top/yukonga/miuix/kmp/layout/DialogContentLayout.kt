@@ -30,7 +30,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -178,7 +178,7 @@ internal fun DialogContentLayout(
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
-        derivedStateOf {
+        computedStateOf {
             if (enableWindowDim) {
                 dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * dimProgress.value).coerceIn(0f, 1f))
             } else {
@@ -187,7 +187,7 @@ internal fun DialogContentLayout(
         }
     }
     val surfaceScale = remember(isLargeScreen, animationProgress, backProgress) {
-        derivedStateOf {
+        computedStateOf {
             if (isLargeScreen) {
                 (0.8f + 0.2f * animationProgress.value) * (1f - 0.2f * backProgress.value)
             } else {

@@ -37,10 +37,21 @@ fun AppTheme(
     val controller = remember(colorMode, keyColor, spec, style, resolvedIsDark) {
         when (colorMode) {
             1 -> ThemeController(ColorSchemeMode.Light)
+
             2 -> ThemeController(ColorSchemeMode.Dark)
-            3 -> ThemeController(ColorSchemeMode.MonetSystem, keyColor = keyColor, colorSpec = spec, paletteStyle = style, isDark = resolvedIsDark)
+
+            3 -> ThemeController(
+                ColorSchemeMode.MonetSystem,
+                keyColor = keyColor,
+                colorSpec = spec,
+                paletteStyle = style,
+                isDark = resolvedIsDark,
+            )
+
             4 -> ThemeController(ColorSchemeMode.MonetLight, keyColor = keyColor, colorSpec = spec, paletteStyle = style)
+
             5 -> ThemeController(ColorSchemeMode.MonetDark, keyColor = keyColor, colorSpec = spec, paletteStyle = style)
+
             else -> ThemeController(ColorSchemeMode.System, isDark = resolvedIsDark)
         }
     }

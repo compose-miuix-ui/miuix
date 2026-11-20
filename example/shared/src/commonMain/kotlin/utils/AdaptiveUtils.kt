@@ -3,18 +3,23 @@
 
 package utils
 
+import LocalPlatformDensity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+
+val LocalContainerSize = compositionLocalOf<IntSize?> { null }
 
 @Composable
 fun shouldShowSplitPane(): Boolean {
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val containerSize = LocalContainerSize.current ?: LocalWindowInfo.current.containerSize
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
-        val widthDp = windowInfo.containerSize.width.toDp()
-        val heightDp = windowInfo.containerSize.height.toDp()
+        val widthDp = containerSize.width.toDp()
+        val heightDp = containerSize.height.toDp()
         val ratio = heightDp / widthDp
         widthDp >= 840.dp || (widthDp >= 600.dp && ratio < 1.2f)
     }
@@ -22,20 +27,20 @@ fun shouldShowSplitPane(): Boolean {
 
 @Composable
 fun shouldShowThreePanes(): Boolean {
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val containerSize = LocalContainerSize.current ?: LocalWindowInfo.current.containerSize
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
-        val widthDp = windowInfo.containerSize.width.toDp()
+        val widthDp = containerSize.width.toDp()
         widthDp >= 1200.dp
     }
 }
 
 @Composable
 fun shouldExpandNavigationRail(): Boolean {
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
+    val containerSize = LocalContainerSize.current ?: LocalWindowInfo.current.containerSize
+    val density = LocalPlatformDensity.current ?: LocalDensity.current
     return with(density) {
-        val widthDp = windowInfo.containerSize.width.toDp()
+        val widthDp = containerSize.width.toDp()
         widthDp >= 1200.dp
     }
 }

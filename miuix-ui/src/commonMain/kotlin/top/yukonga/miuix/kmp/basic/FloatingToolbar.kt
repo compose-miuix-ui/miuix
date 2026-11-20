@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
@@ -92,6 +93,7 @@ object FloatingToolbarDefaults {
      * Default color of the [FloatingToolbar].
      */
     @Composable
+    @ReadOnlyComposable
     fun defaultColor() = MiuixTheme.colorScheme.surfaceContainer
 
     /**

@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -30,7 +31,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -103,7 +104,7 @@ fun SearchBar(
             ) {
                 inputField()
             }
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = expanded,
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
@@ -186,13 +187,16 @@ fun InputField(
     }
 
     val actualTrailingIcon = trailingIcon ?: {
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = query.isNotEmpty(),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
             Box(
-                modifier = Modifier.padding(start = SearchBarDefaults.TrailingIconStartPadding, end = SearchBarDefaults.TrailingIconEndPadding),
+                modifier = Modifier.padding(
+                    start = SearchBarDefaults.TrailingIconStartPadding,
+                    end = SearchBarDefaults.TrailingIconEndPadding,
+                ),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Icon(
@@ -220,7 +224,7 @@ fun InputField(
 
     val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
     val labelText by remember(query, expanded, label) {
-        derivedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
+        computedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
     }
 
     // On API 26-27, focus is incorrectly reassigned after clearFocus(), preventing the
@@ -233,6 +237,7 @@ fun InputField(
         Modifier.pointerInput(Unit) { detectTapGestures { currentOnExpandedChange(true) } }
     }
 
+    @Suppress("DEPRECATION")
     BasicTextField(
         value = query,
         onValueChange = currentOnQueryChange,
@@ -275,7 +280,8 @@ fun InputField(
                     ) {
                         val baseLabelStyle = MiuixTheme.textStyles.main
                         val mergedLabelStyle = remember(baseLabelStyle, textStyle) {
-                            baseLabelStyle.copy(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
+                            baseLabelStyle.copy(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium)
+                                .merge(textStyle)
                         }
                         Text(
                             text = labelText,

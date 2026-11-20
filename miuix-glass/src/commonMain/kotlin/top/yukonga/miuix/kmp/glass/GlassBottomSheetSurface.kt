@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,12 +29,17 @@ object GlassBottomSheetDefaults {
 
     /** Bottom-sheet material for the current theme. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.dialogGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.dialogGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
+        tint = MiuixTheme.colorScheme.surfaceContainer,
+        alpha = 0.72f,
     )
 
     /** Bottom-sheet bloom stroke for the current theme. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
         light = GlassEdgeStrokes.MiddleLight,
@@ -42,6 +48,7 @@ object GlassBottomSheetDefaults {
 
     /** Opaque fallback when no scene or runtime shader support is available. */
     @Composable
+    @ReadOnlyComposable
     fun containerColor(): Color = MiuixTheme.colorScheme.background
 }
 
@@ -80,6 +87,6 @@ fun glassBottomSheetSurface(
         stroke = if (isOverscroll) null else stroke,
         shadow = null,
         shading = false,
-        fallback = Modifier.clip(shape).background(containerColor),
+        fallback = if (effectiveBackdrop == null) Modifier.clip(shape).background(containerColor) else null,
     )
 }

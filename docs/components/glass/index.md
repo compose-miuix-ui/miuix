@@ -12,8 +12,8 @@
 | [GlassTopAppBar](./glasstopappbar) | Collapsing glass top bar | Page titles and actions |
 | [GlassNavigationBar](./glassnavigationbar) | Floating glass navigation bar | Top-level destinations |
 | [GlassNavigationRail](./glassnavigationrail) | Floating glass sidebar collapsing into the navigation bar | Wide-layout destination switching |
+| [GlassSearchOverlay](./glasssearchoverlay) | Full-screen glass search overlay with progressive blur header | In-page search mode |
 | [GlassTabRow](./glasstabrow) | Independent glass tab pills | Content categories |
-| [GlassSegmentedTabRow](./glasstabrow#glasssegmentedtabrow) | Joined glass segmented track | Exclusive view switching |
 | [GlassTransformPopup](./glasstransformpopup) | Menu transforming from its button | Toolbar overflow actions |
 | [GlassPopup](./glasspopup) | Anchored glass menu | Action selection |
 | [GlassSecondaryPopup](./glasssecondarypopup) | Submenu beside a primary menu | Cascading menus |

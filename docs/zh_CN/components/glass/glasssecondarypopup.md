@@ -6,7 +6,7 @@ title: GlassSecondaryPopup
 
 `GlassSecondaryPopup` 是以一级菜单中的菜单行为锚点的玻璃二级菜单。
 
-<div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+<div style="position: relative; height: 280px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassSecondaryPopup" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
 

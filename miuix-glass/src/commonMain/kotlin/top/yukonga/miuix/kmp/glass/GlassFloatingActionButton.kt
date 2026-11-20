@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Default values for [GlassFloatingActionButton]. */
@@ -48,9 +51,11 @@ object GlassFloatingActionButtonDefaults {
 
     /** Primary colour fill when backdrop rendering is unavailable. */
     @Composable
+    @ReadOnlyComposable
     fun fill(): Color = MiuixTheme.colorScheme.primary
 
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassTopAppBarDefaults.buttonStroke()
 }
 
@@ -79,7 +84,7 @@ fun GlassFloatingActionButton(
     style: GlassStyle = GlassDefaults.Style,
     material: GlassMaterial = GlassFloatingActionButtonDefaults.material(),
     size: Dp = GlassFloatingActionButtonDefaults.Size,
-    shape: GlassShape = GlassShape(size / 2),
+    shape: GlassShape = remember(size) { GlassShape(size / 2) },
     fill: Color = GlassFloatingActionButtonDefaults.fill(),
     stroke: EdgeStroke? = GlassFloatingActionButtonDefaults.stroke(),
     shadow: GlassShadow? = GlassShadows.Regular,
@@ -119,6 +124,10 @@ fun GlassFloatingActionButton(
                 scaleX = scale
                 scaleY = scale
             },
-        content = content,
+        content = {
+            CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onPrimary) {
+                content()
+            }
+        },
     )
 }

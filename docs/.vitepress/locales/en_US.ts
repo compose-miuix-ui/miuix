@@ -127,9 +127,13 @@ export default defineConfig({
                     items: [
                         { text: "Overview", link: "/components/glass/" },
                         { text: "GlassIconButton", link: "/components/glass/glassiconbutton" },
+                        { text: "GlassFloatingActionButton", link: "/components/glass/glassfloatingactionbutton" },
+                        { text: "GlassFloatingToolbar", link: "/components/glass/glassfloatingtoolbar" },
                         { text: "GlassTextField", link: "/components/glass/glasstextfield" },
                         { text: "GlassTopAppBar", link: "/components/glass/glasstopappbar" },
                         { text: "GlassNavigationBar", link: "/components/glass/glassnavigationbar" },
+                        { text: "GlassNavigationRail", link: "/components/glass/glassnavigationrail" },
+                        { text: "GlassSearchOverlay", link: "/components/glass/glasssearchoverlay" },
                         { text: "GlassTabRow", link: "/components/glass/glasstabrow" },
                         { text: "GlassTransformPopup", link: "/components/glass/glasstransformpopup" },
                         { text: "GlassPopup", link: "/components/glass/glasspopup" },

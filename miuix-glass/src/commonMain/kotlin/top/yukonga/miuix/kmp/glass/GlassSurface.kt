@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /**
  * A sheet of glass, in the form the library's own components ask for their surface in.
@@ -46,7 +47,7 @@ fun glassSurface(
         stroke = visuals.stroke,
         shadow = visuals.shadow,
         shading = false,
-        fallback = Modifier.clip(providedShape).background(visuals.containerColor),
+        fallback = if (backdrop == null || !isRuntimeShaderSupported()) Modifier.clip(providedShape).background(visuals.containerColor) else null,
     )
 }
 

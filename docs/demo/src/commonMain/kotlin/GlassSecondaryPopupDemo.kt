@@ -2,16 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +18,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
@@ -55,82 +47,31 @@ fun GlassSecondaryPopupDemo() {
     var frozenBounds by remember { mutableStateOf(Rect.Zero) }
     var menuWidth by remember { mutableStateOf(200.dp) }
     var sortOrder by remember { mutableStateOf("Newest first") }
-    var message by remember { mutableStateOf("Open More, then Sort by.") }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(demoBackground()),
-        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .widthIn(max = 600.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .layerBackdrop(backdrop)
+                .background(demoBackground()),
+        )
+        GlassIconButton(
+            onClick = { showPrimary = true },
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .glassPopupAnchor(anchor, cornerRadius = 24.dp, floating = true),
+            backdrop = backdrop,
+            size = 48.dp,
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(360.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.surface),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .layerBackdrop(backdrop)
-                            .background(MiuixTheme.colorScheme.surface),
-                    )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(
-                                    text = "Nested photo actions",
-                                    style = MiuixTheme.textStyles.title2,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    text = "Sort order: $sortOrder",
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                )
-                            }
-                            GlassIconButton(
-                                onClick = { showPrimary = true },
-                                modifier = Modifier
-                                    .glassPopupAnchor(anchor, cornerRadius = 24.dp, floating = true),
-                                backdrop = backdrop,
-                                size = 48.dp,
-                            ) {
-                                Icon(
-                                    imageVector = MiuixIcons.Glass.More,
-                                    contentDescription = "More photo actions",
-                                    modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
-                                    tint = MiuixTheme.colorScheme.onBackground,
-                                )
-                            }
-                        }
-                        Text(
-                            text = message,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        )
-                    }
-                }
-            }
+            Icon(
+                imageVector = MiuixIcons.Glass.More,
+                contentDescription = "More actions",
+                modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
+                tint = MiuixTheme.colorScheme.onBackground,
+            )
         }
         GlassTransformPopup(
             show = showPrimary,
@@ -165,10 +106,7 @@ fun GlassSecondaryPopupDemo() {
             )
             GlassPopupItem(
                 text = "Close actions",
-                onClick = {
-                    message = "Actions closed. Reopen More to try again."
-                    showPrimary = false
-                },
+                onClick = { showPrimary = false },
             )
         }
         GlassSecondaryPopup(
@@ -191,7 +129,6 @@ fun GlassSecondaryPopupDemo() {
                     selected = sortOrder == label,
                     onClick = {
                         sortOrder = label
-                        message = "Sorted by: $label"
                         showSecondary = false
                     },
                 )

@@ -34,13 +34,14 @@ import top.yukonga.miuix.kmp.nav.transition.internal.NavOutlineMorph
  * @param presentation source of the single driving float.
  * @param entryIndex this entry's index in the back stack (for the depth subtraction).
  * @param isRemoving whether this entry is animating out (affects [role]).
+ * @param readLayoutSize reads the host's size; deferred like [relativeDepth].
  */
 @Stable
 internal class LiveNavTransitionScope(
     private val presentation: NavPresentation,
     private val entryIndex: Int,
     private val isRemoving: () -> Boolean,
-    override val layoutSize: IntSize,
+    private val readLayoutSize: () -> IntSize,
     override val layoutDirection: LayoutDirection,
     override val density: Density,
     override val entryKey: NavKey? = null,
@@ -84,6 +85,8 @@ internal class LiveNavTransitionScope(
     }
 
     override val change: NavChange get() = presentation.change
+
+    override val layoutSize: IntSize get() = readLayoutSize()
 
     override val layoutPositionInWindow: Offset get() = layoutPosition()
 

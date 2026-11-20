@@ -25,6 +25,9 @@ Linear progress bar can be used to show operation progress:
 var progress by remember { mutableStateOf(0.3f) }
 
 LinearProgressIndicator(progress = progress)
+
+// Or pass a lambda to avoid recomposing when progress updates at frame rate
+LinearProgressIndicator(progress = { progress })
 ```
 
 ```kotlin
@@ -41,6 +44,9 @@ Circular progress indicator is suitable for space-saving scenarios:
 var progress by remember { mutableStateOf(0.7f) }
 
 CircularProgressIndicator(progress = progress)
+
+// Or pass a lambda to avoid recomposing when progress updates at frame rate
+CircularProgressIndicator(progress = { progress })
 ```
 
 ```kotlin
@@ -91,6 +97,15 @@ CircularProgressIndicator(progress = null)
 | colors        | ProgressIndicatorColors | Color configuration for the progress bar       | ProgressIndicatorDefaults.progressIndicatorColors()            | No       |
 | height        | Dp                      | Height of the progress bar                     | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | No       |
 
+### LinearProgressIndicator (lambda-based) Properties
+
+| Property Name | Type                    | Description                                     | Default Value                                                  | Required |
+| ------------- | ----------------------- | ----------------------------------------------- | -------------------------------------------------------------- | -------- |
+| progress      | () -> Float             | Progress provider (0.0-1.0), read in draw phase | -                                                              | Yes      |
+| modifier      | Modifier                | Modifier applied to the progress bar            | Modifier                                                       | No       |
+| colors        | ProgressIndicatorColors | Color configuration for the progress bar        | ProgressIndicatorDefaults.progressIndicatorColors()            | No       |
+| height        | Dp                      | Height of the progress bar                      | ProgressIndicatorDefaults.DefaultLinearProgressIndicatorHeight | No       |
+
 ### CircularProgressIndicator Properties
 
 | Property Name | Type                    | Description                                    | Default Value                                                         | Required |
@@ -100,6 +115,16 @@ CircularProgressIndicator(progress = null)
 | colors        | ProgressIndicatorColors | Color configuration for the progress indicator | ProgressIndicatorDefaults.progressIndicatorColors()                   | No       |
 | strokeWidth   | Dp                      | Stroke width of the circular track             | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | No       |
 | size          | Dp                      | Size of the circular indicator                 | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | No       |
+
+### CircularProgressIndicator (lambda-based) Properties
+
+| Property Name | Type                    | Description                                     | Default Value                                                         | Required |
+| ------------- | ----------------------- | ----------------------------------------------- | --------------------------------------------------------------------- | -------- |
+| progress      | () -> Float             | Progress provider (0.0-1.0), read in draw phase | -                                                                     | Yes      |
+| modifier      | Modifier                | Modifier applied to the progress indicator      | Modifier                                                              | No       |
+| colors        | ProgressIndicatorColors | Color configuration for the progress indicator  | ProgressIndicatorDefaults.progressIndicatorColors()                   | No       |
+| strokeWidth   | Dp                      | Stroke width of the circular track              | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth | No       |
+| size          | Dp                      | Size of the circular indicator                  | ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize        | No       |
 
 ### InfiniteProgressIndicator Properties
 

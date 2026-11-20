@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -102,6 +103,9 @@ fun MainPage(
 
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
 
     var selectedIndex1 by remember { mutableIntStateOf(0) }
     val optionItems = remember(selectedIndex1) {
@@ -211,6 +215,7 @@ fun MainPage(
                         showTopAppBar = appState.showTopAppBar,
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
+                        isContentScrolled = contentUnderTopBar,
                         color = barColor,
                         actions = {
                             TooltipBox(text = "Options") {
@@ -305,7 +310,7 @@ fun MainPage(
                                 breadcrumbBarSection()
                                 textFieldSection()
                                 progressIndicatorSection()
-                                cardSection()
+                                cardSection(backdrop = pageBackdrop)
                                 tooltipSection()
                                 badgeSection()
                                 numberPickerSection()
@@ -350,6 +355,7 @@ fun MainPage(
                     adapter = rememberScrollBarAdapter(lazyListState),
                     modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                     trackPadding = contentPadding,
+                    topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
                 )
             }
         }

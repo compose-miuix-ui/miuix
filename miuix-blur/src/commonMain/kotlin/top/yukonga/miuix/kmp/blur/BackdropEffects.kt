@@ -5,24 +5,27 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
-import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
-import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD_RAMP
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
 import top.yukonga.miuix.kmp.blur.internal.BLUR_RADIUS_TO_SIGMA
-import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_LIGHT_FRACTION
+import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_BLUR_MAX_TAP
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForExp
 import top.yukonga.miuix.kmp.blur.internal.adjustedVarianceForScale
 import top.yukonga.miuix.kmp.blur.internal.chain
+import top.yukonga.miuix.kmp.blur.internal.computeProgressiveGradient
 import top.yukonga.miuix.kmp.blur.internal.createBlurEffect
 import top.yukonga.miuix.kmp.blur.internal.createProgressiveBlurEffect
-import top.yukonga.miuix.kmp.blur.internal.downScaleExpFor
+import top.yukonga.miuix.kmp.blur.internal.progressiveCurveKind
 import top.yukonga.miuix.kmp.blur.internal.quantizedLevelScale
+import top.yukonga.miuix.kmp.blur.internal.rampBlendModeShader
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import kotlin.math.ceil
+import kotlin.math.sqrt
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Maximum number of blend layers supported by [blendColors]. Extra entries are dropped. */
@@ -96,12 +99,12 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
 }
 
 /**
- * Chains a **progressive** (gradient) Blur: radius ramps from full to zero along [gradient], on the
- * same adaptive downscale as [blur] (so the clear end stays soft — no pixel-sharp pass).
+ * Chains a **progressive** (gradient) Blur: radius ramps from full to zero along [gradient] on an
+ * adaptive downscaled pass.
  *
  * Paired with `drawBackdrop`'s `progressiveGradient` (as [Modifier.progressiveTextureBlur] wires),
- * the draw path renders the multi-level composite instead, and this only records the radii and
- * downscale for it.
+ * the draw path folds post-blur [blendColors] and dithering into the downscaled pass and overlays a
+ * narrow 1× clear-end band when downscaled for a pixel-sharp transition.
  *
  * @param radiusX Horizontal blur radius in pixels at full strength.
  * @param radiusY Vertical blur radius in pixels at full strength. Defaults to [radiusX].
@@ -114,52 +117,31 @@ fun BackdropEffectScope.progressiveBlur(
 ) {
     if (!isRuntimeShaderSupported()) return
     val scope = impl
-    if (scope.progressiveCompositeActive) {
-        // Composite mode: record radii + downscale and split the chain at this point — the stack is
-        // assembled after the effects block, the sharp end draws as a separate overlay. Radius 0
-        // stays (levels collapse to identity, effects keep riding the ramp).
-        val rX = radiusX.coerceAtLeast(0f)
-        val rY = radiusY.coerceAtLeast(0f)
-        // Sized for the middle level: the lightest level's variance then stays above the pyramid's
-        // box floor at common radii, and every stack pass runs on 1/scale² pixels. The sharp end
-        // doesn't ride this layer, so it doesn't constrain the scale.
-        val lightSigma = maxOf(rX, rY) * BLUR_RADIUS_TO_SIGMA * PROGRESSIVE_LIGHT_FRACTION
-        val exp = downScaleExpFor(lightSigma * lightSigma * 2f)
-        val scale = (1 shl exp).toFloat()
-        val kernelPadding = BLUR_KERNEL_REACH * scale
-        if (kernelPadding > padding) {
-            padding = kernelPadding
-        }
-        val paddedW = size.width + padding * 2f
-        val paddedH = size.height + padding * 2f
-        // apply() compares these against the final padding to detect a stale sampling clamp.
-        scope.blurBuiltPaddedW = paddedW
-        scope.blurBuiltPaddedH = paddedH
-        scope.cachedProgRadiusX = rX
-        scope.cachedProgRadiusY = rY
-        scope.cachedProgExp = exp
-        scope.cachedProgSizeW = paddedW
-        scope.cachedProgSizeH = paddedH
-        scope.cachedProgResult = null
-        // Split the effects block here: chained-so-far → pre-blur, what follows → post-blur.
-        scope.progressivePreEffect = renderEffect
-        renderEffect = null
-        downscaleFactor = scale
-        return
-    }
-    if (radiusX <= 0f && radiusY <= 0f) return
-    val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
-    val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
+    val rX = radiusX.coerceAtLeast(0f)
+    val rY = radiusY.coerceAtLeast(0f)
+    if (!scope.progressiveRampActive && rX <= 0f && rY <= 0f) return
 
-    // Same adaptive downscale as blur(), on the power-of-two ladder: the stack's levels are built
-    // from the recorded layer, so the box prefilter at each level is what keeps the fixed 7-tap
-    // kernel from aliasing (blocky banding) at large radii.
-    val exp = downScaleExpFor(maxOf(sigmaX * sigmaX, sigmaY * sigmaY))
+    val sigmaX = rX * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = rY * BLUR_RADIUS_TO_SIGMA
+    val sigma = maxOf(sigmaX, sigmaY)
+    val exp = when {
+        sigma < 4.5f -> 0
+        sigma < 12f -> 1
+        sigma < 32f -> 2
+        sigma < 115f -> 3
+        else -> 4
+    }
     val scale = (1 shl exp).toFloat()
 
-    val kernelPadding = BLUR_KERNEL_REACH * scale
-    if (kernelPadding > padding) {
-        padding = kernelPadding
+    if (rX > 0f || rY > 0f) {
+        val maxAdjVar = adjustedVarianceForExp(sigma * sigma, exp)
+        val maxLoopR = (2f * sqrt(maxAdjVar) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+        if (maxLoopR >= 0.5f) {
+            val kernelPadding = (ceil(maxLoopR).toInt() + 1) * scale
+            if (kernelPadding > padding) {
+                padding = kernelPadding
+            }
+        }
     }
 
     val compW = size.width
@@ -171,56 +153,111 @@ fun BackdropEffectScope.progressiveBlur(
     scope.blurBuiltPaddedW = paddedW
     scope.blurBuiltPaddedH = paddedH
 
-    val effect = if (scope.cachedProgResult != null &&
+    if (scope.progressiveRampActive) {
+        scope.progRecordedRadiusX = rX
+        scope.progRecordedRadiusY = rY
+        scope.progRecordedExp = exp
+        scope.progressivePreEffect = renderEffect
+        renderEffect = null
+        downscaleFactor = scale
+        return
+    }
+
+    val effect = obtainProgressiveBlurEffect(scope, rX, rY, exp, gradient) ?: return
+    downscaleFactor = scale
+    renderEffect = renderEffect?.chain(effect) ?: effect
+}
+
+internal fun obtainProgressiveBlurEffect(
+    scope: BackdropEffectScopeImpl,
+    radiusX: Float,
+    radiusY: Float,
+    exp: Int,
+    gradient: ProgressiveBlur,
+    padLeft: Float = scope.padding,
+    padTop: Float = scope.padding,
+    padRight: Float = scope.padding,
+    padBottom: Float = scope.padding,
+    ditherCoeff: Float = 0f,
+    tintColor: Color = Color.Unspecified,
+): RenderEffect? {
+    val scale = (1 shl exp).toFloat()
+    val compW = scope.size.width
+    val compH = scope.size.height
+    val paddedW = compW + padLeft + padRight
+    val paddedH = compH + padTop + padBottom
+    if (radiusX <= 0f && radiusY <= 0f) {
+        computeProgressiveGradient(
+            downScale = scale,
+            padLeft = padLeft,
+            padTop = padTop,
+            compW = compW,
+            compH = compH,
+            angleDeg = gradient.angle,
+            startFraction = gradient.startFraction,
+            endFraction = gradient.endFraction,
+            curve = gradient.curve,
+            scope = scope,
+        )
+        return null
+    }
+    val cached = scope.cachedProgResult
+    if (cached != null &&
         scope.cachedProgRadiusX == radiusX &&
         scope.cachedProgRadiusY == radiusY &&
         scope.cachedProgSizeW == paddedW &&
         scope.cachedProgSizeH == paddedH &&
-        scope.cachedProgPad == padding &&
+        scope.cachedProgPadLeft == padLeft &&
+        scope.cachedProgPadTop == padTop &&
         scope.cachedProgCompW == compW &&
         scope.cachedProgCompH == compH &&
         scope.cachedProgExp == exp &&
         scope.cachedProgAngle == gradient.angle &&
         scope.cachedProgStart == gradient.startFraction &&
         scope.cachedProgEnd == gradient.endFraction &&
-        scope.cachedProgCurve == gradient.curve
+        scope.cachedProgCurve == gradient.curve &&
+        scope.cachedProgTintColor == tintColor &&
+        scope.cachedProgDitherCoeff == ditherCoeff
     ) {
-        scope.cachedProgResult
-    } else {
-        createProgressiveBlurEffect(
-            radiusX,
-            radiusY,
-            scale,
-            adjustedVarianceForExp(sigmaX * sigmaX, exp),
-            adjustedVarianceForExp(sigmaY * sigmaY, exp),
-            Size(paddedW, paddedH),
-            padding,
-            compW,
-            compH,
-            gradient.angle,
-            gradient.startFraction,
-            gradient.endFraction,
-            gradient.curve,
-            scope,
-        ).also {
-            scope.cachedProgRadiusX = radiusX
-            scope.cachedProgRadiusY = radiusY
-            scope.cachedProgSizeW = paddedW
-            scope.cachedProgSizeH = paddedH
-            scope.cachedProgPad = padding
-            scope.cachedProgCompW = compW
-            scope.cachedProgCompH = compH
-            scope.cachedProgExp = exp
-            scope.cachedProgAngle = gradient.angle
-            scope.cachedProgStart = gradient.startFraction
-            scope.cachedProgEnd = gradient.endFraction
-            scope.cachedProgCurve = gradient.curve
-            scope.cachedProgResult = it
-        }
-    } ?: return
-
-    downscaleFactor = scale
-    renderEffect = renderEffect?.chain(effect) ?: effect
+        return cached
+    }
+    val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
+    val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
+    return createProgressiveBlurEffect(
+        radiusX,
+        radiusY,
+        scale,
+        adjustedVarianceForExp(sigmaX * sigmaX, exp),
+        adjustedVarianceForExp(sigmaY * sigmaY, exp),
+        padLeft,
+        padTop,
+        compW,
+        compH,
+        gradient.angle,
+        gradient.startFraction,
+        gradient.endFraction,
+        gradient.curve,
+        scope,
+        tintColor = tintColor,
+        ditherCoeff = ditherCoeff,
+    ).also {
+        scope.cachedProgRadiusX = radiusX
+        scope.cachedProgRadiusY = radiusY
+        scope.cachedProgSizeW = paddedW
+        scope.cachedProgSizeH = paddedH
+        scope.cachedProgPadLeft = padLeft
+        scope.cachedProgPadTop = padTop
+        scope.cachedProgCompW = compW
+        scope.cachedProgCompH = compH
+        scope.cachedProgExp = exp
+        scope.cachedProgAngle = gradient.angle
+        scope.cachedProgStart = gradient.startFraction
+        scope.cachedProgEnd = gradient.endFraction
+        scope.cachedProgCurve = gradient.curve
+        scope.cachedProgTintColor = tintColor
+        scope.cachedProgDitherCoeff = ditherCoeff
+        scope.cachedProgResult = it
+    }
 }
 
 /**
@@ -245,9 +282,8 @@ fun BackdropEffectScope.blendColors(colors: BlurColors) {
     if (!isRuntimeShaderSupported()) return
     val scope = impl
 
-    // Composite mode: a blend directly following progressiveBlur is recorded for the stack's
-    // folded ramp pass instead of chained (see BackdropEffectScopeImpl.progressivePostBlend).
-    if (scope.progressiveCompositeActive && !scope.cachedProgRadiusX.isNaN() &&
+    // Ramp mode: a blend directly following progressiveBlur is recorded for the single ramp pass.
+    if (scope.progressiveRampActive && !scope.progRecordedRadiusX.isNaN() &&
         renderEffect == null && scope.progressivePostBlend == null
     ) {
         scope.progressivePostBlend = colors
@@ -287,16 +323,34 @@ internal fun buildRampBlendColorsEffect(
     gradOffset: Float,
     curve: Float,
 ): RenderEffect {
+    val cached = scope.cachedRampBlendResult
+    if (cached != null &&
+        scope.cachedRampBlendColors == colors &&
+        scope.cachedRampBlendGradVecX == gradVecX &&
+        scope.cachedRampBlendGradVecY == gradVecY &&
+        scope.cachedRampBlendGradOffset == gradOffset &&
+        scope.cachedRampBlendCurve == curve
+    ) {
+        return cached
+    }
     val needsExtended = colors.needsExtendedBlend()
+    val curveKind = progressiveCurveKind(curve)
     val shader = scope.obtainRuntimeShader(
-        if (needsExtended) "MiBlendModesExtRamp" else "MiBlendModesStdRamp",
-        if (needsExtended) BLEND_MODE_SHADER_EXTENDED_RAMP else BLEND_MODE_SHADER_STANDARD_RAMP,
+        if (needsExtended) "MiBlendModesExtRamp_c$curveKind" else "MiBlendModesStdRamp_c$curveKind",
+        rampBlendModeShader(includeExtended = needsExtended, curveKind = curveKind),
     )
     shader.setBlendLayerUniforms(scope, colors, needsExtended)
     shader.setFloatUniform("in_gradVec", gradVecX, gradVecY)
     shader.setFloatUniform("in_gradOffset", gradOffset)
-    shader.setFloatUniform("in_curve", curve)
-    return createRuntimeShaderEffect(shader, "child")
+    if (curveKind == 3) shader.setFloatUniform("in_curve", curve)
+    return createRuntimeShaderEffect(shader, "child").also {
+        scope.cachedRampBlendColors = colors
+        scope.cachedRampBlendGradVecX = gradVecX
+        scope.cachedRampBlendGradVecY = gradVecY
+        scope.cachedRampBlendGradOffset = gradOffset
+        scope.cachedRampBlendCurve = curve
+        scope.cachedRampBlendResult = it
+    }
 }
 
 private fun BlurColors.needsExtendedBlend(): Boolean {
@@ -371,8 +425,8 @@ fun BackdropEffectScope.textureBlurEffect(
 
 /**
  * [textureBlurEffect] with [progressiveBlur] in place of [blur], so the radius ramps to zero along
- * [gradient]. Pair it with `drawBackdrop`'s `progressiveGradient` (same [gradient]) to get the
- * multi-level composite with a sharp full-resolution clear end.
+ * [gradient]. Pair it with `drawBackdrop`'s `progressiveGradient` (same [gradient]) to fold
+ * [colors] into the progressive ramp and keep a sharp 1× clear end.
  *
  * @param blurRadiusX Horizontal blur radius in dp at full strength.
  * @param blurRadiusY Vertical blur radius in dp at full strength. Defaults to [blurRadiusX].

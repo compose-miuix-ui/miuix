@@ -145,8 +145,6 @@ Compose 原生 `Window` 与 `DialogWindow` 的强化替代容器。自动接管�
 | `minSize` | `DpSize` | `DpSize.Zero` | 窗口最小尺寸约束 |
 | `extraDisplayScale` | `Float` | `1.0f` | 额外的 UI 缩放比例因子 |
 | `extraFontScale` | `Float` | `1.0f` | 额外的字体缩放比例因子 |
-| `onResizeEdgeChange` | `(Window, WindowResizeEdge) -> Unit` | `{ _, _ -> }` | 鼠标进入/离开拉伸边缘的回调 |
-| `onVisibleChange` | `(Window, Boolean) -> Unit` | `{ _, _ -> }` | 窗口可见性改变的回调 |
 
 ## 跨平台特性说明
 

@@ -8,6 +8,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.composeMultiplatform)
@@ -24,10 +25,17 @@ kotlin {
             dependencies {
                 implementation(projects.miuixWindow)
                 implementation(projects.example.shared)
-                implementation(compose.desktop.currentOs)
+                implementation(libs.jetbrains.compose.foundation)
                 implementation(libs.nucleus.darkmode.detector)
             }
         }
+    }
+}
+
+aboutLibraries {
+    export {
+        outputFile = file("src/desktopMain/resources/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 
@@ -97,7 +105,10 @@ tasks.withType<AbstractProguardTask>().configureEach {
                             val name = entry.name
                             val isNative = nativeExts.any { name.endsWith(it) }
                             (name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative) ||
-                                (name.startsWith("nucleus/native/") && nucleusTarget != null && !name.contains(nucleusTarget) && isNative)
+                                (
+                                    name.startsWith("nucleus/native/") && nucleusTarget != null && !name.contains(nucleusTarget) &&
+                                        isNative
+                                )
                         }
                     if (hasForeign) {
                         ZipOutputStream(tempFile.outputStream()).use { zipOut ->

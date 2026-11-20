@@ -29,8 +29,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
@@ -199,7 +200,7 @@ private fun PaletteCanvas(
     Box(
         modifier = Modifier
             .squircleClip(cornerRadius)
-            .onGloballyPositioned { sizePx = it.size }
+            .onSizeChanged { sizePx = it }
             .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown()
@@ -230,62 +231,62 @@ private fun PaletteCanvas(
             isRtl = isRtl,
         )
 
-        if (sizePx.width > 0 && sizePx.height > 0) {
-            val w = sizePx.width
-            val h = sizePx.height
-            val start = (selectedCol * w) / totalColumns
-            val end = ((selectedCol + 1) * w) / totalColumns
-            val top = (selectedRow * h) / rows
-            val bottom = ((selectedRow + 1) * h) / rows
-            val cxPx = (start + end) / 2f
-            val cyPx = (top + bottom) / 2f
-
-            val indicatorSize = indicatorRadius * 2
-            val density = LocalDensity.current
-            val halfIndicatorPx = with(density) { (indicatorSize / 2).roundToPx() }
-            Box(
-                modifier = Modifier
-                    .offset {
+        val indicatorSize = indicatorRadius * 2
+        val density = LocalDensity.current
+        val halfIndicatorPx = with(density) { (indicatorSize / 2).roundToPx() }
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = if (sizePx.width > 0 && sizePx.height > 0) 1f else 0f
+                }
+                .offset {
+                    val w = sizePx.width
+                    val h = sizePx.height
+                    if (w <= 0 || h <= 0) {
+                        IntOffset.Zero
+                    } else {
+                        val start = (selectedCol * w) / totalColumns
+                        val end = ((selectedCol + 1) * w) / totalColumns
+                        val top = (selectedRow * h) / rows
+                        val bottom = ((selectedRow + 1) * h) / rows
+                        val cxPx = (start + end) / 2f
+                        val cyPx = (top + bottom) / 2f
                         IntOffset(
                             x = (cxPx - halfIndicatorPx).toInt(),
                             y = (cyPx - halfIndicatorPx).toInt(),
                         )
                     }
-                    .size(indicatorSize)
-                    .drawWithCache {
-                        val strokeWidth = 6.dp.toPx()
-                        val halfStroke = strokeWidth / 2f
-                        val glowSpread = 2.dp.toPx()
-                        val glowColor = Color.Black.copy(alpha = 0.25f)
+                }
+                .size(indicatorSize)
+                .drawWithCache {
+                    val strokeWidth = 6.dp.toPx()
+                    val halfStroke = strokeWidth / 2f
+                    val glowSpread = 2.dp.toPx()
+                    val glowColor = Color.Black.copy(alpha = 0.25f)
 
-                        val ringCenterRadius = (size.minDimension / 2f) - halfStroke
-                        val gradientRadius = ringCenterRadius + halfStroke + glowSpread
+                    val ringCenterRadius = (size.minDimension / 2f) - halfStroke
+                    val gradientRadius = ringCenterRadius + halfStroke + glowSpread
 
-                        val glowBrush = Brush.radialGradient(
-                            colorStops = listOf(
-                                ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
-                                ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
-                                ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
-                                ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
-                            ).toTypedArray(),
-                            radius = gradientRadius,
+                    val glowBrush = Brush.radialGradient(
+                        colorStops = listOf(
+                            ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
+                            ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
+                            ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
+                            ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
+                        ).toTypedArray(),
+                        radius = gradientRadius,
+                    )
+
+                    onDrawBehind {
+                        drawCircle(brush = glowBrush, radius = gradientRadius)
+                        drawCircle(
+                            color = Color.White,
+                            radius = ringCenterRadius,
+                            style = Stroke(width = strokeWidth),
                         )
-
-                        onDrawBehind {
-                            drawCircle(
-                                brush = glowBrush,
-                                radius = gradientRadius,
-                            )
-
-                            drawCircle(
-                                color = Color.White,
-                                radius = ringCenterRadius,
-                                style = Stroke(width = strokeWidth),
-                            )
-                        }
-                    },
-            )
-        }
+                    }
+                },
+        )
     }
 }
 

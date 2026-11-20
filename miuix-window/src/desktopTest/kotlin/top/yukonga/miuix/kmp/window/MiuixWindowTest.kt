@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -40,7 +39,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultValues() {
-        val properties = MiuixWindowProperties<java.awt.Window>(
+        val properties = MiuixWindowProperties(
             captionBarHeight = 44.dp,
             captionButtonHeight = 44.dp,
             captionButtonsVisible = true,
@@ -57,7 +56,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultNullDarkTheme() {
-        val properties = MiuixWindowProperties<java.awt.Window>()
+        val properties = MiuixWindowProperties()
         kotlin.test.assertNull(properties.captionButtonIsDarkTheme)
         kotlin.test.assertNull(properties.backgroundIsDarkTheme)
     }

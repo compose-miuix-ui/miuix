@@ -34,7 +34,6 @@ kotlin {
         getByName("desktopTest") {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)
             }
         }

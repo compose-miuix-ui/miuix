@@ -24,7 +24,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -91,10 +91,13 @@ fun AboutPage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
     val glassTopBar = LocalAppState.current.topAppBarStyle == 1
 
     val scrollProgress by remember {
-        derivedStateOf {
+        computedStateOf {
             when {
                 lazyListState.firstVisibleItemIndex > 0 -> 1f
 
@@ -115,9 +118,9 @@ fun AboutPage(
     // Capture content and the bar separately so overlays never sample their own host or scrim.
     val overlayBackdrop = if (backdrop != null && barBackdrop != null) rememberCombinedBackdrop(backdrop, barBackdrop) else null
     // Defer the frame-rate scroll read out of composition: these booleans only flip at the
-    // single 1f threshold, so derivedStateOf recomposes the bar on flip rather than every frame.
-    val collapsed by remember { derivedStateOf { scrollProgress == 1f } }
-    val blurActive by remember(backdrop) { derivedStateOf { backdrop != null && scrollProgress == 1f } }
+    // single 1f threshold, so computedStateOf recomposes the bar on flip rather than every frame.
+    val collapsed by remember { computedStateOf { scrollProgress == 1f } }
+    val blurActive by remember(backdrop) { computedStateOf { backdrop != null && scrollProgress == 1f } }
 
     Scaffold(
         topBar = {
@@ -140,6 +143,7 @@ fun AboutPage(
                         isWideScreen = LocalIsWideScreen.current,
                         expandable = false,
                         scrollBehavior = topAppBarScrollBehavior,
+                        isContentScrolled = contentUnderTopBar,
                         color = barColor,
                         titleColor = titleColor,
                         titleAlpha = titleAlpha,
@@ -451,6 +455,7 @@ private fun AboutContent(
             adapter = rememberScrollBarAdapter(lazyListState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             trackPadding = scrollPadding,
+            topAppBarScrollBehavior = topAppBarScrollBehavior,
         )
     }
 

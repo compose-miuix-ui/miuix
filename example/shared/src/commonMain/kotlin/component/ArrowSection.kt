@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.maxLengthReject
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -117,22 +121,20 @@ private fun SliderDialog(
         },
         onDismissFinished = onDismissFinished,
         content = {
-            var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
+            val textState = rememberTextFieldState(
+                initialText = ((volumeState() * 100).toInt()).toString(),
+            )
             TextField(
+                state = textState,
                 modifier = Modifier.padding(bottom = 16.dp),
-                value = text,
-                maxLines = 1,
-                onValueChange = { newValue ->
-                    val digits = newValue.filter { it.isDigit() }
-                    if (digits.isEmpty()) {
-                        text = ""
-                    } else {
-                        val limited = digits.take(3)
-                        val num = limited.toIntOrNull() ?: 0
-                        val clamped = num.coerceIn(0, 100)
-                        text = clamped.toString()
+                lineLimits = TextFieldLineLimits.SingleLine,
+                inputTransformation = InputTransformation {
+                    val digits = asCharSequence().filter { it.isDigit() }
+                    val clamped = digits.take(3).toString().toIntOrNull()?.coerceIn(0, 100)?.toString() ?: ""
+                    if (asCharSequence().toString() != clamped) {
+                        replace(0, length, clamped)
                     }
-                },
+                }.maxLengthReject(3),
             )
             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(
@@ -144,7 +146,7 @@ private fun SliderDialog(
                 TextButton(
                     text = "Confirm",
                     onClick = {
-                        val parsed = text.toIntOrNull()
+                        val parsed = textState.text.toString().toIntOrNull()
                         val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
                         onVolumeChange(clamped / 100f)
                         showDialog.value = false

@@ -35,7 +35,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -187,7 +187,7 @@ internal fun BottomSheetContentLayout(
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, animationProgress) {
-        derivedStateOf {
+        computedStateOf {
             if (enableWindowDim) {
                 dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * animationProgress.value).coerceIn(0f, 1f))
             } else {
@@ -717,7 +717,7 @@ private fun BoxScope.OverscrollBackground(
     surface: (@Composable () -> Modifier)? = null,
 ) {
     val density = LocalDensity.current
-    val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
+    val overscrollOffsetPx by remember { computedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
     if (overscrollOffsetPx > 0f) {
         Box(
             modifier = Modifier

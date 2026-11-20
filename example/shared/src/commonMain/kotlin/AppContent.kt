@@ -3,6 +3,7 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -39,6 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
@@ -54,9 +57,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -143,6 +151,7 @@ import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import ui.isInDarkTheme
 import utils.FPSMonitor
 import utils.LocalAppPageInsets
+import utils.LocalTopAppBarCenterObstructionStart
 import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
 import utils.TopLayerHost
@@ -151,6 +160,7 @@ import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
 import utils.shouldShowSplitPane
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 private object UIConstants {
@@ -176,8 +186,9 @@ enum class FloatingNavigationBarAlignment(val value: Int) {
 }
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator found!") }
-val LocalIsWideScreen = staticCompositionLocalOf { false }
+val LocalIsWideScreen = compositionLocalOf { false }
 val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> { error("LocalMainPagerState not provided") }
+private val DefaultTopAppBarTitleAlpha: () -> Float = { 1f }
 
 @Composable
 fun AppContent(
@@ -214,12 +225,19 @@ fun AppContent(
     val expandSidebar = shouldExpandNavigationRail()
     val sidebarState = rememberGlassNavigationRailState(initialExpanded = expandSidebar)
     LaunchedEffect(expandSidebar) { sidebarState.expanded = expandSidebar }
-    val topAppBarTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
+    val primaryTitleAlpha: () -> Float = remember(useGlassSidebar, sidebarState) {
         if (useGlassSidebar) {
             { sidebarState.progress }
         } else {
             { 1f }
         }
+    }
+    val topAppBarCenterObstructionStart = if (
+        useGlassSidebar && !sidebarState.expanded && sidebarState.collapsedWidth > 0.dp
+    ) {
+        sidebarState.collapsedStart
+    } else {
+        Dp.Unspecified
     }
     LaunchedEffect(useGlassSidebar, sidebarState.expanded) {
         mainPagerState.snapTransitions = useGlassSidebar && sidebarState.expanded
@@ -250,7 +268,8 @@ fun AppContent(
         LocalNavigator provides navigator,
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
-        LocalTopAppBarTitleAlpha provides topAppBarTitleAlpha,
+        LocalTopAppBarTitleAlpha provides DefaultTopAppBarTitleAlpha,
+        LocalTopAppBarCenterObstructionStart provides topAppBarCenterObstructionStart,
         LocalAppPageInsets provides pageInsets,
     ) {
         // Match platform screen corners; split panes have no outer corner.
@@ -363,6 +382,7 @@ fun AppContent(
                                     padding = pageInsets.safeInsets.asPaddingValues(),
                                     navigationItems = navigationItems,
                                     mainPagerState = mainPagerState,
+                                    primaryTitleAlpha = primaryTitleAlpha,
                                 )
                             }
                             if (useGlassSidebar) {
@@ -382,7 +402,7 @@ fun AppContent(
         }
     }
 
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = appState.showFPSMonitor,
         enter = fadeIn(),
         exit = fadeOut(),
@@ -406,6 +426,7 @@ private fun AppNavHost(
     padding: PaddingValues,
     navigationItems: List<NavigationItem>,
     mainPagerState: MainPagerState,
+    primaryTitleAlpha: () -> Float,
     modifier: Modifier = Modifier,
 ) {
     NavDisplay(
@@ -416,10 +437,15 @@ private fun AppNavHost(
         effects = effects,
     ) {
         entry<Route.Main>(swipeDismiss = swipeBackDirection) {
-            Home(
-                navigationItems = navigationItems,
-                mainPagerState = mainPagerState,
-            )
+            CompositionLocalProvider(
+                LocalTopAppBarTitleAlpha provides primaryTitleAlpha,
+                LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
+            ) {
+                Home(
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                )
+            }
         }
         entry<Route.Component>(swipeDismiss = swipeBackDirection) { route ->
             ComponentPage(demo = route.demo, padding = padding)
@@ -882,7 +908,7 @@ private fun FloatingToolbar(
     style: Int,
     backdrop: Backdrop? = null,
 ) {
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = showFloatingToolbar,
         enter = fadeIn(),
         exit = fadeOut(),
@@ -1015,15 +1041,49 @@ fun AppPager(
         flingBehavior = flingBehavior,
         beyondViewportPageCount = 4,
         pageContent = { page ->
-            when (page) {
-                UIConstants.MAIN_PAGE_INDEX -> MainPage(padding = padding)
-                UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
-                UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
-                UIConstants.TEXT_STYLE_PAGE_INDEX -> TextStylePage(padding = padding)
-                else -> SettingsPage(padding = padding)
+            // Pages out of view don't follow a sidebar's morph.
+            val hidden = remember(pagerState, page) {
+                computedStateOf {
+                    abs(page - pagerState.currentPage - pagerState.currentPageOffsetFraction) >= 1f
+                }
+            }
+            val insets = LocalAppPageInsets.current
+            val pageInsets = remember(insets, hidden) { insets.whenHidden { hidden.value } }
+            val frozenConstraints = remember(hidden) { Modifier.keepConstraintsWhile { hidden.value } }
+            CompositionLocalProvider(LocalAppPageInsets provides pageInsets) {
+                Box(modifier = frozenConstraints) {
+                    AppPage(page = page, padding = padding)
+                }
             }
         },
     )
+}
+
+/** Measures with the last constraints seen while [frozen] was false. */
+private fun Modifier.keepConstraintsWhile(frozen: () -> Boolean): Modifier {
+    var last: Constraints? = null
+    return layout { measurable, constraints ->
+        val held = last
+        val used = if (held != null && frozen()) held else constraints.also { last = it }
+        val placeable = measurable.measure(used)
+        layout(constraints.constrainWidth(placeable.width), constraints.constrainHeight(placeable.height)) {
+            placeable.place(0, 0)
+        }
+    }
+}
+
+@Composable
+private fun AppPage(
+    page: Int,
+    padding: PaddingValues,
+) {
+    when (page) {
+        UIConstants.MAIN_PAGE_INDEX -> MainPage(padding = padding)
+        UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
+        UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
+        UIConstants.TEXT_STYLE_PAGE_INDEX -> TextStylePage(padding = padding)
+        else -> SettingsPage(padding = padding)
+    }
 }
 
 @Composable
@@ -1032,7 +1092,7 @@ private fun MainScreenBackHandler(
     navigator: Navigator,
 ) {
     val isPagerBackHandlerEnabled by remember {
-        derivedStateOf {
+        computedStateOf {
             navigator.current() is Route.Main && navigator.backStackSize() == 1 && mainState.selectedPage != 0
         }
     }

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,12 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -56,10 +54,12 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
     var pillSize by remember { mutableStateOf(IntSize.Zero) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
-    val avgTargetColor by remember { derivedStateOf { healthColor(stats.avg, refFps) } }
-    val lowTargetColor by remember { derivedStateOf { healthColor(stats.low1, refFps) } }
-    val avgColor by animateColorAsState(avgTargetColor)
-    val lowColor by animateColorAsState(lowTargetColor)
+    val avgTargetColor by remember { computedStateOf { healthColor(stats.avg, refFps) } }
+    val lowTargetColor by remember { computedStateOf { healthColor(stats.low1, refFps) } }
+    val avgColorState = animateColorAsState(avgTargetColor)
+    val lowColorState = animateColorAsState(lowTargetColor)
+    val avgColorProducer = remember { ColorProducer { avgColorState.value } }
+    val lowColorProducer = remember { ColorProducer { lowColorState.value } }
 
     fun clampOffset(raw: Offset): Offset {
         val xRange = ((parentSize.width - pillSize.width) / 2f).coerceAtLeast(0f)
@@ -106,25 +106,35 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
                 )
             } else {
                 val secondary = MiuixTheme.colorScheme.onSurfaceSecondary
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = secondary)) { append("AVG ") }
-                        withStyle(SpanStyle(color = avgColor)) { append(stats.avg.toString()) }
-                    },
-                    style = MiuixTheme.textStyles.body2,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "AVG ",
+                        style = MiuixTheme.textStyles.body2,
+                        color = secondary,
+                    )
+                    Text(
+                        text = stats.avg.toString(),
+                        color = avgColorProducer,
+                        style = MiuixTheme.textStyles.body2,
+                    )
+                }
                 Text(
                     text = "·",
                     style = MiuixTheme.textStyles.body2,
                     color = secondary,
                 )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = secondary)) { append("LOW ") }
-                        withStyle(SpanStyle(color = lowColor)) { append(stats.low1.toString()) }
-                    },
-                    style = MiuixTheme.textStyles.body2,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "LOW ",
+                        style = MiuixTheme.textStyles.body2,
+                        color = secondary,
+                    )
+                    Text(
+                        text = stats.low1.toString(),
+                        color = lowColorProducer,
+                        style = MiuixTheme.textStyles.body2,
+                    )
+                }
             }
         }
     }

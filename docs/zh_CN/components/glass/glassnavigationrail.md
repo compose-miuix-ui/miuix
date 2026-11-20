@@ -128,7 +128,7 @@ GlassNavigationRail(
 | material | GlassMaterial? | 表面材质；null 省略显式材质层 | GlassNavigationRailDefaults.material() | 否 |
 | stroke | EdgeStroke? | 表面描边；null 移除 | GlassNavigationRailDefaults.stroke() | 否 |
 | shadow | GlassShadow? | 表面阴影；null 移除 | GlassShadows.Float | 否 |
-| selectedColor | Color | 选中图标与文字颜色 | 动态取色主题为 MiuixTheme.colorScheme.primary，其余为 onSurface | 否 |
+| selectedColor | Color | 选中图标与文字颜色 | MiuixTheme.colorScheme.onSurface | 否 |
 | unselectedColor | Color | 未选中图标与文字颜色 | MiuixTheme.colorScheme.onSurface | 否 |
 | indicatorColor | Color | 指示器常态填充 | GlassNavigationBarDefaults.indicatorColor() | 否 |
 | indicatorPressedColor | Color | 折叠胶囊中按下时的指示器填充 | GlassNavigationBarDefaults.indicatorPressedColor() | 否 |

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -84,7 +83,6 @@ fun GlassDropdownPreference(
     var expanded by remember { mutableStateOf(false) }
     val mounted = remember { mutableStateOf(false) }
     val anchor = rememberGlassPopupAnchor()
-    var rowBounds by remember { mutableStateOf(Rect.Zero) }
     val actualEnabled = enabled && items.isNotEmpty()
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val setExpanded: (Boolean) -> Unit = remember {
@@ -107,7 +105,7 @@ fun GlassDropdownPreference(
     }
 
     BasicComponent(
-        modifier = modifier.onGloballyPositioned { rowBounds = it.boundsInWindow() },
+        modifier = modifier,
         title = title,
         titleColor = titleColor,
         summary = summary,
@@ -115,7 +113,7 @@ fun GlassDropdownPreference(
         startAction = startAction,
         endActions = {
             Row(
-                modifier = Modifier.glassPopupAnchorValue(anchor),
+                modifier = Modifier.glassPopupAnchorValue(anchor, trackBounds = mounted.value),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val value = items.getOrNull(selectedIndex)
@@ -143,6 +141,9 @@ fun GlassDropdownPreference(
     )
 
     if (!mounted.value) return
+    DisposableEffect(anchor) {
+        onDispose { anchor.dropdownValueBounds = null }
+    }
 
     PopupLayout(
         visible = mounted,
@@ -152,12 +153,16 @@ fun GlassDropdownPreference(
         exitTransition = ExitTransition.None,
         renderInRootScaffold = renderInRootScaffold,
     ) {
-        // Box for the dropdown's full-page dismiss layer.
+        // Wait for fresh anchor bounds before opening.
+        val bounds = anchor.dropdownValueBounds
+        val show = expanded && actualEnabled
+        if (show && bounds == null) return@PopupLayout
+        // Full-page dismiss area.
         Box(modifier = Modifier.fillMaxSize()) {
             GlassDropdownPopupContent(
-                show = expanded && actualEnabled,
+                show = show,
                 onDismissRequest = { setExpanded(false) },
-                anchorBounds = rowBounds,
+                anchorBounds = bounds ?: Rect.Zero,
                 backdrop = backdrop,
                 anchor = anchor,
                 sizing = sizing,

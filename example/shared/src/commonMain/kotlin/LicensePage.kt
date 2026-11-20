@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,14 +34,15 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.Library
+import utils.LocalAboutLibrariesJsonLoader
 import utils.SimpleJsonParser
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import utils.rememberAboutLibrariesJsonLoader
 
 @Composable
 fun LicensePage(
@@ -62,9 +65,11 @@ fun LicensePage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
 
-    val libraries by produceState<List<Library>?>(initialValue = null) {
+    val fallbackLoader = rememberAboutLibrariesJsonLoader()
+    val loadAboutLibrariesJson = LocalAboutLibrariesJsonLoader.current ?: fallbackLoader
+    val libraries by produceState<List<Library>?>(initialValue = null, loadAboutLibrariesJson) {
         try {
-            val jsonString = Res.readBytes("files/aboutlibraries.json").decodeToString()
+            val jsonString = loadAboutLibrariesJson()
             val libs = SimpleJsonParser(jsonString).parseLibs()
             value = libs.libraries
         } catch (e: CancellationException) {
@@ -101,6 +106,7 @@ fun LicensePage(
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             LazyColumn(
                 state = lazyListState,
+                cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
                 modifier = Modifier.pageScrollModifiers(
                     appState.enableScrollEndHaptic,
                     appState.showTopAppBar,
@@ -135,6 +141,7 @@ fun LicensePage(
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 trackPadding = contentPadding,
+                topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
             )
         }
     }

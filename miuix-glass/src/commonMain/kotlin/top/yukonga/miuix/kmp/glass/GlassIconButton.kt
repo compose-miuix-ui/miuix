@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -70,7 +70,7 @@ fun GlassIconButton(
     style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
     material: GlassMaterial? = null,
     size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
-    shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: GlassShape(size / 2),
+    shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: remember(size) { GlassShape(size / 2) },
     fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
     stroke: EdgeStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
     shadow: GlassShadow? = LocalGlassTopAppBarContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
@@ -79,11 +79,18 @@ fun GlassIconButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val topBarContext = LocalGlassTopAppBarContext.current
+    val usesTopBarButtonBackdrop = topBarContext?.onButtonBackdropConsumerChange != null &&
+        (inheritTopBarMaterial || backdrop == null)
+    DisposableEffect(topBarContext, usesTopBarButtonBackdrop) {
+        val callback = if (usesTopBarButtonBackdrop) topBarContext.onButtonBackdropConsumerChange else null
+        callback?.invoke(1)
+        onDispose { callback?.invoke(-1) }
+    }
     val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
     val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
-    val topBarRamp = topBarContext?.ramp
-    val shadowAlpha = remember(resolvedSurfaceAlpha, topBarRamp) {
-        { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) }
+    val topBarProgress = topBarContext?.materialProgress
+    val shadowAlpha = remember(resolvedSurfaceAlpha, topBarProgress) {
+        { resolvedSurfaceAlpha * (topBarProgress?.value ?: 1f) }
     }
     GlassButtonSurface(
         backdrop = materialContext?.buttonBackdrop ?: backdrop ?: topBarContext?.buttonBackdrop,
@@ -91,8 +98,9 @@ fun GlassIconButton(
         surfaceAlpha = resolvedSurfaceAlpha,
         shadowAlpha = shadowAlpha,
         style = style,
-        material = material?.withUnderlayBlur(materialContext?.buttonUnderlayMaterial)
-            ?: materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
+        material = remember(material, materialContext?.buttonUnderlayMaterial) {
+            material?.withUnderlayBlur(materialContext?.buttonUnderlayMaterial)
+        } ?: materialContext?.material ?: GlassTopAppBarDefaults.buttonMaterial(),
         underlayMaterial = materialContext?.buttonUnderlayMaterial,
         shape = shape,
         size = size,
@@ -152,12 +160,16 @@ internal fun GlassButtonSurface(
         }
     }
     val keepMaterial = sharedKeepMaterial ?: remember(floating, progress) {
-        derivedStateOf { floating || progress.value > 0f }
+        computedStateOf { floating || progress.value > 0f }
     }.value
     val opacity = surfaceAlpha.coerceIn(0f, 1f)
     val effectiveBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
-    val anchorSurface = remember(effectiveBackdrop, style, material, underlayMaterial, stroke, fill) {
-        GlassAnchorSurface(effectiveBackdrop, style, material, underlayMaterial, stroke, fill)
+    val anchorSurface = if (popupAnchor != null) {
+        remember(effectiveBackdrop, style, material, underlayMaterial, stroke, fill) {
+            GlassAnchorSurface(effectiveBackdrop, style, material, underlayMaterial, stroke, fill)
+        }
+    } else {
+        null
     }
     SideEffect {
         val anchor = popupAnchor ?: return@SideEffect

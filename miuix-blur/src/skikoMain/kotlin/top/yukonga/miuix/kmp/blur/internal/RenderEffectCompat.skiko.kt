@@ -6,10 +6,7 @@ package top.yukonga.miuix.kmp.blur.internal
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.skiaImageFilter
-import org.jetbrains.skia.BlendMode
-import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.ImageFilter
-import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.asSkikoRuntimeShader
 
@@ -30,77 +27,3 @@ internal actual fun runtimeShaderEffect(
     uniformShaderName,
     null,
 ).asComposeRenderEffect()
-
-internal actual fun progressiveStackEffect(
-    scope: BackdropEffectScopeImpl,
-    fullSigmaX: Float,
-    fullSigmaY: Float,
-    lightSigmaX: Float,
-    lightSigmaY: Float,
-    gradVecX: Float,
-    gradVecY: Float,
-    gradOffset: Float,
-    curve: Float,
-    preEffect: RenderEffect?,
-    postEffect: RenderEffect?,
-    nativeSharpEnd: Boolean,
-    unpremulBase: Boolean,
-): RenderEffect? {
-    val shader = scope.obtainRuntimeShader(
-        if (nativeSharpEnd) "ProgCompositeSharp" else "ProgComposite",
-        if (nativeSharpEnd) PROGRESSIVE_COMPOSITE_SHARP_SHADER else PROGRESSIVE_COMPOSITE_SHADER,
-    ).apply {
-        setFloatUniform("in_gradVec", gradVecX, gradVecY)
-        setFloatUniform("in_gradOffset", gradOffset)
-        setFloatUniform("in_curve", curve)
-    }
-    val pre = preEffect?.skiaImageFilter
-
-    // Each level is pre → blur; null = the (pre-chained) source itself.
-    fun level(sigmaX: Float, sigmaY: Float): ImageFilter? = if (sigmaX <= 0f && sigmaY <= 0f) {
-        pre
-    } else {
-        ImageFilter.makeBlur(sigmaX, sigmaY, FilterTileMode.CLAMP, pre, null)
-    }
-
-    // clearChild := lightBlur by default, degenerating the last mix segment (the sharp end is the
-    // caller's full-res overlay); with nativeSharpEnd the (pre-chained) source binds instead —
-    // a null child samples the source. Skia evaluates the shared lightBlur instance once.
-    val lightBlur = level(lightSigmaX, lightSigmaY)
-    var filter = if (nativeSharpEnd) {
-        ImageFilter.makeRuntimeShader(
-            shader.asSkikoRuntimeShader(),
-            arrayOf("clearChild", "fullBlur", "lightBlur"),
-            arrayOf(
-                pre,
-                level(fullSigmaX, fullSigmaY),
-                lightBlur,
-            ),
-        )
-    } else {
-        ImageFilter.makeRuntimeShader(
-            shader.asSkikoRuntimeShader(),
-            arrayOf("fullBlur", "lightBlur"),
-            arrayOf(
-                level(fullSigmaX, fullSigmaY),
-                lightBlur,
-            ),
-        )
-    }
-    if (postEffect != null) {
-        val maskShader = scope.obtainRuntimeShader("ProgLevelMask", PROGRESSIVE_LEVEL_MASK_SHADER).apply {
-            setFloatUniform("in_gradVec", gradVecX, gradVecY)
-            setFloatUniform("in_gradOffset", gradOffset)
-            setFloatUniform("in_curve", curve)
-            setFloatUniform("in_level", 1f)
-            setFloatUniform("in_slope", 1f)
-        }
-        val postBranch = ImageFilter.makeRuntimeShader(
-            maskShader.asSkikoRuntimeShader(),
-            "child",
-            ImageFilter.makeCompose(postEffect.skiaImageFilter, filter),
-        )
-        filter = ImageFilter.makeBlend(BlendMode.SRC_OVER, filter, postBranch, null)
-    }
-    return filter.asComposeRenderEffect()
-}

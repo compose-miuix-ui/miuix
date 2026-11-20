@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+
 @Composable
 internal fun GlassDemoBackground(
     backdrop: LayerBackdrop,

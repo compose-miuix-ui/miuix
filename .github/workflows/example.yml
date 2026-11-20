@@ -62,7 +62,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          key: ${{ runner.os }}-konan-release-cache-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-konan-
       - name: Build ${{ matrix.platform }} platform
         run: ${{ matrix.build-command }}
@@ -95,12 +95,12 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          key: ${{ runner.os }}-konan-release-cache-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-konan-
       - name: Build unsigned iOS IPA
         shell: bash
         run: |
-          ./gradlew :example:shared:generateVersionInfo
+          ./gradlew :example:shared:generateVersionInfo --no-daemon
           xcodebuild archive \
             -project example/ios/iosApp.xcodeproj \
             -scheme 'example [ios]' \

@@ -21,7 +21,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -55,6 +56,9 @@ val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 /** Extra title opacity, for chrome that covers the bar's title, such as a collapsed glass sidebar. */
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
 
+/** Start offset of centered chrome (such as a collapsed glass sidebar) obstructing the top bar center. */
+val LocalTopAppBarCenterObstructionStart = compositionLocalOf { Dp.Unspecified }
+
 /**
  * Full-window safe areas and the remaining insets in the current page pane. A sibling rail has
  * already reserved its start space; an overlaid rail is included in [contentInsets]. Backgrounds
@@ -64,12 +68,42 @@ val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
 class AppPageInsets(
     val windowInsets: WindowInsets,
     val safeInsets: WindowInsets,
-    val contentInsets: WindowInsets,
+    private val overlayStart: () -> Dp,
     val searchTop: () -> Dp,
-)
+) {
+    val contentInsets: WindowInsets = object : WindowInsets {
+        override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getLeft(density, layoutDirection) +
+            if (layoutDirection == LayoutDirection.Ltr) with(density) { overlayStart().roundToPx() } else 0
+
+        override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getRight(density, layoutDirection) +
+            if (layoutDirection == LayoutDirection.Rtl) with(density) { overlayStart().roundToPx() } else 0
+
+        override fun getTop(density: Density): Int = safeInsets.getTop(density)
+
+        override fun getBottom(density: Density): Int = safeInsets.getBottom(density)
+    }
+
+    /** Keeps the last in-view clearance while [hidden], instead of following the overlay. */
+    fun whenHidden(hidden: () -> Boolean): AppPageInsets = AppPageInsets(
+        windowInsets = windowInsets,
+        safeInsets = safeInsets,
+        overlayStart = overlayStart.frozenWhile(hidden),
+        searchTop = searchTop.frozenWhile(hidden),
+    )
+}
+
+/** Reads [this] while [frozen] is false; while it is true, returns the last value read instead. */
+private fun (() -> Dp).frozenWhile(frozen: () -> Boolean): () -> Dp {
+    val live = this
+    var last = Dp.Unspecified
+    return {
+        val held = last
+        if (frozen() && held != Dp.Unspecified) held else live().also { last = it }
+    }
+}
 
 val LocalAppPageInsets = staticCompositionLocalOf {
-    AppPageInsets(WindowInsets(0), WindowInsets(0), WindowInsets(0)) { 0.dp }
+    AppPageInsets(WindowInsets(0), WindowInsets(0), { 0.dp }, { 0.dp })
 }
 
 /** Only the app host combines platform safe areas, external host padding and navigation chrome. */
@@ -101,18 +135,7 @@ fun rememberAppPageInsets(
         } else {
             windowInsets
         }
-        val contentInsets = object : WindowInsets {
-            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getLeft(density, layoutDirection) +
-                if (layoutDirection == LayoutDirection.Ltr) with(density) { overlayStart().roundToPx() } else 0
-
-            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = safeInsets.getRight(density, layoutDirection) +
-                if (layoutDirection == LayoutDirection.Rtl) with(density) { overlayStart().roundToPx() } else 0
-
-            override fun getTop(density: Density): Int = safeInsets.getTop(density)
-
-            override fun getBottom(density: Density): Int = safeInsets.getBottom(density)
-        }
-        AppPageInsets(windowInsets, safeInsets, contentInsets, searchTop)
+        AppPageInsets(windowInsets, safeInsets, overlayStart, searchTop)
     }
 }
 
@@ -233,7 +256,6 @@ fun AdaptiveTopAppBar(
     color: Color = MiuixTheme.colorScheme.surface,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
     isContentScrolled: Boolean? = null,
-    visualContentOffset: (() -> Float)? = null,
     titleAlpha: () -> Float = { titleColor.alpha },
     backgroundAlpha: () -> Float = { 1f },
     navigationIcon: @Composable () -> Unit = {},
@@ -244,12 +266,15 @@ fun AdaptiveTopAppBar(
     if (!showTopAppBar) return
     val appState = LocalAppState.current
     val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
+    val centerObstructionStart = LocalTopAppBarCenterObstructionStart.current
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val surfaceColor = MiuixTheme.colorScheme.surface
         val bandBrush = remember(surfaceColor) { GlassTopAppBarDefaults.bandBrush(surfaceColor) }
         val contentScrolled by remember(scrollBehavior, isContentScrolled) {
-            derivedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < 0f) }
+            computedStateOf {
+                isContentScrolled ?: (scrollBehavior.state.contentOffset < -1f || scrollBehavior.state.overscrollOffset < -1f)
+            }
         }
         GlassTopAppBar(
             title = title,
@@ -260,9 +285,9 @@ fun AdaptiveTopAppBar(
             backdrop = backdrop,
             progressiveBlur = appState.enableBlur,
             scrollBehavior = scrollBehavior,
-            visualContentOffset = visualContentOffset,
             titleAlpha = { titleAlpha() * chromeTitleAlpha() },
             backgroundAlpha = backgroundAlpha,
+            centerObstructionStart = centerObstructionStart,
             defaultWindowInsetsPadding = false,
             bandBrush = bandBrush,
             bandOverhang = GlassTopAppBarDefaults.BandOverhang,
@@ -283,6 +308,7 @@ fun AdaptiveTopAppBar(
             titleColor = titleColor,
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = false,
+            centerObstructionStart = centerObstructionStart,
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,

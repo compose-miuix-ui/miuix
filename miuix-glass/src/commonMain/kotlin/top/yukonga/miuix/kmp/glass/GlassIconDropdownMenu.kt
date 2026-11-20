@@ -62,10 +62,11 @@ fun BoxScope.GlassIconDropdownMenu(
     val density = LocalDensity.current
     var submenu by remember { mutableStateOf(false) }
     var submenuPresent by remember { mutableStateOf(false) }
-    var submenuPath by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    val submenuPathState = remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    val submenuPath = submenuPathState.value
     var submenuAnchor by remember { mutableStateOf(Rect.Zero) }
     var primaryWidth by remember { mutableStateOf(sizing.minWidth) }
-    var hostOrigin by remember { mutableStateOf(Offset.Zero) }
+    val hostOriginState = remember { mutableStateOf(Offset.Zero) }
     val groups = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val submenuEntry = submenuPath?.let { groups.getOrNull(it.first) }
     val submenuItem = submenuPath?.let { submenuEntry?.items?.getOrNull(it.second) }
@@ -124,32 +125,41 @@ fun BoxScope.GlassIconDropdownMenu(
             groups.forEachIndexed { groupIndex, entry ->
                 entry.items.forEachIndexed { itemIndex, item ->
                     val children = item.children.orEmpty()
-                    var rowBounds by remember(groupIndex, itemIndex) { mutableStateOf(Rect.Zero) }
+                    val hasChildren = children.isNotEmpty()
+                    val rowBoundsState = if (hasChildren) {
+                        remember(groupIndex, itemIndex) { mutableStateOf(Rect.Zero) }
+                    } else {
+                        null
+                    }
+                    val arrowRotationProvider = remember(groupIndex, itemIndex, submenuArrow, anchor) {
+                        {
+                            val path = submenuPathState.value
+                            if (path?.first == groupIndex && path.second == itemIndex) {
+                                submenuArrow.value * (1f - anchor.secondaryBackProgress)
+                            } else {
+                                0f
+                            }
+                        }
+                    }
                     GlassPopupItem(
                         text = item.text,
                         summary = item.summary,
                         enabled = entry.enabled && item.enabled,
                         selected = item.selected,
-                        showArrow = children.isNotEmpty(),
-                        arrowRotation = {
-                            if (submenuPath?.first == groupIndex && submenuPath?.second == itemIndex) {
-                                submenuArrow.value * (1f - anchor.secondaryBackProgress)
-                            } else {
-                                0f
-                            }
-                        },
-                        modifier = if (children.isNotEmpty()) {
+                        showArrow = hasChildren,
+                        arrowRotation = arrowRotationProvider,
+                        modifier = if (rowBoundsState != null) {
                             Modifier.onGloballyPositioned { coordinates ->
-                                if (!submenuPresent) rowBounds = coordinates.boundsInWindow()
+                                if (!submenuPresent) rowBoundsState.value = coordinates.boundsInWindow()
                             }
                         } else {
                             Modifier
                         },
                         onClick = {
-                            if (children.isNotEmpty()) {
+                            if (hasChildren) {
                                 if (show && !submenuPresent) {
-                                    submenuAnchor = rowBounds
-                                    submenuPath = groupIndex to itemIndex
+                                    submenuAnchor = rowBoundsState?.value ?: Rect.Zero
+                                    submenuPathState.value = groupIndex to itemIndex
                                     submenuPresent = true
                                     submenu = true
                                 }
@@ -172,15 +182,16 @@ fun BoxScope.GlassIconDropdownMenu(
     // Submenu dismissal collapses to the row; full dismissal also moves toward the toolbar anchor.
     Box(
         Modifier.matchParentSize()
-            .onGloballyPositioned { hostOrigin = it.positionInWindow() }
+            .onGloballyPositioned { hostOriginState.value = it.positionInWindow() }
             .graphicsLayer {
                 val progress = menuVisibility.value.coerceIn(0f, 1f)
                 val trigger = anchor.containerBounds
                 val closedScale = (trigger.width / primaryWidth.toPx()).coerceIn(0f, 1f)
                 val scale = closedScale + (1f - closedScale) * progress
                 // The anchor is reported in window coordinates; this layer is host-local.
-                val centerX = trigger.center.x - hostOrigin.x
-                val centerY = trigger.center.y - hostOrigin.y
+                val origin = hostOriginState.value
+                val centerX = trigger.center.x - origin.x
+                val centerY = trigger.center.y - origin.y
                 transformOrigin = TransformOrigin(
                     if (size.width > 0f) centerX / size.width else 0.5f,
                     if (size.height > 0f) centerY / size.height else 0.5f,
@@ -200,7 +211,7 @@ fun BoxScope.GlassIconDropdownMenu(
             visuals = visuals,
             onDismissFinished = {
                 submenuPresent = false
-                submenuPath = null
+                submenuPathState.value = null
             },
         ) {
             submenuItem?.let { parent ->

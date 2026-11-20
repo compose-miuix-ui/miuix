@@ -42,7 +42,6 @@ import top.yukonga.miuix.kmp.window.platform.linux.LinuxMiuixWindowFrame
 import top.yukonga.miuix.kmp.window.platform.macos.MacOSMiuixWindowFrame
 import top.yukonga.miuix.kmp.window.platform.windows.WindowsMiuixWindowFrame
 import java.awt.Dimension
-import java.awt.Window
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.awt.event.WindowAdapter
@@ -62,7 +61,9 @@ fun MiuixWindow(
     enabled: Boolean = true,
     focusable: Boolean = true,
     alwaysOnTop: Boolean = false,
-    properties: MiuixWindowProperties<ComposeWindow> = MiuixWindowProperties.default(),
+    properties: MiuixWindowProperties = MiuixWindowProperties.default(),
+    onVisibleChange: (ComposeWindow, Boolean) -> Unit = { _, _ -> },
+    onResizeEdgeChange: (ComposeWindow, WindowResizeEdge) -> Unit = { _, _ -> },
     onPreviewKeyEvent: (KeyEvent) -> Boolean = { false },
     onKeyEvent: (KeyEvent) -> Boolean = { false },
     init: (ComposeWindow) -> Unit = {},
@@ -72,7 +73,7 @@ fun MiuixWindow(
         "Caption button height must be less than or equal to caption bar height"
     }
 
-    val currentProperties by rememberUpdatedState(properties)
+    val currentOnVisibleChange by rememberUpdatedState(onVisibleChange)
     val resolvedDecoration = decoration.resolveForPlatform()
     val resolvedTransparent = transparent ||
         (DesktopOS.isLinux() && LinuxClientShadow.shouldUseClientShadow(decoration))
@@ -126,17 +127,18 @@ fun MiuixWindow(
                 )
             }
 
-            @Suppress("UNCHECKED_CAST")
             CompositionLocalProvider(
                 LocalWindowState provides state,
                 LocalWindowDraggableAreaRegistration provides remember(window) {
                     WindowDraggableAreaRegistration()
                 },
-                LocalMiuixWindowProperties provides resolvedProperties as MiuixWindowProperties<Window>,
-                LocalDensity provides Density(
-                    density = density.density * resolvedProperties.extraDisplayScale,
-                    fontScale = density.fontScale * resolvedProperties.extraFontScale,
-                ),
+                LocalMiuixWindowProperties provides resolvedProperties,
+                LocalDensity provides remember(density, resolvedProperties.extraDisplayScale, resolvedProperties.extraFontScale) {
+                    Density(
+                        density = density.density * resolvedProperties.extraDisplayScale,
+                        fontScale = density.fontScale * resolvedProperties.extraFontScale,
+                    )
+                },
             ) {
                 val minSize = properties.minSize
                 LaunchedEffect(minSize) {
@@ -155,10 +157,10 @@ fun MiuixWindow(
                         override fun componentResized(e: ComponentEvent?) {}
                         override fun componentMoved(e: ComponentEvent?) {}
                         override fun componentShown(e: ComponentEvent?) {
-                            currentProperties.onVisibleChange(window, true)
+                            currentOnVisibleChange(window, true)
                         }
                         override fun componentHidden(e: ComponentEvent?) {
-                            currentProperties.onVisibleChange(window, false)
+                            currentOnVisibleChange(window, false)
                         }
                     }
 
@@ -182,6 +184,7 @@ fun MiuixWindow(
                             WindowsMiuixWindowFrame(
                                 resizable = resizable,
                                 properties = resolvedProperties,
+                                onResizeEdgeChange = onResizeEdgeChange,
                                 content = content,
                             )
 
@@ -196,6 +199,7 @@ fun MiuixWindow(
                                 resizable = resizable,
                                 decoration = decoration,
                                 properties = resolvedProperties,
+                                onResizeEdgeChange = onResizeEdgeChange,
                                 content = content,
                             )
 

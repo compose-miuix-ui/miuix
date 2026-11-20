@@ -12,6 +12,7 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -23,10 +24,24 @@ import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
 
+private val PressFeedbackReferenceSide = 160.dp
+
+private fun pressFeedbackSizeRatio(width: Int, height: Int, density: Density): Float = with(density) {
+    maxOf(1f, maxOf(width, height) / PressFeedbackReferenceSide.toPx())
+}
+
+private fun pressFeedbackStrength(sizeRatio: Float): Float = 2f / (1f + sizeRatio)
+
+/**
+ * Scales the surface uniformly when pressed. [sinkAmount] is the target scale for compact
+ * surfaces; larger surfaces scale less to limit how far their edges move.
+ */
 @Stable
 data class SinkFeedback(
     val sinkAmount: Float = 0.94f,
@@ -35,9 +50,9 @@ data class SinkFeedback(
     override fun create(interactionSource: InteractionSource): DelegatableNode = SinkFeedbackNode(interactionSource, sinkAmount, animationSpec)
 
     private class SinkFeedbackNode(
-        var interactionSource: InteractionSource,
-        var sinkAmount: Float,
-        var animationSpec: AnimationSpec<Float>,
+        private val interactionSource: InteractionSource,
+        private val sinkAmount: Float,
+        private val animationSpec: AnimationSpec<Float>,
     ) : Modifier.Node(),
         LayoutModifierNode {
 
@@ -70,16 +85,23 @@ data class SinkFeedback(
             constraints: Constraints,
         ): MeasureResult {
             val placeable = measurable.measure(constraints)
+            val scaleStrength = pressFeedbackStrength(pressFeedbackSizeRatio(placeable.width, placeable.height, this))
+            val layerBlock: GraphicsLayerScope.() -> Unit = {
+                val scale = 1f + (animatedScale.value - 1f) * scaleStrength
+                scaleX = scale
+                scaleY = scale
+            }
             return layout(placeable.width, placeable.height) {
-                placeable.placeWithLayer(0, 0) {
-                    scaleX = animatedScale.value
-                    scaleY = animatedScale.value
-                }
+                placeable.placeWithLayer(0, 0, layerBlock = layerBlock)
             }
         }
     }
 }
 
+/**
+ * Tilts the surface toward the press. [tiltAmount] sets the angle in degrees for compact
+ * surfaces; larger surfaces use less rotation and a longer camera distance.
+ */
 @Stable
 data class TiltFeedback(
     val tiltAmount: Float = 8f,
@@ -88,9 +110,9 @@ data class TiltFeedback(
     override fun create(interactionSource: InteractionSource): DelegatableNode = TiltFeedbackNode(interactionSource, tiltAmount, animationSpec)
 
     private class TiltFeedbackNode(
-        var interactionSource: InteractionSource,
-        var tiltAmount: Float,
-        var animationSpec: AnimationSpec<Float>,
+        private val interactionSource: InteractionSource,
+        private val tiltAmount: Float,
+        private val animationSpec: AnimationSpec<Float>,
     ) : Modifier.Node(),
         LayoutModifierNode,
         PointerInputModifierNode {
@@ -158,13 +180,17 @@ data class TiltFeedback(
             constraints: Constraints,
         ): MeasureResult {
             val placeable = measurable.measure(constraints)
+            val sizeRatio = pressFeedbackSizeRatio(placeable.width, placeable.height, this)
+            val angleScale = pressFeedbackStrength(sizeRatio)
+            val perspectiveDistance = 12f * density * sizeRatio
+            val layerBlock: GraphicsLayerScope.() -> Unit = {
+                rotationX = animatedTiltX.value * angleScale
+                rotationY = animatedTiltY.value * angleScale
+                cameraDistance = perspectiveDistance
+                transformOrigin = this@TiltFeedbackNode.transformOrigin
+            }
             return layout(placeable.width, placeable.height) {
-                placeable.placeWithLayer(0, 0) {
-                    rotationX = animatedTiltX.value
-                    rotationY = animatedTiltY.value
-                    cameraDistance = 12 * density
-                    this.transformOrigin = this@TiltFeedbackNode.transformOrigin
-                }
+                placeable.placeWithLayer(0, 0, layerBlock = layerBlock)
             }
         }
     }

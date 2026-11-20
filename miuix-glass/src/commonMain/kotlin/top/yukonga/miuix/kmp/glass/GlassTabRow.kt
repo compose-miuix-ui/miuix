@@ -5,9 +5,10 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -24,6 +25,8 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,12 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -64,6 +69,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -78,6 +84,7 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.drawGlassRim
+import top.yukonga.miuix.kmp.material.drawGlassShadow
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -136,19 +143,23 @@ object GlassTabRowDefaults {
 
     /** `filter-sort-view2-*-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 
     /** Bloom stroke for selected and unselected tabs. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
     /**
-     * The accented set: the selected tab carries the theme's own colour, the same in both themes.
-     * Material is applied to every tab; unselected tabs clear their background so it stays visible.
+     * The accented set: the selected tab carries the theme's own colour, paired with its on-primary
+     * label colour. Material is applied to every tab; unselected tabs clear their background so it
+     * stays visible.
      */
     @Composable
     fun primaryColors(
@@ -156,22 +167,41 @@ object GlassTabRowDefaults {
         containerColor: Color = Color.Transparent,
     ): GlassTabColors {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        val isDynamic = MiuixTheme.isDynamicColor
         val surface = MiuixTheme.colorScheme.surface
-        return remember(isDark, selectedContainerColor, containerColor, surface) {
+        val surfaceContainer = MiuixTheme.colorScheme.surfaceContainer
+        val onPrimary = MiuixTheme.colorScheme.onPrimary
+        val onSurface = MiuixTheme.colorScheme.onSurface
+        val unselectedContent = MiuixTheme.colorScheme.onSurfaceVariantSummary
+        return remember(
+            isDark,
+            isDynamic,
+            selectedContainerColor,
+            containerColor,
+            surface,
+            surfaceContainer,
+            onPrimary,
+            onSurface,
+            unselectedContent,
+        ) {
             GlassTabColors(
                 selectedContainerColor = selectedContainerColor,
-                selectedContentColor = if (isDark) Color.White.copy(alpha = 0.8f) else Color.White,
+                selectedContentColor = if (!isDynamic && isDark && onPrimary == Color.White) {
+                    onPrimary.copy(alpha = 0.8f)
+                } else {
+                    onPrimary
+                },
                 restingContainerColor = if (isDark) {
-                    Color.White.copy(alpha = RestingAlpha).compositeOver(surface)
+                    (if (isDynamic) onSurface else Color.White)
+                        .copy(alpha = RestingAlpha)
+                        .compositeOver(surface)
+                } else if (isDynamic) {
+                    surfaceContainer
                 } else {
                     Color.White
                 },
                 containerColor = containerColor,
-                contentColor = if (isDark) {
-                    Color.White.copy(alpha = 0.5f)
-                } else {
-                    Color.Black.copy(alpha = 0.6f)
-                },
+                contentColor = unselectedContent,
                 pressedOverlayColor = if (isDark) {
                     Color.White.copy(alpha = 0.16f)
                 } else {
@@ -193,13 +223,36 @@ object GlassTabRowDefaults {
     @Composable
     fun neutralColors(): GlassTabColors {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        val isDynamic = MiuixTheme.isDynamicColor
         val page = MiuixTheme.colorScheme.surface
         val onSurface = MiuixTheme.colorScheme.onSurface
-        return remember(isDark, page, onSurface) {
-            val fill = (if (isDark) Color.White else Color.Black).copy(alpha = 0.06f).compositeOver(page)
+        return remember(isDark, isDynamic, page, onSurface) {
+            val fill = (
+                if (isDynamic) {
+                    onSurface
+                } else if (isDark) {
+                    Color.White
+                } else {
+                    Color.Black
+                }
+                )
+                .copy(alpha = 0.06f)
+                .compositeOver(page)
             GlassTabColors(
-                selectedContainerColor = if (isDark) Color(0xFFE6E6E6) else Color(0xFF383838),
-                selectedContentColor = if (isDark) Color.Black else Color.White,
+                selectedContainerColor = if (isDynamic) {
+                    onSurface
+                } else if (isDark) {
+                    Color(0xFFE6E6E6)
+                } else {
+                    Color(0xFF383838)
+                },
+                selectedContentColor = if (isDynamic) {
+                    page
+                } else if (isDark) {
+                    Color.Black
+                } else {
+                    Color.White
+                },
                 restingContainerColor = fill,
                 containerColor = Color.Transparent,
                 contentColor = onSurface,
@@ -258,11 +311,19 @@ fun GlassTabRow(
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val shape = GlassTabRowDefaults.shape(height)
-    val ramp = surfaceAlpha.coerceIn(0f, 1f)
     val topBarContext = LocalGlassTopAppBarContext.current
     val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop)?.takeIf { isRuntimeShaderSupported() }
     val underlayMaterial = topBarContext?.underlayMaterial
     val resolvedMaterial = material?.withUnderlayBlur(underlayMaterial)
+    val targetRamp = if (resolvedBackdrop != null) surfaceAlpha.coerceIn(0f, 1f) else 0f
+    val rampState = animateFloatAsState(
+        targetValue = targetRamp,
+        animationSpec = GlassTabMaterialTransitionSpec,
+        label = "glassTabRamp",
+    )
+    val showGlass by remember(resolvedBackdrop) {
+        computedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
+    }
 
     Row(
         modifier = modifier.height(height).selectableGroup(),
@@ -278,11 +339,12 @@ fun GlassTabRow(
                     animationSpec = GlassMotion.navContent(),
                     label = "glassTabContainer",
                 )
-                val content by animateColorAsState(
+                val contentColorState = animateColorAsState(
                     targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
                     animationSpec = GlassMotion.navContent(),
                     label = "glassTabContent",
                 )
+                val contentColorProducer = remember { ColorProducer { contentColorState.value } }
                 val overlay = animateColorAsState(
                     targetValue = if (pressed) colors.pressedOverlayColor else Color.Transparent,
                     animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
@@ -296,84 +358,129 @@ fun GlassTabRow(
 
                 fun containerColor(): Color {
                     val settled = target.value
-                    return if (selected) settled else lerp(colors.restingContainerColor, settled, if (resolvedBackdrop != null) ramp else 0f)
-                }
-                val materialSurface = if (resolvedBackdrop == null) {
-                    Modifier
-                        .glassShadow(shape, shadow, alpha)
-                        .clip(shape)
-                } else if (underlayMaterial != null) {
-                    Modifier
-                        .glassShadow(shape, shadow, alpha * ramp)
-                        .glassOnActionBar(
-                            backdrop = resolvedBackdrop,
-                            shape = shape,
-                            style = style,
-                            alpha = alpha * ramp,
-                            material = resolvedMaterial,
-                            underlayMaterial = underlayMaterial,
-                            stroke = stroke,
+                    return if (selected) {
+                        settled
+                    } else {
+                        lerp(
+                            colors.restingContainerColor,
+                            settled,
+                            if (resolvedBackdrop != null) rampState.value else 0f,
                         )
-                } else {
-                    Modifier.glassPanel(
-                        backdrop = resolvedBackdrop,
-                        shape = shape,
-                        style = style,
-                        alpha = alpha * ramp,
-                        material = resolvedMaterial,
-                        stroke = stroke,
-                        shadow = shadow,
-                        shading = false,
-                    )
+                    }
                 }
+
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .then(materialSurface)
-                        .drawBehind {
-                            drawRect(containerColor())
-                            drawRect(overlay.value)
-                        }
-                        .drawWithContent {
-                            drawContent()
-                            val restingRim = alpha * (1f - ramp) * rim.value
-                            if (restingRim > 0.001f) {
-                                if (stroke != null) {
-                                    drawEdgeStroke(shape, stroke, restingRim)
+                        .then(
+                            if (shadow != null) {
+                                Modifier.drawBehind {
+                                    val shadowAlpha = alpha * if (resolvedBackdrop != null) rampState.value else 1f
+                                    drawGlassShadow(shape, shadow, shadowAlpha)
                                 }
-                                drawGlassRim(shape, style, containerColor(), restingRim)
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .clip(shape)
+                        .drawBehind {
+                            if (!selected) {
+                                drawRect(colors.restingContainerColor)
                             }
-                        }
-                        .selectable(
-                            selected = selected,
-                            role = Role.Tab,
-                            interactionSource = interactionSource,
-                            indication = null,
-                        ) { onSelect(position) }
-                        .padding(
-                            horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
-                            vertical = GlassTabRowDefaults.TabPaddingVertical,
-                        ),
+                        },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = label,
-                        style = if (selected) {
-                            MiuixTheme.textStyles.subtitle
+                    if (resolvedBackdrop != null) {
+                        val glassModifier = if (underlayMaterial != null) {
+                            Modifier.glassOnActionBar(
+                                backdrop = resolvedBackdrop,
+                                shape = shape,
+                                style = style,
+                                alpha = alpha,
+                                material = resolvedMaterial,
+                                underlayMaterial = underlayMaterial,
+                                stroke = stroke,
+                                enabled = showGlass,
+                            )
                         } else {
-                            MiuixTheme.textStyles.body2
-                        },
-                        color = content,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                            Modifier.glass(
+                                backdrop = resolvedBackdrop,
+                                shape = shape,
+                                style = style,
+                                alpha = alpha,
+                                material = resolvedMaterial,
+                                stroke = stroke,
+                                enabled = showGlass,
+                                shading = false,
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .graphicsLayer { this.alpha = if (showGlass) rampState.value else 0f }
+                                .then(glassModifier),
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .drawBehind {
+                                val settled = target.value
+                                val currentRamp = if (resolvedBackdrop != null) rampState.value else 0f
+                                if (selected) {
+                                    drawRect(settled)
+                                } else if (settled.alpha > 0f) {
+                                    val fillAlpha = if (settled != colors.containerColor) 1f else currentRamp
+                                    if (fillAlpha > 0f) {
+                                        drawRect(settled.copy(alpha = settled.alpha * fillAlpha))
+                                    }
+                                }
+                                drawRect(overlay.value)
+                            }
+                            .drawWithContent {
+                                drawContent()
+                                val currentRamp = if (resolvedBackdrop != null) rampState.value else 0f
+                                val restingRim = alpha * (1f - currentRamp) * rim.value
+                                if (restingRim > 0.001f) {
+                                    if (stroke != null) {
+                                        drawEdgeStroke(shape, stroke, restingRim)
+                                    }
+                                    drawGlassRim(shape, style, containerColor(), restingRim)
+                                }
+                            }
+                            .selectable(
+                                selected = selected,
+                                role = Role.Tab,
+                                interactionSource = interactionSource,
+                                indication = null,
+                            ) { onSelect(position) }
+                            .padding(
+                                horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
+                                vertical = GlassTabRowDefaults.TabPaddingVertical,
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label,
+                            color = contentColorProducer,
+                            style = if (selected) {
+                                MiuixTheme.textStyles.subtitle
+                            } else {
+                                MiuixTheme.textStyles.body2
+                            },
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+private val GlassTabMaterialTransitionSpec = tween<Float>(450, easing = LinearEasing)
 
 /** Default values for [GlassSegmentedTabRow]. */
 object GlassSegmentedTabRowDefaults {
@@ -398,44 +505,59 @@ object GlassSegmentedTabRowDefaults {
 
     /** `filter-sort-view-glass`: 20dp mask blur with pured-thin-glass colour layers. */
     @Composable
-    fun material(): GlassMaterial = GlassMaterials.puredThinGlass(
-        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
     )
 
     /** Bloom stroke for the track. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
 
     /**
      * Fill the track wears before the material comes up. Opaque, so nothing shows through the
-     * control at rest: one layer of [IndicatorAlpha] over the page.
+     * control at rest.
      */
     @Composable
-    fun restingTrackColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = IndicatorAlpha).compositeOver(MiuixTheme.colorScheme.surface)
-    } else {
-        Color.White
+    @ReadOnlyComposable
+    fun restingTrackColor(): Color {
+        val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
+        return when {
+            isDark -> {
+                val tint = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.onSurface else Color.White
+                tint.copy(alpha = IndicatorAlpha).compositeOver(MiuixTheme.colorScheme.surface)
+            }
+
+            MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainer
+
+            else -> Color.White
+        }
     }
 
-    /**
-     * Fill of the indicator behind the current tab: the same layer again, over the track. Both must
-     * be the one figure or the indicator stops separating from the track.
-     */
+    /** Fill of the indicator behind the current tab. */
     @Composable
-    fun indicatorColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = IndicatorAlpha)
-    } else {
-        Color.Black.copy(alpha = 0.06f)
-    }
+    @ReadOnlyComposable
+    fun indicatorColor(): Color = indicatorTint().copy(
+        alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) IndicatorAlpha else 0.06f,
+    )
 
     /** Pressed indicator fill, using a higher opacity for touch feedback. */
     @Composable
-    fun indicatorPressedColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
-        Color.White.copy(alpha = PressedIndicatorAlpha)
-    } else {
-        Color.Black.copy(alpha = 0.14f)
+    @ReadOnlyComposable
+    fun indicatorPressedColor(): Color = indicatorTint().copy(
+        alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) PressedIndicatorAlpha else 0.14f,
+    )
+
+    @Composable
+    @ReadOnlyComposable
+    private fun indicatorTint(): Color = when {
+        MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.primary
+        MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color.White
+        else -> Color.Black
     }
 
     /**
@@ -485,27 +607,33 @@ fun GlassSegmentedTabRow(
     height: Dp = GlassSegmentedTabRowDefaults.Height,
     trackColor: Color = GlassSegmentedTabRowDefaults.restingTrackColor(),
     indicatorColor: Color = GlassSegmentedTabRowDefaults.indicatorColor(),
-    selectedContentColor: Color = MiuixTheme.colorScheme.onSurface,
+    selectedContentColor: Color = if (MiuixTheme.isDynamicColor) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
     contentColor: Color = MiuixTheme.colorScheme.onSurface,
 ) {
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val runtimeShaderSupported = isRuntimeShaderSupported()
-    val ramp = if (runtimeShaderSupported) surfaceAlpha.coerceIn(0f, 1f) else 0f
     val topBarContext = LocalGlassTopAppBarContext.current
     val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop).takeIf { runtimeShaderSupported }
     val underlayMaterial = topBarContext?.underlayMaterial
     val resolvedMaterial = material?.withUnderlayBlur(underlayMaterial)
+    val targetRamp = if (resolvedBackdrop != null) surfaceAlpha.coerceIn(0f, 1f) else 0f
+    val rampState = animateFloatAsState(
+        targetValue = targetRamp,
+        animationSpec = GlassTabMaterialTransitionSpec,
+        label = "glassSegmentedTabRamp",
+    )
+    val showGlass by remember(resolvedBackdrop) {
+        computedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
+    }
     val trackShape = GlassSegmentedTabRowDefaults.shape(height)
     val innerHeight = height - GlassSegmentedTabRowDefaults.TrackPadding * 2
     val indicatorShape = GlassSegmentedTabRowDefaults.shape(innerHeight)
 
-    var trackWidth by remember { mutableIntStateOf(0) }
+    val trackWidthState = remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val gap = with(density) { GlassSegmentedTabRowDefaults.TabGap.toPx() }
-    val slot = if (trackWidth <= 0) 0f else ((trackWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
-    val targetLeft = index * (slot + gap)
     val scope = rememberCoroutineScope()
     val indicatorLeft = remember { Animatable(0f) }
     val indicatorRight = remember { Animatable(0f) }
@@ -525,19 +653,23 @@ fun GlassSegmentedTabRow(
         scope.launch { indicatorRight.animateTo(newRight, rightSpring) }
     }
 
-    LaunchedEffect(index, settleGeneration, targetLeft, slot) {
-        if (dragging.value || slot <= 0f) return@LaunchedEffect
-        if (indicatorRight.value <= indicatorLeft.value) {
-            indicatorLeft.snapTo(targetLeft)
-            indicatorRight.snapTo(targetLeft + slot)
-        } else {
-            animateIndicator(targetLeft, targetLeft + slot)
+    LaunchedEffect(index, settleGeneration, tabs.size, gap) {
+        snapshotFlow { trackWidthState.intValue }.collectLatest { currentTrackWidth ->
+            if (dragging.value || currentTrackWidth <= 0) return@collectLatest
+            val slot = ((currentTrackWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
+            if (slot <= 0f) return@collectLatest
+            val targetLeft = index * (slot + gap)
+            if (indicatorRight.value <= indicatorLeft.value) {
+                indicatorLeft.snapTo(targetLeft)
+                indicatorRight.snapTo(targetLeft + slot)
+            } else {
+                animateIndicator(targetLeft, targetLeft + slot)
+            }
         }
     }
-
     val indicatorPressed = pressedIndex >= 0
-    val defaultIndicatorColor = GlassSegmentedTabRowDefaults.indicatorColor()
     val targetIndicatorFill = if (indicatorPressed) {
+        val defaultIndicatorColor = GlassSegmentedTabRowDefaults.indicatorColor()
         if (indicatorColor == defaultIndicatorColor) {
             GlassSegmentedTabRowDefaults.indicatorPressedColor()
         } else {
@@ -551,7 +683,7 @@ fun GlassSegmentedTabRow(
         animationSpec = if (indicatorPressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
         label = "glassSegmentedTabIndicatorFill",
     )
-    val indicatorScale by animateFloatAsState(
+    val indicatorScale = animateFloatAsState(
         targetValue = if (indicatorPressed) {
             glassPressScale(with(density) { innerHeight.toPx() }, density.density)
         } else {
@@ -560,193 +692,209 @@ fun GlassSegmentedTabRow(
         animationSpec = if (indicatorPressed) GlassMotion.pressDown() else GlassMotion.pressUp(),
         label = "glassSegmentedTabIndicatorPress",
     )
-    val materialSurface = if (resolvedBackdrop == null) {
-        Modifier
-    } else if (underlayMaterial != null) {
-        Modifier.glassOnActionBar(
-            backdrop = resolvedBackdrop,
-            shape = trackShape,
-            style = style,
-            alpha = alpha * ramp,
-            material = resolvedMaterial,
-            underlayMaterial = underlayMaterial,
-            stroke = stroke,
-            enabled = ramp > 0f,
-        )
-    } else {
-        Modifier.glass(
-            backdrop = resolvedBackdrop,
-            shape = trackShape,
-            style = style,
-            alpha = alpha * ramp,
-            material = resolvedMaterial,
-            stroke = stroke,
-            enabled = ramp > 0f,
-            shading = false,
-        )
-    }
-
     Box(
         modifier = modifier
             .height(height)
-            .glassShadow(
-                trackShape,
-                shadow,
-                alpha * if (runtimeShaderSupported) ramp else 1f,
+            .then(
+                if (shadow != null) {
+                    Modifier.drawBehind {
+                        val shadowAlpha = alpha * if (runtimeShaderSupported) rampState.value else 1f
+                        drawGlassShadow(trackShape, shadow, shadowAlpha)
+                    }
+                } else {
+                    Modifier
+                },
             )
             .clip(trackShape)
-            .then(materialSurface)
-            .background(trackColor.copy(alpha = trackColor.alpha * (1f - ramp)))
-            .padding(GlassSegmentedTabRowDefaults.TrackPadding)
-            .onSizeChanged { trackWidth = it.width }
-            .pointerInput(tabs.size, gap, layoutDirection) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val width = size.width.toFloat()
-                    val currentSlot = ((width - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
-                    if (width <= 0f || currentSlot <= 0f) return@awaitEachGesture
-                    fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
-                    fun indexAt(x: Float): Int = (x / (currentSlot + gap)).toInt().coerceIn(0, tabs.lastIndex)
-
-                    val downX = logicalX(down.position.x)
-                    var selectionX = downX
-                    var current = indexAt(downX)
-                    pressedIndex = current
-                    dragging.value = true
-                    val pressedLeft = current * (currentSlot + gap)
-                    animateIndicator(pressedLeft, pressedLeft + currentSlot)
-                    var grabOffset = Float.NaN
-                    try {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                            if (change.isConsumed) break
-                            if (!change.pressed) {
-                                if (change.changedToUp()) {
-                                    val releaseDelta = change.position.x - change.previousPosition.x
-                                    selectionX += if (layoutDirection == LayoutDirection.Rtl) -releaseDelta else releaseDelta
-                                    onSelectState(indexAt(selectionX))
-                                    change.consume()
-                                }
-                                break
-                            }
-                            val activeWidth = size.width.toFloat()
-                            val activeSlot = ((activeWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
-                            val maxLeft = (activeWidth - activeSlot).coerceAtLeast(0f)
-                            val x = logicalX(change.position.x)
-                            val pointerDelta = change.position.x - change.previousPosition.x
-                            val delta = if (layoutDirection == LayoutDirection.Rtl) -pointerDelta else pointerDelta
-                            selectionX += delta
-                            if (grabOffset.isNaN()) {
-                                if (abs(selectionX - downX) < viewConfiguration.touchSlop) {
-                                    pressedIndex = indexAt(selectionX)
-                                    continue
-                                }
-                                grabOffset = downX - pressedLeft
-                            }
-                            val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
-                            val next = indexAt(selectionX)
-                            val target = navigationDragTarget(chipLeft, activeSlot, 0f, activeWidth, delta, next != current)
-                            animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
-                            current = next
-                            pressedIndex = next
-                            change.consume()
-                        }
-                    } finally {
-                        pressedIndex = -1
-                        dragging.value = false
-                        settleGeneration++
-                    }
-                }
-            },
+            .drawBehind { drawRect(trackColor) },
     ) {
+        if (resolvedBackdrop != null) {
+            val materialSurface = if (underlayMaterial != null) {
+                Modifier.glassOnActionBar(
+                    backdrop = resolvedBackdrop,
+                    shape = trackShape,
+                    style = style,
+                    alpha = alpha,
+                    material = resolvedMaterial,
+                    underlayMaterial = underlayMaterial,
+                    stroke = stroke,
+                    enabled = showGlass,
+                )
+            } else {
+                Modifier.glass(
+                    backdrop = resolvedBackdrop,
+                    shape = trackShape,
+                    style = style,
+                    alpha = alpha,
+                    material = resolvedMaterial,
+                    stroke = stroke,
+                    enabled = showGlass,
+                    shading = false,
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { this.alpha = if (showGlass) rampState.value else 0f }
+                    .then(materialSurface),
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .layout { measurable, constraints ->
-                    val bounds = navigationIndicatorBounds(
-                        indicatorLeft.value,
-                        indicatorRight.value,
-                        constraints.maxWidth.toFloat(),
-                        0f,
-                    )
-                    val start = bounds.x.roundToInt()
-                    val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
-                    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
-                    layout(constraints.maxWidth, placeable.height) {
-                        placeable.placeRelative(IntOffset(start, 0))
+                .padding(GlassSegmentedTabRowDefaults.TrackPadding)
+                .onSizeChanged { trackWidthState.intValue = it.width }
+                .pointerInput(tabs.size, gap, layoutDirection) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val width = size.width.toFloat()
+                        val currentSlot = ((width - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
+                        if (width <= 0f || currentSlot <= 0f) return@awaitEachGesture
+                        fun logicalX(x: Float) = if (layoutDirection == LayoutDirection.Rtl) width - x else x
+                        fun indexAt(x: Float): Int = (x / (currentSlot + gap)).toInt().coerceIn(0, tabs.lastIndex)
+
+                        val downX = logicalX(down.position.x)
+                        var selectionX = downX
+                        var current = indexAt(downX)
+                        pressedIndex = current
+                        dragging.value = true
+                        val pressedLeft = current * (currentSlot + gap)
+                        animateIndicator(pressedLeft, pressedLeft + currentSlot)
+                        var grabOffset = Float.NaN
+                        try {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                if (change.isConsumed) break
+                                if (!change.pressed) {
+                                    if (change.changedToUp()) {
+                                        val releaseDelta = change.position.x - change.previousPosition.x
+                                        selectionX += if (layoutDirection == LayoutDirection.Rtl) -releaseDelta else releaseDelta
+                                        onSelectState(indexAt(selectionX))
+                                        change.consume()
+                                    }
+                                    break
+                                }
+                                val activeWidth = size.width.toFloat()
+                                val activeSlot = ((activeWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
+                                val maxLeft = (activeWidth - activeSlot).coerceAtLeast(0f)
+                                val x = logicalX(change.position.x)
+                                val pointerDelta = change.position.x - change.previousPosition.x
+                                val delta = if (layoutDirection == LayoutDirection.Rtl) -pointerDelta else pointerDelta
+                                selectionX += delta
+                                if (grabOffset.isNaN()) {
+                                    if (abs(selectionX - downX) < viewConfiguration.touchSlop) {
+                                        pressedIndex = indexAt(selectionX)
+                                        continue
+                                    }
+                                    grabOffset = downX - pressedLeft
+                                }
+                                val chipLeft = (x - grabOffset).coerceIn(0f, maxLeft)
+                                val next = indexAt(selectionX)
+                                val target = navigationDragTarget(chipLeft, activeSlot, 0f, activeWidth, delta, next != current)
+                                animateIndicator(target.left, target.right, target.leftSpring, target.rightSpring)
+                                current = next
+                                pressedIndex = next
+                                change.consume()
+                            }
+                        } finally {
+                            pressedIndex = -1
+                            dragging.value = false
+                            settleGeneration++
+                        }
                     }
-                }
-                .graphicsLayer {
-                    val insetPx = (1f - indicatorScale) * size.height
-                    scaleX = if (size.width > 0f) ((size.width - insetPx) / size.width).coerceIn(0f, 1f) else 1f
-                    scaleY = indicatorScale
-                }
-                .clip(indicatorShape)
-                .drawBehind { drawRect(animatedIndicatorColor.value) },
-        )
-        Row(
-            modifier = Modifier.fillMaxHeight().selectableGroup(),
-            horizontalArrangement = Arrangement.spacedBy(GlassSegmentedTabRowDefaults.TabGap),
+                },
         ) {
-            tabs.forEachIndexed { position, label ->
-                key(label) {
-                    val selected = position == index
-                    val content by animateColorAsState(
-                        targetValue = if (selected) selectedContentColor else contentColor,
-                        animationSpec = GlassMotion.navContent(),
-                        label = "glassSegmentedTabContent",
-                    )
-                    val pressAlpha = animateFloatAsState(
-                        targetValue = if (position == pressedIndex) {
-                            GlassSegmentedTabRowDefaults.PRESSED_CONTENT_ALPHA
-                        } else {
-                            1f
-                        },
-                        animationSpec = GlassMotion.navContentFloat(),
-                        label = "glassSegmentedTabPressAlpha",
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(indicatorShape)
-                            .semantics(mergeDescendants = true) {
-                                this.role = Role.Tab
-                                this.selected = selected
-                                onClick {
-                                    onSelectState(position)
-                                    true
-                                }
-                            }
-                            .onKeyEvent { event ->
-                                val activationKey = event.key == Key.Enter ||
-                                    event.key == Key.NumPadEnter ||
-                                    event.key == Key.Spacebar
-                                if (activationKey) {
-                                    if (event.type == KeyEventType.KeyUp) onSelectState(position)
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                            .focusable()
-                            .graphicsLayer { this.alpha = pressAlpha.value }
-                            .padding(horizontal = GlassSegmentedTabRowDefaults.TabPaddingHorizontal),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = label,
-                            style = if (selected) {
-                                MiuixTheme.textStyles.subtitle
-                            } else {
-                                MiuixTheme.textStyles.body2
-                            },
-                            color = content,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .layout { measurable, constraints ->
+                        val bounds = navigationIndicatorBounds(
+                            indicatorLeft.value,
+                            indicatorRight.value,
+                            constraints.maxWidth.toFloat(),
+                            0f,
                         )
+                        val start = bounds.x.roundToInt()
+                        val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
+                        val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                        layout(constraints.maxWidth, placeable.height) {
+                            placeable.placeRelative(IntOffset(start, 0))
+                        }
+                    }
+                    .graphicsLayer {
+                        val scale = indicatorScale.value
+                        val insetPx = (1f - scale) * size.height
+                        scaleX = if (size.width > 0f) ((size.width - insetPx) / size.width).coerceIn(0f, 1f) else 1f
+                        scaleY = scale
+                    }
+                    .clip(indicatorShape)
+                    .drawBehind { drawRect(animatedIndicatorColor.value) },
+            )
+            Row(
+                modifier = Modifier.fillMaxHeight().selectableGroup(),
+                horizontalArrangement = Arrangement.spacedBy(GlassSegmentedTabRowDefaults.TabGap),
+            ) {
+                tabs.forEachIndexed { position, label ->
+                    key(label) {
+                        val selected = position == index
+                        val contentColorState = animateColorAsState(
+                            targetValue = if (selected) selectedContentColor else contentColor,
+                            animationSpec = GlassMotion.navContent(),
+                            label = "glassSegmentedTabContent",
+                        )
+                        val contentColorProducer = remember { ColorProducer { contentColorState.value } }
+                        val pressAlpha = animateFloatAsState(
+                            targetValue = if (position == pressedIndex) {
+                                GlassSegmentedTabRowDefaults.PRESSED_CONTENT_ALPHA
+                            } else {
+                                1f
+                            },
+                            animationSpec = GlassMotion.navContentFloat(),
+                            label = "glassSegmentedTabPressAlpha",
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(indicatorShape)
+                                .semantics(mergeDescendants = true) {
+                                    this.role = Role.Tab
+                                    this.selected = selected
+                                    onClick {
+                                        onSelectState(position)
+                                        true
+                                    }
+                                }
+                                .onKeyEvent { event ->
+                                    val activationKey = event.key == Key.Enter ||
+                                        event.key == Key.NumPadEnter ||
+                                        event.key == Key.Spacebar
+                                    if (activationKey) {
+                                        if (event.type == KeyEventType.KeyUp) onSelectState(position)
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                }
+                                .focusable()
+                                .graphicsLayer { this.alpha = pressAlpha.value }
+                                .padding(horizontal = GlassSegmentedTabRowDefaults.TabPaddingHorizontal),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = label,
+                                color = contentColorProducer,
+                                style = if (selected) {
+                                    MiuixTheme.textStyles.subtitle
+                                } else {
+                                    MiuixTheme.textStyles.body2
+                                },
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
             }

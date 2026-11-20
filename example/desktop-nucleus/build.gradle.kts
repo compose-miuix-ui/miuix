@@ -6,6 +6,7 @@ import dev.nucleusframework.desktop.application.dsl.NativeImageOptimization
 import dev.nucleusframework.desktop.application.dsl.TargetFormat
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.composeMultiplatform)
@@ -22,11 +23,18 @@ kotlin {
         named("desktopMain") {
             dependencies {
                 implementation(projects.example.shared)
-                implementation(compose.desktop.currentOs)
+                implementation(libs.jetbrains.compose.foundation)
                 implementation(libs.nucleus.application)
                 implementation(libs.nucleus.decorated.window.tao)
             }
         }
+    }
+}
+
+aboutLibraries {
+    export {
+        outputFile = file("src/desktopMain/resources/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 

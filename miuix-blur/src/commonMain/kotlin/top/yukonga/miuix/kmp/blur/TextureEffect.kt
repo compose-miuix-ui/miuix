@@ -140,18 +140,33 @@ fun Modifier.textureEffect(
     enabled: Boolean = true,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
-    shape = { shape },
-    effects = {
-        textureBlurEffect(
+    pipeline = TextureBlurPipeline(
+        shape = shape,
+        blurRadiusX = blurRadiusX,
+        blurRadiusY = blurRadiusY,
+        noiseCoefficient = noiseCoefficient,
+        colors = colors,
+    ),
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+)
+
+private data class TextureBlurPipeline(
+    override val shape: Shape,
+    val blurRadiusX: Float,
+    val blurRadiusY: Float,
+    val noiseCoefficient: Float,
+    val colors: BlurColors,
+) : BackdropPipeline {
+    override fun configureEffects(scope: BackdropEffectScope) {
+        scope.textureBlurEffect(
             blurRadiusX = blurRadiusX,
             blurRadiusY = blurRadiusY,
             noiseCoefficient = noiseCoefficient,
             colors = colors,
         )
-    },
-    contentBlendMode = contentBlendMode,
-    enabled = enabled,
-)
+    }
+}
 
 /**
  * Applies a **progressive (gradient) backdrop blur**: the blur strength ramps from full to zero
@@ -221,17 +236,33 @@ fun Modifier.progressiveTextureBlur(
     enabled: Boolean = true,
 ): Modifier = this.drawBackdrop(
     backdrop = backdrop,
-    shape = { shape },
-    effects = {
-        progressiveTextureBlurEffect(
+    pipeline = ProgressiveTextureBlurPipeline(
+        shape = shape,
+        blurRadiusX = blurRadiusX,
+        blurRadiusY = blurRadiusY,
+        progressiveGradient = gradient,
+        noiseCoefficient = noiseCoefficient,
+        colors = colors,
+    ),
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+)
+
+private data class ProgressiveTextureBlurPipeline(
+    override val shape: Shape,
+    val blurRadiusX: Float,
+    val blurRadiusY: Float,
+    override val progressiveGradient: ProgressiveBlur,
+    val noiseCoefficient: Float,
+    val colors: BlurColors,
+) : BackdropPipeline {
+    override fun configureEffects(scope: BackdropEffectScope) {
+        scope.progressiveTextureBlurEffect(
             blurRadiusX = blurRadiusX,
             blurRadiusY = blurRadiusY,
-            gradient = gradient,
+            gradient = progressiveGradient,
             noiseCoefficient = noiseCoefficient,
             colors = colors,
         )
-    },
-    contentBlendMode = contentBlendMode,
-    progressiveGradient = gradient,
-    enabled = enabled,
-)
+    }
+}

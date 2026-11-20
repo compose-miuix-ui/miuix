@@ -5,6 +5,9 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableFloatStateOf
@@ -37,111 +40,6 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassTopAppBarBackdropTest {
-    @Test
-    fun gradientFadesSmoothlyAcrossSubtitleBarEdge() = assertGradientCoverage(withBottomContent = false)
-
-    @Test
-    fun gradientFadesSmoothlyAcrossDynamicBottomContentEdge() = assertGradientCoverage(withBottomContent = true)
-
-    private fun assertGradientCoverage(withBottomContent: Boolean) = runComposeUiTest {
-        val state = TopAppBarState(-1000f, 0f, -1000f)
-        val contentHeight = mutableFloatStateOf(40f)
-        val opacity = mutableFloatStateOf(1f)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(400.dp, 400.dp).background(Color.Blue)) {
-                    GlassTopAppBar(
-                        title = "Title",
-                        subtitle = if (withBottomContent) "" else "Subtitle",
-                        modifier = Modifier.testTag("gradient-bar"),
-                        isContentScrolled = true,
-                        scrollBehavior = MiuixScrollBehavior(state),
-                        bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),
-                        backgroundAlpha = { opacity.floatValue },
-                        bottomContent = {
-                            if (withBottomContent) Box(Modifier.size(200.dp, contentHeight.floatValue.dp))
-                        },
-                    )
-                }
-            }
-        }
-        fun assertCoverage() {
-            val bottom = onNodeWithTag("gradient-bar").fetchSemanticsNode().boundsInRoot.bottom.roundToInt()
-            val overhang = with(density) { GlassTopAppBarDefaults.BandOverhang.roundToPx() }
-            val fadeInset = with(density) { 36.dp.roundToPx() }
-            runOnIdle { opacity.floatValue = 1f }
-            val pixels = onRoot().captureToImage().toPixelMap()
-            val top = pixels[5, 2].red
-            val inside = pixels[5, bottom - fadeInset / 2].red
-            val edge = pixels[5, bottom].red
-            val outside = pixels[5, bottom + overhang / 2].red
-            assertTrue(top in 0.87f..0.93f, "Top edge must remain translucent without an opaque shelf ($top)")
-            assertTrue(top > inside && inside > edge && edge > outside && outside > 0f, "The fade must span smoothly across the bar and overhang")
-            assertColorNear(Color.Blue, pixels[5, bottom + overhang + 2])
-            runOnIdle { opacity.floatValue = 0.99f }
-            val almostOpaque = onRoot().captureToImage().toPixelMap()
-            assertTrue(abs(almostOpaque[5, bottom + overhang / 2].red - outside) < 0.02f, "The fade must not pop in when the alpha layer becomes opaque")
-            runOnIdle { opacity.floatValue = 0.5f }
-            val halfOpaque = onRoot().captureToImage().toPixelMap()
-            assertTrue(abs(halfOpaque[5, bottom + overhang / 2].red - outside * 0.5f) < 0.015f, "Offscreen compositing must retain the fade outside the foreground bounds")
-        }
-        assertCoverage()
-        runOnIdle { state.heightOffset = state.heightOffsetLimit }
-        assertCoverage()
-        if (withBottomContent) {
-            runOnIdle { contentHeight.floatValue = 80f }
-            assertCoverage()
-        }
-    }
-
-    @Test
-    fun gradientFollowsFastScrollWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = false)
-
-    @Test
-    fun gradientFollowsProgrammaticVisualOffsetWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = true)
-
-    private fun assertImmediateGradient(useVisualOffset: Boolean) = runComposeUiTest {
-        val offset = mutableFloatStateOf(0f)
-        val opacity = mutableFloatStateOf(1f)
-        val state = TopAppBarState(-1000f, 0f, 0f)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(400.dp, 200.dp).background(Color.Blue)) {
-                    GlassTopAppBar(
-                        title = "",
-                        // Deliberately disagree: band opacity belongs to the visual offset.
-                        isContentScrolled = offset.floatValue >= 0f,
-                        scrollBehavior = MiuixScrollBehavior(state),
-                        visualContentOffset = if (useVisualOffset) ({ offset.floatValue }) else null,
-                        bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),
-                        backgroundAlpha = { opacity.floatValue },
-                        defaultWindowInsetsPadding = false,
-                    )
-                }
-            }
-        }
-        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
-        mainClock.autoAdvance = false
-        runOnIdle {
-            offset.floatValue = -1000f
-            state.contentOffset = -1000f
-            state.heightOffset = state.heightOffsetLimit
-        }
-        mainClock.advanceTimeByFrame()
-        val fullRed = onRoot().captureToImage().toPixelMap()[5, 5].red
-        assertTrue(fullRed in 0.87f..0.93f, "Scrolled band should appear immediately ($fullRed)")
-        runOnIdle { opacity.floatValue = 0.5f }
-        mainClock.advanceTimeByFrame()
-        val halfRed = onRoot().captureToImage().toPixelMap()[5, 5].red
-        assertTrue(abs(halfRed - fullRed * 0.5f) < 0.02f, "Half opacity should halve the band contribution")
-        runOnIdle {
-            offset.floatValue = 0f
-            state.contentOffset = 0f
-            state.heightOffset = 0f
-        }
-        mainClock.advanceTimeByFrame()
-        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
-    }
 
     @Test
     fun explicitOverlapKeepsTheButtonMaterialOverAnUnscrolledHero() = runComposeUiTest {
@@ -234,10 +132,13 @@ class GlassTopAppBarBackdropTest {
             val center = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot.center
             return onRoot().captureToImage().toPixelMap()[center.x.roundToInt(), center.y.roundToInt()]
         }
+
         fun tabColor(): Color {
             val bounds = onNodeWithTag("tabs").fetchSemanticsNode().boundsInRoot
-            return onRoot().captureToImage().toPixelMap()[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
+            return onRoot().captureToImage()
+                .toPixelMap()[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
         }
+
         val button = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot
         val pixels = onRoot().captureToImage().toPixelMap()
         val band = pixels[(button.right + button.width).roundToInt(), button.center.y.roundToInt()]
@@ -299,11 +200,63 @@ class GlassTopAppBarBackdropTest {
             val center = onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.center
             return image[center.x.roundToInt(), center.y.roundToInt()]
         }
+
         val actual = centerColor("scene-button")
         val reference = centerColor("reference-button")
         assertColorNear(reference, actual)
         assertTrue(actual.blue > actual.red + 0.05f, "Scene buttons must sample blue, not the original red page: $actual")
         val inherited = centerColor("inherited-button")
         assertTrue(inherited.red > inherited.blue + 0.05f, "Default buttons must retain the bar's red backdrop and material: $inherited")
+    }
+
+    @Test
+    fun progressiveBandWithoutButtonsBlursSmoothlyWhenScrolledAndSkipsAtTop() = runComposeUiTest {
+        val offset = mutableFloatStateOf(0f)
+        val scrollState = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    Box(Modifier.size(400.dp, 300.dp)) {
+                        Column(Modifier.matchParentSize().layerBackdrop(backdrop)) {
+                            repeat(6) { index ->
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(30.dp)
+                                        .background(if (index % 2 == 0) Color.Red else Color.Blue),
+                                )
+                            }
+                        }
+                        GlassTopAppBar(
+                            title = "",
+                            isContentScrolled = offset.floatValue < 0f,
+                            progressiveBlur = true,
+                            backdrop = backdrop,
+                            scrollBehavior = MiuixScrollBehavior(scrollState),
+                            defaultWindowInsetsPadding = false,
+                        )
+                    }
+                }
+            }
+        }
+        // At rest (offset == 0f), the progressive band is gated off and shows crisp stripes.
+        val atTop = onRoot().captureToImage().toPixelMap()
+        val stripe1Y = with(density) { 15.dp.roundToPx() }
+        val stripe2Y = with(density) { 45.dp.roundToPx() }
+        assertColorNear(Color.Red, atTop[20, stripe1Y], tolerance = 3f / 255f)
+        assertColorNear(Color.Blue, atTop[20, stripe2Y], tolerance = 3f / 255f)
+
+        // Scrolled: strong top blur mixes red + blue stripes with surface scrim, while far below stays crisp.
+        runOnIdle {
+            offset.floatValue = -1000f
+            scrollState.contentOffset = -1000f
+            scrollState.heightOffset = scrollState.heightOffsetLimit
+        }
+        val scrolled = onRoot().captureToImage().toPixelMap()
+        val topBlurred = scrolled[20, stripe1Y]
+        assertTrue(topBlurred.blue > 0.1f && topBlurred.red > 0.1f, "Top progressive blur must blend stripes: $topBlurred")
+        val belowBarY = with(density) { 165.dp.roundToPx() }
+        assertColorNear(Color.Blue, scrolled[20, belowBarY], tolerance = 3f / 255f)
     }
 }

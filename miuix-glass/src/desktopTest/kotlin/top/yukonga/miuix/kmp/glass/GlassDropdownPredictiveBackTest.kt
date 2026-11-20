@@ -5,12 +5,11 @@ package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -29,6 +28,35 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassDropdownPredictiveBackTest {
+    @Test
+    fun stoppingBoundsTrackingKeepsTheRestoredValueAndItsRemainingFade() = runComposeUiTest {
+        val mounted = mutableStateOf(true)
+        val fade = mutableFloatStateOf(0.25f)
+        val back = mutableFloatStateOf(0.6f)
+        val anchor = GlassPopupAnchor().apply {
+            valueAlphaState = fade
+            dropdownBackProgressState = back
+        }
+        setContent {
+            Box(Modifier.size(24.dp).background(Color.Black)) {
+                Box(Modifier.matchParentSize().glassPopupAnchorValue(anchor, trackBounds = mounted.value).background(Color.White))
+            }
+        }
+        fun valueBrightness() = onRoot().captureToImage().toPixelMap()[5, 5].red
+
+        assertEquals(0.6f, valueBrightness(), 0.01f)
+        runOnIdle {
+            mounted.value = false
+            anchor.dropdownRetainedValueAlpha = back.floatValue
+            anchor.dropdownBackProgressState = null
+        }
+        assertEquals(0.6f, valueBrightness(), 0.01f)
+        runOnIdle { fade.floatValue = 0.8f }
+        assertEquals(0.8f, valueBrightness(), 0.01f)
+        runOnIdle { fade.floatValue = 1f }
+        assertEquals(1f, valueBrightness(), 0.01f)
+    }
+
     @Test
     fun systemTakeoverKeepsDropdownHeldUntilBackIsCancelledOrCompleted() = runComposeUiTest {
         mainClock.autoAdvance = false

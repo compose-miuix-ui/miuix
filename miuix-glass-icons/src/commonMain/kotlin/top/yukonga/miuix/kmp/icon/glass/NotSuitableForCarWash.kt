@@ -3,13 +3,8 @@
 
 package top.yukonga.miuix.kmp.icon.glass
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathNode
-import androidx.compose.ui.graphics.vector.group
-import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 
 val MiuixIcons.Glass.NotSuitableForCarWash: ImageVector

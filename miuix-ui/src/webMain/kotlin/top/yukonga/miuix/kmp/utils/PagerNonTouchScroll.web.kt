@@ -17,8 +17,6 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.WheelEvent
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.js
 import kotlin.math.abs
 
 /**

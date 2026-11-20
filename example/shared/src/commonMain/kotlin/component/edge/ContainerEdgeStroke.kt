@@ -4,10 +4,13 @@
 package component.edge
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.remember
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.EdgeStrokes
-import top.yukonga.miuix.kmp.material.rememberTiltLight
+import top.yukonga.miuix.kmp.material.sensor.rememberDeviceTilt
+import top.yukonga.miuix.kmp.material.withTilt
 
 /**
  * Resolves an [EdgeStroke] for the given [container] and theme, optionally driving its two
@@ -25,29 +28,41 @@ internal fun rememberContainerEdgeStroke(
     tiltDriven: Boolean,
     primarySensitivity: Float = 0.15f,
     secondarySensitivity: Float = 0.12f,
-): EdgeStroke? {
+): EdgeStroke? = rememberContainerEdgeStrokeState(
+    container = container,
+    isDark = isDark,
+    tiltDriven = tiltDriven,
+    primarySensitivity = primarySensitivity,
+    secondarySensitivity = secondarySensitivity,
+).value
+
+@Composable
+internal fun rememberContainerEdgeStrokeState(
+    container: EdgeStrokeConfig.Container,
+    isDark: Boolean,
+    tiltDriven: Boolean,
+    primarySensitivity: Float = 0.15f,
+    secondarySensitivity: Float = 0.12f,
+): State<EdgeStroke?> {
     val strokeBase = EdgeStrokeConfig.get(container, isDark)
     val baseStroke = strokeBase ?: EdgeStrokes.MiddleLight
+    val tilt = rememberDeviceTilt()
 
-    val tiltPrimary = rememberTiltLight(
-        base = baseStroke.primary,
-        sensitivity = primarySensitivity,
-    )
-    val tiltSecondary = rememberTiltLight(
-        base = baseStroke.secondary,
-        sensitivity = secondarySensitivity,
-    )
+    return remember(strokeBase, baseStroke, tiltDriven, primarySensitivity, secondarySensitivity, tilt) {
+        computedStateOf {
+            when {
+                strokeBase == null -> null
 
-    return remember(strokeBase, baseStroke, tiltDriven, tiltPrimary, tiltSecondary) {
-        when {
-            strokeBase == null -> null
+                tiltDriven -> {
+                    val sample = tilt.value
+                    baseStroke.copy(
+                        primary = baseStroke.primary.withTilt(sample, primarySensitivity),
+                        secondary = baseStroke.secondary.withTilt(sample, secondarySensitivity),
+                    )
+                }
 
-            tiltDriven -> baseStroke.copy(
-                primary = tiltPrimary,
-                secondary = tiltSecondary,
-            )
-
-            else -> baseStroke
+                else -> baseStroke
+            }
         }
     }
 }

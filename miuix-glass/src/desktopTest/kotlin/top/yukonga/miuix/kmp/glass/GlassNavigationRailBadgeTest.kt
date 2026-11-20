@@ -133,6 +133,7 @@ class GlassNavigationRailBadgeTest {
             val library = onNodeWithContentDescription("Library").fetchSemanticsNode().boundsInRoot
             return (minOf(home.left, library.left) + maxOf(home.right, library.right)) / 2
         }
+
         val capsuleCenter = capsuleCenter()
         mainClock.autoAdvance = false
         runOnIdle { shownItems.value = items.map { it.copy(badge = null) } }

@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.computedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,6 +140,9 @@ private fun ComponentPageContent(
     val backdrop = rememberBlurBackdrop()
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -148,6 +153,7 @@ private fun ComponentPageContent(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    isContentScrolled = contentUnderTopBar,
                     color = if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surface,
                     navigationIcon = { BackNavigationIcon(onClick = onBack) },
                 )
@@ -177,6 +183,7 @@ private fun ComponentPageContent(
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 trackPadding = contentPadding,
+                topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
             )
         }
     }

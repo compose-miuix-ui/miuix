@@ -6,9 +6,8 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 /**
  * The selected destination's own surface, shared by the glass navigation bar and
@@ -44,7 +42,7 @@ internal fun GlassNavigationIndicator(
     scaleOnPress: Boolean = true,
 ) {
     val density = LocalDensity.current
-    val scale by animateFloatAsState(
+    val scale = animateFloatAsState(
         targetValue = if (pressed && scaleOnPress) {
             glassPressScale(with(density) { height.toPx() }, density.density)
         } else {
@@ -61,10 +59,11 @@ internal fun GlassNavigationIndicator(
     Box(
         modifier = modifier
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
+                val s = scale.value
+                scaleX = s
+                scaleY = s
             }
-            .clip(RoundedCornerShape(percent = 50))
+            .clip(CircleShape)
             .drawBehind { drawRect(fill.value) },
     )
 }

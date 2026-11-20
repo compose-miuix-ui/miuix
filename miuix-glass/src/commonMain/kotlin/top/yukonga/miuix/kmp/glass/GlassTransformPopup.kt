@@ -15,7 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -180,19 +180,26 @@ fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.
 fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.containerBounds = it.boundsInWindow() }
 
 /**
- * Reports a row's value bounds for dropdown positioning and fades it out while its choices are open.
+ * Anchors the dropdown to the selected value and fades that value while the popup is open.
+ * Apply to the value and chevron, not the whole row.
  *
- * Apply to the value and chevron, not the whole row. After predictive Back completes, the value
- * keeps its restored opacity through popup disposal until its fade reaches full opacity.
- *
- * @param anchor The anchor the row reported itself to.
+ * @param anchor The dropdown's anchor.
  */
 @Stable
-fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = this
-    .onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
-    .graphicsLayer {
+fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = glassPopupAnchorValue(anchor, trackBounds = true)
+
+@Stable
+internal fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor, trackBounds: Boolean): Modifier {
+    val positioned = if (trackBounds) {
+        onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
+    } else {
+        this
+    }
+    // The value can still fade after bounds tracking stops.
+    return positioned.graphicsLayer {
         alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
     }
+}
 
 /**
  * A glass menu that expands from an anchored control with a content crossfade.
@@ -290,33 +297,36 @@ fun BoxScope.GlassTransformPopup(
     if (!active) return
 
     val anchorSurface = anchor.surface
-    val anchorVisuals = anchorSurface?.let {
-        visuals.copy(
-            style = it.style,
-            material = it.material,
-            stroke = it.stroke,
-            containerColor = it.fill.copy(alpha = it.fill.alpha * anchor.surfaceMaterialAlpha),
-            alpha = anchor.surfaceMaterialAlpha,
-        )
+    val anchorMaterialAlpha = anchor.surfaceMaterialAlpha
+    val anchorVisuals = remember(anchorSurface, visuals, anchorMaterialAlpha) {
+        anchorSurface?.let {
+            visuals.copy(
+                style = it.style,
+                material = it.material,
+                stroke = it.stroke,
+                containerColor = it.fill.copy(alpha = it.fill.alpha * anchorMaterialAlpha),
+                alpha = anchorMaterialAlpha,
+            )
+        }
     }
     val menuBackdrop = backdrop ?: anchorSurface?.backdrop
     val materialProgress = remember(bounds, backProgress) {
-        derivedStateOf { popupFractionWithBack(bounds.value, backProgress.value).coerceIn(0f, 1f) }
+        computedStateOf { popupFractionWithBack(bounds.value, backProgress.value).coerceIn(0f, 1f) }
     }
     val drawAnchorSurface by remember(anchorSurface, materialProgress) {
-        derivedStateOf { anchorSurface != null && materialProgress.value < 1f }
+        computedStateOf { anchorSurface != null && materialProgress.value < 1f }
     }
     val drawMenuSurface by remember(anchorSurface, materialProgress) {
-        derivedStateOf { anchorSurface == null || materialProgress.value > 0f }
+        computedStateOf { anchorSurface == null || materialProgress.value > 0f }
     }
 
-    val startRect = anchor.containerBounds
     val layoutDirection = LocalLayoutDirection.current
-    val iconRect = anchor.contentBounds.takeUnless { it.isEmpty } ?: startRect
-    val startRadius = anchor.cornerRadius
+    fun startRect() = anchor.containerBounds
+    fun iconRect() = anchor.contentBounds.takeUnless { it.isEmpty } ?: anchor.containerBounds
     fun geometryProgress() = popupFractionWithBack(bounds.value, backProgress.value)
     fun centerProgress() = popupFractionWithBack(center.value, backProgress.value)
     fun iconProgress() = popupFractionWithBack(iconMaterial.value, backProgress.value)
+    fun contentProgress() = popupFractionWithBack(contentMaterial.value, backProgress.value)
     fun stackedProgress() = popupFractionWithBack(pushedBack.value, anchor.secondaryBackProgress)
     fun panelAlpha() = transformPanelAlpha(
         floating = if (anchorSurface != null) anchor.surfaceFloating || anchor.surfaceVisibility > 0f else anchor.floating,
@@ -328,6 +338,7 @@ fun BoxScope.GlassTransformPopup(
         geometryProgress = geometryProgress(),
         iconMaterial = iconProgress(),
     )
+
     val travel = remember { TransformTravel() }
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
 
@@ -338,10 +349,11 @@ fun BoxScope.GlassTransformPopup(
         visuals = visuals,
         contentPadding = contentPadding,
         panelLayer = {
+            val rect = startRect()
             alpha = panelAlpha()
             transformOrigin = TransformOrigin(
-                if (startRect.center.x < travel.endCenterX) 0f else 1f,
-                if (startRect.center.y < travel.endCenterY) 0f else 1f,
+                if (rect.center.x < travel.endCenterX) 0f else 1f,
+                if (rect.center.y < travel.endCenterY) 0f else 1f,
             )
             val s = 1f - 0.05f * stackedProgress()
             scaleX = s
@@ -354,20 +366,21 @@ fun BoxScope.GlassTransformPopup(
             }
         },
         frame = { end, windowBounds ->
+            val rect = startRect()
             val frame = transformFrame(
-                anchor = startRect,
+                anchor = rect,
                 end = end,
                 window = windowBounds,
                 margin = sizing.safeMargin.toPx(),
                 gap = gap.toPx(),
                 sizeFraction = geometryProgress(),
                 positionFraction = centerProgress(),
-                startRadius = startRadius,
+                startRadius = anchor.cornerRadius,
                 endRadius = cornerRadius,
                 layoutDirection = layoutDirection,
             )
             val settled = placeGlassPopup(
-                startRect.translate(0f, gap.toPx()),
+                rect.translate(0f, gap.toPx()),
                 end,
                 sizing.safeMargin.toPx(),
                 windowBounds,
@@ -379,11 +392,12 @@ fun BoxScope.GlassTransformPopup(
             frame
         },
         contentLayer = { end, _ ->
-            val width = startRect.width + (end.width - startRect.width) * geometryProgress()
+            val rect = startRect()
+            val width = rect.width + (end.width - rect.width) * geometryProgress()
             val scale = if (end.width > 0f) (width / end.width).coerceAtLeast(0f) else 1f
             scaleX = scale
             scaleY = scale
-            val fraction = popupFractionWithBack(contentMaterial.value, backProgress.value)
+            val fraction = contentProgress()
             alpha = fraction
             val blur = GlassMotion.TRANSFORM_BLUR_PX * (1f - fraction)
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
@@ -416,7 +430,7 @@ fun BoxScope.GlassTransformPopup(
     )
 
     val renderAnchorContent by remember(simplified, show, iconMaterial, backProgress) {
-        derivedStateOf {
+        computedStateOf {
             shouldRenderAnchorContent(simplified, show && backProgress.value == 0f) &&
                 popupFractionWithBack(iconMaterial.value, backProgress.value) < 0.999f
         }
@@ -427,24 +441,26 @@ fun BoxScope.GlassTransformPopup(
                 // Outside the placement modifier so it reports the host origin, not the copy offset.
                 .onGloballyPositioned { hostOrigin.value = it.positionInWindow() }
                 .layout { measurable, constraints ->
+                    val rect = iconRect()
                     val placeable = measurable.measure(
                         Constraints.fixed(
-                            width = iconRect.width.roundToInt().coerceAtLeast(0),
-                            height = iconRect.height.roundToInt().coerceAtLeast(0),
+                            width = rect.width.roundToInt().coerceAtLeast(0),
+                            height = rect.height.roundToInt().coerceAtLeast(0),
                         ),
                     )
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         placeable.place(
-                            (iconRect.left - hostOrigin.value.x).roundToInt(),
-                            (iconRect.top - hostOrigin.value.y).roundToInt(),
+                            (rect.left - hostOrigin.value.x).roundToInt(),
+                            (rect.top - hostOrigin.value.y).roundToInt(),
                         )
                     }
                 }
                 .graphicsLayer {
-                    translationX = (travel.endCenterX - startRect.center.x) * centerProgress()
-                    translationY = (travel.endCenterY - startRect.center.y) * centerProgress()
-                    val width = startRect.width + (travel.endWidth - startRect.width) * geometryProgress()
-                    val growth = if (startRect.width > 0f) width / startRect.width else 1f
+                    val rect = startRect()
+                    translationX = (travel.endCenterX - rect.center.x) * centerProgress()
+                    translationY = (travel.endCenterY - rect.center.y) * centerProgress()
+                    val width = rect.width + (travel.endWidth - rect.width) * geometryProgress()
+                    val growth = if (rect.width > 0f) width / rect.width else 1f
                     scaleX = growth
                     scaleY = growth
                     transformOrigin = TransformOrigin(0.5f, 0.5f)

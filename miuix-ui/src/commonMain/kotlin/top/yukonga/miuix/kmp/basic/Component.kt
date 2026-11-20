@@ -3,7 +3,9 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,11 +51,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param onClickLabel Optional label describing the click action for accessibility services.
  * @param role The semantic [Role] of the [BasicComponent] for accessibility services.
- * @param holdDownState Used to determine whether it is in the pressed state.
+ * @param holdDownState Whether to show pressed feedback, even without [onClick].
  * @param enabled Whether the [BasicComponent] is enabled.
- * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
- *   The value should remain null or non-null for the lifetime of this component;
- *   switching across recompositions will allocate a new internal source and lose pending interactions.
+ * @param interactionSource Optional [MutableInteractionSource] for observing or emitting interactions.
  */
 @Composable
 fun BasicComponent(
@@ -115,11 +115,9 @@ fun BasicComponent(
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param onClickLabel Optional label describing the click action for accessibility services.
  * @param role The semantic [Role] of the [BasicComponent] for accessibility services.
- * @param holdDownState Used to determine whether it is in the pressed state.
+ * @param holdDownState Whether to show pressed feedback, even without [onClick].
  * @param enabled Whether the [BasicComponent] is enabled.
- * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
- *   The value should remain null or non-null for the lifetime of this component;
- *   switching across recompositions will allocate a new internal source and lose pending interactions.
+ * @param interactionSource Optional [MutableInteractionSource] for observing or emitting interactions.
  * @param content The content of the [BasicComponent].
  */
 @Composable
@@ -137,23 +135,35 @@ fun BasicComponent(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val currentOnClick by rememberUpdatedState(onClick)
+    val holdInteractionSource = interactionSource ?: run {
+        // Keep the source alive for the release animation.
+        val holdSource = remember { lazy(LazyThreadSafetyMode.NONE) { MutableInteractionSource() } }
+        if (holdDownState || holdSource.isInitialized()) holdSource.value else null
+    }
 
-    HoldDownObserver(holdDownState, interactionSource)
+    if (holdInteractionSource != null) {
+        HoldDownObserver(holdDownState, holdInteractionSource)
+    }
 
-    val clickableModifier = remember(enabled, onClick != null, interactionSource, role, onClickLabel) {
-        if (enabled && onClick != null) {
+    val clickableModifier = if (enabled && onClick != null) {
+        val currentOnClick by rememberUpdatedState(onClick)
+        remember(interactionSource, role, onClickLabel) {
             Modifier.clickable(
                 interactionSource = interactionSource,
                 onClickLabel = onClickLabel,
                 role = role,
-                onClick = { currentOnClick?.invoke() },
+                onClick = { currentOnClick() },
             )
-        } else {
-            Modifier
         }
+    } else {
+        Modifier
+    }
+
+    // An internal hold must not replace the clickable's existing interactions.
+    val holdIndication = if (enabled && holdInteractionSource != null && (onClick == null || interactionSource == null)) {
+        Modifier.indication(holdInteractionSource, LocalIndication.current)
+    } else {
+        Modifier
     }
 
     Column(
@@ -161,6 +171,7 @@ fun BasicComponent(
             .heightIn(min = 56.dp)
             .fillMaxWidth()
             .then(clickableModifier)
+            .then(holdIndication)
             .padding(insideMargin),
         verticalArrangement = Arrangement.Center,
     ) {

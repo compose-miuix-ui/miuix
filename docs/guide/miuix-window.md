@@ -145,8 +145,6 @@ Drop-in replacements for Compose `Window` and `DialogWindow`. They manage non-cl
 | `minSize` | `DpSize` | `DpSize.Zero` | Minimum window size constraint |
 | `extraDisplayScale` | `Float` | `1.0f` | Additional UI display scaling factor |
 | `extraFontScale` | `Float` | `1.0f` | Additional font scaling factor |
-| `onResizeEdgeChange` | `(Window, WindowResizeEdge) -> Unit` | `{ _, _ -> }` | Callback when pointer enters/leaves resize borders |
-| `onVisibleChange` | `(Window, Boolean) -> Unit` | `{ _, _ -> }` | Callback on window visibility change |
 
 ## Platform Specifics
 

@@ -6,9 +6,9 @@ import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import org.w3c.dom.url.URLSearchParams
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalWasmJsInterop::class)
 fun main() {
-    val iFrameParams = URLSearchParams(document.location?.search)
+    val iFrameParams = URLSearchParams(document.location?.search?.toJsString())
     val id = iFrameParams.get("id")
     ComposeViewport(
         viewportContainerId = "ComposeTarget",

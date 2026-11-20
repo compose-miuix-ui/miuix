@@ -35,6 +35,6 @@ if (providers.systemProperty("idea.sync.active").map(String::toBoolean).getOrEls
         // Work around KGP's task realization race during parallel IDE sync.
         // Initialize JS/Wasm root package tasks before parallel model queries.
         // https://slack-chats.kotlinlang.org/t/32838689/sometimes-while-making-gradle-sync-project-got-exception-see
-        tasks.withType<RootPackageJsonTask>().forEach { }
+        tasks.withType<RootPackageJsonTask>().forEach { _ -> }
     }
 }

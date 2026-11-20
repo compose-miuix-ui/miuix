@@ -7,11 +7,13 @@ import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction.HoldDown
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction.Release
 
@@ -42,14 +44,11 @@ interface HoldDownInteraction : Interaction {
 }
 
 /**
- * Subscribes to this [MutableInteractionSource] and returns a [State] representing whether this
- * component is selected or not.
- *
- * @return [State] representing whether this component is being focused or not
+ * Returns whether this source has any unreleased [HoldDown] interactions.
  */
 @Composable
 fun InteractionSource.collectIsHeldDownAsState(): State<Boolean> {
-    val isHeldDown = remember { mutableStateOf(false) }
+    val isHeldDown = remember(this) { mutableStateOf(false) }
     LaunchedEffect(this) {
         val holdInteraction = mutableListOf<HoldDown>()
         interactions.collect { interaction ->
@@ -71,29 +70,14 @@ internal fun HoldDownObserver(
     holdDownState: Boolean,
     interactionSource: MutableInteractionSource,
 ) {
-    val holdDown = remember { mutableStateOf<HoldDown?>(null) }
-    LaunchedEffect(holdDownState, interactionSource) {
-        suspend fun release() {
-            holdDown.value?.let { current ->
-                interactionSource.emit(Release(current))
-                holdDown.value = null
-            }
-        }
-        if (holdDownState) {
-            release()
-            val interaction = HoldDown()
-            holdDown.value = interaction
-            interactionSource.emit(interaction)
-        } else {
-            release()
-        }
-    }
-    DisposableEffect(interactionSource) {
-        onDispose {
-            holdDown.value?.let { current ->
-                interactionSource.tryEmit(Release(current))
-            }
-            holdDown.value = null
+    if (!holdDownState) return
+    LaunchedEffect(interactionSource) {
+        val hold = HoldDown()
+        interactionSource.emit(hold)
+        try {
+            awaitCancellation()
+        } finally {
+            withContext(NonCancellable) { interactionSource.emit(Release(hold)) }
         }
     }
 }

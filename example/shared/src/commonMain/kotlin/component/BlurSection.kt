@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.blend.ColorBlendToken
 import component.edge.EdgeStrokeConfig
-import component.edge.rememberContainerEdgeStroke
+import component.edge.rememberContainerEdgeStrokeState
 import component.effect.BgEffectBackground
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
@@ -248,11 +248,12 @@ private fun BlurDemo() {
     var containerIndex by remember { mutableIntStateOf(EdgeStrokeConfig.Container.Small.ordinal) }
     val currentContainer = containers[containerIndex]
     val blurShape = RoundedCornerShape(24.dp)
-    val containerStroke = rememberContainerEdgeStroke(
+    val containerStrokeState = rememberContainerEdgeStrokeState(
         container = currentContainer,
         isDark = isInDark,
         tiltDriven = tiltDriven,
     )
+    val containerStrokeProvider = remember(containerStrokeState) { { containerStrokeState.value } }
 
     val blendConfigs = remember(isInDark, surface) {
         listOf(
@@ -314,13 +315,7 @@ private fun BlurDemo() {
                                 saturation = saturation,
                             ),
                         )
-                        .then(
-                            if (containerStroke != null) {
-                                Modifier.edgeStroke(shape = blurShape, stroke = containerStroke)
-                            } else {
-                                Modifier
-                            },
-                        ),
+                        .edgeStroke(shape = blurShape, stroke = containerStrokeProvider),
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.1"
+agp = "9.5.2"
 kotlin = "2.4.21"
 kotlinx-serialization = "1.13.0"
 kotlinx-collections-immutable = "0.5.2"
@@ -7,10 +7,10 @@ kotlinx-collections-immutable = "0.5.2"
 about-libraries = "15.3.0"
 androidx-activity = "1.13.0"
 androidx-navigationevent = "1.2.0"
-jetbrains-compose-multiplatform = "1.12.2"
+jetbrains-compose-multiplatform = "1.13.0-rc01"
 jetbrains-compose-window-size = "1.12.0-alpha03"
 jetbrains-dokka = "2.3.0"
-jetbrains-compose-hotReload = "1.2.0"
+jetbrains-compose-hotReload = "1.3.0"
 jetbrains-lifecycle = "2.11.0"
 materialKolor-utilities = "6.0.0"
 jna = "5.19.1"
@@ -23,6 +23,7 @@ uiautomator = "2.4.1"
 benchmark-macro-junit4 = "1.5.0"
 baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
+hiddenapibypass = "6.2"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -53,6 +54,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 
 nucleus-application = { module = "dev.nucleusframework:nucleus.nucleus-application", version.ref = "nucleus" }
 nucleus-darkmode-detector = { module = "dev.nucleusframework:nucleus.darkmode-detector", version.ref = "nucleus" }

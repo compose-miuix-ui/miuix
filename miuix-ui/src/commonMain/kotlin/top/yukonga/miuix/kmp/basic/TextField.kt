@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -25,7 +26,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -34,7 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.squircle.squircleBackground
@@ -106,7 +111,7 @@ fun TextField(
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val labelState by remember(label, useLabelAsPlaceholder) {
-        derivedStateOf {
+        computedStateOf {
             when {
                 label.isEmpty() -> LabelAnimState.Hidden
                 useLabelAsPlaceholder && state.text.isNotEmpty() -> LabelAnimState.Placeholder
@@ -184,6 +189,19 @@ fun TextField(
  * @param interactionSource The interaction source to be applied to the [TextField].
  * @param cursorBrush The brush to be used for the cursor.
  */
+@Deprecated(
+    "Use the TextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun TextField(
     value: TextFieldValue,
@@ -290,6 +308,19 @@ fun TextField(
  * @param interactionSource The interaction source to be applied to the [TextField].
  * @param cursorBrush The brush to be used for the cursor.
  */
+@Deprecated(
+    "Use the TextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun TextField(
     value: String,
@@ -448,10 +479,10 @@ private fun TextFieldChrome(
             LabelAnimState.Hidden -> 0.dp
         },
     )
-    val labelFontSize by animateDpAsState(
+    val labelScale = animateFloatAsState(
         when (labelState) {
-            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
-            else -> TextFieldDefaults.LabelFontSizeNormal
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating.value / TextFieldDefaults.LabelFontSizeNormal.value
+            else -> 1f
         },
     )
     val hasLeadingIcon = leadingIcon != null
@@ -467,7 +498,7 @@ private fun TextFieldChrome(
 
     TextFieldDecorationBox(
         label = label,
-        labelFontSize = labelFontSize,
+        labelScale = { labelScale.value },
         labelColor = colors.labelColor,
         labelState = labelState,
         backgroundColor = colors.backgroundColor,
@@ -486,7 +517,7 @@ private fun TextFieldChrome(
 @Composable
 private fun TextFieldDecorationBox(
     label: String,
-    labelFontSize: Dp,
+    labelScale: () -> Float,
     labelColor: Color,
     labelState: LabelAnimState,
     backgroundColor: Color,
@@ -520,12 +551,20 @@ private fun TextFieldDecorationBox(
                 contentAlignment = Alignment.TopStart,
             ) {
                 if (labelState != LabelAnimState.Hidden && labelState != LabelAnimState.Placeholder) {
+                    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
                     Text(
                         text = label,
-                        fontSize = labelFontSize.value.sp,
+                        fontSize = TextFieldDefaults.LabelFontSizeNormal.value.sp,
                         color = labelColor,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.offset { IntOffset(0, labelAnim().roundToPx()) },
+                        modifier = Modifier
+                            .offset { IntOffset(0, labelAnim().roundToPx()) }
+                            .graphicsLayer {
+                                val s = labelScale()
+                                scaleX = s
+                                scaleY = s
+                                transformOrigin = TransformOrigin(if (isLtr) 0f else 1f, 0f)
+                            },
                         textAlign = TextAlign.Start,
                     )
                 }

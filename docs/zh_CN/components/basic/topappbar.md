@@ -178,6 +178,7 @@ TopAppBarDefaults 对象提供了 TopAppBar 和 SmallTopAppBar 组件的默认�
 | 常量名                    | 类型 | 说明                              | 默认值 |
 | ------------------------- | ---- | --------------------------------- | ------ |
 | TitlePadding    | Dp   | 标题和大标题的水平内边距          | 26.dp  |
+| TitleControlSpacing | Dp   | 标题与侧边控件之间的间距          | 12.dp  |
 | NavigationIconPadding      | Dp   | 导航图标的起始边距               | 16.dp  |
 | ActionIconPadding          | Dp   | 操作图标的末尾边距               | 16.dp  |
 | CollapsedHeight            | Dp   | TopAppBar 折叠时的高度           | 52.dp  |

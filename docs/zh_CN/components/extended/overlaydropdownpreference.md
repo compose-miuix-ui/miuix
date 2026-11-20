@@ -87,6 +87,8 @@ Scaffold {
 
 当单个下拉项需要额外状态时，例如选中状态、点击回调或禁用某个选项，可以使用 `DropdownEntry` 和 `DropdownItem`。
 
+需要原地更新 `entries` 或分组的 `items` 时，请使用 `mutableStateListOf`。普通列表应通过 Compose 状态整体替换。
+
 ```kotlin
 var selectedIndex by remember { mutableStateOf(0) }
 val entry = DropdownEntry(

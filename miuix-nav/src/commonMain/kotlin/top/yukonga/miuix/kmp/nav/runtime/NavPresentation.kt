@@ -7,7 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -153,7 +153,7 @@ internal class NavPresentation(initialTopIndex: Float) : NavSettleSink {
      * event (a fresh [NavGesture] each move), so composition-time readers must subscribe to this
      * derived flag instead: it flips only at gesture start and at gesture resolution.
      */
-    val gestureActive: Boolean by derivedStateOf { gesture != null }
+    val gestureActive: Boolean by computedStateOf { gesture != null }
 
     /**
      * Published settle context (see [NavSettle]); written by [trackSettle] around every

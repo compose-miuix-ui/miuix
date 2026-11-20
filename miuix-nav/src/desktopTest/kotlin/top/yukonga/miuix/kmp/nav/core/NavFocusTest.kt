@@ -5,11 +5,9 @@ package top.yukonga.miuix.kmp.nav.core
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -34,7 +32,6 @@ class NavFocusTest {
 
     @Test
     fun pushingEntryClearsFocusFromCoveredEntry() = runComposeUiTest {
-        var text by mutableStateOf("")
         val backStack = navBackStackOf(FocusRouteA)
         setContent {
             NavDisplay(
@@ -44,12 +41,11 @@ class NavFocusTest {
             ) {
                 entry<FocusRouteA> {
                     BasicTextField(
-                        value = text,
-                        onValueChange = { text = it },
+                        state = rememberTextFieldState(),
                         modifier = Modifier.size(120.dp).testTag("old-input"),
                     )
                 }
-                entry<FocusRouteB> { BasicTextField(value = "new", onValueChange = {}) }
+                entry<FocusRouteB> { BasicTextField(state = rememberTextFieldState("new")) }
             }
         }
         onNodeWithTag("old-input").performClick()
@@ -63,18 +59,16 @@ class NavFocusTest {
 
     @Test
     fun newEntryCanRequestFocusAfterStackChange() = runComposeUiTest {
-        var text by mutableStateOf("")
         val backStack = navBackStackOf(FocusRouteA)
         setContent {
             NavDisplay(backStack = backStack, effects = NavDisplayEffects.None) {
                 entry<FocusRouteA> {
-                    BasicTextField(value = text, onValueChange = { text = it })
+                    BasicTextField(state = rememberTextFieldState())
                 }
                 entry<FocusRouteB> {
                     val requester = remember { FocusRequester() }
                     BasicTextField(
-                        value = "",
-                        onValueChange = {},
+                        state = rememberTextFieldState(),
                         modifier = Modifier.size(120.dp).focusRequester(requester).testTag("new-input"),
                     )
                     LaunchedEffect(Unit) { requester.requestFocus() }
