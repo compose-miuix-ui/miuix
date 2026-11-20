@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,9 @@ fun OverscrollLoadMorePage(
     var loadedPages by rememberSaveable { mutableIntStateOf(0) }
     var loadingMore by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
 
     LaunchedEffect(lazyListState) {
         snapshotFlow {
@@ -88,6 +92,7 @@ fun OverscrollLoadMorePage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    isContentScrolled = contentUnderTopBar,
                     color = barColor,
                     navigationIcon = {
                         BackNavigationIcon(

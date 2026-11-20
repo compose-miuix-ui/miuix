@@ -26,7 +26,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -347,7 +347,7 @@ class PullToRefreshState(
     /** The progress of the pull gesture, from 0.0 to 1.0, relative to the effective threshold
      * (the larger of the visual threshold and the trigger threshold). With a trigger threshold
      * below the visual threshold, [RefreshState.ThresholdReached] occurs before this reaches 1.0. */
-    val pullProgress: Float by derivedStateOf {
+    val pullProgress: Float by computedStateOf {
         if (effectiveThresholdOffset > 0f) {
             (dragOffset / effectiveThresholdOffset).coerceIn(0f, 1f)
         } else {
@@ -359,7 +359,7 @@ class PullToRefreshState(
      * from 0.0 to 1.0 (where 1.0 represents the visual maximum).
      * Unlike [pullProgress] which saturates at 1.0 once the threshold is reached,
      * this value continues to grow as the user pulls further beyond the threshold. */
-    val fullDragProgress: Float by derivedStateOf {
+    val fullDragProgress: Float by computedStateOf {
         if (fullDragRangePx > 0f) {
             (dragOffset / fullDragRangePx).coerceIn(0f, 1f)
         } else {
@@ -370,7 +370,7 @@ class PullToRefreshState(
     /** The visual scaling progress of the indicator, from 0.0 to 1.0. The scale-up completes
      * at the smaller of the built-in visual threshold and the trigger threshold, so entering
      * [RefreshState.ThresholdReached] always coincides with a fully scaled indicator. */
-    val visualProgress: Float by derivedStateOf {
+    val visualProgress: Float by computedStateOf {
         val scaleEndOffset = min(refreshThresholdOffset, triggerProgressOffset)
         when {
             scaleEndOffset > 0f -> (dragOffset / scaleEndOffset).coerceIn(0f, 1f)
@@ -736,7 +736,7 @@ private fun RefreshHeader(
     }
 
     val refreshText by remember(pullToRefreshState, refreshTexts) {
-        derivedStateOf {
+        computedStateOf {
             when (pullToRefreshState.refreshState) {
                 RefreshState.Idle -> ""
 
@@ -754,7 +754,7 @@ private fun RefreshHeader(
     }
 
     val refreshTextAlpha by remember(pullToRefreshState) {
-        derivedStateOf {
+        computedStateOf {
             when (pullToRefreshState.refreshState) {
                 RefreshState.Idle -> 0f
 

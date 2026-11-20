@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -237,10 +238,9 @@ private fun BottomSheetContent(
             }
         }
         item {
-            var textFieldValue by remember { mutableStateOf("") }
+            val textFieldState = rememberTextFieldState()
             TextField(
-                value = textFieldValue,
-                onValueChange = { textFieldValue = it },
+                state = textFieldState,
                 label = "TextField",
                 modifier = Modifier.padding(bottom = 12.dp),
             )

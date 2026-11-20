@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -113,7 +113,7 @@ object GlassTopAppBarDefaults {
         val rampPx = with(density) { RampDistance.toPx() }
         val currentOffset by rememberUpdatedState(visualContentOffset)
         return remember(scrollBehavior, startPx, rampPx) {
-            derivedStateOf {
+            computedStateOf {
                 val offset = currentOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
                 if (offset == null) 1f else ((-offset - startPx) / rampPx).coerceIn(0f, 1f)
             }
@@ -297,9 +297,9 @@ fun GlassTopAppBar(
 ) {
     val currentOffset by rememberUpdatedState(visualContentOffset)
     val isContentScrolled by remember(scrollBehavior) {
-        derivedStateOf {
+        computedStateOf {
             val offset = scrollBehavior?.state?.contentOffset ?: currentOffset?.invoke()
-            offset?.let { it < 0f } ?: true
+            offset?.let { it < -1f } ?: true
         }
     }
     GlassTopAppBar(
@@ -382,18 +382,12 @@ fun GlassTopAppBar(
         transitionSpec = { GlassMotion.topBarMask() },
         label = "glassTopBarMask",
     ) { if (it) 1f else 0f }
-    val scrolledMaterialProgress = transition.animateFloat(
+    val materialProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
     ) { if (it) 1f else 0f }
-    val materialProgress = remember(scrolledMaterialProgress, scrollBehavior, ramp) {
-        derivedStateOf {
-            val elasticProgress = if (scrollBehavior != null && scrollBehavior.state.overscrollOffset != 0f) ramp.value else 0f
-            maxOf(scrolledMaterialProgress.value, elasticProgress)
-        }
-    }
     val keepMaterial by remember(isContentScrolled, materialProgress) {
-        derivedStateOf { isContentScrolled || materialProgress.value > 0f }
+        computedStateOf { isContentScrolled || materialProgress.value > 0f }
     }
     val rawBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
     val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { keepMaterial && rawBackdrop != null }
@@ -432,7 +426,7 @@ fun GlassTopAppBar(
             val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
             val rampDistancePx = with(LocalDensity.current) { GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx() }
             val bandActive by remember(scrollBehavior, maskProgress, rampDistancePx) {
-                derivedStateOf {
+                computedStateOf {
                     val offset = currentVisualOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
                     val rampVal = offset?.let { (-it / rampDistancePx).coerceIn(0f, 1f) } ?: maskProgress.value
                     rampVal * currentBgAlpha().coerceIn(0f, 1f) > 0.001f

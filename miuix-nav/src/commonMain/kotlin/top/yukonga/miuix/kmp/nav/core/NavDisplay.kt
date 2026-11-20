@@ -12,6 +12,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -357,14 +358,13 @@ private fun NavDisplayLayout(
     val currentKeyList = backStack.toList()
     // Covered entries stay composed, so clear their focus when the top entry changes.
     val previousTopKey = remember { arrayOfNulls<NavKey>(1) }
-    DisposableEffect(currentKeyList.lastOrNull()) {
+    SideEffect(currentKeyList.lastOrNull()) {
         val currentTopKey = currentKeyList.lastOrNull()
         val previous = previousTopKey[0]
         if (previous != null && previous != currentTopKey) {
             focusManager.clearFocus()
         }
         previousTopKey[0] = currentTopKey
-        onDispose { }
     }
     // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
     // by UI, so it must not be snapshot state (no cross-phase back-write).
@@ -835,7 +835,7 @@ private fun NavEntryHost(
     // host recomposes solely on an actual threshold crossing. Raw per-frame floats are read only
     // inside the deferred graphicsLayer blocks installed below.
     val depthBuckets by remember(presentation, entryIndex, entry, effects) {
-        derivedStateOf {
+        computedStateOf {
             val d = presentation.animatedTop.value - entryIndex
             var mask = navMaxLifecycleFor(entry.presentation, d, presentation.gesture != null).ordinal
             if (d <= 0f) mask = mask or DEPTH_BUCKET_GOVERNS_OWN

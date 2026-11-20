@@ -4,6 +4,7 @@
 package component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -250,7 +251,7 @@ fun SearchBar(
             )
         },
         trailingIcon = {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 searchStatus.searchText.isNotEmpty(),
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut(),

@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -253,7 +253,7 @@ fun AdaptiveTopAppBar(
         val surfaceColor = MiuixTheme.colorScheme.surface
         val bandBrush = remember(surfaceColor) { GlassTopAppBarDefaults.bandBrush(surfaceColor) }
         val contentScrolled by remember(scrollBehavior, isContentScrolled) {
-            derivedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < 0f) }
+            computedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < -1f) }
         }
         GlassTopAppBar(
             title = title,

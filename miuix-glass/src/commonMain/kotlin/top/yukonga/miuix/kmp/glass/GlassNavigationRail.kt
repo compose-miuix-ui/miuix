@@ -53,7 +53,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -536,7 +536,7 @@ private fun GlassNavigationRailPanel(
     // The column only scrolls once it has settled into the panel; while rows fly they keep their
     // own geometry.
     val scrollEnabled by remember(state, rowProgress) {
-        derivedStateOf { state.expanded && state.morph.value == 1f && rowProgress.all { it.value == 1f } }
+        computedStateOf { state.expanded && state.morph.value == 1f && rowProgress.all { it.value == 1f } }
     }
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -636,10 +636,10 @@ private fun GlassNavigationRailPanel(
             ) {
                 val scrollOffsetProvider = remember(scrollState) { { scrollState.value } }
                 val showSecondary by remember(state, rowProgress, items.size) {
-                    derivedStateOf {
-                        if (state.progress > 0f) return@derivedStateOf true
+                    computedStateOf {
+                        if (state.progress > 0f) return@computedStateOf true
                         for (i in items.size until rowProgress.size) {
-                            if (rowProgress[i].value > 0f) return@derivedStateOf true
+                            if (rowProgress[i].value > 0f) return@computedStateOf true
                         }
                         false
                     }

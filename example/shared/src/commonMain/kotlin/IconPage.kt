@@ -28,7 +28,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -164,7 +164,7 @@ fun IconsPage(
         }
     }
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { iconFamilies.size })
-    val currentPage by remember { derivedStateOf { pagerState.currentPage } }
+    val currentPage by remember { computedStateOf { pagerState.currentPage } }
     val searchIsGlass = currentPage == 0
     val searchCatalog = iconCatalogs[currentPage]
     val searchRegularIcons = searchCatalog.regularIcons
@@ -181,7 +181,7 @@ fun IconsPage(
     val headerHeights = remember { List(2) { mutableIntStateOf(0) } }
     val activeListState = listStates[currentPage]
     val contentUnderTopBar by remember(activeListState) {
-        derivedStateOf { activeListState.canScrollBackward }
+        computedStateOf { activeListState.canScrollBackward }
     }
     val activeHeaderHeight = headerHeights[currentPage]
     val saturatedScrollDistance = with(density) {

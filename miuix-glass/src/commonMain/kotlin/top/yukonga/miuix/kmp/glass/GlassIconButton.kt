@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -88,9 +88,9 @@ fun GlassIconButton(
     }
     val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
     val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
-    val topBarRamp = topBarContext?.ramp
-    val shadowAlpha = remember(resolvedSurfaceAlpha, topBarRamp) {
-        { resolvedSurfaceAlpha * (topBarRamp?.value ?: 1f) }
+    val topBarProgress = topBarContext?.materialProgress
+    val shadowAlpha = remember(resolvedSurfaceAlpha, topBarProgress) {
+        { resolvedSurfaceAlpha * (topBarProgress?.value ?: 1f) }
     }
     GlassButtonSurface(
         backdrop = materialContext?.buttonBackdrop ?: backdrop ?: topBarContext?.buttonBackdrop,
@@ -159,7 +159,7 @@ internal fun GlassButtonSurface(
         }
     }
     val keepMaterial = sharedKeepMaterial ?: remember(floating, progress) {
-        derivedStateOf { floating || progress.value > 0f }
+        computedStateOf { floating || progress.value > 0f }
     }.value
     val opacity = surfaceAlpha.coerceIn(0f, 1f)
     val effectiveBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,8 +56,8 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
     var pillSize by remember { mutableStateOf(IntSize.Zero) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
-    val avgTargetColor by remember { derivedStateOf { healthColor(stats.avg, refFps) } }
-    val lowTargetColor by remember { derivedStateOf { healthColor(stats.low1, refFps) } }
+    val avgTargetColor by remember { computedStateOf { healthColor(stats.avg, refFps) } }
+    val lowTargetColor by remember { computedStateOf { healthColor(stats.low1, refFps) } }
     val avgColor by animateColorAsState(avgTargetColor)
     val lowColor by animateColorAsState(lowTargetColor)
 

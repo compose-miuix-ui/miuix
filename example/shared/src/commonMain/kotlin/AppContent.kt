@@ -3,6 +3,7 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
@@ -392,7 +394,7 @@ fun AppContent(
         }
     }
 
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = appState.showFPSMonitor,
         enter = fadeIn(),
         exit = fadeOut(),
@@ -889,7 +891,7 @@ private fun FloatingToolbar(
     style: Int,
     backdrop: Backdrop? = null,
 ) {
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = showFloatingToolbar,
         enter = fadeIn(),
         exit = fadeOut(),
@@ -1039,7 +1041,7 @@ private fun MainScreenBackHandler(
     navigator: Navigator,
 ) {
     val isPagerBackHandlerEnabled by remember {
-        derivedStateOf {
+        computedStateOf {
             navigator.current() is Route.Main && navigator.backStackSize() == 1 && mainState.selectedPage != 0
         }
     }

@@ -3,7 +3,11 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -169,7 +173,11 @@ private fun SettingsContent(
                                 selectedIndex = appState.colorMode,
                                 onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
                             )
-                            AnimatedVisibility(visible = appState.colorMode in 3..5) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.colorMode in 3..5,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "Key Color",
@@ -178,7 +186,11 @@ private fun SettingsContent(
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
                                 )
                             }
-                            AnimatedVisibility(visible = appState.colorMode in 3..5 && appState.seedIndex > 0) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.colorMode in 3..5 && appState.seedIndex > 0,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 Column {
                                     GlassDropdownPreference(
                                         backdrop = backdrop,
@@ -254,7 +266,11 @@ private fun SettingsContent(
                                 checked = appState.enablePageUserScroll,
                                 onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                             )
-                            AnimatedVisibility(visible = appState.enablePageUserScroll) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.enablePageUserScroll,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "Pager Gesture Mode",
@@ -272,7 +288,11 @@ private fun SettingsContent(
                                 checked = appState.showTopAppBar,
                                 onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
                             )
-                            AnimatedVisibility(visible = appState.showTopAppBar) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showTopAppBar,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "TopAppBar Style",
@@ -291,7 +311,11 @@ private fun SettingsContent(
                                 onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
                             )
                             // Sidebar options only exist on the layout that actually shows a sidebar.
-                            AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showNavigationBar && isWideScreen,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "Sidebar Style",
@@ -300,14 +324,22 @@ private fun SettingsContent(
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailStyle = it) } },
                                 )
                             }
-                            AnimatedVisibility(visible = appState.showNavigationBar) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showNavigationBar,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 SwitchPreference(
                                     title = "Show Navigation Badge",
                                     checked = appState.showNavigationBarBadge,
                                     onCheckedChange = { updateAppState { state -> state.copy(showNavigationBarBadge = it) } },
                                 )
                             }
-                            AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "NavigationBar Mode",
@@ -316,14 +348,22 @@ private fun SettingsContent(
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
                                 )
                             }
-                            AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showNavigationBar && !isWideScreen,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 Column {
                                     SwitchPreference(
                                         title = "Use FloatingNavigationBar",
                                         checked = appState.useFloatingNavigationBar,
                                         onCheckedChange = { updateAppState { state -> state.copy(useFloatingNavigationBar = it) } },
                                     )
-                                    AnimatedVisibility(visible = appState.useFloatingNavigationBar) {
+                                    CapturedAnimatedVisibility(
+                                        visible = appState.useFloatingNavigationBar,
+                                        enter = fadeIn() + expandVertically(),
+                                        exit = fadeOut() + shrinkVertically(),
+                                    ) {
                                         Column {
                                             GlassDropdownPreference(
                                                 backdrop = backdrop,
@@ -332,7 +372,11 @@ private fun SettingsContent(
                                                 selectedIndex = appState.floatingNavigationBarStyle,
                                                 onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarStyle = it) } },
                                             )
-                                            AnimatedVisibility(visible = appState.floatingNavigationBarStyle == 0) {
+                                            CapturedAnimatedVisibility(
+                                                visible = appState.floatingNavigationBarStyle == 0,
+                                                enter = fadeIn() + expandVertically(),
+                                                exit = fadeOut() + shrinkVertically(),
+                                            ) {
                                                 Column {
                                                     GlassDropdownPreference(
                                                         backdrop = backdrop,
@@ -356,7 +400,11 @@ private fun SettingsContent(
                                 checked = appState.showFloatingToolbar,
                                 onCheckedChange = { updateAppState { state -> state.copy(showFloatingToolbar = it) } },
                             )
-                            AnimatedVisibility(visible = appState.showFloatingToolbar) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showFloatingToolbar,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 Column {
                                     GlassDropdownPreference(
                                         backdrop = backdrop,
@@ -390,7 +438,11 @@ private fun SettingsContent(
                                 checked = appState.showFloatingActionButton,
                                 onCheckedChange = { updateAppState { state -> state.copy(showFloatingActionButton = it) } },
                             )
-                            AnimatedVisibility(visible = appState.showFloatingActionButton) {
+                            CapturedAnimatedVisibility(
+                                visible = appState.showFloatingActionButton,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
                                 Column {
                                     GlassDropdownPreference(
                                         backdrop = backdrop,

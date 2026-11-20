@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -519,7 +519,7 @@ fun RangeSlider(
     var isDraggingEnd by remember { mutableStateOf(false) }
     var isHoveringStartThumb by remember { mutableStateOf(false) }
     var isHoveringEndThumb by remember { mutableStateOf(false) }
-    val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
+    val isDragging by remember { computedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     var lastDraggedIsStart by remember { mutableStateOf(true) }

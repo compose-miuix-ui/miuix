@@ -25,7 +25,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -317,7 +317,7 @@ fun GlassTabRow(
         label = "glassTabRamp",
     )
     val showGlass by remember(resolvedBackdrop) {
-        derivedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
+        computedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
     }
 
     Row(
@@ -611,7 +611,7 @@ fun GlassSegmentedTabRow(
         label = "glassSegmentedTabRamp",
     )
     val showGlass by remember(resolvedBackdrop) {
-        derivedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
+        computedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
     }
     val trackShape = GlassSegmentedTabRowDefaults.shape(height)
     val innerHeight = height - GlassSegmentedTabRowDefaults.TrackPadding * 2

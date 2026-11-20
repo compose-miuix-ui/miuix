@@ -36,7 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -269,7 +269,7 @@ fun GlassSearchOverlay(
         val currentScrollOffset by rememberUpdatedState(scrollOffset)
         val pillMaterialProgress = if (contentBackdrop != null && scrollMaterialThreshold.isSpecified) {
             val thresholdPx = with(LocalDensity.current) { scrollMaterialThreshold.toPx() }
-            val hasOverlap by remember(thresholdPx) { derivedStateOf { currentScrollOffset() > thresholdPx } }
+            val hasOverlap by remember(thresholdPx) { computedStateOf { currentScrollOffset() > thresholdPx } }
             animateFloatAsState(
                 targetValue = if (expanded && hasOverlap) 1f else 0f,
                 animationSpec = tween(450, easing = LinearEasing),
@@ -307,7 +307,7 @@ fun GlassSearchOverlay(
                 val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
                 val rampDistancePx = with(LocalDensity.current) { GlassTopAppBarDefaults.ProgressiveBlurRampDistance.toPx() }
                 val bandActive by remember(rampDistancePx) {
-                    derivedStateOf { (currentScrollOffset() / rampDistancePx).coerceIn(0f, 1f) > 0.001f }
+                    computedStateOf { (currentScrollOffset() / rampDistancePx).coerceIn(0f, 1f) > 0.001f }
                 }
                 Box(
                     modifier = Modifier
@@ -519,7 +519,7 @@ private fun ScrollSearchPillBackground(
     modifier: Modifier = Modifier,
 ) {
     val currentProgress by rememberUpdatedState(progress)
-    val showGlass by remember { derivedStateOf { currentProgress() > 0.001f } }
+    val showGlass by remember { computedStateOf { currentProgress() > 0.001f } }
     Box(
         modifier = modifier
             .then(if (shadow != null) Modifier.drawBehind { drawGlassShadow(shape, shadow, currentProgress()) } else Modifier)

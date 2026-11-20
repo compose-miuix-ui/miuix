@@ -33,7 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -755,9 +755,9 @@ fun TopAppBarLayout(
         }
     }
 
-    // Boolean derivedStateOf invalidates only on flip → the spring fires once per crossing, not per frame.
+    // Boolean computedStateOf invalidates only on flip → the spring fires once per crossing, not per frame.
     val smallTitleVisible by remember(scrollBehavior, expandable) {
-        derivedStateOf {
+        computedStateOf {
             !expandable || scrollBehavior?.state?.let { state ->
                 if (state.pinnedBySmallTopAppBar) {
                     state.contentOffset < 0f

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -126,7 +126,7 @@ internal fun BoxScope.GlassDropdownPopupContent(
     ) { if (it) 1f else 0f }
 
     val active by remember(show, size) {
-        derivedStateOf { show || size.value > 0.0001f }
+        computedStateOf { show || size.value > 0.0001f }
     }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     LaunchedEffect(show, active) {

@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -103,7 +103,7 @@ fun NumberPicker(
 
     // Total offset combines drag + fling
     val totalOffset by remember {
-        derivedStateOf { dragOffset + flingAnimatable.value }
+        computedStateOf { dragOffset + flingAnimatable.value }
     }
 
     // Sync offset when value changes externally
@@ -115,7 +115,7 @@ fun NumberPicker(
 
     // Haptic feedback when crossing item boundaries during scroll
     val effectiveIndex by remember(currentIndex, itemCount, wrapAround) {
-        derivedStateOf {
+        computedStateOf {
             val rawIndex = currentIndex + totalOffset.fastRoundToInt()
             if (wrapAround) {
                 ((rawIndex % itemCount) + itemCount) % itemCount

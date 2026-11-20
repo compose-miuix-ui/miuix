@@ -19,8 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -172,7 +173,7 @@ fun GlassPage(padding: PaddingValues) {
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
     val contentUnderTopBar by remember {
-        derivedStateOf { listState.canScrollBackward }
+        computedStateOf { listState.canScrollBackward }
     }
     val tabSurfaceAlpha = if (contentUnderTopBar) 1f else 0f
 
@@ -415,10 +416,9 @@ fun GlassPage(padding: PaddingValues) {
                 material = material ?: GlassDialogDefaults.material(),
                 stroke = stroke,
             ) {
-                var dialogText by remember { mutableStateOf("") }
+                val dialogTextState = rememberTextFieldState()
                 GlassTextField(
-                    value = dialogText,
-                    onValueChange = { dialogText = it },
+                    state = dialogTextState,
                     label = "Input something...",
                     useLabelAsPlaceholder = true,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),

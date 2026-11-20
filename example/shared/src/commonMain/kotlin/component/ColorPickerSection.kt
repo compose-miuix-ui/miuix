@@ -8,11 +8,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.maxLengthReject
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,11 +49,6 @@ fun LazyListScope.colorPaletteSection() {
         SmallTitle(text = "ColorPalette")
         val miuixColor = MiuixTheme.colorScheme.primary
         var selectedColor by remember { mutableStateOf(miuixColor) }
-        var colorHex by remember(selectedColor) {
-            mutableStateOf(
-                selectedColor.toArgb().toHexString(HexFormat.UpperCase),
-            )
-        }
 
         Card(
             modifier = Modifier
@@ -71,9 +74,8 @@ fun LazyListScope.colorPaletteSection() {
                 onColorChanged = { selectedColor = it },
                 showPreview = false,
             )
-            ColorHexTextField(colorHex) { newHex, newColor ->
-                colorHex = newHex
-                if (newColor != null) selectedColor = newColor
+            ColorHexTextField(selectedColor) { newColor ->
+                selectedColor = newColor
             }
         }
     }
@@ -83,11 +85,6 @@ fun LazyListScope.colorPaletteSection() {
 private fun ColorPickerCard(colorSpace: ColorSpace) {
     val miuixColor = MiuixTheme.colorScheme.primary
     var selectedColor by remember { mutableStateOf(miuixColor) }
-    var colorHex by remember(selectedColor) {
-        mutableStateOf(
-            selectedColor.toArgb().toHexString(HexFormat.UpperCase),
-        )
-    }
 
     Card(
         modifier = Modifier
@@ -114,31 +111,47 @@ private fun ColorPickerCard(colorSpace: ColorSpace) {
             colorSpace = colorSpace,
             showPreview = false,
         )
-        ColorHexTextField(colorHex) { newHex, newColor ->
-            colorHex = newHex
-            if (newColor != null) selectedColor = newColor
+        ColorHexTextField(selectedColor) { newColor ->
+            selectedColor = newColor
         }
     }
 }
 
 @Composable
 private fun ColorHexTextField(
-    colorHex: String,
-    onUpdate: (String, Color?) -> Unit,
+    selectedColor: Color,
+    onColorSelected: (Color) -> Unit,
 ) {
-    TextField(
-        value = colorHex,
-        onValueChange = { newHex ->
-            if (newHex.length <= 8 && newHex.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
-                val upperHex = newHex.uppercase()
-                val newColor = if (newHex.length == 8) {
-                    Color(upperHex.toUInt(16).toInt())
-                } else {
-                    null
-                }
-                onUpdate(upperHex, newColor)
+    val currentOnColorSelected by rememberUpdatedState(onColorSelected)
+    val expectedHex = selectedColor.toArgb().toHexString(HexFormat.UpperCase)
+    val currentExpectedHex by rememberUpdatedState(expectedHex)
+    val hexState = rememberTextFieldState(initialText = expectedHex)
+    LaunchedEffect(expectedHex) {
+        if (hexState.text.toString() != expectedHex) {
+            hexState.setTextAndPlaceCursorAtEnd(expectedHex)
+        }
+    }
+    LaunchedEffect(hexState) {
+        snapshotFlow { hexState.text.toString() }.collect { currentHex ->
+            if (currentHex.length == 8 && currentHex != currentExpectedHex) {
+                runCatching { Color(currentHex.toUInt(16).toInt()) }
+                    .getOrNull()
+                    ?.let(currentOnColorSelected)
             }
-        },
+        }
+    }
+    TextField(
+        state = hexState,
+        lineLimits = TextFieldLineLimits.SingleLine,
+        inputTransformation = InputTransformation {
+            val filtered = asCharSequence()
+                .filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+                .toString()
+                .uppercase()
+            if (asCharSequence().toString() != filtered) {
+                replace(0, length, filtered)
+            }
+        }.maxLengthReject(8),
         leadingIcon = {
             Text(
                 "HEX: #",

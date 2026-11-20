@@ -30,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -136,7 +136,7 @@ fun TabRow(
         }
 
         val scrollOffset by remember {
-            derivedStateOf {
+            computedStateOf {
                 val state = config.listState
                 val firstIndex = state.firstVisibleItemIndex
                 val firstOffset = state.firstVisibleItemScrollOffset
@@ -145,10 +145,10 @@ fun TabRow(
         }
 
         val hasScrollRange by remember(config.listState) {
-            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+            computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
         }
         val reverseScrolling by remember(config.listState) {
-            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+            computedStateOf { config.listState.layoutInfo.reverseLayout }
         }
         val reverseDirection = ScrollableDefaults.reverseDirection(
             layoutDirection = LocalLayoutDirection.current,
@@ -288,7 +288,7 @@ fun TabRowWithContour(
         }
 
         val scrollOffset by remember {
-            derivedStateOf {
+            computedStateOf {
                 val state = config.listState
                 val firstIndex = state.firstVisibleItemIndex
                 val firstOffset = state.firstVisibleItemScrollOffset
@@ -297,10 +297,10 @@ fun TabRowWithContour(
         }
 
         val hasScrollRange by remember(config.listState) {
-            derivedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
+            computedStateOf { config.listState.canScrollBackward || config.listState.canScrollForward }
         }
         val reverseScrolling by remember(config.listState) {
-            derivedStateOf { config.listState.layoutInfo.reverseLayout }
+            computedStateOf { config.listState.layoutInfo.reverseLayout }
         }
         val reverseDirection = ScrollableDefaults.reverseDirection(
             layoutDirection = LocalLayoutDirection.current,
