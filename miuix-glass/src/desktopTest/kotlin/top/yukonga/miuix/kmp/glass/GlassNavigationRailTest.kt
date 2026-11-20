@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -22,6 +24,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -89,6 +92,42 @@ class GlassNavigationRailTest {
         // The row is centred on the container, allowing for the toggle block at its leading edge.
         val rowCentre = (labels[0].left + labels[2].right) / 2
         assertTrue(rowCentre > 380.dp && rowCentre < 440.dp, "row centre was $rowCentre")
+    }
+
+    @Test
+    fun collapsedCapsuleStaysCentredWhenTheDensityChanges() = runComposeUiTest {
+        var scale by mutableFloatStateOf(1f)
+        setContent {
+            DialogTestHost {
+                val outer = LocalDensity.current
+                // The container keeps its pixel size while the density changes, as with an app-wide UI scale.
+                Box(Modifier.size(800.dp, 600.dp).testTag("container")) {
+                    CompositionLocalProvider(LocalDensity provides Density(outer.density * scale, outer.fontScale)) {
+                        GlassNavigationRail(
+                            items = items,
+                            selectedIndex = 0,
+                            onSelect = {},
+                            backdrop = null,
+                            state = remember { GlassNavigationRailState(initialExpanded = false) },
+                            defaultWindowInsetsPadding = false,
+                        )
+                    }
+                }
+            }
+        }
+        fun capsuleCentreOffset(): Float {
+            val container = onNodeWithTag("container").fetchSemanticsNode().boundsInRoot
+            val toggle = onNodeWithContentDescription(GlassNavigationRailDefaults.ExpandContentDescription)
+                .fetchSemanticsNode().boundsInRoot
+            val last = onNodeWithContentDescription("Settings").fetchSemanticsNode().boundsInRoot
+            return container.center.x - (toggle.left + last.right) / 2
+        }
+        waitForIdle()
+        val before = capsuleCentreOffset()
+        scale = 0.8f
+        waitForIdle()
+        // The capsule's chrome is asymmetric, but in its own dp the offset from the centre is constant.
+        assertEquals(before, capsuleCentreOffset() / 0.8f, 1.5f)
     }
 
     @Test
