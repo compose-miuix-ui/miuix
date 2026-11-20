@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -222,6 +223,14 @@ fun GlassPage(padding: PaddingValues) {
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
     val tabsInTopBar = tabRowPlacement == TABS_IN_TOP_BAR
+    var previousTabsInTopBar by remember { mutableStateOf(tabsInTopBar) }
+    LaunchedEffect(tabsInTopBar) {
+        if (previousTabsInTopBar == tabsInTopBar) return@LaunchedEffect
+        previousTabsInTopBar = tabsInTopBar
+        listState.scrollToItem(0)
+        scrollBehavior.state.heightOffset = 0f
+        scrollBehavior.state.contentOffset = 0f
+    }
     // List tabs sample the wallpaper to avoid sampling their own recording layer.
     val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
     val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
