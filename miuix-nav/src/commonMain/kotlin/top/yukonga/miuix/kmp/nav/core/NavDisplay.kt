@@ -611,7 +611,9 @@ private fun NavDisplayLayout(
         topEntry.swipeDismissOrNull() ?: (topEntry.transitionOrNull() ?: transition).dismissDirection
     }
 
+    // Read only inside the transitions' deferred blocks.
     var layoutSize by remember { mutableStateOf(IntSize.Zero) }
+    val layoutSizeProvider = remember { { layoutSize } }
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
@@ -732,7 +734,7 @@ private fun NavDisplayLayout(
                             entryIndex = entryIndex - 1,
                             isRemoving = belowEntry?.presentation?.isRemoving == true,
                             change = presentation.change,
-                            layoutSize = layoutSize,
+                            readLayoutSize = layoutSizeProvider,
                             layoutDirection = layoutDirection,
                             density = density,
                         )
@@ -756,7 +758,7 @@ private fun NavDisplayLayout(
                         upperTransition = upperTransition,
                         change = presentation.change,
                         effects = effects,
-                        layoutSize = layoutSize,
+                        layoutSize = layoutSizeProvider,
                         layoutDirection = layoutDirection,
                         density = density,
                     )
@@ -817,7 +819,7 @@ private fun NavEntryHost(
     upperTransition: NavTransition,
     change: NavChange,
     effects: NavDisplayEffects,
-    layoutSize: IntSize,
+    layoutSize: () -> IntSize,
     layoutDirection: LayoutDirection,
     density: Density,
 ) {
@@ -883,7 +885,7 @@ private fun NavEntryHost(
             entryIndex = entryIndex,
             isRemoving = entry.presentation.isRemoving,
             change = change,
-            layoutSize = layoutSize,
+            readLayoutSize = layoutSize,
             layoutDirection = layoutDirection,
             density = density,
         )

@@ -25,6 +25,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavTransitionScope
  * @param presentation source of the single driving float.
  * @param entryIndex this entry's index in the back stack (for the depth subtraction).
  * @param isRemoving whether this entry is animating out (affects [role]).
+ * @param readLayoutSize reads the host's size; deferred like [relativeDepth].
  */
 @Stable
 internal class LiveNavTransitionScope(
@@ -32,10 +33,12 @@ internal class LiveNavTransitionScope(
     private val entryIndex: Int,
     private val isRemoving: Boolean,
     override val change: NavChange,
-    override val layoutSize: IntSize,
+    private val readLayoutSize: () -> IntSize,
     override val layoutDirection: LayoutDirection,
     override val density: Density,
 ) : NavTransitionScope {
+    override val layoutSize: IntSize get() = readLayoutSize()
+
     override val relativeDepth: Float
         get() = relativeDepth(presentation.animatedTop.value, entryIndex)
 
