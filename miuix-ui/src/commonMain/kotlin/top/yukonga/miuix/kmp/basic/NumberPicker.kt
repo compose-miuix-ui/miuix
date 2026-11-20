@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
@@ -229,51 +231,62 @@ fun NumberPicker(
         contentAlignment = Alignment.Center,
     ) {
         if (itemHeightPx > 0) {
-            val currentTotalOffset = totalOffset
-            val centerItemOffset = currentTotalOffset - currentTotalOffset.fastRoundToInt()
-            val roundedOffset = currentTotalOffset.fastRoundToInt()
+            val roundedOffsetState = remember {
+                computedStateOf { totalOffset.fastRoundToInt() }
+            }
+            val roundedOffset by roundedOffsetState
             val selectedColor = colors.selectedTextColor(enabled)
             val unselectedColor = colors.unselectedTextColor(enabled)
-            val resolvedTextStyle = if (textStyle.fontWeight == null) textStyle.copy(fontWeight = FontWeight.SemiBold) else textStyle
+            val resolvedTextStyle = remember(textStyle) {
+                if (textStyle.fontWeight == null) textStyle.copy(fontWeight = FontWeight.SemiBold) else textStyle
+            }
+            val halfSpan = halfVisibleCount + 0.5f
 
             for (i in -halfVisibleCount - 1..halfVisibleCount + 1) {
-                val rawItemIndex = currentIndex + i + roundedOffset
-                val itemIndex = if (wrapAround) {
-                    ((rawItemIndex % itemCount) + itemCount) % itemCount
-                } else {
-                    if (rawItemIndex !in 0..<itemCount) continue
-                    rawItemIndex
+                key(i) {
+                    val rawItemIndex = currentIndex + i + roundedOffset
+                    val itemIndex = if (wrapAround) {
+                        ((rawItemIndex % itemCount) + itemCount) % itemCount
+                    } else {
+                        rawItemIndex
+                    }
+                    if (wrapAround || itemIndex in 0..<itemCount) {
+                        val textColor = remember(i, halfSpan, selectedColor, unselectedColor) {
+                            ColorProducer {
+                                val distanceFromCenter = i.toFloat() - (totalOffset - roundedOffsetState.value)
+                                val normalizedDistance = (abs(distanceFromCenter) / halfSpan).coerceIn(0f, 1f)
+                                Color(
+                                    red = lerp(selectedColor.red, unselectedColor.red, normalizedDistance),
+                                    green = lerp(selectedColor.green, unselectedColor.green, normalizedDistance),
+                                    blue = lerp(selectedColor.blue, unselectedColor.blue, normalizedDistance),
+                                    alpha = lerp(selectedColor.alpha, unselectedColor.alpha, normalizedDistance),
+                                )
+                            }
+                        }
+
+                        val itemGraphicsModifier = remember(i, halfSpan) {
+                            Modifier.graphicsLayer {
+                                val distanceFromCenter = i.toFloat() - (totalOffset - roundedOffsetState.value)
+                                val normalizedDistance = (abs(distanceFromCenter) / halfSpan).coerceIn(0f, 1f)
+                                this.alpha = (1f - normalizedDistance) * (1f - normalizedDistance * 0.5f)
+                                val scale = 1f - 0.2f * normalizedDistance
+                                scaleX = scale
+                                scaleY = scale
+                                translationY = distanceFromCenter * itemHeightPx
+                            }
+                        }
+
+                        Text(
+                            text = label(range.first + itemIndex),
+                            color = textColor,
+                            modifier = itemGraphicsModifier,
+                            style = resolvedTextStyle,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-
-                val distanceFromCenter = i.toFloat() - centerItemOffset
-                val normalizedDistance = (abs(distanceFromCenter) / (halfVisibleCount + 0.5f)).coerceIn(0f, 1f)
-
-                val alpha = (1f - normalizedDistance) * (1f - normalizedDistance * 0.5f)
-                val scale = 1f - 0.2f * normalizedDistance
-                val yOffset = distanceFromCenter * itemHeightPx
-
-                val textColor = Color(
-                    red = lerp(selectedColor.red, unselectedColor.red, normalizedDistance),
-                    green = lerp(selectedColor.green, unselectedColor.green, normalizedDistance),
-                    blue = lerp(selectedColor.blue, unselectedColor.blue, normalizedDistance),
-                    alpha = lerp(selectedColor.alpha, unselectedColor.alpha, normalizedDistance),
-                )
-
-                Text(
-                    text = label(range.first + itemIndex),
-                    modifier = Modifier
-                        .graphicsLayer {
-                            this.alpha = alpha
-                            scaleX = scale
-                            scaleY = scale
-                            translationY = yOffset
-                        },
-                    style = resolvedTextStyle,
-                    color = textColor,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
         }
     }

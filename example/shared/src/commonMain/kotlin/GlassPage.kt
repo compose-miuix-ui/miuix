@@ -172,7 +172,6 @@ fun GlassPage(padding: PaddingValues) {
     }
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
-    val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
     val contentUnderTopBar by remember(listState, scrollBehavior) {
         computedStateOf { listState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
     }
@@ -209,6 +208,11 @@ fun GlassPage(padding: PaddingValues) {
     var submenu by remember { mutableStateOf(false) }
     var submenuPresent by remember { mutableStateOf(false) }
     var submenuAnchor by remember { mutableStateOf(Rect.Zero) }
+    val latestSubmenuAnchor = remember {
+        object {
+            var rect = Rect.Zero
+        }
+    }
     var menuWidth by remember { mutableStateOf(0.dp) }
     var sortOrder by remember { mutableIntStateOf(0) }
     val openSearch: () -> Unit = {
@@ -218,7 +222,7 @@ fun GlassPage(padding: PaddingValues) {
     }
     val density = LocalDensity.current
     val arrowTurn = CascadingPopupDefaults.arrowRotation(LocalLayoutDirection.current)
-    val submenuArrow by animateFloatAsState(
+    val submenuArrowState = animateFloatAsState(
         targetValue = if (submenu) arrowTurn else 0f,
         animationSpec = CascadingPopupDefaults.arrowSpring(submenu),
     )
@@ -621,7 +625,6 @@ fun GlassPage(padding: PaddingValues) {
                     },
                     stacked = submenu,
                     visuals = popupVisuals,
-                    anchorAlpha = collapseRamp,
                     gap = 0.dp,
                     onMeasured = { menuWidth = with(density) { it.width.toDp() } },
                 ) {
@@ -636,17 +639,18 @@ fun GlassPage(padding: PaddingValues) {
                         text = "Sort by",
                         onClick = {
                             if (overlayIndex == OVERLAY_POPUP) {
+                                submenuAnchor = latestSubmenuAnchor.rect
                                 submenuPresent = true
                                 submenu = true
                             }
                         },
                         modifier = Modifier.onGloballyPositioned {
-                            if (!submenuPresent) submenuAnchor = it.boundsInWindow()
+                            if (!submenuPresent) latestSubmenuAnchor.rect = it.boundsInWindow()
                         },
                         icon = MiuixIcons.Glass.Edit,
                         summary = SortOrders[sortOrder],
                         showArrow = true,
-                        arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },
+                        arrowRotation = { submenuArrowState.value * (1f - menuAnchor.secondaryBackProgress) },
                     )
                     GlassPopupItem(
                         text = "Settings",
@@ -672,7 +676,7 @@ fun GlassPage(padding: PaddingValues) {
                     icon = MiuixIcons.Glass.Edit,
                     summary = SortOrders[sortOrder],
                     showArrow = true,
-                    arrowRotation = { submenuArrow * (1f - menuAnchor.secondaryBackProgress) },
+                    arrowRotation = { submenuArrowState.value * (1f - menuAnchor.secondaryBackProgress) },
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(

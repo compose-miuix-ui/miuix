@@ -3,13 +3,11 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -35,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -148,7 +148,7 @@ fun HsvColorPicker(
     var lastAppliedExternalColorArgb by remember {
         mutableStateOf(color.toArgb())
     }
-    val selectedColor by remember {
+    val selectedColorState = remember {
         derivedStateOf {
             Hsv(
                 h = currentHue,
@@ -160,7 +160,7 @@ fun HsvColorPicker(
 
     SideEffect {
         val externalArgb = color.toArgb()
-        val internalArgb = selectedColor.toArgb()
+        val internalArgb = selectedColorState.value.toArgb()
 
         if (
             externalArgb != lastAppliedExternalColorArgb &&
@@ -176,7 +176,7 @@ fun HsvColorPicker(
     }
 
     fun notifyUserColorChanged() {
-        val newColor = selectedColor
+        val newColor = selectedColorState.value
         if (newColor.toArgb() != color.toArgb()) {
             currentOnColorChanged(newColor)
         }
@@ -193,7 +193,7 @@ fun HsvColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(capsuleShape)
-                    .background(selectedColor),
+                    .drawBehind { drawRect(selectedColorState.value) },
             )
         }
 
@@ -396,7 +396,7 @@ fun OkHsvColorPicker(
     var lastAppliedExternalColorArgb by remember {
         mutableStateOf(color.toArgb())
     }
-    val selectedColor by remember {
+    val selectedColorState = remember {
         derivedStateOf {
             OkHsv(
                 h = currentH,
@@ -408,7 +408,7 @@ fun OkHsvColorPicker(
 
     SideEffect {
         val externalArgb = color.toArgb()
-        val internalArgb = selectedColor.toArgb()
+        val internalArgb = selectedColorState.value.toArgb()
 
         if (
             externalArgb != lastAppliedExternalColorArgb &&
@@ -424,7 +424,7 @@ fun OkHsvColorPicker(
     }
 
     fun notifyUserColorChanged() {
-        val newColor = selectedColor
+        val newColor = selectedColorState.value
         if (newColor.toArgb() != color.toArgb()) {
             currentOnColorChanged(newColor)
         }
@@ -441,7 +441,7 @@ fun OkHsvColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(capsuleShape)
-                    .background(selectedColor),
+                    .drawBehind { drawRect(selectedColorState.value) },
             )
         }
 
@@ -648,7 +648,7 @@ fun OkLabColorPicker(
     var lastAppliedExternalColorArgb by remember {
         mutableStateOf(color.toArgb())
     }
-    val selectedColor by remember {
+    val selectedColorState = remember {
         derivedStateOf {
             OkLab(
                 l = currentL * 100f,
@@ -660,7 +660,7 @@ fun OkLabColorPicker(
 
     SideEffect {
         val externalArgb = color.toArgb()
-        val internalArgb = selectedColor.toArgb()
+        val internalArgb = selectedColorState.value.toArgb()
 
         if (
             externalArgb != lastAppliedExternalColorArgb &&
@@ -676,7 +676,7 @@ fun OkLabColorPicker(
     }
 
     fun notifyUserColorChanged() {
-        val newColor = selectedColor
+        val newColor = selectedColorState.value
         if (newColor.toArgb() != color.toArgb()) {
             currentOnColorChanged(newColor)
         }
@@ -693,7 +693,7 @@ fun OkLabColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(capsuleShape)
-                    .background(selectedColor),
+                    .drawBehind { drawRect(selectedColorState.value) },
             )
         }
 
@@ -778,7 +778,7 @@ fun OkLchColorPicker(
     var lastAppliedExternalColorArgb by remember {
         mutableStateOf(color.toArgb())
     }
-    val selectedColor by remember {
+    val selectedColorState = remember {
         derivedStateOf {
             OkLch(
                 l = currentL * 100f,
@@ -790,7 +790,7 @@ fun OkLchColorPicker(
 
     SideEffect {
         val externalArgb = color.toArgb()
-        val internalArgb = selectedColor.toArgb()
+        val internalArgb = selectedColorState.value.toArgb()
 
         if (
             externalArgb != lastAppliedExternalColorArgb &&
@@ -806,7 +806,7 @@ fun OkLchColorPicker(
     }
 
     fun notifyUserColorChanged() {
-        val newColor = selectedColor
+        val newColor = selectedColorState.value
         if (newColor.toArgb() != color.toArgb()) {
             currentOnColorChanged(newColor)
         }
@@ -823,7 +823,7 @@ fun OkLchColorPicker(
                     .fillMaxWidth()
                     .height(26.dp)
                     .clip(capsuleShape)
-                    .background(selectedColor),
+                    .drawBehind { drawRect(selectedColorState.value) },
             )
         }
 
@@ -1157,6 +1157,8 @@ private fun ColorSlider(
     hapticEffect: SliderDefaults.SliderHapticEffect = SliderDefaults.DefaultHapticEffect,
 ) {
     val onValueChangedState = rememberUpdatedState(onValueChanged)
+    val currentValue by rememberUpdatedState(value)
+    val valueProvider = remember { { currentValue } }
     val capsuleShape = CircleShape
     val density = LocalDensity.current
     val indicatorSizeDp = 20.dp
@@ -1166,10 +1168,11 @@ private fun ColorSlider(
     val hapticState = remember { SliderHapticState() }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var sliderWidthPxState by remember { mutableFloatStateOf(0f) }
+    val sliderWidthPxProvider = remember { { sliderWidthPxState } }
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .clip(capsuleShape)
             .then(modifier)
@@ -1219,8 +1222,8 @@ private fun ColorSlider(
     ) {
         SliderIndicator(
             modifier = Modifier.align(Alignment.CenterStart),
-            valueProvider = { value },
-            sliderWidth = maxWidth,
+            valueProvider = valueProvider,
+            sliderWidthPxProvider = sliderWidthPxProvider,
             sliderSizePx = sliderHeightPx,
             indicatorSize = indicatorSizeDp,
         )
@@ -1230,16 +1233,19 @@ private fun ColorSlider(
 @Composable
 private fun SliderIndicator(
     valueProvider: () -> Float,
-    sliderWidth: Dp,
+    sliderWidthPxProvider: () -> Float,
     sliderSizePx: Float,
     indicatorSize: Dp,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
+            .graphicsLayer {
+                alpha = if (sliderWidthPxProvider() > 0f) 1f else 0f
+            }
             .offset {
-                val sliderWidthPx = sliderWidth.toPx()
-                val effectiveWidthPx = sliderWidthPx - sliderSizePx
+                val sliderWidthPx = sliderWidthPxProvider()
+                val effectiveWidthPx = (sliderWidthPx - sliderSizePx).coerceAtLeast(0f)
                 val indicatorPositionPx = (valueProvider() * effectiveWidthPx) + (sliderSizePx / 2)
                 val indicatorOffsetXDp = indicatorPositionPx.toDp() - (indicatorSize / 2)
                 IntOffset(indicatorOffsetXDp.roundToPx(), 0)

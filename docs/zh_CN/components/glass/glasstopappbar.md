@@ -2,7 +2,7 @@
 
 `GlassTopAppBar` 是支持折叠标题和操作插槽的玻璃顶栏。使用 [GlassIconButton](./glassiconbutton) 为导航和操作按钮提供一致的样式。
 
-提供滚动行为或 `visualContentOffset` 时，颜色渐变背景带在绘制阶段直接跟随实际滚动距离，不再等待独立淡入动画。没有滚动来源时，显式内容重叠状态仍使用淡入淡出动画。两种模式均保留 `backgroundAlpha` 的透明度乘数。
+颜色渐变背景带透明度直接随滚动状态（`isContentScrolled` 或负向 `overscrollOffset`）切换，不使用独立淡入动画或滚动距离渐变。`backgroundAlpha` 仍作为透明度乘数生效。
 
 默认背景带跟随实测的标题、副标题与 `bottomContent` 高度。渐隐从底边内侧 12.dp 开始，平滑过渡到顶栏下方的 `bandOverhang` 处，保留副标题下方的遮挡，同时提供更长的渐隐尾部，不向外延伸实色段。半透明时完整渐变也位于背景层范围内，不会在滚动至完全不透明时突然多出一块。不增加前景布局高度；自定义画刷保留原有拉伸背景带行为。
 
@@ -67,10 +67,8 @@ Scaffold(
 
 ### 内容位于顶部或已滚动
 
-- `isContentScrolled` 控制按钮材质的悬浮过渡，建议传入 `listState.canScrollBackward`。省略时依次从滚动行为的 `contentOffset`、`visualContentOffset` 推导，两者均无则默认显示。
-- 背景带透明度与阴影进度优先跟随 `visualContentOffset`，其次为滚动行为的 `visualContentOffset`。两者均无时，背景带透明度跟随布尔状态。
-- 弹性越界也可提高按钮材质进度。在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。
-- 程序化滚动时，同时提供列表的布尔状态与有符号视觉位移；需要时叠加弹性位移。
+- `isContentScrolled` 控制按钮材质的悬浮过渡与背景带显示状态，建议传入 `listState.canScrollBackward`。省略时依次从滚动行为的 `contentOffset` 与 `overscrollOffset` 推导，无滚动行为时默认显示。
+- 弹性越界也可提高按钮材质进度并触发背景带。在 `.nestedScroll(...)` 前绑定 `overScrollVertical(onOffsetChanged = ...)`，见[越界回弹示例](/zh_CN/guide/utils#垂直越界回弹)。
 
 ## 属性
 
@@ -88,7 +86,6 @@ Scaffold(
 | largeTitle | String | 展开时的大标题 | title | 否 |
 | subtitle | String | 副标题 | "" | 否 |
 | scrollBehavior | ScrollBehavior? | 标题折叠与阴影行为 | null | 否 |
-| visualContentOffset | (() -> Float)? | 实时有符号内容位置（像素），覆盖滚动行为中用于视觉效果的位移 | null | 否 |
 | bandBrush | Brush | 背景带渐变 | GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) | 否 |
 | bandOverhang | Dp | 背景带向顶栏下方延伸的距离 | GlassTopAppBarDefaults.BandOverhang | 否 |
 | titleBlurRadius | Dp | 标题收起/展开过渡时的最大模糊半径 | GlassTopAppBarDefaults.TitleBlurRadius | 否 |
@@ -109,7 +106,7 @@ Scaffold(
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | 显式按钮材质悬浮状态；无位移来源时也控制背景带透明度 | - | 是 |
+| isContentScrolled | Boolean | 显式按钮材质悬浮状态与背景带显示状态 | - | 是 |
 
 ### GlassTopAppBarDefaults 对象 {#glasstopappbardefaults}
 

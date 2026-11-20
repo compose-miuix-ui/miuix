@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -67,6 +66,23 @@ fun RadioButtonPreference(
     val currentOnClick by rememberUpdatedState(onClick)
     val hapticFeedback = LocalHapticFeedback.current
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentSelected by rememberUpdatedState(selected)
+    val currentEnabled by rememberUpdatedState(enabled)
+    val onRowClick = remember(onClick != null) {
+        if (onClick != null) {
+            {
+                currentOnClick.takeIf { currentEnabled }?.let { click ->
+                    click()
+                    currentHapticFeedback.performHapticFeedback(
+                        if (currentSelected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
+                    )
+                }
+                Unit
+            }
+        } else {
+            null
+        }
+    }
 
     BasicComponent(
         modifier = modifier,
@@ -124,18 +140,7 @@ fun RadioButtonPreference(
             }
         },
         bottomAction = bottomAction,
-        onClick = if (onClick != null) {
-            {
-                currentOnClick.takeIf { enabled }?.let { onClick ->
-                    onClick()
-                    currentHapticFeedback.performHapticFeedback(
-                        if (selected) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
-                    )
-                }
-            }
-        } else {
-            null
-        },
+        onClick = onRowClick,
         role = Role.RadioButton,
         holdDownState = holdDownState,
         enabled = enabled,

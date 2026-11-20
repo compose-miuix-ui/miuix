@@ -247,7 +247,7 @@ fun OverlayDropdownPreference(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val hasEntries = nonEmptyEntries.isNotEmpty()
     val actualEnabled = enabled && hasEntries
 
@@ -268,6 +268,8 @@ fun OverlayDropdownPreference(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     BasicComponent(
         modifier = modifier,
@@ -279,14 +281,16 @@ fun OverlayDropdownPreference(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            val selectedValueText = nonEmptyEntries
-                .asSequence()
-                .flatMap { group -> group.items }
-                .filter { it.selected }
-                .map { it.text }
-                .filter { it.isNotBlank() }
-                .joinToString("\n")
-                .ifBlank { null }
+            val selectedValueText = remember(nonEmptyEntries) {
+                nonEmptyEntries
+                    .asSequence()
+                    .flatMap { group -> group.items }
+                    .filter { it.selected }
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .joinToString("\n")
+                    .ifBlank { null }
+            }
             if (showValue && hasEntries && !selectedValueText.isNullOrBlank()) {
                 Text(
                     text = selectedValueText,
@@ -303,8 +307,8 @@ fun OverlayDropdownPreference(
                 OverlayDropdownPopup(
                     entries = nonEmptyEntries,
                     show = isDropdownExpanded.value,
-                    onDismiss = { setExpanded(false) },
-                    onDismissFinished = { isHoldDown.value = false },
+                    onDismiss = onDismissPopup,
+                    onDismissFinished = onDismissFinishedPopup,
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     renderInRootScaffold = renderInRootScaffold,

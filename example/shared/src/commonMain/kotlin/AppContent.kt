@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -185,8 +186,9 @@ enum class FloatingNavigationBarAlignment(val value: Int) {
 }
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator found!") }
-val LocalIsWideScreen = staticCompositionLocalOf { false }
+val LocalIsWideScreen = compositionLocalOf { false }
 val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> { error("LocalMainPagerState not provided") }
+private val DefaultTopAppBarTitleAlpha: () -> Float = { 1f }
 
 @Composable
 fun AppContent(
@@ -266,7 +268,7 @@ fun AppContent(
         LocalNavigator provides navigator,
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
-        LocalTopAppBarTitleAlpha provides { 1f },
+        LocalTopAppBarTitleAlpha provides DefaultTopAppBarTitleAlpha,
         LocalTopAppBarCenterObstructionStart provides topAppBarCenterObstructionStart,
         LocalAppPageInsets provides pageInsets,
     ) {

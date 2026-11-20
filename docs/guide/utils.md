@@ -94,7 +94,7 @@ LazyColumn(
 }
 ```
 
-Keep the app bar connection after the overscroll modifier: `contentOffset` records actual list scrolling, while `overscrollOffset` tracks damped displacement through dragging and spring rebound. Glass app bars use `visualContentOffset` (their sum) for progressive blur, band progress, and shadow progress. Do not accumulate overscroll consumption into `contentOffset`: spring rebound does not generate inverse scroll events. When the list already owns the app bar connection, do not also pass the same behavior to an enclosing `PullToRefresh`.
+Keep the app bar connection after the overscroll modifier: `contentOffset` records actual list scrolling, while `overscrollOffset` tracks damped displacement through dragging and spring rebound. Glass app bars read `overscrollOffset` alongside `isContentScrolled` to activate progressive blur and button materials during elastic rebound. Do not accumulate overscroll consumption into `contentOffset`: spring rebound does not generate inverse scroll events. When the list already owns the app bar connection, do not also pass the same behavior to an enclosing `PullToRefresh`.
 
 ### Horizontal Overscroll
 

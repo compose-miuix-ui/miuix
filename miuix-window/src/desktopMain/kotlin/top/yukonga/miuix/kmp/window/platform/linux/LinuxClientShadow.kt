@@ -22,11 +22,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowDecoration
-import com.sun.jna.Library
 import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.NativeLong
-import com.sun.jna.Pointer
 import com.sun.jna.platform.unix.X11
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

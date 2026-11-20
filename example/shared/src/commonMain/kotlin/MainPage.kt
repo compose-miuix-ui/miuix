@@ -307,7 +307,7 @@ fun MainPage(
                                 breadcrumbBarSection()
                                 textFieldSection()
                                 progressIndicatorSection()
-                                cardSection()
+                                cardSection(backdrop = pageBackdrop)
                                 tooltipSection()
                                 badgeSection()
                                 numberPickerSection()

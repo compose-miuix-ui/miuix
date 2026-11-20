@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -34,7 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.squircle.squircleBackground
@@ -474,10 +479,10 @@ private fun TextFieldChrome(
             LabelAnimState.Hidden -> 0.dp
         },
     )
-    val labelFontSize by animateDpAsState(
+    val labelScale = animateFloatAsState(
         when (labelState) {
-            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating
-            else -> TextFieldDefaults.LabelFontSizeNormal
+            LabelAnimState.Floating -> TextFieldDefaults.LabelFontSizeFloating.value / TextFieldDefaults.LabelFontSizeNormal.value
+            else -> 1f
         },
     )
     val hasLeadingIcon = leadingIcon != null
@@ -493,7 +498,7 @@ private fun TextFieldChrome(
 
     TextFieldDecorationBox(
         label = label,
-        labelFontSize = labelFontSize,
+        labelScale = { labelScale.value },
         labelColor = colors.labelColor,
         labelState = labelState,
         backgroundColor = colors.backgroundColor,
@@ -512,7 +517,7 @@ private fun TextFieldChrome(
 @Composable
 private fun TextFieldDecorationBox(
     label: String,
-    labelFontSize: Dp,
+    labelScale: () -> Float,
     labelColor: Color,
     labelState: LabelAnimState,
     backgroundColor: Color,
@@ -546,12 +551,20 @@ private fun TextFieldDecorationBox(
                 contentAlignment = Alignment.TopStart,
             ) {
                 if (labelState != LabelAnimState.Hidden && labelState != LabelAnimState.Placeholder) {
+                    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
                     Text(
                         text = label,
-                        fontSize = labelFontSize.value.sp,
+                        fontSize = TextFieldDefaults.LabelFontSizeNormal.value.sp,
                         color = labelColor,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.offset { IntOffset(0, labelAnim().roundToPx()) },
+                        modifier = Modifier
+                            .offset { IntOffset(0, labelAnim().roundToPx()) }
+                            .graphicsLayer {
+                                val s = labelScale()
+                                scaleX = s
+                                scaleY = s
+                                transformOrigin = TransformOrigin(if (isLtr) 0f else 1f, 0f)
+                            },
                         textAlign = TextAlign.Start,
                     )
                 }

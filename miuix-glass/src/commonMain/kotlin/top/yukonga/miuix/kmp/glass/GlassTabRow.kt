@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -334,11 +335,12 @@ fun GlassTabRow(
                     animationSpec = GlassMotion.navContent(),
                     label = "glassTabContainer",
                 )
-                val content by animateColorAsState(
+                val contentColorState = animateColorAsState(
                     targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
                     animationSpec = GlassMotion.navContent(),
                     label = "glassTabContent",
                 )
+                val contentColorProducer = remember { ColorProducer { contentColorState.value } }
                 val overlay = animateColorAsState(
                     targetValue = if (pressed) colors.pressedOverlayColor else Color.Transparent,
                     animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
@@ -455,12 +457,12 @@ fun GlassTabRow(
                     ) {
                         Text(
                             text = label,
+                            color = contentColorProducer,
                             style = if (selected) {
                                 MiuixTheme.textStyles.subtitle
                             } else {
                                 MiuixTheme.textStyles.body2
                             },
-                            color = content,
                             textAlign = TextAlign.Center,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -820,11 +822,12 @@ fun GlassSegmentedTabRow(
                 tabs.forEachIndexed { position, label ->
                     key(label) {
                         val selected = position == index
-                        val content by animateColorAsState(
+                        val contentColorState = animateColorAsState(
                             targetValue = if (selected) selectedContentColor else contentColor,
                             animationSpec = GlassMotion.navContent(),
                             label = "glassSegmentedTabContent",
                         )
+                        val contentColorProducer = remember { ColorProducer { contentColorState.value } }
                         val pressAlpha = animateFloatAsState(
                             targetValue = if (position == pressedIndex) {
                                 GlassSegmentedTabRowDefaults.PRESSED_CONTENT_ALPHA
@@ -865,12 +868,12 @@ fun GlassSegmentedTabRow(
                         ) {
                             Text(
                                 text = label,
+                                color = contentColorProducer,
                                 style = if (selected) {
                                     MiuixTheme.textStyles.subtitle
                                 } else {
                                     MiuixTheme.textStyles.body2
                                 },
-                                color = content,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,

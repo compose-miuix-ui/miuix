@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,6 +62,15 @@ fun CheckboxPreference(
     enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentChecked by rememberUpdatedState(checked)
+    val currentEnabled by rememberUpdatedState(enabled)
+    val onRowClick = remember(onCheckedChange != null) {
+        if (onCheckedChange != null) {
+            { currentOnCheckedChange.takeIf { currentEnabled }?.invoke(!currentChecked) ?: Unit }
+        } else {
+            null
+        }
+    }
 
     BasicComponent(
         modifier = modifier,
@@ -119,11 +127,7 @@ fun CheckboxPreference(
             }
         },
         bottomAction = bottomAction,
-        onClick = if (onCheckedChange != null) {
-            { currentOnCheckedChange.takeIf { enabled }?.invoke(!checked) }
-        } else {
-            null
-        },
+        onClick = onRowClick,
         role = Role.Checkbox,
         holdDownState = holdDownState,
         enabled = enabled,

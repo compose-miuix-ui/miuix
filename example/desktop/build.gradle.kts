@@ -105,7 +105,10 @@ tasks.withType<AbstractProguardTask>().configureEach {
                             val name = entry.name
                             val isNative = nativeExts.any { name.endsWith(it) }
                             (name.startsWith("com/sun/jna/") && !name.contains(jnaTarget) && isNative) ||
-                                (name.startsWith("nucleus/native/") && nucleusTarget != null && !name.contains(nucleusTarget) && isNative)
+                                (
+                                    name.startsWith("nucleus/native/") && nucleusTarget != null && !name.contains(nucleusTarget) &&
+                                        isNative
+                                )
                         }
                     if (hasForeign) {
                         ZipOutputStream(tempFile.outputStream()).use { zipOut ->

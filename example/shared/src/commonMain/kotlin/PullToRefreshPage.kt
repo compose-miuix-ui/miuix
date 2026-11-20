@@ -183,11 +183,7 @@ fun PullToRefreshPage(
                                 showIndication = true,
                                 onClick = { showSettings = true },
                             ) {
-                                Text(
-                                    text = "Pull Progress: ${(currentPullProgress * 100).toInt()}%",
-                                    style = MiuixTheme.textStyles.body1,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                )
+                                PullProgressText(progressProvider = { currentPullProgress })
                                 Text(
                                     text = "Threshold: ${(thresholdValue * 100).toInt()}%",
                                     style = MiuixTheme.textStyles.body2,
@@ -283,4 +279,15 @@ fun PullToRefreshPage(
             )
         }
     }
+}
+
+@Composable
+private fun PullProgressText(
+    progressProvider: () -> Float,
+) {
+    Text(
+        text = "Pull Progress: ${(progressProvider() * 100).toInt()}%",
+        style = MiuixTheme.textStyles.body1,
+        color = MiuixTheme.colorScheme.onSurface,
+    )
 }

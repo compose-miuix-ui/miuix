@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlin.math.abs
 
 @Composable
 actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
@@ -38,6 +39,10 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
         var smoothRoll = 0f
         var smoothGravityX = 0f
         var smoothGravityY = 0f
+        var lastPublishedPitch = 0f
+        var lastPublishedRoll = 0f
+        var lastPublishedGravityX = 0f
+        var lastPublishedGravityY = 0f
         var initialized = false
         var registered = false
 
@@ -49,7 +54,8 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
                 // Gravity in device space = R^T * (0, 0, -1)_world = -(R[2][0], R[2][1], R[2][2])
                 val gravityX = -rotationMatrix[6]
                 val gravityY = -rotationMatrix[7]
-                if (!initialized) {
+                val firstSample = !initialized
+                if (firstSample) {
                     smoothPitch = orientation[1]
                     smoothRoll = orientation[2]
                     smoothGravityX = gravityX
@@ -61,12 +67,23 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
                     smoothGravityX += (gravityX - smoothGravityX) * smoothing
                     smoothGravityY += (gravityY - smoothGravityY) * smoothing
                 }
-                tilt.value = DeviceTilt(
-                    pitch = smoothPitch,
-                    roll = smoothRoll,
-                    gravityX = smoothGravityX,
-                    gravityY = smoothGravityY,
-                )
+                if (firstSample ||
+                    abs(smoothPitch - lastPublishedPitch) > TILT_EPSILON ||
+                    abs(smoothRoll - lastPublishedRoll) > TILT_EPSILON ||
+                    abs(smoothGravityX - lastPublishedGravityX) > TILT_EPSILON ||
+                    abs(smoothGravityY - lastPublishedGravityY) > TILT_EPSILON
+                ) {
+                    lastPublishedPitch = smoothPitch
+                    lastPublishedRoll = smoothRoll
+                    lastPublishedGravityX = smoothGravityX
+                    lastPublishedGravityY = smoothGravityY
+                    tilt.value = DeviceTilt(
+                        pitch = smoothPitch,
+                        roll = smoothRoll,
+                        gravityX = smoothGravityX,
+                        gravityY = smoothGravityY,
+                    )
+                }
             }
 
             override fun onAccuracyChanged(s: Sensor?, a: Int) = Unit
@@ -106,3 +123,5 @@ actual fun rememberDeviceTilt(smoothing: Float): State<DeviceTilt> {
 
     return tilt
 }
+
+private const val TILT_EPSILON = 5e-4f

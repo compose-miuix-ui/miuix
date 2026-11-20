@@ -21,7 +21,6 @@ import top.yukonga.miuix.kmp.material.internal.glassEdgeShader
 import top.yukonga.miuix.kmp.material.internal.setEdgeStrokeUniforms
 import top.yukonga.miuix.kmp.material.internal.sharedShaderCache
 import kotlin.math.PI
-import kotlin.math.floor
 import kotlin.math.min
 
 /**

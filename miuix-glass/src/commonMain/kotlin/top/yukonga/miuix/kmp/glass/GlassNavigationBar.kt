@@ -47,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -74,7 +76,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BadgedBox
@@ -305,25 +310,29 @@ fun GlassNavigationBar(
     val chipPressed = pressedIndex >= 0
 
     val onSelectState by rememberUpdatedState(onSelect)
-    val bottomPadding = if (defaultWindowInsetsPadding) {
+    val bottomPaddingProvider: (() -> Dp)? = if (defaultWindowInsetsPadding) {
         val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
             .asPaddingValues().calculateBottomPadding()
         val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
             .asPaddingValues().calculateBottomPadding()
-        val animatedCaptionBarHeight by animateDpAsState(
+        val animatedCaptionBarHeight = animateDpAsState(
             targetValue = captionBarBottom.coerceAtLeast(0.dp),
             animationSpec = tween(durationMillis = 300),
             label = "glassNavigationCaptionBarHeight",
         )
-        val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
-        when {
-            platform() == Platform.IOS -> 24.dp
-            systemBottom <= 16.dp -> 20.dp
-            systemBottom >= 28.dp -> systemBottom
-            else -> 12.dp + systemBottom
+        remember(navigationBarBottom, animatedCaptionBarHeight) {
+            {
+                val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight.value)
+                when {
+                    platform() == Platform.IOS -> 24.dp
+                    systemBottom <= 16.dp -> 20.dp
+                    systemBottom >= 28.dp -> systemBottom
+                    else -> 12.dp + systemBottom
+                }
+            }
         }
     } else {
-        0.dp
+        null
     }
     GlassNavigationBarLayout(
         modifier = Modifier
@@ -339,7 +348,22 @@ fun GlassNavigationBar(
             )
             .then(modifier)
             .fillMaxWidth()
-            .padding(bottom = bottomPadding)
+            .then(
+                if (bottomPaddingProvider != null) {
+                    Modifier.layout { measurable, constraints ->
+                        val bottomPx = bottomPaddingProvider().roundToPx().coerceAtLeast(0)
+                        val placeable = measurable.measure(constraints.offset(vertical = -bottomPx))
+                        layout(
+                            constraints.constrainWidth(placeable.width),
+                            constraints.constrainHeight(placeable.height + bottomPx),
+                        ) {
+                            placeable.placeRelative(0, 0)
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+            )
             .graphicsLayer {
                 val show = showScale.value
                 val visibility = ((show - GlassMotion.NAV_HIDE_SCALE) / (1f - GlassMotion.NAV_HIDE_SCALE))
@@ -507,11 +531,12 @@ fun GlassNavigationBar(
                 items.forEachIndexed { position, item ->
                     key(item) {
                         val selected = position == index
-                        val tint by animateColorAsState(
+                        val tintState = animateColorAsState(
                             targetValue = if (selected) selectedColor else unselectedColor,
                             animationSpec = GlassMotion.navContent(),
                             label = "glassNavigationTint",
                         )
+                        val tintProducer = remember { ColorProducer { tintState.value } }
                         val pressAlpha = animateFloatAsState(
                             targetValue = if (position == pressedIndex) {
                                 GlassNavigationBarDefaults.PressedAlpha
@@ -568,17 +593,17 @@ fun GlassNavigationBar(
                             ) {
                                 BadgedBox(badge = { item.badge?.invoke() }) {
                                     Icon(
-                                        imageVector = item.icon,
+                                        painter = rememberVectorPainter(item.icon),
+                                        tint = tintProducer,
                                         contentDescription = null,
                                         modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
-                                        tint = tint,
                                     )
                                 }
                                 if (item.label != null) {
                                     Text(
                                         text = item.label,
+                                        color = tintProducer,
                                         style = MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
-                                        color = tint,
                                         textAlign = TextAlign.Center,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,

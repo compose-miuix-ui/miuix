@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -23,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -210,6 +210,7 @@ private data class TopAppBarFadeBrush(
     }
 }
 
+@Stable
 internal data class GlassTopAppBarContext(
     val backdrop: Backdrop?,
     val buttonBackdrop: Backdrop?,
@@ -218,7 +219,6 @@ internal data class GlassTopAppBarContext(
     val buttonUnderlayMaterial: GlassMaterial?,
     val floating: Boolean,
     val alpha: Float,
-    val ramp: State<Float>,
     val materialProgress: State<Float>,
     val keepMaterial: Boolean,
     val style: GlassStyle,
@@ -230,7 +230,7 @@ internal data class GlassTopAppBarContext(
     val onButtonBackdropConsumerChange: ((Int) -> Unit)? = null,
 )
 
-internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBarContext?> { null }
+internal val LocalGlassTopAppBarContext = compositionLocalOf<GlassTopAppBarContext?> { null }
 
 /**
  * Top app bar whose material visibility follows actual content scrolling in [ScrollBehavior].
@@ -244,8 +244,6 @@ internal val LocalGlassTopAppBarContext = staticCompositionLocalOf<GlassTopAppBa
  * @param subtitle Optional subtitle below the title.
  * @param titleBlurRadius Maximum blur radius applied to titles during collapse/expand transitions.
  * @param scrollBehavior Behavior driving collapse and material visibility from actual content scroll.
- * @param visualContentOffset Content position in pixels, negative upward, including elastic displacement.
- *   Overrides band/shadow progress; pair with [isContentScrolled] for programmatic scrolling.
  * @param style Glass style forwarded to the renderer.
  * @param alpha Opacity multiplier for button colour layers and stroke.
  * @param buttonShape Button-pill silhouette.
@@ -275,7 +273,6 @@ fun GlassTopAppBar(
     largeTitle: String = title,
     subtitle: String = "",
     scrollBehavior: ScrollBehavior? = null,
-    visualContentOffset: (() -> Float)? = null,
     bandBrush: Brush = GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface),
     bandOverhang: Dp = GlassTopAppBarDefaults.BandOverhang,
     titleBlurRadius: Dp = GlassTopAppBarDefaults.TitleBlurRadius,
@@ -295,12 +292,9 @@ fun GlassTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val currentOffset by rememberUpdatedState(visualContentOffset)
     val isContentScrolled by remember(scrollBehavior) {
         computedStateOf {
-            scrollBehavior?.state?.let { it.contentOffset < -1f || it.overscrollOffset < -1f }
-                ?: currentOffset?.invoke()?.let { it < -1f }
-                ?: true
+            scrollBehavior?.state?.let { it.contentOffset < -1f || it.overscrollOffset < -1f } ?: true
         }
     }
     GlassTopAppBar(
@@ -313,7 +307,6 @@ fun GlassTopAppBar(
         largeTitle = largeTitle,
         subtitle = subtitle,
         scrollBehavior = scrollBehavior,
-        visualContentOffset = visualContentOffset,
         bandBrush = bandBrush,
         bandOverhang = bandOverhang,
         titleBlurRadius = titleBlurRadius,
@@ -342,8 +335,6 @@ fun GlassTopAppBar(
  * @param title Compact title.
  * @param isContentScrolled Button floating state; use `listState.canScrollBackward`.
  *   Elastic overscroll can also raise material progress.
- * @param visualContentOffset Overrides the behavior's visual offset for band opacity and shadows.
- *   With neither offset source, band opacity follows [isContentScrolled].
  */
 @Composable
 fun GlassTopAppBar(
@@ -357,7 +348,6 @@ fun GlassTopAppBar(
     largeTitle: String = title,
     subtitle: String = "",
     scrollBehavior: ScrollBehavior? = null,
-    visualContentOffset: (() -> Float)? = null,
     bandBrush: Brush = GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface),
     bandOverhang: Dp = GlassTopAppBarDefaults.BandOverhang,
     titleBlurRadius: Dp = GlassTopAppBarDefaults.TitleBlurRadius,
@@ -377,17 +367,12 @@ fun GlassTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val ramp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior, visualContentOffset)
     val contentScrolled by remember(isContentScrolled, scrollBehavior) {
         computedStateOf {
             isContentScrolled || (scrollBehavior?.state?.overscrollOffset ?: 0f) < -1f
         }
     }
     val transition = updateTransition(contentScrolled, label = "glassTopBarFloat")
-    val maskProgress = transition.animateFloat(
-        transitionSpec = { GlassMotion.topBarMask() },
-        label = "glassTopBarMask",
-    ) { if (it) 1f else 0f }
     val materialProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
@@ -429,9 +414,9 @@ fun GlassTopAppBar(
             }
             val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
             val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
-            val bandActive by remember(maskProgress) {
+            val bandActive by remember(contentScrolled) {
                 computedStateOf {
-                    maskProgress.value * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
+                    contentScrolled && currentBgAlpha().coerceIn(0f, 1f) > 0.001f
                 }
             }
             val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
@@ -444,7 +429,7 @@ fun GlassTopAppBar(
             Box(
                 modifier = backdropCaptureModifier
                     .graphicsLayer {
-                        this.alpha = maskProgress.value * backgroundAlpha().coerceIn(0f, 1f)
+                        this.alpha = if (contentScrolled) backgroundAlpha().coerceIn(0f, 1f) else 0f
                     }
                     .progressiveTextureBlur(
                         backdrop = rawBackdrop,
@@ -464,8 +449,7 @@ fun GlassTopAppBar(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        val progress = if (visualContentOffset != null || scrollBehavior != null) ramp.value else maskProgress.value
-                        this.alpha = progress * backgroundAlpha().coerceIn(0f, 1f)
+                        this.alpha = if (contentScrolled) backgroundAlpha().coerceIn(0f, 1f) else 0f
                         transformOrigin = TransformOrigin(0.5f, 0f)
                         scaleY = if (bandBrush !is TopAppBarBandBrush && size.height > 0f) (size.height + overhangPx) / size.height else 1f
                     }
@@ -480,8 +464,26 @@ fun GlassTopAppBar(
                     ),
             )
         }
-        CompositionLocalProvider(
-            LocalGlassTopAppBarContext provides GlassTopAppBarContext(
+        val consumerChangeCallback = if (progressiveBackdrop != null) onButtonBackdropConsumerChange else null
+        val topBarContext = remember(
+            rawBackdrop,
+            progressiveBackdrop,
+            resolvedMaterial,
+            underlayMaterial,
+            buttonUnderlay,
+            contentScrolled,
+            alpha,
+            materialProgress,
+            keepMaterial,
+            style,
+            buttonSize,
+            buttonShape,
+            fill,
+            stroke,
+            buttonShadow,
+            consumerChangeCallback,
+        ) {
+            GlassTopAppBarContext(
                 backdrop = rawBackdrop,
                 buttonBackdrop = progressiveBackdrop ?: rawBackdrop,
                 material = resolvedMaterial,
@@ -489,7 +491,6 @@ fun GlassTopAppBar(
                 buttonUnderlayMaterial = buttonUnderlay,
                 floating = contentScrolled,
                 alpha = alpha,
-                ramp = ramp,
                 materialProgress = materialProgress,
                 keepMaterial = keepMaterial,
                 style = style,
@@ -498,8 +499,11 @@ fun GlassTopAppBar(
                 fill = fill,
                 stroke = stroke,
                 shadow = buttonShadow,
-                onButtonBackdropConsumerChange = if (progressiveBackdrop != null) onButtonBackdropConsumerChange else null,
-            ),
+                onButtonBackdropConsumerChange = consumerChangeCallback,
+            )
+        }
+        CompositionLocalProvider(
+            LocalGlassTopAppBarContext provides topBarContext,
         ) {
             BlurTopAppBar(
                 title = title,

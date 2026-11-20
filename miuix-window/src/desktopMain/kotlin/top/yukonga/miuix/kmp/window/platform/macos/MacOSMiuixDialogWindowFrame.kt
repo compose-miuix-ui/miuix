@@ -9,7 +9,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.window.DialogWindowScope
 import top.yukonga.miuix.kmp.window.LocalIsHitTestInCaptionBarState
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo

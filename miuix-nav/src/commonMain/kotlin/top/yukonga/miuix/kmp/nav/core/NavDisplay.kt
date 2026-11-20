@@ -617,6 +617,11 @@ private fun NavDisplayLayout(
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
+    val externalGestureOwnershipProvider = remember(predictiveBackOwnership) { { predictiveBackOwnership.generation } }
+    val onCommitBack = remember { { currentOnBack.value() } }
+    val onCancelSwipe = remember { {} }
+    val onSwipeGesture = remember(presentation) { { g: NavGesture? -> presentation.gesture = g } }
+
     Box(
         // The unified swipe recognizer lives on the DISPLAY CONTAINER, not on the top entry's host:
         // the host's hit-rect follows its graphicsLayer translation, so early in a push most of the
@@ -636,10 +641,10 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 motion = topMotion,
                 settleSink = presentation,
-                externalGestureOwnership = { predictiveBackOwnership.generation },
-                onCommit = currentOnBack.value,
-                onCancel = {},
-                onGesture = { presentation.gesture = it },
+                externalGestureOwnership = externalGestureOwnershipProvider,
+                onCommit = onCommitBack,
+                onCancel = onCancelSwipe,
+                onGesture = onSwipeGesture,
             ),
     ) {
         // Backdrop behind every entry (reference shell behavior): a solid layer in the page
@@ -729,15 +734,27 @@ private fun NavDisplayLayout(
                         // fraction is read inside the deferred graphicsLayer, so the per-frame float
                         // never recomposes this layout.
                         val belowEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex - 1 }
-                        val scrimScope = LiveNavTransitionScope(
-                            presentation = presentation,
-                            entryIndex = entryIndex - 1,
-                            isRemoving = belowEntry?.presentation?.isRemoving == true,
-                            change = presentation.change,
-                            readLayoutSize = layoutSizeProvider,
-                            layoutDirection = layoutDirection,
-                            density = density,
-                        )
+                        val isBelowRemoving = belowEntry?.presentation?.isRemoving == true
+                        val scrimChange = presentation.change
+                        val scrimScope = remember(
+                            presentation,
+                            entryIndex,
+                            isBelowRemoving,
+                            scrimChange,
+                            layoutSizeProvider,
+                            layoutDirection,
+                            density,
+                        ) {
+                            LiveNavTransitionScope(
+                                presentation = presentation,
+                                entryIndex = entryIndex - 1,
+                                isRemoving = isBelowRemoving,
+                                change = scrimChange,
+                                readLayoutSize = layoutSizeProvider,
+                                layoutDirection = layoutDirection,
+                                density = density,
+                            )
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()

@@ -71,6 +71,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -78,6 +79,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -916,11 +918,12 @@ private fun NavigationRailRow(
     labelStyle: TextStyle,
     onClick: () -> Unit,
 ) {
-    val tint by animateColorAsState(
+    val tintState = animateColorAsState(
         targetValue = if (selected) selectedColor else unselectedColor,
         animationSpec = GlassMotion.navContent(),
         label = "glassNavigationRailTint",
     )
+    val tintProducer = remember { ColorProducer { tintState.value } }
     val badgeVisibility = animateFloatAsState(
         targetValue = if (item.badge != null) 1f else 0f,
         animationSpec = RailMorphMotion,
@@ -1016,10 +1019,10 @@ private fun NavigationRailRow(
                         .graphicsLayer { this.alpha = iconAlpha() },
                 ) {
                     Icon(
-                        imageVector = item.icon,
+                        painter = rememberVectorPainter(item.icon),
+                        tint = tintProducer,
                         contentDescription = null,
                         modifier = Modifier.size(RailSideIconSize),
-                        tint = tint,
                     )
                 }
                 if (item.label != null) {
@@ -1034,7 +1037,7 @@ private fun NavigationRailRow(
                                 placeable.placeRelative(0, 0)
                             }
                         },
-                        color = tint,
+                        color = tintProducer,
                         style = labelStyle,
                         maxLines = 1,
                         softWrap = false,
@@ -1115,11 +1118,12 @@ private fun SecondaryNavigationRailRow(
     labelStyle: TextStyle,
     onClick: () -> Unit,
 ) {
-    val tint by animateColorAsState(
+    val tintState = animateColorAsState(
         targetValue = if (selected) selectedColor else unselectedColor,
         animationSpec = GlassMotion.navContent(),
         label = "glassNavigationRailSecondaryTint",
     )
+    val tintProducer = remember { ColorProducer { tintState.value } }
     Box(
         modifier = Modifier
             .layout { measurable, constraints ->
@@ -1179,16 +1183,16 @@ private fun SecondaryNavigationRailRow(
             horizontalArrangement = Arrangement.spacedBy(RailIconColumnWidth - RailSideIconSize),
         ) {
             Icon(
-                imageVector = item.icon,
+                painter = rememberVectorPainter(item.icon),
+                tint = tintProducer,
                 contentDescription = null,
                 modifier = Modifier.size(RailSideIconSize),
-                tint = tint,
             )
             item.label?.let { label ->
                 Text(
                     text = label,
+                    color = tintProducer,
                     style = labelStyle,
-                    color = tint,
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Ellipsis,

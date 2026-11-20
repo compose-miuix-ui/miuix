@@ -50,7 +50,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
@@ -78,7 +77,6 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlayDefaults
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
-import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
 import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -179,37 +177,9 @@ fun IconsPage(
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 
     val listStates = remember { List(2) { LazyListState() } }
-    val headerHeights = remember { List(2) { mutableIntStateOf(0) } }
     val activeListState = listStates[currentPage]
     val contentUnderTopBar by remember(activeListState, topAppBarScrollBehavior) {
         computedStateOf { activeListState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
-    }
-    val activeHeaderHeight = headerHeights[currentPage]
-    val saturatedScrollDistance = with(density) {
-        maxOf(
-            GlassTopAppBarDefaults.RampStart + GlassTopAppBarDefaults.RampDistance,
-            GlassTopAppBarDefaults.ProgressiveBlurRampDistance,
-        ).toPx()
-    }
-    val visualContentOffset: () -> Float = remember(activeListState, activeHeaderHeight, topAppBarScrollBehavior, saturatedScrollDistance) {
-        {
-            // Keep progress continuous through the first icon row, then saturate.
-            when (activeListState.firstVisibleItemIndex) {
-                0 -> -activeListState.firstVisibleItemScrollOffset.toFloat() + topAppBarScrollBehavior.state.overscrollOffset
-
-                1 -> {
-                    val measuredHeaderHeight = activeHeaderHeight.intValue
-                    if (measuredHeaderHeight > 0) {
-                        -(measuredHeaderHeight + activeListState.firstVisibleItemScrollOffset.toFloat()) + topAppBarScrollBehavior.state.overscrollOffset
-                    } else {
-                        // Restored lists may skip measuring the header.
-                        -saturatedScrollDistance
-                    }
-                }
-
-                else -> -saturatedScrollDistance
-            }
-        }
     }
     val coroutineScope = rememberCoroutineScope()
 
@@ -257,8 +227,14 @@ fun IconsPage(
                         isWideScreen = isWideScreen,
                         scrollBehavior = topAppBarScrollBehavior,
                         isContentScrolled = contentUnderTopBar,
-                        visualContentOffset = visualContentOffset,
-                        contentModifier = if (glassTopBar) Modifier.glassSearchBarTransition(searchExpanded, blurEnabled = appState.enableBlur) { 1f } else Modifier,
+                        contentModifier = if (glassTopBar) {
+                            Modifier.glassSearchBarTransition(
+                                searchExpanded,
+                                blurEnabled = appState.enableBlur,
+                            ) { 1f }
+                        } else {
+                            Modifier
+                        },
                         color = barColor,
                         actions = {
                             if (glassTopBar) {
@@ -335,7 +311,6 @@ fun IconsPage(
                 ) { page ->
                     val isPageGlass = page == 0
                     val pageListState = listStates[page]
-                    val pageHeaderHeight = headerHeights[page]
                     val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
                     val catalog = iconCatalogs[page]
                     val regularIcons = catalog.regularIcons
@@ -368,11 +343,7 @@ fun IconsPage(
                                 item(key = "section_title_$title") {
                                     SmallTitle(
                                         text = title,
-                                        modifier = if (sectionIndex == 0) {
-                                            Modifier.onSizeChanged { pageHeaderHeight.intValue = it.height }
-                                        } else {
-                                            Modifier
-                                        },
+                                        modifier = Modifier,
                                     )
                                 }
                                 items(

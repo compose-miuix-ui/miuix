@@ -2,7 +2,7 @@
 
 `GlassTopAppBar` is a glass top bar with collapsing titles and action slots. Use [GlassIconButton](./glassiconbutton) for matching navigation and action buttons.
 
-With a scroll behavior or `visualContentOffset`, gradient-band opacity follows the live scroll distance during drawing, without a separate fade delay. Without either scroll source, the explicit overlap state retains its fade animation. `backgroundAlpha` still multiplies either mode.
+Gradient-band opacity follows the scrolled state (`isContentScrolled` or negative `overscrollOffset`) without a separate fade delay or scroll-distance ramp. `backgroundAlpha` still multiplies the band opacity.
 
 The default band follows the measured title, subtitle and `bottomContent` height. A smooth fade starts 12.dp inside the bottom edge and ends at `bandOverhang` below it. This keeps the lower subtitle area covered while providing a long fading tail without an opaque extension below the bar. The full fade fits inside the background layer even at partial opacity, so it does not suddenly appear when scrolling reaches full opacity. This does not increase foreground layout height. Custom brushes retain their existing stretched-band behavior.
 
@@ -67,10 +67,8 @@ Only the list is recorded into `backdrop`. The glass controls use the bar's back
 
 ### Content at the Top or Scrolled
 
-- `isContentScrolled` controls the button material's floating transition; use `listState.canScrollBackward`. Without it, state is inferred from the behavior's `contentOffset`, then `visualContentOffset`, or defaults to visible.
-- Band opacity and shadow progress follow `visualContentOffset`, then the behavior's `visualContentOffset`. With neither source, band opacity follows the boolean state.
-- Elastic overscroll can also raise button material progress. Bind `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)`; see [Overscroll](/guide/utils#vertical-overscroll).
-- For programmatic scrolling, provide both the list's boolean state and its signed visual offset, including elastic displacement when needed.
+- `isContentScrolled` controls the button material's floating transition and band opacity; use `listState.canScrollBackward`. Without it, state is inferred from the behavior's `contentOffset` and `overscrollOffset`, or defaults to visible.
+- Elastic overscroll can also raise button material progress and band visibility. Bind `overScrollVertical(onOffsetChanged = ...)` before `.nestedScroll(...)`; see [Overscroll](/guide/utils#vertical-overscroll).
 
 ## Properties
 
@@ -88,7 +86,6 @@ These parameters are shared by both overloads:
 | largeTitle | String | Expanded title | title | No |
 | subtitle | String | Subtitle | "" | No |
 | scrollBehavior | ScrollBehavior? | Title collapse and shadow behavior | null | No |
-| visualContentOffset | (() -> Float)? | Live signed content position in pixels, overriding the behavior's offset for visual effects | null | No |
 | bandBrush | Brush | Background band gradient | GlassTopAppBarDefaults.bandBrush(MiuixTheme.colorScheme.surface) | No |
 | bandOverhang | Dp | Band extension below the bar | GlassTopAppBarDefaults.BandOverhang | No |
 | titleBlurRadius | Dp | Maximum blur radius during title collapse/expand transitions | GlassTopAppBarDefaults.TitleBlurRadius | No |
@@ -109,7 +106,7 @@ The explicit-overlap overload adds one required parameter:
 
 | Property Name | Type | Description | Default Value | Required |
 | --- | --- | --- | --- | --- |
-| isContentScrolled | Boolean | Explicit button material floating state; also controls band opacity when no offset source is supplied | - | Yes |
+| isContentScrolled | Boolean | Explicit button material floating state and background band visibility | - | Yes |
 
 ### GlassTopAppBarDefaults Object {#glasstopappbardefaults}
 

@@ -199,7 +199,8 @@ private fun SettingsContent(
                                         selectedIndex = appState.paletteStyle,
                                         onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
                                     )
-                                    val currentStyle = ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
+                                    val currentStyle =
+                                        ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
                                     val isCmf = currentStyle == ThemePaletteStyle.Cmf
                                     val isSpec2025Supported = currentStyle in Spec2025SupportedPaletteStyles
                                     val (colorSpecItems, colorSpecIndex, colorSpecEnabled) = when {
@@ -383,7 +384,13 @@ private fun SettingsContent(
                                                         title = "FloatingNavigationBar Position",
                                                         items = FloatingNavigationBarPositionOptions,
                                                         selectedIndex = appState.floatingNavigationBarPosition,
-                                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarPosition = it) } },
+                                                        onSelectedIndexChange = {
+                                                            updateAppState { state ->
+                                                                state.copy(
+                                                                    floatingNavigationBarPosition = it,
+                                                                )
+                                                            }
+                                                        },
                                                     )
                                                 }
                                             }

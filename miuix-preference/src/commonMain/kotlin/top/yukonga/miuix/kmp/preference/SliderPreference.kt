@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -107,6 +106,7 @@ fun SliderPreference(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val stableOnValueChange = remember { { v: Float -> currentOnValueChange(v) } }
     val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
@@ -148,7 +148,7 @@ fun SliderPreference(
                 bottomAction?.invoke()
                 Slider(
                     value = value,
-                    onValueChange = { currentOnValueChange(it) },
+                    onValueChange = stableOnValueChange,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
                     valueRange = valueRange,
@@ -234,6 +234,7 @@ fun RangeSliderPreference(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val stableOnValueChange = remember { { r: ClosedFloatingPointRange<Float> -> currentOnValueChange(r) } }
     val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
@@ -275,7 +276,7 @@ fun RangeSliderPreference(
                 bottomAction?.invoke()
                 RangeSlider(
                     value = value,
-                    onValueChange = { currentOnValueChange(it) },
+                    onValueChange = stableOnValueChange,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
                     valueRange = valueRange,

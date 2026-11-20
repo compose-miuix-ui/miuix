@@ -3,7 +3,6 @@
 
 package top.yukonga.miuix.kmp.window
 
-import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.platform.linux.input.gesture.LinuxTouchTapRecognizer
 import top.yukonga.miuix.kmp.window.platform.linux.input.gesture.LinuxWindowGestureState
 import top.yukonga.miuix.kmp.window.platform.linux.input.gesture.LinuxWindowGestureState.CaptionHit

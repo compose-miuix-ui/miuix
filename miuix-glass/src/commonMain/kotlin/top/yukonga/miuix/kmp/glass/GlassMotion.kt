@@ -122,10 +122,6 @@ object GlassMotion {
         easing = LinearEasing,
     )
 
-    /** Linear transition for the action-bar overlay mask. */
-    @Stable
-    fun topBarMask(): FiniteAnimationSpec<Float> = tween(durationMillis = 100, easing = LinearEasing)
-
     /** Spring for popup entry. */
     @Stable
     fun <T> popupEnter(): SpringSpec<T> = springOf(0.8f, 0.28f)

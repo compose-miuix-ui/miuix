@@ -107,55 +107,6 @@ class GlassTopAppBarBackdropTest {
     }
 
     @Test
-    fun gradientFollowsFastScrollWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = false)
-
-    @Test
-    fun gradientFollowsProgrammaticVisualOffsetWithoutWaitingForFade() = assertImmediateGradient(useVisualOffset = true)
-
-    private fun assertImmediateGradient(useVisualOffset: Boolean) = runComposeUiTest {
-        val offset = mutableFloatStateOf(0f)
-        val opacity = mutableFloatStateOf(1f)
-        val state = TopAppBarState(-1000f, 0f, 0f)
-        setContent {
-            DialogTestHost {
-                Box(Modifier.size(400.dp, 200.dp).background(Color.Blue)) {
-                    GlassTopAppBar(
-                        title = "",
-                        // Deliberately disagree: band opacity belongs to the visual offset.
-                        isContentScrolled = offset.floatValue >= 0f,
-                        scrollBehavior = MiuixScrollBehavior(state),
-                        visualContentOffset = if (useVisualOffset) ({ offset.floatValue }) else null,
-                        bandBrush = GlassTopAppBarDefaults.bandBrush(Color.White),
-                        backgroundAlpha = { opacity.floatValue },
-                        defaultWindowInsetsPadding = false,
-                    )
-                }
-            }
-        }
-        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
-        mainClock.autoAdvance = false
-        runOnIdle {
-            offset.floatValue = -1000f
-            state.contentOffset = -1000f
-            state.heightOffset = state.heightOffsetLimit
-        }
-        mainClock.advanceTimeByFrame()
-        val fullRed = onRoot().captureToImage().toPixelMap()[5, 5].red
-        assertTrue(fullRed in 0.87f..0.93f, "Scrolled band should appear immediately ($fullRed)")
-        runOnIdle { opacity.floatValue = 0.5f }
-        mainClock.advanceTimeByFrame()
-        val halfRed = onRoot().captureToImage().toPixelMap()[5, 5].red
-        assertTrue(abs(halfRed - fullRed * 0.5f) < 0.02f, "Half opacity should halve the band contribution")
-        runOnIdle {
-            offset.floatValue = 0f
-            state.contentOffset = 0f
-            state.heightOffset = 0f
-        }
-        mainClock.advanceTimeByFrame()
-        assertColorNear(Color.Blue, onRoot().captureToImage().toPixelMap()[5, 5])
-    }
-
-    @Test
     fun explicitOverlapKeepsTheButtonMaterialOverAnUnscrolledHero() = runComposeUiTest {
         val overlapping = mutableStateOf(true)
         val scrollState = TopAppBarState(-1000f, 0f, 0f)
@@ -348,7 +299,6 @@ class GlassTopAppBarBackdropTest {
                             progressiveBlur = true,
                             backdrop = backdrop,
                             scrollBehavior = MiuixScrollBehavior(scrollState),
-                            visualContentOffset = { offset.floatValue },
                             defaultWindowInsetsPadding = false,
                         )
                     }

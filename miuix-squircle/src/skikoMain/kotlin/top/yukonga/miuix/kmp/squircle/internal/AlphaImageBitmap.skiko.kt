@@ -16,7 +16,6 @@ import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.SamplingMode
-import top.yukonga.miuix.kmp.material.asComposeShader
 
 internal actual fun makeAlphaImageBitmap(size: Int, alphaBytes: ByteArray): ImageBitmap {
     val info = ImageInfo(
