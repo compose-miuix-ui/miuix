@@ -32,10 +32,11 @@ internal fun buildBlurShader(tapCount: Int): String {
 /** Maximum number of tap pairs for the Blur shader. */
 internal const val MAX_BLUR_TAPS = 7
 
-/** Pre-built per-tap-count shader sources; index 0 is unused. */
-internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
-    if (i == 0) "" else buildBlurShader(i)
-}
+/** Lazy-built per-tap-count shader sources; index 0 is unused. */
+private val BLUR_SHADER_BY_TAP = arrayOfNulls<String>(MAX_BLUR_TAPS + 1)
+
+internal fun blurShaderForTap(tapCount: Int): String = BLUR_SHADER_BY_TAP[tapCount]
+    ?: buildBlurShader(tapCount).also { BLUR_SHADER_BY_TAP[tapCount] = it }
 
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
@@ -271,31 +272,17 @@ internal fun progressiveLoopTapBound(maxRadius: Float): Int {
     return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
 }
 
-private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<Array<Array<String>>>>> = Array(2) { axis ->
-    Array(5) { unpremulMode ->
-        Array(4) { curveKind ->
-            Array(LEVEL_BUCKETS) { bucket ->
-                Array(6) { tapIdx ->
-                    val tap = (tapIdx + 1) * 4
-                    "LMPGL_${axis}_${unpremulMode}_c${curveKind}_b${bucket}_t$tap"
-                }
-            }
-        }
-    }
-}
+private const val PROGRESSIVE_LOOP_MODE_COUNT = 5
+private const val PROGRESSIVE_CURVE_KIND_COUNT = 4
+private const val PROGRESSIVE_TAP_COUNT = 6
 
-private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<Array<Array<String>>>>> = Array(2) { mid ->
-    Array(2) { axis ->
-        Array(2) { masked ->
-            Array(4) { curveKind ->
-                Array(6) { tapIdx ->
-                    val tap = (tapIdx + 1) * 4
-                    "LMPSL_${mid}_${axis}_m${masked}_c${curveKind}_t$tap"
-                }
-            }
-        }
-    }
-}
+private val PROGRESSIVE_LOOP_KEYS = arrayOfNulls<String>(
+    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * LEVEL_BUCKETS * PROGRESSIVE_TAP_COUNT,
+)
+
+private val PROGRESSIVE_SHARP_KEYS = arrayOfNulls<String>(
+    2 * 2 * 2 * PROGRESSIVE_CURVE_KIND_COUNT * PROGRESSIVE_TAP_COUNT,
+)
 
 internal fun progressiveLoopShaderKey(
     axis: Int,
@@ -313,7 +300,12 @@ internal fun progressiveLoopShaderKey(
         unpremul -> 1
         else -> 0
     }
-    return PROGRESSIVE_LOOP_KEYS[axis][mode][curveKind][levelBucket(downScale)][((tap / 4) - 1).coerceIn(0, 5)]
+    val bucket = levelBucket(downScale)
+    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val slot = (((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * LEVEL_BUCKETS + bucket) *
+        PROGRESSIVE_TAP_COUNT + tapIdx
+    return PROGRESSIVE_LOOP_KEYS[slot]
+        ?: "LMPGL_${axis}_${mode}_c${curveKind}_b${bucket}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
 }
 
 internal fun progressiveSharpShaderKey(
@@ -322,7 +314,14 @@ internal fun progressiveSharpShaderKey(
     curveKind: Int,
     masked: Boolean,
     midDecay: Boolean = false,
-): String = PROGRESSIVE_SHARP_KEYS[if (midDecay) 1 else 0][axis][if (masked) 1 else 0][curveKind][((tap / 4) - 1).coerceIn(0, 5)]
+): String {
+    val mid = if (midDecay) 1 else 0
+    val maskedIdx = if (masked) 1 else 0
+    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val slot = (((mid * 2 + axis) * 2 + maskedIdx) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * PROGRESSIVE_TAP_COUNT + tapIdx
+    return PROGRESSIVE_SHARP_KEYS[slot]
+        ?: "LMPSL_${mid}_${axis}_m${masked}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_SHARP_KEYS[slot] = it }
+}
 
 /**
  * Single-pass 1-tap alpha-ramp mask for the `1×` clear-end overlay when the underlying `2×`

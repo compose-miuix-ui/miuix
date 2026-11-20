@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,6 +143,7 @@ object GlassDialogButtonDefaults {
 
     /** Press overlay color for the current theme. */
     @Composable
+    @ReadOnlyComposable
     fun pressedColor(): Color {
         val scheme = MiuixTheme.colorScheme
         return scheme.onBackground.copy(alpha = if (scheme.background.luminance() < 0.5f) 36f / 255f else 31f / 255f)

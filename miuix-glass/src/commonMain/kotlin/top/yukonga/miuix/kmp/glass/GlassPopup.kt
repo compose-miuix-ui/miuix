@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -119,6 +120,7 @@ object GlassPopupDefaults {
 
     /** Pressed item background color. */
     @Composable
+    @ReadOnlyComposable
     fun itemPressedColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color.White.copy(alpha = 0.1f)
     } else {
@@ -127,6 +129,7 @@ object GlassPopupDefaults {
 
     /** Overlay color for a primary menu behind a secondary menu. */
     @Composable
+    @ReadOnlyComposable
     fun maskColor(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) {
         Color.Black.copy(alpha = 0.4f)
     } else {
@@ -142,11 +145,13 @@ object GlassPopupDefaults {
         shadow: GlassShadow? = GlassShadows.Regular,
         material: GlassMaterial? = material(),
         containerColor: Color = containerColor(),
-    ): GlassPopupVisuals = GlassPopupVisuals(style, alpha, stroke, shadow, material, containerColor)
+    ): GlassPopupVisuals = remember(style, alpha, stroke, shadow, material, containerColor) {
+        GlassPopupVisuals(style, alpha, stroke, shadow, material, containerColor)
+    }
 
     /** Creates the popup shape. */
     @Composable
-    fun shape(cornerRadius: Dp = CornerRadius): GlassShape = GlassShape(cornerRadius)
+    fun shape(cornerRadius: Dp = CornerRadius): GlassShape = remember(cornerRadius) { GlassShape(cornerRadius) }
 
     /** Default popup material for the current theme. */
     @Composable
@@ -160,6 +165,7 @@ object GlassPopupDefaults {
 
     /** Default popup bloom stroke for the current theme. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
         light = GlassEdgeStrokes.SmallLight,
@@ -168,6 +174,7 @@ object GlassPopupDefaults {
 
     /** Opaque fallback color for the current theme. */
     @Composable
+    @ReadOnlyComposable
     fun containerColor(): Color = when {
         MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainer
         MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color(0xFF2C2C2C)
@@ -230,12 +237,12 @@ fun BoxScope.GlassPopup(
         animationSpec = GlassMotion.popupMorph(),
         label = "glassPopupBounds",
     )
-    val fade by animateFloatAsState(
+    val fade = animateFloatAsState(
         targetValue = if (show) 1f else 0f,
         animationSpec = GlassMotion.popupMorphFade(show),
         label = "glassPopupFade",
     )
-    val sharpness by animateFloatAsState(
+    val sharpness = animateFloatAsState(
         targetValue = if (show) 1f else 0f,
         animationSpec = GlassMotion.popupMorphBlur(),
         label = "glassPopupBlur",
@@ -272,9 +279,9 @@ fun BoxScope.GlassPopup(
             val scale = GlassMotion.POPUP_START_WIDTH + (1f - GlassMotion.POPUP_START_WIDTH) * t
             scaleX = scale
             scaleY = scale
-            val blur = (1f - sharpness) * GlassMotion.POPUP_MORPH_BLUR_PX
+            val blur = (1f - sharpness.value) * GlassMotion.POPUP_MORPH_BLUR_PX
             renderEffect = if (blur > 0.5f) BlurEffect(blur, blur, TileMode.Decal) else null
-            alpha = fade
+            alpha = fade.value
         },
         modifier = modifier,
         scrollable = true,
@@ -361,10 +368,13 @@ fun GlassPopupItem(
             .heightIn(min = GlassPopupDefaults.ItemMinHeight)
             .padding(horizontal = GlassPopupDefaults.ItemPressInset)
             .drawBehind {
-                drawRoundRect(
-                    color = pressFill.value,
-                    cornerRadius = CornerRadius(GlassPopupDefaults.ItemPressRadius.toPx()),
-                )
+                val fill = pressFill.value
+                if (fill.alpha > 0f) {
+                    drawRoundRect(
+                        color = fill,
+                        cornerRadius = CornerRadius(GlassPopupDefaults.ItemPressRadius.toPx()),
+                    )
+                }
             }
             .selectable(
                 selected = selected,

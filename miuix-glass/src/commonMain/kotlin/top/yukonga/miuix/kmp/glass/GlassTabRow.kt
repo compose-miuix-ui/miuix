@@ -25,6 +25,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,6 +69,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -148,6 +151,7 @@ object GlassTabRowDefaults {
 
     /** Bloom stroke for selected and unselected tabs. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
@@ -507,6 +511,7 @@ object GlassSegmentedTabRowDefaults {
 
     /** Bloom stroke for the track. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
@@ -516,6 +521,7 @@ object GlassSegmentedTabRowDefaults {
      * control at rest.
      */
     @Composable
+    @ReadOnlyComposable
     fun restingTrackColor(): Color {
         val isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f
         return when {
@@ -532,17 +538,20 @@ object GlassSegmentedTabRowDefaults {
 
     /** Fill of the indicator behind the current tab. */
     @Composable
+    @ReadOnlyComposable
     fun indicatorColor(): Color = indicatorTint().copy(
         alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) IndicatorAlpha else 0.06f,
     )
 
     /** Pressed indicator fill, using a higher opacity for touch feedback. */
     @Composable
+    @ReadOnlyComposable
     fun indicatorPressedColor(): Color = indicatorTint().copy(
         alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) PressedIndicatorAlpha else 0.14f,
     )
 
     @Composable
+    @ReadOnlyComposable
     private fun indicatorTint(): Color = when {
         MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.primary
         MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color.White
@@ -619,12 +628,10 @@ fun GlassSegmentedTabRow(
     val innerHeight = height - GlassSegmentedTabRowDefaults.TrackPadding * 2
     val indicatorShape = GlassSegmentedTabRowDefaults.shape(innerHeight)
 
-    var trackWidth by remember { mutableIntStateOf(0) }
+    val trackWidthState = remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val gap = with(density) { GlassSegmentedTabRowDefaults.TabGap.toPx() }
-    val slot = if (trackWidth <= 0) 0f else ((trackWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
-    val targetLeft = index * (slot + gap)
     val scope = rememberCoroutineScope()
     val indicatorLeft = remember { Animatable(0f) }
     val indicatorRight = remember { Animatable(0f) }
@@ -644,19 +651,23 @@ fun GlassSegmentedTabRow(
         scope.launch { indicatorRight.animateTo(newRight, rightSpring) }
     }
 
-    LaunchedEffect(index, settleGeneration, targetLeft, slot) {
-        if (dragging.value || slot <= 0f) return@LaunchedEffect
-        if (indicatorRight.value <= indicatorLeft.value) {
-            indicatorLeft.snapTo(targetLeft)
-            indicatorRight.snapTo(targetLeft + slot)
-        } else {
-            animateIndicator(targetLeft, targetLeft + slot)
+    LaunchedEffect(index, settleGeneration, tabs.size, gap) {
+        snapshotFlow { trackWidthState.intValue }.collectLatest { currentTrackWidth ->
+            if (dragging.value || currentTrackWidth <= 0) return@collectLatest
+            val slot = ((currentTrackWidth - gap * (tabs.size - 1)) / tabs.size).coerceAtLeast(0f)
+            if (slot <= 0f) return@collectLatest
+            val targetLeft = index * (slot + gap)
+            if (indicatorRight.value <= indicatorLeft.value) {
+                indicatorLeft.snapTo(targetLeft)
+                indicatorRight.snapTo(targetLeft + slot)
+            } else {
+                animateIndicator(targetLeft, targetLeft + slot)
+            }
         }
     }
-
     val indicatorPressed = pressedIndex >= 0
-    val defaultIndicatorColor = GlassSegmentedTabRowDefaults.indicatorColor()
     val targetIndicatorFill = if (indicatorPressed) {
+        val defaultIndicatorColor = GlassSegmentedTabRowDefaults.indicatorColor()
         if (indicatorColor == defaultIndicatorColor) {
             GlassSegmentedTabRowDefaults.indicatorPressedColor()
         } else {
@@ -670,7 +681,7 @@ fun GlassSegmentedTabRow(
         animationSpec = if (indicatorPressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
         label = "glassSegmentedTabIndicatorFill",
     )
-    val indicatorScale by animateFloatAsState(
+    val indicatorScale = animateFloatAsState(
         targetValue = if (indicatorPressed) {
             glassPressScale(with(density) { innerHeight.toPx() }, density.density)
         } else {
@@ -728,7 +739,7 @@ fun GlassSegmentedTabRow(
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(GlassSegmentedTabRowDefaults.TrackPadding)
-                .onSizeChanged { trackWidth = it.width }
+                .onSizeChanged { trackWidthState.intValue = it.width }
                 .pointerInput(tabs.size, gap, layoutDirection) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -808,9 +819,10 @@ fun GlassSegmentedTabRow(
                         }
                     }
                     .graphicsLayer {
-                        val insetPx = (1f - indicatorScale) * size.height
+                        val scale = indicatorScale.value
+                        val insetPx = (1f - scale) * size.height
                         scaleX = if (size.width > 0f) ((size.width - insetPx) / size.width).coerceIn(0f, 1f) else 1f
-                        scaleY = indicatorScale
+                        scaleY = scale
                     }
                     .clip(indicatorShape)
                     .drawBehind { drawRect(animatedIndicatorColor.value) },

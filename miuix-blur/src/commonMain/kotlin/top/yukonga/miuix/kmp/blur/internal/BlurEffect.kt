@@ -45,14 +45,24 @@ private const val BUCKETS_PER_OCTAVE = 4
 internal const val LEVEL_BUCKETS = 17
 
 /**
- * Gaussian shader-cache keys, `[tapCount][bucket]`: the bucket separates levels live in the same
- * frame without giving every level value its own shader instance.
+ * Gaussian shader-cache keys, `[tapCount][bucket]`: lazily populated so unused combinations do not
+ * allocate at startup.
  */
-private val BLUR_H_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
-    Array(LEVEL_BUCKETS) { b -> "LMGauss${n}_H_b$b" }
+private val BLUR_H_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
+private val BLUR_V_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
+
+private fun blurHShaderKey(tapCount: Int, bucket: Int): String {
+    val slot = tapCount * LEVEL_BUCKETS + bucket
+    return BLUR_H_KEYS[slot] ?: "LMGauss${tapCount}_H_b$bucket".also { BLUR_H_KEYS[slot] = it }
 }
-private val BLUR_V_KEYS: Array<Array<String>> = Array(MAX_BLUR_TAPS + 1) { n ->
-    Array(LEVEL_BUCKETS) { b -> "LMGauss${n}_V_b$b" }
+
+private fun blurVShaderKey(tapCount: Int, bucket: Int): String {
+    val slot = tapCount * LEVEL_BUCKETS + bucket
+    return BLUR_V_KEYS[slot] ?: "LMGauss${tapCount}_V_b$bucket".also { BLUR_V_KEYS[slot] = it }
+}
+
+private val LEVEL_SCALES = FloatArray(LEVEL_BUCKETS) { b ->
+    2f.pow(b.toFloat() / BUCKETS_PER_OCTAVE)
 }
 
 /** Cache-key bucket for a level: log2(scale) in [BUCKETS_PER_OCTAVE]-ths, i.e. the grid index. */
@@ -88,8 +98,12 @@ internal fun createBlurEffect(
 
     // H / V keep separate keys (each pass owns its shader instance); the bucket splits the levels
     // that can share a frame.
+    var cachedTapCount = -1
+    var cachedPairWeightSum = 0f
+
     if (radiusX > 0f) {
         val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
+        cachedTapCount = n
         if (n > 0) {
             val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
             val shaderWeights = scope.obtainShaderWeightsBuffer(n)
@@ -100,9 +114,10 @@ internal fun createBlurEffect(
                 shaderWeights[i] = paramWeights[i]
                 pairWeightSum += paramWeights[i]
             }
+            cachedPairWeightSum = pairWeightSum
             val hShader = scope.obtainRuntimeShader(
-                BLUR_H_KEYS[n][bucket],
-                BLUR_SHADER_BY_TAP[n],
+                blurHShaderKey(n, bucket),
+                blurShaderForTap(n),
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
                 setFloatUniform("in_blurWeight", shaderWeights)
@@ -114,20 +129,32 @@ internal fun createBlurEffect(
     }
 
     if (radiusY > 0f) {
-        val n = computeBlurParamsInto(adjustedVarianceY, rawScratch, paramOffsets, paramWeights)
+        val reuseFromX = radiusX > 0f && adjustedVarianceX == adjustedVarianceY && cachedTapCount >= 0
+        val n = if (reuseFromX) {
+            cachedTapCount
+        } else {
+            computeBlurParamsInto(adjustedVarianceY, rawScratch, paramOffsets, paramWeights)
+        }
         if (n > 0) {
             val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
             val shaderWeights = scope.obtainShaderWeightsBuffer(n)
-            var pairWeightSum = 0f
-            for (i in 0 until n) {
-                shaderOffsets[i * 2] = 0f
-                shaderOffsets[i * 2 + 1] = paramOffsets[i]
-                shaderWeights[i] = paramWeights[i]
-                pairWeightSum += paramWeights[i]
+            var pairWeightSum = if (reuseFromX) cachedPairWeightSum else 0f
+            if (reuseFromX) {
+                for (i in 0 until n) {
+                    shaderOffsets[i * 2] = 0f
+                    shaderOffsets[i * 2 + 1] = paramOffsets[i]
+                }
+            } else {
+                for (i in 0 until n) {
+                    shaderOffsets[i * 2] = 0f
+                    shaderOffsets[i * 2 + 1] = paramOffsets[i]
+                    shaderWeights[i] = paramWeights[i]
+                    pairWeightSum += paramWeights[i]
+                }
             }
             val vShader = scope.obtainRuntimeShader(
-                BLUR_V_KEYS[n][bucket],
-                BLUR_SHADER_BY_TAP[n],
+                blurVShaderKey(n, bucket),
+                blurShaderForTap(n),
             ).apply {
                 setFloatUniform("in_blurOffset", shaderOffsets)
                 setFloatUniform("in_blurWeight", shaderWeights)
@@ -138,7 +165,6 @@ internal fun createBlurEffect(
                 ?: runtimeShaderEffect(vShader, "child")
         }
     }
-
     return effect
 }
 
@@ -621,7 +647,7 @@ private fun levelScaleFor(sigmaSquared: Float): Float = (sqrt(sigmaSquared.coerc
  * Recording level for [sigmaSquared], snapped to the 1/4-octave grid. The first step (1.19×) stays:
  * one full-resolution noise layer is still ~0.4 ms cheaper than the full-resolution blur.
  */
-internal fun quantizedLevelScale(sigmaSquared: Float): Float = 2f.pow(levelBucket(levelScaleFor(sigmaSquared)).toFloat() / BUCKETS_PER_OCTAVE)
+internal fun quantizedLevelScale(sigmaSquared: Float): Float = LEVEL_SCALES[levelBucket(levelScaleFor(sigmaSquared))]
 
 /** Implied box-prefilter variance (source px²) at level [scale]. */
 internal fun impliedBoxVarianceForScale(scale: Float): Float {
@@ -635,7 +661,11 @@ internal fun impliedBoxVarianceForScale(scale: Float): Float {
 internal fun adjustedVarianceForScale(sigmaSquared: Float, scale: Float): Float = ((sigmaSquared - impliedBoxVarianceForScale(scale)) / (scale * scale)).coerceAtLeast(0.1f)
 
 /** [adjustedVarianceForScale] at a ladder level. */
-internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float = adjustedVarianceForScale(sigmaSquared, (1 shl exp).toFloat())
+internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float {
+    val clampedExp = exp.coerceIn(0, 4)
+    val scale = (1 shl clampedExp).toFloat()
+    return ((sigmaSquared - IMPLIED_BOX_VARIANCE[clampedExp]) / (scale * scale)).coerceAtLeast(0.1f)
+}
 
 /**
  * Generates a 27-tap discrete kernel (-13..+13) from [variance], normalizes it, and merges

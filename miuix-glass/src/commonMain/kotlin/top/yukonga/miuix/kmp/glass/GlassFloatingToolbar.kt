@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,13 +46,16 @@ object GlassFloatingToolbarDefaults {
 
     /** Default bloom stroke for [GlassFloatingToolbar]. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(isDark = isDarkTheme())
 
     /** Default fallback fill colour when no [Backdrop] is provided. */
     @Composable
+    @ReadOnlyComposable
     fun fill(): Color = MiuixTheme.colorScheme.surfaceContainer
 
     @Composable
+    @ReadOnlyComposable
     private fun isDarkTheme(): Boolean = MiuixTheme.colorScheme.background.luminance() < 0.5f
 }
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
@@ -122,6 +123,7 @@ object GlassTopAppBarDefaults {
 
     /** Fallback button fill when backdrop material is unavailable. */
     @Composable
+    @ReadOnlyComposable
     fun buttonFill(): Color = when {
         MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainerHigh
         isDarkTheme() -> Color(0xFF2C2C2C)
@@ -134,10 +136,12 @@ object GlassTopAppBarDefaults {
 
     /** Material applied beneath child buttons and tabs. */
     @Composable
+    @ReadOnlyComposable
     internal fun actionBarUnderlayMaterial(): GlassMaterial = GlassMaterials.actionBarMask(isDarkTheme())
 
     /** The small bloom stroke paired with [buttonMaterial]. */
     @Composable
+    @ReadOnlyComposable
     fun buttonStroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = isDarkTheme(),
         light = GlassEdgeStrokes.SmallLight,
@@ -146,6 +150,7 @@ object GlassTopAppBarDefaults {
 
     /** The state overlay painted behind a held action-bar icon. */
     @Composable
+    @ReadOnlyComposable
     fun buttonPressedOverlay(): Color = if (isDarkTheme()) {
         Color.White.copy(alpha = 0.14f)
     } else {
@@ -163,13 +168,16 @@ object GlassTopAppBarDefaults {
     val BandOverhang: Dp = 36.dp
 
     @Composable
+    @ReadOnlyComposable
     private fun isDarkTheme(): Boolean = MiuixTheme.colorScheme.background.luminance() < 0.5f
 }
 
 /** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
+private val TopBarProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.25f)
+
+/** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
 private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     private val colors = opacities.map { color.copy(alpha = color.alpha * it) }
-
     override fun createShader(size: Size): Shader = createBandShader(size, 0f, size.height)
 
     fun createBandShader(size: Size, fadeStart: Float, fadeHeight: Float): Shader {
@@ -398,8 +406,7 @@ fun GlassTopAppBar(
         null
     }
     val buttonUnderlay = underlayMaterial.takeIf { progressiveBackdrop == null }
-    val resolvedMaterial = material.withUnderlayBlur(buttonUnderlay)
-
+    val resolvedMaterial = remember(material, buttonUnderlay) { material.withUnderlayBlur(buttonUnderlay) }
     val measurements = remember { GlassTopAppBarMeasurements() }
     GlassTopAppBarLayout(
         modifier = modifier,
@@ -434,15 +441,16 @@ fun GlassTopAppBar(
                     .progressiveTextureBlur(
                         backdrop = rawBackdrop,
                         shape = RectangleShape,
-                        gradient = ProgressiveBlur.Top.copy(curve = 0.25f),
+                        gradient = TopBarProgressiveGradient,
                         blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
                         colors = blurColors,
                         enabled = bandActive,
                     ),
             )
         } else {
-            val overhangPx = with(LocalDensity.current) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
-            val fadeHeight = overhangPx + with(LocalDensity.current) { 36.dp.toPx() }
+            val density = LocalDensity.current
+            val overhangPx = with(density) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
+            val fadeHeight = overhangPx + with(density) { 36.dp.toPx() }
             val fadeBrush = remember(bandBrush, fadeHeight) {
                 if (bandBrush is TopAppBarBandBrush) TopAppBarFadeBrush(bandBrush, fadeHeight) else null
             }

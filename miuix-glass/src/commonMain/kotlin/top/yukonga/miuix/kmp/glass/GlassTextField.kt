@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -253,6 +254,7 @@ object GlassTextFieldDefaults {
     }
 
     @Composable
+    @ReadOnlyComposable
     private fun defaultBackgroundColor(): Color {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f
@@ -260,6 +262,7 @@ object GlassTextFieldDefaults {
     }
 
     @Composable
+    @ReadOnlyComposable
     private fun defaultLabelColor(): Color {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f

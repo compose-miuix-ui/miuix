@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +32,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,6 +82,7 @@ import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.Icon
@@ -95,6 +97,7 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.platform
@@ -158,6 +161,7 @@ object GlassNavigationBarDefaults {
 
     /** The rim traced around the bar. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
@@ -172,17 +176,20 @@ object GlassNavigationBarDefaults {
 
     /** Resting indicator fill. */
     @Composable
+    @ReadOnlyComposable
     fun indicatorColor(): Color = indicatorTint().copy(
         alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) 0.12f else 0.06f,
     )
 
     /** Pressed indicator fill, using the same theme tint at a higher opacity. */
     @Composable
+    @ReadOnlyComposable
     fun indicatorPressedColor(): Color = indicatorTint().copy(
         alpha = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) 0.26f else 0.16f,
     )
 
     @Composable
+    @ReadOnlyComposable
     private fun indicatorTint(): Color = when {
         MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.primary
         MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color.White
@@ -257,7 +264,7 @@ fun GlassNavigationBar(
     val contentInset = with(density) { GlassNavigationBarDefaults.ContentPaddingHorizontal.toPx() }
     val overhang = with(density) { GlassNavigationBarDefaults.IndicatorOverhang.toPx() }
 
-    var barWidth by remember { mutableIntStateOf(0) }
+    val barWidthState = remember { mutableIntStateOf(0) }
     var pressedIndex by remember { mutableIntStateOf(-1) }
     val dragging = remember { mutableStateOf(false) }
     var settleGeneration by remember { mutableIntStateOf(0) }
@@ -274,11 +281,6 @@ fun GlassNavigationBar(
             interactionEnabled = false
         }
     }
-
-    val slotWidth = ((barWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
-    val targetLeft = contentStart - overhang + index * slotWidth
-    val targetRight = contentStart + overhang + (index + 1) * slotWidth
-    val hasSlots = barWidth > contentStart + contentInset
 
     val scope = rememberCoroutineScope()
     val left = remember { Animatable(0f) }
@@ -297,24 +299,27 @@ fun GlassNavigationBar(
 
     // Settle after composition commits the selection returned by onSelect. The even split waits for
     // the bar's size, so its first "no slot yet" result is revisited once it is known.
-    LaunchedEffect(index, settleGeneration, targetLeft, targetRight, hasSlots) {
-        if (dragging.value) return@LaunchedEffect
-        if (!hasSlots) return@LaunchedEffect
-        if (right.value <= left.value) {
-            left.snapTo(targetLeft)
-            right.snapTo(targetRight)
-        } else {
-            animateIndicator(targetLeft, targetRight)
+    LaunchedEffect(index, settleGeneration, items.size, contentStart, contentInset, overhang) {
+        snapshotFlow { barWidthState.intValue }.collectLatest { currentBarWidth ->
+            if (dragging.value) return@collectLatest
+            if (currentBarWidth <= contentStart + contentInset) return@collectLatest
+            val slotWidth = ((currentBarWidth - contentStart - contentInset) / items.size).coerceAtLeast(0f)
+            val targetLeft = contentStart - overhang + index * slotWidth
+            val targetRight = contentStart + overhang + (index + 1) * slotWidth
+            if (right.value <= left.value) {
+                left.snapTo(targetLeft)
+                right.snapTo(targetRight)
+            } else {
+                animateIndicator(targetLeft, targetRight)
+            }
         }
     }
     val chipPressed = pressedIndex >= 0
 
     val onSelectState by rememberUpdatedState(onSelect)
     val bottomPaddingProvider: (() -> Dp)? = if (defaultWindowInsetsPadding) {
-        val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-            .asPaddingValues().calculateBottomPadding()
-        val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
-            .asPaddingValues().calculateBottomPadding()
+        val navigationBarBottom = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
+        val captionBarBottom = with(density) { WindowInsets.captionBar.getBottom(this).toDp() }
         val animatedCaptionBarHeight = animateDpAsState(
             targetValue = captionBarBottom.coerceAtLeast(0.dp),
             animationSpec = tween(durationMillis = 300),
@@ -334,18 +339,35 @@ fun GlassNavigationBar(
     } else {
         null
     }
+    val horizontalInsetsModifier = if (defaultWindowInsetsPadding) {
+        val cutout = WindowInsets.displayCutout
+        val navBars = WindowInsets.navigationBars
+        val horizontalInsets = remember(cutout, navBars) {
+            cutout.union(navBars).only(WindowInsetsSides.Horizontal)
+        }
+        Modifier.windowInsetsPadding(horizontalInsets)
+    } else {
+        Modifier
+    }
+    val wrappedTrailingAction: (@Composable () -> Unit)? = remember(trailingAction, interactionEnabled) {
+        trailingAction?.let { action ->
+            {
+                Box(
+                    modifier = Modifier
+                        .then(if (interactionEnabled) Modifier else Modifier.clearAndSetSemantics { })
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) {
+                                if (interactionEnabled) placeable.placeRelative(0, 0)
+                            }
+                        },
+                ) { action() }
+            }
+        }
+    }
     GlassNavigationBarLayout(
         modifier = Modifier
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier.windowInsetsPadding(
-                        WindowInsets.displayCutout.union(WindowInsets.navigationBars)
-                            .only(WindowInsetsSides.Horizontal),
-                    )
-                } else {
-                    Modifier
-                },
-            )
+            .then(horizontalInsetsModifier)
             .then(modifier)
             .fillMaxWidth()
             .then(
@@ -374,20 +396,7 @@ fun GlassNavigationBar(
                 val blurPx = ((1f - visibility) * GlassMotion.NAV_HIDE_BLUR_DP).dp.toPx()
                 renderEffect = if (blurPx > 0.5f) BlurEffect(blurPx, blurPx, TileMode.Decal) else null
             },
-        trailingAction = trailingAction?.let { action ->
-            {
-                Box(
-                    modifier = Modifier
-                        .then(if (interactionEnabled) Modifier else Modifier.clearAndSetSemantics { })
-                        .layout { measurable, constraints ->
-                            val placeable = measurable.measure(constraints)
-                            layout(placeable.width, placeable.height) {
-                                if (interactionEnabled) placeable.placeRelative(0, 0)
-                            }
-                        },
-                ) { action() }
-            }
-        },
+        trailingAction = wrappedTrailingAction,
     ) {
         Box(
             modifier = Modifier
@@ -402,11 +411,15 @@ fun GlassNavigationBar(
                     stroke = stroke,
                     shadow = shadow,
                     shading = false,
-                    fallback = Modifier
-                        .clip(shape)
-                        .background(MiuixTheme.colorScheme.surfaceContainer),
+                    fallback = if (backdrop == null || !isRuntimeShaderSupported()) {
+                        Modifier
+                            .clip(shape)
+                            .background(MiuixTheme.colorScheme.surfaceContainer)
+                    } else {
+                        null
+                    },
                 )
-                .onSizeChanged { barWidth = it.width }
+                .onSizeChanged { barWidthState.intValue = it.width }
                 .then(
                     if (interactionEnabled) {
                         Modifier.pointerInput(
@@ -600,10 +613,14 @@ fun GlassNavigationBar(
                                     )
                                 }
                                 if (item.label != null) {
+                                    val baseLabelStyle = MiuixTheme.textStyles.footnote2
+                                    val labelTextStyle = remember(baseLabelStyle, labelSize) {
+                                        baseLabelStyle.copy(fontSize = labelSize)
+                                    }
                                     Text(
                                         text = item.label,
                                         color = tintProducer,
-                                        style = MiuixTheme.textStyles.footnote2.copy(fontSize = labelSize),
+                                        style = labelTextStyle,
                                         textAlign = TextAlign.Center,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,

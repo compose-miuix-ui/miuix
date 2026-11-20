@@ -67,6 +67,8 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositingStrategy
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
+private val EmptyEffects: BackdropEffectScope.() -> Unit = {}
+private val DefaultShapeBlock: () -> Shape = { androidx.compose.ui.graphics.RectangleShape }
 
 /** Float tolerance for "a box step lands exactly on the level". */
 private const val LEVEL_EPS = 1e-3f
@@ -192,24 +194,28 @@ private class BackdropPipelineElement(
 
     override fun create(): DrawBackdropNode = DrawBackdropNode(
         backdrop = backdrop,
-        shape = { pipeline.shape },
-        effects = { pipeline.configureEffects(this) },
+        shape = DefaultShapeBlock,
+        effects = EmptyEffects,
         layerBlock = null,
         onDrawBehind = null,
         onDrawBackdrop = DefaultOnDrawBackdrop,
         onDrawSurface = null,
-        onDrawFront = { pipeline.drawFront(this) },
+        onDrawFront = null,
         contentBlendMode = contentBlendMode,
         progressiveGradient = pipeline.progressiveGradient,
         enabled = enabled,
-    )
+    ).apply {
+        updatePipeline(pipeline)
+    }
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
+        val pipelineChanged = node.pipelineRef != pipeline
+        val blendChanged = node.contentBlendMode != contentBlendMode
         node.backdrop = backdrop
-        node.updateShape { pipeline.shape }
-        node.effects = { pipeline.configureEffects(this) }
-        node.onDrawFront = { pipeline.drawFront(this) }
+        if (pipelineChanged) {
+            node.updatePipeline(pipeline)
+        }
         node.contentBlendMode = contentBlendMode
         node.progressiveGradient = pipeline.progressiveGradient
         node.enabled = enabled
@@ -219,9 +225,19 @@ private class BackdropPipelineElement(
             }
             node.invalidateMeasurement()
         }
-        node.invalidateDrawCache()
+        if (!enabled) {
+            node.invalidateDraw()
+            return
+        }
+        if (pipelineChanged || enabledChanged) {
+            node.invalidateDrawCache()
+        } else if (blendChanged) {
+            node.invalidateDraw()
+            node.invalidatePlacement()
+        } else {
+            node.invalidateDraw()
+        }
     }
-
     override fun InspectorInfo.inspectableProperties() {
         name = "drawBackdrop"
         properties["backdrop"] = backdrop
@@ -295,7 +311,11 @@ private class DrawBackdropElement(
             }
             node.invalidateMeasurement()
         }
-        node.invalidateDrawCache()
+        if (enabled) {
+            node.invalidateDrawCache()
+        } else {
+            node.invalidateDraw()
+        }
     }
 
     override fun InspectorInfo.inspectableProperties() {
@@ -360,10 +380,24 @@ private class DrawBackdropNode(
 
     private val shapeProvider: ShapeProvider = ShapeProvider(shape)
 
-    fun updateShape(shape: () -> Shape) {
-        shapeProvider.shapeBlock = shape
+    var pipelineRef: BackdropPipeline? = null
+        private set
+
+    private val pipelineShape: () -> Shape = { pipelineRef!!.shape }
+    private val pipelineEffects: BackdropEffectScope.() -> Unit = { pipelineRef!!.configureEffects(this) }
+    private val pipelineDrawFront: DrawScope.() -> Unit = { pipelineRef!!.drawFront(this) }
+
+    fun updatePipeline(pipeline: BackdropPipeline) {
+        pipelineRef = pipeline
+        shapeProvider.shapeBlock = pipelineShape
+        effects = pipelineEffects
+        onDrawFront = pipelineDrawFront
     }
 
+    fun updateShape(shape: () -> Shape) {
+        pipelineRef = null
+        shapeProvider.shapeBlock = shape
+    }
     private val effectScope = object : BackdropEffectScopeImpl() {
         override val shape: Shape get() = shapeProvider.innerShape
     }
@@ -887,6 +921,7 @@ private class DrawBackdropNode(
     }
 
     fun invalidateDrawCache() {
+        if (!enabled) return
         observeEffects()
         if (isAttached && effectsSized) {
             // placeWithLayer inside an ancestor GraphicsLayer (e.g. squircleSurface) can skip

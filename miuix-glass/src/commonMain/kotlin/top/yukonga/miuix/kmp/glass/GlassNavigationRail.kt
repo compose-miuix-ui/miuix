@@ -51,6 +51,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.computedStateOf
@@ -122,6 +123,7 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.ceil
 import kotlin.math.roundToInt
@@ -226,6 +228,7 @@ object GlassNavigationRailDefaults {
 
     /** The panel's rim. */
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
         isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
     )
@@ -394,20 +397,21 @@ fun GlassNavigationRail(
         }
     }
 
+    val windowInsetsModifier = if (defaultWindowInsetsPadding) {
+        val systemBars = WindowInsets.systemBars
+        val captionBar = WindowInsets.captionBar
+        val displayCutout = WindowInsets.displayCutout
+        val combinedInsets = remember(systemBars, captionBar, displayCutout) {
+            systemBars.union(captionBar).union(displayCutout)
+        }
+        Modifier.windowInsetsPadding(combinedInsets)
+    } else {
+        Modifier
+    }
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier.windowInsetsPadding(
-                        WindowInsets.systemBars
-                            .union(WindowInsets.captionBar)
-                            .union(WindowInsets.displayCutout),
-                    )
-                } else {
-                    Modifier
-                },
-            ),
+            .then(windowInsetsModifier),
     ) {
         // maxWidth/maxHeight go stale when only the density changes; the pixels don't.
         val viewportWidth = with(density) { constraints.maxWidth.toDp() }
@@ -451,23 +455,28 @@ fun GlassNavigationRail(
             targetChangeSpec = RailMorphDpMotion,
         ) { expanding -> if (expanding) RailMorphDpMotion else RailReboundMotion }
 
+        val iconAlphaProvider = remember(iconAlpha) { { iconAlpha.value } }
+        val collapsedWidthProvider = remember(animatedCapsuleWidth) { { animatedCapsuleWidth.value } }
+        val panelStartProvider = remember(panelStart) { { panelStart.value } }
+        val panelHeightProvider = remember(panelHeight) { { panelHeight.value } }
+
         GlassNavigationRailPanel(
             items = items,
             selectedIndex = index,
             secondaryItems = secondaryItems,
             state = state,
             rowProgress = rowProgress,
-            iconAlpha = { iconAlpha.value },
+            iconAlpha = iconAlphaProvider,
             showToggle = showToggle,
             tabWidths = tabWidths,
             labelWidths = labelWidths,
             contentStart = contentStart,
-            collapsedWidth = { animatedCapsuleWidth.value },
+            collapsedWidth = collapsedWidthProvider,
             expandedWidth = expandedWidth,
-            panelStart = { panelStart.value },
+            panelStart = panelStartProvider,
             collapsedTop = collapsedTop,
             expandedTop = expandedTop,
-            panelHeight = { panelHeight.value },
+            panelHeight = panelHeightProvider,
             backdrop = backdrop,
             style = style,
             alpha = alpha,
@@ -607,9 +616,13 @@ private fun GlassNavigationRailPanel(
                 stroke = stroke,
                 shadow = shadow,
                 shading = false,
-                fallback = Modifier
-                    .clip(shape)
-                    .background(MiuixTheme.colorScheme.surfaceContainer),
+                fallback = if (backdrop == null || !isRuntimeShaderSupported()) {
+                    Modifier
+                        .clip(shape)
+                        .background(MiuixTheme.colorScheme.surfaceContainer)
+                } else {
+                    null
+                },
             )
             .clip(shape),
     ) {
@@ -679,6 +692,8 @@ private fun GlassNavigationRailPanel(
                     key(position) {
                         val rowSelected = position == selectedIndex ||
                             (!expanded && hasSecondarySelection && position == lastPrimaryIndex)
+                        val rowProgressProvider = remember(rowProgress, position) { { rowProgress[position].value } }
+                        val onRowClick = remember(position) { { currentOnSelect.value(position) } }
                         NavigationRailRow(
                             item = item,
                             selected = rowSelected,
@@ -687,7 +702,7 @@ private fun GlassNavigationRailPanel(
                             interactionSource = interaction.rowInteractions[position],
                             expanded = expanded,
                             pressed = pressedIndex == position,
-                            rowProgress = { rowProgress[position].value },
+                            rowProgress = rowProgressProvider,
                             iconAlpha = iconAlpha,
                             scrollOffset = scrollOffsetProvider,
                             tabWidths = tabWidths,
@@ -697,7 +712,7 @@ private fun GlassNavigationRailPanel(
                             selectedColor = selectedColor,
                             unselectedColor = unselectedColor,
                             labelStyle = labelStyle,
-                            onClick = { onSelect(position) },
+                            onClick = onRowClick,
                         )
                     }
                 }

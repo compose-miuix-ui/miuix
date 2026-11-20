@@ -35,6 +35,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -126,6 +127,9 @@ private val SearchModeEasing: Easing = run {
 }
 
 /** Default values for [GlassSearchOverlay]. */
+private val SearchOverlayProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.5f)
+
+/** Default values for [GlassSearchOverlay]. */
 object GlassSearchOverlayDefaults {
     val BarHeight = 44.dp
     val HorizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
@@ -136,6 +140,7 @@ object GlassSearchOverlayDefaults {
     fun material(): GlassMaterial = GlassNavigationRailDefaults.material()
 
     @Composable
+    @ReadOnlyComposable
     fun stroke(): EdgeStroke = GlassNavigationRailDefaults.stroke()
 
     fun shadow(): GlassShadow = GlassShadows.Float
@@ -319,7 +324,7 @@ fun GlassSearchOverlay(
                         .progressiveTextureBlur(
                             backdrop = contentBackdrop,
                             shape = RectangleShape,
-                            gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
+                            gradient = SearchOverlayProgressiveGradient,
                             blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
                             colors = blurColors,
                             enabled = bandActive,
@@ -348,13 +353,7 @@ fun GlassSearchOverlay(
             val pillShape = remember { GlassShape(GlassSearchOverlayDefaults.BarHeight / 2) }
             val glassPillModifier = if (contentBackdrop != null) {
                 Modifier
-                    .then(
-                        if (shadow != null) {
-                            Modifier.drawBehind { drawGlassShadow(pillShape, shadow, 1f) }
-                        } else {
-                            Modifier
-                        },
-                    )
+                    .glassShadow(pillShape, shadow, 1f)
                     .glass(
                         backdrop = contentBackdrop,
                         shape = pillShape,
@@ -522,7 +521,7 @@ private fun ScrollSearchPillBackground(
     val showGlass by remember { computedStateOf { currentProgress() > 0.001f } }
     Box(
         modifier = modifier
-            .then(if (shadow != null) Modifier.drawBehind { drawGlassShadow(shape, shadow, currentProgress()) } else Modifier)
+            .glassShadow(shape, shadow, currentProgress)
             .background(fill, shape),
     ) {
         if (showGlass) {
@@ -575,30 +574,34 @@ fun Modifier.glassSearchBarTransition(expanded: Boolean, blurEnabled: Boolean = 
         transitionSpec = { tween(if (targetState) 150 else 120, easing = LinearEasing) },
         label = "glassSearchTopBarBlur",
     ) { if (it && blurActive) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
-    return drawWithCache {
-        val layer = obtainGraphicsLayer()
-        val halo = ceil(layerOutset).toInt()
-        val layerSize = IntSize(size.width.toInt() + halo * 2, size.height.toInt() + halo * 2)
-        onDrawWithContent {
-            val opacity = barAlpha().coerceIn(0f, 1f)
-            val currentScale = scale.value
-            val currentBlur = blur.value
-            if (opacity > 0f) {
-                if (opacity == 1f && currentScale == 1f && currentBlur == 0f) {
-                    drawContent()
-                } else {
-                    // Keep the halo in the recorded bounds: Skiko can replay nested layers with
-                    // LayerOutsets without applying their opacity or render effect.
-                    layer.record(density = this@drawWithCache, size = layerSize) {
-                        translate(halo.toFloat(), halo.toFloat()) { this@record.drawContent() }
+    val currentBarAlpha by rememberUpdatedState(barAlpha)
+    val transitionModifier = remember(layerOutset, scale, blur, blurActive) {
+        Modifier.drawWithCache {
+            val layer = obtainGraphicsLayer()
+            val halo = ceil(layerOutset).toInt()
+            val layerSize = IntSize(size.width.toInt() + halo * 2, size.height.toInt() + halo * 2)
+            onDrawWithContent {
+                val opacity = currentBarAlpha().coerceIn(0f, 1f)
+                val currentScale = scale.value
+                val currentBlur = blur.value
+                if (opacity > 0f) {
+                    if (opacity == 1f && currentScale == 1f && currentBlur == 0f) {
+                        drawContent()
+                    } else {
+                        // Keep the halo in the recorded bounds: Skiko can replay nested layers with
+                        // LayerOutsets without applying their opacity or render effect.
+                        layer.record(density = this@drawWithCache, size = layerSize) {
+                            translate(halo.toFloat(), halo.toFloat()) { this@record.drawContent() }
+                        }
+                        layer.alpha = opacity
+                        layer.scaleX = currentScale
+                        layer.scaleY = currentScale
+                        layer.renderEffect = if (blurActive && currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
+                        translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
                     }
-                    layer.alpha = opacity
-                    layer.scaleX = currentScale
-                    layer.scaleY = currentScale
-                    layer.renderEffect = if (blurActive && currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
-                    translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
                 }
             }
         }
     }
+    return this.then(transitionModifier)
 }
