@@ -74,8 +74,12 @@ private class NavDirectionalTransition(
 
     override fun bind(context: NavTransitionHostContext, entryKey: NavKey?): NavTransition {
         val boundPush = context.resolve(push, entryKey)
-        val boundPop = context.resolve(pop, entryKey)
-        val boundPredictivePop = context.resolve(predictivePop, entryKey)
+        val boundPop = if (pop == push) boundPush else context.resolve(pop, entryKey)
+        val boundPredictivePop = when (predictivePop) {
+            pop -> boundPop
+            push -> boundPush
+            else -> context.resolve(predictivePop, entryKey)
+        }
         return if (boundPush === push && boundPop === pop && boundPredictivePop === predictivePop) {
             this
         } else {

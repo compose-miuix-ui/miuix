@@ -117,7 +117,8 @@ NavDisplay(
 
 - Attach `navTransitionSource` after padding and before the background/clip. Match the source's `containerColor` and outline (`cornerRadius`, `corners`, or `shape`); custom shapes must have one contour without holes.
 - Use an opaque destination background matching the container color. `Expansion` uses the first opaque color from `expansion(containerColor = ...)`, `NavDisplayEffects.backdropColor`, or the source's `containerColor`. `cornerClipRadius` supplies the final moving-frame radius; settled pages are not clipped.
-- Source and destination must share a window. Without a live source or an opaque container color, pages use `MiuixDefault`; multiple bindings to the same route use the pressed source.
+- Source and destination must share a window. Opening a page without a capturable source or an opaque container color uses `MiuixDefault`. If multiple components bind the same route, the pressed source wins.
+- When an Expansion entry returns, the original source must still have a visible area within the navigation container. A fully clipped or recycled source uses the centered shrink and fade. A newly created source for the same route does not inherit the previous source's landing position.
 
 ## Swipe-to-dismiss direction
 

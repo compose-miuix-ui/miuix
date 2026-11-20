@@ -4,7 +4,9 @@
 package top.yukonga.miuix.kmp.nav.transition.internal
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Outline
@@ -77,6 +79,7 @@ internal class NavOutlineMorph {
     private val coveragePoints = FloatArray((PLANE_COUNT + 4) * 2)
     private val pointsA = FloatArray((PLANE_COUNT + 4) * 2)
     private val pointsB = FloatArray((PLANE_COUNT + 4) * 2)
+    private val matrix = Matrix()
 
     fun outline(
         source: Shape?,
@@ -86,43 +89,28 @@ internal class NavOutlineMorph {
         squircleEnabled: Boolean,
         layoutDirection: LayoutDirection,
         density: Density,
-    ): Outline = Outline.Generic(
-        path(source, sourceSize, sourceBounds, frame, squircleEnabled, layoutDirection, density).apply {
-            transform(Matrix().apply { scale(1f / frame.scale, 1f / frame.scale) })
-        },
-    )
-
-    private fun path(
-        source: Shape?,
-        sourceSize: Size,
-        sourceBounds: Rect?,
-        frame: NavExpandFrame,
-        squircleEnabled: Boolean,
-        layoutDirection: LayoutDirection,
-        density: Density,
-    ): Path {
+    ): Outline {
         // Work in host pixels so a changing page scale does not invalidate source geometry.
         val revealSize = frame.bounds.size
         val fraction = frame.sourceFraction
         val radius = if (fraction < 1f) frame.movingRadius else frame.cornerRadius
         if (source == null || sourceBounds == null || sourceSize.width <= 0f || sourceSize.height <= 0f) {
-            return Path().apply { addSquircleRect(revealSize.width, revealSize.height, radius, squircleEnabled = squircleEnabled) }
+            return roundOutline(frame, radius, squircleEnabled)
         }
         val previousVersion = sourceOutline.version
         if (!sourceOutline.update(source, sourceSize, layoutDirection, density)) {
-            return Path().apply { addSquircleRect(revealSize.width, revealSize.height, radius, squircleEnabled = squircleEnabled) }
+            return roundOutline(frame, radius, squircleEnabled)
         }
         if (sourceOutline.version != previousVersion) cachedProjection = Size.Zero
         if (fraction <= 0f) {
-            return Path().apply {
+            matrix.reset()
+            matrix.translate(sourceBounds.left - frame.bounds.left, sourceBounds.top - frame.bounds.top)
+            matrix.scale(sourceBounds.width / sourceSize.width, sourceBounds.height / sourceSize.height)
+            val path = Path().apply {
                 addPath(sourceOutline.path)
-                transform(
-                    Matrix().apply {
-                        translate(sourceBounds.left - frame.bounds.left, sourceBounds.top - frame.bounds.top)
-                        scale(sourceBounds.width / sourceSize.width, sourceBounds.height / sourceSize.height)
-                    },
-                )
+                transform(matrix)
             }
+            return scaleOutline(path, frame.scale)
         }
         if (cachedSquircle != squircleEnabled) {
             val side = 2f * if (squircleEnabled) SquircleDefaults.Extension else 1f
@@ -142,7 +130,7 @@ internal class NavOutlineMorph {
         )
         updateCoverage(sourceSize, sourceBounds.size, sourceClip)
         if (sourceClipped && coverageCount == 0) {
-            return Path().apply { addSquircleRect(revealSize.width, revealSize.height, radius, squircleEnabled = squircleEnabled) }
+            return roundOutline(frame, radius, squircleEnabled)
         }
         val revealScaleX = revealSize.width / sourceSize.width
         val revealScaleY = revealSize.height / sourceSize.height
@@ -177,7 +165,7 @@ internal class NavOutlineMorph {
         val fillFraction = navExpandFraction(frame.progress, 0f, 0.18f)
         val fillingPolygon = sourceOutline.concavePolygon?.takeIf { fillFraction < 1f }
         if (fraction >= 1f && fillingPolygon == null) {
-            return Path().apply { addSquircleRect(revealSize.width, revealSize.height, targetRadius * cornerScale, squircleEnabled = squircleEnabled) }
+            return roundOutline(frame, targetRadius * cornerScale, squircleEnabled)
         }
         for (i in 0 until PLANE_COUNT) {
             val x = NORMALS[i * 2]
@@ -185,7 +173,7 @@ internal class NavOutlineMorph {
             outlineLimits[i] = max(x, 0f) * revealSize.width + max(y, 0f) * revealSize.height - outlineGaps[i] * cornerScale
         }
         if (fillingPolygon != null) {
-            return fillingPolygon.path(sourceSize, sourceBounds, frame.bounds, NORMALS, outlineLimits, fillFraction)
+            return scaleOutline(fillingPolygon.path(sourceSize, sourceBounds, frame.bounds, NORMALS, outlineLimits, fillFraction), frame.scale)
         }
         var input = pointsA
         var output = pointsB
@@ -199,12 +187,32 @@ internal class NavOutlineMorph {
             input = output
             output = swap
         }
-        return Path().apply {
+        val path = Path().apply {
             for (i in 0 until count) {
                 if (i == 0) moveTo(input[0], input[1]) else lineTo(input[i * 2], input[i * 2 + 1])
             }
             close()
         }
+        return scaleOutline(path, frame.scale)
+    }
+
+    private fun scaleOutline(path: Path, scale: Float): Outline {
+        matrix.reset()
+        matrix.scale(1f / scale, 1f / scale)
+        path.transform(matrix)
+        return Outline.Generic(path)
+    }
+
+    private fun roundOutline(frame: NavExpandFrame, radius: Float, squircleEnabled: Boolean): Outline {
+        val width = frame.bounds.width / frame.scale
+        val height = frame.bounds.height / frame.scale
+        val scaledRadius = min(radius / frame.scale, min(width, height) / 2f)
+        if (!squircleEnabled) {
+            val bounds = Rect(0f, 0f, width, height)
+            if (scaledRadius == 0f) return Outline.Rectangle(bounds)
+            return Outline.Rounded(RoundRect(bounds, CornerRadius(scaledRadius)))
+        }
+        return Outline.Generic(Path().apply { addSquircleRect(width, height, scaledRadius, squircleEnabled = true) })
     }
 
     private fun updateCoverage(sourceSize: Size, projection: Size, clip: Rect) {
@@ -339,7 +347,9 @@ internal class NavOutlineMorph {
     }
 
     private companion object {
-        const val PLANE_COUNT = 128
+        // Each plane still uses analytic curve extrema. A 64-direction envelope reduces
+        // clipping work while keeping the axis and diagonal directions exact.
+        const val PLANE_COUNT = 64
         val NORMALS = FloatArray(PLANE_COUNT * 2) { index ->
             val angle = 2.0 * PI * (index / 2) / PLANE_COUNT
             (if (index % 2 == 0) cos(angle) else sin(angle)).toFloat()

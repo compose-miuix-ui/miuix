@@ -80,6 +80,25 @@ class NavExpandTransitionTest {
     }
 
     @Test
+    fun aClippedSourceKeepsItsFullDrawingBoundsAndUsesOnlyTheVisibleLandingArea() {
+        val full = Rect(20f, 300f, 380f, 420f)
+        val visible = Rect(20f, 360f, 380f, 420f)
+        val frame = navExpandFrame(
+            anchor = NavTransitionAnchor(full),
+            layoutSize = host,
+            layoutPosition = Offset.Zero,
+            progress = 0f,
+            initialScale = 0.85f,
+            cornerRadius = 28f,
+            targetCornerRadius = 0f,
+            density = Density(2f),
+            visibleSourceBounds = visible,
+        )
+        assertEquals(visible, frame.bounds)
+        assertEquals(full, frame.sourceBounds)
+    }
+
+    @Test
     fun displacedSourcesApproachOppositeEdgesTogetherWithoutUncoveringTheCard() {
         for (bounds in listOf(
             Rect(20f, 100f, 380f, 220f),
@@ -124,8 +143,10 @@ class NavExpandTransitionTest {
     @Test
     fun cornerHandoffWaitsForEveryEdgeAndPreservesTheDeviceRadius() {
         val source = NavTransitionAnchor(Rect(20f, 100f, 380f, 220f), 8.dp)
-        // At 96% progress the farther edge is still over 4px (2dp) away from the host.
-        assertEquals(28f, frame(source, 0.96f).cornerRadius)
+        // Assert before the eased geometry reaches the 4px (2dp) edge clearance.
+        val beforeHandoff = frame(source, 0.94f)
+        assertTrue(host.height - beforeHandoff.bounds.bottom >= 4f)
+        assertEquals(28f, beforeHandoff.cornerRadius)
         assertTrue(frame(source, 0.99f).cornerRadius in 0f..28f)
         for (step in 35..100) {
             assertEquals(48f, frame(source, step / 100f, targetCornerRadius = 48f).cornerRadius)

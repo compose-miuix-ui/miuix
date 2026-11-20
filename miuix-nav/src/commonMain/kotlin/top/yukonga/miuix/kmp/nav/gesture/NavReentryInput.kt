@@ -25,9 +25,18 @@ internal fun Modifier.navReentryInput(
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
         if (down.isConsumed) return@awaitEachGesture
-        val topEntry = presentation.presented.maxWithOrNull(
-            compareBy<NavEntry<*>> { indices[it.contentKey] ?: -1 }.thenBy { !it.presentation.isRemoving },
-        ) ?: return@awaitEachGesture
+        val entries = presentation.presented
+        var candidate: NavEntry<*>? = null
+        var topIndex = -1
+        for (i in entries.indices) {
+            val entry = entries[i]
+            val index = indices[entry.contentKey] ?: -1
+            if (candidate == null || index > topIndex || (index == topIndex && candidate.presentation.isRemoving && !entry.presentation.isRemoving)) {
+                candidate = entry
+                topIndex = index
+            }
+        }
+        val topEntry = candidate ?: return@awaitEachGesture
         if (!topEntry.presentation.isRemoving) return@awaitEachGesture
         val reentry = (topEntry.transitionOrNull() ?: transition) as? NavTransitionReentry
             ?: return@awaitEachGesture

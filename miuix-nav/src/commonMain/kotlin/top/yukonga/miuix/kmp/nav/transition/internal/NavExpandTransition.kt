@@ -5,9 +5,9 @@ package top.yukonga.miuix.kmp.nav.transition.internal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -26,7 +26,6 @@ import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionAnchor
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionScope
-import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -36,25 +35,39 @@ internal class NavExpandTransition(
     private val anchor: (NavTransitionScope) -> NavTransitionAnchor?,
     private val initialScale: Float,
     private val cornerRadius: Dp,
-    private val targetCornerRadius: Dp,
-    internal val containerColor: Color,
+    private val targetCornerRadius: () -> Dp,
+    internal val containerColor: () -> Color,
     override val motion: NavMotion,
 ) : NavTransition,
     NavHostTransition {
     override fun handlesCornerClip(scope: NavTransitionScope): Boolean = true
 
-    internal fun frame(scope: NavTransitionScope, source: NavTransitionAnchor?): NavExpandFrame = navExpandFrame(
-        anchor = source,
-        layoutSize = scope.layoutSize,
-        layoutPosition = scope.layoutPositionInWindow,
-        progress = (1f + scope.relativeDepth).coerceIn(0f, 1f),
-        initialScale = initialScale,
-        cornerRadius = with(scope.density) { cornerRadius.toPx() },
-        targetCornerRadius = with(scope.density) { targetCornerRadius.toPx() },
-        density = scope.density,
-        windowToLocal = { it },
-        sourceBounds = source?.boundsInHost(scope),
-    )
+    internal fun frame(scope: NavTransitionScope): NavExpandFrame = if (scope is LiveNavTransitionScope) {
+        scope.expansionFrame(this) { derivedStateOf { calculateFrame(scope) } }
+    } else {
+        calculateFrame(scope)
+    }
+
+    private fun calculateFrame(scope: NavTransitionScope): NavExpandFrame {
+        val source = anchor(scope)
+        val live = scope as? LiveNavTransitionScope
+        val returning = source?.source != null && live?.isReturningExpansion == true
+        val bounds = source?.let { live?.expansionReturnBounds(it, returning) }
+        val sourceBounds = if (returning) bounds?.full else source?.boundsInHost(scope)
+        return navExpandFrame(
+            anchor = source,
+            layoutSize = scope.layoutSize,
+            layoutPosition = scope.layoutPositionInWindow,
+            progress = (1f + scope.relativeDepth).coerceIn(0f, 1f),
+            initialScale = initialScale,
+            cornerRadius = with(scope.density) { cornerRadius.toPx() },
+            targetCornerRadius = with(scope.density) { targetCornerRadius().toPx() },
+            density = scope.density,
+            windowToLocal = { it },
+            sourceBounds = sourceBounds,
+            visibleSourceBounds = if (returning) bounds?.visible else sourceBounds,
+        )
+    }
 
     @Composable
     override fun rememberRenderer(scope: NavTransitionScope): NavEntryRenderer {
@@ -66,16 +79,15 @@ internal class NavExpandTransition(
         return renderer
     }
 
-    @Suppress("ktlint:compose:modifier-composed-check")
-    override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier = composed {
-        val squircleEnabled = isSquircleEnabled()
-        val outlineMorph = remember { NavOutlineMorph() }
-        val source = anchor(scope)
-        graphicsLayer {
+    override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier {
+        val live = scope as? LiveNavTransitionScope
+        val squircleEnabled = live?.squircleEnabled == true
+        val outlineMorph = lazy(LazyThreadSafetyMode.NONE) { live?.expansionOutline ?: NavOutlineMorph() }
+        return graphicsLayer {
             val d = scope.relativeDepth
             if (d > 0f || scope.layoutSize.width <= 0 || scope.layoutSize.height <= 0) return@graphicsLayer
-            val hasUpperEntry = (scope as? LiveNavTransitionScope)?.hasUpperEntry == true
-            val frame = frame(scope, source)
+            val hasUpperEntry = live?.coveredByEntry == true
+            val frame = frame(scope)
             // Gesture ownership alone does not enable clipping at the square page endpoint.
             if (frame.progress == 1f && (scope.gesture != null || !scope.isRunning || hasUpperEntry)) {
                 clip = false
@@ -89,12 +101,13 @@ internal class NavExpandTransition(
             translationY = frame.bounds.top
             scaleX = frame.scale
             scaleY = frame.scale
-            val sourceBounds = source?.boundsInHost(scope)?.takeIf { frame.hasSource && it.isFinite && !it.isEmpty }
+            val source = anchor(scope)
+            val sourceBounds = frame.sourceBounds?.takeIf { frame.hasSource }
             shape = NavExpandShape(
-                morph = outlineMorph,
+                morph = outlineMorph.value,
                 frame = frame,
                 sourceShape = source?.shapeFor(scope, squircleEnabled),
-                sourceSize = source?.source?.takeUnless { it.isReleased }?.layer?.size?.let { Size(it.width.toFloat(), it.height.toFloat()) } ?: sourceBounds?.size ?: frame.origin.size,
+                sourceSize = source?.source?.size ?: sourceBounds?.size ?: frame.origin.size,
                 sourceBounds = sourceBounds,
                 squircleEnabled = squircleEnabled,
             )
@@ -102,17 +115,15 @@ internal class NavExpandTransition(
         }
     }
 
-    @Suppress("ktlint:compose:modifier-composed-check")
-    override fun Modifier.transformContent(scope: NavTransitionScope): Modifier = composed {
-        val source = anchor(scope)
-        graphicsLayer {
-            if (scope.relativeDepth > 0f || scope.layoutSize.width <= 0 || scope.layoutSize.height <= 0) return@graphicsLayer
-            val frame = frame(scope, source)
-            // Keep the same anchor as the renderer until this host leaves composition.
-            translationX = (frame.bounds.width / frame.scale - size.width) / 2f
-        }
+    override fun Modifier.transformContent(scope: NavTransitionScope): Modifier = graphicsLayer {
+        if (scope.relativeDepth > 0f || scope.layoutSize.width <= 0 || scope.layoutSize.height <= 0) return@graphicsLayer
+        val frame = frame(scope)
+        // Keep the same anchor as the renderer until this host leaves composition.
+        translationX = (frame.bounds.width / frame.scale - size.width) / 2f
     }
 }
+
+internal data class NavExpandSourceBounds(val full: Rect, val visible: Rect)
 
 /** Visible silhouette in host-local pixels; contents use one uniform [scale]. */
 internal data class NavExpandFrame(
@@ -124,6 +135,7 @@ internal data class NavExpandFrame(
     val origin: Rect,
     val sourceFraction: Float,
     val movingRadius: Float,
+    val sourceBounds: Rect? = null,
 )
 
 internal fun navExpandFrame(
@@ -137,11 +149,12 @@ internal fun navExpandFrame(
     density: Density,
     windowToLocal: (Offset) -> Offset = { it - layoutPosition },
     sourceBounds: Rect? = anchor?.bounds,
+    visibleSourceBounds: Rect? = sourceBounds,
 ): NavExpandFrame {
     val width = layoutSize.width.toFloat()
     val height = layoutSize.height.toFloat()
     val viewport = Rect(0f, 0f, width, height)
-    val source = sourceBounds?.takeIf { it.isFinite && !it.isEmpty }
+    val source = visibleSourceBounds?.takeIf { it.isFinite && !it.isEmpty }
         ?.let { Rect(windowToLocal(it.topLeft), windowToLocal(it.bottomRight)) }
         ?.takeIf { it.isFinite && !it.isEmpty }
         ?.intersect(viewport)
@@ -173,7 +186,13 @@ internal fun navExpandFrame(
         bottom = height - verticalInset * remaining - (height - start.bottom - verticalInset) * asymmetry,
     )
     val startRadius = if (source != null && anchor != null) with(density) { anchor.cornerRadius.toPx() } else cornerRadius
-    val sourceRadius = anchor?.corners?.let { with(density) { max(max(it.topLeft.toPx(), it.topRight.toPx()), max(it.bottomRight.toPx(), it.bottomLeft.toPx())) } } ?: startRadius
+    val sourceRadius = if (source != null && anchor != null) {
+        with(density) {
+            anchor.corners.let { max(max(it.topLeft.toPx(), it.topRight.toPx()), max(it.bottomRight.toPx(), it.bottomLeft.toPx())) }
+        }
+    } else {
+        startRadius
+    }
     val movingRadius = max(max(sourceRadius, cornerRadius), targetCornerRadius)
     val clearance = max(max(bounds.left, width - bounds.right), max(bounds.top, height - bounds.bottom))
     // Settle the radius against the actual silhouette, not a fixed late time interval. Until
@@ -206,6 +225,7 @@ internal fun navExpandFrame(
         origin = start,
         sourceFraction = sourceCornerFraction,
         movingRadius = movingRadius,
+        sourceBounds = sourceBounds.takeIf { source != null },
     )
 }
 

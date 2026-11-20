@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.nav.transition.internal
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionAnchor
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionScope
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 
@@ -26,25 +28,28 @@ internal data class NavExpansionPreset(
     override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier = this
 
     override fun bind(context: NavTransitionHostContext, entryKey: NavKey?): NavTransition {
-        val color = navExpansionContainerColor(containerColor, context.effects.backdropColor)
+        val anchor = entryKey?.let(context.expansion::anchorState)
+        val color = { navExpansionContainerColor(containerColor, context.effects.backdropColor) }
         return NavExpansionTransition(
             state = context.expansion,
-            entryKey = entryKey,
+            anchor = anchor,
             containerColor = color,
-            delegate = NavTransitions.expandFrom(
+            delegate = NavExpandTransition(
                 containerColor = color,
                 cornerRadius = cornerRadius,
-                targetCornerRadius = context.effects.cornerClipRadius,
+                targetCornerRadius = { context.effects.cornerClipRadius },
+                initialScale = 0.85f,
                 motion = motion,
-            ) { context.expansion.anchor(it.entryKey) },
+                anchor = { anchor?.value },
+            ),
         )
     }
 }
 
 private class NavExpansionTransition(
     private val state: NavExpansionState,
-    private val entryKey: NavKey?,
-    private val containerColor: Color,
+    private val anchor: State<NavTransitionAnchor?>?,
+    private val containerColor: () -> Color,
     private val delegate: NavTransition,
 ) : NavTransition by delegate,
     NavHostTransition,
@@ -52,8 +57,8 @@ private class NavExpansionTransition(
     // The upper page also governs the covered layer: resolve against its owner, not the
     // scope's entryKey, which belongs to whichever layer is currently being transformed.
     private fun transition(): NavTransition {
-        val anchor = state.anchor(entryKey) ?: return NavTransitions.MiuixDefault
-        return if (navExpansionContainerColor(containerColor, anchor.containerColor).isSpecified) delegate else NavTransitions.MiuixDefault
+        val source = anchor?.value ?: return NavTransitions.MiuixDefault
+        return if (navExpansionContainerColor(containerColor(), source.containerColor).isSpecified) delegate else NavTransitions.MiuixDefault
     }
 
     override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier = with(transition()) { transformEntry(scope) }

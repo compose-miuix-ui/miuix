@@ -66,7 +66,7 @@ internal class NavEntry<K : NavKey>(
     /** Bind host-owned presets without wrapping or changing the page content's identity. */
     fun bindTransition(context: NavTransitionHostContext, defaultTransition: NavTransition): NavEntry<K> {
         val transition = transitionOrNull() ?: defaultTransition
-        val bound = context.resolve(transition, key)
+        val bound = context.resolveEntry(transition, key)
         if (bound === transition) return this
         val current = registration
         return NavEntry(current.key, contentKey, current.metadata + (NAV_TRANSITION_METADATA_KEY to bound), current.content)

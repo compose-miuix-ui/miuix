@@ -6,33 +6,35 @@ package top.yukonga.miuix.kmp.nav.transition
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.RememberObserver
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.GraphicsContext
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ObserverModifierNode
+import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.observeReads
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -40,214 +42,275 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.nav.core.LocalNavTransitionScope
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavExpansionState
-import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavSourceRegistry
 import top.yukonga.miuix.kmp.nav.transition.internal.NavCornerShape
 import top.yukonga.miuix.kmp.nav.transition.internal.NavExpansionBinding
+import top.yukonga.miuix.kmp.nav.transition.internal.NavExpansionState
 import top.yukonga.miuix.kmp.nav.transition.internal.NavSourceOutline
-import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
-import kotlin.random.Random
+import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
 
-/** A retained Compose drawing, not a bitmap. Its layer survives source culling while in use. */
+internal enum class NavSourceDrawing { InPlace, Handoff, Covered }
+
+/** A retained Compose drawing whose layer can outlive the source node during an exit. */
 @Stable
-internal class NavTransitionSource(
-    private val graphicsContext: GraphicsContext,
-    private val onReleased: (NavTransitionSource) -> Unit = {},
-) {
-    private var recording: GraphicsLayer? = null
-    private var recordingEnabled = true
-    private var released = false
-    internal val isReleased: Boolean get() = released
-    internal val layer: GraphicsLayer
-        get() {
-            recording?.let { return it }
-            check(!released) { "Cannot record a released source" }
-            return graphicsContext.createGraphicsLayer().also { recording = it }
-        }
+internal class NavTransitionSource(internal val graphicsContext: GraphicsContext) {
+    internal var layer: GraphicsLayer? by mutableStateOf(null)
+        private set
     internal var coordinates: LayoutCoordinates? by mutableStateOf(null)
+        private set
     internal var shape: Shape? by mutableStateOf(null)
     internal var squircleEnabled by mutableStateOf(false)
     internal var density: Density by mutableStateOf(Density(1f))
     internal var layoutDirection by mutableStateOf(LayoutDirection.Ltr)
     private val outline by lazy(LazyThreadSafetyMode.NONE) { NavSourceOutline() }
-    private var owners = 0
     private var references = 0
-    private val drawingOwners = mutableStateMapOf<Any, () -> Boolean>()
+    private var pressed by mutableStateOf(false)
+    private var pendingCapture by mutableStateOf(false)
+    private val drawingOwners = mutableStateMapOf<Any, State<NavSourceDrawing>>()
+    private var windowBounds by mutableStateOf<Rect?>(null)
 
-    internal fun claimDrawing(owner: Any, claimed: () -> Boolean) {
-        drawingOwners[owner] = claimed
+    internal fun claimDrawing(owner: Any, drawing: State<NavSourceDrawing>) {
+        drawingOwners[owner] = drawing
     }
 
     internal fun releaseDrawing(owner: Any) {
         drawingOwners.remove(owner)
     }
 
-    internal val isDrawingClaimed: Boolean get() = drawingOwners.values.any { it() }
-
     internal val hasLivePlacement: Boolean
-        get() = coordinates?.isAttached == true && !released
+        get() = coordinates?.isAttached == true
+
+    internal val size: Size?
+        get() = (coordinates?.size ?: layer?.size)?.let { Size(it.width.toFloat(), it.height.toFloat()) }
 
     internal val currentBounds: Rect?
-        get() = coordinates?.takeIf { it.isAttached && !released }
-            ?.boundsInWindow(clipBounds = false)?.takeIf { it.isFinite && !it.isEmpty }
+        get() = coordinates?.takeIf { it.isAttached }?.boundsInWindow(clipBounds = false)
+            ?.takeIf { it.isFinite && !it.isEmpty }
+
+    internal fun placed(coordinates: LayoutCoordinates) {
+        this.coordinates = coordinates
+        // LayoutCoordinates is mutable in place. Observe geometry changes even when its identity
+        // stays the same (for example when a lazy list scrolls).
+        if (references != 0) windowBounds = currentBounds
+    }
+
+    internal fun observePlacement() {
+        windowBounds
+    }
 
     internal fun sourceShape(corners: NavTransitionCorners): Shape = shape ?: NavCornerShape(corners, squircleEnabled)
 
-    internal fun enableRecording(enabled: Boolean) {
-        recordingEnabled = enabled
-        if (!enabled && references == 0) releaseRecording()
+    internal fun setPressed(pressed: Boolean) {
+        this.pressed = pressed
+        releaseIfUnused()
     }
 
-    private fun releaseRecording() {
-        recording?.let { graphicsContext.releaseGraphicsLayer(it) }
-        recording = null
+    internal fun draw(scope: ContentDrawScope) {
+        var handoff = false
+        for (owner in drawingOwners.values) {
+            when (owner.value) {
+                NavSourceDrawing.Covered -> return
+                NavSourceDrawing.Handoff -> handoff = true
+                NavSourceDrawing.InPlace -> Unit
+            }
+        }
+        if (pendingCapture || pressed || handoff) {
+            val recording = layer ?: graphicsContext.createGraphicsLayer()
+            with(scope) { recording.record { scope.drawContent() } }
+            layer = recording
+            pendingCapture = false
+            if (!handoff) scope.drawLayer(recording)
+        } else {
+            scope.drawContent()
+        }
     }
 
     internal fun contains(positionInWindow: Offset, corners: NavTransitionCorners): Boolean {
         val coordinates = coordinates?.takeIf { it.isAttached } ?: return false
         val position = coordinates.windowToLocal(positionInWindow)
         val size = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
-        if (!outline.update(sourceShape(corners), size, layoutDirection, density)) return false
-        return outline.contains(position)
-    }
-    internal fun attach() {
-        owners++
+        return outline.update(sourceShape(corners), size, layoutDirection, density) && outline.contains(position)
     }
 
     internal fun detach() {
-        check(owners > 0)
-        owners--
-        if (owners == 0) coordinates = null
+        coordinates = null
+        windowBounds = null
+        pressed = false
         releaseIfUnused()
     }
 
     internal fun retain() {
-        check(!released) { "Cannot navigate from a released source" }
         references++
+        if (hasLivePlacement && layer == null) pendingCapture = true
     }
 
     internal fun release() {
         check(references > 0)
         references--
-        if (!recordingEnabled && references == 0) releaseRecording()
         releaseIfUnused()
     }
 
-    internal fun releaseIfUnused() {
-        if (owners == 0 && references == 0 && !released) {
-            released = true
-            releaseRecording()
-            onReleased(this)
-        }
+    private fun releaseIfUnused() {
+        if (references != 0 || pressed) return
+        pendingCapture = false
+        val unused = layer
+        layer = null
+        windowBounds = null
+        if (unused != null) graphicsContext.releaseGraphicsLayer(unused)
     }
 
-    /**
-     * Validates the outline before retaining drawing resources. Unsupported shapes use the
-     * host's ordinary navigation instead of failing during an animation's draw traversal.
-     */
-    fun capture(
-        cornerRadius: Dp = 16.dp,
-        containerColor: Color = Color.Unspecified,
-        corners: NavTransitionCorners = NavTransitionCorners(cornerRadius),
-    ): NavTransitionAnchor? {
+    /** Validate geometry before retaining any drawing resources. */
+    internal fun capture(cornerRadius: Dp, containerColor: Color, corners: NavTransitionCorners): NavTransitionAnchor? {
+        val coordinates = coordinates?.takeIf { it.isAttached } ?: return null
+        val bounds = currentBounds ?: return null
+        val size = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
         val sourceShape = sourceShape(corners)
-        val size = Size(layer.size.width.toFloat(), layer.size.height.toFloat())
         if (!outline.update(sourceShape, size, layoutDirection, density)) return null
-        return NavTransitionAnchor(
-            bounds = currentBounds ?: Rect.Zero,
-            cornerRadius = cornerRadius,
-            containerColor = containerColor,
-            corners = corners,
-            shape = sourceShape,
-        ).also {
+        return NavTransitionAnchor(bounds, cornerRadius, containerColor, corners, sourceShape).also {
             it.source = this
             it.retain()
         }
     }
 }
 
-/** Match the component's [shape]: a convex outline or a star-shaped polygon, without holes. */
-@Composable
-internal fun rememberNavTransitionSource(shape: Shape? = null, recordingEnabled: Boolean = true): NavTransitionSource {
-    val graphicsContext = LocalGraphicsContext.current
-    val registry = LocalNavSourceRegistry.current
-    val identity = rememberSaveable { Random.nextLong().toString(16) }
-    val squircleEnabled = isSquircleEnabled()
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val source = remember(graphicsContext, registry, identity) {
-        NavSourceOwner(registry?.acquire(identity, graphicsContext) ?: NavTransitionSource(graphicsContext))
-    }.source
-    SideEffect {
-        source.shape = shape
-        source.squircleEnabled = squircleEnabled
-        source.density = density
-        source.layoutDirection = layoutDirection
-        source.enableRecording(recordingEnabled)
-    }
-    return source
-}
-
-private class NavSourceOwner(val source: NavTransitionSource) : RememberObserver {
-    override fun onRemembered() = source.attach()
-    override fun onForgotten() = source.detach()
-    override fun onAbandoned() = source.releaseIfUnused()
-}
-
-/** Attach after outer padding and before the component's surface/clip; one source per component. */
-internal fun Modifier.navTransitionSource(source: NavTransitionSource, recordingEnabled: Boolean = true): Modifier = this
-    .onGloballyPositioned { source.coordinates = it }
-    .drawWithContent {
-        if (recordingEnabled) {
-            // Keep the endpoint up to date while its destination owns drawing.
-            source.layer.record { this@drawWithContent.drawContent() }
-            if (!source.isDrawingClaimed) drawLayer(source.layer)
-        } else {
-            drawContent()
-        }
-    }
-
 /**
  * Binds this component to [route] for [NavTransitions.Expansion]. Navigate using the application's
- * normal click callback; the nearest NavDisplay captures the source and manages its lifetime.
- * Supply the component's background and outline (convex or star-shaped polygon, without holes). Multiple components may bind the same route;
- * the pressed component wins. A unique binding can also serve programmatic navigation.
+ * normal click callback. Attach after outer padding and before the component's surface/clip.
+ * Supply its background and outline (convex or star-shaped polygon, without holes). When several
+ * components bind the same route, the pressed component wins.
  */
-@Suppress("ktlint:compose:modifier-composed-check")
 fun Modifier.navTransitionSource(
     route: NavKey,
     cornerRadius: Dp = 16.dp,
     containerColor: Color = Color.Unspecified,
     corners: NavTransitionCorners = NavTransitionCorners(cornerRadius),
     shape: Shape? = null,
-): Modifier = composed {
-    val state = checkNotNull(LocalNavExpansionState.current) { "Route-bound navigation sources require a NavDisplay" }
-    val origin = checkNotNull(LocalNavTransitionScope.current.entryKey) { "Navigation sources must belong to a destination entry" }
-    val recordingEnabled = state.usesExpansion(route)
-    val source = rememberNavTransitionSource(shape, recordingEnabled)
-    val binding = remember(origin, route, source, cornerRadius, containerColor, corners) {
-        NavExpansionBinding(origin, route, source, cornerRadius, containerColor, corners)
+): Modifier = this then NavTransitionSourceElement(route, cornerRadius, containerColor, corners, shape)
+
+private data class NavTransitionSourceElement(
+    val route: NavKey,
+    val cornerRadius: Dp,
+    val containerColor: Color,
+    val corners: NavTransitionCorners,
+    val shape: Shape?,
+) : ModifierNodeElement<NavTransitionSourceNode>() {
+    override fun create() = NavTransitionSourceNode(this)
+
+    override fun update(node: NavTransitionSourceNode) {
+        node.element = this
+        node.refresh()
     }
-    DisposableEffect(state, binding) {
-        state.bind(binding)
-        onDispose { state.unbind(binding) }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "navTransitionSource"
+        properties["route"] = route
     }
-    if (!recordingEnabled) return@composed this.navTransitionSource(source, recordingEnabled = false)
-    this.navTransitionSource(source).pointerInput(state, binding) {
-        awaitEachGesture {
-            // Observe without consuming or replacing the component's click/press indication.
-            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-            state.activate(binding)
-            try {
-                if (waitForUpOrCancellation(pass = PointerEventPass.Initial) != null) {
-                    // Let the component's normal click callback run before capturing its route.
-                    awaitPointerEvent(PointerEventPass.Final)
-                }
-            } finally {
-                state.deactivate(binding)
+}
+
+private class NavTransitionSourceNode(var element: NavTransitionSourceElement) :
+    DelegatingNode(),
+    CompositionLocalConsumerModifierNode,
+    ObserverModifierNode {
+    private var recording: NavSourceRecordingNode? = null
+
+    override fun onAttach() = refresh()
+
+    override fun onObservedReadsChanged() = refresh()
+
+    override fun onReset() = clearRecording()
+
+    override fun onDetach() = clearRecording()
+
+    fun refresh() {
+        if (!isAttached) return
+        observeReads {
+            val state = checkNotNull(currentValueOf(LocalNavExpansionState)) { "Route-bound navigation sources require a NavDisplay" }
+            if (!state.usesExpansion(element.route)) {
+                clearRecording()
+                return@observeReads
             }
+            val origin = checkNotNull(currentValueOf(LocalNavTransitionScope).entryKey) { "Navigation sources must belong to a destination entry" }
+            val context = currentValueOf(LocalGraphicsContext)
+            val old = recording
+            val node = if (old != null && old.matches(state, origin, element.route, context)) {
+                old
+            } else {
+                clearRecording()
+                val source = NavTransitionSource(context)
+                delegate(NavSourceRecordingNode(state, origin, element.route, source)).also { recording = it }
+            }
+            node.update(element)
+            node.source.density = currentValueOf(LocalDensity)
+            node.source.layoutDirection = currentValueOf(LocalLayoutDirection)
+            node.source.squircleEnabled = currentValueOf(LocalSquircleEnabled) && isRuntimeShaderSupported()
         }
+    }
+
+    private fun clearRecording() {
+        recording?.let {
+            it.release()
+            undelegate(it)
+        }
+        recording = null
+    }
+}
+
+private class NavSourceRecordingNode(
+    private val state: NavExpansionState,
+    private val origin: NavKey,
+    private val route: NavKey,
+    val source: NavTransitionSource,
+) : DelegatingNode(),
+    GlobalPositionAwareModifierNode,
+    DrawModifierNode {
+    private lateinit var binding: NavExpansionBinding
+
+    init {
+        delegate(
+            SuspendingPointerInputModifierNode {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    val pressedBinding = binding
+                    state.activate(pressedBinding)
+                    source.setPressed(true)
+                    try {
+                        if (waitForUpOrCancellation(pass = PointerEventPass.Initial) != null) {
+                            awaitPointerEvent(PointerEventPass.Final)
+                        }
+                    } finally {
+                        state.deactivate(pressedBinding)
+                        source.setPressed(false)
+                    }
+                }
+            },
+        )
+    }
+
+    fun matches(state: NavExpansionState, origin: NavKey, route: NavKey, context: GraphicsContext): Boolean = this.state === state && this.origin == origin && this.route == route && source.graphicsContext === context
+
+    fun update(element: NavTransitionSourceElement) {
+        if (::binding.isInitialized) {
+            binding.cornerRadius = element.cornerRadius
+            binding.containerColor = element.containerColor
+            binding.corners = element.corners
+        } else {
+            binding = NavExpansionBinding(origin, route, source, element.cornerRadius, element.containerColor, element.corners)
+            state.bind(binding)
+        }
+        source.shape = element.shape
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        source.placed(coordinates)
+    }
+
+    override fun ContentDrawScope.draw() = source.draw(this)
+
+    fun release() {
+        if (::binding.isInitialized) state.unbind(binding)
+        source.detach()
     }
 }

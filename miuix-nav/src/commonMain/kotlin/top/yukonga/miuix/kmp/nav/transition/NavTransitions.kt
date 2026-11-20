@@ -40,6 +40,7 @@ object NavTransitions {
      * from [containerColor], the host's backdrop, or the source, in that order. Without a live source
      * or an opaque color, pages use [MiuixDefault]. The host's corner-clip radius supplies the final
      * moving-frame radius. Settled pages have no transition clip.
+     * On return, an unavailable or fully clipped source uses a centered shrink and fade.
      */
     fun expansion(
         containerColor: Color = Color.Unspecified,
@@ -150,7 +151,7 @@ private fun expandTransition(
     require(targetCornerRadius.value.isFinite() && targetCornerRadius >= 0.dp) {
         "targetCornerRadius must be finite and non-negative"
     }
-    return NavExpandTransition(anchor, initialScale, cornerRadius, targetCornerRadius, containerColor, motion)
+    return NavExpandTransition(anchor, initialScale, cornerRadius, { targetCornerRadius }, { containerColor }, motion)
 }
 
 /**

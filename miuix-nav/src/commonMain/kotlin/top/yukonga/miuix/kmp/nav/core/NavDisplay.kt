@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -83,14 +84,13 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavExpansionState
-import top.yukonga.miuix.kmp.nav.transition.internal.LocalNavSourceRegistry
 import top.yukonga.miuix.kmp.nav.transition.internal.NavEntryRenderer
 import top.yukonga.miuix.kmp.nav.transition.internal.NavExpansionState
 import top.yukonga.miuix.kmp.nav.transition.internal.NavHostTransition
-import top.yukonga.miuix.kmp.nav.transition.internal.NavSourceRegistry
 import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostBinding
 import top.yukonga.miuix.kmp.nav.transition.internal.NavTransitionHostContext
 import top.yukonga.miuix.kmp.squircle.absoluteSquircleClip
+import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import kotlin.reflect.KClass
 
 /**
@@ -120,6 +120,7 @@ internal const val NAV_SWIPE_DISMISS_METADATA_KEY: String = "top.yukonga.miuix.k
  */
 class NavEntryBuilder {
     private val factories: MutableMap<KClass<*>, (NavKey) -> NavEntry<*>> = mutableMapOf()
+    private val transitions = mutableMapOf<KClass<*>, NavTransition?>()
 
     /**
      * Registers how to render keys of type [T].
@@ -152,7 +153,7 @@ class NavEntryBuilder {
         metadata: Map<String, Any> = emptyMap(),
         noinline content: @Composable (T) -> Unit,
     ) {
-        register(T::class) { key ->
+        register(T::class, transition ?: metadata[NAV_TRANSITION_METADATA_KEY] as? NavTransition) { key ->
             @Suppress("UNCHECKED_CAST")
             val typed = key as T
             var mergedMetadata = metadata
@@ -172,8 +173,16 @@ class NavEntryBuilder {
      * reified [entry] can call it across the inline boundary; not intended for direct use.
      */
     @PublishedApi
+    internal fun register(clazz: KClass<*>, transition: NavTransition?, factory: (NavKey) -> NavEntry<*>) {
+        factories[clazz] = factory
+        transitions[clazz] = transition
+    }
+
+    // Retain the hook called by already compiled versions of the inline entry DSL.
+    @PublishedApi
     internal fun register(clazz: KClass<*>, factory: (NavKey) -> NavEntry<*>) {
         factories[clazz] = factory
+        transitions.remove(clazz)
     }
 
     /**
@@ -183,10 +192,23 @@ class NavEntryBuilder {
      * no portable superclass walk). Throws if a key has no registered [entry] of its exact type.
      */
     @PublishedApi
-    internal fun build(): (NavKey) -> NavEntry<*> = { key ->
-        val factory = factories[key::class]
-            ?: error("No entry { } registered for ${key::class.simpleName ?: key::class}")
-        factory(key)
+    internal fun build(): (NavKey) -> NavEntry<*> = buildRegistrations()::createEntry
+
+    internal fun buildRegistrations(): RegisteredNavEntries = RegisteredNavEntries(factories.toMap(), transitions.toMap())
+}
+
+internal class RegisteredNavEntries(
+    private val factories: Map<KClass<*>, (NavKey) -> NavEntry<*>>,
+    private val transitions: Map<KClass<*>, NavTransition?>,
+) {
+    fun createEntry(key: NavKey): NavEntry<*> = factories[key::class]?.invoke(key)
+        ?: error("No entry { } registered for ${key::class.simpleName ?: key::class}")
+
+    fun transitionFor(key: NavKey, default: NavTransition): NavTransition? {
+        val type = key::class
+        if (type in transitions) return transitions[type] ?: default
+        val factory = factories[type] ?: return null
+        return factory(key).transitionOrNull() ?: default
     }
 }
 
@@ -355,7 +377,6 @@ private fun NavDisplayLayout(
     modifier: Modifier = Modifier,
 ) {
     val presentation = rememberNavPresentation(backStack.lastIndex)
-    val sourceRegistry = remember { NavSourceRegistry() }
     val entryRenderers = remember { mutableStateMapOf<Any, NavEntryRenderer>() }
     val stateHolder = rememberNavSaveableStateHolder()
     val viewModelStores = rememberNavEntryViewModelStores()
@@ -395,7 +416,7 @@ private fun NavDisplayLayout(
     // signal that re-evaluates the visible window and the entry hosts.
     val indexByContentKey = remember { mutableStateMapOf<Any, Int>() }
     remember(currentKeyList, entryProvider) {
-        hostContext.expansion.prepare(currentKeyList)
+        Snapshot.withoutReadObservation { hostContext.expansion.prepare(currentKeyList) }
         val currentEntries = currentKeyList.map { entryProvider(it) }
         val newContentKeys = currentEntries.map { it.contentKey }
         // Content keys are the entry identity everywhere downstream (presentation reconcile,
@@ -797,8 +818,7 @@ private fun NavDisplayLayout(
                         val scrimScope = LiveNavTransitionScope(
                             presentation = presentation,
                             entryIndex = entryIndex - 1,
-                            isRemoving = belowEntry?.presentation?.isRemoving == true,
-                            change = presentation.change,
+                            isRemoving = { belowEntry?.presentation?.isRemoving == true },
                             layoutSize = layoutSize,
                             layoutDirection = layoutDirection,
                             density = density,
@@ -822,12 +842,10 @@ private fun NavDisplayLayout(
                         presentation = presentation,
                         stateHolder = stateHolder,
                         viewModelStores = viewModelStores,
-                        sourceRegistry = sourceRegistry,
                         entryRenderers = entryRenderers,
                         ownTransition = ownTransition,
                         upperTransition = upperTransition,
                         hasUpperEntry = upperEntry != null,
-                        change = presentation.change,
                         effects = effects,
                         layoutSize = layoutSize,
                         layoutDirection = layoutDirection,
@@ -889,12 +907,10 @@ private fun NavEntryHost(
     presentation: NavPresentation,
     stateHolder: NavSaveableStateHolder,
     viewModelStores: NavEntryViewModelStores,
-    sourceRegistry: NavSourceRegistry,
     entryRenderers: SnapshotStateMap<Any, NavEntryRenderer>,
     ownTransition: NavTransition,
     upperTransition: NavTransition,
     hasUpperEntry: Boolean,
-    change: NavChange,
     effects: NavDisplayEffects,
     layoutSize: IntSize,
     layoutDirection: LayoutDirection,
@@ -951,16 +967,17 @@ private fun NavEntryHost(
     // the top (d <= 0), the upper neighbour's transition while covered (0 < d). The per-frame
     // visual is then a pure deferred read inside the transition's own graphicsLayer.
     val activeTransition = if ((depthBuckets and DEPTH_BUCKET_GOVERNS_OWN) != 0) ownTransition else upperTransition
+    val upperEntryState = rememberUpdatedState(hasUpperEntry)
+    val squircleEnabled = isSquircleEnabled()
     val transitionScope = remember(
         presentation,
         entryIndex,
-        entry.presentation.isRemoving,
-        change,
+        entry,
         layoutSize,
         layoutDirection,
         density,
         entry.key,
-        hasUpperEntry,
+        squircleEnabled,
         layoutPosition,
         windowPositionToLocal,
         hostCoordinates,
@@ -968,13 +985,13 @@ private fun NavEntryHost(
         LiveNavTransitionScope(
             presentation = presentation,
             entryIndex = entryIndex,
-            isRemoving = entry.presentation.isRemoving,
-            change = change,
+            isRemoving = { entry.presentation.isRemoving },
             layoutSize = layoutSize,
             layoutDirection = layoutDirection,
             density = density,
             entryKey = entry.key,
-            hasUpperEntry = hasUpperEntry,
+            hasUpperEntry = { upperEntryState.value },
+            squircleEnabled = squircleEnabled,
             layoutPosition = layoutPosition,
             windowPositionToLocal = windowPositionToLocal,
             hostCoordinates = hostCoordinates,
@@ -987,16 +1004,20 @@ private fun NavEntryHost(
         Modifier.transformContent(transitionScope)
     }
     val renderer = (ownTransition as? NavHostTransition)?.rememberRenderer(transitionScope)
-    DisposableEffect(entry.contentKey, renderer, entryRenderers) {
-        if (renderer != null) entryRenderers[entry.contentKey] = renderer
-        onDispose {
-            if (renderer != null) {
+    if (renderer != null) {
+        DisposableEffect(entry.contentKey, renderer, entryRenderers) {
+            entryRenderers[entry.contentKey] = renderer
+            onDispose {
                 if (entryRenderers[entry.contentKey] === renderer) entryRenderers.remove(entry.contentKey)
             }
         }
+        LaunchedEffect(renderer) { renderer.trackLifetime() }
     }
-    LaunchedEffect(renderer) { renderer?.trackLifetime() }
-    val renderingModifier = if (renderer == null) Modifier else Modifier.drawWithContent { renderer.drawContent(this) }
+    val renderingModifier = if (renderer == null) {
+        Modifier
+    } else {
+        Modifier.drawWithContent { renderer.drawContent(this) }.graphicsLayer { with(renderer) { transformPage() } }
+    }
 
     val clipModifier = if ((depthBuckets and DEPTH_BUCKET_CLIP_CORNERS) != 0 && !activeTransition.handlesCornerClip(transitionScope)) {
         // Squircle-clip the transitioning top entry. The radius comes from the effects, so callers
@@ -1044,20 +1065,22 @@ private fun NavEntryHost(
         }
     }
 
-    Box(modifier = entryModifier.then(clipModifier).then(blockInputModifier).then(opaqueInputModifier)) {
-        Box(modifier = contentModifier.then(renderingModifier), propagateMinConstraints = true) {
-            ProvideNavEntryBackScope(entryDispatcherOwner) {
-                stateHolder.EntryStateContent(entry.contentKey) {
-                    val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
-                    ProvideNavEntryViewModelStore(vmOwner) {
-                        ProvideNavEntryLifecycle(lifecycleOwner) {
-                            movableContent {
-                                CompositionLocalProvider(
-                                    LocalNavTransitionScope provides transitionScope,
-                                    LocalNavSourceRegistry provides sourceRegistry,
-                                ) {
-                                    entry.Content()
-                                }
+    Box(
+        modifier = entryModifier
+            .then(clipModifier)
+            .then(blockInputModifier)
+            .then(opaqueInputModifier)
+            .then(contentModifier)
+            .then(renderingModifier),
+    ) {
+        ProvideNavEntryBackScope(entryDispatcherOwner) {
+            stateHolder.EntryStateContent(entry.contentKey) {
+                val vmOwner = rememberNavEntryViewModelStoreOwner(viewModelStores, entry.contentKey)
+                ProvideNavEntryViewModelStore(vmOwner) {
+                    ProvideNavEntryLifecycle(lifecycleOwner) {
+                        movableContent {
+                            CompositionLocalProvider(LocalNavTransitionScope provides transitionScope) {
+                                entry.Content()
                             }
                         }
                     }
@@ -1090,7 +1113,8 @@ fun NavDisplay(
     effects: NavDisplayEffects = NavDisplayEffects(),
     content: NavEntryBuilder.() -> Unit,
 ) {
-    val provider = remember(content) { entryProvider(content) }
+    val registrations = remember(content) { NavEntryBuilder().apply(content).buildRegistrations() }
+    val provider = remember(registrations) { registrations::createEntry }
     NavDisplay(
         backStack = backStack,
         entryProvider = provider,
@@ -1098,6 +1122,7 @@ fun NavDisplay(
         onBack = onBack,
         transition = transition,
         effects = effects,
+        sourceTransition = registrations::transitionFor,
     )
 }
 
@@ -1152,20 +1177,25 @@ internal fun NavDisplay(
     onBack: () -> Unit = { backStack.removeLastOrNull() },
     transition: NavTransition = NavTransitions.MiuixDefault,
     effects: NavDisplayEffects = NavDisplayEffects(),
+    sourceTransition: ((NavKey, NavTransition) -> NavTransition?)? = null,
 ) {
     require(backStack.isNotEmpty()) { "NavDisplay back stack cannot be empty" }
     val currentProvider = rememberUpdatedState(entryProvider)
     val currentTransition = rememberUpdatedState(transition)
+    val currentSourceTransition = rememberUpdatedState(sourceTransition)
     val expansionState = remember(backStack) {
         NavExpansionState(backStack) { key ->
-            val target = currentProvider.value(key).transitionOrNull() ?: currentTransition.value
+            val default = currentTransition.value
+            val lookup = currentSourceTransition.value
+            val target = if (lookup != null) lookup(key, default) else currentProvider.value(key).transitionOrNull() ?: default
             (target as? NavTransitionHostBinding)?.needsSource == true
         }
     }
     DisposableEffect(expansionState) {
         onDispose { expansionState.dispose() }
     }
-    val hostContext = remember(expansionState, effects) { NavTransitionHostContext(expansionState, effects) }
+    val currentEffects = rememberUpdatedState(effects)
+    val hostContext = remember(expansionState) { NavTransitionHostContext(expansionState) { currentEffects.value } }
     val boundProvider = remember(entryProvider, hostContext, transition) {
         { key: NavKey -> entryProvider(key).bindTransition(hostContext, transition) }
     }

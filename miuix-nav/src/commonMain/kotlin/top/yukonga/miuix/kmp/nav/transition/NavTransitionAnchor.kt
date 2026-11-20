@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.nav.core.LiveNavTransitionScope
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.transition.internal.NavCornerShape
+import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandSourceBounds
 
 /** Physical source corners, clockwise from top-left. Use zero for square joining corners. */
 @Immutable
@@ -77,10 +78,20 @@ internal class NavTransitionAnchor(
     internal fun boundsInHost(scope: NavTransitionScope): Rect {
         // Read the actual source in the host's coordinate space on both push and pop. A source
         // inside a still-settling parent must not keep the window bounds captured by its click.
+        source?.observePlacement()
         val live = source?.coordinates?.let { (scope as? LiveNavTransitionScope)?.boundsInHost(it) }
         if (live != null) return live
         val bounds = source?.currentBounds ?: openingBounds
         return Rect(scope.windowToLocal(bounds.topLeft), scope.windowToLocal(bounds.bottomRight))
+    }
+
+    internal fun visibleSourceBounds(scope: LiveNavTransitionScope): NavExpandSourceBounds? {
+        val coordinates = source?.coordinates ?: return null
+        val bounds = scope.boundsInHost(coordinates) ?: return null
+        val viewport = Rect(0f, 0f, scope.layoutSize.width.toFloat(), scope.layoutSize.height.toFloat())
+        val visible = scope.boundsInHost(coordinates, clipBounds = true)?.intersect(viewport)
+            ?.takeUnless { it.isEmpty } ?: return null
+        return NavExpandSourceBounds(bounds, visible)
     }
 
     internal fun shapeFor(scope: NavTransitionScope, squircleEnabled: Boolean): Shape = (if (scope.isReturning()) source?.sourceShape(corners) else openingShape)
