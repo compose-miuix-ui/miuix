@@ -56,10 +56,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -1025,19 +1029,35 @@ fun AppPager(
         flingBehavior = flingBehavior,
         beyondViewportPageCount = 4,
         pageContent = { page ->
-            // All pages stay composed; only those in view follow the sidebar's morph frame by frame.
-            val insets = LocalAppPageInsets.current
-            val pageInsets = remember(insets, pagerState, page) {
-                val hidden = computedStateOf {
+            // Pages out of view don't follow a sidebar's morph.
+            val hidden = remember(pagerState, page) {
+                computedStateOf {
                     abs(page - pagerState.currentPage - pagerState.currentPageOffsetFraction) >= 1f
                 }
-                insets.whenHidden { hidden.value }
             }
+            val insets = LocalAppPageInsets.current
+            val pageInsets = remember(insets, hidden) { insets.whenHidden { hidden.value } }
+            val frozenConstraints = remember(hidden) { Modifier.keepConstraintsWhile { hidden.value } }
             CompositionLocalProvider(LocalAppPageInsets provides pageInsets) {
-                AppPage(page = page, padding = padding)
+                Box(modifier = frozenConstraints) {
+                    AppPage(page = page, padding = padding)
+                }
             }
         },
     )
+}
+
+/** Measures with the last constraints seen while [frozen] was false. */
+private fun Modifier.keepConstraintsWhile(frozen: () -> Boolean): Modifier {
+    var last: Constraints? = null
+    return layout { measurable, constraints ->
+        val held = last
+        val used = if (held != null && frozen()) held else constraints.also { last = it }
+        val placeable = measurable.measure(used)
+        layout(constraints.constrainWidth(placeable.width), constraints.constrainHeight(placeable.height)) {
+            placeable.place(0, 0)
+        }
+    }
 }
 
 @Composable
