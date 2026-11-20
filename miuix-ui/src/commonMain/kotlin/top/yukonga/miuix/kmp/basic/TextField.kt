@@ -184,6 +184,19 @@ fun TextField(
  * @param interactionSource The interaction source to be applied to the [TextField].
  * @param cursorBrush The brush to be used for the cursor.
  */
+@Deprecated(
+    "Use the TextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun TextField(
     value: TextFieldValue,
@@ -290,6 +303,19 @@ fun TextField(
  * @param interactionSource The interaction source to be applied to the [TextField].
  * @param cursorBrush The brush to be used for the cursor.
  */
+@Deprecated(
+    "Use the TextField(state: TextFieldState, ...) overload instead. To migrate: " +
+        "create a TextFieldState via rememberTextFieldState(initialText) in composition or " +
+        "TextFieldState(initialText) in a state holder; read text from state.text and update " +
+        "it programmatically via state.edit { ... } or state.setTextAndPlaceCursorAtEnd(text); " +
+        "observe text changes for side effects via snapshotFlow { state.text }.collect { ... }; " +
+        "and replace onValueChange input filtering with InputTransformation, visualTransformation " +
+        "with OutputTransformation, singleLine/maxLines/minLines with TextFieldLineLimits, and " +
+        "keyboardActions with onKeyboardAction. See " +
+        "https://developer.android.com/develop/ui/compose/text/migrate-state-based for full " +
+        "migration guidance.",
+)
+@Suppress("DEPRECATION")
 @Composable
 fun TextField(
     value: String,

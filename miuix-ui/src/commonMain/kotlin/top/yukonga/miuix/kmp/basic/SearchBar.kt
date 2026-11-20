@@ -236,6 +236,7 @@ fun InputField(
         Modifier.pointerInput(Unit) { detectTapGestures { currentOnExpandedChange(true) } }
     }
 
+    @Suppress("DEPRECATION")
     BasicTextField(
         value = query,
         onValueChange = currentOnQueryChange,

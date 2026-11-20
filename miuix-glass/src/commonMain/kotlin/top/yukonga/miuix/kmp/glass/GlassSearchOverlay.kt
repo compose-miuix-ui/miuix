@@ -28,18 +28,18 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -221,14 +221,14 @@ fun GlassSearchOverlay(
         transitionSpec = { tween(150, delayMillis = if (targetState) 100 else 0, easing = LinearEasing) },
         label = "glassSearchCancelMaterial",
     ) { if (it) 1f else 0f }
-    var query by remember { mutableStateOf("") }
+    val queryState = rememberTextFieldState()
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
     val active = expanded || transition.currentState || transition.isRunning
     LaunchedEffect(expanded) {
-        query = ""
+        queryState.clearText()
         if (expanded) {
             focusRequester.requestFocus()
             keyboard?.show()
@@ -298,7 +298,7 @@ fun GlassSearchOverlay(
                     .then(if (contentBackdrop != null) Modifier.layerBackdrop(contentBackdrop) else Modifier)
                     .background(colors.surface),
             ) {
-                content(query)
+                content(queryState.text.toString())
             }
             if (contentBackdrop != null) {
                 val blendColors = remember(colors.surface) {
@@ -385,14 +385,13 @@ fun GlassSearchOverlay(
                     .graphicsLayer { translationY = -topInsets.getTop(this) * (1f - progress.value) },
             ) {
                 BasicTextField(
-                    value = query,
-                    onValueChange = { query = it },
+                    state = queryState,
                     enabled = expanded,
-                    singleLine = true,
+                    lineLimits = TextFieldLineLimits.SingleLine,
                     textStyle = MiuixTheme.textStyles.body1.copy(color = colors.onSurface),
                     cursorBrush = SolidColor(colors.primary),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+                    onKeyboardAction = { keyboard?.hide() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .layout { measurable, constraints ->
@@ -405,7 +404,7 @@ fun GlassSearchOverlay(
                         }
                         .height(GlassSearchOverlayDefaults.BarHeight)
                         .focusRequester(focusRequester),
-                    decorationBox = { field ->
+                    decorator = { field ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -438,13 +437,13 @@ fun GlassSearchOverlay(
                                     tint = mutedColor,
                                 )
                                 Box(Modifier.weight(1f)) {
-                                    if (query.isEmpty()) Text(label, color = mutedColor, style = MiuixTheme.textStyles.body1)
+                                    if (queryState.text.isEmpty()) Text(label, color = mutedColor, style = MiuixTheme.textStyles.body1)
                                     field()
                                 }
-                                if (query.isNotEmpty()) {
+                                if (queryState.text.isNotEmpty()) {
                                     IconButton(
                                         onClick = {
-                                            query = ""
+                                            queryState.clearText()
                                             focusRequester.requestFocus()
                                         },
                                         modifier = Modifier.size(24.dp),

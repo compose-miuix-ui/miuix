@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.maxLengthReject
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.Composable
@@ -603,7 +603,7 @@ private fun DensityScaleDialog(
         GlassTextField(
             state = textState,
             modifier = Modifier.fillMaxWidth(),
-            inputTransformation = DigitsOnlyTransformation.maxLength(3),
+            inputTransformation = DigitsOnlyTransformation.maxLengthReject(3),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             trailingIcon = {
                 Text(
