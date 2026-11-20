@@ -389,7 +389,7 @@ fun GlassTopAppBar(
         computedStateOf { contentScrolled || materialProgress.value > 0f }
     }
     val rawBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
-    val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { keepMaterial && rawBackdrop != null }
+    val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { rawBackdrop != null }
     var backgroundCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var buttonBackdropConsumers by remember { mutableIntStateOf(0) }
     val hasButtonBackdropConsumers = buttonBackdropConsumers > 0

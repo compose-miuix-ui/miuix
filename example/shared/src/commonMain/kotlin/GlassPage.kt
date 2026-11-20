@@ -246,7 +246,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassTabRowDefaults.material(),
             )
@@ -257,7 +257,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassTabRowDefaults.material(),
                 height = GlassTabRowDefaults.NeutralHeight,
@@ -270,7 +270,7 @@ fun GlassPage(padding: PaddingValues) {
                 backdrop = tabBackdrop,
                 style = style,
                 alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 1f,
+                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
                 stroke = stroke,
                 material = material ?: GlassSegmentedTabRowDefaults.material(),
             )

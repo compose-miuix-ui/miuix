@@ -391,7 +391,7 @@ fun GlassTabRow(
                         },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (showGlass && resolvedBackdrop != null) {
+                    if (resolvedBackdrop != null) {
                         val glassModifier = if (underlayMaterial != null) {
                             Modifier.glassOnActionBar(
                                 backdrop = resolvedBackdrop,
@@ -401,6 +401,7 @@ fun GlassTabRow(
                                 material = resolvedMaterial,
                                 underlayMaterial = underlayMaterial,
                                 stroke = stroke,
+                                enabled = showGlass,
                             )
                         } else {
                             Modifier.glass(
@@ -410,13 +411,14 @@ fun GlassTabRow(
                                 alpha = alpha,
                                 material = resolvedMaterial,
                                 stroke = stroke,
+                                enabled = showGlass,
                                 shading = false,
                             )
                         }
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
-                                .graphicsLayer { this.alpha = rampState.value }
+                                .graphicsLayer { this.alpha = if (showGlass) rampState.value else 0f }
                                 .then(glassModifier),
                         )
                     }
@@ -706,7 +708,7 @@ fun GlassSegmentedTabRow(
             .clip(trackShape)
             .drawBehind { drawRect(trackColor) },
     ) {
-        if (showGlass && resolvedBackdrop != null) {
+        if (resolvedBackdrop != null) {
             val materialSurface = if (underlayMaterial != null) {
                 Modifier.glassOnActionBar(
                     backdrop = resolvedBackdrop,
@@ -716,6 +718,7 @@ fun GlassSegmentedTabRow(
                     material = resolvedMaterial,
                     underlayMaterial = underlayMaterial,
                     stroke = stroke,
+                    enabled = showGlass,
                 )
             } else {
                 Modifier.glass(
@@ -725,13 +728,14 @@ fun GlassSegmentedTabRow(
                     alpha = alpha,
                     material = resolvedMaterial,
                     stroke = stroke,
+                    enabled = showGlass,
                     shading = false,
                 )
             }
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer { this.alpha = rampState.value }
+                    .graphicsLayer { this.alpha = if (showGlass) rampState.value else 0f }
                     .then(materialSurface),
             )
         }
