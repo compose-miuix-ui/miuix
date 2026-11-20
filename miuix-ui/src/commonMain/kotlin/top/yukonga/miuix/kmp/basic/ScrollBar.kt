@@ -351,7 +351,7 @@ object ScrollBarDefaults {
     val CornerRadius: Dp = Dp.Unspecified
     val FadeDelayMillis = 1000
     val FadeDurationMillis = 500
-    val TouchTargetWidth: Dp = 48.dp
+    val TouchTargetWidth: Dp = 24.dp
     val DragThumbWidth: Dp = 6.dp
     val ThumbAlpha = 0.1f
     val DragThumbAlpha = 0.3f
