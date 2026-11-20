@@ -253,7 +253,9 @@ fun AdaptiveTopAppBar(
         val surfaceColor = MiuixTheme.colorScheme.surface
         val bandBrush = remember(surfaceColor) { GlassTopAppBarDefaults.bandBrush(surfaceColor) }
         val contentScrolled by remember(scrollBehavior, isContentScrolled) {
-            computedStateOf { isContentScrolled ?: (scrollBehavior.state.contentOffset < -1f) }
+            computedStateOf {
+                isContentScrolled ?: (scrollBehavior.state.contentOffset < -1f || scrollBehavior.state.overscrollOffset < -1f)
+            }
         }
         GlassTopAppBar(
             title = title,

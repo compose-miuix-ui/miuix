@@ -374,4 +374,62 @@ class GlassTopAppBarBackdropTest {
         val belowBarY = with(density) { 165.dp.roundToPx() }
         assertColorNear(Color.Blue, scrolled[20, belowBarY], tolerance = 3f / 255f)
     }
+
+    @Test
+    fun progressiveBandActivatesDuringBottomOverscrollWhenIsContentScrolledIsFalse() = runComposeUiTest {
+        val scrollState = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    Box(Modifier.size(400.dp, 300.dp)) {
+                        Column(Modifier.matchParentSize().layerBackdrop(backdrop)) {
+                            repeat(6) { index ->
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(30.dp)
+                                        .background(if (index % 2 == 0) Color.Red else Color.Blue),
+                                )
+                            }
+                        }
+                        GlassTopAppBar(
+                            title = "",
+                            isContentScrolled = false,
+                            progressiveBlur = true,
+                            backdrop = backdrop,
+                            scrollBehavior = MiuixScrollBehavior(scrollState),
+                            defaultWindowInsetsPadding = false,
+                        )
+                    }
+                }
+            }
+        }
+        val stripe1Y = with(density) { 15.dp.roundToPx() }
+        val stripe2Y = with(density) { 45.dp.roundToPx() }
+        val belowBarY = with(density) { 165.dp.roundToPx() }
+
+        val atRest = onRoot().captureToImage().toPixelMap()
+        assertColorNear(Color.Red, atRest[20, stripe1Y], tolerance = 3f / 255f)
+        assertColorNear(Color.Blue, atRest[20, stripe2Y], tolerance = 3f / 255f)
+
+        runOnIdle { scrollState.overscrollOffset = 80f }
+        val topOverscroll = onRoot().captureToImage().toPixelMap()
+        assertColorNear(Color.Red, topOverscroll[20, stripe1Y], tolerance = 3f / 255f)
+        assertColorNear(Color.Blue, topOverscroll[20, stripe2Y], tolerance = 3f / 255f)
+
+        runOnIdle { scrollState.overscrollOffset = -80f }
+        val bottomOverscroll = onRoot().captureToImage().toPixelMap()
+        val topBlurred = bottomOverscroll[20, stripe1Y]
+        assertTrue(
+            topBlurred.blue > 0.1f && topBlurred.red > 0.1f,
+            "Negative overscroll must activate top progressive blur even when isContentScrolled is false: $topBlurred",
+        )
+        assertColorNear(Color.Blue, bottomOverscroll[20, belowBarY], tolerance = 3f / 255f)
+
+        runOnIdle { scrollState.overscrollOffset = 0f }
+        val restored = onRoot().captureToImage().toPixelMap()
+        assertColorNear(Color.Red, restored[20, stripe1Y], tolerance = 3f / 255f)
+        assertColorNear(Color.Blue, restored[20, stripe2Y], tolerance = 3f / 255f)
+    }
 }

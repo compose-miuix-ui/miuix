@@ -172,8 +172,8 @@ fun GlassPage(padding: PaddingValues) {
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
     val collapseRamp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior).value
-    val contentUnderTopBar by remember {
-        computedStateOf { listState.canScrollBackward }
+    val contentUnderTopBar by remember(listState, scrollBehavior) {
+        computedStateOf { listState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
     }
     val tabSurfaceAlpha = if (contentUnderTopBar) 1f else 0f
 

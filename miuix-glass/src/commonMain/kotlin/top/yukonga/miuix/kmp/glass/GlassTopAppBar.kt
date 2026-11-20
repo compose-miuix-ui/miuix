@@ -378,7 +378,12 @@ fun GlassTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     val ramp = GlassTopAppBarDefaults.collapseRamp(scrollBehavior, visualContentOffset)
-    val transition = updateTransition(isContentScrolled, label = "glassTopBarFloat")
+    val contentScrolled by remember(isContentScrolled, scrollBehavior) {
+        computedStateOf {
+            isContentScrolled || (scrollBehavior?.state?.overscrollOffset ?: 0f) < -1f
+        }
+    }
+    val transition = updateTransition(contentScrolled, label = "glassTopBarFloat")
     val maskProgress = transition.animateFloat(
         transitionSpec = { GlassMotion.topBarMask() },
         label = "glassTopBarMask",
@@ -387,8 +392,8 @@ fun GlassTopAppBar(
         transitionSpec = { GlassMotion.topBarButtonFloat() },
         label = "glassTopBarMaterial",
     ) { if (it) 1f else 0f }
-    val keepMaterial by remember(isContentScrolled, materialProgress) {
-        computedStateOf { isContentScrolled || materialProgress.value > 0f }
+    val keepMaterial by remember(contentScrolled, materialProgress) {
+        computedStateOf { contentScrolled || materialProgress.value > 0f }
     }
     val rawBackdrop = backdrop?.takeIf { isRuntimeShaderSupported() }
     val underlayMaterial = GlassTopAppBarDefaults.actionBarUnderlayMaterial().takeIf { keepMaterial && rawBackdrop != null }
@@ -482,7 +487,7 @@ fun GlassTopAppBar(
                 material = resolvedMaterial,
                 underlayMaterial = underlayMaterial,
                 buttonUnderlayMaterial = buttonUnderlay,
-                floating = isContentScrolled,
+                floating = contentScrolled,
                 alpha = alpha,
                 ramp = ramp,
                 materialProgress = materialProgress,

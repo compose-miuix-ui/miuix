@@ -181,8 +181,8 @@ fun IconsPage(
     val listStates = remember { List(2) { LazyListState() } }
     val headerHeights = remember { List(2) { mutableIntStateOf(0) } }
     val activeListState = listStates[currentPage]
-    val contentUnderTopBar by remember(activeListState) {
-        computedStateOf { activeListState.canScrollBackward }
+    val contentUnderTopBar by remember(activeListState, topAppBarScrollBehavior) {
+        computedStateOf { activeListState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
     }
     val activeHeaderHeight = headerHeights[currentPage]
     val saturatedScrollDistance = with(density) {

@@ -130,13 +130,20 @@ class GlassTopAppBarStateTest {
     }
 
     @Test
-    fun shortPageOverscrollCompletesProgressiveButtonMaterial() = assertElasticButtonMaterial(progressive = true)
+    fun shortPageOverscrollCompletesProgressiveButtonMaterial() = assertElasticButtonMaterial(progressive = true, explicitOverlap = false)
 
     @Test
-    fun shortPageOverscrollCompletesSceneButtonMaterial() = assertElasticButtonMaterial(progressive = false)
+    fun shortPageOverscrollCompletesSceneButtonMaterial() = assertElasticButtonMaterial(progressive = false, explicitOverlap = false)
 
-    private fun assertElasticButtonMaterial(progressive: Boolean) = runComposeUiTest {
+    @Test
+    fun explicitUnscrolledShortPageOverscrollCompletesProgressiveButtonMaterial() = assertElasticButtonMaterial(progressive = true, explicitOverlap = true)
+
+    @Test
+    fun explicitUnscrolledShortPageOverscrollCompletesSceneButtonMaterial() = assertElasticButtonMaterial(progressive = false, explicitOverlap = true)
+
+    private fun assertElasticButtonMaterial(progressive: Boolean, explicitOverlap: Boolean) = runComposeUiTest {
         val state = TopAppBarState(-1000f, 0f, 0f)
+        val explicitScrolled = mutableStateOf(false)
         setContent {
             DialogTestHost {
                 val backdrop = rememberLayerBackdrop()
@@ -160,21 +167,37 @@ class GlassTopAppBarStateTest {
                     ) {
                         item { Box(Modifier.height(20.dp)) }
                     }
-                    GlassTopAppBar(
-                        title = "",
-                        scrollBehavior = MiuixScrollBehavior(state),
-                        progressiveBlur = progressive,
-                        backdrop = backdrop,
-                        navigationIcon = {
-                            GlassIconButton(onClick = {}, modifier = Modifier.testTag("elastic-button")) { }
-                        },
-                    )
+                    if (explicitOverlap) {
+                        GlassTopAppBar(
+                            title = "",
+                            isContentScrolled = explicitScrolled.value,
+                            scrollBehavior = MiuixScrollBehavior(state),
+                            progressiveBlur = progressive,
+                            backdrop = backdrop,
+                            navigationIcon = {
+                                GlassIconButton(onClick = {}, modifier = Modifier.testTag("elastic-button")) { }
+                            },
+                        )
+                    } else {
+                        GlassTopAppBar(
+                            title = "",
+                            scrollBehavior = MiuixScrollBehavior(state),
+                            progressiveBlur = progressive,
+                            backdrop = backdrop,
+                            navigationIcon = {
+                                GlassIconButton(onClick = {}, modifier = Modifier.testTag("elastic-button")) { }
+                            },
+                        )
+                    }
                 }
             }
         }
         fun buttonPixels() = onNodeWithTag("elastic-button").captureToImage().toPixelMap()
         val resting = buttonPixels()
-        runOnIdle { state.contentOffset = -1000f }
+        runOnIdle {
+            state.contentOffset = -1000f
+            explicitScrolled.value = true
+        }
         val complete = buttonPixels()
         assertTrue(
             (0 until complete.height).any { y ->
@@ -182,7 +205,10 @@ class GlassTopAppBarStateTest {
             },
             "The reference material must visibly blur and tint the striped backdrop",
         )
-        runOnIdle { state.contentOffset = 0f }
+        runOnIdle {
+            state.contentOffset = 0f
+            explicitScrolled.value = false
+        }
         waitForIdle()
         onNodeWithTag("short-list").performTouchInput {
             down(Offset(centerX, height - 10f))
@@ -288,6 +314,40 @@ class GlassTopAppBarStateTest {
             state.overscrollOffset = 0f
             state.contentOffset = 0f
         }
+        assertButton(Color.Blue)
+    }
+
+    @Test
+    fun explicitUnscrolledActivatesOnlyOnNegativeOverscroll() = runComposeUiTest {
+        val state = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                Box(Modifier.size(400.dp, 300.dp).background(Color.Blue)) {
+                    GlassTopAppBar(
+                        title = "",
+                        isContentScrolled = false,
+                        scrollBehavior = MiuixScrollBehavior(state),
+                        backgroundAlpha = { 0f },
+                        fill = Color.Red,
+                        buttonShadow = null,
+                        stroke = null,
+                        navigationIcon = {
+                            GlassIconButton(onClick = {}, modifier = Modifier.testTag("button")) { }
+                        },
+                    )
+                }
+            }
+        }
+        fun assertButton(color: Color) {
+            val image = onNodeWithTag("button").captureToImage().toPixelMap()
+            assertColorNear(color, image[image.width / 2, image.height / 2])
+        }
+        assertButton(Color.Blue)
+        runOnIdle { state.overscrollOffset = 80f }
+        assertButton(Color.Blue)
+        runOnIdle { state.overscrollOffset = -80f }
+        assertButton(Color.Red)
+        runOnIdle { state.overscrollOffset = 0f }
         assertButton(Color.Blue)
     }
 
