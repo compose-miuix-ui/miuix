@@ -178,6 +178,7 @@ fun IconsPage(
 
     val listStates = remember { List(2) { LazyListState() } }
     val activeListState = listStates[currentPage]
+    val pageColumns = remember { IntArray(2) { 3 } }
     val contentUnderTopBar by remember(activeListState, topAppBarScrollBehavior) {
         computedStateOf { activeListState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
     }
@@ -205,8 +206,12 @@ fun IconsPage(
                         legacySearchStatus = legacySearchStatus?.copy(current = SearchStatus.Status.COLLAPSING)
                         coroutineScope.launch {
                             delay(400.milliseconds)
-                            // The header is the only list item before icon rows.
-                            activeListState.animateScrollToItem(index + 1)
+                            val targetItemIndex = findIconListItemIndex(
+                                sections = searchCatalog.sections,
+                                columns = pageColumns[currentPage],
+                                targetIconIndex = index,
+                            )
+                            activeListState.animateScrollToItem(targetItemIndex)
                         }
                     },
                 )
@@ -324,6 +329,7 @@ fun IconsPage(
                         val columns = remember(maxWidth) {
                             ((maxWidth - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
                         }
+                        pageColumns[page] = columns
                         val sectionRows = remember(catalog.sections, columns) {
                             catalog.sections.map { it.title to it.indices.chunked(columns) }
                         }
@@ -339,7 +345,7 @@ fun IconsPage(
                                 ),
                             contentPadding = contentPadding,
                         ) {
-                            sectionRows.forEachIndexed { sectionIndex, (title, rows) ->
+                            sectionRows.forEachIndexed { _, (title, rows) ->
                                 item(key = "section_title_$title") {
                                     SmallTitle(
                                         text = title,
@@ -562,4 +568,21 @@ fun IconsPage(
             }
         }
     }
+}
+
+private fun findIconListItemIndex(
+    sections: List<IconSection>,
+    columns: Int,
+    targetIconIndex: Int,
+): Int {
+    var listIndex = 0
+    for ((_, indices) in sections) {
+        listIndex += 1
+        val pos = indices.indexOf(targetIconIndex)
+        if (pos >= 0) {
+            return listIndex + pos / columns
+        }
+        listIndex += (indices.size + columns - 1) / columns
+    }
+    return 0
 }
