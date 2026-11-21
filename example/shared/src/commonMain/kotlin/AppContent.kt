@@ -455,6 +455,9 @@ private fun AppNavHost(
         entry<Route.About>(swipeDismiss = swipeBackDirection) {
             AboutPage(padding = padding)
         }
+        entry<Route.ThemeSettings>(swipeDismiss = swipeBackDirection) {
+            ThemeSettingsPage(padding = padding)
+        }
         entry<Route.License>(swipeDismiss = swipeBackDirection) {
             LicensePage(padding = padding)
         }
