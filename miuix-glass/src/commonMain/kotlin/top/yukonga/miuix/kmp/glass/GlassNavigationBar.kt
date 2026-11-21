@@ -81,6 +81,7 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import androidx.compose.ui.util.fastRoundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -102,7 +103,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
 import top.yukonga.miuix.kmp.utils.platform
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -523,8 +523,8 @@ fun GlassNavigationBar(
                             contentStart - overhang,
                             contentInset - overhang,
                         )
-                        val start = bounds.x.roundToInt()
-                        val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
+                        val start = bounds.x.fastRoundToInt()
+                        val width = (bounds.y.fastRoundToInt() - start).coerceAtLeast(0)
                         val placeable = measurable.measure(
                             constraints.copy(minWidth = width, maxWidth = width),
                         )

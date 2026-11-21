@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
@@ -63,7 +64,6 @@ import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositingStrategy
 
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
@@ -691,8 +691,8 @@ private class DrawBackdropNode(
 
         // Texel size of the padded region recorded at [scale].
         fun recordedSize(scale: Float): IntSize = IntSize(
-            (fullWidth / scale).roundToInt().coerceAtLeast(1),
-            (fullHeight / scale).roundToInt().coerceAtLeast(1),
+            (fullWidth / scale).fastRoundToInt().coerceAtLeast(1),
+            (fullHeight / scale).fastRoundToInt().coerceAtLeast(1),
         )
 
         // Filters from an earlier frame must not survive into this one: the cascade layers are

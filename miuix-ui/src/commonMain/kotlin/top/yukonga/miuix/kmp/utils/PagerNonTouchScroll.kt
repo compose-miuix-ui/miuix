@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastRoundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -53,7 +54,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.atan2
-import kotlin.math.roundToInt
 import kotlin.math.sign
 
 /**
@@ -457,7 +457,7 @@ private class PagerSnapFlingBehavior(
                         } else {
                             0f
                         }
-                    val targetPage = flingPageDisplacement.roundToInt() + pagerState.currentPage
+                    val targetPage = flingPageDisplacement.fastRoundToInt() + pagerState.currentPage
                     with(pagerState) { scope.updateTargetPage(targetPage) }
                 }
             }
@@ -699,7 +699,7 @@ private class PagerMouseWheelScrollingLogic(
 
                     val durationMillis =
                         (abs(targetValue - animationState.value) / speed)
-                            .roundToInt()
+                            .fastRoundToInt()
                             .coerceAtMost(MAX_ANIMATION_DURATION)
                     animateMouseWheelScroll(animationState, targetValue, durationMillis) { lastValue ->
                         // Sum delta from all pending events to avoid multiple animation restarts.

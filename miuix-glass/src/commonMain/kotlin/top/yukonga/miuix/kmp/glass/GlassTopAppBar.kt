@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBarLayout
@@ -73,7 +74,6 @@ import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.math.roundToInt
 
 /** Default values for [GlassTopAppBar] and [GlassIconButton]. */
 object GlassTopAppBarDefaults {
@@ -580,7 +580,7 @@ private fun GlassTopAppBarLayout(
                 height.toFloat(),
                 topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
             )
-            (coveredHeight + gradientOverhang.toPx().coerceAtLeast(0f)).roundToInt()
+            (coveredHeight + gradientOverhang.toPx().coerceAtLeast(0f)).fastRoundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
         }

@@ -3,12 +3,12 @@
 
 package top.yukonga.miuix.kmp.window.platform.linux.input
 
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.window.platform.linux.x11.LinuxXInputSession
 import java.awt.Component
 import java.awt.Window
 import java.awt.event.InputEvent
 import java.awt.event.MouseEvent
-import kotlin.math.roundToInt
 
 /**
  * Chooses one mouse source before window handlers and Compose receive input.
@@ -159,10 +159,10 @@ internal class LinuxMouseInput(
                 },
                 System.currentTimeMillis(),
                 keyboardModifiers(event.modifiers),
-                (event.x / transform.scaleX).roundToInt(),
-                (event.y / transform.scaleY).roundToInt(),
-                (event.rootX / transform.scaleX).roundToInt(),
-                (event.rootY / transform.scaleY).roundToInt(),
+                (event.x / transform.scaleX).fastRoundToInt(),
+                (event.y / transform.scaleY).fastRoundToInt(),
+                (event.rootX / transform.scaleX).fastRoundToInt(),
+                (event.rootY / transform.scaleY).fastRoundToInt(),
                 0,
                 false,
                 MouseEvent.NOBUTTON,

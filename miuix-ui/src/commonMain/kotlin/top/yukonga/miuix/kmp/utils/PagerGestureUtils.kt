@@ -48,6 +48,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastRoundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -59,7 +60,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 
 /**
  * Horizontal pager behavior when a child scrollable is flinging or overscrolling.
@@ -633,7 +633,7 @@ private class PagerPageMotion(
             val target = when {
                 signedVelocity > minimum -> ceil(position).toInt()
                 signedVelocity < -minimum -> floor(position).toInt()
-                else -> position.roundToInt()
+                else -> position.fastRoundToInt()
             }
             state.animateToPage(this, target, signedVelocity)
         }

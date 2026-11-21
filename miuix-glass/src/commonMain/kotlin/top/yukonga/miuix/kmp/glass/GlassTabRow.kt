@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
@@ -89,7 +91,6 @@ import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
  * Colours used by a tab in each interaction state.
@@ -815,8 +816,8 @@ fun GlassSegmentedTabRow(
                             constraints.maxWidth.toFloat(),
                             0f,
                         )
-                        val start = bounds.x.roundToInt()
-                        val width = (bounds.y.roundToInt() - start).coerceAtLeast(0)
+                        val start = bounds.x.fastRoundToInt()
+                        val width = (bounds.y.fastRoundToInt() - start).coerceAtLeast(0)
                         val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
                         layout(constraints.maxWidth, placeable.height) {
                             placeable.placeRelative(IntOffset(start, 0))
@@ -825,7 +826,7 @@ fun GlassSegmentedTabRow(
                     .graphicsLayer {
                         val scale = indicatorScale.value
                         val insetPx = (1f - scale) * size.height
-                        scaleX = if (size.width > 0f) ((size.width - insetPx) / size.width).coerceIn(0f, 1f) else 1f
+                        scaleX = if (size.width > 0f) ((size.width - insetPx) / size.width).fastCoerceIn(0f, 1f) else 1f
                         scaleY = scale
                     }
                     .clip(indicatorShape)

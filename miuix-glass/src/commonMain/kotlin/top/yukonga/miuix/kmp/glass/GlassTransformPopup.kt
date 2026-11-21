@@ -38,12 +38,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.material.GlassStyle
-import kotlin.math.roundToInt
 
 /**
  * Anchor geometry and appearance for a [GlassTransformPopup] or [GlassDropdownPopup].
@@ -444,14 +444,14 @@ fun BoxScope.GlassTransformPopup(
                     val rect = iconRect()
                     val placeable = measurable.measure(
                         Constraints.fixed(
-                            width = rect.width.roundToInt().coerceAtLeast(0),
-                            height = rect.height.roundToInt().coerceAtLeast(0),
+                            width = rect.width.fastRoundToInt().coerceAtLeast(0),
+                            height = rect.height.fastRoundToInt().coerceAtLeast(0),
                         ),
                     )
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         placeable.place(
-                            (rect.left - hostOrigin.value.x).roundToInt(),
-                            (rect.top - hostOrigin.value.y).roundToInt(),
+                            (rect.left - hostOrigin.value.x).fastRoundToInt(),
+                            (rect.top - hostOrigin.value.y).fastRoundToInt(),
                         )
                     }
                 }

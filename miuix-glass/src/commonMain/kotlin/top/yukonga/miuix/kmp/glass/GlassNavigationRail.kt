@@ -104,6 +104,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.flow.collectLatest
@@ -126,7 +127,6 @@ import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 private val RailTopBarIcon: ImageVector = ImageVector.Builder(
     name = "RailTopBar",
@@ -595,8 +595,8 @@ private fun GlassNavigationRailPanel(
     Box(
         Modifier
             .layout { measurable, _ ->
-                val fraction = state.progress.coerceIn(0f, 1f)
-                val width = lerp(collapsedWidth().toPx(), expandedWidth.toPx(), fraction).roundToInt()
+                val fraction = state.progress.fastCoerceIn(0f, 1f)
+                val width = lerp(collapsedWidth().toPx(), expandedWidth.toPx(), fraction).fastRoundToInt()
                 val height = panelHeight().roundToPx().coerceAtLeast(0)
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(width, height) { placeable.place(0, 0) }
@@ -604,7 +604,7 @@ private fun GlassNavigationRailPanel(
             .offset {
                 IntOffset(
                     x = panelStart().roundToPx(),
-                    y = lerp(collapsedTop.toPx(), expandedTop.toPx(), state.progress).roundToInt(),
+                    y = lerp(collapsedTop.toPx(), expandedTop.toPx(), state.progress).fastRoundToInt(),
                 )
             }
             .glassPanel(
@@ -723,29 +723,29 @@ private fun GlassNavigationRailPanel(
                     HorizontalDivider(
                         modifier = Modifier
                             .layout { measurable, constraints ->
-                                val fraction = dividerProgress().coerceIn(0f, 1f)
+                                val fraction = dividerProgress().fastCoerceIn(0f, 1f)
                                 val paddingPx = RailItemContentPadding.toPx()
                                 val collapsedDividerWidth = (lastSlotWidthProvider() - paddingPx * 2).coerceAtLeast(0f)
                                 val expandedDividerWidth = (itemWidth - RailItemContentPadding * 2).toPx()
                                 val width = lerp(collapsedDividerWidth, expandedDividerWidth, fraction)
-                                    .roundToInt()
+                                    .fastRoundToInt()
                                     .coerceAtLeast(0)
                                 val x = lerp(
                                     lastSlotStartProvider() + paddingPx,
                                     (RailItemHorizontalMargin + RailItemContentPadding).toPx(),
                                     fraction,
-                                ).roundToInt()
+                                ).fastRoundToInt()
                                 val expandedDividerY =
                                     (RailExpandedRowTop + RailRowPitch * items.size + (RailDividerSectionHeight - 0.5.dp) / 2)
                                         .toPx()
                                 val y = if (fraction == 1f) {
-                                    expandedDividerY.roundToInt()
+                                    expandedDividerY.fastRoundToInt()
                                 } else {
                                     lerp(
                                         RailRowTop.toPx() + scrollOffsetProvider() + RailCollapsedRowHeight.toPx() / 2f,
                                         expandedDividerY,
                                         fraction,
-                                    ).roundToInt()
+                                    ).fastRoundToInt()
                                 }
                                 val placeable = measurable.measure(
                                     constraints.copy(minWidth = width, maxWidth = width),
@@ -962,7 +962,7 @@ private fun NavigationRailRow(
             RailRowGeometry(
                 slotStart = slotStart.toFloat(),
                 slotWidth = slotWidth.toFloat(),
-                sourceStart = (slotStart + ((slotWidth - labelPx) / 2f).roundToInt() - labelStart).toFloat(),
+                sourceStart = (slotStart + ((slotWidth - labelPx) / 2f).fastRoundToInt() - labelStart).toFloat(),
                 sourceWidth = (labelStart + labelPx + padding).toFloat(),
                 expandedTop = (RailExpandedRowTop + RailRowPitch * position).toPx(),
                 labelMinWidth = if (labelWidth.roundToPx() > slotWidth) minOf(labelPx, expandedLabelWidth) else expandedLabelWidth,
@@ -977,15 +977,15 @@ private fun NavigationRailRow(
     Box(
         modifier = Modifier
             .layout { measurable, constraints ->
-                val fraction = rowProgress().coerceIn(0f, 1f)
-                val width = lerp(slotWidth.value, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                val fraction = rowProgress().fastCoerceIn(0f, 1f)
+                val width = lerp(slotWidth.value, itemWidth.toPx(), fraction).fastRoundToInt().coerceAtLeast(0)
                 val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
-                val x = lerp(slotStart.value, RailItemHorizontalMargin.toPx(), fraction).roundToInt()
+                val x = lerp(slotStart.value, RailItemHorizontalMargin.toPx(), fraction).fastRoundToInt()
                 // The scrolling parent places settled rows; only the morph needs scroll compensation.
                 val y = if (fraction == 1f) {
-                    geometry.expandedTop.roundToInt()
+                    geometry.expandedTop.fastRoundToInt()
                 } else {
-                    lerp(RailRowTop.toPx() + scrollOffset(), geometry.expandedTop, fraction).roundToInt()
+                    lerp(RailRowTop.toPx() + scrollOffset(), geometry.expandedTop, fraction).fastRoundToInt()
                 }
                 slot.left = x.toFloat()
                 slot.top = y.toFloat()
@@ -1020,10 +1020,10 @@ private fun NavigationRailRow(
         Layout(
             modifier = Modifier
                 .layout { measurable, constraints ->
-                    val fraction = rowProgress().coerceIn(0f, 1f)
-                    val width = lerp(sourceWidth.value, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                    val fraction = rowProgress().fastCoerceIn(0f, 1f)
+                    val width = lerp(sourceWidth.value, itemWidth.toPx(), fraction).fastRoundToInt().coerceAtLeast(0)
                     val placeable = measurable.measure(Constraints.fixed(width, constraints.maxHeight))
-                    val x = lerp(sourceStart.value - slotStart.value, 0f, fraction).roundToInt()
+                    val x = lerp(sourceStart.value - slotStart.value, 0f, fraction).fastRoundToInt()
                     layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(x, 0) }
                 }
                 .padding(horizontal = RailItemContentPadding),
@@ -1086,14 +1086,14 @@ private fun NavigationRailRow(
             }
             val badge = measurables.last().measure(constraints.copy(minWidth = 0, minHeight = 0))
             layout(constraints.maxWidth, constraints.maxHeight) {
-                val fraction = rowProgress().coerceIn(0f, 1f)
+                val fraction = rowProgress().fastCoerceIn(0f, 1f)
                 icon.placeRelative(0, (constraints.maxHeight - icon.height) / 2)
                 val visibility = badgeVisibility.value
                 val badgeGap = RailBadgeSpacing.toPx() * visibility
                 val badgeWidth = badge.width * visibility
                 val badgeSpace = badgeWidth + badgeGap
                 val labelShift = -badgeSpace / 2 * (1f - fraction)
-                label?.placeRelative((icon.width + labelShift).roundToInt(), (constraints.maxHeight - label.height) / 2)
+                label?.placeRelative((icon.width + labelShift).fastRoundToInt(), (constraints.maxHeight - label.height) / 2)
                 val hasContent = badge.width > BadgeDefaults.Size.roundToPx()
                 val horizontalOverlap = if (hasContent) 12.dp.roundToPx() else 6.dp.roundToPx()
                 val verticalOverlap = if (hasContent) 14.dp.roundToPx() else 6.dp.roundToPx()
@@ -1102,14 +1102,14 @@ private fun NavigationRailRow(
                 // Clamp to the actual animated slot, not the wider row retaining its icon column.
                 val rowOffset = lerp(sourceStart.value - slotStart.value, 0f, fraction) + RailItemContentPadding.toPx()
                 val currentSlotWidth = lerp(slotWidth.value, itemWidth.toPx(), fraction)
-                val end = (currentSlotWidth - rowOffset - badge.width - RailBadgeSpacing.toPx()).roundToInt()
-                val start = (RailBadgeSpacing.toPx() - rowOffset).roundToInt()
+                val end = (currentSlotWidth - rowOffset - badge.width - RailBadgeSpacing.toPx()).fastRoundToInt()
+                val start = (RailBadgeSpacing.toPx() - rowOffset).fastRoundToInt()
                 val collapsedX = icon.width + (label?.width ?: 0) + labelShift + badgeGap - (badge.width - badgeWidth) / 2
                 val expandedX = anchorEnd - horizontalOverlap
-                val x = lerp(collapsedX, expandedX, fraction).roundToInt().coerceIn(start, maxOf(start, end))
+                val x = lerp(collapsedX, expandedX, fraction).fastRoundToInt().fastCoerceIn(start, maxOf(start, end))
                 val collapsedY = (constraints.maxHeight - badge.height) / 2f
                 val expandedY = (constraints.maxHeight - anchorHeight) / 2 - badge.height + verticalOverlap
-                val y = lerp(collapsedY, expandedY, fraction).roundToInt().coerceAtLeast(0)
+                val y = lerp(collapsedY, expandedY, fraction).fastRoundToInt().coerceAtLeast(0)
                 badge.placeRelative(x, y)
             }
         }
@@ -1142,25 +1142,25 @@ private fun SecondaryNavigationRailRow(
     Box(
         modifier = Modifier
             .layout { measurable, constraints ->
-                val fraction = rowProgress().coerceIn(0f, 1f)
+                val fraction = rowProgress().fastCoerceIn(0f, 1f)
                 val width = lerp(lastSlotWidth(), itemWidth.toPx(), fraction)
-                    .roundToInt()
+                    .fastRoundToInt()
                     .coerceAtLeast(0)
                 val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
                 val x = lerp(
                     lastSlotStart(),
                     RailItemHorizontalMargin.toPx(),
                     fraction,
-                ).roundToInt()
+                ).fastRoundToInt()
                 val expandedRowY = (secondaryTop + RailRowPitch * secondaryPosition).toPx()
                 val y = if (fraction == 1f) {
-                    expandedRowY.roundToInt()
+                    expandedRowY.fastRoundToInt()
                 } else {
                     lerp(
                         RailRowTop.toPx() + scrollOffset(),
                         expandedRowY,
                         fraction,
-                    ).roundToInt()
+                    ).fastRoundToInt()
                 }
                 val placeable = measurable.measure(Constraints.fixed(width, height))
                 layout(constraints.maxWidth, constraints.maxHeight) {
@@ -1235,7 +1235,7 @@ private fun NavigationRailIndicator(
         color = color,
         pressedColor = pressedColor,
         modifier = Modifier.layout { measurable, constraints ->
-            val fraction = rowProgress().coerceIn(0f, 1f)
+            val fraction = rowProgress().fastCoerceIn(0f, 1f)
             val width: Int
             val x: Float
             val y: Float
@@ -1253,14 +1253,14 @@ private fun NavigationRailIndicator(
                     interaction.contentStart,
                     interaction.endPadding,
                 )
-                width = lerp(bounds.y - bounds.x, itemWidth.toPx(), fraction).roundToInt().coerceAtLeast(0)
+                width = lerp(bounds.y - bounds.x, itemWidth.toPx(), fraction).fastRoundToInt().coerceAtLeast(0)
                 x = lerp(bounds.x, RailItemHorizontalMargin.toPx(), fraction)
                 y = lerp(RailRowTop.toPx() + scrollOffset(), targetY, fraction)
             }
             val height = (RailCollapsedRowHeight + RailRowGrowth * fraction).roundToPx()
             val placeable = measurable.measure(Constraints.fixed(width, height))
             layout(constraints.maxWidth, constraints.maxHeight) {
-                placeable.placeRelative(x.roundToInt(), y.roundToInt())
+                placeable.placeRelative(x.fastRoundToInt(), y.fastRoundToInt())
             }
         },
     )

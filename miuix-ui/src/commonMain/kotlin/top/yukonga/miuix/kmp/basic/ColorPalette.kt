@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
@@ -46,7 +47,6 @@ import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import kotlin.math.abs
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * A color palette component that allows users to select colors from a grid of HSV values.
@@ -100,7 +100,7 @@ fun ColorPalette(
             totalColumns - 1
         } else {
             val k = (h % 360f) / 360f * hueColumns
-            k.roundToInt().coerceIn(0, hueColumns - 1)
+            k.fastRoundToInt().coerceIn(0, hueColumns - 1)
         }
         val row = if (isGray) {
             indexOfNearestGrayV(v, grayV)

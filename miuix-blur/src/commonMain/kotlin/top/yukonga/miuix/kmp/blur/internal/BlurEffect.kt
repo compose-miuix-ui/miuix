@@ -8,6 +8,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import kotlin.math.PI
 import kotlin.math.abs
@@ -16,7 +18,6 @@ import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -66,7 +67,7 @@ private val LEVEL_SCALES = FloatArray(LEVEL_BUCKETS) { b ->
 }
 
 /** Cache-key bucket for a level: log2(scale) in [BUCKETS_PER_OCTAVE]-ths, i.e. the grid index. */
-internal fun levelBucket(scale: Float): Int = ((ln(scale.coerceIn(1f, 16f)) / LN2) * BUCKETS_PER_OCTAVE).roundToInt().coerceIn(0, LEVEL_BUCKETS - 1)
+internal fun levelBucket(scale: Float): Int = ((ln(scale.fastCoerceIn(1f, 16f)) / LN2) * BUCKETS_PER_OCTAVE).fastRoundToInt().fastCoerceIn(0, LEVEL_BUCKETS - 1)
 
 /**
  * Builds the separable Blur [RenderEffect] (H then V) at [downScale] from variances already
