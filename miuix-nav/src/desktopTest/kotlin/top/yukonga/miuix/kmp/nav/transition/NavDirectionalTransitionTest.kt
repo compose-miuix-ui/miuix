@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.nav.transition
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -33,15 +34,35 @@ private class Marker(
     var picked: Int = 0
         private set
 
+    var contentPicked: Int = 0
+        private set
+
     override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier {
         picked++
         return this
     }
 
     override fun scrimFraction(scope: NavTransitionScope): Float = scrim
+
+    override fun Modifier.transformContent(scope: NavTransitionScope): Modifier {
+        contentPicked++
+        return this
+    }
 }
 
 class NavDirectionalTransitionTest {
+
+    @Test
+    fun cornerClipOwnershipFollowsTheSelectedBranch() {
+        val combined = navDirectionalTransition(
+            push = NavTransitions.expandFrom(Color.Blue) { null },
+            pop = NavTransitions.MiuixDefault,
+            predictivePop = NavTransitions.expandFrom(Color.Blue) { null },
+        )
+        assertEquals(true, combined.handlesCornerClip(FakeScope(NavChange.Push, null)))
+        assertEquals(false, combined.handlesCornerClip(FakeScope(NavChange.Pop, null)))
+        assertEquals(true, combined.handlesCornerClip(FakeScope(NavChange.Pop, gesture())))
+    }
 
     private fun gesture() = NavGesture(progress = 0.3f, swipeEdge = NavSwipeEdge.Left, touchY = 0f)
 
@@ -59,6 +80,13 @@ class NavDirectionalTransitionTest {
         assertEquals(2, pop.picked)
         with(combined) { Modifier.transformEntry(FakeScope(NavChange.Pop, gesture = gesture())) }
         assertEquals(1, predictive.picked)
+
+        with(combined) { Modifier.transformContent(FakeScope(NavChange.Push, gesture = null)) }
+        with(combined) { Modifier.transformContent(FakeScope(NavChange.Pop, gesture = null)) }
+        with(combined) { Modifier.transformContent(FakeScope(NavChange.Pop, gesture = gesture())) }
+        assertEquals(1, push.contentPicked)
+        assertEquals(1, pop.contentPicked)
+        assertEquals(1, predictive.contentPicked)
 
         assertEquals(0.2f, combined.scrimFraction(FakeScope(NavChange.Pop, gesture = null)))
         assertEquals(0.3f, combined.scrimFraction(FakeScope(NavChange.Pop, gesture = gesture())))

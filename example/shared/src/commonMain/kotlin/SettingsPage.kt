@@ -19,6 +19,7 @@ import component.CardItem
 import component.groupedCardItems
 import misc.VersionInfo
 import navigation.Route
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -29,6 +30,8 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -120,6 +123,12 @@ private fun SettingsContent(
                         CardItem("themeSettings") {
                             ArrowPreference(
                                 title = "Theme Settings",
+                                modifier = Modifier.navTransitionSource(
+                                    Route.ThemeSettings,
+                                    containerColor = MiuixTheme.colorScheme.surfaceContainer,
+                                    corners = NavTransitionCorners(0.dp, 0.dp, CardDefaults.CornerRadius, CardDefaults.CornerRadius),
+                                    sourceKey = "themeSettings",
+                                ),
                                 onClick = { navigator.push(Route.ThemeSettings) },
                             )
                         },
@@ -332,6 +341,7 @@ private fun SettingsContent(
                         ArrowPreference(
                             title = "About",
                             summary = "About this example App",
+                            modifier = Modifier.navTransitionSource(Route.About, containerColor = MiuixTheme.colorScheme.surfaceContainer, sourceKey = "about"),
                             onClick = { navigator.push(Route.About) },
                         )
                     },

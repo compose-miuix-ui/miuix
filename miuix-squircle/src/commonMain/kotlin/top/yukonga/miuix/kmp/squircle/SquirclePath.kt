@@ -52,41 +52,55 @@ fun Path.addSquircleRect(
     cornerRadius: Float,
     extension: Float = SquircleDefaults.Extension,
     squircleEnabled: Boolean = true,
+) = addSquircleRect(width, height, cornerRadius, cornerRadius, cornerRadius, cornerRadius, extension, squircleEnabled)
+
+/** Physical-corner variant of [addSquircleRect], for grouped surfaces with square joining edges. */
+fun Path.addSquircleRect(
+    width: Float,
+    height: Float,
+    topLeft: Float,
+    topRight: Float,
+    bottomRight: Float,
+    bottomLeft: Float,
+    extension: Float = SquircleDefaults.Extension,
+    squircleEnabled: Boolean = true,
 ) {
     if (width <= 0f || height <= 0f) return
     if (!squircleEnabled) {
-        val radius = max(0f, cornerRadius).coerceAtMost(min(width, height) * 0.5f)
-        if (radius <= 0f) {
-            addRect(Rect(0f, 0f, width, height))
-        } else {
-            addRoundRect(
-                RoundRect(
-                    left = 0f,
-                    top = 0f,
-                    right = width,
-                    bottom = height,
-                    cornerRadius = CornerRadius(radius, radius),
-                ),
-            )
-        }
+        val limit = min(width, height) * 0.5f
+        addRoundRect(
+            RoundRect(
+                left = 0f,
+                top = 0f,
+                right = width,
+                bottom = height,
+                topLeftCornerRadius = CornerRadius(topLeft.coerceIn(0f, limit)),
+                topRightCornerRadius = CornerRadius(topRight.coerceIn(0f, limit)),
+                bottomRightCornerRadius = CornerRadius(bottomRight.coerceIn(0f, limit)),
+                bottomLeftCornerRadius = CornerRadius(bottomLeft.coerceIn(0f, limit)),
+            ),
+        )
         return
     }
     val extClamped = extension.coerceIn(SquircleDefaults.ExtensionMin, SquircleDefaults.ExtensionMax)
     val halfMin = min(width, height) * 0.5f
-    val tile = max(0f, cornerRadius * extClamped).coerceAtMost(halfMin)
-    if (tile <= 0f) {
+    val tl = max(0f, topLeft * extClamped).coerceAtMost(halfMin)
+    val tr = max(0f, topRight * extClamped).coerceAtMost(halfMin)
+    val br = max(0f, bottomRight * extClamped).coerceAtMost(halfMin)
+    val bl = max(0f, bottomLeft * extClamped).coerceAtMost(halfMin)
+    if (max(max(tl, tr), max(br, bl)) <= 0f) {
         addRect(Rect(0f, 0f, width, height))
         return
     }
-    val handle = tile * (1f - SQUIRCLE_CONTROL)
-    moveTo(tile, 0f)
-    lineTo(width - tile, 0f)
-    cubicTo(width - handle, 0f, width, handle, width, tile)
-    lineTo(width, height - tile)
-    cubicTo(width, height - handle, width - handle, height, width - tile, height)
-    lineTo(tile, height)
-    cubicTo(handle, height, 0f, height - handle, 0f, height - tile)
-    lineTo(0f, tile)
-    cubicTo(0f, handle, handle, 0f, tile, 0f)
+    val control = 1f - SQUIRCLE_CONTROL
+    moveTo(tl, 0f)
+    lineTo(width - tr, 0f)
+    cubicTo(width - tr * control, 0f, width, tr * control, width, tr)
+    lineTo(width, height - br)
+    cubicTo(width, height - br * control, width - br * control, height, width - br, height)
+    lineTo(bl, height)
+    cubicTo(bl * control, height, 0f, height - bl * control, 0f, height - bl)
+    lineTo(0f, tl)
+    cubicTo(0f, tl * control, tl * control, 0f, tl, 0f)
     close()
 }

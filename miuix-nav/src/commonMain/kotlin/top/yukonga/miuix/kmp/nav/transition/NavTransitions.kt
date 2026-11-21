@@ -3,16 +3,20 @@
 
 package top.yukonga.miuix.kmp.nav.transition
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
+import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandTransition
+import top.yukonga.miuix.kmp.nav.transition.internal.NavExpansionPreset
 
 /**
- * Preset library of [NavTransition]s, all implemented as pure functions of the single float
+ * Preset library of [NavTransition]s, driven by the single float
  * driver [NavTransitionScope.relativeDepth] (d = animatedTop - entryIndex).
  *
- * Every preset maps `d` to spatial graphics-layer properties only (translationX / scaleX /
- * scaleY / alpha / clip / shape) and reads `d` deferred inside the [navGraphicsTransition]
- * block, so animations cost zero recomposition. The same `d -> visual` mapping is reused by
+ * Presets read `d` in deferred layer or drawing blocks, so animation frames do not recompose
+ * page content. Container presets also control content reveal. The same `d -> visual` mapping is reused by
  * both the spring-convergence path and the interactive gesture path (predictive back / edge
  * swipe), so no preset needs a separate predictive-back animation.
  *
@@ -26,6 +30,54 @@ import androidx.compose.ui.util.fastRoundToInt
  * non-linear since it is identical in both drive modes.
  */
 object NavTransitions {
+
+    /** Expands route-bound components into pages. May be the global or a per-entry transition. */
+    val Expansion: NavTransition = expansion()
+
+    /**
+     * Component expansion with the same motion as [MiuixDefault]. Bind a destination route using
+     * `Modifier.navTransitionSource(route)` and navigate normally. The opaque container color comes
+     * from [containerColor], the host's backdrop, or the source, in that order. Without a live source
+     * or an opaque color, pages use [MiuixDefault]. The host's corner-clip radius supplies the final
+     * moving-frame radius. Settled pages have no transition clip.
+     * On return, an unavailable or fully clipped source uses a centered shrink and fade.
+     */
+    fun expansion(
+        containerColor: Color = Color.Unspecified,
+        cornerRadius: Dp = 28.dp,
+        motion: NavMotion = NavMotion.Default,
+    ): NavTransition {
+        require(cornerRadius.value.isFinite() && cornerRadius >= 0.dp) {
+            "cornerRadius must be finite and non-negative"
+        }
+        return NavExpansionPreset(containerColor, cornerRadius, motion)
+    }
+
+    /**
+     * Expands from window-space [anchor] bounds; a missing anchor uses a centered zoom.
+     * Prefer [Expansion] with route-bound sources for automatic capture and resource lifetime.
+     *
+     * [containerColor] must match the destination background. [cornerRadius] applies during motion;
+     * [targetCornerRadius] is the final moving-frame radius (platform screen radius for a full-screen
+     * host, zero for an interior pane). The settled page has no transition clip.
+     *
+     * Keep anchors until exit and resolve them by [NavTransitionScope.entryKey] for stacked pages.
+     * Push, pop and predictive back share the same geometry and [NavMotion.Default] timing.
+     */
+    internal fun expandFrom(
+        containerColor: Color,
+        cornerRadius: Dp = 28.dp,
+        targetCornerRadius: Dp = 0.dp,
+        motion: NavMotion = NavMotion.Default,
+        anchor: (NavTransitionScope) -> NavTransitionAnchor?,
+    ): NavTransition = expandTransition(
+        anchor = anchor,
+        initialScale = 0.85f,
+        cornerRadius = cornerRadius,
+        targetCornerRadius = targetCornerRadius,
+        containerColor = containerColor,
+        motion = motion,
+    )
 
     /**
      * Default preset. Reproduces the established miuix navigation feel: the entering page slides
@@ -80,6 +132,26 @@ object NavTransitions {
         // Intentionally empty: identity transform, instant swap. No motion means no swipe to follow,
         // so the interactive dismiss gesture is disabled; pop via the back button / system back.
     }
+}
+
+private fun expandTransition(
+    anchor: (NavTransitionScope) -> NavTransitionAnchor?,
+    initialScale: Float,
+    cornerRadius: Dp,
+    targetCornerRadius: Dp,
+    containerColor: Color,
+    motion: NavMotion,
+): NavTransition {
+    require(initialScale.isFinite() && initialScale > 0f && initialScale <= 1f) {
+        "initialScale must be finite and in (0, 1]"
+    }
+    require(cornerRadius.value.isFinite() && cornerRadius >= 0.dp) {
+        "cornerRadius must be finite and non-negative"
+    }
+    require(targetCornerRadius.value.isFinite() && targetCornerRadius >= 0.dp) {
+        "targetCornerRadius must be finite and non-negative"
+    }
+    return NavExpandTransition(anchor, initialScale, cornerRadius, { targetCornerRadius }, { containerColor }, motion)
 }
 
 /**

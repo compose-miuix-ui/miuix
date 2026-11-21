@@ -97,7 +97,7 @@ private val Spec2025SupportedPaletteStyles = setOf(
     ThemePaletteStyle.Vibrant,
     ThemePaletteStyle.Expressive,
 )
-private val NavTransitionStyleOptions = listOf("Miuix", "AOSP")
+private val NavTransitionStyleOptions = listOf("Miuix", "AOSP", "Expansion")
 private val PagerGestureModeOptions = listOf("Default", "Cross-Axis")
 private val DensityScaleKeyPoints = listOf(80f, 90f, 100f, 110f)
 

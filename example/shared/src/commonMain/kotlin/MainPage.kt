@@ -46,6 +46,7 @@ import navigation.ComponentDemo
 import navigation.ComponentDemoGroup
 import navigation.Route
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
@@ -71,6 +72,8 @@ import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.menu.OverlayIconCascadingDropdownMenu
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
@@ -325,17 +328,32 @@ fun MainPage(
                                             CardItem("PullToRefresh") {
                                                 ArrowPreference(
                                                     title = "PullToRefresh",
+                                                    modifier = Modifier.navTransitionSource(
+                                                        Route.PullToRefresh,
+                                                        containerColor = MiuixTheme.colorScheme.surfaceContainer,
+                                                        corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp),
+                                                        sourceKey = "pullToRefresh",
+                                                    ),
                                                     onClick = { navigator.push(Route.PullToRefresh) },
                                                 )
                                             },
                                         )
                                     }
-                                    demos.forEach { demo ->
+                                    demos.forEachIndexed { index, demo ->
+                                        val top = if (index == 0 && group != ComponentDemoGroup.Ui) CardDefaults.CornerRadius else 0.dp
+                                        val bottom = if (index == demos.lastIndex) CardDefaults.CornerRadius else 0.dp
                                         add(
                                             CardItem(demo.name) {
+                                                val destination = Route.Component(demo)
                                                 ArrowPreference(
                                                     title = demo.title,
-                                                    onClick = { navigator.push(Route.Component(demo)) },
+                                                    modifier = Modifier.navTransitionSource(
+                                                        destination,
+                                                        containerColor = MiuixTheme.colorScheme.surfaceContainer,
+                                                        corners = NavTransitionCorners(top, top, bottom, bottom),
+                                                        sourceKey = demo.name,
+                                                    ),
+                                                    onClick = { navigator.push(destination) },
                                                 )
                                             },
                                         )
@@ -349,6 +367,7 @@ fun MainPage(
                         Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                             ArrowPreference(
                                 title = "Glass Component",
+                                modifier = Modifier.navTransitionSource(Route.Glass, containerColor = MiuixTheme.colorScheme.surfaceContainer, sourceKey = "glass"),
                                 onClick = { navigator.push(Route.Glass) },
                             )
                         }
