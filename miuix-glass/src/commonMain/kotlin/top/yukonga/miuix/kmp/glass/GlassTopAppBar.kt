@@ -576,8 +576,10 @@ private fun GlassTopAppBarLayout(
         val width = constraints.constrainWidth(foreground.width)
         val height = constraints.constrainHeight(foreground.height)
         val bandHeight = if (progressiveBlur) {
-            val coveredHeight = topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() +
-                measurements.bottomContentHeight
+            val coveredHeight = maxOf(
+                height.toFloat(),
+                topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
+            )
             ((coveredHeight + 20.dp.toPx()) * 1.2f).roundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
