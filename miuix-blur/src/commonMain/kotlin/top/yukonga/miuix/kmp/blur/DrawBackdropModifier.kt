@@ -710,7 +710,7 @@ private class DrawBackdropNode(
             // Half or finer: a single bilinear record straight to the level.
             target.cascadeFirstStepScale = level
             recordLayer(layer, size = recordedSize(level)) { recordBackdrop(target) }
-            drawUpscaledLayer(target, layer, level, padL, padT, fullWidth, fullHeight)
+            drawUpscaledLayer(target, layer, level, padL, padT)
             return
         }
 
@@ -789,7 +789,7 @@ private class DrawBackdropNode(
             )
         }
 
-        drawUpscaledLayer(target, layer, level, padL, padT, fullWidth, fullHeight)
+        drawUpscaledLayer(target, layer, level, padL, padT)
     }
 
     override fun MeasureScope.measure(
@@ -951,9 +951,9 @@ private class DrawBackdropNode(
             finalizeProgressiveRamp()
         } else {
             chainFullResNoiseIfNeeded()
+            stackDitherChained = false
             midSharpOverlay.active = false
             sharpOverlay.active = false
-            stackDitherChained = false
             primary.padLeft = effectScope.padding
             primary.padTop = effectScope.padding
             primary.padRight = effectScope.padding
@@ -1181,25 +1181,23 @@ private class DrawBackdropNode(
     private fun chainFullResNoiseIfNeeded() {
         val noiseCoeff = effectScope.noiseCoefficient
         if (noiseCoeff > 0f && effectScope.downscaleFactor <= 1f) {
-            val input = effectScope.renderEffect
-            if (effectScope.cachedNoiseChainResult != null &&
-                effectScope.cachedNoiseChainInput === input &&
-                effectScope.cachedNoiseChainCoeff == noiseCoeff
-            ) {
-                effectScope.renderEffect = effectScope.cachedNoiseChainResult
-                return
-            }
-            effectScope.runtimeShaderEffect(
-                key = "NoiseDither",
-                shaderString = NOISE_DITHER_SHADER,
-                uniformShaderName = "child",
-            ) {
-                setFloatUniform("noise_coeff", noiseCoeff)
-            }
-            effectScope.cachedNoiseChainInput = input
-            effectScope.cachedNoiseChainCoeff = noiseCoeff
-            effectScope.cachedNoiseChainResult = effectScope.renderEffect
+            chainNoisePass(noiseCoeff)
         }
+    }
+
+    private fun chainNoisePass(coeff: Float) {
+        val input = effectScope.renderEffect
+        if (effectScope.cachedNoiseChainResult != null &&
+            effectScope.cachedNoiseChainInput === input &&
+            effectScope.cachedNoiseChainCoeff == coeff
+        ) {
+            effectScope.renderEffect = effectScope.cachedNoiseChainResult
+            return
+        }
+        effectScope.renderEffect = input.chain(obtainStackDitherEffect(coeff))
+        effectScope.cachedNoiseChainInput = input
+        effectScope.cachedNoiseChainCoeff = coeff
+        effectScope.cachedNoiseChainResult = effectScope.renderEffect
     }
 
     override fun onAttach() {
@@ -1251,26 +1249,33 @@ private class DrawBackdropNode(
         texelScale: Float,
         padLeft: Float,
         padTop: Float,
-        fullWidth: Int,
-        fullHeight: Int,
     ) {
         val noiseCoeff = if (stackDitherChained) 0f else effectScope.noiseCoefficient
         val residualX = backdrop.offsetResidualX
         val residualY = backdrop.offsetResidualY
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
+            val compW = ceil(size.width).toInt().coerceAtLeast(1)
+            val compH = ceil(size.height).toInt().coerceAtLeast(1)
             val noiseL = target.noiseLayer
                 ?: graphicsContext.createGraphicsLayer().also { target.noiseLayer = it }
-            recordLayer(noiseL, size = IntSize(fullWidth, fullHeight)) {
-                scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
+            recordLayer(noiseL, size = IntSize(compW, compH)) {
+                translate(-padLeft - residualX, -padTop - residualY) {
+                    scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
+                }
             }
             noiseL.renderEffect = target.noiseRenderEffect(noiseCoeff) {
                 val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
                 noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
                 runtimeShaderEffect(noiseShader, "child")
             }
-            drawShiftedLayer(noiseL, padLeft, padTop, 1f, residualX, residualY)
+            noiseL.topLeft = IntOffset.Zero
+            drawLayer(noiseL)
         } else {
+            target.noiseLayer?.let {
+                graphicsContext.releaseGraphicsLayer(it)
+                target.noiseLayer = null
+            }
             drawShiftedLayer(layer, padLeft / texelScale, padTop / texelScale, texelScale, residualX, residualY)
         }
     }
