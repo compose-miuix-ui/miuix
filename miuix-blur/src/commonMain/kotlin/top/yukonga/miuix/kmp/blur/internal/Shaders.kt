@@ -3,28 +3,38 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-/** Builds a separable Blur shader with [tapCount] symmetric tap pairs (1..7). */
-internal fun buildBlurShader(tapCount: Int): String {
+/** Builds a 1D separable Blur shader with [tapCount] symmetric tap pairs (1..7) along [axis] (0=X, 1=Y). */
+internal fun buildBlurShader(tapCount: Int, axis: Int, unpremul: Boolean): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
+    val samplePair = if (axis == 0) {
+        "child.eval(float2(clamp(clampedXy.x + o, 0.5, in_maxCoord.x), clampedXy.y)) + child.eval(float2(clamp(clampedXy.x - o, 0.5, in_maxCoord.x), clampedXy.y))"
+    } else {
+        "child.eval(float2(clampedXy.x, clamp(clampedXy.y + o, 0.5, in_maxCoord.y))) + child.eval(float2(clampedXy.x, clamp(clampedXy.y - o, 0.5, in_maxCoord.y)))"
+    }
+    val tail = if (unpremul) {
+        """
+        if (color.a > 0.0039 && color.a < 0.996) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;"""
+    } else {
+        """
+        return color;"""
+    }
     return """
     uniform shader child;
-    uniform float2 in_blurOffset[$tapCount];
+    uniform float in_blurOffset[$tapCount];
     uniform float in_blurWeight[$tapCount];
     uniform float in_centerWeight;
     uniform float2 in_maxCoord;
 
     half4 main(float2 xy) {
-        half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord)) * half(in_centerWeight);
+        float2 clampedXy = clamp(xy, float2(0.5), in_maxCoord);
+        half4 color = child.eval(clampedXy) * half(in_centerWeight);
         for (int i = 0; i < $tapCount; i++) {
-            float2 offset = in_blurOffset[i];
-            float2 c1 = clamp(xy + offset, float2(0.5), in_maxCoord);
-            float2 c2 = clamp(xy - offset, float2(0.5), in_maxCoord);
-            color += (child.eval(c1) + child.eval(c2)) * half(in_blurWeight[i]);
-        }
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0);
-        }
-        return color;
+            float o = in_blurOffset[i];
+            color += ($samplePair) * half(in_blurWeight[i]);
+        }$tail
     }
 """
 }
@@ -32,11 +42,14 @@ internal fun buildBlurShader(tapCount: Int): String {
 /** Maximum number of tap pairs for the Blur shader. */
 internal const val MAX_BLUR_TAPS = 7
 
-/** Lazy-built per-tap-count shader sources; index 0 is unused. */
-private val BLUR_SHADER_BY_TAP = arrayOfNulls<String>(MAX_BLUR_TAPS + 1)
+/** Lazy-built per-(tapCount, axis, unpremul) shader sources; tapCount 0 is unused. */
+private val BLUR_SHADER_CACHE = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * 4)
 
-internal fun blurShaderForTap(tapCount: Int): String = BLUR_SHADER_BY_TAP[tapCount]
-    ?: buildBlurShader(tapCount).also { BLUR_SHADER_BY_TAP[tapCount] = it }
+internal fun blurShaderForTap(tapCount: Int, axis: Int, unpremul: Boolean): String {
+    val slot = (tapCount * 2 + (axis and 1)) * 2 + if (unpremul) 1 else 0
+    return BLUR_SHADER_CACHE[slot]
+        ?: buildBlurShader(tapCount, axis, unpremul).also { BLUR_SHADER_CACHE[slot] = it }
+}
 
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24

@@ -151,7 +151,7 @@ internal abstract class BackdropEffectScopeImpl :
     private val shaderWeightsByTaps: Array<FloatArray?> = arrayOfNulls(MAX_BLUR_TAPS + 1)
 
     internal fun obtainShaderOffsetsBuffer(tapCount: Int): FloatArray = shaderOffsetsByTaps[tapCount]
-        ?: FloatArray(tapCount * 2).also { shaderOffsetsByTaps[tapCount] = it }
+        ?: FloatArray(tapCount).also { shaderOffsetsByTaps[tapCount] = it }
 
     internal fun obtainShaderWeightsBuffer(tapCount: Int): FloatArray = shaderWeightsByTaps[tapCount]
         ?: FloatArray(tapCount).also { shaderWeightsByTaps[tapCount] = it }
