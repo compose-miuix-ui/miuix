@@ -12,14 +12,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -139,56 +137,22 @@ fun FPSMonitor(modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(Unit) {
-        val samples = ArrayDeque<Long>(WINDOW_FRAME_CAP)
-        val avgHistory = ArrayDeque<AvgTick>(REF_HISTORY_CAP)
-        var sumNs = 0L
-        var lastFrameNs = 0L
-        var nextRefreshNs = 0L
-        while (true) {
-            withFrameNanos { frameNs ->
-                if (lastFrameNs != 0L) {
-                    val delta = frameNs - lastFrameNs
-                    if (delta in 1L..IDLE_THRESHOLD_NS) {
-                        samples.addLast(delta)
-                        sumNs += delta
-                        while (sumNs > WINDOW_NS && samples.size > MIN_SAMPLES) {
-                            sumNs -= samples.removeFirst()
-                        }
-                        while (samples.size > WINDOW_FRAME_CAP) {
-                            sumNs -= samples.removeFirst()
-                        }
-                        if (frameNs >= nextRefreshNs && samples.size >= MIN_SAMPLES) {
-                            val newStats = computeFpsStats(samples, sumNs)
-                            stats = newStats
-                            avgHistory.addLast(AvgTick(frameNs, newStats.avg))
-                            while (avgHistory.size > 1 && frameNs - avgHistory.first().timeNs > REF_HISTORY_NS) {
-                                avgHistory.removeFirst()
-                            }
-                            while (avgHistory.size > REF_HISTORY_CAP) {
-                                avgHistory.removeFirst()
-                            }
-                            refFps = avgHistory.maxOf { it.avg }
-                            nextRefreshNs = frameNs + REFRESH_INTERVAL_NS
-                        }
-                    }
-                }
-                lastFrameNs = frameNs
-            }
-        }
+    ObserveFrameStats { newStats, newRefFps ->
+        stats = newStats
+        refFps = newRefFps
     }
 }
 
 @Immutable
-private data class FpsStats(val avg: Int, val low1: Int) {
+internal data class FpsStats(val avg: Int, val low1: Int) {
     companion object {
         val Empty = FpsStats(0, 0)
     }
 }
 
-private data class AvgTick(val timeNs: Long, val avg: Int)
+internal data class AvgTick(val timeNs: Long, val avg: Int)
 
-private fun computeFpsStats(samples: ArrayDeque<Long>, sumNs: Long): FpsStats {
+internal fun computeFpsStats(samples: ArrayDeque<Long>, sumNs: Long): FpsStats {
     val size = samples.size
     val avgNs = sumNs.toDouble() / size
     val sorted = samples.toLongArray().also { it.sort() }
@@ -200,6 +164,40 @@ private fun computeFpsStats(samples: ArrayDeque<Long>, sumNs: Long): FpsStats {
         avg = (NS_PER_SECOND / avgNs).toInt(),
         low1 = (NS_PER_SECOND / low1AvgNs).toInt(),
     )
+}
+
+internal class FpsSampleCollector {
+    private val samples = ArrayDeque<Long>(WINDOW_FRAME_CAP)
+    private val avgHistory = ArrayDeque<AvgTick>(REF_HISTORY_CAP)
+    private var sumNs = 0L
+    private var nextRefreshNs = 0L
+
+    fun record(
+        durationNs: Long,
+        timestampNs: Long,
+        onStatsUpdate: (stats: FpsStats, refFps: Int) -> Unit,
+    ) {
+        samples.addLast(durationNs)
+        sumNs += durationNs
+        while (sumNs > WINDOW_NS && samples.size > MIN_SAMPLES) {
+            sumNs -= samples.removeFirst()
+        }
+        while (samples.size > WINDOW_FRAME_CAP) {
+            sumNs -= samples.removeFirst()
+        }
+        if (timestampNs >= nextRefreshNs && samples.size >= MIN_SAMPLES) {
+            val newStats = computeFpsStats(samples, sumNs)
+            avgHistory.addLast(AvgTick(timestampNs, newStats.avg))
+            while (avgHistory.size > 1 && timestampNs - avgHistory.first().timeNs > REF_HISTORY_NS) {
+                avgHistory.removeFirst()
+            }
+            while (avgHistory.size > REF_HISTORY_CAP) {
+                avgHistory.removeFirst()
+            }
+            onStatsUpdate(newStats, avgHistory.maxOf { it.avg })
+            nextRefreshNs = timestampNs + REFRESH_INTERVAL_NS
+        }
+    }
 }
 
 private fun healthColor(value: Int, ref: Int): Color {
@@ -218,11 +216,16 @@ private val HealthRed = Color(0xFFFF5B29)
 
 private val PillCorner = 12.dp
 
-private const val NS_PER_SECOND = 1_000_000_000.0
-private const val WINDOW_NS = 5L * 1_000_000_000L // 5 seconds
-private const val WINDOW_FRAME_CAP = 1_200 // upper bound for ~240Hz × 5s
-private const val MIN_SAMPLES = 30 // need at least ~0.5s of data before reporting
-private const val REFRESH_INTERVAL_NS = 500_000_000L // refresh stats twice per second
-private const val IDLE_THRESHOLD_NS = 500_000_000L // ignore gaps > 500ms (idle frames)
-private const val REF_HISTORY_NS = 30L * 1_000_000_000L // refFps reflects best avg in last 30s
-private const val REF_HISTORY_CAP = 120 // hard cap on stored ticks (2Hz × 60s headroom)
+internal const val NS_PER_SECOND = 1_000_000_000.0
+internal const val WINDOW_NS = 5L * 1_000_000_000L // 5 seconds
+internal const val WINDOW_FRAME_CAP = 1_200 // upper bound for ~240Hz × 5s
+internal const val MIN_SAMPLES = 30 // need at least ~0.5s of data before reporting
+internal const val REFRESH_INTERVAL_NS = 500_000_000L // refresh stats twice per second
+internal const val IDLE_THRESHOLD_NS = 500_000_000L // ignore gaps > 500ms (idle frames)
+internal const val REF_HISTORY_NS = 30L * 1_000_000_000L // refFps reflects best avg in last 30s
+internal const val REF_HISTORY_CAP = 120 // hard cap on stored ticks (2Hz × 60s headroom)
+
+@Composable
+internal expect fun ObserveFrameStats(
+    onStatsUpdate: (stats: FpsStats, refFps: Int) -> Unit,
+)

@@ -77,6 +77,9 @@ kotlin {
                 implementation(libs.kotlinx.serialization.core)
             }
         }
+        androidMain.dependencies {
+            implementation(libs.androidx.metrics.performance)
+        }
     }
 }
 

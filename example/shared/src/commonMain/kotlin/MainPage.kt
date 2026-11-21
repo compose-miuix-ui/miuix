@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import component.CardItem
 import component.badgeSection
 import component.basicComponentSection
 import component.breadcrumbBarSection
@@ -32,6 +33,7 @@ import component.buttonSection
 import component.cardSection
 import component.checkboxSection
 import component.colorPaletteSection
+import component.groupedCardItems
 import component.numberPickerSection
 import component.otherPageSection
 import component.progressIndicatorSection
@@ -316,26 +318,46 @@ fun MainPage(
                                 numberPickerSection()
                                 colorPaletteSection()
                             }
-                            item(key = "${group.title}-pages") {
-                                Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                            groupedCardItems(
+                                keyPrefix = "${group.title}-pages",
+                                outerTopPadding = 0.dp,
+                                outerBottomPadding = 12.dp,
+                                items = buildList {
                                     if (group == ComponentDemoGroup.Ui) {
-                                        ArrowPreference(
-                                            title = "PullToRefresh",
-                                            modifier = Modifier.navTransitionSource(Route.PullToRefresh, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp)),
-                                            onClick = { navigator.push(Route.PullToRefresh) },
+                                        add(
+                                            CardItem("PullToRefresh") {
+                                                ArrowPreference(
+                                                    title = "PullToRefresh",
+                                                    modifier = Modifier.navTransitionSource(
+                                                        Route.PullToRefresh,
+                                                        containerColor = MiuixTheme.colorScheme.surfaceContainer,
+                                                        corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp),
+                                                    ),
+                                                    onClick = { navigator.push(Route.PullToRefresh) },
+                                                )
+                                            },
                                         )
                                     }
                                     demos.forEachIndexed { index, demo ->
                                         val top = if (index == 0 && group != ComponentDemoGroup.Ui) CardDefaults.CornerRadius else 0.dp
                                         val bottom = if (index == demos.lastIndex) CardDefaults.CornerRadius else 0.dp
-                                        ArrowPreference(
-                                            title = demo.title,
-                                            modifier = Modifier.navTransitionSource(Route.Component(demo), containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(top, top, bottom, bottom)),
-                                            onClick = { navigator.push(Route.Component(demo)) },
+                                        add(
+                                            CardItem(demo.name) {
+                                                val destination = Route.Component(demo)
+                                                ArrowPreference(
+                                                    title = demo.title,
+                                                    modifier = Modifier.navTransitionSource(
+                                                        destination,
+                                                        containerColor = MiuixTheme.colorScheme.surfaceContainer,
+                                                        corners = NavTransitionCorners(top, top, bottom, bottom),
+                                                    ),
+                                                    onClick = { navigator.push(destination) },
+                                                )
+                                            },
                                         )
                                     }
-                                }
-                            }
+                                },
+                            )
                         }
                     }
                     item(key = "miuix-glass") {
