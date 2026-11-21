@@ -1270,7 +1270,6 @@ private class DrawBackdropNode(
                 runtimeShaderEffect(noiseShader, "child")
             }
             drawShiftedLayer(noiseL, padLeft, padTop, 1f, residualX, residualY)
-            noiseL.renderEffect = null
         } else {
             drawShiftedLayer(layer, padLeft / texelScale, padTop / texelScale, texelScale, residualX, residualY)
         }
