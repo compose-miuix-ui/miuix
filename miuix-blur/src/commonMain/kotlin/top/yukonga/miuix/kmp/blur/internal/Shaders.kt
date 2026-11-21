@@ -290,7 +290,7 @@ private const val PROGRESSIVE_CURVE_KIND_COUNT = 4
 private const val PROGRESSIVE_TAP_COUNT = 6
 
 private val PROGRESSIVE_LOOP_KEYS = arrayOfNulls<String>(
-    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * LEVEL_BUCKETS * PROGRESSIVE_TAP_COUNT,
+    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * PROGRESSIVE_TAP_COUNT,
 )
 
 private val PROGRESSIVE_SHARP_KEYS = arrayOfNulls<String>(
@@ -313,12 +313,11 @@ internal fun progressiveLoopShaderKey(
         unpremul -> 1
         else -> 0
     }
-    val bucket = levelBucket(downScale)
     val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
-    val slot = (((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * LEVEL_BUCKETS + bucket) *
+    val slot = ((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) *
         PROGRESSIVE_TAP_COUNT + tapIdx
     return PROGRESSIVE_LOOP_KEYS[slot]
-        ?: "LMPGL_${axis}_${mode}_c${curveKind}_b${bucket}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
+        ?: "LMPGL_${axis}_${mode}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
 }
 
 internal fun progressiveSharpShaderKey(

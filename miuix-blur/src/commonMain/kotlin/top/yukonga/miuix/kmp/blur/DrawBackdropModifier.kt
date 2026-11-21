@@ -701,8 +701,12 @@ private class DrawBackdropNode(
 
         if (level <= 1.001f) {
             target.cascadeFirstStepScale = 1f
-            recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
-            drawShiftedLayer(layer, padL, padT, 1f)
+            if (layer.renderEffect == null && padL == 0f && padT == 0f && target.padRight == 0f && target.padBottom == 0f) {
+                recordBackdrop(target)
+            } else {
+                recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
+                drawShiftedLayer(layer, padL, padT, 1f)
+            }
             return
         }
 

@@ -44,7 +44,7 @@ internal const val MAX_BLEND_LAYERS = 8
  * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX].
  */
 fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
-    if (!isRuntimeShaderSupported()) return
+    if (!isRuntimeShaderSupported() || (radiusX <= 0f && radiusY <= 0f)) return
     val scope = impl
     val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
@@ -54,8 +54,10 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     val sigma = maxOf(sigmaX, sigmaY)
     val scale = quantizedLevelScale(sigma * sigma)
 
-    // Padding covers the kernel reach in source pixels, so the recorded size follows the level.
-    val kernelPadding = BLUR_KERNEL_REACH * scale
+    // Padding covers the kernel reach in source pixels; typical radii (adjVar <= 9) only reach 9 texels.
+    val adjVar = adjustedVarianceForScale(sigma * sigma, scale)
+    val kernelReach = if (adjVar <= 9f) 9 else BLUR_KERNEL_REACH
+    val kernelPadding = kernelReach * scale
     if (kernelPadding > padding) {
         padding = kernelPadding
     }

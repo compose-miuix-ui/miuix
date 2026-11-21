@@ -49,18 +49,15 @@ internal const val LEVEL_BUCKETS = 17
  * Gaussian shader-cache keys, `[tapCount][bucket]`: lazily populated so unused combinations do not
  * allocate at startup.
  */
-private val BLUR_H_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
-private val BLUR_V_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
+private val BLUR_H_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * 2)
+private val BLUR_V_KEYS = arrayOfNulls<String>(MAX_BLUR_TAPS + 1)
 
-private fun blurHShaderKey(tapCount: Int, bucket: Int): String {
-    val slot = tapCount * LEVEL_BUCKETS + bucket
-    return BLUR_H_KEYS[slot] ?: "LMGauss${tapCount}_H_b$bucket".also { BLUR_H_KEYS[slot] = it }
+private fun blurHShaderKey(tapCount: Int, unpremul: Boolean): String {
+    val slot = tapCount * 2 + if (unpremul) 1 else 0
+    return BLUR_H_KEYS[slot] ?: (if (unpremul) "LMGauss${tapCount}_H_u" else "LMGauss${tapCount}_H").also { BLUR_H_KEYS[slot] = it }
 }
 
-private fun blurVShaderKey(tapCount: Int, bucket: Int): String {
-    val slot = tapCount * LEVEL_BUCKETS + bucket
-    return BLUR_V_KEYS[slot] ?: "LMGauss${tapCount}_V_b$bucket".also { BLUR_V_KEYS[slot] = it }
-}
+private fun blurVShaderKey(tapCount: Int): String = BLUR_V_KEYS[tapCount] ?: "LMGauss${tapCount}_V".also { BLUR_V_KEYS[tapCount] = it }
 
 private val LEVEL_SCALES = FloatArray(LEVEL_BUCKETS) { b ->
     2f.pow(b.toFloat() / BUCKETS_PER_OCTAVE)
@@ -93,8 +90,6 @@ internal fun createBlurEffect(
     val paramOffsets = scope.blurParamOffsets
     val paramWeights = scope.blurParamWeights
 
-    val bucket = levelBucket(downScale)
-
     var effect: RenderEffect? = null
 
     // H / V keep separate keys (each pass owns its shader instance); the bucket splits the levels
@@ -126,9 +121,8 @@ internal fun createBlurEffect(
 
     if (hN > 0) {
         val hUnpremul = vN <= 0
-        val hKey = if (hUnpremul) "${blurHShaderKey(hN, bucket)}_u" else blurHShaderKey(hN, bucket)
         val hShader = scope.obtainRuntimeShader(
-            hKey,
+            blurHShaderKey(hN, hUnpremul),
             blurShaderForTap(hN, axis = 0, unpremul = hUnpremul),
         ).apply {
             setFloatUniform("in_blurOffset", hOffsets!!)
@@ -158,7 +152,7 @@ internal fun createBlurEffect(
             }
         }
         val vShader = scope.obtainRuntimeShader(
-            blurVShaderKey(vN, bucket),
+            blurVShaderKey(vN),
             blurShaderForTap(vN, axis = 1, unpremul = true),
         ).apply {
             setFloatUniform("in_blurOffset", shaderOffsets)
