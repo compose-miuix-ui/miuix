@@ -3,13 +3,7 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.animation.CapturedAnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -139,17 +133,17 @@ private fun SettingsContent(
                 outerBottomPadding = 12.dp,
                 items = buildList {
                     add(
-                        CardItem("topAppBar") {
+                        CardItem("showTopAppBar") {
                             SwitchPreference(
                                 title = "Show TopAppBar",
                                 checked = appState.showTopAppBar,
                                 onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
                             )
-                            CapturedAnimatedVisibility(
-                                visible = appState.showTopAppBar,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
+                        },
+                    )
+                    if (appState.showTopAppBar) {
+                        add(
+                            CardItem("topAppBarStyle") {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "TopAppBar Style",
@@ -157,22 +151,21 @@ private fun SettingsContent(
                                     selectedIndex = appState.topAppBarStyle,
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(topAppBarStyle = it) } },
                                 )
-                            }
-                        },
-                    )
+                            },
+                        )
+                    }
                     add(
-                        CardItem("navigationBar") {
+                        CardItem("showNavigationBar") {
                             SwitchPreference(
                                 title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",
                                 checked = appState.showNavigationBar,
                                 onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
                             )
-                            // Sidebar options only exist on the layout that actually shows a sidebar.
-                            CapturedAnimatedVisibility(
-                                visible = appState.showNavigationBar && isWideScreen,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
+                        },
+                    )
+                    if (appState.showNavigationBar && isWideScreen) {
+                        add(
+                            CardItem("sidebarStyle") {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "Sidebar Style",
@@ -180,23 +173,23 @@ private fun SettingsContent(
                                     selectedIndex = appState.navigationRailStyle,
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailStyle = it) } },
                                 )
-                            }
-                            CapturedAnimatedVisibility(
-                                visible = appState.showNavigationBar,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
+                            },
+                        )
+                    }
+                    if (appState.showNavigationBar) {
+                        add(
+                            CardItem("navigationBadge") {
                                 SwitchPreference(
                                     title = "Show Navigation Badge",
                                     checked = appState.showNavigationBarBadge,
                                     onCheckedChange = { updateAppState { state -> state.copy(showNavigationBarBadge = it) } },
                                 )
-                            }
-                            CapturedAnimatedVisibility(
-                                visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
+                            },
+                        )
+                    }
+                    if (appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
+                        add(
+                            CardItem("navigationBarMode") {
                                 GlassDropdownPreference(
                                     backdrop = backdrop,
                                     title = "NavigationBar Mode",
@@ -204,127 +197,129 @@ private fun SettingsContent(
                                     selectedIndex = appState.navigationBarMode,
                                     onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
                                 )
-                            }
-                            CapturedAnimatedVisibility(
-                                visible = appState.showNavigationBar && !isWideScreen,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
-                                Column {
-                                    SwitchPreference(
-                                        title = "Use FloatingNavigationBar",
-                                        checked = appState.useFloatingNavigationBar,
-                                        onCheckedChange = { updateAppState { state -> state.copy(useFloatingNavigationBar = it) } },
+                            },
+                        )
+                    }
+                    if (appState.showNavigationBar && !isWideScreen) {
+                        add(
+                            CardItem("useFloatingNavigationBar") {
+                                SwitchPreference(
+                                    title = "Use FloatingNavigationBar",
+                                    checked = appState.useFloatingNavigationBar,
+                                    onCheckedChange = { updateAppState { state -> state.copy(useFloatingNavigationBar = it) } },
+                                )
+                            },
+                        )
+                        if (appState.useFloatingNavigationBar) {
+                            add(
+                                CardItem("floatingNavigationBarStyle") {
+                                    GlassDropdownPreference(
+                                        backdrop = backdrop,
+                                        title = "FloatingNavigationBar Style",
+                                        items = FloatingNavigationBarStyleOptions,
+                                        selectedIndex = appState.floatingNavigationBarStyle,
+                                        onSelectedIndexChange = {
+                                            updateAppState { state -> state.copy(floatingNavigationBarStyle = it) }
+                                        },
                                     )
-                                    CapturedAnimatedVisibility(
-                                        visible = appState.useFloatingNavigationBar,
-                                        enter = fadeIn() + expandVertically(),
-                                        exit = fadeOut() + shrinkVertically(),
-                                    ) {
-                                        Column {
-                                            GlassDropdownPreference(
-                                                backdrop = backdrop,
-                                                title = "FloatingNavigationBar Style",
-                                                items = FloatingNavigationBarStyleOptions,
-                                                selectedIndex = appState.floatingNavigationBarStyle,
-                                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarStyle = it) } },
-                                            )
-                                            CapturedAnimatedVisibility(
-                                                visible = appState.floatingNavigationBarStyle == 0,
-                                                enter = fadeIn() + expandVertically(),
-                                                exit = fadeOut() + shrinkVertically(),
-                                            ) {
-                                                Column {
-                                                    GlassDropdownPreference(
-                                                        backdrop = backdrop,
-                                                        title = "FloatingNavigationBar Position",
-                                                        items = FloatingNavigationBarPositionOptions,
-                                                        selectedIndex = appState.floatingNavigationBarPosition,
-                                                        onSelectedIndexChange = {
-                                                            updateAppState { state ->
-                                                                state.copy(
-                                                                    floatingNavigationBarPosition = it,
-                                                                )
-                                                            }
-                                                        },
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                },
+                            )
+                            if (appState.floatingNavigationBarStyle == 0) {
+                                add(
+                                    CardItem("floatingNavigationBarPosition") {
+                                        GlassDropdownPreference(
+                                            backdrop = backdrop,
+                                            title = "FloatingNavigationBar Position",
+                                            items = FloatingNavigationBarPositionOptions,
+                                            selectedIndex = appState.floatingNavigationBarPosition,
+                                            onSelectedIndexChange = {
+                                                updateAppState { state -> state.copy(floatingNavigationBarPosition = it) }
+                                            },
+                                        )
+                                    },
+                                )
                             }
-                        },
-                    )
+                        }
+                    }
                     add(
-                        CardItem("floatingToolbar") {
+                        CardItem("showFloatingToolbar") {
                             SwitchPreference(
                                 title = "Show FloatingToolbar",
                                 checked = appState.showFloatingToolbar,
                                 onCheckedChange = { updateAppState { state -> state.copy(showFloatingToolbar = it) } },
                             )
-                            CapturedAnimatedVisibility(
-                                visible = appState.showFloatingToolbar,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
-                                Column {
-                                    GlassDropdownPreference(
-                                        backdrop = backdrop,
-                                        title = "FloatingToolbar Position",
-                                        items = FloatingToolbarPositionOptions,
-                                        selectedIndex = appState.floatingToolbarPosition,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarPosition = it) } },
-                                    )
-                                    GlassDropdownPreference(
-                                        backdrop = backdrop,
-                                        title = "FloatingToolbar Orientation",
-                                        items = FloatingToolbarOrientationOptions,
-                                        selectedIndex = appState.floatingToolbarOrientation,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
-                                    )
-                                    GlassDropdownPreference(
-                                        backdrop = backdrop,
-                                        title = "FloatingToolbar Style",
-                                        items = TopAppBarStyleOptions,
-                                        selectedIndex = appState.floatingToolbarStyle,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarStyle = it) } },
-                                    )
-                                }
-                            }
                         },
                     )
+                    if (appState.showFloatingToolbar) {
+                        add(
+                            CardItem("floatingToolbarPosition") {
+                                GlassDropdownPreference(
+                                    backdrop = backdrop,
+                                    title = "FloatingToolbar Position",
+                                    items = FloatingToolbarPositionOptions,
+                                    selectedIndex = appState.floatingToolbarPosition,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarPosition = it) } },
+                                )
+                            },
+                        )
+                        add(
+                            CardItem("floatingToolbarOrientation") {
+                                GlassDropdownPreference(
+                                    backdrop = backdrop,
+                                    title = "FloatingToolbar Orientation",
+                                    items = FloatingToolbarOrientationOptions,
+                                    selectedIndex = appState.floatingToolbarOrientation,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
+                                )
+                            },
+                        )
+                        add(
+                            CardItem("floatingToolbarStyle") {
+                                GlassDropdownPreference(
+                                    backdrop = backdrop,
+                                    title = "FloatingToolbar Style",
+                                    items = TopAppBarStyleOptions,
+                                    selectedIndex = appState.floatingToolbarStyle,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarStyle = it) } },
+                                )
+                            },
+                        )
+                    }
                     add(
-                        CardItem("floatingActionButton") {
+                        CardItem("showFloatingActionButton") {
                             SwitchPreference(
                                 title = "Show FloatingActionButton",
                                 checked = appState.showFloatingActionButton,
                                 onCheckedChange = { updateAppState { state -> state.copy(showFloatingActionButton = it) } },
                             )
-                            CapturedAnimatedVisibility(
-                                visible = appState.showFloatingActionButton,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
-                                Column {
-                                    GlassDropdownPreference(
-                                        backdrop = backdrop,
-                                        title = "FloatingActionButton Position",
-                                        items = FabPositionOptions,
-                                        selectedIndex = appState.floatingActionButtonPosition,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
-                                    )
-                                    GlassDropdownPreference(
-                                        backdrop = backdrop,
-                                        title = "FloatingActionButton Style",
-                                        items = TopAppBarStyleOptions,
-                                        selectedIndex = appState.floatingActionButtonStyle,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonStyle = it) } },
-                                    )
-                                }
-                            }
                         },
                     )
+                    if (appState.showFloatingActionButton) {
+                        add(
+                            CardItem("floatingActionButtonPosition") {
+                                GlassDropdownPreference(
+                                    backdrop = backdrop,
+                                    title = "FloatingActionButton Position",
+                                    items = FabPositionOptions,
+                                    selectedIndex = appState.floatingActionButtonPosition,
+                                    onSelectedIndexChange = {
+                                        updateAppState { state -> state.copy(floatingActionButtonPosition = it) }
+                                    },
+                                )
+                            },
+                        )
+                        add(
+                            CardItem("floatingActionButtonStyle") {
+                                GlassDropdownPreference(
+                                    backdrop = backdrop,
+                                    title = "FloatingActionButton Style",
+                                    items = TopAppBarStyleOptions,
+                                    selectedIndex = appState.floatingActionButtonStyle,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonStyle = it) } },
+                                )
+                            },
+                        )
+                    }
                 },
             )
             item(key = "settingsAboutTitle") { SmallTitle("Other") }

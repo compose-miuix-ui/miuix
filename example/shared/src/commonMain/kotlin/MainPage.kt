@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import component.CardItem
 import component.badgeSection
 import component.basicComponentSection
 import component.breadcrumbBarSection
@@ -32,6 +33,7 @@ import component.buttonSection
 import component.cardSection
 import component.checkboxSection
 import component.colorPaletteSection
+import component.groupedCardItems
 import component.numberPickerSection
 import component.otherPageSection
 import component.progressIndicatorSection
@@ -313,22 +315,33 @@ fun MainPage(
                                 numberPickerSection()
                                 colorPaletteSection()
                             }
-                            item(key = "${group.title}-pages") {
-                                Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                            groupedCardItems(
+                                keyPrefix = "${group.title}-pages",
+                                outerTopPadding = 0.dp,
+                                outerBottomPadding = 12.dp,
+                                items = buildList {
                                     if (group == ComponentDemoGroup.Ui) {
-                                        ArrowPreference(
-                                            title = "PullToRefresh",
-                                            onClick = { navigator.push(Route.PullToRefresh) },
+                                        add(
+                                            CardItem("PullToRefresh") {
+                                                ArrowPreference(
+                                                    title = "PullToRefresh",
+                                                    onClick = { navigator.push(Route.PullToRefresh) },
+                                                )
+                                            },
                                         )
                                     }
                                     demos.forEach { demo ->
-                                        ArrowPreference(
-                                            title = demo.title,
-                                            onClick = { navigator.push(Route.Component(demo)) },
+                                        add(
+                                            CardItem(demo.name) {
+                                                ArrowPreference(
+                                                    title = demo.title,
+                                                    onClick = { navigator.push(Route.Component(demo)) },
+                                                )
+                                            },
                                         )
                                     }
-                                }
-                            }
+                                },
+                            )
                         }
                     }
                     item(key = "miuix-glass") {

@@ -104,7 +104,6 @@ import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.glass.GlassFloatingActionButton
 import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
@@ -668,12 +667,8 @@ private fun CompactScreenLayout(
     mainPagerState: MainPagerState,
     pagerContent: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
-    val surfaceColor = MiuixTheme.colorScheme.surface
     val appState = LocalAppState.current
-    val backdrop = rememberLayerBackdrop {
-        drawRect(surfaceColor)
-        drawContent()
-    }
+    val backdrop = rememberBlurBackdrop()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = LocalAppPageInsets.current.safeInsets,
@@ -702,7 +697,7 @@ private fun CompactScreenLayout(
         },
         floatingToolbarPosition = appState.floatingToolbarPosition.toToolbarPosition(),
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
+        Box(modifier = Modifier.fillMaxSize().then(if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier)) {
             pagerContent(
                 innerPadding,
                 Modifier.imePadding(),
