@@ -580,7 +580,7 @@ private fun GlassTopAppBarLayout(
                 height.toFloat(),
                 topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
             )
-            ((coveredHeight + 20.dp.toPx()) * 1.2f).roundToInt()
+            (coveredHeight + gradientOverhang.toPx().coerceAtLeast(0f)).roundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
         }
