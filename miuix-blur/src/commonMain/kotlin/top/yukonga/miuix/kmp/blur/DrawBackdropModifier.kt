@@ -1083,10 +1083,33 @@ private class DrawBackdropNode(
             progBasePadRight = scope.padding
             progBasePadBottom = scope.padding
         }
-        primary.padLeft = progBasePadLeft
-        primary.padTop = progBasePadTop
-        primary.padRight = progBasePadRight
-        primary.padBottom = progBasePadBottom
+        var padL = progBasePadLeft
+        var padT = progBasePadTop
+        var padR = progBasePadRight
+        var padB = progBasePadBottom
+        if (pre == null && layerBlock == null) {
+            val layerCoords = (backdrop as? LayerBackdrop)?.layerCoordinates?.takeIf { it.isAttached }
+            val coords = layoutCoordinates?.takeIf { it.isAttached }
+            if (layerCoords != null && coords != null) {
+                val pos = try {
+                    layerCoords.localPositionOf(coords)
+                } catch (_: Exception) {
+                    null
+                }
+                if (pos != null) {
+                    val layerW = layerCoords.size.width.toFloat()
+                    val layerH = layerCoords.size.height.toFloat()
+                    padL = minOf(padL, pos.x.coerceAtLeast(0f))
+                    padT = minOf(padT, pos.y.coerceAtLeast(0f))
+                    padR = minOf(padR, (layerW - (pos.x + scope.size.width)).coerceAtLeast(0f))
+                    padB = minOf(padB, (layerH - (pos.y + scope.size.height)).coerceAtLeast(0f))
+                }
+            }
+        }
+        primary.padLeft = padL
+        primary.padTop = padT
+        primary.padRight = padR
+        primary.padBottom = padB
 
         val inlineTint = postBlend.singleSrcOverColorOrUnspecified()
         val noiseCoeff = scope.noiseCoefficient
@@ -1102,10 +1125,10 @@ private class DrawBackdropNode(
             radiusY = rY,
             exp = exp,
             gradient = gradient,
-            padLeft = progBasePadLeft,
-            padTop = progBasePadTop,
-            padRight = progBasePadRight,
-            padBottom = progBasePadBottom,
+            padLeft = padL,
+            padTop = padT,
+            padRight = padR,
+            padBottom = padB,
             tintColor = inlineTint,
             ditherCoeff = inlineDitherCoeff,
         )
