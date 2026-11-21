@@ -118,7 +118,7 @@ NavDisplay(
 - 将 `navTransitionSource` 放在 padding 之后、背景 / 裁剪之前。传入来源组件的 `containerColor` 和轮廓（`cornerRadius`、`corners` 或 `shape`）；自定义形状须为不含孔洞的单轮廓。
 - 目标页面应绘制与容器颜色一致的不透明背景。`Expansion` 依次使用 `expansion(containerColor = ...)`、`NavDisplayEffects.backdropColor`、来源 `containerColor` 中首个不透明颜色。`cornerClipRadius` 提供最后运动帧的圆角；稳定页面不保留转场裁剪。
 - 来源和目标须在同一窗口中。打开页面时，若无法捕获来源或没有不透明容器颜色，使用 `MiuixDefault`。同一 route 绑定多个来源时，以按下的组件为准。
-- 已使用 Expansion 打开的页面返回时，原入口仍有可见区域才会缩回入口。原入口完全被裁切或回收时，页面会居中缩小并淡出。重新创建的同路由入口不会接管原入口的返回位置。
+- 已使用 Expansion 打开的页面返回时，原入口仍有可见区域才会缩回入口。入口可能随页面一起重建时，传入稳定的 `sourceKey` 来恢复绑定。同一来源页面和目标路由下的各个入口应使用不同的键。原入口仍未挂载或被完全裁切时，页面会居中缩小并淡出。
 
 ## 滑动关闭方向
 

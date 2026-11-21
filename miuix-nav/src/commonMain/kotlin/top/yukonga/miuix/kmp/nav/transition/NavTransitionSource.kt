@@ -192,6 +192,8 @@ internal fun LayoutCoordinates.navVisibleBoundsOf(source: LayoutCoordinates): Re
  * normal click callback. Attach after outer padding and before the component's surface/clip.
  * Supply its background and outline (convex or star-shaped polygon, without holes). When several
  * components bind the same route, the pressed component wins.
+ * [sourceKey] can reconnect this source after it is composed again. Keep it stable and unique
+ * among sources for the same destination in the same origin entry.
  */
 fun Modifier.navTransitionSource(
     route: NavKey,
@@ -199,7 +201,8 @@ fun Modifier.navTransitionSource(
     containerColor: Color = Color.Unspecified,
     corners: NavTransitionCorners = NavTransitionCorners(cornerRadius),
     shape: Shape? = null,
-): Modifier = this then NavTransitionSourceElement(route, cornerRadius, containerColor, corners, shape)
+    sourceKey: String? = null,
+): Modifier = this then NavTransitionSourceElement(route, cornerRadius, containerColor, corners, shape, sourceKey)
 
 private data class NavTransitionSourceElement(
     val route: NavKey,
@@ -207,6 +210,7 @@ private data class NavTransitionSourceElement(
     val containerColor: Color,
     val corners: NavTransitionCorners,
     val shape: Shape?,
+    val sourceKey: String?,
 ) : ModifierNodeElement<NavTransitionSourceNode>() {
     override fun create() = NavTransitionSourceNode(this)
 
@@ -246,12 +250,12 @@ private class NavTransitionSourceNode(var element: NavTransitionSourceElement) :
             val origin = checkNotNull(currentValueOf(LocalNavTransitionScope).entryKey) { "Navigation sources must belong to a destination entry" }
             val context = currentValueOf(LocalGraphicsContext)
             val old = recording
-            val node = if (old != null && old.matches(state, origin, element.route, context)) {
+            val node = if (old != null && old.matches(state, origin, element.route, element.sourceKey, context)) {
                 old
             } else {
                 clearRecording()
                 val source = NavTransitionSource(context)
-                delegate(NavSourceRecordingNode(state, origin, element.route, source)).also { recording = it }
+                delegate(NavSourceRecordingNode(state, origin, element.route, element.sourceKey, source)).also { recording = it }
             }
             node.update(element)
             node.source.density = currentValueOf(LocalDensity)
@@ -273,6 +277,7 @@ private class NavSourceRecordingNode(
     private val state: NavExpansionState,
     private val origin: NavKey,
     private val route: NavKey,
+    private val sourceKey: String?,
     val source: NavTransitionSource,
 ) : DelegatingNode(),
     GlobalPositionAwareModifierNode,
@@ -300,7 +305,7 @@ private class NavSourceRecordingNode(
         )
     }
 
-    fun matches(state: NavExpansionState, origin: NavKey, route: NavKey, context: GraphicsContext): Boolean = this.state === state && this.origin == origin && this.route == route && source.graphicsContext === context
+    fun matches(state: NavExpansionState, origin: NavKey, route: NavKey, sourceKey: String?, context: GraphicsContext): Boolean = this.state === state && this.origin == origin && this.route == route && this.sourceKey == sourceKey && source.graphicsContext === context
 
     fun update(element: NavTransitionSourceElement) {
         if (::binding.isInitialized) {
@@ -308,7 +313,7 @@ private class NavSourceRecordingNode(
             binding.containerColor = element.containerColor
             binding.corners = element.corners
         } else {
-            binding = NavExpansionBinding(origin, route, source, element.cornerRadius, element.containerColor, element.corners)
+            binding = NavExpansionBinding(origin, route, source, element.cornerRadius, element.containerColor, element.corners, sourceKey)
             state.bind(binding)
         }
         source.shape = element.shape
@@ -316,6 +321,7 @@ private class NavSourceRecordingNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         source.placed(coordinates)
+        if (sourceKey != null) state.reconnectPlacedSource(binding)
     }
 
     override fun ContentDrawScope.draw() = source.draw(this)

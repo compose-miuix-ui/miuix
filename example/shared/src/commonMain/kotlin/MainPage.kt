@@ -332,6 +332,7 @@ fun MainPage(
                                                         Route.PullToRefresh,
                                                         containerColor = MiuixTheme.colorScheme.surfaceContainer,
                                                         corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp),
+                                                        sourceKey = "pullToRefresh",
                                                     ),
                                                     onClick = { navigator.push(Route.PullToRefresh) },
                                                 )
@@ -350,6 +351,7 @@ fun MainPage(
                                                         destination,
                                                         containerColor = MiuixTheme.colorScheme.surfaceContainer,
                                                         corners = NavTransitionCorners(top, top, bottom, bottom),
+                                                        sourceKey = demo.name,
                                                     ),
                                                     onClick = { navigator.push(destination) },
                                                 )
@@ -365,7 +367,7 @@ fun MainPage(
                         Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                             ArrowPreference(
                                 title = "Glass Component",
-                                modifier = Modifier.navTransitionSource(Route.Glass, containerColor = MiuixTheme.colorScheme.surfaceContainer),
+                                modifier = Modifier.navTransitionSource(Route.Glass, containerColor = MiuixTheme.colorScheme.surfaceContainer, sourceKey = "glass"),
                                 onClick = { navigator.push(Route.Glass) },
                             )
                         }

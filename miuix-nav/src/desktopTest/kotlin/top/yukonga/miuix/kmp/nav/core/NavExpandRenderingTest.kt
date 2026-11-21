@@ -132,7 +132,7 @@ class NavExpandRenderingTest {
                         if (present.value) {
                             Box(
                                 Modifier.size(80.dp)
-                                    .navTransitionSource(detail, containerColor = Color.Green)
+                                    .navTransitionSource(detail, containerColor = Color.Green, sourceKey = "original")
                                     .drawWithContent {
                                         sourceDraws++
                                         drawRect(color.value)
@@ -140,7 +140,7 @@ class NavExpandRenderingTest {
                                     },
                             )
                         } else {
-                            Box(Modifier.padding(start = 120.dp).size(80.dp).navTransitionSource(detail).background(Color.Red))
+                            Box(Modifier.padding(start = 120.dp).size(80.dp).navTransitionSource(detail, sourceKey = "replacement").background(Color.Red))
                         }
                     }
                 }
@@ -196,7 +196,7 @@ class NavExpandRenderingTest {
                             if (index == 0) {
                                 Box(
                                     Modifier.size(80.dp).testTag("lazy-source")
-                                        .navTransitionSource(detail, containerColor = Color.Green)
+                                        .navTransitionSource(detail, containerColor = Color.Green, sourceKey = "lazy-source")
                                         .background(Color.Green)
                                         .clickable { stack.add(detail) },
                                 )
@@ -313,6 +313,75 @@ class NavExpandRenderingTest {
         }
         waitForIdle()
         assertEquals(ExpandRoot, stack.last())
+    }
+
+    @Test
+    fun stackedExpansionReconnectsTheOriginalVisibleSourceAfterItsPageWasCulled() = runComposeUiTest {
+        val middle = ExpandDetail(1)
+        val top = ExpandDetail(2)
+        val stack = navBackStackOf(ExpandRoot)
+        var expansion: NavExpansionState? = null
+        var middleScope: LiveNavTransitionScope? = null
+        setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f)) {
+                NavDisplay(stack, modifier = Modifier.size(320.dp), effects = NavDisplayEffects.None, transition = NavTransitions.expansion(Color.Blue)) {
+                    entry<ExpandRoot> {
+                        expansion = LocalNavExpansionState.current
+                        Row {
+                            for (key in listOf("alternative", "original")) {
+                                Box(
+                                    Modifier.size(80.dp).testTag(key)
+                                        .navTransitionSource(middle, containerColor = Color.Green, sourceKey = key)
+                                        .background(Color.Green)
+                                        .clickable { stack.add(middle) },
+                                )
+                            }
+                        }
+                    }
+                    entry<ExpandDetail> { route ->
+                        Box(Modifier.fillMaxSize().background(Color.Blue)) {
+                            if (route == middle) {
+                                middleScope = LocalNavTransitionScope.current as LiveNavTransitionScope
+                                Box(
+                                    Modifier.size(80.dp)
+                                        .navTransitionSource(top, containerColor = Color.Green, sourceKey = "toTop")
+                                        .background(Color.Green),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        onNodeWithTag("original").performTouchInput { click() }
+        waitForIdle()
+        val state = assertNotNull(expansion)
+        val middleAnchor = assertNotNull(state.anchorState(middle).value)
+        val originalSource = assertNotNull(middleAnchor.source)
+
+        runOnIdle { stack.add(top) }
+        waitForIdle()
+        assertNotNull(state.anchorState(top).value)
+        assertFalse(originalSource.hasLivePlacement)
+
+        runOnIdle { stack.removeLastOrNull() }
+        waitForIdle()
+        val reconnectedSource = assertNotNull(middleAnchor.source)
+        assertNotSame(originalSource, reconnectedSource)
+        assertTrue(reconnectedSource.hasLivePlacement)
+
+        mainClock.autoAdvance = false
+        runOnIdle { stack.removeLastOrNull() }
+        mainClock.advanceTimeUntil(400) { assertNotNull(middleScope).relativeDepth <= -0.5f }
+        waitForIdle()
+        runOnIdle {
+            val scope = assertNotNull(middleScope)
+            assertTrue(scope.isReturningExpansion)
+            assertEquals(Rect(80f, 0f, 160f, 80f), assertNotNull(scope.expansionReturnBounds(middleAnchor)).visible)
+        }
+        mainClock.autoAdvance = true
+        waitForIdle()
+        assertEquals(listOf<NavKey>(ExpandRoot), stack.toList())
     }
 
     @Test

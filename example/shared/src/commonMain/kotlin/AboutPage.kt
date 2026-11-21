@@ -442,7 +442,7 @@ private fun AboutContent(
                             )
                             ArrowPreference(
                                 title = "Third Party Licenses",
-                                modifier = Modifier.navTransitionSource(Route.License, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(0.dp, 0.dp, 16.dp, 16.dp)),
+                                modifier = Modifier.navTransitionSource(Route.License, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(0.dp, 0.dp, 16.dp, 16.dp), sourceKey = "license"),
                                 onClick = { navigator.push(Route.License) },
                             )
                         }

@@ -81,7 +81,7 @@ private fun ExpansionPreference(
     ArrowPreference(
         title = "Push another Navigation page",
         summary = "Component expansion",
-        modifier = Modifier.navTransitionSource(destination, containerColor = sourceColor, corners = corners)
+        modifier = Modifier.navTransitionSource(destination, containerColor = sourceColor, corners = corners, sourceKey = "expansion-${destination.id}")
             .absoluteSquircleSurface(sourceColor, corners.topLeft, corners.topRight, corners.bottomRight, corners.bottomLeft),
         onClick = { navigator.push(destination) },
     )
@@ -92,7 +92,7 @@ private fun ExpansionCard(destination: Route.ExpansionDetail, modifier: Modifier
     val navigator = LocalNavigator.current
     val sourceColor = MiuixTheme.colorScheme.surfaceContainer
     Card(
-        modifier = modifier.navTransitionSource(destination, CardDefaults.CornerRadius, sourceColor),
+        modifier = modifier.navTransitionSource(destination, CardDefaults.CornerRadius, sourceColor, sourceKey = "expansion-${destination.id}"),
         onClick = { navigator.push(destination) },
     ) {
         BasicComponent(title = "Title", summary = "Summary")
@@ -105,7 +105,7 @@ private fun ExpansionShapeCard(destination: Route.ExpansionDetail, shape: Shape,
     val sourceColor = MiuixTheme.colorScheme.surfaceContainer
     Card(
         modifier = modifier.aspectRatio(1f)
-            .navTransitionSource(destination, cornerRadius = 0.dp, containerColor = sourceColor, shape = shape)
+            .navTransitionSource(destination, cornerRadius = 0.dp, containerColor = sourceColor, shape = shape, sourceKey = "expansion-${destination.id}")
             .clip(shape),
         cornerRadius = 0.dp,
         onClick = { navigator.push(destination) },

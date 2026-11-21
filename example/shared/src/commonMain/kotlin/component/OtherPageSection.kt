@@ -5,7 +5,7 @@ package component
 
 import LocalNavigator
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import navigation.Route
@@ -28,7 +28,7 @@ fun LazyListScope.otherPageSection() {
         items = listOf(
             CardItem("navigationTest") {
                 val navigator = LocalNavigator.current
-                val destination = remember { Route.Navigation(Random.nextLong().toString()) }
+                val destination = Route.Navigation(rememberSaveable { Random.nextLong().toString() })
                 ArrowPreference(
                     title = "Navigation test",
                     summary = "Navigate to a Navigation Page",
@@ -36,6 +36,7 @@ fun LazyListScope.otherPageSection() {
                         destination,
                         containerColor = MiuixTheme.colorScheme.surfaceContainer,
                         corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp),
+                        sourceKey = "navigationTest",
                     ),
                     onClick = { navigator.push(destination) },
                 )
@@ -45,7 +46,7 @@ fun LazyListScope.otherPageSection() {
                 ArrowPreference(
                     title = "MultiScaffold Test",
                     summary = "Navigate to a MultiScaffold Page",
-                    modifier = Modifier.navTransitionSource(Route.MultiScaffold, containerColor = MiuixTheme.colorScheme.surfaceContainer, cornerRadius = 0.dp),
+                    modifier = Modifier.navTransitionSource(Route.MultiScaffold, containerColor = MiuixTheme.colorScheme.surfaceContainer, cornerRadius = 0.dp, sourceKey = "multiScaffoldTest"),
                     onClick = { navigator.push(Route.MultiScaffold) },
                 )
             },
@@ -54,7 +55,7 @@ fun LazyListScope.otherPageSection() {
                 ArrowPreference(
                     title = "Nested Navigation Test",
                     summary = "A NavDisplay nested inside an entry",
-                    modifier = Modifier.navTransitionSource(Route.NestedNav, containerColor = MiuixTheme.colorScheme.surfaceContainer, cornerRadius = 0.dp),
+                    modifier = Modifier.navTransitionSource(Route.NestedNav, containerColor = MiuixTheme.colorScheme.surfaceContainer, cornerRadius = 0.dp, sourceKey = "nestedNavTest"),
                     onClick = { navigator.push(Route.NestedNav) },
                 )
             },
@@ -67,6 +68,7 @@ fun LazyListScope.otherPageSection() {
                         Route.OverscrollLoadMore,
                         containerColor = MiuixTheme.colorScheme.surfaceContainer,
                         corners = NavTransitionCorners(0.dp, 0.dp, CardDefaults.CornerRadius, CardDefaults.CornerRadius),
+                        sourceKey = "overscrollLoadMoreTest",
                     ),
                     onClick = { navigator.push(Route.OverscrollLoadMore) },
                 )

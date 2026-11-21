@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,7 +67,8 @@ fun NavTestPage(
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
-    val nextRoute = remember { Route.Navigation(Random.nextLong().toString()) }
+    val nextRouteId = rememberSaveable(route) { Random.nextLong().toString() }
+    val nextRoute = remember(nextRouteId) { Route.Navigation(nextRouteId) }
 
     Scaffold(
         topBar = {
@@ -110,7 +112,7 @@ fun NavTestPage(
                             ArrowPreference(
                                 title = "Push another Navigation page",
                                 summary = "Single push (animatedTop N -> N+1)",
-                                modifier = Modifier.navTransitionSource(nextRoute, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(16.dp, 16.dp, 0.dp, 0.dp)),
+                                modifier = Modifier.navTransitionSource(nextRoute, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(16.dp, 16.dp, 0.dp, 0.dp), sourceKey = "pushNavigation"),
                                 onClick = { navigator.push(nextRoute) },
                             )
                             ArrowPreference(

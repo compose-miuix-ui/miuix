@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.nav.core.LiveNavTransitionScope
+import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 import top.yukonga.miuix.kmp.nav.transition.internal.NavCornerShape
 import top.yukonga.miuix.kmp.nav.transition.internal.NavExpandSourceBounds
@@ -47,6 +48,8 @@ internal class NavTransitionAnchor(
     val shape: Shape? = null,
 ) {
     internal var source: NavTransitionSource? by mutableStateOf(null)
+    internal var sourceOrigin: NavKey? = null
+    internal var sourceKey: String? = null
     internal var openingBounds: Rect by mutableStateOf(bounds)
     internal var openingShape: Shape? by mutableStateOf(shape)
     private var retained = false
@@ -68,6 +71,12 @@ internal class NavTransitionAnchor(
             source?.release()
             retained = false
         }
+    }
+
+    internal fun reconnectSource(source: NavTransitionSource) {
+        release()
+        this.source = source
+        retain()
     }
 
     internal fun updateOrigin() {

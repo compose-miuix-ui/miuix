@@ -36,6 +36,16 @@ internal class NavExpansionState(private val backStack: NavBackStack, private va
         if (activated === binding) activated = null
     }
 
+    fun reconnectPlacedSource(binding: NavExpansionBinding) {
+        val sourceKey = binding.sourceKey ?: return
+        val anchor = anchors[binding.destination]?.value ?: return
+        if (anchor.sourceOrigin != binding.origin || anchor.sourceKey != sourceKey) return
+        val previous = anchor.source ?: return
+        if (previous === binding.source || previous.hasLivePlacement || !binding.source.hasLivePlacement) return
+        if (bindings.any { it !== binding && it.origin == binding.origin && it.destination == binding.destination && it.sourceKey == sourceKey }) return
+        anchor.reconnectSource(binding.source)
+    }
+
     fun activate(binding: NavExpansionBinding) {
         activated = binding
     }
@@ -124,6 +134,10 @@ internal class NavExpansionBinding(
     var cornerRadius: Dp,
     var containerColor: Color,
     var corners: NavTransitionCorners,
+    val sourceKey: String? = null,
 ) {
-    fun captureAnchor(): NavTransitionAnchor? = source.capture(cornerRadius, containerColor, corners)
+    fun captureAnchor(): NavTransitionAnchor? = source.capture(cornerRadius, containerColor, corners)?.also {
+        it.sourceOrigin = origin
+        it.sourceKey = sourceKey
+    }
 }
