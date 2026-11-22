@@ -47,14 +47,11 @@ import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
-import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
 import component.liquid.rememberCombinedBackdrop
 import misc.VersionInfo
 import navigation.Route
 import org.jetbrains.compose.resources.painterResource
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -69,6 +66,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
+import top.yukonga.miuix.kmp.glass.GlassCard
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
@@ -95,7 +93,6 @@ fun AboutPage(
     val contentUnderTopBar by remember(lazyListState) {
         computedStateOf { lazyListState.canScrollBackward }
     }
-    val glassTopBar = LocalAppState.current.topAppBarStyle == 1
 
     val scrollProgress by remember {
         computedStateOf {
@@ -195,11 +192,7 @@ private fun AboutContent(
     val backdrop = rememberBlurBackdrop()
     var isOs3Effect by remember { mutableStateOf(true) }
     var showTextureSet by remember { mutableStateOf(false) }
-    var blurRadius by remember { mutableFloatStateOf(60f) }
     var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
-    var brightness by remember { mutableFloatStateOf(0f) }
-    var contrast by remember { mutableFloatStateOf(1f) }
-    var saturation by remember { mutableFloatStateOf(1f) }
 
     val isInDark = isInDarkTheme()
     val dynamicBackground = remember { mutableStateOf(shaderSupported) }
@@ -357,7 +350,7 @@ private fun AboutContent(
                                 Column(
                                     modifier = Modifier.padding(bottom = scrollPadding.calculateBottomPadding()),
                                 ) {
-                                    Card(
+                                    GlassCard(
                                         modifier = Modifier.padding(horizontal = 12.dp),
                                     ) {
                                         ArrowPreference(
@@ -383,7 +376,7 @@ private fun AboutContent(
                                             onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
                                         )
                                     }
-                                    Card(
+                                    GlassCard(
                                         modifier = Modifier
                                             .padding(horizontal = 12.dp)
                                             .padding(top = 12.dp),
