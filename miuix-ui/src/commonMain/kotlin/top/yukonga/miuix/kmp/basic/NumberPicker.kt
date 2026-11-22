@@ -104,7 +104,7 @@ fun NumberPicker(
     val flingAnimatable = remember { Animatable(0f) }
     var isDragging by remember { mutableStateOf(false) }
     var isUserScrolling by remember { mutableStateOf(false) }
-    var itemHeightPx by remember { mutableIntStateOf(initialItemHeightPx) }
+    var itemHeightPx by remember(itemHeight, density) { mutableIntStateOf(initialItemHeightPx) }
     // Total offset combines drag + fling
     val totalOffset by remember {
         computedStateOf { dragOffset + flingAnimatable.value }
