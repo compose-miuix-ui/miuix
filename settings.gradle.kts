@@ -12,32 +12,32 @@ enableFeaturePreview("ENHANCED_GRAPH_ORDERING")
 pluginManagement {
     repositories {
         google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
             }
+        }
+        if (System.getenv("CI") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
         }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
     repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
+        google()
+        if (System.getenv("CI") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
         }
         mavenCentral()
     }
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 includeBuild("build-logic")
