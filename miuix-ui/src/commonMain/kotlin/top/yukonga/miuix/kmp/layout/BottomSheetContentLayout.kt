@@ -841,6 +841,8 @@ private fun TitleAndActionsRow(
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
 ) {
+    if (title == null && startAction == null && endAction == null) return
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

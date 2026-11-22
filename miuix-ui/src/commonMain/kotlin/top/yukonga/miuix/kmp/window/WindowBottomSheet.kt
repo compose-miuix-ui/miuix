@@ -31,7 +31,8 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  *
  * @param show Whether the [WindowBottomSheet] is shown.
  * @param modifier The modifier to be applied to the [WindowBottomSheet].
- * @param title Optional title to display at the top of the [WindowBottomSheet].
+ * @param title Optional title. The header takes up space if any of [title], [startAction], or
+ *   [endAction] is non-null (including `title = ""`). The drag handle is unaffected.
  * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
  * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [WindowBottomSheet].

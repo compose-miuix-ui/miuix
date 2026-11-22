@@ -62,7 +62,7 @@ WindowBottomSheet(
 | -------------------------- | ------------------------- |----------------------------------------------------------------|----------------------------------------------| -------- |
 | show                       | Boolean                   | Whether to show the bottom sheet                               | -                                            | Yes      |
 | modifier                   | Modifier                  | Modifier applied to the bottom sheet                           | Modifier                                     | No       |
-| title                      | String?                   | Bottom sheet title                                             | null                                         | No       |
+| title | String? | Optional title. The header takes up space if any of `title`, `startAction`, or `endAction` is non-null (including `title = ""`). The drag handle is unaffected. | null | No |
 | startAction                | @Composable (() -> Unit)? | Optional composable for start action (e.g., close button)      | null                                         | No       |
 | endAction                  | @Composable (() -> Unit)? | Optional composable for end action (e.g., submit button)       | null                                         | No       |
 | backgroundColor            | Color                     | Bottom sheet background color                                  | BottomSheetDefaults.backgroundColor()  | No       |

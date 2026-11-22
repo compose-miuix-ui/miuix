@@ -31,7 +31,8 @@ import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
  * @param allowDismiss Whether outside taps, drags and back gestures may dismiss the sheet.
  * @param enableNestedScroll Whether child scrolling can transfer motion to the sheet.
  * @param renderInRootScaffold Whether the outermost Scaffold hosts the sheet.
- * @param title Optional title above the body.
+ * @param title Optional title. The header takes up space if any of [title], [startAction], or
+ *   [endAction] is non-null (including `title = ""`). The drag handle is unaffected.
  * @param startAction Optional leading header action.
  * @param endAction Optional trailing header action.
  * @param cornerRadius Top-corner radius; bottom corners remain square.

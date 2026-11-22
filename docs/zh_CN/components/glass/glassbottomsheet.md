@@ -92,7 +92,7 @@ Scaffold { padding ->
 | allowDismiss | Boolean | 允许外部点击、拖动或返回关闭 | true | 否 |
 | enableNestedScroll | Boolean | 在子内容滚动与抽屉拖动之间传递位移 | true | 否 |
 | renderInRootScaffold | Boolean | 使用最外层 Scaffold；false 使用当前 Scaffold | true | 否 |
-| title | String? | 标题栏标题 | null | 否 |
+| title | String? | 可选标题。`title`、`startAction`、`endAction` 任一非 `null`（包括 `title = ""`），标题栏就占位。拖拽手柄不受影响。 | null | 否 |
 | startAction | (@Composable () -> Unit)? | 标题栏前侧操作 | null | 否 |
 | endAction | (@Composable () -> Unit)? | 标题栏后侧操作 | null | 否 |
 | cornerRadius | Dp | 顶角半径；底角保持直角 | BottomSheetDefaults.cornerRadius | 否 |

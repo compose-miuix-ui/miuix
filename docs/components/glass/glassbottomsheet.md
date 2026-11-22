@@ -92,7 +92,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | allowDismiss | Boolean | Allow dismissal by outside tap, drag or Back | true | No |
 | enableNestedScroll | Boolean | Hand motion between child scrolling and sheet dragging | true | No |
 | renderInRootScaffold | Boolean | Use the outermost Scaffold; false uses the current Scaffold | true | No |
-| title | String? | Header title | null | No |
+| title | String? | Optional title. The header takes up space if any of `title`, `startAction`, or `endAction` is non-null (including `title = ""`). The drag handle is unaffected. | null | No |
 | startAction | (@Composable () -> Unit)? | Leading header action | null | No |
 | endAction | (@Composable () -> Unit)? | Trailing header action | null | No |
 | cornerRadius | Dp | Top-corner radius; bottom corners remain square | BottomSheetDefaults.cornerRadius | No |
