@@ -419,7 +419,7 @@ internal fun DialogContent(
                         // does: its own height plus the margin and insets beneath it, keyboard included.
                         val anim = animationProgress.value
                         val back = backProgress.value
-                        val offsetY = if (anim >= 1f && back <= 0f) {
+                        val offsetY = if (anim == 1f && back <= 0f) {
                             0
                         } else {
                             val insetBottom = if (defaultWindowInsetsPadding) {
