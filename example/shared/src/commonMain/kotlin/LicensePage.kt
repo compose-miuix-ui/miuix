@@ -112,6 +112,7 @@ fun LicensePage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 libraries?.let { libs ->

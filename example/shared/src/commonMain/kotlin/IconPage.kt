@@ -343,6 +343,7 @@ fun IconsPage(
                                     appState.showTopAppBar,
                                     topAppBarScrollBehavior,
                                 ),
+                            overscrollEffect = null,
                             contentPadding = contentPadding,
                         ) {
                             sectionRows.forEachIndexed { _, (title, rows) ->

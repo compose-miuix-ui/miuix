@@ -166,6 +166,7 @@ fun PullToRefreshPage(
                             appState.showTopAppBar,
                             topAppBarScrollBehavior,
                         ),
+                        overscrollEffect = null,
                         contentPadding = contentPadding,
                     ) {
                         item(key = "progress_card") {

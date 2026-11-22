@@ -290,6 +290,7 @@ fun MainPage(
                         appState.showTopAppBar,
                         topAppBarScrollBehavior,
                     ),
+                    overscrollEffect = null,
                     contentPadding = contentPadding,
                 ) {
                     demoGroups.forEach { (group, demos) ->

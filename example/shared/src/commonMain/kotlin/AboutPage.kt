@@ -316,6 +316,7 @@ private fun AboutContent(
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
             ),
+            overscrollEffect = null,
             contentPadding = listContentPadding,
         ) {
             // Transparent spacer matching logo height

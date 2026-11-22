@@ -97,6 +97,7 @@ fun ColorPage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 item(key = "current") {

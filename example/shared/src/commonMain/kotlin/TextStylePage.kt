@@ -104,6 +104,7 @@ fun TextStylePage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 item(key = "title_header") {

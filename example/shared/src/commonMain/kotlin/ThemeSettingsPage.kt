@@ -151,6 +151,7 @@ fun ThemeSettingsPage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = pageContentPadding(innerPadding, padding),
             ) {
                 item(key = "themePreview") {

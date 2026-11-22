@@ -94,6 +94,7 @@ fun NavTestPage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 item(key = "nav_continuous") {
