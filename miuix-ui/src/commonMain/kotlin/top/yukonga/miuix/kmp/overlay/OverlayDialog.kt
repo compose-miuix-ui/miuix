@@ -14,9 +14,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
+import top.yukonga.miuix.kmp.layout.DialogMotion
 import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
 
 /**
  * A dialog with a title, a summary, and other contents.
@@ -44,6 +45,7 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  *   for the centered presentation, or derived from the screen corner radius (clamped to
  *   32dp..48dp) when bottom-attached.
  * @param dimColor The dimming color before the host's animation is applied.
+ * @param motion The enter and exit motion. See [DialogMotion].
  * @param surface Optional surface replacing the default background and clip. It receives the
  *   resolved radius and animated scrim/scale state; apply its modifier before content padding.
  * @param content The [Composable] content of the [OverlayDialog].
@@ -68,6 +70,7 @@ fun OverlayDialog(
     largeScreen: Boolean? = null,
     cornerRadius: Dp? = null,
     dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    motion: DialogMotion = DialogMotion.Default,
     surface: (@Composable DialogSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -81,13 +84,14 @@ fun OverlayDialog(
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
             visibleState.value = visible
-            DialogLayout(
+            DialogLayoutImpl(
                 visible = visibleState,
                 enableWindowDim = false,
                 enterTransition = EnterTransition.None,
                 exitTransition = ExitTransition.None,
                 enableAutoLargeScreen = false,
                 renderInRootScaffold = renderInRootScaffold,
+                consumeBackgroundTouches = false,
             ) {
                 hostContent()
             }
@@ -103,6 +107,7 @@ fun OverlayDialog(
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
         dimColor = dimColor,
+        motion = motion,
         surface = surface,
         content = content,
     )

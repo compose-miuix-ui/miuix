@@ -566,12 +566,14 @@ fun GlassPage(padding: PaddingValues) {
                             )
                             ArrowPreference(
                                 title = "Show Dialog",
+                                holdDownState = overlayIndex == OVERLAY_DIALOG,
                                 onClick = {
                                     overlayIndex = OVERLAY_DIALOG
                                 },
                             )
                             ArrowPreference(
                                 title = "Show BottomSheet",
+                                holdDownState = overlayIndex == OVERLAY_BOTTOM_SHEET,
                                 onClick = {
                                     overlayIndex = OVERLAY_BOTTOM_SHEET
                                 },
