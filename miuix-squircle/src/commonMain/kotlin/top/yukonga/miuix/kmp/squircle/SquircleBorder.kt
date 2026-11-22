@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -87,6 +88,9 @@ fun Modifier.squircleBorder(
     return this.drawWithCache {
         val cornerRadiusPx = cornerRadius.toPx()
         val path = Path()
+        var lastSize = Size.Unspecified
+        var lastWidthPx = Float.NaN
+        var cachedStroke: Stroke? = null
         onDrawBehind {
             val widthPx = width().toPx()
             if (widthPx <= 0f) return@onDrawBehind
@@ -94,17 +98,25 @@ fun Modifier.squircleBorder(
             val innerW = size.width - widthPx
             val innerH = size.height - widthPx
             if (innerW <= 0f || innerH <= 0f) return@onDrawBehind
-            val innerCornerRadius = (cornerRadiusPx - halfStroke).coerceAtLeast(0f)
-            path.rewind()
-            path.addSquircleRect(
-                width = innerW,
-                height = innerH,
-                cornerRadius = innerCornerRadius,
-                extension = extension,
-                squircleEnabled = squircleEnabled,
-            )
+            val cached = cachedStroke
+            val stroke = if (cached != null && size == lastSize && widthPx == lastWidthPx) {
+                cached
+            } else {
+                lastSize = size
+                lastWidthPx = widthPx
+                val innerCornerRadius = (cornerRadiusPx - halfStroke).coerceAtLeast(0f)
+                path.rewind()
+                path.addSquircleRect(
+                    width = innerW,
+                    height = innerH,
+                    cornerRadius = innerCornerRadius,
+                    extension = extension,
+                    squircleEnabled = squircleEnabled,
+                )
+                Stroke(width = widthPx).also { cachedStroke = it }
+            }
             translate(halfStroke, halfStroke) {
-                drawPath(path = path, color = color(), style = Stroke(width = widthPx))
+                drawPath(path = path, color = color(), style = stroke)
             }
         }
     }
