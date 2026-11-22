@@ -64,7 +64,7 @@ fun GlassBottomSheet(
     cornerRadius: Dp = BottomSheetDefaults.cornerRadius,
     sheetMaxWidth: Dp = BottomSheetDefaults.maxWidth,
     outsideMargin: DpSize = BottomSheetDefaults.outsideMargin,
-    insideMargin: DpSize = BottomSheetDefaults.insideMargin,
+    insideMargin: DpSize = GlassBottomSheetDefaults.InsideMargin,
     dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
     material: GlassMaterial = GlassBottomSheetDefaults.material(),
     stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),

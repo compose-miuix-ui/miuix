@@ -151,6 +151,7 @@ export default defineConfig({
                         { text: "GlassDropdownPreference", link: "/zh_CN/components/glass/glassdropdownpreference" },
                         { text: "GlassDialog", link: "/zh_CN/components/glass/glassdialog" },
                         { text: "GlassBottomSheet", link: "/zh_CN/components/glass/glassbottomsheet" },
+                        { text: "GlassCard", link: "/zh_CN/components/glass/glasscard" },
                     ],
                 },
             ],
