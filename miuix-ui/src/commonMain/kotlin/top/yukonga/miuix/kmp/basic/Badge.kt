@@ -209,8 +209,9 @@ private fun ProvideContentColorTextStyle(
     content: @Composable () -> Unit,
 ) {
     val textStyles = LocalTextStyles.current
-    val badgeTextStyles = remember(textStyles, textStyle) {
-        textStyles.copy(main = textStyles.main.merge(textStyle))
+    val mainStyle = textStyles.main
+    val badgeTextStyles = remember(textStyles, mainStyle, textStyle) {
+        textStyles.copy(main = mainStyle.merge(textStyle))
     }
     CompositionLocalProvider(
         LocalContentColor provides contentColor,

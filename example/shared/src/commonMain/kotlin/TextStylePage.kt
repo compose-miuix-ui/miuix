@@ -61,24 +61,22 @@ fun TextStylePage(
 
     val textStyles = MiuixTheme.textStyles
 
-    val styleEntries = remember(textStyles) {
-        listOf(
-            TextStyleEntry("title1", textStyles.title1, "32sp"),
-            TextStyleEntry("title2", textStyles.title2, "24sp"),
-            TextStyleEntry("title3", textStyles.title3, "20sp"),
-            TextStyleEntry("title4", textStyles.title4, "18sp"),
-            TextStyleEntry("headline1", textStyles.headline1, "17sp"),
-            TextStyleEntry("headline2", textStyles.headline2, "16sp"),
-            TextStyleEntry("subtitle", textStyles.subtitle, "14sp / Bold"),
-            TextStyleEntry("main", textStyles.main, "17sp"),
-            TextStyleEntry("paragraph", textStyles.paragraph, "17sp / lineHeight 1.2em"),
-            TextStyleEntry("body1", textStyles.body1, "16sp"),
-            TextStyleEntry("body2", textStyles.body2, "14sp"),
-            TextStyleEntry("button", textStyles.button, "17sp"),
-            TextStyleEntry("footnote1", textStyles.footnote1, "13sp"),
-            TextStyleEntry("footnote2", textStyles.footnote2, "11sp"),
-        )
-    }
+    val styleEntries = listOf(
+        TextStyleEntry("title1", textStyles.title1, "32sp"),
+        TextStyleEntry("title2", textStyles.title2, "24sp"),
+        TextStyleEntry("title3", textStyles.title3, "20sp"),
+        TextStyleEntry("title4", textStyles.title4, "18sp"),
+        TextStyleEntry("headline1", textStyles.headline1, "17sp"),
+        TextStyleEntry("headline2", textStyles.headline2, "16sp"),
+        TextStyleEntry("subtitle", textStyles.subtitle, "14sp / Bold"),
+        TextStyleEntry("main", textStyles.main, "17sp"),
+        TextStyleEntry("paragraph", textStyles.paragraph, "17sp / lineHeight 1.2em"),
+        TextStyleEntry("body1", textStyles.body1, "16sp"),
+        TextStyleEntry("body2", textStyles.body2, "14sp"),
+        TextStyleEntry("button", textStyles.button, "17sp"),
+        TextStyleEntry("footnote1", textStyles.footnote1, "13sp"),
+        TextStyleEntry("footnote2", textStyles.footnote2, "11sp"),
+    )
 
     val backdrop = rememberBlurBackdrop()
     val blurActive = backdrop != null
