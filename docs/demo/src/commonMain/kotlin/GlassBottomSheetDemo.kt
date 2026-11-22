@@ -94,21 +94,21 @@ fun GlassBottomSheetDemo() {
                         .padding(bottom = 24.dp),
                 ) {
                     GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    SwitchPreference(
-                        title = "Allow notifications",
-                        checked = notificationsEnabled,
-                        onCheckedChange = { notificationsEnabled = it },
-                    )
-                    SwitchPreference(
-                        title = "Play sound",
-                        checked = soundEnabled,
-                        onCheckedChange = { soundEnabled = it },
-                    )
-                    SwitchPreference(
-                        title = "Show previews",
-                        checked = previewsEnabled,
-                        onCheckedChange = { previewsEnabled = it },
-                    )
+                        SwitchPreference(
+                            title = "Allow notifications",
+                            checked = notificationsEnabled,
+                            onCheckedChange = { notificationsEnabled = it },
+                        )
+                        SwitchPreference(
+                            title = "Play sound",
+                            checked = soundEnabled,
+                            onCheckedChange = { soundEnabled = it },
+                        )
+                        SwitchPreference(
+                            title = "Show previews",
+                            checked = previewsEnabled,
+                            onCheckedChange = { previewsEnabled = it },
+                        )
                     }
                 }
             }
