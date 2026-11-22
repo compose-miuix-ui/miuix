@@ -34,6 +34,7 @@ internal fun GlassBottomSheetDemo(
     modifier: Modifier = Modifier,
     material: GlassMaterial = GlassBottomSheetDefaults.material(),
     stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     GlassBottomSheet(
         show = show,
@@ -41,6 +42,7 @@ internal fun GlassBottomSheetDemo(
         title = "Glass BottomSheet",
         backdrop = backdrop,
         onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
         material = material,
         stroke = stroke,
     ) {
