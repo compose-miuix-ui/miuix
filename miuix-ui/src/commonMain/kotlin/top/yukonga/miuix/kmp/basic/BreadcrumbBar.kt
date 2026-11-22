@@ -306,18 +306,19 @@ private fun BreadcrumbSeparator(
     color: Color,
 ) {
     val layoutDirection = LocalLayoutDirection.current
+    val flipModifier = if (layoutDirection == LayoutDirection.Rtl) RtlFlipModifier else Modifier
     Image(
         modifier = Modifier
             .padding(horizontal = 4.dp)
             .size(width = 10.dp, height = 16.dp)
-            .graphicsLayer {
-                scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            },
+            .then(flipModifier),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = ColorFilter.tint(color),
     )
 }
+
+private val RtlFlipModifier = Modifier.graphicsLayer { scaleX = -1f }
 
 object BreadcrumbBarDefaults {
 

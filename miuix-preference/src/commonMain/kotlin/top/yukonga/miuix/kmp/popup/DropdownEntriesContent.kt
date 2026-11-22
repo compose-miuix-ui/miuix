@@ -71,7 +71,11 @@ internal fun LazyListScope.dropdownEntriesDialogItems(
 ) {
     val lastEntryIdx = entries.lastIndex
     entries.forEachIndexed { entryIdx, entry ->
-        items(entry.items.size, key = { itemIdx -> "$entryIdx-$itemIdx" }) { itemIdx ->
+        items(
+            count = entry.items.size,
+            key = { itemIdx -> "$entryIdx-$itemIdx" },
+            contentType = { "item" },
+        ) { itemIdx ->
             val item = entry.items[itemIdx]
             val onEntryClick = remember(entryIdx, onItemClick) {
                 { idx: Int -> onItemClick(entryIdx, idx) }
@@ -88,7 +92,10 @@ internal fun LazyListScope.dropdownEntriesDialogItems(
             )
         }
         if (entryIdx != lastEntryIdx) {
-            item(key = "divider-$entryIdx") {
+            item(
+                key = "divider-$entryIdx",
+                contentType = "divider",
+            ) {
                 HorizontalDivider(
                     modifier = Modifier
                         .padding(horizontal = 20.dp, vertical = 4.dp),

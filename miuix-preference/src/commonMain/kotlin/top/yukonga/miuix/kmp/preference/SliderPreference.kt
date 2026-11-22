@@ -306,15 +306,16 @@ private fun RowScope.SliderPreferenceArrowIcon(
         ColorFilter.tint(actionColors.color(enabled = enabled))
     }
     val layoutDirection = LocalLayoutDirection.current
+    val flipModifier = if (layoutDirection == LayoutDirection.Rtl) RtlFlipModifier else Modifier
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp)
-            .graphicsLayer {
-                scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            }
+            .then(flipModifier)
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = tintFilter,
     )
 }
+
+private val RtlFlipModifier = Modifier.graphicsLayer { scaleX = -1f }

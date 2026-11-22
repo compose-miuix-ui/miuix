@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastFirstOrNull
 import top.yukonga.miuix.kmp.interfaces.HoldDownObserver
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -212,9 +214,9 @@ fun BasicComponent(
             ) { measurables, constraints ->
                 val spacerPx = 8.dp.roundToPx()
 
-                val startMeasurable = measurables.firstOrNull { it.layoutId == "start" }
-                val centerMeasurable = measurables.first { it.layoutId == "center" }
-                val endMeasurable = measurables.firstOrNull { it.layoutId == "end" }
+                val startMeasurable = measurables.fastFirstOrNull { it.layoutId == "start" }
+                val centerMeasurable = measurables.fastFirst { it.layoutId == "center" }
+                val endMeasurable = measurables.fastFirstOrNull { it.layoutId == "end" }
 
                 val maxWidth = constraints.maxWidth
                 val maxHeight = constraints.maxHeight

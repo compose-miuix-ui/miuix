@@ -76,14 +76,15 @@ fun OverlaySpinnerPreference(
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
-    val entries = remember(items, selectedIndex, onSelectedIndexChange) {
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val entries = remember(items, selectedIndex) {
         listOf(
             DropdownEntry(
                 items = items.mapIndexed { index, item ->
                     item.copy(
                         selected = index == selectedIndex,
                         onClick = {
-                            onSelectedIndexChange?.invoke(index)
+                            currentOnSelectedIndexChange?.invoke(index)
                             item.onClick?.invoke()
                         },
                     )
@@ -185,7 +186,7 @@ fun OverlaySpinnerPreference(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val hasEntries = nonEmptyEntries.isNotEmpty()
     val actualEnabled = enabled && hasEntries
 
@@ -206,6 +207,8 @@ fun OverlaySpinnerPreference(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     BasicComponent(
         modifier = modifier,
@@ -217,14 +220,16 @@ fun OverlaySpinnerPreference(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            val selectedValueText = nonEmptyEntries
-                .asSequence()
-                .flatMap { group -> group.items }
-                .filter { it.selected }
-                .map { it.text }
-                .filter { it.isNotBlank() }
-                .joinToString("\n")
-                .ifBlank { null }
+            val selectedValueText = remember(nonEmptyEntries) {
+                nonEmptyEntries
+                    .asSequence()
+                    .flatMap { group -> group.items }
+                    .filter { it.selected }
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .joinToString("\n")
+                    .ifBlank { null }
+            }
             if (showValue && hasEntries && !selectedValueText.isNullOrBlank()) {
                 Text(
                     text = selectedValueText,
@@ -244,8 +249,8 @@ fun OverlaySpinnerPreference(
                 OverlayDropdownPopup(
                     entries = nonEmptyEntries,
                     show = isDropdownExpanded.value,
-                    onDismiss = { setExpanded(false) },
-                    onDismissFinished = { isHoldDown.value = false },
+                    onDismiss = onDismissPopup,
+                    onDismissFinished = onDismissFinishedPopup,
                     maxHeight = maxHeight,
                     dropdownColors = spinnerColors,
                     renderInRootScaffold = renderInRootScaffold,
@@ -306,13 +311,14 @@ fun OverlaySpinnerPreference(
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
-    val entry = remember(items, selectedIndex, onSelectedIndexChange) {
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val entry = remember(items, selectedIndex) {
         DropdownEntry(
             items = items.mapIndexed { index, item ->
                 item.copy(
                     selected = index == selectedIndex,
                     onClick = {
-                        onSelectedIndexChange?.invoke(index)
+                        currentOnSelectedIndexChange?.invoke(index)
                         item.onClick?.invoke()
                     },
                 )
@@ -417,7 +423,7 @@ fun OverlaySpinnerPreference(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val hasEntries = nonEmptyEntries.isNotEmpty()
     val actualEnabled = enabled && hasEntries
 
@@ -438,6 +444,8 @@ fun OverlaySpinnerPreference(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     BasicComponent(
         modifier = modifier,
@@ -449,14 +457,16 @@ fun OverlaySpinnerPreference(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            val selectedValueText = nonEmptyEntries
-                .asSequence()
-                .flatMap { group -> group.items }
-                .filter { it.selected }
-                .map { it.text }
-                .filter { it.isNotBlank() }
-                .joinToString("\n")
-                .ifBlank { null }
+            val selectedValueText = remember(nonEmptyEntries) {
+                nonEmptyEntries
+                    .asSequence()
+                    .flatMap { group -> group.items }
+                    .filter { it.selected }
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .joinToString("\n")
+                    .ifBlank { null }
+            }
             if (showValue && hasEntries && !selectedValueText.isNullOrBlank()) {
                 Text(
                     text = selectedValueText,
@@ -478,8 +488,8 @@ fun OverlaySpinnerPreference(
                     title = title,
                     dialogButtonString = dialogButtonString,
                     show = isDropdownExpanded.value,
-                    onDismiss = { setExpanded(false) },
-                    onDismissFinished = { isHoldDown.value = false },
+                    onDismiss = onDismissPopup,
+                    onDismissFinished = onDismissFinishedPopup,
                     dropdownColors = spinnerColors,
                     popupModifier = popupModifier,
                     renderInRootScaffold = renderInRootScaffold,
