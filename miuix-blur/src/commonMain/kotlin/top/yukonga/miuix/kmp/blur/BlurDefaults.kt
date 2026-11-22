@@ -30,6 +30,43 @@ class BlurColors(
 ) {
     val blendColors: List<BlendColorEntry> = if (blendColors.isEmpty()) emptyList() else blendColors.toList()
 
+    fun copy(
+        blendColors: List<BlendColorEntry> = this.blendColors,
+        brightness: Float = this.brightness,
+        contrast: Float = this.contrast,
+        saturation: Float = this.saturation,
+    ): BlurColors = BlurColors(
+        blendColors = blendColors,
+        brightness = brightness,
+        contrast = contrast,
+        saturation = saturation,
+    )
+
+    operator fun component1(): List<BlendColorEntry> = blendColors
+    operator fun component2(): Float = brightness
+    operator fun component3(): Float = contrast
+    operator fun component4(): Float = saturation
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BlurColors) return false
+        return blendColors == other.blendColors &&
+            brightness == other.brightness &&
+            contrast == other.contrast &&
+            saturation == other.saturation
+    }
+
+    override fun hashCode(): Int {
+        var result = blendColors.hashCode()
+        result = 31 * result + brightness.hashCode()
+        result = 31 * result + contrast.hashCode()
+        result = 31 * result + saturation.hashCode()
+        return result
+    }
+
+    override fun toString(): String = "BlurColors(blendColors=$blendColors, brightness=$brightness, contrast=$contrast, saturation=$saturation)"
+}
+
 /**
  * One color blend entry over the blurred backdrop: standard SkBlendMode values (0-29, GPU hardware)
  * or custom modes (100-121, 200-203, runtime shader). See [BlurBlendMode].
