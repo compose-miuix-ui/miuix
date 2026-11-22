@@ -13,7 +13,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -90,6 +89,7 @@ import top.yukonga.miuix.kmp.material.drawGlassRim
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.MiuixIndication
 import kotlin.math.abs
 
 /**
@@ -334,7 +334,6 @@ fun GlassTabRow(
             key(label) {
                 val selected = position == index
                 val interactionSource = remember { MutableInteractionSource() }
-                val pressed by interactionSource.collectIsPressedAsState()
                 val edgeBrushCache = remember { ShaderBrushCache() }
                 val target = animateColorAsState(
                     targetValue = if (selected) colors.selectedContainerColor else colors.containerColor,
@@ -347,11 +346,6 @@ fun GlassTabRow(
                     label = "glassTabContent",
                 )
                 val contentColorProducer = remember { ColorProducer { contentColorState.value } }
-                val overlay = animateColorAsState(
-                    targetValue = if (pressed) colors.pressedOverlayColor else Color.Transparent,
-                    animationSpec = if (pressed) GlassMotion.navPressEnter() else GlassMotion.navPressExit(),
-                    label = "glassTabOverlay",
-                )
                 val rim = animateFloatAsState(
                     targetValue = if (selected) 0f else colors.restingStrokeAlpha,
                     animationSpec = GlassMotion.navContentFloat(),
@@ -429,7 +423,6 @@ fun GlassTabRow(
                                         drawRect(settled.copy(alpha = settled.alpha * fillAlpha))
                                     }
                                 }
-                                drawRect(overlay.value)
                             }
                             .drawWithContent {
                                 drawContent()
@@ -447,7 +440,12 @@ fun GlassTabRow(
                                 selected = selected,
                                 role = Role.Tab,
                                 interactionSource = interactionSource,
-                                indication = null,
+                                indication = remember(colors.pressedOverlayColor) {
+                                    MiuixIndication(
+                                        color = colors.pressedOverlayColor.copy(alpha = 1f),
+                                        pressAlpha = colors.pressedOverlayColor.alpha,
+                                    )
+                                },
                             ) { onSelect(position) }
                             .padding(
                                 horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
