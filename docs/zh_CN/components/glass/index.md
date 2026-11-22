@@ -22,6 +22,7 @@
 | [GlassDialog](./glassdialog) | 遮罩之上的玻璃对话框 | 提示与确认 |
 | [GlassDialogButton](./glassdialog#glassdialogbutton) | 共享对话框材质的操作按钮 | 对话框操作 |
 | [GlassBottomSheet](./glassbottomsheet) | 贴底玻璃抽屉 | 补充内容与操作 |
+| [GlassCard](./glasscard) | 用于玻璃表面内容的半透明卡片 | 在抽屉与对话框中分组内容 |
 
 ## 配置
 

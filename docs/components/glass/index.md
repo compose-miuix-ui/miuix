@@ -22,6 +22,7 @@
 | [GlassDialog](./glassdialog) | Glass dialog over a scrim | Prompts and confirmation |
 | [GlassDialogButton](./glassdialog#glassdialogbutton) | Action over shared dialog material | Dialog actions |
 | [GlassBottomSheet](./glassbottomsheet) | Attached glass bottom sheet | Additional content and actions |
+| [GlassCard](./glasscard) | Translucent card for content on glass surfaces | Grouping content in sheets and dialogs |
 
 ## Setup
 
