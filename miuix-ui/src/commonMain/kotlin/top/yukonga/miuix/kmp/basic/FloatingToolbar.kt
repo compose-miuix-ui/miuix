@@ -58,11 +58,7 @@ fun FloatingToolbar(
     val shadowMod = if (shadowElevation > 0.dp) {
         Modifier.dropShadow(
             shape = shape,
-            shadow = Shadow(
-                radius = 10.dp,
-                color = Color.Black,
-                alpha = 0.1f,
-            ),
+            shadow = FloatingToolbarShadow,
         )
     } else {
         Modifier
@@ -101,3 +97,9 @@ object FloatingToolbarDefaults {
      */
     val OutSidePadding = PaddingValues(12.dp, 8.dp)
 }
+
+private val FloatingToolbarShadow = Shadow(
+    radius = 10.dp,
+    color = Color.Black,
+    alpha = 0.1f,
+)

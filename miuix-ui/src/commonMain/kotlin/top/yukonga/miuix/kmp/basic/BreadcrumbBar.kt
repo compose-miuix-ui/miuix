@@ -307,6 +307,7 @@ private fun BreadcrumbSeparator(
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val flipModifier = if (layoutDirection == LayoutDirection.Rtl) RtlFlipModifier else Modifier
+    val colorFilter = remember(color) { ColorFilter.tint(color) }
     Image(
         modifier = Modifier
             .padding(horizontal = 4.dp)
@@ -314,7 +315,7 @@ private fun BreadcrumbSeparator(
             .then(flipModifier),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
-        colorFilter = ColorFilter.tint(color),
+        colorFilter = colorFilter,
     )
 }
 

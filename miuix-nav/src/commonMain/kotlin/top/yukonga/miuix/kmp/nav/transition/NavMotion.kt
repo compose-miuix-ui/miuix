@@ -81,6 +81,19 @@ class NavMotion(
         easing = NavProgrammaticEasing,
     ),
 ) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NavMotion) return false
+        return commit == other.commit && cancel == other.cancel && programmatic == other.programmatic
+    }
+
+    override fun hashCode(): Int {
+        var result = commit.hashCode()
+        result = 31 * result + cancel.hashCode()
+        result = 31 * result + programmatic.hashCode()
+        return result
+    }
+
     companion object {
         /** Shared default instance: the established navigation feel, no overshoot anywhere. */
         val Default: NavMotion = NavMotion()

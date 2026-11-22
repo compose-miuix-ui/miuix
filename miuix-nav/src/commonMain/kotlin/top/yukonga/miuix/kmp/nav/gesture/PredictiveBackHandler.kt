@@ -45,7 +45,24 @@ class NavBackEvent(
     val swipeEdge: NavSwipeEdge,
     val touchY: Float,
     val frameTimeMillis: Long = 0,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NavBackEvent) return false
+        return progress == other.progress &&
+            swipeEdge == other.swipeEdge &&
+            touchY == other.touchY &&
+            frameTimeMillis == other.frameTimeMillis
+    }
+
+    override fun hashCode(): Int {
+        var result = progress.hashCode()
+        result = 31 * result + swipeEdge.hashCode()
+        result = 31 * result + touchY.hashCode()
+        result = 31 * result + frameTimeMillis.hashCode()
+        return result
+    }
+}
 
 /**
  * Back-navigation bridge registered on the [androidx.navigationevent] dispatcher.

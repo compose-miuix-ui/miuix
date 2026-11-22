@@ -119,6 +119,7 @@ fun Slider(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValueState by rememberUpdatedState(coercedValue)
 
     val progressAnimationSpec = remember(isDragging) {
         if (isDragging) {
@@ -222,7 +223,7 @@ fun Slider(
                                 val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
                                 val calculatedValue = fractionToValue(fractionForValue)
                                 onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue, valueRange, coercedValue)
+                                hapticState.reset(calculatedValue, valueRange, coercedValueState)
                             },
                             onDragStopped = {
                                 isDragging = false
@@ -323,6 +324,7 @@ fun VerticalSlider(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValueState by rememberUpdatedState(coercedValue)
 
     val progressAnimationSpec = remember(isDragging) {
         if (isDragging) {
@@ -422,7 +424,7 @@ fun VerticalSlider(
                                 val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
                                 val calculatedValue = fractionToValueVertical(fractionForValue)
                                 onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue, valueRange, coercedValue)
+                                hapticState.reset(calculatedValue, valueRange, coercedValueState)
                             },
                             onDragStopped = {
                                 isDragging = false
@@ -537,6 +539,8 @@ fun RangeSlider(
 
     val coercedStart = currentStartValue.coerceIn(valueRange.start, valueRange.endInclusive)
     val coercedEnd = currentEndValue.coerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedStartState by rememberUpdatedState(coercedStart)
+    val coercedEndState by rememberUpdatedState(coercedEnd)
 
     val progressAnimationSpec = remember(isDragging) {
         if (isDragging) {
@@ -738,24 +742,24 @@ fun RangeSlider(
                                     isOnStartThumb && !isOnEndThumb -> {
                                         isDraggingStart = true
                                         startDragOffset = offset.x
-                                        hapticState.resetStart(coercedStart, valueRange)
+                                        hapticState.resetStart(coercedStartState, valueRange)
                                     }
 
                                     !isOnStartThumb && isOnEndThumb -> {
                                         isDraggingEnd = true
                                         endDragOffset = offset.x
-                                        hapticState.resetEnd(coercedEnd, valueRange)
+                                        hapticState.resetEnd(coercedEndState, valueRange)
                                     }
 
                                     isOnStartThumb && isOnEndThumb -> {
                                         if (lastDraggedIsStart) {
                                             isDraggingStart = true
                                             startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart, valueRange)
+                                            hapticState.resetStart(coercedStartState, valueRange)
                                         } else {
                                             isDraggingEnd = true
                                             endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd, valueRange)
+                                            hapticState.resetEnd(coercedEndState, valueRange)
                                         }
                                     }
 
@@ -765,11 +769,11 @@ fun RangeSlider(
                                         if (diffStart <= diffEnd) {
                                             isDraggingStart = true
                                             startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart, valueRange)
+                                            hapticState.resetStart(coercedStartState, valueRange)
                                         } else {
                                             isDraggingEnd = true
                                             endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd, valueRange)
+                                            hapticState.resetEnd(coercedEndState, valueRange)
                                         }
                                     }
                                 }
@@ -1188,7 +1192,7 @@ internal class RangeSliderHapticState {
         )
     }
 
-    private fun handleHapticFeedbackInternal(
+    private inline fun handleHapticFeedbackInternal(
         currentValue: Float,
         valueRange: ClosedFloatingPointRange<Float>,
         hapticEffect: SliderDefaults.SliderHapticEffect,
@@ -1306,10 +1310,12 @@ private fun verticalVisualFraction(offsetY: Float, sizeHeight: Int, sizeWidth: I
 private fun pointsToFractions(
     points: List<Float>,
     valueRange: ClosedFloatingPointRange<Float>,
-): FloatArray = points.map { point ->
-    ((point - valueRange.start) / (valueRange.endInclusive - valueRange.start))
-        .coerceIn(0f, 1f)
-}.toFloatArray()
+): FloatArray {
+    val span = valueRange.endInclusive - valueRange.start
+    return FloatArray(points.size) { index ->
+        ((points[index] - valueRange.start) / span).coerceIn(0f, 1f)
+    }
+}
 
 /**
  * Computes key point fractions for slider display.
