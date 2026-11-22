@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.window.platform.macos
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -18,6 +19,7 @@ import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.LocalWindowState
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.internal.ProvideWindowComponentFrame
 
 @Composable
 internal fun FrameWindowScope.MacOSMiuixWindowFrame(
@@ -89,6 +91,6 @@ internal fun FrameWindowScope.MacOSMiuixWindowFrame(
             )
         }
 
-        content()
+        ProvideWindowComponentFrame(WindowInsets(0, 0, 0, 0)) { content() }
     }
 }

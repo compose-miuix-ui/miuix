@@ -16,13 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
 import top.yukonga.miuix.kmp.theme.LocalDismissState
-import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
-import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
  * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
@@ -88,15 +84,10 @@ fun WindowDialog(
         insideMargin = insideMargin,
         popupHost = { visible, hostContent ->
             if (visible) {
-                Dialog(
+                WindowComponentHost(
                     onDismissRequest = { currentOnDismissRequest.value?.invoke() },
-                    properties = platformDialogProperties(),
-                ) {
-                    RemovePlatformDialogDefaultEffects()
-                    WindowNavigationEventScope {
-                        hostContent()
-                    }
-                }
+                    content = hostContent,
+                )
             }
         },
         modifier = modifier,

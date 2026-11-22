@@ -16,13 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.theme.LocalDismissState
-import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
-import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
  * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
@@ -89,19 +85,14 @@ fun WindowBottomSheet(
         dragHandleColor = dragHandleColor,
         popupHost = { visible, hostContent ->
             if (visible) {
-                Dialog(
+                WindowComponentHost(
                     onDismissRequest = {
                         if (allowDismiss) {
                             currentOnDismissRequest.value?.invoke()
                         }
                     },
-                    properties = platformDialogProperties(),
-                ) {
-                    RemovePlatformDialogDefaultEffects()
-                    WindowNavigationEventScope {
-                        hostContent()
-                    }
-                }
+                    content = hostContent,
+                )
             }
         },
         modifier = modifier,

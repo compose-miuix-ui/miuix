@@ -3,6 +3,7 @@
 
 package top.yukonga.miuix.kmp.window.platform.macos
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -13,6 +14,7 @@ import androidx.compose.ui.window.DialogWindowScope
 import top.yukonga.miuix.kmp.window.LocalIsHitTestInCaptionBarState
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.internal.ProvideWindowComponentFrame
 
 @Composable
 internal fun DialogWindowScope.MacOSMiuixDialogWindowFrame(
@@ -62,6 +64,6 @@ internal fun DialogWindowScope.MacOSMiuixDialogWindowFrame(
             )
         }
 
-        content()
+        ProvideWindowComponentFrame(WindowInsets(0, 0, 0, 0)) { content() }
     }
 }

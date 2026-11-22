@@ -401,6 +401,15 @@ fun rememberListPopupLayoutInfo(
     popupPositionProvider: PopupPositionProvider,
     parentBounds: IntRect,
     popupContentSize: IntSize,
+): ListPopupLayoutInfo = rememberListPopupLayoutInfo(alignment, popupPositionProvider, parentBounds, popupContentSize, componentBounds = null)
+
+@Composable
+internal fun rememberListPopupLayoutInfo(
+    alignment: PopupPositionProvider.Align,
+    popupPositionProvider: PopupPositionProvider,
+    parentBounds: IntRect,
+    popupContentSize: IntSize,
+    componentBounds: IntRect?,
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
@@ -424,7 +433,7 @@ fun rememberListPopupLayoutInfo(
 
     val containerSize = windowInfo.containerSize
 
-    val windowBounds = remember(
+    val windowBounds = componentBounds ?: remember(
         layoutDirection,
         density,
         displayCutout,

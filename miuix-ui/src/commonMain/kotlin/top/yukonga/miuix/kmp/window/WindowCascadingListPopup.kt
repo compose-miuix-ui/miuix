@@ -4,7 +4,6 @@
 package top.yukonga.miuix.kmp.window
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -17,9 +16,6 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.layout.CascadingListPopupLayout
-import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
-import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
  * A cascading list popup rendered at window level (as a [Dialog]) instead of inside a
@@ -76,7 +72,7 @@ fun WindowCascadingListPopup(
  * @param popupPositionProvider Position strategy for the primary popup relative to its anchor.
  * @param alignment Alignment of the primary popup.
  * @param enableWindowDim Whether to dim the rest of the window while the popup is shown.
- * @param maxHeight Maximum height of either side. Null bounds it by the safe area.
+ * @param maxHeight Maximum height of either menu. Available space after margins always caps it.
  * @param minWidth Minimum width of the popup.
  * @param dropdownColors Colors used by every row.
  * @param collapseOnSelection When true, selecting any leaf dismisses the popup.
@@ -97,23 +93,18 @@ fun WindowCascadingListPopup(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
 ) {
-    val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
-
     CascadingListPopupLayout(
         show = show,
-        popupHost = { visible, hostContent ->
+        popupHost = { visible, onOutsideTap, hostContent ->
             if (visible) {
-                Dialog(
-                    onDismissRequest = { currentOnDismissRequest.value() },
-                    properties = platformDialogProperties(),
-                ) {
-                    RemovePlatformDialogDefaultEffects()
-                    WindowNavigationEventScope {
-                        hostContent()
-                    }
-                }
+                WindowComponentHost(
+                    onDismissRequest = onOutsideTap,
+                    content = hostContent,
+                )
             }
         },
+        componentBounds = windowComponentBounds(),
+        constrainHeightToViewport = true,
         entries = entries,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

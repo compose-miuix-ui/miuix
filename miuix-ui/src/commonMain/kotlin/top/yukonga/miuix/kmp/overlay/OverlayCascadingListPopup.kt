@@ -20,6 +20,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.layout.CascadingListPopupLayout
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 
 /**
  * A cascading list popup rendered inside the host `Scaffold`, using the traditional solid panel
@@ -102,7 +103,7 @@ fun OverlayCascadingListPopup(
 ) {
     CascadingListPopupLayout(
         show = show,
-        popupHost = { visible, hostContent ->
+        popupHost = { visible, _, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
             visibleState.value = visible
             PopupLayout(
@@ -116,6 +117,7 @@ fun OverlayCascadingListPopup(
                 hostContent()
             }
         },
+        componentBounds = windowComponentBounds(),
         entries = entries,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

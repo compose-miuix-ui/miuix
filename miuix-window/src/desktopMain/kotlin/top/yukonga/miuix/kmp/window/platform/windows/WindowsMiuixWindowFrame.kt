@@ -41,6 +41,7 @@ import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMaximize
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMinimize
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.basic.rememberWindowsCaptionBarFontIconFamily
+import top.yukonga.miuix.kmp.window.internal.ProvideWindowComponentFrame
 import java.awt.event.WindowEvent
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -147,7 +148,7 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
                 captionBarRect = Rect.Zero
             }
 
-            content()
+            ProvideWindowComponentFrame(windowClientInsets) { content() }
 
             if (properties.captionButtonsVisible && !currentIsFullscreen) {
                 Row(

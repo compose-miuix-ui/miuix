@@ -126,7 +126,7 @@ private fun List<DropdownEntry>.itemAt(position: CascadingItemPosition): Dropdow
 @Composable
 internal fun CascadingListPopupLayout(
     show: Boolean,
-    popupHost: @Composable (visible: Boolean, content: @Composable () -> Unit) -> Unit,
+    popupHost: @Composable (visible: Boolean, onOutsideTap: () -> Unit, content: @Composable () -> Unit) -> Unit,
     entries: List<DropdownEntry>,
     onDismissRequest: () -> Unit,
     dropdownColors: DropdownColors,
@@ -139,6 +139,8 @@ internal fun CascadingListPopupLayout(
     minWidth: Dp = 200.dp,
     collapseOnSelection: Boolean = true,
     surface: (@Composable (Shape) -> Modifier)? = null,
+    componentBounds: IntRect? = null,
+    constrainHeightToViewport: Boolean = false,
 ) {
     val internalVisible = remember { mutableStateOf(false) }
     val enterFraction = remember { Animatable(0f) }
@@ -256,11 +258,21 @@ internal fun CascadingListPopupLayout(
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = primarySize,
+        componentBounds = componentBounds,
     )
 
     val anchorBoundsByPosition = remember { mutableStateMapOf<CascadingItemPosition, IntRect>() }
 
-    popupHost(internalVisible.value) {
+    val onOutsideTap: () -> Unit = remember {
+        {
+            if (expandedItemPosition != null) {
+                expandedItemPosition = null
+            } else {
+                currentOnDismiss()
+            }
+        }
+    }
+    popupHost(internalVisible.value, onOutsideTap) {
         val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
         NavigationBackHandler(
             state = backState,
@@ -279,13 +291,7 @@ internal fun CascadingListPopupLayout(
                 }
             },
             // Mirror outside-tap: depth > 0 collapses the secondary, depth 0 dismisses the popup.
-            onBackCompleted = {
-                if (expandedItemPosition != null) {
-                    expandedItemPosition = null
-                } else {
-                    currentOnDismiss()
-                }
-            },
+            onBackCompleted = onOutsideTap,
         )
 
         LaunchedEffect(Unit) {
@@ -333,13 +339,7 @@ internal fun CascadingListPopupLayout(
                             hostMeasured = true
                         }
                         .pointerInput(Unit) {
-                            detectTapGestures(onTap = {
-                                if (expandedItemPosition != null) {
-                                    expandedItemPosition = null
-                                } else {
-                                    currentOnDismiss()
-                                }
-                            })
+                            detectTapGestures { onOutsideTap() }
                         },
                 ) {
                     CascadingMorphSubLayout(
@@ -375,6 +375,7 @@ internal fun CascadingListPopupLayout(
                         alignment = alignment,
                         hostOriginInWindow = { hostPositionInWindow },
                         maxHeight = maxHeight,
+                        constrainHeightToViewport = constrainHeightToViewport,
                         minWidth = minWidth,
                         dropdownColors = dropdownColors,
                         enterFraction = { enterFraction.value * (1f - backEnterProgress.value) },
@@ -424,6 +425,7 @@ private fun CascadingMorphSubLayout(
     alignment: PopupPositionProvider.Align,
     hostOriginInWindow: () -> IntOffset,
     maxHeight: Dp?,
+    constrainHeightToViewport: Boolean,
     minWidth: Dp,
     dropdownColors: DropdownColors,
     enterFraction: () -> Float,
@@ -439,9 +441,13 @@ private fun CascadingMorphSubLayout(
     maskColor: Color,
 ) {
     SubcomposeLayout(modifier = Modifier.fillMaxSize()) { constraints ->
-        val resolvedMaxHeightPx = maxHeight?.roundToPx()?.coerceAtLeast(50.dp.roundToPx())
-            ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)
-                .coerceAtLeast(50.dp.roundToPx())
+        val minHeightPx = ListPopupDefaults.MinPopupHeight.roundToPx()
+        val requestedMaxHeight = maxHeight?.roundToPx()
+        val resolvedMaxHeightPx = if (constrainHeightToViewport) {
+            popupHeightLimit(windowBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+        } else {
+            (requestedMaxHeight ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)).coerceAtLeast(minHeightPx)
+        }
         val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
         val primaryConstraints = Constraints(
             minWidth = minWidthPx,
@@ -508,7 +514,6 @@ private fun CascadingMorphSubLayout(
         // known before the real secondary is measured at union size for its anchor-to-final slide.
         val probeConstraints = primaryConstraints.copy(
             minWidth = primaryWidth.coerceAtMost(primaryConstraints.maxWidth),
-            maxHeight = resolvedMaxHeightPx.coerceAtMost(constraints.maxHeight),
         )
 
         data class SecondaryLayout(
@@ -572,7 +577,7 @@ private fun CascadingMorphSubLayout(
                             anchorLocalInUnion = anchorLocalInUnion,
                             anchorPaddingTopPx = anchorPaddingTopPx,
                             isAnchorPopupLast = isAnchorPopupLast,
-                            secondaryContentMaxHeight = resolvedMaxHeightPx,
+                            secondaryContentMaxHeight = primaryConstraints.maxHeight,
                             enterFraction = enterFraction,
                             enterAlpha = enterAlpha,
                             popupLayoutPosition = layoutInfo.popupLayoutPosition,
@@ -649,11 +654,13 @@ internal fun computeSecondaryRect(
         anchor.bottom - secondarySize.height >= windowBounds.top -> anchor.bottom - secondarySize.height
         else -> (windowBounds.bottom - secondarySize.height).coerceAtLeast(windowBounds.top)
     }
+    val x = left.coerceIn(windowBounds.left, (windowBounds.right - secondarySize.width).coerceAtLeast(windowBounds.left))
+    val y = top.coerceIn(windowBounds.top, (windowBounds.bottom - secondarySize.height).coerceAtLeast(windowBounds.top))
     return IntRect(
-        left = left,
-        top = top,
-        right = left + secondarySize.width,
-        bottom = top + secondarySize.height,
+        left = x,
+        top = y,
+        right = x + secondarySize.width,
+        bottom = y + secondarySize.height,
     )
 }
 

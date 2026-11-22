@@ -77,6 +77,8 @@ internal fun ListPopupLayout(
     onDismissFinished: (() -> Unit)? = null,
     maxHeight: Dp? = null,
     minWidth: Dp = ListPopupDefaults.MinWidth,
+    componentBounds: IntRect? = null,
+    constrainHeightToViewport: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { mutableStateOf(false) }
@@ -142,6 +144,7 @@ internal fun ListPopupLayout(
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = popupContentSize,
+        componentBounds = componentBounds,
     )
 
     val requestDismiss: () -> Unit = remember {
@@ -203,12 +206,16 @@ internal fun ListPopupLayout(
                         val windowBounds = layoutInfo.windowBounds
                         val popupMargin = layoutInfo.popupMargin
                         val minHeightPx = ListPopupDefaults.MinPopupHeight.roundToPx()
+                        val requestedMaxHeight = maxHeight?.roundToPx()
+                        val resolvedMaxHeight = if (constrainHeightToViewport) {
+                            popupHeightLimit(windowBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+                        } else {
+                            (requestedMaxHeight ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)).coerceAtLeast(minHeightPx)
+                        }
                         val placeable = measurable.measure(
                             constraints.copy(
-                                maxHeight = maxHeight?.roundToPx()?.coerceAtLeast(minHeightPx)
-                                    ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)
-                                        .coerceAtLeast(minHeightPx),
-                                minHeight = if (minHeightPx <= constraints.maxHeight) minHeightPx else constraints.maxHeight,
+                                maxHeight = resolvedMaxHeight,
+                                minHeight = minOf(minHeightPx, resolvedMaxHeight, constraints.maxHeight),
                                 maxWidth = constraints.maxWidth,
                                 minWidth = minWidth.roundToPx().coerceAtMost(constraints.maxWidth),
                             ),
@@ -250,4 +257,16 @@ internal fun ListPopupLayout(
             }
         }
     }
+}
+
+internal fun popupHeightLimit(
+    windowHeight: Int,
+    margin: IntRect,
+    hostHeight: Int,
+    preferredMinHeight: Int,
+    requestedMaxHeight: Int?,
+): Int {
+    val availableHeight = (minOf(windowHeight, hostHeight) - margin.top - margin.bottom).coerceAtLeast(0)
+    val preferredHeight = requestedMaxHeight?.coerceAtLeast(preferredMinHeight) ?: availableHeight
+    return minOf(availableHeight, preferredHeight)
 }
