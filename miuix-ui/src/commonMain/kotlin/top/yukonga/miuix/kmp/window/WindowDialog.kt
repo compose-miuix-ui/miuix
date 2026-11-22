@@ -3,14 +3,7 @@
 
 package top.yukonga.miuix.kmp.window
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,7 +12,6 @@ import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
 import top.yukonga.miuix.kmp.layout.DialogMotion
-import top.yukonga.miuix.kmp.theme.LocalDismissState
 
 /**
  * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
@@ -69,13 +61,6 @@ fun WindowDialog(
     motion: DialogMotion = DialogMotion.Default,
     content: @Composable () -> Unit,
 ) {
-    val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
-        maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
-    }
-
     val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
 
     DialogContentLayout(
@@ -100,19 +85,10 @@ fun WindowDialog(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        topInset = safeTopInset,
         maxWidth = maxWidth,
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
         motion = motion,
-        content = {
-            CompositionLocalProvider(
-                LocalDismissState provides {
-                    currentOnDismissRequest.value?.invoke()
-                },
-            ) {
-                content()
-            }
-        },
+        content = content,
     )
 }

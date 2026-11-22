@@ -383,13 +383,12 @@ internal fun DialogContent(
     val surfaceModifier = surface?.invoke(surfaceScope)
         ?: Modifier.squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
 
-    val calculatedTopInset = if (topInset != null) {
-        topInset
-    } else {
-        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-        maxOf(statusBars, captionBar, displayCutout)
+    val calculatedTopInset = topInset ?: with(density) {
+        maxOf(
+            WindowInsets.statusBars.getTop(this),
+            WindowInsets.captionBar.getTop(this),
+            WindowInsets.displayCutout.getTop(this),
+        ).toDp()
     }
 
     // Slide distance and predictive-back translation pad (small-screen only). Pre-converted to px

@@ -59,6 +59,7 @@ import top.yukonga.miuix.kmp.basic.resolveLocalTransformOrigin
 import top.yukonga.miuix.kmp.basic.resolvePopupLayoutPosition
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 
 internal val CascadingPopupCornerRadius = 16.dp
 
@@ -142,6 +143,7 @@ internal fun CascadingListPopupLayout(
     collapseOnSelection: Boolean = true,
     surface: (@Composable (Shape) -> Modifier)? = null,
     componentBounds: IntRect? = null,
+    useWindowComponentBounds: Boolean = false,
     constrainHeightToViewport: Boolean = false,
 ) {
     val internalVisible = remember { mutableStateOf(false) }
@@ -238,6 +240,7 @@ internal fun CascadingListPopupLayout(
     }
 
     if (!show && !internalVisible.value) return
+    val resolvedComponentBounds = componentBounds ?: if (useWindowComponentBounds) windowComponentBounds() else null
 
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
     Spacer(
@@ -260,7 +263,7 @@ internal fun CascadingListPopupLayout(
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = IntSize.Zero,
-        componentBounds = componentBounds,
+        componentBounds = resolvedComponentBounds,
     )
     val placement = remember {
         PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)

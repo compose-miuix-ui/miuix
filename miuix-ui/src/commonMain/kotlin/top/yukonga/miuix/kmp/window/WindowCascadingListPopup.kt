@@ -103,7 +103,7 @@ fun WindowCascadingListPopup(
                 )
             }
         },
-        componentBounds = windowComponentBounds(),
+        useWindowComponentBounds = true,
         constrainHeightToViewport = true,
         entries = entries,
         onDismissRequest = onDismissRequest,

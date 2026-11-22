@@ -218,10 +218,12 @@ internal fun BottomSheetContentLayout(
         { currentOnDismissRequest?.invoke() }
     }
 
-    val resetGesture: suspend () -> Unit = {
-        dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-            dimAlpha.floatValue = value
+    val resetGesture: suspend () -> Unit = remember {
+        {
+            dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+            animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+                dimAlpha.floatValue = value
+            }
         }
     }
 
@@ -406,13 +408,12 @@ internal fun BottomSheetContent(
 
     val settlingJob = remember { mutableStateOf<Job?>(null) }
     val isSettling = remember { mutableStateOf(false) }
-    val calculatedTopInset = if (topInset != null) {
-        topInset
-    } else {
-        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-        maxOf(statusBars, captionBar, displayCutout)
+    val calculatedTopInset = topInset ?: with(density) {
+        maxOf(
+            WindowInsets.statusBars.getTop(this),
+            WindowInsets.captionBar.getTop(this),
+            WindowInsets.displayCutout.getTop(this),
+        ).toDp()
     }
 
     val calculateNewOffset = remember(allowDismiss) {

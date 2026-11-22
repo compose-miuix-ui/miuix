@@ -3,14 +3,7 @@
 
 package top.yukonga.miuix.kmp.window
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +11,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
-import top.yukonga.miuix.kmp.theme.LocalDismissState
 
 /**
  * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
@@ -66,13 +58,6 @@ fun WindowBottomSheet(
     enableNestedScroll: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
-        maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
-    }
-
     val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
 
     BottomSheetContentLayout(
@@ -105,15 +90,6 @@ fun WindowBottomSheet(
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
-        topInset = safeTopInset,
-        content = {
-            CompositionLocalProvider(
-                LocalDismissState provides {
-                    currentOnDismissRequest.value?.invoke()
-                },
-            ) {
-                content()
-            }
-        },
+        content = content,
     )
 }

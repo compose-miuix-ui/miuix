@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowListPopup
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 
 /**
  * Internal shared layout logic for [OverlayListPopup] and [WindowListPopup].
@@ -81,11 +82,13 @@ internal fun ListPopupLayout(
     maxHeight: Dp? = null,
     minWidth: Dp = ListPopupDefaults.MinWidth,
     componentBounds: IntRect? = null,
+    useWindowComponentBounds: Boolean = false,
     constrainHeightToViewport: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { mutableStateOf(false) }
     if (!show && !internalVisible.value) return
+    val resolvedComponentBounds = componentBounds ?: if (useWindowComponentBounds) windowComponentBounds() else null
 
     val fractionProgress = remember { Animatable(0f) }
     val alphaProgress = remember { Animatable(0f) }
@@ -145,7 +148,7 @@ internal fun ListPopupLayout(
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
         popupContentSize = IntSize.Zero,
-        componentBounds = componentBounds,
+        componentBounds = resolvedComponentBounds,
     )
     val placement = remember {
         PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)
