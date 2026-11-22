@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val HOVER_ALPHA_DELTA = 0.06f
 private const val FOCUS_ALPHA_DELTA = 0.08f
@@ -119,7 +120,7 @@ class MiuixIndication(
                                 releaseHoldJob?.cancel()
                                 releaseHoldJob =
                                     coroutineScope.launch {
-                                        delay(PRESS_RELEASE_HOLD_MS)
+                                        delay(PRESS_RELEASE_HOLD_MS.milliseconds)
                                         if (pressToken == token && isPressed) {
                                             isPressed = false
                                             animateOverlay(PressExitSpring)
