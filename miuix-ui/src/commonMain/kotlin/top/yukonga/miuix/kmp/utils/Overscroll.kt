@@ -434,6 +434,7 @@ private class OverscrollNode(
 /**
  * Tracks whether overscroll is active.
  */
+@Stable
 class OverScrollState {
     var isOverScrollActive by mutableStateOf(false)
         internal set
