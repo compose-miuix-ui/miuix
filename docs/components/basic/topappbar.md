@@ -84,8 +84,6 @@ Scaffold(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            // If you want to add the overscroll effect, please add it before the scroll behavior
-            .overScrollVertical()
             // Bind TopAppBar scroll behavior
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentPadding = PaddingValues(top = paddingValues.calculateTopPadding())
