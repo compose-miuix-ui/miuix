@@ -468,6 +468,8 @@ private fun CascadingMorphSubLayout(
         // Last-row anchors share primary's rounded bottom — keep the morph's bottom corners
         // full. Mid-list anchors must shrink uniformly or a rounded tongue would protrude from
         // a flat internal row. === because DropdownItem is a data class.
+        val isAnchorPopupFirst = activeExpanded != null &&
+            entries.firstOrNull { it.items.isNotEmpty() }?.items?.first() === activeExpanded
         val isAnchorPopupLast = activeExpanded != null &&
             entries.lastOrNull { it.items.isNotEmpty() }?.items?.last() === activeExpanded
 
@@ -576,6 +578,7 @@ private fun CascadingMorphSubLayout(
                             secondaryLocalInUnion = secondaryLocalInUnion,
                             anchorLocalInUnion = anchorLocalInUnion,
                             anchorPaddingTopPx = anchorPaddingTopPx,
+                            isAnchorPopupFirst = isAnchorPopupFirst,
                             isAnchorPopupLast = isAnchorPopupLast,
                             secondaryContentMaxHeight = primaryConstraints.maxHeight,
                             enterFraction = enterFraction,
