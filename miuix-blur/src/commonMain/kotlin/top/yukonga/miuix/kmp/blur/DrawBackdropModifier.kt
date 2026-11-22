@@ -425,6 +425,29 @@ private class DrawBackdropNode(
         var padRight: Float = 0f
         var padBottom: Float = 0f
 
+        var pendingDownsampleSource: GraphicsLayer? = null
+        var pendingDownsampleScale: Float = 1f
+        var pendingNoiseLayer: GraphicsLayer? = null
+        var pendingNoiseScale: Float = 1f
+        var pendingNoiseTx: Float = 0f
+        var pendingNoiseTy: Float = 0f
+
+        val recordBackdropBlock: DrawScope.() -> Unit = { recordBackdrop(this@LevelTarget) }
+        val recordDownsampleBlock: DrawScope.() -> Unit = {
+            val src = pendingDownsampleSource
+            if (src != null) {
+                scale(pendingDownsampleScale, pendingDownsampleScale, Offset.Zero) { drawLayer(src) }
+            }
+        }
+        val recordNoiseBlock: DrawScope.() -> Unit = {
+            val src = pendingNoiseLayer
+            if (src != null) {
+                translate(pendingNoiseTx, pendingNoiseTy) {
+                    scale(pendingNoiseScale, pendingNoiseScale, Offset.Zero) { drawLayer(src) }
+                }
+            }
+        }
+
         /** Scale of the first (bilinear) record step: the level, or 2 for the ½ cascade below it. */
         var cascadeFirstStepScale: Float = 1f
 
@@ -498,6 +521,39 @@ private class DrawBackdropNode(
     private inner class SharpBandOverlay(private val downScale: Int) {
         var layer: GraphicsLayer? = null
         var active = false
+        private var pendingShared2xSource: GraphicsLayer? = null
+        private var pendingSharedTx: Float = 0f
+        private var pendingSharedTy: Float = 0f
+        private var pendingSharpDx: Float = 0f
+        private var pendingSharpDy: Float = 0f
+        private var pendingSharpDs: Float = 1f
+        private val recordShared2xBlock: DrawScope.() -> Unit = {
+            val src = pendingShared2xSource
+            if (src != null) {
+                translate(pendingSharedTx, pendingSharedTy) {
+                    drawLayer(src)
+                }
+            }
+        }
+        private val recordDirectBackdropCall: DrawScope.() -> Unit = {
+            with(backdrop) {
+                drawBackdrop(
+                    density = effectScope,
+                    coordinates = layoutCoordinates,
+                    layerBlock = layerBlock,
+                    downscaleFactor = pendingSharpDs,
+                )
+            }
+        }
+        private val recordDirectBackdropBlock: DrawScope.() -> Unit = {
+            translate(pendingSharpDx, pendingSharpDy) {
+                if (onDrawBackdrop === DefaultOnDrawBackdrop) {
+                    recordDirectBackdropCall()
+                } else {
+                    onDrawBackdrop(recordDirectBackdropCall)
+                }
+            }
+        }
         private var effect: RenderEffect? = null
         private var cachedGradient: ProgressiveBlur? = null
         private var cachedW = Float.NaN
@@ -601,26 +657,16 @@ private class DrawBackdropNode(
             val dsFloat = downScale.toFloat()
             val targetLayer = layer ?: graphicsContext.createGraphicsLayer().also { layer = it }
             if (downScale == 2 && shared2xSource != null) {
-                recordLayer(targetLayer, size = texSize) {
-                    translate(-(sharedPadLeft + offset.x) / 2f, -(sharedPadTop + offset.y) / 2f) {
-                        drawLayer(shared2xSource)
-                    }
-                }
+                pendingShared2xSource = shared2xSource
+                pendingSharedTx = -(sharedPadLeft + offset.x) / 2f
+                pendingSharedTy = -(sharedPadTop + offset.y) / 2f
+                recordLayer(targetLayer, size = texSize, block = recordShared2xBlock)
+                pendingShared2xSource = null
             } else {
-                recordLayer(targetLayer, size = texSize) {
-                    translate(-offset.x / dsFloat, -offset.y / dsFloat) {
-                        onDrawBackdrop {
-                            with(backdrop) {
-                                drawBackdrop(
-                                    density = effectScope,
-                                    coordinates = layoutCoordinates,
-                                    layerBlock = layerBlock,
-                                    downscaleFactor = dsFloat,
-                                )
-                            }
-                        }
-                    }
-                }
+                pendingSharpDx = -offset.x / dsFloat
+                pendingSharpDy = -offset.y / dsFloat
+                pendingSharpDs = dsFloat
+                recordLayer(targetLayer, size = texSize, block = recordDirectBackdropBlock)
             }
             targetLayer.renderEffect = effect
             if (downScale == 1) {
@@ -673,6 +719,18 @@ private class DrawBackdropNode(
         invalidateDraw()
     }
 
+    private var pendingBackdropScaleFactor: Float = 1f
+    private val recordBackdropCall: DrawScope.() -> Unit = {
+        with(backdrop) {
+            drawBackdrop(
+                density = effectScope,
+                coordinates = layoutCoordinates,
+                layerBlock = layerBlock,
+                downscaleFactor = pendingBackdropScaleFactor,
+            )
+        }
+    }
+
     private fun DrawScope.recordBackdrop(target: LevelTarget) {
         val scaleFactor = target.cascadeFirstStepScale
         // Exact (fractional) padding: snapping it shifts the recording by up to a texel whenever
@@ -680,7 +738,7 @@ private class DrawBackdropNode(
         val scaledPadX = if (target.padLeft == 0f) 0f else target.padLeft / scaleFactor
         val scaledPadY = if (target.padTop == 0f) 0f else target.padTop / scaleFactor
         translate(scaledPadX, scaledPadY) {
-            onDrawBackdrop {
+            if (onDrawBackdrop === DefaultOnDrawBackdrop) {
                 with(backdrop) {
                     drawBackdrop(
                         density = effectScope,
@@ -689,6 +747,9 @@ private class DrawBackdropNode(
                         downscaleFactor = scaleFactor,
                     )
                 }
+            } else {
+                pendingBackdropScaleFactor = scaleFactor
+                onDrawBackdrop(recordBackdropCall)
             }
         }
     }
@@ -720,7 +781,7 @@ private class DrawBackdropNode(
             if (layer.renderEffect == null && padL == 0f && padT == 0f && target.padRight == 0f && target.padBottom == 0f) {
                 recordBackdrop(target)
             } else {
-                recordLayer(layer, size = IntSize(fullWidth, fullHeight)) { recordBackdrop(target) }
+                recordLayer(layer, size = IntSize(fullWidth, fullHeight), block = target.recordBackdropBlock)
                 drawShiftedLayer(layer, padL, padT, 1f)
             }
             return
@@ -729,7 +790,7 @@ private class DrawBackdropNode(
         if (level <= 2.001f) {
             // Half or finer: a single bilinear record straight to the level.
             target.cascadeFirstStepScale = level
-            recordLayer(layer, size = recordedSize(level)) { recordBackdrop(target) }
+            recordLayer(layer, size = recordedSize(level), block = target.recordBackdropBlock)
             drawUpscaledLayer(target, layer, level, padL, padT)
             return
         }
@@ -743,7 +804,7 @@ private class DrawBackdropNode(
         } else {
             LayerCompositingStrategy.Auto
         }
-        recordLayer(source, size = sourceSize) { recordBackdrop(target) }
+        recordLayer(source, size = sourceSize, block = target.recordBackdropBlock)
 
         var covered = 2f
         var step = 0
@@ -1286,9 +1347,10 @@ private class DrawBackdropNode(
                 uniformShaderName = "child",
             )
         }
-        recordLayer(dest, size = destSize) {
-            scale(scale, scale, Offset.Zero) { drawLayer(source) }
-        }
+        target.pendingDownsampleSource = source
+        target.pendingDownsampleScale = scale
+        recordLayer(dest, size = destSize, block = target.recordDownsampleBlock)
+        target.pendingDownsampleSource = null
     }
 
     /**
@@ -1312,11 +1374,12 @@ private class DrawBackdropNode(
             val compH = ceil(size.height).toInt().coerceAtLeast(1)
             val noiseL = target.noiseLayer
                 ?: graphicsContext.createGraphicsLayer().also { target.noiseLayer = it }
-            recordLayer(noiseL, size = IntSize(compW, compH)) {
-                translate(-padLeft - residualX, -padTop - residualY) {
-                    scale(texelScale, texelScale, Offset.Zero) { drawLayer(layer) }
-                }
-            }
+            target.pendingNoiseLayer = layer
+            target.pendingNoiseScale = texelScale
+            target.pendingNoiseTx = -padLeft - residualX
+            target.pendingNoiseTy = -padTop - residualY
+            recordLayer(noiseL, size = IntSize(compW, compH), block = target.recordNoiseBlock)
+            target.pendingNoiseLayer = null
             noiseL.renderEffect = target.noiseRenderEffect(noiseCoeff) {
                 val noiseShader = effectScope.obtainRuntimeShader("NoiseDither", NOISE_DITHER_SHADER)
                 noiseShader.setFloatUniform("noise_coeff", noiseCoeff)
