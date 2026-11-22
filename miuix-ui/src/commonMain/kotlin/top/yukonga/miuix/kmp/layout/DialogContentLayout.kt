@@ -415,16 +415,22 @@ internal fun DialogContent(
             } else {
                 // Rest the panel just below the screen edge when hidden, as the platform dialog
                 // does: its own height plus the margin and insets beneath it, keyboard included.
-                val insetBottom = if (defaultWindowInsetsPadding) {
-                    maxOf(
-                        imeInsets.getBottom(this),
-                        navBarInsets.getBottom(this) + captionBarInsets.getBottom(this),
-                    )
+                val anim = animationProgress.value
+                val back = backProgress.value
+                if (anim >= 1f && back <= 0f) {
+                    translationY = 0f
                 } else {
-                    0
+                    val insetBottom = if (defaultWindowInsetsPadding) {
+                        maxOf(
+                            imeInsets.getBottom(this),
+                            navBarInsets.getBottom(this) + captionBarInsets.getBottom(this),
+                        )
+                    } else {
+                        0
+                    }
+                    val offScreen = size.height + outsideMarginBottomPx + insetBottom
+                    translationY = (1f - anim) * offScreen + back * offScreen
                 }
-                val offScreen = size.height + outsideMarginBottomPx + insetBottom
-                translationY = (1f - animationProgress.value) * offScreen + backProgress.value * offScreen
                 alpha = 1f
             }
         }

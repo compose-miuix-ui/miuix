@@ -648,7 +648,7 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || onDrawFront != null) {
+        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver) {
             CompositingStrategy.Offscreen
         } else {
             CompositingStrategy.Auto
