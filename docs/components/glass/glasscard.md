@@ -72,14 +72,12 @@ GlassBottomSheet(
 | --- | --- | --- | --- |
 | CornerRadius | Dp | Default corner radius | 20.dp |
 | InsideMargin | PaddingValues | Default inner padding | CardDefaults.InsideMargin |
-| LightColor | Color | Fill over light glass | Color(0x8CFFFFFF) |
-| DarkColor | Color | Fill over dark glass | Color(0x14FFFFFF) |
 
 #### Methods
 
 | Method Name | Return Type | Description |
 | --- | --- | --- |
-| color() | Color | `LightColor` or `DarkColor` for the current theme |
+| color() | Color | Translucent fill derived from the current theme color scheme |
 | colors(color, contentColor) | CardColors | Card colors; defaults to `color()` and `onSurfaceContainer` |
 
 ## Advanced Usage

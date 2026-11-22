@@ -107,16 +107,21 @@ object GlassCardDefaults {
     /** The default margin inside the [GlassCard]. */
     val InsideMargin: PaddingValues = CardDefaults.InsideMargin
 
-    /** Translucent fill used over light glass. */
-    val LightColor: Color = Color(0x8CFFFFFF)
-
-    /** Translucent fill used over dark glass. */
-    val DarkColor: Color = Color(0x14FFFFFF)
+    private const val LIGHT_ALPHA: Float = 0x8C / 255f
+    private const val DARK_ALPHA: Float = 0x14 / 255f
 
     /** Translucent fill for the current theme. */
     @Composable
     @ReadOnlyComposable
-    fun color(): Color = if (MiuixTheme.colorScheme.background.luminance() < 0.5f) DarkColor else LightColor
+    fun color(): Color {
+        val scheme = MiuixTheme.colorScheme
+        val isDark = scheme.background.luminance() < 0.5f
+        return when {
+            isDark -> scheme.onSurfaceContainer.copy(alpha = DARK_ALPHA)
+            MiuixTheme.isDynamicColor -> scheme.background.copy(alpha = LIGHT_ALPHA)
+            else -> scheme.surfaceContainer.copy(alpha = LIGHT_ALPHA)
+        }
+    }
 
     /** The default colors of the [GlassCard]. */
     @Composable

@@ -72,14 +72,12 @@ GlassBottomSheet(
 | --- | --- | --- | --- |
 | CornerRadius | Dp | 默认圆角半径 | 20.dp |
 | InsideMargin | PaddingValues | 默认内边距 | CardDefaults.InsideMargin |
-| LightColor | Color | 浅色玻璃上的填充 | Color(0x8CFFFFFF) |
-| DarkColor | Color | 深色玻璃上的填充 | Color(0x14FFFFFF) |
 
 #### 方法
 
 | 方法名 | 返回类型 | 说明 |
 | --- | --- | --- |
-| color() | Color | 当前主题对应的 `LightColor` 或 `DarkColor` |
+| color() | Color | 基于当前主题配色方案派生的半透明填充 |
 | colors(color, contentColor) | CardColors | 卡片颜色；默认使用 `color()` 与 `onSurfaceContainer` |
 
 ## 进阶用法

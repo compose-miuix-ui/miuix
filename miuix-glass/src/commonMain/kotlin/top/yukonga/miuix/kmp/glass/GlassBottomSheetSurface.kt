@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
@@ -32,6 +33,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 /** Default values for [GlassBottomSheet] and [glassBottomSheetSurface]. */
 object GlassBottomSheetDefaults {
     val ScrimColor: Color = GlassDialogDefaults.ScrimColor
+
+    /** Default panel content padding for [GlassBottomSheet]. */
+    val InsideMargin: DpSize = DpSize(12.dp, 0.dp)
 
     /** Bottom-sheet material for the current theme. */
     @Composable

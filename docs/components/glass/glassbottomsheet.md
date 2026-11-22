@@ -98,7 +98,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | cornerRadius | Dp | Top-corner radius; bottom corners remain square | BottomSheetDefaults.cornerRadius | No |
 | sheetMaxWidth | Dp | Maximum sheet width | BottomSheetDefaults.maxWidth | No |
 | outsideMargin | DpSize | Horizontal external margins use `width`; `height` is not applied | BottomSheetDefaults.outsideMargin | No |
-| insideMargin | DpSize | Horizontal content padding uses `width`; bottom padding uses `height` | BottomSheetDefaults.insideMargin | No |
+| insideMargin | DpSize | Horizontal content padding uses `width`; bottom padding uses `height` | GlassBottomSheetDefaults.InsideMargin | No |
 | dragHandleColor | Color | Handle color before press opacity is applied | BottomSheetDefaults.dragHandleColor() | No |
 | material | GlassMaterial | Blur and ordered color layers | GlassBottomSheetDefaults.material() | No |
 | stroke | EdgeStroke? | Edge stroke; null removes it | GlassBottomSheetDefaults.stroke() | No |
@@ -125,6 +125,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | Constant Name | Type | Description | Value |
 | --- | --- | --- | --- |
 | ScrimColor | Color | Scrim color before host animation | GlassDialogDefaults.ScrimColor (`Color(0x33000000)`) |
+| InsideMargin | DpSize | Default panel content padding | `DpSize(12.dp, 0.dp)` |
 
 #### Methods
 

@@ -98,7 +98,7 @@ Scaffold { padding ->
 | cornerRadius | Dp | 顶角半径；底角保持直角 | BottomSheetDefaults.cornerRadius | 否 |
 | sheetMaxWidth | Dp | 抽屉最大宽度 | BottomSheetDefaults.maxWidth | 否 |
 | outsideMargin | DpSize | `width` 用作水平外边距；不应用 `height` | BottomSheetDefaults.outsideMargin | 否 |
-| insideMargin | DpSize | `width` 用作水平内容内边距，`height` 用作底部内边距 | BottomSheetDefaults.insideMargin | 否 |
+| insideMargin | DpSize | `width` 用作水平内容内边距，`height` 用作底部内边距 | GlassBottomSheetDefaults.InsideMargin | 否 |
 | dragHandleColor | Color | 应用按压透明度之前的拖动手柄颜色 | BottomSheetDefaults.dragHandleColor() | 否 |
 | material | GlassMaterial | 模糊及有序颜色层 | GlassBottomSheetDefaults.material() | 否 |
 | stroke | EdgeStroke? | 辉光描边；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
@@ -125,6 +125,7 @@ Scaffold { padding ->
 | 常量名 | 类型 | 说明 | 值 |
 | --- | --- | --- | --- |
 | ScrimColor | Color | 宿主应用动画之前的遮罩颜色 | GlassDialogDefaults.ScrimColor（`Color(0x33000000)`） |
+| InsideMargin | DpSize | 默认面板内容内边距 | `DpSize(12.dp, 0.dp)` |
 
 #### 方法
 

@@ -51,10 +51,10 @@ internal fun GlassBottomSheetDemo(
                 .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Drag the handle or scroll the content to try the sheet material.", style = MiuixTheme.textStyles.body2)
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 BasicComponent(
-                    title = "Glass card",
+                    title = "Drag or scroll",
+                    summary = "Drag the handle or scroll the content to try the sheet material.",
                     onClick = {},
                 )
             }
