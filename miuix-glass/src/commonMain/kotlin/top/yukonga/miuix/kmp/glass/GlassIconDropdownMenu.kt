@@ -105,8 +105,15 @@ fun BoxScope.GlassIconDropdownMenu(
             }
         }
     }
-    // Only record the primary. Recording the secondary here would make it sample itself.
-    Box(Modifier.matchParentSize().layerBackdrop(primaryBackdrop)) {
+    val secondaryActive = submenuShown || submenuPresent
+    // Only record the primary while a submenu is active; recording the secondary here would make it sample itself.
+    Box(
+        if (secondaryActive) {
+            Modifier.matchParentSize().layerBackdrop(primaryBackdrop)
+        } else {
+            Modifier.matchParentSize()
+        },
+    ) {
         GlassTransformPopup(
             show = show,
             onDismissRequest = {
@@ -179,65 +186,70 @@ fun BoxScope.GlassIconDropdownMenu(
             }
         }
     }
-    // Submenu dismissal collapses to the row; full dismissal also moves toward the toolbar anchor.
-    Box(
-        Modifier.matchParentSize()
-            .onGloballyPositioned { hostOriginState.value = it.positionInWindow() }
-            .graphicsLayer {
-                val progress = menuVisibility.value.coerceIn(0f, 1f)
-                val trigger = anchor.containerBounds
-                val closedScale = (trigger.width / primaryWidth.toPx()).coerceIn(0f, 1f)
-                val scale = closedScale + (1f - closedScale) * progress
-                // The anchor is reported in window coordinates; this layer is host-local.
-                val origin = hostOriginState.value
-                val centerX = trigger.center.x - origin.x
-                val centerY = trigger.center.y - origin.y
-                transformOrigin = TransformOrigin(
-                    if (size.width > 0f) centerX / size.width else 0.5f,
-                    if (size.height > 0f) centerY / size.height else 0.5f,
-                )
-                scaleX = scale
-                scaleY = scale
-                alpha = progress
-            },
-    ) {
-        GlassSecondaryPopup(
-            show = submenuShown,
-            onDismissRequest = { submenu = false },
-            anchorBounds = submenuAnchor,
-            backdrop = layeredBackdrop,
-            materialAnchor = anchor,
-            sizing = sizing.copy(minWidth = primaryWidth),
-            visuals = visuals,
-            onDismissFinished = {
-                submenuPresent = false
-                submenuPathState.value = null
-            },
-        ) {
-            submenuItem?.let { parent ->
-                GlassPopupItem(
-                    text = parent.text,
-                    summary = parent.summary,
-                    selected = parent.selected,
-                    showArrow = true,
-                    arrowRotation = { submenuArrow.value * (1f - anchor.secondaryBackProgress) },
-                    onClick = { submenu = false },
-                )
-                GlassMenuDivider()
-                parent.children.orEmpty().forEach { item ->
-                    GlassPopupItem(
-                        text = item.text,
-                        summary = item.summary,
-                        enabled = submenuEntry?.enabled == true && parent.enabled && item.enabled,
-                        selected = item.selected,
-                        onClick = {
-                            item.onClick?.invoke()
-                            if (collapseOnSelection) {
-                                submenu = false
-                                onDismissRequest()
-                            }
-                        },
+    if (secondaryActive) {
+        // Submenu dismissal collapses to the row; full dismissal also moves toward the toolbar anchor.
+        Box(
+            Modifier.matchParentSize()
+                .onGloballyPositioned { hostOriginState.value = it.positionInWindow() }
+                .graphicsLayer {
+                    val progress = menuVisibility.value.coerceIn(0f, 1f)
+                    val trigger = anchor.containerBounds
+                    val closedScale = (trigger.width / primaryWidth.toPx()).coerceIn(0f, 1f)
+                    val scale = closedScale + (1f - closedScale) * progress
+                    // The anchor is reported in window coordinates; this layer is host-local.
+                    val origin = hostOriginState.value
+                    val centerX = trigger.center.x - origin.x
+                    val centerY = trigger.center.y - origin.y
+                    transformOrigin = TransformOrigin(
+                        if (size.width > 0f) centerX / size.width else 0.5f,
+                        if (size.height > 0f) centerY / size.height else 0.5f,
                     )
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                },
+        ) {
+            GlassSecondaryPopup(
+                show = submenuShown,
+                onDismissRequest = { submenu = false },
+                anchorBounds = submenuAnchor,
+                backdrop = layeredBackdrop,
+                materialAnchor = anchor,
+                sizing = sizing.copy(minWidth = primaryWidth),
+                visuals = visuals,
+                onDismissFinished = {
+                    submenuPresent = false
+                    submenuPathState.value = null
+                },
+            ) {
+                submenuItem?.let { parent ->
+                    val secondaryArrowRotation = remember(submenuArrow, anchor) {
+                        { submenuArrow.value * (1f - anchor.secondaryBackProgress) }
+                    }
+                    GlassPopupItem(
+                        text = parent.text,
+                        summary = parent.summary,
+                        selected = parent.selected,
+                        showArrow = true,
+                        arrowRotation = secondaryArrowRotation,
+                        onClick = { submenu = false },
+                    )
+                    GlassMenuDivider()
+                    parent.children.orEmpty().forEach { item ->
+                        GlassPopupItem(
+                            text = item.text,
+                            summary = item.summary,
+                            enabled = submenuEntry?.enabled == true && parent.enabled && item.enabled,
+                            selected = item.selected,
+                            onClick = {
+                                item.onClick?.invoke()
+                                if (collapseOnSelection) {
+                                    submenu = false
+                                    onDismissRequest()
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

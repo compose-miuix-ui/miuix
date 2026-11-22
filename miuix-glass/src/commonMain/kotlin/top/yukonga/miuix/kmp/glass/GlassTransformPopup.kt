@@ -18,6 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,10 +31,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.LayoutModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -81,20 +90,65 @@ class GlassPopupAnchor {
     internal val surfaceVisibility: Float get() = surfaceProgress?.value ?: 1f
     internal var surfaceFloating: Boolean by mutableStateOf(false)
 
+    internal var containerCoordinates: LayoutCoordinates? = null
+    internal var cachedContainerBounds: Rect? = null
+    private var containerBoundsTick by mutableIntStateOf(0)
+
     /** The control's outer bounds in window coordinates. */
-    internal var containerBounds: Rect by mutableStateOf(Rect.Zero)
+    internal val containerBounds: Rect
+        get() {
+            if (contentHidden) {
+                @Suppress("UNUSED_EXPRESSION")
+                containerBoundsTick
+            }
+            val cached = cachedContainerBounds
+            if (cached != null) return cached
+            val coordinates = containerCoordinates?.takeIf { it.isAttached } ?: return Rect.Zero
+            return coordinates.boundsInWindow().also { cachedContainerBounds = it }
+        }
+
+    internal var contentCoordinates: LayoutCoordinates? = null
+    internal var cachedContentBounds: Rect? = null
+    private var contentBoundsTick by mutableIntStateOf(0)
 
     /** Control content bounds in window coordinates. */
-    internal var contentBounds: Rect by mutableStateOf(Rect.Zero)
+    internal val contentBounds: Rect
+        get() {
+            if (contentHidden) {
+                @Suppress("UNUSED_EXPRESSION")
+                contentBoundsTick
+            }
+            val cached = cachedContentBounds
+            if (cached != null) return cached
+            val coordinates = contentCoordinates?.takeIf { it.isAttached } ?: return Rect.Zero
+            return coordinates.boundsInWindow().also { cachedContentBounds = it }
+        }
+
+    internal var dropdownValueCoordinates: LayoutCoordinates? = null
+    internal var cachedDropdownValueBounds: Rect? = null
+    private var dropdownValueTick by mutableIntStateOf(0)
 
     /** The dropdown's value and chevron bounds in window coordinates. */
-    internal var dropdownValueBounds: Rect? by mutableStateOf(null)
+    internal var dropdownValueBounds: Rect?
+        get() {
+            @Suppress("UNUSED_EXPRESSION")
+            dropdownValueTick
+            val cached = cachedDropdownValueBounds
+            if (cached != null) return cached
+            val coordinates = dropdownValueCoordinates?.takeIf { it.isAttached } ?: return null
+            return coordinates.boundsInWindow().also { cachedDropdownValueBounds = it }
+        }
+        set(value) {
+            dropdownValueCoordinates = null
+            cachedDropdownValueBounds = value
+            dropdownValueTick++
+        }
 
     /** Control corner radius used at the collapsed endpoint. */
-    internal var cornerRadius: Dp by mutableStateOf(0.dp)
+    internal var cornerRadius: Dp = 0.dp
 
     /** Whether to keep the panel opaque during the transition instead of fading with the icon. */
-    internal var floating: Boolean by mutableStateOf(false)
+    internal var floating: Boolean = false
 
     /** Hides the whole transform anchor, or only the dropdown value, while the popup is open. */
     internal var contentHidden: Boolean by mutableStateOf(false)
@@ -105,6 +159,53 @@ class GlassPopupAnchor {
     /** Value opacity during predictive-back collapse. */
     internal val dropdownValueAlpha: Float
         get() = (dropdownBackProgressState?.value ?: dropdownRetainedValueAlpha).coerceIn(0f, 1f)
+
+    internal fun updateContainerCoordinates(coordinates: LayoutCoordinates) {
+        containerCoordinates = coordinates
+        cachedContainerBounds = null
+        if (contentHidden) containerBoundsTick++
+    }
+
+    internal fun clearContainerCoordinates(coordinates: LayoutCoordinates?) {
+        if (containerCoordinates === coordinates) {
+            containerCoordinates = null
+            cachedContainerBounds = null
+        }
+    }
+
+    internal fun updateContentCoordinates(coordinates: LayoutCoordinates) {
+        contentCoordinates = coordinates
+        cachedContentBounds = null
+        if (contentHidden) contentBoundsTick++
+    }
+
+    internal fun clearContentCoordinates(coordinates: LayoutCoordinates?) {
+        if (contentCoordinates === coordinates) {
+            contentCoordinates = null
+            cachedContentBounds = null
+        }
+    }
+
+    internal fun updateDropdownValueCoordinates(coordinates: LayoutCoordinates) {
+        val wasNull = dropdownValueCoordinates == null
+        dropdownValueCoordinates = coordinates
+        cachedDropdownValueBounds = null
+        if (wasNull || contentHidden) dropdownValueTick++
+    }
+
+    internal fun freezeDropdownValueBounds() {
+        if (dropdownValueCoordinates != null) {
+            cachedDropdownValueBounds = dropdownValueBounds
+            dropdownValueCoordinates = null
+        }
+    }
+
+    internal fun clearDropdownValueCoordinates(coordinates: LayoutCoordinates?) {
+        if (dropdownValueCoordinates === coordinates) {
+            dropdownValueCoordinates = null
+            cachedDropdownValueBounds = null
+        }
+    }
 }
 
 /** The button's sampling and colour treatment at the collapsed endpoint of its menu. */
@@ -118,7 +219,207 @@ internal data class GlassAnchorSurface(
 )
 
 /** Marks the button's modifier so its renderer can publish the actual surface to this anchor. */
-internal data class GlassPopupAnchorElement(val anchor: GlassPopupAnchor) : Modifier.Element
+internal data class GlassPopupAnchorElement(
+    val anchor: GlassPopupAnchor,
+    val cornerRadius: Dp,
+    val floating: Boolean,
+) : ModifierNodeElement<GlassPopupAnchorNode>() {
+    override fun create(): GlassPopupAnchorNode = GlassPopupAnchorNode(anchor, cornerRadius, floating)
+
+    override fun update(node: GlassPopupAnchorNode) {
+        node.update(anchor, cornerRadius, floating)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassPopupAnchor"
+        properties["cornerRadius"] = cornerRadius
+        properties["floating"] = floating
+    }
+}
+
+internal class GlassPopupAnchorNode(
+    private var anchor: GlassPopupAnchor,
+    private var cornerRadius: Dp,
+    private var floating: Boolean,
+) : Modifier.Node(),
+    LayoutModifierNode,
+    GlobalPositionAwareModifierNode {
+    private var lastCoordinates: LayoutCoordinates? = null
+
+    override fun onAttach() {
+        anchor.cornerRadius = cornerRadius
+        anchor.floating = floating
+    }
+
+    fun update(anchor: GlassPopupAnchor, cornerRadius: Dp, floating: Boolean) {
+        if (this.anchor !== anchor) {
+            this.anchor.clearContainerCoordinates(lastCoordinates)
+            this.anchor = anchor
+            lastCoordinates?.takeIf { it.isAttached }?.let { anchor.updateContainerCoordinates(it) }
+        }
+        this.cornerRadius = cornerRadius
+        this.floating = floating
+        anchor.cornerRadius = cornerRadius
+        anchor.floating = floating
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        lastCoordinates = coordinates
+        anchor.updateContainerCoordinates(coordinates)
+    }
+
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) {
+            placeable.placeWithLayer(0, 0) {
+                alpha = if (anchor.contentHidden) 0f else 1f
+            }
+        }
+    }
+
+    override fun onDetach() {
+        anchor.clearContainerCoordinates(lastCoordinates)
+        lastCoordinates = null
+    }
+}
+
+private data class GlassPopupAnchorContentElement(
+    val anchor: GlassPopupAnchor,
+) : ModifierNodeElement<GlassPopupAnchorContentNode>() {
+    override fun create(): GlassPopupAnchorContentNode = GlassPopupAnchorContentNode(anchor)
+
+    override fun update(node: GlassPopupAnchorContentNode) {
+        node.update(anchor)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassPopupAnchorContent"
+    }
+}
+
+private class GlassPopupAnchorContentNode(
+    private var anchor: GlassPopupAnchor,
+) : Modifier.Node(),
+    GlobalPositionAwareModifierNode {
+    private var lastCoordinates: LayoutCoordinates? = null
+
+    fun update(anchor: GlassPopupAnchor) {
+        if (this.anchor !== anchor) {
+            this.anchor.clearContentCoordinates(lastCoordinates)
+            this.anchor = anchor
+            lastCoordinates?.takeIf { it.isAttached }?.let { anchor.updateContentCoordinates(it) }
+        }
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        lastCoordinates = coordinates
+        anchor.updateContentCoordinates(coordinates)
+    }
+
+    override fun onDetach() {
+        anchor.clearContentCoordinates(lastCoordinates)
+        lastCoordinates = null
+    }
+}
+
+private data class GlassPopupAnchorRowElement(
+    val anchor: GlassPopupAnchor,
+) : ModifierNodeElement<GlassPopupAnchorRowNode>() {
+    override fun create(): GlassPopupAnchorRowNode = GlassPopupAnchorRowNode(anchor)
+
+    override fun update(node: GlassPopupAnchorRowNode) {
+        node.update(anchor)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassPopupAnchorRow"
+    }
+}
+
+private class GlassPopupAnchorRowNode(
+    private var anchor: GlassPopupAnchor,
+) : Modifier.Node(),
+    GlobalPositionAwareModifierNode {
+    private var lastCoordinates: LayoutCoordinates? = null
+
+    fun update(anchor: GlassPopupAnchor) {
+        if (this.anchor !== anchor) {
+            this.anchor.clearContainerCoordinates(lastCoordinates)
+            this.anchor = anchor
+            lastCoordinates?.takeIf { it.isAttached }?.let { anchor.updateContainerCoordinates(it) }
+        }
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        lastCoordinates = coordinates
+        anchor.updateContainerCoordinates(coordinates)
+    }
+
+    override fun onDetach() {
+        anchor.clearContainerCoordinates(lastCoordinates)
+        lastCoordinates = null
+    }
+}
+
+private data class GlassPopupAnchorValueElement(
+    val anchor: GlassPopupAnchor,
+    val trackBounds: Boolean,
+) : ModifierNodeElement<GlassPopupAnchorValueNode>() {
+    override fun create(): GlassPopupAnchorValueNode = GlassPopupAnchorValueNode(anchor, trackBounds)
+
+    override fun update(node: GlassPopupAnchorValueNode) {
+        node.update(anchor, trackBounds)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassPopupAnchorValue"
+        properties["trackBounds"] = trackBounds
+    }
+}
+
+private class GlassPopupAnchorValueNode(
+    private var anchor: GlassPopupAnchor,
+    private var trackBounds: Boolean,
+) : Modifier.Node(),
+    LayoutModifierNode,
+    GlobalPositionAwareModifierNode {
+    private var lastCoordinates: LayoutCoordinates? = null
+
+    fun update(anchor: GlassPopupAnchor, trackBounds: Boolean) {
+        if (this.anchor !== anchor) {
+            this.anchor.clearDropdownValueCoordinates(lastCoordinates)
+            this.anchor = anchor
+        }
+        val wasTracking = this.trackBounds
+        this.trackBounds = trackBounds
+        if (trackBounds) {
+            lastCoordinates?.takeIf { it.isAttached }?.let { anchor.updateDropdownValueCoordinates(it) }
+        } else if (wasTracking) {
+            anchor.freezeDropdownValueBounds()
+        }
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        lastCoordinates = coordinates
+        if (trackBounds) {
+            anchor.updateDropdownValueCoordinates(coordinates)
+        }
+    }
+
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) {
+            placeable.placeWithLayer(0, 0) {
+                alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
+            }
+        }
+    }
+
+    override fun onDetach() {
+        anchor.clearDropdownValueCoordinates(lastCoordinates)
+        lastCoordinates = null
+    }
+}
 
 /**
  * Remembers a [GlassPopupAnchor] and its value fade, which must continue after the popup exits.
@@ -151,14 +452,7 @@ fun Modifier.glassPopupAnchor(
     anchor: GlassPopupAnchor,
     cornerRadius: Dp,
     floating: Boolean = false,
-): Modifier = this
-    .then(GlassPopupAnchorElement(anchor))
-    .onGloballyPositioned {
-        anchor.containerBounds = it.boundsInWindow()
-        anchor.cornerRadius = cornerRadius
-        anchor.floating = floating
-    }
-    .graphicsLayer { alpha = if (anchor.contentHidden) 0f else 1f }
+): Modifier = this.then(GlassPopupAnchorElement(anchor, cornerRadius, floating))
 
 /**
  * Identifies the content copied during a popup transition.
@@ -169,7 +463,7 @@ fun Modifier.glassPopupAnchor(
  * @param anchor Popup anchor.
  */
 @Stable
-fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.contentBounds = it.boundsInWindow() }
+fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.then(GlassPopupAnchorContentElement(anchor))
 
 /**
  * Reports row bounds for a [GlassDropdownPopup] without hiding the row.
@@ -177,7 +471,7 @@ fun Modifier.glassPopupAnchorContent(anchor: GlassPopupAnchor): Modifier = this.
  * @param anchor The anchor to report to.
  */
 @Stable
-fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGloballyPositioned { anchor.containerBounds = it.boundsInWindow() }
+fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.then(GlassPopupAnchorRowElement(anchor))
 
 /**
  * Anchors the dropdown to the selected value and fades that value while the popup is open.
@@ -189,17 +483,7 @@ fun Modifier.glassPopupAnchorRow(anchor: GlassPopupAnchor): Modifier = this.onGl
 fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor): Modifier = glassPopupAnchorValue(anchor, trackBounds = true)
 
 @Stable
-internal fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor, trackBounds: Boolean): Modifier {
-    val positioned = if (trackBounds) {
-        onGloballyPositioned { anchor.dropdownValueBounds = it.boundsInWindow() }
-    } else {
-        this
-    }
-    // The value can still fade after bounds tracking stops.
-    return positioned.graphicsLayer {
-        alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
-    }
-}
+internal fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor, trackBounds: Boolean): Modifier = this.then(GlassPopupAnchorValueElement(anchor, trackBounds))
 
 /**
  * A glass menu that expands from an anchored control with a content crossfade.
