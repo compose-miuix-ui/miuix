@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.layout.DialogContentLayout
 import top.yukonga.miuix.kmp.layout.DialogDefaults
+import top.yukonga.miuix.kmp.layout.DialogMotion
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
 import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
@@ -48,6 +49,7 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  * @param cornerRadius Optional corner radius override. If null, [DialogDefaults.CornerRadius]
  *   for the centered presentation, or derived from the screen corner radius (clamped to
  *   32dp..48dp) when bottom-attached.
+ * @param motion The enter and exit motion. See [DialogMotion].
  * @param content The [Composable] content of the [WindowDialog].
  */
 @Composable
@@ -68,6 +70,7 @@ fun WindowDialog(
     maxWidth: Dp = DialogDefaults.MaxWidth,
     largeScreen: Boolean? = null,
     cornerRadius: Dp? = null,
+    motion: DialogMotion = DialogMotion.Default,
     content: @Composable () -> Unit,
 ) {
     val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -110,6 +113,7 @@ fun WindowDialog(
         maxWidth = maxWidth,
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
+        motion = motion,
         content = {
             CompositionLocalProvider(
                 LocalDismissState provides {
