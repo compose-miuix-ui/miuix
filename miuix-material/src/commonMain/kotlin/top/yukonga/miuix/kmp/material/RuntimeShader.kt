@@ -139,3 +139,9 @@ expect fun RuntimeShader.asComposeShader(): Shader
  * is created on every call to ensure uniform updates are visible.
  */
 expect fun RuntimeShader.asBrush(): ShaderBrush
+
+/**
+ * Whether [RuntimeShader.asBrush] produces an immutable [ShaderBrush] snapshot that can be safely
+ * cached across draws (`true` on Skiko, `false` on Android where the underlying shader is mutable).
+ */
+expect fun isRuntimeShaderBrushImmutable(): Boolean

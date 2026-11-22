@@ -191,15 +191,22 @@ Box(
 
 ### 倾斜光
 
-`rememberTiltLight(base, sensitivity)` 返回一个 UV 位置跟随设备旋转传感器的 `EdgeLightSource`，形成随设备方向"流动"的边缘视差。无传感器的平台上，光固定在 `base`。
+`rememberTiltLightState(base, sensitivity)` 返回一个 `State<EdgeLightSource>`，其 UV 位置跟随设备旋转传感器，并将状态读取延迟到绘制阶段（避免 50Hz 传感器采样触发持续重组），形成随设备方向"流动"的边缘视差。无传感器的平台上，光固定在 `base`。（若需要在组合阶段直接读取值，可使用 `rememberTiltLight`。）
 
 ```kotlin
 import top.yukonga.miuix.kmp.material.EdgeLightSource
-import top.yukonga.miuix.kmp.material.rememberTiltLight
+import top.yukonga.miuix.kmp.material.EdgeStrokes
+import top.yukonga.miuix.kmp.material.edgeStroke
+import top.yukonga.miuix.kmp.material.rememberTiltLightState
 
-val primary = rememberTiltLight(
+val primaryLight by rememberTiltLightState(
     base = EdgeLightSource(0.5f, 0.5f, -0.5f, intensity = 0.4f),
     sensitivity = 0.1f, // 每弧度倾斜对应的 UV 偏移
+)
+
+Modifier.edgeStroke(
+    shape = shape,
+    stroke = { EdgeStrokes.MiddleLight.copy(primary = primaryLight) },
 )
 ```
 

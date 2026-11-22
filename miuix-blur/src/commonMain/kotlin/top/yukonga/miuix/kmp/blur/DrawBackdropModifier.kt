@@ -166,6 +166,12 @@ interface BackdropPipeline {
 
     /** Optional progressive gradient for multi-level composite rendering. */
     val progressiveGradient: ProgressiveBlur? get() = null
+
+    /**
+     * Whether [other] produces identical backdrop effects (blur, colour blend, shading), differing
+     * only in foreground drawing ([drawFront]). When true, updates skip rebuilding effects.
+     */
+    fun hasSameBackdropEffects(other: BackdropPipeline): Boolean = this == other
 }
 
 /** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
@@ -211,7 +217,9 @@ private class BackdropPipelineElement(
 
     override fun update(node: DrawBackdropNode) {
         val enabledChanged = node.enabled != enabled
-        val pipelineChanged = node.pipelineRef != pipeline
+        val oldPipeline = node.pipelineRef
+        val pipelineChanged = oldPipeline != pipeline
+        val effectsChanged = oldPipeline == null || !oldPipeline.hasSameBackdropEffects(pipeline)
         val blendChanged = node.contentBlendMode != contentBlendMode
         node.backdrop = backdrop
         if (pipelineChanged) {
@@ -230,7 +238,7 @@ private class BackdropPipelineElement(
             node.requestDraw()
             return
         }
-        if (pipelineChanged || enabledChanged) {
+        if (effectsChanged || enabledChanged) {
             node.invalidateDrawCache()
         } else if (blendChanged) {
             node.requestDraw()

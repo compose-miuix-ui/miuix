@@ -21,6 +21,14 @@ fun DrawScope.drawEdgeStroke(
     shape: Shape,
     stroke: EdgeStroke,
     alpha: Float = 1f,
+) = drawEdgeStroke(shape, stroke, alpha, brushCache = null)
+
+/** Cached overload of [drawEdgeStroke] reusing immutable Skiko [ShaderBrush] instances via [brushCache]. */
+fun DrawScope.drawEdgeStroke(
+    shape: Shape,
+    stroke: EdgeStroke,
+    alpha: Float,
+    brushCache: ShaderBrushCache?,
 ) {
     if (stroke.width.value <= 0f || alpha <= 0f) return
     if (shape is CutCornerShape) return
@@ -30,5 +38,6 @@ fun DrawScope.drawEdgeStroke(
         smoothing = (shape as? GlassShape)?.smoothing ?: 0f,
         stroke = stroke,
         alpha = alpha,
+        brushCache = brushCache,
     )
 }

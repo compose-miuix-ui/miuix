@@ -126,6 +126,23 @@ fun BackdropEffectScope.runtimeShaderEffect(
     renderEffect = renderEffect.chain(effect)
 }
 
+/**
+ * Builds a standalone [RenderEffect] from [key] / [shaderString] without chaining it onto
+ * [BackdropEffectScope.renderEffect], or returns `null` when runtime shaders are unsupported.
+ */
+fun BackdropEffectScope.buildRuntimeShaderEffect(
+    key: String,
+    shaderString: String,
+    uniformShaderName: String,
+    block: RuntimeShader.() -> Unit,
+): RenderEffect? {
+    if (!isRuntimeShaderSupported()) return null
+    return createRuntimeShaderEffect(
+        runtimeShader = obtainRuntimeShader(key, shaderString).apply(block),
+        uniformShaderName = uniformShaderName,
+    )
+}
+
 internal abstract class BackdropEffectScopeImpl :
     BackdropEffectScope,
     RuntimeShaderCache {
