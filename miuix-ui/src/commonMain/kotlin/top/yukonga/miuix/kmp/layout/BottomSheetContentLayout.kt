@@ -35,6 +35,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -953,12 +954,14 @@ object BottomSheetDefaults {
      * The default background color of the bottom sheet.
      */
     @Composable
+    @ReadOnlyComposable
     fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**
      * The default color of the drag handle.
      */
     @Composable
+    @ReadOnlyComposable
     fun dragHandleColor() = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f)
 
     /**

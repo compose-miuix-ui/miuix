@@ -22,12 +22,13 @@ import kotlin.jvm.JvmInline
  * @param saturation Saturation multiplier; 1 means no change.
  */
 @Immutable
-data class BlurColors(
-    val blendColors: List<BlendColorEntry> = emptyList(),
+class BlurColors(
+    blendColors: List<BlendColorEntry> = emptyList(),
     val brightness: Float = 0f,
     val contrast: Float = 1f,
     val saturation: Float = 1f,
-)
+) {
+    val blendColors: List<BlendColorEntry> = if (blendColors.isEmpty()) emptyList() else blendColors.toList()
 
 /**
  * One color blend entry over the blurred backdrop: standard SkBlendMode values (0-29, GPU hardware)

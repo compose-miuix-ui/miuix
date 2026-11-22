@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -520,6 +521,7 @@ object DialogDefaults {
      * compact -> expanded boundary (840 dp width / 480 dp height).
      */
     @Composable
+    @ReadOnlyComposable
     internal fun isLargeScreen(): Boolean {
         val windowInfo = LocalWindowInfo.current
         val windowWidth = windowInfo.containerDpSize.width
@@ -531,18 +533,21 @@ object DialogDefaults {
      * The default color of the title.
      */
     @Composable
+    @ReadOnlyComposable
     fun titleColor() = MiuixTheme.colorScheme.onBackground
 
     /**
      * The default color of the summary.
      */
     @Composable
+    @ReadOnlyComposable
     fun summaryColor() = MiuixTheme.colorScheme.onSurfaceSecondary
 
     /**
      * The default background color of the dialog.
      */
     @Composable
+    @ReadOnlyComposable
     fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**

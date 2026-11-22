@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ class WindowComponentFrame(
 val LocalWindowComponentFrame = compositionLocalOf<WindowComponentFrame?> { null }
 
 @Composable
+@ReadOnlyComposable
 internal fun windowComponentBounds(): IntRect? {
     val insets = LocalWindowComponentFrame.current?.insets ?: return null
     val density = LocalDensity.current
