@@ -58,17 +58,22 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
@@ -683,12 +688,12 @@ private fun BottomSheetColumn(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - topInset)
-                .onGloballyPositioned { coordinates ->
+                .onSizeChanged { size ->
                     // Only capture the natural sheet height while the IME is closed; otherwise the
                     // bottom inset added by imePadding would inflate sheetHeightPx, shifting the
                     // dim threshold and causing translationY jumps mid-animation.
                     if (imeInsets.getBottom(density) == 0) {
-                        sheetHeightPx.intValue = coordinates.size.height
+                        sheetHeightPx.intValue = size.height
                     }
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
@@ -741,15 +746,24 @@ private fun BoxScope.OverscrollBackground(
     backgroundColor: Color,
     surface: (@Composable () -> Modifier)? = null,
 ) {
-    val density = LocalDensity.current
-    val overscrollOffsetPx by remember { computedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
-    if (overscrollOffsetPx > 0f) {
+    val isOverscrolling by remember(dragOffsetY) { computedStateOf { dragOffsetY.value < 0f } }
+    if (isOverscrolling) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
-                .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
+                .layout { measurable, constraints ->
+                    val heightPx = constraints.constrainHeight(
+                        ((-dragOffsetY.value).coerceAtLeast(0f) + 1.dp.toPx()).fastRoundToInt(),
+                    )
+                    val placeable = measurable.measure(
+                        constraints.copy(minHeight = heightPx, maxHeight = heightPx),
+                    )
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .padding(horizontal = outsideMargin.width)
                 .then(surface?.invoke() ?: Modifier.background(backgroundColor)),
         )
@@ -846,8 +860,14 @@ private fun DragHandleArea(
     ) {
         Box(
             modifier = Modifier
-                .width(pressWidth.value.dp)
-                .height(4.dp)
+                .layout { measurable, constraints ->
+                    val widthPx = constraints.constrainWidth(pressWidth.value.dp.roundToPx())
+                    val heightPx = constraints.constrainHeight(4.dp.roundToPx())
+                    val placeable = measurable.measure(Constraints.fixed(widthPx, heightPx))
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .graphicsLayer {
                     scaleY = pressScale.value
                 }

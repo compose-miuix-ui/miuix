@@ -63,6 +63,8 @@ import kotlin.math.absoluteValue
 private val ThumbStart = 4.dp
 private val ThumbTravel = 21.dp
 private val ThumbPositionSpring = folmeSpring(damping = 0.6f, response = 0.346f, visibilityThreshold = 0.001f)
+private val ThumbScaleSpring = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+private val TrackColorSpring = spring<Color>(dampingRatio = 0.99f, stiffness = 438.6f)
 
 /**
  * A [Switch] component with Miuix style.
@@ -100,7 +102,6 @@ fun Switch(
     val travelPx = with(LocalDensity.current) { ThumbTravel.toPx() }
 
     val capsuleShape = CircleShape
-    val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
 
     val thumbPosition = remember { Animatable(if (checked) 1f else 0f) }
     LaunchedEffect(checked, isDragging, canDrag, completedDrags) {
@@ -149,7 +150,7 @@ fun Switch(
         } else {
             1f
         },
-        animationSpec = thumbScaleSpringSpec,
+        animationSpec = ThumbScaleSpring,
     )
 
     val thumbColorState = animateColorAsState(
@@ -158,7 +159,7 @@ fun Switch(
 
     val backgroundColorState = animateColorAsState(
         if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
-        animationSpec = spring(dampingRatio = 0.99f, stiffness = 438.6f),
+        animationSpec = TrackColorSpring,
     )
 
     val toggleableModifier = if (hasCallback) {
