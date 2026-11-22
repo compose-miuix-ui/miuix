@@ -88,13 +88,9 @@ internal fun buildProgressiveBlurShader(
     inlineNoise: Boolean = false,
 ): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
-    val maxCoordUniform = if (sharpBand) {
-        """
+    val maxCoordUniform = """
     uniform float2 in_maxCoord;
 """
-    } else {
-        ""
-    }
     val curveUniform = if (curveKind == 3) {
         """
     uniform float in_curve;
@@ -140,12 +136,10 @@ internal fun buildProgressiveBlurShader(
         """
         float radius = in_maxRadius * (1.0 - smoothRaw);"""
     }
-    val centerCoord = if (sharpBand) "clamp(xy, float2(0.5), in_maxCoord)" else "xy"
-    fun axisSampleCoord(sign: String): String = when {
-        axis == 0 && sharpBand -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
-        axis == 0 -> "float2(xy.x $sign o, xy.y)"
-        sharpBand -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
-        else -> "float2(xy.x, xy.y $sign o)"
+    val centerCoord = "clamp(xy, float2(0.5), in_maxCoord)"
+    fun axisSampleCoord(sign: String): String = when (axis) {
+        0 -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
+        else -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
     }
     val tintUniform = if (inlineTint) "\n    uniform float4 in_tintColor;" else ""
     val noiseUniform = if (inlineNoise) "\n    uniform float noise_coeff;" else ""

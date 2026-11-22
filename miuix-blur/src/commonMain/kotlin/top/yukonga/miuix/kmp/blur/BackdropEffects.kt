@@ -233,6 +233,8 @@ internal fun obtainProgressiveBlurEffect(
         adjustedVarianceForExp(sigmaY * sigmaY, exp),
         padLeft,
         padTop,
+        padRight,
+        padBottom,
         compW,
         compH,
         gradient.angle,

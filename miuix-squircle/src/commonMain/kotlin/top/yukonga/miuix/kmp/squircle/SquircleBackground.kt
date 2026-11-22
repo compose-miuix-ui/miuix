@@ -605,9 +605,9 @@ private class SquircleShaderHolder(
 
 private const val SQUIRCLE_SHADER_KEY = "SquircleBackground"
 
-// Max node dimension composited in one offscreen layer. 2048 px is the texture-size floor guaranteed
-// by GL ES 3.0 / WebGL2 / Metal, so it never overflows the GPU max texture; larger nodes go banded.
-private const val MAX_OFFSCREEN_PX = 2048f
+// Max node dimension composited in one offscreen layer. 4096 px is well within GPU max texture
+// limits on RuntimeShader-capable targets and avoids banded saveLayer clipping on tall cards.
+private const val MAX_OFFSCREEN_PX = 4096f
 
 // π/4 — squircle → circle blend threshold. Above this ratio of cornerSize / halfMin the SDF result
 // is mixed with a pure circle SDF so capsule / pill / circle silhouettes degrade cleanly.
