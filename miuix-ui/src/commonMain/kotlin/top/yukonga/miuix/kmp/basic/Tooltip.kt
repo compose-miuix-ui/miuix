@@ -250,7 +250,7 @@ fun rememberTooltipState(
  * tween would discard that velocity and produce a stall-and-reverse hitch.
  */
 private val TooltipExitScaleSpec: FiniteAnimationSpec<Float> =
-    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.0001f)
+    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.001f)
 
 /**
  * A tooltip box that anchors a [tooltip] (a [PlainTooltip] or [RichTooltip]) to its [content].

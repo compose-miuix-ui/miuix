@@ -44,7 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -60,6 +60,7 @@ import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
@@ -136,6 +137,7 @@ internal fun DialogContentLayout(
     val internalVisible = remember { mutableStateOf(false) }
     // Whether the last opening animation ran to rest; a close before that is an interruption.
     val enterSettled = remember { mutableStateOf(false) }
+    val blockTouches = remember { mutableStateOf(false) }
 
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
@@ -149,6 +151,7 @@ internal fun DialogContentLayout(
         val motionAtStart = currentMotion
         if (show) {
             internalVisible.value = true
+            blockTouches.value = true
             enterSettled.value = false
             if (enableWindowDim) {
                 launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
@@ -175,6 +178,16 @@ internal fun DialogContentLayout(
                 null
             }
             val exitSpec = motionAtStart.exitSpec(interrupted = !enterSettled.value)
+            val touchReleaseJob = launch {
+                snapshotFlow {
+                    if (largeAtStart && motionAtStart.isGlass) {
+                        alphaProgress.value <= 0.33f
+                    } else {
+                        animationProgress.value <= 0.02f
+                    }
+                }.first { it }
+                blockTouches.value = false
+            }
             coroutineScope {
                 when {
                     // The glass panel fades out at its current size.
@@ -188,6 +201,8 @@ internal fun DialogContentLayout(
                     else -> animationProgress.animateTo(0f, exitSpec)
                 }
             }
+            touchReleaseJob.cancel()
+            blockTouches.value = false
             dimJob?.cancel()
             dimProgress.snapTo(0f)
             animationProgress.snapTo(0f)
@@ -282,6 +297,7 @@ internal fun DialogContentLayout(
         }
 
         DialogContent(
+            show = blockTouches.value,
             title = title,
             titleColor = titleColor,
             summary = summary,
@@ -318,6 +334,7 @@ internal fun DialogContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root", "ktlint:compose:state-param-check")
 @Composable
 internal fun DialogContent(
+    show: Boolean,
     title: String?,
     titleColor: Color,
     summary: String?,
@@ -375,19 +392,15 @@ internal fun DialogContent(
         maxOf(statusBars, captionBar, displayCutout)
     }
 
-    // Slide distance and predictive-back translation pad (small-screen only). Pre-converted to px so the per-frame
-    // graphicsLayer block does not call asPaddingValues() / toPx() each invalidation.
-    val bottomPadding = if (isLargeScreen) {
-        0.dp
-    } else {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
-    }
-    val extraBottomPaddingPx = remember(density, bottomPadding, outsideMargin.height, isLargeScreen) {
-        if (isLargeScreen) 0f else with(density) { (bottomPadding + outsideMargin.height).toPx() }
+    // Slide distance and predictive-back translation pad (small-screen only). Pre-converted to px
+    // so the per-frame graphicsLayer block does not call toPx() each invalidation.
+    val outsideMarginBottomPx = remember(density, outsideMargin.height, isLargeScreen) {
+        if (isLargeScreen) 0f else with(density) { outsideMargin.height.toPx() }
     }
 
     val imeInsets = WindowInsets.ime
+    val navBarInsets = WindowInsets.navigationBars
+    val captionBarInsets = WindowInsets.captionBar
     val contentModifier = Modifier
         .graphicsLayer {
             // Apply the open/close and predictive back animations; branch inside the block so the
@@ -402,8 +415,15 @@ internal fun DialogContent(
             } else {
                 // Rest the panel just below the screen edge when hidden, as the platform dialog
                 // does: its own height plus the margin and insets beneath it, keyboard included.
-                val imeBottom = if (defaultWindowInsetsPadding) imeInsets.getBottom(this) else 0
-                val offScreen = size.height + extraBottomPaddingPx + imeBottom
+                val insetBottom = if (defaultWindowInsetsPadding) {
+                    maxOf(
+                        imeInsets.getBottom(this),
+                        navBarInsets.getBottom(this) + captionBarInsets.getBottom(this),
+                    )
+                } else {
+                    0
+                }
+                val offScreen = size.height + outsideMarginBottomPx + insetBottom
                 translationY = (1f - animationProgress.value) * offScreen + backProgress.value * offScreen
                 alpha = 1f
             }
@@ -411,13 +431,19 @@ internal fun DialogContent(
         .then(modifier)
         .widthIn(max = maxWidth)
         .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
-        .onGloballyPositioned { coordinates ->
-            dialogHeightPx.intValue = coordinates.size.height
-            dialogWidthPx.intValue = coordinates.size.width
+        .onSizeChanged { size ->
+            dialogHeightPx.intValue = size.height
+            dialogWidthPx.intValue = size.width
         }
-        .pointerInput(Unit) {
-            detectTapGestures { /* Consume click */ }
-        }
+        .then(
+            if (show) {
+                Modifier.pointerInput(Unit) {
+                    detectTapGestures { /* Consume click */ }
+                }
+            } else {
+                Modifier
+            },
+        )
         .then(surfaceModifier)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
@@ -434,17 +460,24 @@ internal fun DialogContent(
                 },
             )
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { currentOnDismiss?.invoke() },
-                )
-            }
-            .semantics {
-                onClick(label = "Dismiss") {
-                    currentOnDismiss?.invoke()
-                    true
-                }
-            }
+            .then(
+                if (show) {
+                    Modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { currentOnDismiss?.invoke() },
+                            )
+                        }
+                        .semantics {
+                            onClick(label = "Dismiss") {
+                                currentOnDismiss?.invoke()
+                                true
+                            }
+                        }
+                } else {
+                    Modifier
+                },
+            )
             .padding(horizontal = outsideMargin.width)
             .padding(top = calculatedTopInset, bottom = outsideMargin.height),
     ) {

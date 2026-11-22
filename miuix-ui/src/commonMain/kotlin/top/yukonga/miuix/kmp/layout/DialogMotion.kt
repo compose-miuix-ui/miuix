@@ -50,7 +50,7 @@ class DialogMotion private constructor(
 }
 
 /** Visibility threshold for the 0..1 progress values the dialog animates. */
-internal const val DIALOG_PROGRESS_THRESHOLD = 0.0001f
+internal const val DIALOG_PROGRESS_THRESHOLD = 0.001f
 
 // The launcher drives its dialog off a 723 ms route; its fades are fractions of that route.
 private const val GLASS_ROUTE_MILLIS = 723
