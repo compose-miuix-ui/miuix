@@ -324,13 +324,11 @@ private fun AboutContent(
                                 Modifier
                                     .fillMaxWidth()
                                     .layout { measurable, constraints ->
-                                        val extraPx = (
-                                            52.dp +
-                                                logoPadding.calculateTopPadding() -
-                                                scrollPadding.calculateTopPadding() +
-                                                126.dp
-                                            ).roundToPx().coerceAtLeast(0)
-                                        val totalHeight = (logoHeightPx.intValue + extraPx).coerceAtLeast(0)
+                                        val totalHeight = (
+                                            logoHeightPx.intValue -
+                                                scrollPadding.calculateTopPadding().roundToPx() +
+                                                126.dp.roundToPx()
+                                            ).coerceAtLeast(0)
                                         val placeable = measurable.measure(
                                             constraints.copy(minHeight = totalHeight, maxHeight = totalHeight),
                                         )
