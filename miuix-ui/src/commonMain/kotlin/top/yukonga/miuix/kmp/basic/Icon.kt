@@ -174,19 +174,30 @@ fun Icon(
     contentDescription: String?,
     modifier: Modifier = Modifier,
 ) {
+    val tintedModifier = if (tint == null) {
+        modifier
+    } else {
+        modifier.drawWithCache {
+            val layer = obtainGraphicsLayer()
+            layer.record { drawContent() }
+            var hasEvaluated = false
+            var lastTint = Color.Unspecified
+            onDrawWithContent {
+                val currentTint = tint()
+                if (!hasEvaluated || currentTint != lastTint) {
+                    hasEvaluated = true
+                    lastTint = currentTint
+                    layer.colorFilter = if (currentTint == Color.Unspecified) null else ColorFilter.tint(currentTint)
+                }
+                drawLayer(graphicsLayer = layer)
+            }
+        }
+    }
     Icon(
         painter = painter,
         tint = Color.Unspecified,
         contentDescription = contentDescription,
-        modifier =
-        modifier.drawWithCache {
-            val layer = obtainGraphicsLayer()
-            layer.apply {
-                record { drawContent() }
-                tint?.let { this@apply.colorFilter = ColorFilter.tint(it()) }
-            }
-            onDrawWithContent { drawLayer(graphicsLayer = layer) }
-        },
+        modifier = tintedModifier,
     )
 }
 
