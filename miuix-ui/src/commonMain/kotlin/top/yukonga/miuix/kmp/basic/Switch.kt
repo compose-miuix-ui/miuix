@@ -7,8 +7,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -36,7 +40,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -84,12 +88,16 @@ fun Switch(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val currentHapticFeedback by rememberUpdatedState(LocalHapticFeedback.current)
-    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val hasCallback = onCheckedChange != null
     val canDrag = enabled && hasCallback
     var isDragging by remember { mutableStateOf(false) }
     var dragPosition by remember { mutableFloatStateOf(Float.NaN) }
     var completedDrags by remember { mutableIntStateOf(0) }
+    var startPosition by remember { mutableFloatStateOf(0f) }
+    var rawPosition by remember { mutableFloatStateOf(0f) }
+    var lastHaptic by remember { mutableStateOf<Boolean?>(null) }
+    val travelPx = with(LocalDensity.current) { ThumbTravel.toPx() }
 
     val capsuleShape = CircleShape
     val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
@@ -102,6 +110,35 @@ fun Switch(
             dragPosition = Float.NaN
         }
         thumbPosition.animateTo(if (checked) 1f else 0f, ThumbPositionSpring)
+    }
+    val finishDrag by rememberUpdatedState<(Boolean) -> Unit> { released ->
+        if (isDragging) {
+            val position = dragPosition
+            isDragging = false
+            completedDrags++
+            if (released && canDrag) {
+                val target = position >= 0.5f
+                if (target != currentChecked) currentOnCheckedChange?.invoke(target)
+                if (lastHaptic != target && (position - startPosition).absoluteValue >= 1f / ThumbTravel.value) {
+                    currentHapticFeedback.performHapticFeedback(if (target) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+                }
+            }
+        }
+    }
+    val dragInteractionSource = remember(interactionSource) {
+        SwitchDragInteractionSource(interactionSource) { released -> finishDrag(released) }
+    }
+    val draggableState = rememberDraggableState { amount ->
+        if (isDragging) {
+            rawPosition += amount / travelPx
+            val previousPosition = dragPosition
+            dragPosition = rawPosition.fastCoerceIn(0f, 1f)
+            if (dragPosition != previousPosition && (dragPosition == 0f || dragPosition == 1f)) {
+                val reachedOn = dragPosition == 1f
+                currentHapticFeedback.performHapticFeedback(if (reachedOn) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+                lastHaptic = reachedOn
+            }
+        }
     }
 
     val thumbScaleState = animateFloatAsState(
@@ -170,56 +207,18 @@ fun Switch(
                     val position = if (dragPosition.isNaN()) thumbPosition.value else dragPosition
                     IntOffset((ThumbStart.toPx() + position * ThumbTravel.toPx()).fastRoundToInt(), 0)
                 }
-                .then(
-                    if (canDrag) {
-                        Modifier.pointerInput(direction) {
-                            val travelPx = ThumbTravel.toPx()
-                            var startPosition = 0f
-                            var rawPosition = 0f
-                            var lastHaptic: Boolean? = null
-
-                            fun finishDrag() {
-                                if (isDragging) {
-                                    isDragging = false
-                                    completedDrags++
-                                }
-                            }
-
-                            try {
-                                detectHorizontalDragGestures(
-                                    onDragStart = {
-                                        startPosition = (if (dragPosition.isNaN()) thumbPosition.value else dragPosition).fastCoerceIn(0f, 1f)
-                                        rawPosition = startPosition
-                                        dragPosition = startPosition
-                                        lastHaptic = null
-                                        isDragging = true
-                                    },
-                                    onHorizontalDrag = { _, amount ->
-                                        rawPosition += direction * amount / travelPx
-                                        val previousPosition = dragPosition
-                                        dragPosition = rawPosition.fastCoerceIn(0f, 1f)
-                                        if (dragPosition != previousPosition && (dragPosition == 0f || dragPosition == 1f)) {
-                                            val reachedOn = dragPosition == 1f
-                                            currentHapticFeedback.performHapticFeedback(if (reachedOn) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
-                                            lastHaptic = reachedOn
-                                        }
-                                    },
-                                    onDragEnd = {
-                                        val target = dragPosition >= 0.5f
-                                        if (target != currentChecked) currentOnCheckedChange?.invoke(target)
-                                        if (lastHaptic != target && (dragPosition - startPosition).absoluteValue >= 1.dp.toPx() / travelPx) {
-                                            currentHapticFeedback.performHapticFeedback(if (target) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
-                                        }
-                                        finishDrag()
-                                    },
-                                    onDragCancel = ::finishDrag,
-                                )
-                            } finally {
-                                finishDrag()
-                            }
-                        }
-                    } else {
-                        Modifier
+                .draggable(
+                    state = draggableState,
+                    orientation = Orientation.Horizontal,
+                    enabled = canDrag,
+                    interactionSource = dragInteractionSource,
+                    reverseDirection = isRtl,
+                    onDragStarted = {
+                        startPosition = (if (dragPosition.isNaN()) thumbPosition.value else dragPosition).fastCoerceIn(0f, 1f)
+                        rawPosition = startPosition
+                        dragPosition = startPosition
+                        lastHaptic = null
+                        isDragging = true
                     },
                 )
                 .graphicsLayer {
@@ -230,6 +229,29 @@ fun Switch(
                     drawCircle(color = thumbColorState.value)
                 },
         )
+    }
+}
+
+// Draggable calls onDragStopped for both release and cancellation. Its interactions carry the outcome.
+private class SwitchDragInteractionSource(
+    private val source: MutableInteractionSource,
+    private val finishDrag: (Boolean) -> Unit,
+) : MutableInteractionSource by source {
+    override suspend fun emit(interaction: Interaction) {
+        onDragInteraction(interaction)
+        source.emit(interaction)
+    }
+
+    override fun tryEmit(interaction: Interaction): Boolean {
+        onDragInteraction(interaction)
+        return source.tryEmit(interaction)
+    }
+
+    private fun onDragInteraction(interaction: Interaction) {
+        when (interaction) {
+            is DragInteraction.Stop -> finishDrag(true)
+            is DragInteraction.Cancel -> finishDrag(false)
+        }
     }
 }
 
