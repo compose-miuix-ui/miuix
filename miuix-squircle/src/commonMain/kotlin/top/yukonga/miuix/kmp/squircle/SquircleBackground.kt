@@ -10,25 +10,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
-import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
-import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -40,8 +36,6 @@ import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
 import top.yukonga.miuix.kmp.squircle.internal.isShaderBrushImmutable
 import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
 import top.yukonga.miuix.kmp.squircle.internal.makeLinearShader
-import kotlin.math.ceil
-import kotlin.math.floor
 
 /**
  * Squircle solid background — fill-only, descendants are NOT clipped.
@@ -392,8 +386,9 @@ private class SquircleShaderMaskNode(
     DrawModifierNode {
 
     private val shaderHolder = SquircleShaderHolder(cornerTilesPx, shaderCache)
-    private var layerPaint: Paint? = null
-    private var contentLayer: GraphicsLayer? = null
+    private var clipPath: Path? = null
+    private var cachedPathSize: Size = Size.Unspecified
+    private var cachedPathTiles: FloatArray? = null
 
     fun updateParams(cornerTilesPx: FloatArray, fillColor: Color?, shaderCache: RuntimeShaderCache) {
         val tilesChanged = shaderHolder.cornerTilesPx !== cornerTilesPx &&
@@ -403,6 +398,9 @@ private class SquircleShaderMaskNode(
             this.fillColor = fillColor
             shaderHolder.cornerTilesPx = cornerTilesPx
             shaderHolder.shaderCache = shaderCache
+            if (tilesChanged) {
+                cachedPathSize = Size.Unspecified
+            }
             if (tilesChanged || cacheChanged) {
                 shaderHolder.invalidateCache()
             }
@@ -416,23 +414,63 @@ private class SquircleShaderMaskNode(
             return
         }
         if (maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX) {
-            contentLayer?.let {
-                requireGraphicsContext().releaseGraphicsLayer(it)
-                contentLayer = null
-            }
+            clipPath = null
+            cachedPathSize = Size.Unspecified
             drawSquircleFast(shaderHolder, fillColor)
         } else {
-            val paint = layerPaint ?: Paint().also { layerPaint = it }
-            val layer = contentLayer ?: requireGraphicsContext().createGraphicsLayer().also { contentLayer = it }
-            layer.record { this@draw.drawContent() }
-            drawSquircleBanded(shaderHolder, fillColor, paint, layer)
+            val path = obtainOversizeClipPath(size)
+            val fill = fillColor
+            clipPath(path) {
+                if (fill != null) drawRect(fill)
+                this@draw.drawContent()
+            }
         }
     }
 
+    private fun obtainOversizeClipPath(size: Size): Path {
+        val existing = clipPath
+        if (existing != null && cachedPathSize == size && cachedPathTiles === shaderHolder.cornerTilesPx) {
+            return existing
+        }
+        val path = (existing ?: Path().also { clipPath = it }).apply { rewind() }
+        val w = size.width
+        val h = size.height
+        val tl = shaderHolder.effectiveCornerPx(0, size)
+        val tr = shaderHolder.effectiveCornerPx(1, size)
+        val br = shaderHolder.effectiveCornerPx(2, size)
+        val bl = shaderHolder.effectiveCornerPx(3, size)
+        val handleFactor = 1f - SQUIRCLE_CONTROL
+        path.moveTo(tl, 0f)
+        path.lineTo(w - tr, 0f)
+        if (tr > 0f) {
+            val hTr = tr * handleFactor
+            path.cubicTo(w - hTr, 0f, w, hTr, w, tr)
+        }
+        path.lineTo(w, h - br)
+        if (br > 0f) {
+            val hBr = br * handleFactor
+            path.cubicTo(w, h - hBr, w - hBr, h, w - br, h)
+        }
+        path.lineTo(bl, h)
+        if (bl > 0f) {
+            val hBl = bl * handleFactor
+            path.cubicTo(hBl, h, 0f, h - hBl, 0f, h - bl)
+        }
+        path.lineTo(0f, tl)
+        if (tl > 0f) {
+            val hTl = tl * handleFactor
+            path.cubicTo(0f, hTl, hTl, 0f, tl, 0f)
+        }
+        path.close()
+        cachedPathSize = size
+        cachedPathTiles = shaderHolder.cornerTilesPx
+        return path
+    }
+
     override fun onDetach() {
-        contentLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
-        contentLayer = null
-        layerPaint = null
+        clipPath = null
+        cachedPathSize = Size.Unspecified
+        cachedPathTiles = null
         shaderHolder.invalidateCache()
     }
 }
@@ -445,47 +483,6 @@ private fun ContentDrawScope.drawSquircleFast(
     if (fillColor != null) drawRect(fillColor)
     drawContent()
     maskSquircleCorners(holder, top = true, bottom = true)
-}
-
-// Oversize path: replay recorded content per corner band so no single offscreen exceeds the texture
-// max; the straight middle draws with no offscreen at all.
-private fun ContentDrawScope.drawSquircleBanded(
-    holder: SquircleShaderHolder,
-    fillColor: Color?,
-    layerPaint: Paint,
-    contentLayer: GraphicsLayer,
-) {
-    val width = size.width
-    val height = size.height
-    val canvas = drawContext.canvas
-    val topBand = holder.topBandHeightPx(size)
-    val bottomBand = holder.bottomBandHeightPx(size)
-
-    // One offscreen slice: fill + content + its corner pair(s). [clip] bounds a banded slice.
-    fun maskedBand(top: Float, bottom: Float, maskTop: Boolean, maskBottom: Boolean, clip: Boolean) {
-        canvas.saveLayer(Rect(0f, top, width, bottom), layerPaint)
-        if (clip) canvas.clipRect(0f, top, width, bottom)
-        if (fillColor != null) drawRect(fillColor)
-        drawLayer(contentLayer)
-        maskSquircleCorners(holder, top = maskTop, bottom = maskBottom)
-        canvas.restore()
-    }
-
-    // No straight middle: one offscreen for the whole (no-taller-than-wide) node.
-    if (height <= topBand + bottomBand) {
-        maskedBand(0f, height, maskTop = true, maskBottom = true, clip = false)
-        return
-    }
-
-    // Offscreen only the corner bands; replay the straight middle directly. Whole-pixel edges tile.
-    val midTop = ceil(topBand)
-    val midBottom = floor(height - bottomBand)
-    if (topBand > 0f) maskedBand(0f, midTop, maskTop = true, maskBottom = false, clip = true)
-    clipRect(top = midTop, bottom = midBottom) {
-        if (fillColor != null) drawRect(fillColor)
-        drawLayer(contentLayer)
-    }
-    if (bottomBand > 0f) maskedBand(midBottom, height, maskTop = false, maskBottom = true, clip = true)
 }
 
 // Carve the corner squares (the shader is opaque elsewhere). Must run inside an offscreen already
@@ -590,11 +587,6 @@ private class SquircleShaderHolder(
         }
         return brush
     }
-
-    // Corner index order: 0 = topStart/topLeft, 1 = topEnd/topRight, 2 = bottomEnd/bottomRight, 3 = bottomStart/bottomLeft.
-    fun topBandHeightPx(size: Size): Float = maxOf(effectiveCornerPx(0, size), effectiveCornerPx(1, size))
-
-    fun bottomBandHeightPx(size: Size): Float = maxOf(effectiveCornerPx(2, size), effectiveCornerPx(3, size))
 
     // Corner tile size the shader uses at [index], clamped to half the smaller side.
     fun effectiveCornerPx(index: Int, size: Size): Float {
