@@ -344,7 +344,7 @@ fun GlassPage(padding: PaddingValues) {
                     expandable = !isWideScreen,
                     defaultWindowInsetsPadding = false,
                     isContentScrolled = contentUnderTopBar.value,
-                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current,
+                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current(),
                     backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     progressiveBlur = topAppBarProgressiveBlur,

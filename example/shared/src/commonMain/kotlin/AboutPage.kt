@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,12 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
@@ -127,12 +130,8 @@ fun AboutPage(
             } else {
                 if (collapsed) MiuixTheme.colorScheme.surface else Color.Transparent
             }
-            val titleAlpha = { ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f) }
-            val titleColor = if (glassTopBar) {
-                MiuixTheme.colorScheme.onSurface
-            } else {
-                MiuixTheme.colorScheme.onSurface.copy(alpha = titleAlpha())
-            }
+            val titleAlpha = remember { { ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f) } }
+            val titleColor = MiuixTheme.colorScheme.onSurface
             Box(modifier = if (barBackdrop != null) Modifier.layerBackdrop(barBackdrop) else Modifier) {
                 BlurredBar(backdrop, blurActive) {
                     AdaptiveTopAppBar(
@@ -223,8 +222,7 @@ private fun AboutContent(
         }
     }
 
-    val density = LocalDensity.current
-    var logoHeightDp by remember { mutableStateOf(300.dp) }
+    val logoHeightPx = remember { mutableIntStateOf(0) }
 
     BgEffectBackground(
         dynamicBackground = dynamicBackground.value,
@@ -234,227 +232,256 @@ private fun AboutContent(
         bgModifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier,
         alpha = { 1f - scrollProgressProvider() },
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(logoContentPadding)
-                .onSizeChanged { size ->
-                    with(density) { logoHeightDp = size.height.toDp() }
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(88.dp)
-                    .graphicsLayer {
-                        val iconProgress = ((scrollProgressProvider() - 0.35f) / 0.15f).coerceIn(0f, 1f)
-                        clip = true
-                        shape = RoundedCornerShape(24.dp)
-                        alpha = 1 - iconProgress
-                        scaleX = 1 - (iconProgress * 0.05f)
-                        scaleY = 1 - (iconProgress * 0.05f)
-                    }
-                    .background(Color.White),
-            ) {
-                Image(
-                    modifier = Modifier.size(74.dp),
-                    painter = painterResource(Res.drawable.ic_launcher),
-                    contentDescription = null,
-                )
-            }
-            Text(
-                modifier = Modifier.padding(top = 12.dp, bottom = 5.dp)
-                    .graphicsLayer {
-                        val projectNameProgress = ((scrollProgressProvider() - 0.20f) / 0.15f).coerceIn(0f, 1f)
-                        alpha = 1 - projectNameProgress
-                        scaleX = 1 - (projectNameProgress * 0.05f)
-                        scaleY = 1 - (projectNameProgress * 0.05f)
-                    }
-                    .then(
-                        if (backdrop != null) {
-                            Modifier
-                                .textureBlur(
-                                    backdrop = backdrop,
-                                    shape = RoundedCornerShape(16.dp),
-                                    blurRadius = 100f,
-                                    noiseCoefficient = noiseCoefficient,
-                                    colors = BlurDefaults.blurColors(
-                                        blendColors = logoBlend,
-                                    ),
-                                    contentBlendMode = ComposeBlendMode.DstIn,
-                                )
-                        } else {
-                            Modifier
-                        },
-                    ),
-                text = "Miuix for Compose",
-                color = MiuixTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold,
-                fontSize = 35.sp,
-            )
-            Text(
-                modifier = Modifier.fillMaxWidth()
-                    .graphicsLayer {
-                        val versionCodeProgress = ((scrollProgressProvider() - 0.05f) / 0.15f).coerceIn(0f, 1f)
-                        alpha = 1 - versionCodeProgress
-                        scaleX = 1 - (versionCodeProgress * 0.05f)
-                        scaleY = 1 - (versionCodeProgress * 0.05f)
-                    },
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        // Scrollable content
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxSize().pageScrollModifiers(
-                appState.enableScrollEndHaptic,
-                appState.showTopAppBar,
-                topAppBarScrollBehavior,
-            ),
-            overscrollEffect = null,
-            contentPadding = listContentPadding,
-        ) {
-            // Transparent spacer matching logo height
-            item(key = "logoSpacer") {
-                Box(
-                    Modifier
+        Layout(
+            modifier = Modifier.fillMaxSize(),
+            content = {
+                Column(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .height(
-                            logoHeightDp + 52.dp + logoPadding.calculateTopPadding() - scrollPadding.calculateTopPadding() + 126.dp,
-                        )
-                        .then(
-                            if (shaderSupported) {
-                                Modifier.pointerInput(Unit) {
-                                    detectTapGestures {
-                                        showTextureSet = true
-                                    }
-                                }
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    contentAlignment = Alignment.TopCenter,
-                    content = { },
-                )
-            }
-
-            item(key = "about") {
-                Box {
-                    Spacer(Modifier.fillParentMaxHeight())
-                    Column(
-                        modifier = Modifier.padding(bottom = scrollPadding.calculateBottomPadding()),
+                        .padding(logoContentPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(88.dp)
+                            .graphicsLayer {
+                                val iconProgress = ((scrollProgressProvider() - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                                clip = true
+                                shape = RoundedCornerShape(24.dp)
+                                alpha = 1 - iconProgress
+                                scaleX = 1 - (iconProgress * 0.05f)
+                                scaleY = 1 - (iconProgress * 0.05f)
+                            }
+                            .background(Color.White),
                     ) {
-                        Card(
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                                .then(
-                                    if (backdrop != null) {
-                                        Modifier
-                                            .textureBlur(
-                                                backdrop = backdrop,
-                                                shape = RoundedCornerShape(16.dp),
-                                                blurRadius = blurRadius,
-                                                noiseCoefficient = noiseCoefficient,
-                                                colors = BlurDefaults.blurColors(
-                                                    blendColors = cardBlend,
-                                                    brightness = brightness,
-                                                    contrast = contrast,
-                                                    saturation = saturation,
-                                                ),
-                                            )
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
-                            colors = CardDefaults.defaultColors(
-                                if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                                Color.Transparent,
-                            ),
-                        ) {
-                            ArrowPreference(
-                                title = "View Source",
-                                endActions = {
-                                    Text(
-                                        text = "GitHub",
-                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                    )
-                                },
-                                onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
-                            )
-                            ArrowPreference(
-                                title = "Join Group",
-                                endActions = {
-                                    Text(
-                                        text = "Telegram",
-                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                    )
-                                },
-                                onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
-                            )
-                        }
-                        Card(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .padding(top = 12.dp)
-                                .then(
-                                    if (backdrop != null) {
-                                        Modifier
-                                            .textureBlur(
-                                                backdrop = backdrop,
-                                                shape = RoundedCornerShape(16.dp),
-                                                blurRadius = blurRadius,
-                                                noiseCoefficient = noiseCoefficient,
-                                                colors = BlurDefaults.blurColors(
-                                                    blendColors = cardBlend,
-                                                    brightness = brightness,
-                                                    contrast = contrast,
-                                                    saturation = saturation,
-                                                ),
-                                            )
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
-                            colors = CardDefaults.defaultColors(
-                                if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                                Color.Transparent,
-                            ),
-                        ) {
-                            ArrowPreference(
-                                title = "License",
-                                endActions = {
-                                    Text(
-                                        text = "Apache-2.0",
-                                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                                    )
-                                },
-                                onClick = {
-                                    uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                                },
-                            )
-                            ArrowPreference(
-                                title = "Third Party Licenses",
-                                onClick = { navigator.push(Route.License) },
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Image(
+                            modifier = Modifier.size(74.dp),
+                            painter = painterResource(Res.drawable.ic_launcher),
+                            contentDescription = null,
+                        )
                     }
+                    Text(
+                        modifier = Modifier.padding(top = 12.dp, bottom = 5.dp)
+                            .graphicsLayer {
+                                val projectNameProgress = ((scrollProgressProvider() - 0.20f) / 0.15f).coerceIn(0f, 1f)
+                                alpha = 1 - projectNameProgress
+                                scaleX = 1 - (projectNameProgress * 0.05f)
+                                scaleY = 1 - (projectNameProgress * 0.05f)
+                            }
+                            .then(
+                                if (backdrop != null) {
+                                    Modifier
+                                        .textureBlur(
+                                            backdrop = backdrop,
+                                            shape = RoundedCornerShape(16.dp),
+                                            blurRadius = 100f,
+                                            noiseCoefficient = noiseCoefficient,
+                                            colors = BlurDefaults.blurColors(
+                                                blendColors = logoBlend,
+                                            ),
+                                            contentBlendMode = ComposeBlendMode.DstIn,
+                                        )
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                        text = "Miuix for Compose",
+                        color = MiuixTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 35.sp,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth()
+                            .graphicsLayer {
+                                val versionCodeProgress = ((scrollProgressProvider() - 0.05f) / 0.15f).coerceIn(0f, 1f)
+                                alpha = 1 - versionCodeProgress
+                                scaleX = 1 - (versionCodeProgress * 0.05f)
+                                scaleY = 1 - (versionCodeProgress * 0.05f)
+                            },
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        text = "v" + VersionInfo.VERSION_NAME + " (" + VersionInfo.VERSION_CODE + ")",
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
                 }
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Scrollable content
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.fillMaxSize().pageScrollModifiers(
+                            appState.enableScrollEndHaptic,
+                            appState.showTopAppBar,
+                            topAppBarScrollBehavior,
+                        ),
+                        overscrollEffect = null,
+                        contentPadding = listContentPadding,
+                    ) {
+                        // Transparent spacer matching logo height
+                        item(key = "logoSpacer") {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .layout { measurable, constraints ->
+                                        val extraPx = (
+                                            52.dp +
+                                                logoPadding.calculateTopPadding() -
+                                                scrollPadding.calculateTopPadding() +
+                                                126.dp
+                                            ).roundToPx().coerceAtLeast(0)
+                                        val totalHeight = (logoHeightPx.intValue + extraPx).coerceAtLeast(0)
+                                        val placeable = measurable.measure(
+                                            constraints.copy(minHeight = totalHeight, maxHeight = totalHeight),
+                                        )
+                                        layout(placeable.width, placeable.height) {
+                                            placeable.place(0, 0)
+                                        }
+                                    }
+                                    .then(
+                                        if (shaderSupported) {
+                                            Modifier.pointerInput(Unit) {
+                                                detectTapGestures {
+                                                    showTextureSet = true
+                                                }
+                                            }
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
+                                contentAlignment = Alignment.TopCenter,
+                                content = { },
+                            )
+                        }
+
+                        item(key = "about") {
+                            Box {
+                                Spacer(Modifier.fillParentMaxHeight())
+                                Column(
+                                    modifier = Modifier.padding(bottom = scrollPadding.calculateBottomPadding()),
+                                ) {
+                                    Card(
+                                        modifier = Modifier.padding(horizontal = 12.dp)
+                                            .then(
+                                                if (backdrop != null) {
+                                                    Modifier
+                                                        .textureBlur(
+                                                            backdrop = backdrop,
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            blurRadius = blurRadius,
+                                                            noiseCoefficient = noiseCoefficient,
+                                                            colors = BlurDefaults.blurColors(
+                                                                blendColors = cardBlend,
+                                                                brightness = brightness,
+                                                                contrast = contrast,
+                                                                saturation = saturation,
+                                                            ),
+                                                        )
+                                                } else {
+                                                    Modifier
+                                                },
+                                            ),
+                                        colors = CardDefaults.defaultColors(
+                                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                                            Color.Transparent,
+                                        ),
+                                    ) {
+                                        ArrowPreference(
+                                            title = "View Source",
+                                            endActions = {
+                                                Text(
+                                                    text = "GitHub",
+                                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                                )
+                                            },
+                                            onClick = { uriHandler.openUri("https://github.com/compose-miuix-ui/miuix") },
+                                        )
+                                        ArrowPreference(
+                                            title = "Join Group",
+                                            endActions = {
+                                                Text(
+                                                    text = "Telegram",
+                                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                                )
+                                            },
+                                            onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
+                                        )
+                                    }
+                                    Card(
+                                        modifier = Modifier
+                                            .padding(horizontal = 12.dp)
+                                            .padding(top = 12.dp)
+                                            .then(
+                                                if (backdrop != null) {
+                                                    Modifier
+                                                        .textureBlur(
+                                                            backdrop = backdrop,
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            blurRadius = blurRadius,
+                                                            noiseCoefficient = noiseCoefficient,
+                                                            colors = BlurDefaults.blurColors(
+                                                                blendColors = cardBlend,
+                                                                brightness = brightness,
+                                                                contrast = contrast,
+                                                                saturation = saturation,
+                                                            ),
+                                                        )
+                                                } else {
+                                                    Modifier
+                                                },
+                                            ),
+                                        colors = CardDefaults.defaultColors(
+                                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                                            Color.Transparent,
+                                        ),
+                                    ) {
+                                        ArrowPreference(
+                                            title = "License",
+                                            endActions = {
+                                                Text(
+                                                    text = "Apache-2.0",
+                                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                                                )
+                                            },
+                                            onClick = {
+                                                uriHandler.openUri("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                                            },
+                                        )
+                                        ArrowPreference(
+                                            title = "Third Party Licenses",
+                                            onClick = { navigator.push(Route.License) },
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                }
+                            }
+                        }
+                    }
+                    VerticalScrollBar(
+                        adapter = rememberScrollBarAdapter(lazyListState),
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        trackPadding = scrollPadding,
+                        topAppBarScrollBehavior = topAppBarScrollBehavior,
+                    )
+                }
+            },
+        ) { measurables, constraints ->
+            val relaxed = constraints.copy(minWidth = 0, minHeight = 0)
+            val logoPlaceable = measurables[0].measure(relaxed)
+            if (logoHeightPx.intValue != logoPlaceable.height) {
+                logoHeightPx.intValue = logoPlaceable.height
+            }
+            val listPlaceable = measurables[1].measure(relaxed)
+            val width = constraints.constrainWidth(maxOf(logoPlaceable.width, listPlaceable.width))
+            val height = constraints.constrainHeight(maxOf(logoPlaceable.height, listPlaceable.height))
+            layout(width, height) {
+                logoPlaceable.placeRelative(0, 0)
+                listPlaceable.placeRelative(0, 0)
             }
         }
-        VerticalScrollBar(
-            adapter = rememberScrollBarAdapter(lazyListState),
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            trackPadding = scrollPadding,
-            topAppBarScrollBehavior = topAppBarScrollBehavior,
-        )
     }
 
     if (!shaderSupported) return
