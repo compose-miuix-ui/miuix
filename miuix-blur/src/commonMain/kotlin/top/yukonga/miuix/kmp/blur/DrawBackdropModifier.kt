@@ -919,11 +919,11 @@ private class DrawBackdropNode(
     private var progBasePadTop = 0f
     private var progBasePadRight = 0f
     private var progBasePadBottom = 0f
+    private var blurBasePadding = 0f
 
     private fun DrawScope.clampProgressivePaddingToBackdrop() {
         if (!effectScope.progressiveRampActive || effectScope.progressivePreEffect != null || layerBlock != null) return
-        val layerBackdrop = backdrop as? LayerBackdrop ?: return
-        val layerCoords = layerBackdrop.layerCoordinates?.takeIf { it.isAttached } ?: return
+        val layerCoords = backdrop.backdropCoordinates ?: return
         val coords = layoutCoordinates?.takeIf { it.isAttached } ?: return
         val pos = try {
             layerCoords.localPositionOf(coords)
@@ -949,8 +949,40 @@ private class DrawBackdropNode(
         }
     }
 
+    private fun DrawScope.clampBlurPaddingToBackdrop() {
+        if (effectScope.progressiveRampActive || layerBlock != null || blurBasePadding <= 0f) return
+        val layerCoords = backdrop.backdropCoordinates ?: return
+        val coords = layoutCoordinates?.takeIf { it.isAttached } ?: return
+        val pos = try {
+            layerCoords.localPositionOf(coords)
+        } catch (_: Exception) {
+            return
+        }
+        val layerW = layerCoords.size.width.toFloat()
+        val layerH = layerCoords.size.height.toFloat()
+        val availL = pos.x.coerceAtLeast(0f)
+        val availT = pos.y.coerceAtLeast(0f)
+        val availR = (layerW - (pos.x + size.width)).coerceAtLeast(0f)
+        val availB = (layerH - (pos.y + size.height)).coerceAtLeast(0f)
+        val nextL = minOf(blurBasePadding, availL)
+        val nextT = minOf(blurBasePadding, availT)
+        val nextR = minOf(blurBasePadding, availR)
+        val nextB = minOf(blurBasePadding, availB)
+        if (nextL != primary.padLeft || nextT != primary.padTop || nextR != primary.padRight || nextB != primary.padBottom) {
+            effectScope.maxPadLeft = availL
+            effectScope.maxPadTop = availT
+            effectScope.maxPadRight = availR
+            effectScope.maxPadBottom = availB
+            updateEffects()
+        }
+    }
+
     private fun DrawScope.drawBlurredBackdrop() {
-        clampProgressivePaddingToBackdrop()
+        if (effectScope.progressiveRampActive) {
+            clampProgressivePaddingToBackdrop()
+        } else {
+            clampBlurPaddingToBackdrop()
+        }
         renderBlurInto(primary)
     }
 
@@ -996,7 +1028,7 @@ private class DrawBackdropNode(
                 if (pos != lastPositionInWindow) {
                     lastPositionInWindow = pos
                     if (enabled) {
-                        invalidateDraw()
+                        requestDraw()
                     }
                 }
             } else {
@@ -1043,10 +1075,12 @@ private class DrawBackdropNode(
             stackDitherChained = false
             midSharpOverlay.active = false
             sharpOverlay.active = false
-            primary.padLeft = effectScope.padding
-            primary.padTop = effectScope.padding
-            primary.padRight = effectScope.padding
-            primary.padBottom = effectScope.padding
+            val basePad = effectScope.padding
+            blurBasePadding = basePad
+            primary.padLeft = minOf(basePad, effectScope.maxPadLeft)
+            primary.padTop = minOf(basePad, effectScope.maxPadTop)
+            primary.padRight = minOf(basePad, effectScope.maxPadRight)
+            primary.padBottom = minOf(basePad, effectScope.maxPadBottom)
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
         primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1f)
@@ -1438,6 +1472,7 @@ private class DrawBackdropNode(
         progBasePadTop = 0f
         progBasePadRight = 0f
         progBasePadBottom = 0f
+        blurBasePadding = 0f
         effectScope.reset()
     }
 

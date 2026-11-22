@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
@@ -45,6 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -402,38 +403,41 @@ internal fun DialogContent(
     val navBarInsets = WindowInsets.navigationBars
     val captionBarInsets = WindowInsets.captionBar
     val contentModifier = Modifier
-        .graphicsLayer {
-            // Apply the open/close and predictive back animations; branch inside the block so the
-            // modifier chain produces a single graphicsLayer node instead of swapping nodes per
-            // recomposition. Must precede the user modifier so its draw modifiers follow the
-            // transform (issue #373).
+        .then(
             if (isLargeScreen) {
-                val scale = enterScale.value * (1f - backProgress.value * 0.2f)
-                scaleX = scale
-                scaleY = scale
-                alpha = alphaProgress.value.coerceIn(0f, 1f)
-            } else {
-                // Rest the panel just below the screen edge when hidden, as the platform dialog
-                // does: its own height plus the margin and insets beneath it, keyboard included.
-                val anim = animationProgress.value
-                val back = backProgress.value
-                if (anim >= 1f && back <= 0f) {
-                    translationY = 0f
-                } else {
-                    val insetBottom = if (defaultWindowInsetsPadding) {
-                        maxOf(
-                            imeInsets.getBottom(this),
-                            navBarInsets.getBottom(this) + captionBarInsets.getBottom(this),
-                        )
-                    } else {
-                        0
-                    }
-                    val offScreen = size.height + outsideMarginBottomPx + insetBottom
-                    translationY = (1f - anim) * offScreen + back * offScreen
+                Modifier.graphicsLayer {
+                    val scale = enterScale.value * (1f - backProgress.value * 0.2f)
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = alphaProgress.value.coerceIn(0f, 1f)
                 }
-                alpha = 1f
-            }
-        }
+            } else {
+                Modifier.layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        // Rest the panel just below the screen edge when hidden, as the platform dialog
+                        // does: its own height plus the margin and insets beneath it, keyboard included.
+                        val anim = animationProgress.value
+                        val back = backProgress.value
+                        val offsetY = if (anim >= 1f && back <= 0f) {
+                            0
+                        } else {
+                            val insetBottom = if (defaultWindowInsetsPadding) {
+                                maxOf(
+                                    imeInsets.getBottom(density),
+                                    navBarInsets.getBottom(density) + captionBarInsets.getBottom(density),
+                                )
+                            } else {
+                                0
+                            }
+                            val offScreen = placeable.height + outsideMarginBottomPx + insetBottom
+                            ((1f - anim) * offScreen + back * offScreen).fastRoundToInt()
+                        }
+                        placeable.placeRelative(0, offsetY)
+                    }
+                }
+            },
+        )
         .then(modifier)
         .widthIn(max = maxWidth)
         .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)

@@ -30,6 +30,12 @@ interface Backdrop {
     val offsetResidualY: Float get() = 0f
 
     /**
+     * Attached coordinates of the underlying backdrop surface when bounded, or `null` when
+     * unbounded or unavailable. Used to clamp blur sampling padding at backdrop edges.
+     */
+    val backdropCoordinates: LayoutCoordinates? get() = null
+
+    /**
      * Draws the backdrop content into [DrawScope].
      *
      * @param density The current density for unit conversion.

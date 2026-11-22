@@ -61,6 +61,9 @@ class LayerBackdrop internal constructor(
 
     internal var layerCoordinates: LayoutCoordinates? by mutableStateOf(null)
 
+    override val backdropCoordinates: LayoutCoordinates?
+        get() = layerCoordinates?.takeIf { it.isAttached }
+
     override var offsetResidualX: Float = 0f
         internal set
     override var offsetResidualY: Float = 0f

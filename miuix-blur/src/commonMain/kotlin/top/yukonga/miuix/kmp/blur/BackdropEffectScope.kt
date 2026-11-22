@@ -251,6 +251,11 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedNoiseChainCoeff: Float = Float.NaN
     internal var cachedNoiseChainResult: RenderEffect? = null
 
+    internal var maxPadLeft: Float = Float.POSITIVE_INFINITY
+    internal var maxPadTop: Float = Float.POSITIVE_INFINITY
+    internal var maxPadRight: Float = Float.POSITIVE_INFINITY
+    internal var maxPadBottom: Float = Float.POSITIVE_INFINITY
+
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
 
     fun update(scope: DrawScope): Boolean {
@@ -291,8 +296,10 @@ internal abstract class BackdropEffectScopeImpl :
         // blur() bakes its sampling clamp from the padding at its call site. If a later effect
         // raised the padding, re-run once (padding only grows, so one pass converges) — otherwise
         // the clamp sits inside the recording and the bottom/right edge smears.
+        val expectedPaddedW = size.width + minOf(padding, maxPadLeft) + minOf(padding, maxPadRight)
+        val expectedPaddedH = size.height + minOf(padding, maxPadTop) + minOf(padding, maxPadBottom)
         if (!blurBuiltPaddedW.isNaN() &&
-            (blurBuiltPaddedW != size.width + padding * 2f || blurBuiltPaddedH != size.height + padding * 2f)
+            (blurBuiltPaddedW != expectedPaddedW || blurBuiltPaddedH != expectedPaddedH)
         ) {
             val finalPadding = padding
             renderEffect = null
@@ -367,6 +374,10 @@ internal abstract class BackdropEffectScopeImpl :
         progressivePostBlend = null
         cachedNoiseChainInput = null
         cachedNoiseChainResult = null
+        maxPadLeft = Float.POSITIVE_INFINITY
+        maxPadTop = Float.POSITIVE_INFINITY
+        maxPadRight = Float.POSITIVE_INFINITY
+        maxPadBottom = Float.POSITIVE_INFINITY
     }
 }
 

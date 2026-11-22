@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -318,12 +316,16 @@ internal fun BottomSheetContentLayout(
         ) {
             // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
             val sheetModifier = Modifier
-                .graphicsLayer {
-                    val progress = animationProgress.value
-                    val currentHeight = sheetHeightPx.intValue.toFloat()
-                    val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
-                    val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
-                    translationY = baseOffset * (1f - progress) + dragOffsetY.value
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        val progress = animationProgress.value
+                        val currentHeight = sheetHeightPx.intValue.toFloat()
+                        val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
+                        val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
+                        val offsetY = (baseOffset * (1f - progress) + dragOffsetY.value).fastRoundToInt()
+                        placeable.placeRelative(0, offsetY)
+                    }
                 }
                 .then(modifier)
 
