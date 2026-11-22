@@ -17,18 +17,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.util.fastCoerceIn
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.interfaces.HoldDownInteraction
 
 private const val HOVER_ALPHA_DELTA = 0.06f
 private const val FOCUS_ALPHA_DELTA = 0.08f
-private const val PRESS_ALPHA_DELTA = 0.10f
-private const val HOLD_DOWN_ALPHA_DELTA = 0.10f
+private const val PRESS_ALPHA_DELTA = 20f / 255f
+private const val HOLD_DOWN_ALPHA_DELTA = 20f / 255f
+private const val PRESS_RELEASE_HOLD_MS = 200L
 
-private val PressEnterSpring: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.2f)
-private val PressExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.95f, response = 0.35f)
+private val PressEnterSpring: SpringSpec<Float> = folmeSpring(damping = 0.99f, response = 0.15f)
+private val PressExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.99f, response = 0.30f)
 private val HoverEnterSpring: SpringSpec<Float> = folmeSpring(damping = 1.0f, response = 0.6f)
 private val HoverExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.96f, response = 0.2f)
 
@@ -38,57 +41,61 @@ private val HoverExitSpring: SpringSpec<Float> = folmeSpring(damping = 0.96f, re
 @Immutable
 class MiuixIndication(
     private val color: Color = Color.Black,
+    private val pressAlpha: Float = PRESS_ALPHA_DELTA,
+    private val hoverAlpha: Float = HOVER_ALPHA_DELTA,
+    private val focusAlpha: Float = FOCUS_ALPHA_DELTA,
 ) : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode = MiuixIndicationInstance(interactionSource, color)
-
-    override fun hashCode(): Int = color.hashCode()
+    override fun create(interactionSource: InteractionSource): DelegatableNode = MiuixIndicationInstance(interactionSource, color, pressAlpha, hoverAlpha, focusAlpha)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is MiuixIndication) return false
-        if (color != other.color) return false
-        return true
+        return color == other.color &&
+            pressAlpha == other.pressAlpha &&
+            hoverAlpha == other.hoverAlpha &&
+            focusAlpha == other.focusAlpha
+    }
+
+    override fun hashCode(): Int {
+        var result = color.hashCode()
+        result = 31 * result + pressAlpha.hashCode()
+        result = 31 * result + hoverAlpha.hashCode()
+        result = 31 * result + focusAlpha.hashCode()
+        return result
     }
 
     private class MiuixIndicationInstance(
         private val interactionSource: InteractionSource,
         private val color: Color,
+        private val pressAlpha: Float,
+        private val hoverAlpha: Float,
+        private val focusAlpha: Float,
     ) : Modifier.Node(),
         DrawModifierNode {
         private var isPressed = false
         private var isHovered = false
         private var isFocused = false
         private var isHoldDown = false
+        private var animationJob: Job? = null
+        private var releaseHoldJob: Job? = null
+        private var pressToken: Long = 0L
         private val animatedAlpha = Animatable(0f)
-        private var pressedAnimation: Job? = null
-        private var restingAnimation: Job? = null
-
         private fun targetAlpha(): Float {
             var targetAlpha = 0.0f
-            if (isHovered) targetAlpha += HOVER_ALPHA_DELTA
-            if (isFocused) targetAlpha += FOCUS_ALPHA_DELTA
-            if (isPressed && !isHoldDown) targetAlpha += PRESS_ALPHA_DELTA
+            if (isHovered) targetAlpha += hoverAlpha
+            if (isFocused) targetAlpha += focusAlpha
+            if (isPressed && !isHoldDown) targetAlpha += pressAlpha
             if (isHoldDown) targetAlpha += HOLD_DOWN_ALPHA_DELTA
-            return targetAlpha
+            return targetAlpha.fastCoerceIn(0f, 1f)
         }
 
-        private fun animateOverlay(spring: SpringSpec<Float>, fromPressRelease: Boolean) {
+        private fun animateOverlay(spring: SpringSpec<Float>) {
             val target = targetAlpha()
-            if (fromPressRelease || target == 0f) {
-                restingAnimation?.cancel()
-                restingAnimation =
-                    coroutineScope.launch {
-                        pressedAnimation?.join()
-                        animatedAlpha.animateTo(targetValue = target, animationSpec = spring)
-                    }
-            } else {
-                pressedAnimation?.cancel()
-                restingAnimation?.cancel()
-                pressedAnimation =
-                    coroutineScope.launch {
-                        animatedAlpha.animateTo(targetValue = target, animationSpec = spring)
-                    }
-            }
+            animationJob?.cancel()
+            animationJob =
+                coroutineScope.launch {
+                    animatedAlpha.animateTo(targetValue = target, animationSpec = spring)
+                }
         }
 
         override fun onAttach() {
@@ -100,14 +107,46 @@ class MiuixIndication(
                     val previousHoldDown = isHoldDown
 
                     when (interaction) {
-                        is PressInteraction.Press -> isPressed = true
-                        is PressInteraction.Release, is PressInteraction.Cancel -> isPressed = false
+                        is PressInteraction.Press -> {
+                            pressToken++
+                            releaseHoldJob?.cancel()
+                            isPressed = true
+                        }
+
+                        is PressInteraction.Release -> {
+                            if (isPressed) {
+                                val token = pressToken
+                                releaseHoldJob?.cancel()
+                                releaseHoldJob =
+                                    coroutineScope.launch {
+                                        delay(PRESS_RELEASE_HOLD_MS)
+                                        if (pressToken == token && isPressed) {
+                                            isPressed = false
+                                            animateOverlay(PressExitSpring)
+                                        }
+                                    }
+                            }
+                            return@collect
+                        }
+
+                        is PressInteraction.Cancel -> {
+                            pressToken++
+                            releaseHoldJob?.cancel()
+                            isPressed = false
+                        }
+
                         is HoverInteraction.Enter -> isHovered = true
+
                         is HoverInteraction.Exit -> isHovered = false
+
                         is FocusInteraction.Focus -> isFocused = true
+
                         is FocusInteraction.Unfocus -> isFocused = false
+
                         is HoldDownInteraction.HoldDown -> isHoldDown = true
+
                         is HoldDownInteraction.Release -> isHoldDown = false
+
                         else -> return@collect
                     }
 
@@ -119,19 +158,17 @@ class MiuixIndication(
                             previousFocused != isFocused -> if (isFocused) HoverEnterSpring else HoverExitSpring
                             else -> return@collect
                         }
-                    val fromPressRelease =
-                        (previousPressed && !isPressed) || (previousHoldDown && !isHoldDown)
-                    animateOverlay(spring, fromPressRelease)
+                    animateOverlay(spring)
                 }
             }
         }
 
         override fun ContentDrawScope.draw() {
-            drawContent()
             val alpha = animatedAlpha.value
             if (alpha > 0f) {
                 drawRect(color = color, alpha = alpha, size = size)
             }
+            drawContent()
         }
     }
 }
