@@ -58,6 +58,7 @@ fun OverlayBottomSheetDemo() {
                     OverlayBottomSheet(
                         title = "BottomSheet Title",
                         show = showBottomSheet,
+                        dimColor = MiuixTheme.colorScheme.windowDimming.copy(alpha = 0.2f),
                         startAction = {
                             IconButton(onClick = { showBottomSheet = false }) {
                                 Icon(

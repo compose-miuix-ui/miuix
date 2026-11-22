@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +24,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,12 +41,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import component.blend.ColorBlendToken
 import component.effect.BgEffectBackground
+import component.liquid.rememberCombinedBackdrop
 import misc.VersionInfo
 import navigation.Route
 import org.jetbrains.compose.resources.painterResource
@@ -56,25 +55,27 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.glass.GlassBottomSheet
+import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
 import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
+import utils.AdaptiveTopAppBar
 import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -88,9 +89,13 @@ fun AboutPage(
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
+    val glassTopBar = LocalAppState.current.topAppBarStyle == 1
 
     val scrollProgress by remember {
-        derivedStateOf {
+        computedStateOf {
             when {
                 lazyListState.firstVisibleItemIndex > 0 -> 1f
 
@@ -107,10 +112,13 @@ fun AboutPage(
     }
 
     val backdrop = rememberBlurBackdrop()
+    val barBackdrop = if (backdrop != null) rememberLayerBackdrop() else null
+    // Capture content and the bar separately so overlays never sample their own host or scrim.
+    val overlayBackdrop = if (backdrop != null && barBackdrop != null) rememberCombinedBackdrop(backdrop, barBackdrop) else null
     // Defer the frame-rate scroll read out of composition: these booleans only flip at the
-    // single 1f threshold, so derivedStateOf recomposes the bar on flip rather than every frame.
-    val collapsed by remember { derivedStateOf { scrollProgress == 1f } }
-    val blurActive by remember(backdrop) { derivedStateOf { backdrop != null && scrollProgress == 1f } }
+    // single 1f threshold, so computedStateOf recomposes the bar on flip rather than every frame.
+    val collapsed by remember { computedStateOf { scrollProgress == 1f } }
+    val blurActive by remember(backdrop) { computedStateOf { backdrop != null && scrollProgress == 1f } }
 
     Scaffold(
         topBar = {
@@ -119,34 +127,42 @@ fun AboutPage(
             } else {
                 if (collapsed) MiuixTheme.colorScheme.surface else Color.Transparent
             }
-            val titleColor = MiuixTheme.colorScheme.onSurface.copy(
-                alpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f),
-            )
-            BlurredBar(backdrop, blurActive) {
-                SmallTopAppBar(
-                    title = "About",
-                    scrollBehavior = topAppBarScrollBehavior,
-                    color = barColor,
-                    titleColor = titleColor,
-                    defaultWindowInsetsPadding = false,
-                    navigationIcon = {
-                        BackNavigationIcon(
-                            onClick = { navigator.pop() },
-                        )
-                    },
-                )
+            val titleAlpha = { ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f) }
+            val titleColor = if (glassTopBar) {
+                MiuixTheme.colorScheme.onSurface
+            } else {
+                MiuixTheme.colorScheme.onSurface.copy(alpha = titleAlpha())
+            }
+            Box(modifier = if (barBackdrop != null) Modifier.layerBackdrop(barBackdrop) else Modifier) {
+                BlurredBar(backdrop, blurActive) {
+                    AdaptiveTopAppBar(
+                        title = "About",
+                        showTopAppBar = true,
+                        isWideScreen = LocalIsWideScreen.current,
+                        expandable = false,
+                        scrollBehavior = topAppBarScrollBehavior,
+                        isContentScrolled = contentUnderTopBar,
+                        color = barColor,
+                        titleColor = titleColor,
+                        titleAlpha = titleAlpha,
+                        navigationIcon = {
+                            BackNavigationIcon(
+                                onClick = { navigator.pop() },
+                            )
+                        },
+                    )
+                }
             }
         },
     ) { innerPadding ->
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
             AboutContent(
-                padding = PaddingValues(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding(),
-                ),
+                scrollPadding = pageContentPadding(innerPadding, padding),
+                logoPadding = pageContentPadding(innerPadding, padding, extraTop = 40.dp),
                 topAppBarScrollBehavior = topAppBarScrollBehavior,
                 lazyListState = lazyListState,
                 scrollProgressProvider = { scrollProgress },
+                overlayBackdrop = overlayBackdrop,
             )
         }
     }
@@ -154,15 +170,28 @@ fun AboutPage(
 
 @Composable
 private fun AboutContent(
-    padding: PaddingValues,
+    scrollPadding: PaddingValues,
+    logoPadding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
     lazyListState: LazyListState,
     scrollProgressProvider: () -> Float,
+    overlayBackdrop: Backdrop?,
 ) {
     val appState = LocalAppState.current
-    val isWideScreen = LocalIsWideScreen.current
+    val shaderSupported = isRuntimeShaderSupported()
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
+    val logoContentPadding = remember(logoPadding) {
+        object : PaddingValues by logoPadding {
+            override fun calculateTopPadding() = logoPadding.calculateTopPadding() + 52.dp
+            override fun calculateBottomPadding() = 0.dp
+        }
+    }
+    val listContentPadding = remember(scrollPadding) {
+        object : PaddingValues by scrollPadding {
+            override fun calculateBottomPadding() = 0.dp
+        }
+    }
 
     val backdrop = rememberBlurBackdrop()
     var isOs3Effect by remember { mutableStateOf(true) }
@@ -172,24 +201,9 @@ private fun AboutContent(
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
-    val scrollPadding = pageContentPadding(
-        padding,
-        padding,
-        isWideScreen,
-        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-        extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-    )
-    val logoPadding = pageContentPadding(
-        padding,
-        padding,
-        isWideScreen,
-        extraTop = 40.dp,
-        extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-        extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
-    )
 
     val isInDark = isInDarkTheme()
-    val dynamicBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
+    val dynamicBackground = remember { mutableStateOf(shaderSupported) }
     val isFullScreenBackground = remember { mutableStateOf(true) }
 
     val cardBlend = if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light
@@ -223,11 +237,7 @@ private fun AboutContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = logoPadding.calculateTopPadding() + 52.dp,
-                    start = logoPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    end = logoPadding.calculateRightPadding(LayoutDirection.Ltr),
-                )
+                .padding(logoContentPadding)
                 .onSizeChanged { size ->
                     with(density) { logoHeightDp = size.height.toDp() }
                 },
@@ -267,7 +277,7 @@ private fun AboutContent(
                                 .textureBlur(
                                     backdrop = backdrop,
                                     shape = RoundedCornerShape(16.dp),
-                                    blurRadius = 150f,
+                                    blurRadius = 100f,
                                     noiseCoefficient = noiseCoefficient,
                                     colors = BlurDefaults.blurColors(
                                         blendColors = logoBlend,
@@ -306,11 +316,7 @@ private fun AboutContent(
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
             ),
-            contentPadding = PaddingValues(
-                top = scrollPadding.calculateTopPadding(),
-                start = scrollPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                end = scrollPadding.calculateRightPadding(LayoutDirection.Ltr),
-            ),
+            contentPadding = listContentPadding,
         ) {
             // Transparent spacer matching logo height
             item(key = "logoSpacer") {
@@ -320,11 +326,17 @@ private fun AboutContent(
                         .height(
                             logoHeightDp + 52.dp + logoPadding.calculateTopPadding() - scrollPadding.calculateTopPadding() + 126.dp,
                         )
-                        .pointerInput(Unit) {
-                            detectTapGestures {
-                                showTextureSet = true
-                            }
-                        },
+                        .then(
+                            if (shaderSupported) {
+                                Modifier.pointerInput(Unit) {
+                                    detectTapGestures {
+                                        showTextureSet = true
+                                    }
+                                }
+                            } else {
+                                Modifier
+                            },
+                        ),
                     contentAlignment = Alignment.TopCenter,
                     content = { },
                 )
@@ -440,10 +452,14 @@ private fun AboutContent(
             adapter = rememberScrollBarAdapter(lazyListState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             trackPadding = scrollPadding,
+            topAppBarScrollBehavior = topAppBarScrollBehavior,
         )
     }
 
-    OverlayBottomSheet(
+    if (!shaderSupported) return
+
+    GlassBottomSheet(
+        backdrop = overlayBackdrop,
         show = showTextureSet,
         title = "Background Effect",
         onDismissRequest = {
@@ -454,7 +470,8 @@ private fun AboutContent(
         LazyColumn {
             item {
                 val effectVariantOptions = listOf("OS2", "OS3")
-                OverlayDropdownPreference(
+                GlassDropdownPreference(
+                    backdrop = overlayBackdrop,
                     title = "Effect Variant",
                     items = effectVariantOptions,
                     selectedIndex = if (isOs3Effect) 1 else 0,
@@ -477,17 +494,8 @@ private fun AboutContent(
                     },
                 )
             }
+            // This sheet is window-owned: reserve its navigation area, not the page sidebar.
             item { Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) }
         }
     }
-}
-
-@Suppress("FunctionName")
-@Composable
-private fun ValueText(text: String) {
-    Text(
-        text = text,
-        fontSize = MiuixTheme.textStyles.body2.fontSize,
-        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-    )
 }

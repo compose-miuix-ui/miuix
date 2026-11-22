@@ -12,6 +12,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -357,14 +358,13 @@ private fun NavDisplayLayout(
     val currentKeyList = backStack.toList()
     // Covered entries stay composed, so clear their focus when the top entry changes.
     val previousTopKey = remember { arrayOfNulls<NavKey>(1) }
-    DisposableEffect(currentKeyList.lastOrNull()) {
+    SideEffect(currentKeyList.lastOrNull()) {
         val currentTopKey = currentKeyList.lastOrNull()
         val previous = previousTopKey[0]
         if (previous != null && previous != currentTopKey) {
             focusManager.clearFocus()
         }
         previousTopKey[0] = currentTopKey
-        onDispose { }
     }
     // Plain (non-snapshot) holder for the previous classification input; bookkeeping only, never read
     // by UI, so it must not be snapshot state (no cross-phase back-write).
@@ -611,9 +611,16 @@ private fun NavDisplayLayout(
         topEntry.swipeDismissOrNull() ?: (topEntry.transitionOrNull() ?: transition).dismissDirection
     }
 
+    // Read only inside the transitions' deferred blocks.
     var layoutSize by remember { mutableStateOf(IntSize.Zero) }
+    val layoutSizeProvider = remember { { layoutSize } }
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
+
+    val externalGestureOwnershipProvider = remember(predictiveBackOwnership) { { predictiveBackOwnership.generation } }
+    val onCommitBack = remember { { currentOnBack.value() } }
+    val onCancelSwipe = remember { {} }
+    val onSwipeGesture = remember(presentation) { { g: NavGesture? -> presentation.gesture = g } }
 
     Box(
         // The unified swipe recognizer lives on the DISPLAY CONTAINER, not on the top entry's host:
@@ -634,10 +641,10 @@ private fun NavDisplayLayout(
                 topIndex = topIndex,
                 motion = topMotion,
                 settleSink = presentation,
-                externalGestureOwnership = { predictiveBackOwnership.generation },
-                onCommit = currentOnBack.value,
-                onCancel = {},
-                onGesture = { presentation.gesture = it },
+                externalGestureOwnership = externalGestureOwnershipProvider,
+                onCommit = onCommitBack,
+                onCancel = onCancelSwipe,
+                onGesture = onSwipeGesture,
             ),
     ) {
         // Backdrop behind every entry (reference shell behavior): a solid layer in the page
@@ -727,15 +734,27 @@ private fun NavDisplayLayout(
                         // fraction is read inside the deferred graphicsLayer, so the per-frame float
                         // never recomposes this layout.
                         val belowEntry = presentation.presented.firstOrNull { indexByContentKey[it.contentKey] == entryIndex - 1 }
-                        val scrimScope = LiveNavTransitionScope(
-                            presentation = presentation,
-                            entryIndex = entryIndex - 1,
-                            isRemoving = belowEntry?.presentation?.isRemoving == true,
-                            change = presentation.change,
-                            layoutSize = layoutSize,
-                            layoutDirection = layoutDirection,
-                            density = density,
-                        )
+                        val isBelowRemoving = belowEntry?.presentation?.isRemoving == true
+                        val scrimChange = presentation.change
+                        val scrimScope = remember(
+                            presentation,
+                            entryIndex,
+                            isBelowRemoving,
+                            scrimChange,
+                            layoutSizeProvider,
+                            layoutDirection,
+                            density,
+                        ) {
+                            LiveNavTransitionScope(
+                                presentation = presentation,
+                                entryIndex = entryIndex - 1,
+                                isRemoving = isBelowRemoving,
+                                change = scrimChange,
+                                readLayoutSize = layoutSizeProvider,
+                                layoutDirection = layoutDirection,
+                                density = density,
+                            )
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -756,7 +775,7 @@ private fun NavDisplayLayout(
                         upperTransition = upperTransition,
                         change = presentation.change,
                         effects = effects,
-                        layoutSize = layoutSize,
+                        layoutSize = layoutSizeProvider,
                         layoutDirection = layoutDirection,
                         density = density,
                     )
@@ -817,7 +836,7 @@ private fun NavEntryHost(
     upperTransition: NavTransition,
     change: NavChange,
     effects: NavDisplayEffects,
-    layoutSize: IntSize,
+    layoutSize: () -> IntSize,
     layoutDirection: LayoutDirection,
     density: Density,
 ) {
@@ -835,7 +854,7 @@ private fun NavEntryHost(
     // host recomposes solely on an actual threshold crossing. Raw per-frame floats are read only
     // inside the deferred graphicsLayer blocks installed below.
     val depthBuckets by remember(presentation, entryIndex, entry, effects) {
-        derivedStateOf {
+        computedStateOf {
             val d = presentation.animatedTop.value - entryIndex
             var mask = navMaxLifecycleFor(entry.presentation, d, presentation.gesture != null).ordinal
             if (d <= 0f) mask = mask or DEPTH_BUCKET_GOVERNS_OWN
@@ -883,7 +902,7 @@ private fun NavEntryHost(
             entryIndex = entryIndex,
             isRemoving = entry.presentation.isRemoving,
             change = change,
-            layoutSize = layoutSize,
+            readLayoutSize = layoutSize,
             layoutDirection = layoutDirection,
             density = density,
         )

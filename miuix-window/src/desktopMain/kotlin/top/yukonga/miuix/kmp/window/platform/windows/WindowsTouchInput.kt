@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package top.yukonga.miuix.kmp.window.platform.windows
-
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -12,6 +11,8 @@ import com.sun.jna.platform.win32.WinDef.LPARAM
 import com.sun.jna.platform.win32.WinDef.WPARAM
 import top.yukonga.miuix.kmp.window.internal.findSkiaLayer
 import top.yukonga.miuix.kmp.window.internal.hwnd
+import top.yukonga.miuix.kmp.window.platform.input.DesktopTouchScene
+import top.yukonga.miuix.kmp.window.platform.input.TouchPointerState
 import top.yukonga.miuix.kmp.window.platform.windows.WinUserConst.WM_MOUSELEAVE
 import top.yukonga.miuix.kmp.window.platform.windows.WinUserConst.WM_MOUSEMOVE
 import top.yukonga.miuix.kmp.window.platform.windows.WinUserConst.WM_NCMOUSELEAVE
@@ -30,10 +31,10 @@ internal class WindowsTouchInput private constructor(
     private val window: Window,
     private val canvas: Component,
     private val hwnd: HWND,
-    private val target: WindowsTouchScene,
+    private val target: DesktopTouchScene,
 ) {
     private val acceptedPointers = mutableMapOf<Int, WindowsTouchEvent>()
-    private val pointerState = WindowsTouchPointerState()
+    private val pointerState = TouchPointerState()
 
     private var captionPointerId: Int? = null
 
@@ -210,7 +211,7 @@ internal class WindowsTouchInput private constructor(
                 cancelOnEdt()
             } else {
                 val pointers = pointerState.update(
-                    id,
+                    id.toLong(),
                     target.positionInScene(canvas, position),
                     eventType,
                 )
@@ -259,7 +260,7 @@ internal class WindowsTouchInput private constructor(
     }
 
     companion object {
-        fun create(window: Window, canvas: Component, hwnd: HWND): WindowsTouchInput? = WindowsTouchScene.create(window)?.let { WindowsTouchInput(window, canvas, hwnd, it) }
+        fun create(window: Window, canvas: Component, hwnd: HWND): WindowsTouchInput? = DesktopTouchScene.create(window)?.let { WindowsTouchInput(window, canvas, hwnd, it) }
 
         private const val WM_NCPOINTERUPDATE = 0x0241
         private const val WM_NCPOINTERDOWN = 0x0242

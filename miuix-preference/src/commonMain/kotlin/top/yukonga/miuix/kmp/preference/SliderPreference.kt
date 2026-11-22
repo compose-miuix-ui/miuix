@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -79,7 +78,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param insideMargin The margin inside the [SliderPreference].
  */
 @Composable
-@NonRestartableComposable
 fun SliderPreference(
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -108,6 +106,7 @@ fun SliderPreference(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val stableOnValueChange = remember { { v: Float -> currentOnValueChange(v) } }
     val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
@@ -149,7 +148,7 @@ fun SliderPreference(
                 bottomAction?.invoke()
                 Slider(
                     value = value,
-                    onValueChange = { currentOnValueChange(it) },
+                    onValueChange = stableOnValueChange,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
                     valueRange = valueRange,
@@ -208,7 +207,6 @@ fun SliderPreference(
  * @param insideMargin The margin inside the [RangeSliderPreference].
  */
 @Composable
-@NonRestartableComposable
 fun RangeSliderPreference(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
@@ -236,6 +234,7 @@ fun RangeSliderPreference(
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val stableOnValueChange = remember { { r: ClosedFloatingPointRange<Float> -> currentOnValueChange(r) } }
     val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
@@ -277,7 +276,7 @@ fun RangeSliderPreference(
                 bottomAction?.invoke()
                 RangeSlider(
                     value = value,
-                    onValueChange = { currentOnValueChange(it) },
+                    onValueChange = stableOnValueChange,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
                     valueRange = valueRange,

@@ -6,19 +6,16 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.runtime.Immutable
 
 /**
- * A two-point linear gradient describing how a progressive blur ramps from full strength at
- * [startFraction] to zero at [endFraction], measured along [angle]. Use the [Top] / [Bottom] /
- * [Left] / [Right] presets for the common edge-fade cases.
+ * Two-point gradient for a progressive blur: full strength at [startFraction], zero at
+ * [endFraction], measured along [angle]. [Top] / [Bottom] / [Left] / [Right] cover the common
+ * edge fades.
  *
- * @param angle Gradient direction in degrees, clockwise from the +X axis: `0` fades left→right,
- *   `90` top→bottom, `180` right→left, `270` bottom→top.
- * @param startFraction Fraction in `[0, 1]` of the surface's projected extent along [angle] where
- *   the blur is at full strength.
- * @param endFraction Fraction in `[0, 1]` where the blur fades to zero. May be smaller than
- *   [startFraction] to reverse the ramp; must differ from it.
- * @param curve Power-curve exponent reshaping the falloff between the fixed endpoints: `< 1`
- *   concentrates the radius change toward the strong end (fast early change, long soft tail),
- *   `> 1` toward the clear end. Must be positive.
+ * @param angle Direction in degrees clockwise from +X: `0` left→right, `90` top→bottom.
+ * @param startFraction Where the blur is at full strength, as a fraction of the surface's extent
+ *   along [angle].
+ * @param endFraction Where it reaches zero; may be smaller to reverse the ramp, must differ.
+ * @param curve Falloff exponent: `< 1` concentrates the change toward the strong end, `> 1` toward
+ *   the clear end. Must be positive.
  */
 @Immutable
 data class ProgressiveBlur(

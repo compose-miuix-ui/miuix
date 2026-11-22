@@ -3,7 +3,7 @@
 
 package component
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,9 +28,6 @@ fun LazyListScope.switchSection() {
     item(key = "switch") {
         val switch = remember { mutableStateOf(false) }
         val switchTrue = remember { mutableStateOf(true) }
-        val superSwitch = remember { mutableStateOf("false") }
-        val superSwitchState = remember { mutableStateOf(false) }
-        val superSwitchAnimState = remember { mutableStateOf(false) }
 
         SmallTitle(text = "Switch")
         Card(
@@ -66,6 +63,22 @@ fun LazyListScope.switchSection() {
                     enabled = false,
                 )
             }
+        }
+    }
+}
+
+fun LazyListScope.switchPreferenceSection() {
+    item(key = "switchPreference") {
+        val superSwitch = remember { mutableStateOf("false") }
+        val superSwitchState = remember { mutableStateOf(false) }
+        val superSwitchAnimState = remember { mutableStateOf(false) }
+
+        SmallTitle(text = "SwitchPreference")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
             SwitchPreference(
                 title = "Switch",
                 summary = "Click to expand a Switch",
@@ -75,7 +88,7 @@ fun LazyListScope.switchSection() {
                 },
             )
 
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = superSwitchAnimState.value,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),

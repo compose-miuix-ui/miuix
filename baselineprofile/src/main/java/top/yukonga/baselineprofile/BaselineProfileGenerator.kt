@@ -70,21 +70,119 @@ class BaselineProfileGenerator {
             val width = device.displayWidth
             val height = device.displayHeight
             val swipeX = (width * 0.96f).toInt()
-            val scrollDownStart = (height * 0.80f).toInt()
-            val scrollDownEnd = (height * 0.20f).toInt()
+            val scrollDownStart = (height * 0.65f).toInt()
+            val scrollDownEnd = (height * 0.35f).toInt()
 
-            repeat(16) {
-                device.swipe(swipeX, scrollDownStart, swipeX, scrollDownEnd, 12)
-                Thread.sleep(800)
+            val componentPages = listOf(
+                "PullToRefresh",
+                "Dialog",
+                "BottomSheet",
+                "Snackbar",
+                "Slider",
+                "ColorPicker",
+                "Preferences",
+                "Glass Component",
+            )
+            for (title in componentPages) {
+                var item = device.findObject(By.text(title))
+                var attempts = 0
+                while (item == null && attempts < 10) {
+                    device.swipe(swipeX, scrollDownStart, swipeX, scrollDownEnd, 40)
+                    Thread.sleep(500)
+                    item = device.findObject(By.text(title))
+                    attempts++
+                }
+                if (item != null) {
+                    item.click()
+                    device.waitForIdle()
+                    Thread.sleep(500)
+                    when (title) {
+                        "PullToRefresh" -> {
+                            device.swipe(swipeX, scrollDownEnd, swipeX, scrollDownStart, 30)
+                            Thread.sleep(600)
+                        }
+
+                        "Dialog" -> {
+                            device.findObject(By.text("Dialog (O)"))?.let {
+                                it.click()
+                                device.waitForIdle()
+                                Thread.sleep(400)
+                                device.pressBack()
+                                device.waitForIdle()
+                                Thread.sleep(300)
+                            }
+                        }
+
+                        "BottomSheet" -> {
+                            device.findObject(By.text("BottomSheet (O)"))?.let {
+                                it.click()
+                                device.waitForIdle()
+                                Thread.sleep(400)
+                                device.pressBack()
+                                device.waitForIdle()
+                                Thread.sleep(300)
+                            }
+                        }
+
+                        "Snackbar" -> {
+                            device.findObject(By.text("Short (4s)"))?.let {
+                                it.click()
+                                device.waitForIdle()
+                                Thread.sleep(400)
+                            }
+                        }
+
+                        "Glass Component" -> {
+                            device.findObject(By.desc("Sort"))?.let {
+                                it.click()
+                                device.waitForIdle()
+                                Thread.sleep(400)
+                                device.pressBack()
+                                device.waitForIdle()
+                                Thread.sleep(300)
+                            }
+                            device.swipe(swipeX, scrollDownStart, swipeX, scrollDownEnd, 40)
+                            Thread.sleep(400)
+                        }
+
+                        "Preferences" -> {
+                            repeat(8) {
+                                device.swipe(swipeX, scrollDownStart, swipeX, scrollDownEnd, 40)
+                                Thread.sleep(200)
+                            }
+                        }
+
+                        else -> {
+                            device.swipe(swipeX, scrollDownStart, swipeX, scrollDownEnd, 40)
+                            Thread.sleep(400)
+                        }
+                    }
+                    val backButton = device.findObject(By.desc("Back"))
+                    if (backButton != null) {
+                        backButton.click()
+                    } else {
+                        device.pressBack()
+                    }
+                    device.waitForIdle()
+                    Thread.sleep(700)
+                    if (device.currentPackageName != packageName) break
+                }
             }
 
-            val tabTitles = listOf("Icon", "Color", "TextStyle", "Settings")
-            for (title in tabTitles) {
-                val tab = device.findObjects(By.pkg(packageName).text(title)).lastOrNull()
-                if (tab != null) {
-                    tab.click()
+            val tab = device.findObjects(By.pkg(packageName).text("Settings")).lastOrNull()
+            if (tab != null) {
+                tab.click()
+                device.waitForIdle()
+                Thread.sleep(400)
+                device.findObject(By.text("Color Mode"))?.let {
+                    it.click()
                     device.waitForIdle()
                     Thread.sleep(400)
+                    device.findObject(By.text("MonetDark"))?.let { option ->
+                        option.click()
+                        device.waitForIdle()
+                        Thread.sleep(500)
+                    }
                 }
             }
         }

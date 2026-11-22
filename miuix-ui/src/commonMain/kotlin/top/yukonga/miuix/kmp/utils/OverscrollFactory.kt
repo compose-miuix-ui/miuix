@@ -5,6 +5,9 @@ package top.yukonga.miuix.kmp.utils
 
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.OverscrollFactory
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -15,12 +18,8 @@ import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.currentValueOf
-import androidx.compose.ui.node.invalidatePlacement
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -53,35 +52,22 @@ object MiuixOverscrollFactory : OverscrollFactory {
 class MiuixOverscrollEffect : OverscrollEffect {
     private val offsetThreshold = 1f
 
-    // Placement rounds to pixels, so invalidate only when the rounded offset changes.
-    private var lastPlacedOffsetX = 0f
+    // Round only the layer translation, not the spring state.
+    internal var translationX by mutableFloatStateOf(0f)
+        private set
+    internal var translationY by mutableFloatStateOf(0f)
+        private set
+
     internal var offsetX = 0f
         private set(value) {
-            if (field != value) {
-                field = value
-                val rounded = round(value)
-                if (rounded != lastPlacedOffsetX) {
-                    lastPlacedOffsetX = rounded
-                    invalidateNodePlacement?.invoke()
-                }
-            }
+            field = value
+            translationX = round(value)
         }
-
-    private var lastPlacedOffsetY = 0f
     internal var offsetY = 0f
         private set(value) {
-            if (field != value) {
-                field = value
-                val rounded = round(value)
-                if (rounded != lastPlacedOffsetY) {
-                    lastPlacedOffsetY = rounded
-                    invalidateNodePlacement?.invoke()
-                }
-            }
+            field = value
+            translationY = round(value)
         }
-
-    // Injected by MiuixOverscrollEffectNode when attached
-    internal var invalidateNodePlacement: (() -> Unit)? = null
 
     private var rawTouchAccumulationX = 0f
     private var rawTouchAccumulationY = 0f
@@ -93,6 +79,12 @@ class MiuixOverscrollEffect : OverscrollEffect {
     private val springEngineY = SpringEngine()
     private var animationJobX: Job? = null
     private var animationJobY: Job? = null
+
+    internal val isVerticallyRebounding: Boolean
+        get() = animationJobY?.isActive == true
+
+    internal val isHorizontallyRebounding: Boolean
+        get() = animationJobX?.isActive == true
 
     // Injected by MiuixOverscrollEffectNode when attached
     internal var launchAnimation: ((suspend CoroutineScope.() -> Unit) -> Job)? = null
@@ -361,7 +353,14 @@ private class MiuixOverscrollEffectNode(
     val effect: MiuixOverscrollEffect,
 ) : Modifier.Node(),
     CompositionLocalConsumerModifierNode,
+    OverscrollMotionNode,
     LayoutModifierNode {
+
+    override val isVerticallyRebounding: Boolean
+        get() = effect.isVerticallyRebounding
+
+    override val isHorizontallyRebounding: Boolean
+        get() = effect.isHorizontallyRebounding
 
     override fun onAttach() {
         super.onAttach()
@@ -369,7 +368,6 @@ private class MiuixOverscrollEffectNode(
         effect.launchAnimation = { block -> coroutineScope.launch(block = block) }
         effect.getPullToRefreshState = { currentValueOf(LocalPullToRefreshState) }
         effect.getOverScrollState = { currentValueOf(LocalOverScrollState) }
-        effect.invalidateNodePlacement = { invalidatePlacement() }
     }
 
     override fun onDetach() {
@@ -377,23 +375,13 @@ private class MiuixOverscrollEffectNode(
         effect.launchAnimation = null
         effect.getPullToRefreshState = null
         effect.getOverScrollState = null
-        effect.invalidateNodePlacement = null
         effect.resetAll()
     }
 
-    private var cachedDensity: Density? = null
-    private var cachedWindowInfo: WindowInfo? = null
-
     private fun updateScrollRange() {
-        val density = currentValueOf(LocalDensity)
-        val windowInfo = currentValueOf(LocalWindowInfo)
-        if (density == cachedDensity && windowInfo == cachedWindowInfo) return
-        cachedDensity = density
-        cachedWindowInfo = windowInfo
-        with(density) {
-            effect.scrollRangeV = windowInfo.containerDpSize.height.toPx()
-            effect.scrollRangeH = windowInfo.containerDpSize.width.toPx()
-        }
+        val size = currentValueOf(LocalWindowInfo).containerSize
+        effect.scrollRangeV = size.height.toFloat()
+        effect.scrollRangeH = size.width.toFloat()
     }
 
     override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
@@ -401,8 +389,8 @@ private class MiuixOverscrollEffectNode(
         val placeable = measurable.measure(constraints)
         return layout(placeable.width, placeable.height) {
             placeable.placeWithLayer(0, 0) {
-                translationX = round(effect.offsetX)
-                translationY = round(effect.offsetY)
+                translationX = effect.translationX
+                translationY = effect.translationY
                 clip = true
             }
         }

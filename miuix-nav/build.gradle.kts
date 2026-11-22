@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
     id("module.kotlin-jvm-toolchain")
@@ -68,7 +69,6 @@ kotlin {
         }
         named("desktopTest") {
             dependencies {
-                implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)
             }
         }

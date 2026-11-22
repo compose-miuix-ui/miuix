@@ -1,0 +1,42 @@
+# Glass Components
+
+`miuix-glass` provides glass buttons, navigation bars and rails, tabs, menus, dialogs and bottom sheets.
+
+## Components
+
+| Component | Description | Common Usage |
+| --- | --- | --- |
+| [GlassIconButton](./glassiconbutton) | Round glass icon action | Toolbar and floating actions |
+| [GlassFloatingActionButton](./glassfloatingactionbutton) | Round glass floating action button | Primary floating actions |
+| [GlassFloatingToolbar](./glassfloatingtoolbar) | Floating glass toolbar container | Floating action groups |
+| [GlassTopAppBar](./glasstopappbar) | Collapsing glass top bar | Page titles and actions |
+| [GlassNavigationBar](./glassnavigationbar) | Floating glass navigation bar | Top-level destinations |
+| [GlassNavigationRail](./glassnavigationrail) | Floating glass sidebar collapsing into the navigation bar | Wide-layout destination switching |
+| [GlassSearchOverlay](./glasssearchoverlay) | Full-screen glass search overlay with progressive blur header | In-page search mode |
+| [GlassTabRow](./glasstabrow) | Independent glass tab pills | Content categories |
+| [GlassTransformPopup](./glasstransformpopup) | Menu transforming from its button | Toolbar overflow actions |
+| [GlassPopup](./glasspopup) | Anchored glass menu | Action selection |
+| [GlassSecondaryPopup](./glasssecondarypopup) | Submenu beside a primary menu | Cascading menus |
+| [GlassDropdownPopup](./glassdropdownpopup) | Glass dropdown from a settings row | Option selection |
+| [GlassDropdownPreference](./glassdropdownpreference) | Preference row with a managed glass dropdown | Settings selection |
+| [GlassDialog](./glassdialog) | Glass dialog over a scrim | Prompts and confirmation |
+| [GlassDialogButton](./glassdialog#glassdialogbutton) | Action over shared dialog material | Dialog actions |
+| [GlassBottomSheet](./glassbottomsheet) | Attached glass bottom sheet | Additional content and actions |
+
+## Setup
+
+See [Glass Surfaces](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-glass-icons` module provides icons through `MiuixIcons.Glass`.
+
+## Usage Requirements
+
+- Buttons, bars and tabs can be used directly in layouts.
+- Popup menus require a full-page `BoxScope`; anchors are reported in window coordinates and the popup subtracts its host's window offset.
+- `GlassDialog`, `GlassBottomSheet` and `GlassDropdownPreference` require a Miuix [Scaffold](../basic/scaffold).
+
+The sampled backdrop must exclude the glass surface itself. See [Background Sampling](/guide/glass#background-sampling).
+
+## Related Documentation
+
+- [Material](/guide/material): render primitives, material definitions and the edge stroke.
+- [Glass Surfaces](/guide/glass): surfaces, modifiers and background sampling.
+- [Icon System](/guide/icons): Glass icon imports and weights.

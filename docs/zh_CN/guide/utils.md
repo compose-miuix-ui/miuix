@@ -30,7 +30,7 @@ DialogLayout(
 }
 ```
 
-正常情况下无需主动使用。详见 [OverlayDialog](../components/overlaydialog.md) 或 [OverlayBottomSheet](../components/overlaybottomsheet.md) 文档。
+正常情况下无需主动使用。详见 [OverlayDialog](../components/basic/overlaydialog.md) 或 [OverlayBottomSheet](../components/basic/overlaybottomsheet.md) 文档。
 
 ### 弹出窗口布局 (PopupLayout)
 
@@ -51,7 +51,7 @@ PopupLayout(
 }
 ```
 
-正常情况下无需主动使用。详见 [OverlayListPopup](../components/overlaylistpopup) 文档。
+正常情况下无需主动使用。详见 [OverlayListPopup](../components/basic/overlaylistpopup) 文档。
 
 ## 越界回弹效果 (Overscroll)
 
@@ -78,16 +78,23 @@ Miuix 提供了易于使用的越界回弹效果修饰符，让滚动体验更�
 ### 垂直越界回弹
 
 ```kotlin
+val scrollState = scrollBehavior.state
+val onOverscrollChanged: (Float) -> Unit = remember(scrollState) {
+    { scrollState.overscrollOffset = it }
+}
+
 LazyColumn(
     modifier = Modifier
         // 添加越界回弹效果
-        .overScrollVertical()
+        .overScrollVertical(onOffsetChanged = onOverscrollChanged)
         // 如需绑定 TopAppBar 滚动事件，则应在越界回弹效果之后添加
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {
     // 列表内容
 }
 ```
+
+将顶栏连接放在越界修饰符之后：`contentOffset` 记录列表实际滚动，`overscrollOffset` 跟踪拖动及弹簧回弹过程中的阻尼位移。Glass 顶栏会结合 `overscrollOffset` 与 `isContentScrolled` 在弹性回弹时激活渐进模糊与按钮材质。不要将越界消耗量累加进 `contentOffset`：弹簧回弹不会产生反向滚动事件。列表已绑定顶栏连接时，不要再将同一个滚动行为传给外层 `PullToRefresh`。
 
 ### 水平越界回弹
 
@@ -106,7 +113,6 @@ LazyRow(
 ```kotlin
 LazyColumn(
     modifier = Modifier.overScrollVertical(
-        nestedScrollToParent = true, // 是否分发嵌套滚动事件到父级，默认 true
         isEnabled = { true },        // 是否启用效果，默认全平台启用
     ),
     overscrollEffect = null // 建议将此参数设置为 null，禁用默认效果
@@ -117,8 +123,10 @@ LazyColumn(
 
 **参数说明:**
 
-- `nestedScrollToParent`：布尔值，是否分发嵌套滚动事件到父级。默认：`true`。
+- `onOffsetChanged`：可选的 `(Float) -> Unit` 回调，按舍入后的像素合并报告拖动和弹簧回弹的阻尼位移。重置、移除修饰符或替换回调时向旧接收方归零，新回调立即收到当前位移。默认：`null`，适用于所有越界修饰符。
 - `isEnabled`：Lambda，是否启用越界回弹。默认：全平台启用。
+
+显式垂直越界修饰符会让路给可处理当前手势的下拉刷新和 BottomSheet。内容区下拉关闭需同时启用 `enableNestedScroll` 和 `allowDismiss`。
 
 ### 通过 OverscrollFactory（主题级集成）
 
@@ -256,7 +264,7 @@ Box(
 
 ## Pager 手势冲突处理与弹簧切页 (Modifier.pagerGestureOverride())
 
-`HorizontalPager` 内嵌竖向列表时，使用 `pagerGestureOverride` 可在列表惯性滚动或回弹期间横滑切页。
+`pagerGestureOverride` 支持在子列表惯性滚动或 Miuix 越界回弹期间横滑切页，竖滑仍由列表处理。回弹接管支持 Miuix 越界修饰符和 `MiuixOverscrollFactory`；其他越界实现结束 fling 后使用常规手势判定。
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(
@@ -290,7 +298,6 @@ HorizontalPager(
 | :------------------ | :----------------------------------------------- |
 | `CrossAxis`（默认） | 列表滚动或回弹时，仍可横滑切页。                 |
 | `Native`            | 使用 Compose 原生 Pager 手势。                   |
-| `TapToHalt`         | 列表惯性滚动时，首次横滑停止列表，再次横滑切页。 |
 
 禁用滑动切页时，将修饰符的 `enabled` 和 Pager 的 `userScrollEnabled` 都设为 `false`。
 
@@ -303,3 +310,9 @@ coroutineScope.launch {
     pagerState.springAnimateToPage(targetPage)
 }
 ```
+
+## 屏幕缺口修复 (`ProvideDisplayCutoutFix`)
+
+`ProvideDisplayCutoutFix` 解决了部分 Android OEM 设备（如横屏平板设备和折叠屏设备）在系统分发时丢失屏幕缺口（Cutout）的缺陷，通过底层 `WindowManager.currentWindowMetrics` 动态补齐缺口安全边距。
+
+该功能已默认内置在 `MiuixTheme` 中。详情请参见[主题系统](theme.md#屏幕缺口适配-providedisplaycutoutfix)指南。

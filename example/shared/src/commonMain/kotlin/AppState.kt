@@ -4,6 +4,7 @@
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.Density
 
 @Stable
 data class AppState(
@@ -15,17 +16,21 @@ data class AppState(
     // UI
     val showFPSMonitor: Boolean = false,
     val showTopAppBar: Boolean = true,
+    val topAppBarStyle: Int = 1,
     val showNavigationBar: Boolean = true,
+    val navigationRailStyle: Int = 1,
     val showNavigationBarBadge: Boolean = false,
     val navigationBarMode: Int = 0,
-    val useFloatingNavigationBar: Boolean = false,
+    val useFloatingNavigationBar: Boolean = true,
     val floatingNavigationBarPosition: Int = 0,
-    val floatingNavigationBarStyle: Int = 0,
+    val floatingNavigationBarStyle: Int = 1,
     val showFloatingToolbar: Boolean = false,
     val floatingToolbarPosition: Int = 1,
     val floatingToolbarOrientation: Int = 1,
+    val floatingToolbarStyle: Int = 1,
     val showFloatingActionButton: Boolean = false,
     val floatingActionButtonPosition: Int = 2,
+    val floatingActionButtonStyle: Int = 1,
     val enablePageUserScroll: Boolean = true,
     val enableScrollEndHaptic: Boolean = true,
     val pagerInterceptionMode: Int = 1,
@@ -34,12 +39,20 @@ data class AppState(
     val blockInputDuringTransition: Boolean = false,
     val enableSwipeBack: Boolean = false,
     val navTransitionStyle: Int = 0,
+    val enablePredictiveBack: Boolean = true,
     // Squircle
     val enableSquircle: Boolean = true,
     // Blur
     val enableBlur: Boolean = true,
-    val blurStyle: Int = 0,
+    // Display
+    val densityScale: Float = DEFAULT_DENSITY_SCALE,
 )
+
+const val MIN_DENSITY_SCALE = 0.8f
+const val MAX_DENSITY_SCALE = 1.1f
+const val DEFAULT_DENSITY_SCALE = 1f
+
+fun normalizeDensityScale(value: Float): Float = if (value.isFinite()) value.coerceIn(MIN_DENSITY_SCALE, MAX_DENSITY_SCALE) else DEFAULT_DENSITY_SCALE
 
 val LocalAppState = compositionLocalOf<AppState> {
     error("No AppState provided!")
@@ -48,3 +61,7 @@ val LocalAppState = compositionLocalOf<AppState> {
 val LocalUpdateAppState = staticCompositionLocalOf<((AppState) -> AppState) -> Unit> {
     error("No AppState updater provided!")
 }
+
+val LocalPlatformDensity = staticCompositionLocalOf<Density?> { null }
+
+val LocalOnPredictiveBackChange = staticCompositionLocalOf<((Boolean) -> Unit)?> { null }

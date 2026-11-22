@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirst
@@ -68,10 +70,9 @@ fun BadgedBox(
             measurables
                 .fastFirst { it.layoutId == "badge" }
                 .measure(
-                    // Measure with loose constraints for height as we don't want the text to take
-                    // up more
-                    // space than it needs.
-                    constraints.copy(minHeight = 0),
+                    // Measure with unbounded width and loose height so the badge never wraps
+                    // inside tight anchor constraints (e.g., FlexBox or fixed-size icon slots).
+                    constraints.copy(minWidth = 0, minHeight = 0, maxWidth = Constraints.Infinity),
                 )
 
         val anchorPlaceable = measurables.fastFirst { it.layoutId == "anchor" }.measure(constraints)
@@ -186,11 +187,15 @@ object BadgeDefaults {
 
     /** Default container color for a badge. */
     val containerColor: Color
-        @Composable get() = MiuixTheme.colorScheme.error
+        @Composable
+        @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.error
 
     /** Default content color for a badge. */
     val contentColor: Color
-        @Composable get() = MiuixTheme.colorScheme.onError
+        @Composable
+        @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.onError
 }
 
 /**

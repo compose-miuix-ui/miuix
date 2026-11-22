@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.coroutines.delay
@@ -64,6 +61,9 @@ fun OverscrollLoadMorePage(
     var loadedPages by rememberSaveable { mutableIntStateOf(0) }
     var loadingMore by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
+    val contentUnderTopBar by remember(lazyListState) {
+        computedStateOf { lazyListState.canScrollBackward }
+    }
 
     LaunchedEffect(lazyListState) {
         snapshotFlow {
@@ -92,6 +92,7 @@ fun OverscrollLoadMorePage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    isContentScrolled = contentUnderTopBar,
                     color = barColor,
                     navigationIcon = {
                         BackNavigationIcon(
@@ -105,10 +106,7 @@ fun OverscrollLoadMorePage(
         val contentPadding = pageContentPadding(
             innerPadding,
             padding,
-            true,
             extraTop = 12.dp,
-            extraStart = WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             extraBottom = 12.dp,
         )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
@@ -130,7 +128,8 @@ fun OverscrollLoadMorePage(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 8.dp),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(16.dp),
                         colors = CardDefaults.defaultColors(

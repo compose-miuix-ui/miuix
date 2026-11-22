@@ -1,4 +1,4 @@
-# miuix-nav
+# Navigation Support
 
 `miuix-nav` is a self-contained Compose Multiplatform navigation runtime with **continuous stack depth** as its core model. The whole back stack is driven by a single `Animatable<Float>` (`animatedTop`); every entry's visuals are a pure function of its relative depth. This makes continuous push/pop, fully custom float-driven transitions, and 1:1 gesture back fall out naturally. It has **zero dependency** on `androidx.navigation3`.
 

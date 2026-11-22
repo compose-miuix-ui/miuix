@@ -1,0 +1,342 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.icon.glass
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathNode
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+
+val MiuixIcons.Glass.Bookmarked: ImageVector
+    get() = MiuixIcons.Glass.Regular.Bookmarked
+
+val MiuixIcons.Glass.Light.Bookmarked: ImageVector
+    get() {
+        if (_bookmarkedSurfaceLight != null) return _bookmarkedSurfaceLight!!
+        _bookmarkedSurfaceLight = buildHyperOSIcon(
+            name = "Bookmarked.Glass.Light",
+            pathData = listOf(
+                PathNode.MoveTo(407.4f, 869.1f),
+                PathNode.QuadTo(371.8f, 866.1f, 344.4f, 853.4f),
+                PathNode.QuadTo(292f, 825.2f, 267.3f, 775.3f),
+                PathNode.QuadTo(255.1f, 749.4f, 250.2f, 711.9f),
+                PathNode.QuadTo(247.2f, 671.6f, 247.2f, 578.6f),
+                PathNode.VerticalTo(113.6f),
+                PathNode.QuadTo(247.2f, 25.1f, 251.2f, -29.8f),
+                PathNode.QuadTo(256.7f, -68.1f, 269f, -88f),
+                PathNode.QuadTo(284.2f, -107.3f, 304.4f, -119.9f),
+                PathNode.QuadTo(328.1f, -133f, 351f, -135.1f),
+                PathNode.QuadTo(375.9f, -137.7f, 408.3f, -121.4f),
+                PathNode.QuadTo(443.3f, -104.7f, 536.1f, -52.6f),
+                PathNode.LineTo(655.2f, 17.4f),
+                PathNode.QuadTo(660.7f, 20.3f, 665.3f, 20.3f),
+                PathNode.QuadTo(669.9f, 20.3f, 674.2f, 17.4f),
+                PathNode.LineTo(793.9f, -52.6f),
+                PathNode.QuadTo(869.8f, -96.6f, 920.2f, -121.4f),
+                PathNode.QuadTo(954.7f, -137.7f, 980f, -135.1f),
+                PathNode.QuadTo(1000.4f, -133f, 1023.6f, -119.9f),
+                PathNode.QuadTo(1047.7f, -105.4f, 1060f, -87.6f),
+                PathNode.QuadTo(1074.8f, -69.2f, 1077.8f, -28.8f),
+                PathNode.QuadTo(1081.8f, 7.2f, 1081.8f, 114.6f),
+                PathNode.VerticalTo(579.6f),
+                PathNode.QuadTo(1081.8f, 673.4f, 1078.8f, 712.9f),
+                PathNode.QuadTo(1075.8f, 751.8f, 1063.1f, 775.9f),
+                PathNode.QuadTo(1035.9f, 828.3f, 983.6f, 854.4f),
+                PathNode.QuadTo(959.3f, 867.1f, 921.6f, 870.1f),
+                PathNode.QuadTo(866.7f, 874.1f, 787.2f, 874.1f),
+                PathNode.HorizontalTo(541.8f),
+                PathNode.QuadTo(476.3f, 874.1f, 407.4f, 869.1f),
+                PathNode.Close,
+                PathNode.MoveTo(858.2f, 629.6f),
+                PathNode.LineTo(874.3f, 617.1f),
+                PathNode.QuadTo(881.3f, 611.2f, 882.4f, 604f),
+                PathNode.QuadTo(883.4f, 596.8f, 877.6f, 589.2f),
+                PathNode.LineTo(657.8f, 310.6f),
+                PathNode.QuadTo(646f, 295.1f, 631.7f, 294.6f),
+                PathNode.QuadTo(617.3f, 294f, 604f, 307.3f),
+                PathNode.LineTo(453.4f, 457.4f),
+                PathNode.QuadTo(447f, 463.9f, 447f, 470.8f),
+                PathNode.QuadTo(447f, 477.8f, 454f, 485.2f),
+                PathNode.LineTo(468.1f, 499.2f),
+                PathNode.QuadTo(481.6f, 513.6f, 495.9f, 498.7f),
+                PathNode.LineTo(619.7f, 375.3f),
+                PathNode.QuadTo(627.4f, 368f, 634.1f, 376.3f),
+                PathNode.LineTo(830.4f, 625.8f),
+                PathNode.QuadTo(836.3f, 633.3f, 843.8f, 634.4f),
+                PathNode.QuadTo(851.2f, 635.4f, 858.2f, 629.6f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 2.1667f,
+            translationY = 1035.9928f,
+            autoMirror = false,
+        )
+        return _bookmarkedSurfaceLight!!
+    }
+
+private var _bookmarkedSurfaceLight: ImageVector? = null
+
+val MiuixIcons.Glass.Normal.Bookmarked: ImageVector
+    get() {
+        if (_bookmarkedSurfaceNormal != null) return _bookmarkedSurfaceNormal!!
+        _bookmarkedSurfaceNormal = buildHyperOSIcon(
+            name = "Bookmarked.Glass.Normal",
+            pathData = listOf(
+                PathNode.MoveTo(409.9f, 872.5f),
+                PathNode.QuadTo(373.3f, 869.5f, 344.1f, 855.9f),
+                PathNode.QuadTo(289.3f, 826.4f, 263.7f, 774.4f),
+                PathNode.QuadTo(250.2f, 746.4f, 245.9f, 708.5f),
+                PathNode.QuadTo(242.9f, 669.1f, 242.9f, 576.1f),
+                PathNode.VerticalTo(116.6f),
+                PathNode.QuadTo(242.9f, 28.5f, 246.9f, -25.8f),
+                PathNode.QuadTo(252.1f, -66f, 266.3f, -88f),
+                PathNode.QuadTo(282.7f, -109.2f, 304.1f, -122f),
+                PathNode.QuadTo(328.7f, -135.7f, 353.7f, -138.5f),
+                PathNode.QuadTo(380.8f, -141.3f, 415.7f, -123.9f),
+                PathNode.QuadTo(453.4f, -105.6f, 542.2f, -55.6f),
+                PathNode.LineTo(656.4f, 11.6f),
+                PathNode.QuadTo(661.6f, 13.9f, 665.4f, 13.9f),
+                PathNode.QuadTo(669.3f, 13.9f, 672.7f, 11.6f),
+                PathNode.LineTo(787.8f, -55.6f),
+                PathNode.QuadTo(868.6f, -102.4f, 913.2f, -123.9f),
+                PathNode.QuadTo(950.1f, -141.3f, 977.3f, -138.5f),
+                PathNode.QuadTo(1000.1f, -135.7f, 1023.9f, -122f),
+                PathNode.QuadTo(1048.6f, -107.9f, 1062.7f, -87.9f),
+                PathNode.QuadTo(1079.1f, -67.7f, 1082.1f, -24.8f),
+                PathNode.QuadTo(1086.1f, 11.2f, 1086.1f, 117.6f),
+                PathNode.VerticalTo(577.1f),
+                PathNode.QuadTo(1086.1f, 670.4f, 1083.1f, 709.5f),
+                PathNode.QuadTo(1080.1f, 750.6f, 1066.5f, 775.3f),
+                PathNode.QuadTo(1038f, 830.2f, 983.9f, 856.9f),
+                PathNode.QuadTo(958.4f, 870.5f, 919.1f, 873.5f),
+                PathNode.QuadTo(864.8f, 877.5f, 785.7f, 877.5f),
+                PathNode.HorizontalTo(543.3f),
+                PathNode.QuadTo(478.2f, 877.5f, 409.9f, 872.5f),
+                PathNode.Close,
+                PathNode.MoveTo(859.4f, 635.4f),
+                PathNode.LineTo(878.9f, 620.5f),
+                PathNode.QuadTo(888.7f, 612.4f, 890f, 602.6f),
+                PathNode.QuadTo(891.4f, 592.8f, 883.4f, 582.2f),
+                PathNode.LineTo(667.6f, 308.1f),
+                PathNode.QuadTo(651.5f, 287.5f, 632.6f, 286.6f),
+                PathNode.QuadTo(613.7f, 285.8f, 595.8f, 303.7f),
+                PathNode.LineTo(447.6f, 451.6f),
+                PathNode.QuadTo(438.8f, 460.5f, 438.8f, 469.9f),
+                PathNode.QuadTo(438.8f, 479.3f, 448.5f, 489.2f),
+                PathNode.LineTo(466f, 505.9f),
+                PathNode.QuadTo(484.6f, 524.9f, 503.5f, 505.1f),
+                PathNode.LineTo(617.8f, 390.9f),
+                PathNode.QuadTo(627.1f, 381.7f, 634.7f, 391.9f),
+                PathNode.LineTo(821.9f, 630.1f),
+                PathNode.QuadTo(829.9f, 640.7f, 839.8f, 642f),
+                PathNode.QuadTo(849.7f, 643.4f, 859.4f, 635.4f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 2.1667f,
+            translationY = 1035.9651f,
+            autoMirror = false,
+        )
+        return _bookmarkedSurfaceNormal!!
+    }
+
+private var _bookmarkedSurfaceNormal: ImageVector? = null
+
+val MiuixIcons.Glass.Regular.Bookmarked: ImageVector
+    get() {
+        if (_bookmarkedSurfaceRegular != null) return _bookmarkedSurfaceRegular!!
+        _bookmarkedSurfaceRegular = buildHyperOSIcon(
+            name = "Bookmarked.Glass.Regular",
+            pathData = listOf(
+                PathNode.MoveTo(411f, 874f),
+                PathNode.QuadTo(374f, 871f, 344f, 857f),
+                PathNode.QuadTo(288f, 827f, 262f, 774f),
+                PathNode.QuadTo(248f, 745f, 244f, 707f),
+                PathNode.QuadTo(241f, 668f, 241f, 575f),
+                PathNode.VerticalTo(118f),
+                PathNode.QuadTo(241f, 30f, 245f, -24f),
+                PathNode.QuadTo(250f, -65f, 265f, -88f),
+                PathNode.QuadTo(282f, -110f, 304f, -123f),
+                PathNode.QuadTo(329f, -137f, 355f, -140f),
+                PathNode.QuadTo(383f, -143f, 419f, -125f),
+                PathNode.QuadTo(458f, -106f, 545f, -57f),
+                PathNode.LineTo(657f, 9f),
+                PathNode.QuadTo(662f, 11f, 665.5f, 11f),
+                PathNode.QuadTo(669f, 11f, 672f, 9f),
+                PathNode.LineTo(785f, -57f),
+                PathNode.QuadTo(868f, -105f, 910f, -125f),
+                PathNode.QuadTo(948f, -143f, 976f, -140f),
+                PathNode.QuadTo(1000f, -137f, 1024f, -123f),
+                PathNode.QuadTo(1049f, -109f, 1064f, -88f),
+                PathNode.QuadTo(1081f, -67f, 1084f, -23f),
+                PathNode.QuadTo(1088f, 13f, 1088f, 119f),
+                PathNode.VerticalTo(576f),
+                PathNode.QuadTo(1088f, 669f, 1085f, 708f),
+                PathNode.QuadTo(1082f, 750f, 1068f, 775f),
+                PathNode.QuadTo(1039f, 831f, 984f, 858f),
+                PathNode.QuadTo(958f, 872f, 918f, 875f),
+                PathNode.QuadTo(864f, 879f, 785f, 879f),
+                PathNode.HorizontalTo(544f),
+                PathNode.QuadTo(479f, 879f, 411f, 874f),
+                PathNode.Close,
+                PathNode.MoveTo(860f, 638f),
+                PathNode.LineTo(881f, 622f),
+                PathNode.QuadTo(892f, 613f, 893.5f, 602f),
+                PathNode.QuadTo(895f, 591f, 886f, 579f),
+                PathNode.LineTo(672f, 307f),
+                PathNode.QuadTo(654f, 284f, 633f, 283f),
+                PathNode.QuadTo(612f, 282f, 592f, 302f),
+                PathNode.LineTo(445f, 449f),
+                PathNode.QuadTo(435f, 459f, 435f, 469.5f),
+                PathNode.QuadTo(435f, 480f, 446f, 491f),
+                PathNode.LineTo(465f, 509f),
+                PathNode.QuadTo(486f, 530f, 507f, 508f),
+                PathNode.LineTo(617f, 398f),
+                PathNode.QuadTo(627f, 388f, 635f, 399f),
+                PathNode.LineTo(818f, 632f),
+                PathNode.QuadTo(827f, 644f, 838f, 645.5f),
+                PathNode.QuadTo(849f, 647f, 860f, 638f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 2.1667f,
+            translationY = 1035.9524f,
+            autoMirror = false,
+        )
+        return _bookmarkedSurfaceRegular!!
+    }
+
+private var _bookmarkedSurfaceRegular: ImageVector? = null
+
+val MiuixIcons.Glass.Medium.Bookmarked: ImageVector
+    get() {
+        if (_bookmarkedSurfaceMedium != null) return _bookmarkedSurfaceMedium!!
+        _bookmarkedSurfaceMedium = buildHyperOSIcon(
+            name = "Bookmarked.Glass.Medium",
+            pathData = listOf(
+                PathNode.MoveTo(413.2f, 876.4f),
+                PathNode.QuadTo(374.8f, 873.4f, 343.7f, 858.9f),
+                PathNode.QuadTo(286.4f, 828.4f, 259f, 773.2f),
+                PathNode.QuadTo(244.5f, 742.6f, 240.5f, 704.3f),
+                PathNode.QuadTo(237.5f, 665.8f, 237.5f, 572.8f),
+                PathNode.VerticalTo(120.7f),
+                PathNode.QuadTo(237.5f, 32.7f, 241.5f, -20.8f),
+                PathNode.QuadTo(246.5f, -62.6f, 262.8f, -87.7f),
+                PathNode.QuadTo(280.9f, -111.1f, 303.7f, -124.6f),
+                PathNode.QuadTo(329.5f, -138.9f, 357.4f, -142.4f),
+                PathNode.QuadTo(386.8f, -145.7f, 424.9f, -126.9f),
+                PathNode.QuadTo(463.1f, -108.2f, 550.1f, -59.4f),
+                PathNode.LineTo(657.3f, 3.9f),
+                PathNode.QuadTo(661.7f, 5.9f, 665.4f, 5.9f),
+                PathNode.QuadTo(669f, 5.9f, 672f, 3.9f),
+                PathNode.LineTo(779.9f, -59.4f),
+                PathNode.QuadTo(862.3f, -106.9f, 904.1f, -126.9f),
+                PathNode.QuadTo(943.9f, -145.7f, 973.6f, -142.4f),
+                PathNode.QuadTo(1000f, -138.9f, 1024.3f, -124.6f),
+                PathNode.QuadTo(1050.1f, -109.8f, 1066.2f, -88f),
+                PathNode.QuadTo(1084.5f, -65.4f, 1087.5f, -19.8f),
+                PathNode.QuadTo(1091.5f, 16.2f, 1091.5f, 121.7f),
+                PathNode.VerticalTo(573.8f),
+                PathNode.QuadTo(1091.5f, 666.6f, 1088.5f, 705f),
+                PathNode.QuadTo(1085.5f, 747.6f, 1070.7f, 774.5f),
+                PathNode.QuadTo(1040.1f, 832.6f, 984.3f, 859.9f),
+                PathNode.QuadTo(957.2f, 874.4f, 915.8f, 877.4f),
+                PathNode.QuadTo(862.4f, 881.4f, 783.6f, 881.4f),
+                PathNode.HorizontalTo(545.4f),
+                PathNode.QuadTo(480.4f, 881.4f, 413.2f, 876.4f),
+                PathNode.Close,
+                PathNode.MoveTo(858.9f, 645f),
+                PathNode.LineTo(888.6f, 622.5f),
+                PathNode.QuadTo(900.9f, 612.7f, 902.4f, 600.8f),
+                PathNode.QuadTo(903.9f, 588.8f, 894.1f, 576f),
+                PathNode.LineTo(673.6f, 295.9f),
+                PathNode.QuadTo(655.4f, 272.6f, 633.9f, 271.6f),
+                PathNode.QuadTo(612.5f, 270.6f, 592.3f, 290.9f),
+                PathNode.LineTo(436.9f, 446.3f),
+                PathNode.QuadTo(425.8f, 457.4f, 425.9f, 469f),
+                PathNode.QuadTo(426.1f, 480.5f, 438.2f, 492.1f),
+                PathNode.LineTo(465.3f, 517.1f),
+                PathNode.QuadTo(488.7f, 539.5f, 511.3f, 516.1f),
+                PathNode.LineTo(617f, 410.4f),
+                PathNode.QuadTo(626.7f, 400.7f, 634.2f, 411.2f),
+                PathNode.LineTo(813.1f, 638.8f),
+                PathNode.QuadTo(822.9f, 651.6f, 834.9f, 653.1f),
+                PathNode.QuadTo(846.8f, 654.6f, 858.9f, 645f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 2.1667f,
+            translationY = 1035.9245f,
+            autoMirror = false,
+        )
+        return _bookmarkedSurfaceMedium!!
+    }
+
+private var _bookmarkedSurfaceMedium: ImageVector? = null
+
+val MiuixIcons.Glass.Demibold.Bookmarked: ImageVector
+    get() {
+        if (_bookmarkedSurfaceDemibold != null) return _bookmarkedSurfaceDemibold!!
+        _bookmarkedSurfaceDemibold = buildHyperOSIcon(
+            name = "Bookmarked.Glass.Demibold",
+            pathData = listOf(
+                PathNode.MoveTo(414.7f, 878.1f),
+                PathNode.QuadTo(375.4f, 875.1f, 343.5f, 860.2f),
+                PathNode.QuadTo(285.2f, 829.3f, 256.9f, 772.6f),
+                PathNode.QuadTo(242f, 740.9f, 238f, 702.4f),
+                PathNode.QuadTo(235f, 664.3f, 235f, 571.3f),
+                PathNode.VerticalTo(122.6f),
+                PathNode.QuadTo(235f, 34.6f, 239f, -18.5f),
+                PathNode.QuadTo(244f, -60.9f, 261.3f, -87.5f),
+                PathNode.QuadTo(280.2f, -111.8f, 303.5f, -125.8f),
+                PathNode.QuadTo(329.9f, -140.2f, 359.1f, -144.1f),
+                PathNode.QuadTo(389.4f, -147.6f, 429.1f, -128.2f),
+                PathNode.QuadTo(466.7f, -109.7f, 553.7f, -61.1f),
+                PathNode.LineTo(657.5f, 0.3f),
+                PathNode.QuadTo(661.5f, 2.3f, 665.3f, 2.3f),
+                PathNode.QuadTo(669f, 2.3f, 672f, 0.3f),
+                PathNode.LineTo(776.3f, -61.1f),
+                PathNode.QuadTo(858.4f, -108.2f, 899.9f, -128.2f),
+                PathNode.QuadTo(941.1f, -147.6f, 971.9f, -144.1f),
+                PathNode.QuadTo(1000f, -140.2f, 1024.5f, -125.8f),
+                PathNode.QuadTo(1050.8f, -110.4f, 1067.7f, -88f),
+                PathNode.QuadTo(1087f, -64.2f, 1090f, -17.5f),
+                PathNode.QuadTo(1094f, 18.5f, 1094f, 123.6f),
+                PathNode.VerticalTo(572.3f),
+                PathNode.QuadTo(1094f, 664.9f, 1091f, 702.9f),
+                PathNode.QuadTo(1088f, 745.9f, 1072.6f, 774.1f),
+                PathNode.QuadTo(1040.8f, 833.8f, 984.5f, 861.2f),
+                PathNode.QuadTo(956.6f, 876.1f, 914.3f, 879.1f),
+                PathNode.QuadTo(861.2f, 883.1f, 782.7f, 883.1f),
+                PathNode.HorizontalTo(546.3f),
+                PathNode.QuadTo(481.3f, 883.1f, 414.7f, 878.1f),
+                PathNode.Close,
+                PathNode.MoveTo(858.2f, 649.9f),
+                PathNode.LineTo(893.9f, 622.9f),
+                PathNode.QuadTo(907.2f, 612.5f, 908.7f, 599.9f),
+                PathNode.QuadTo(910.2f, 587.3f, 899.8f, 573.9f),
+                PathNode.LineTo(674.8f, 288.2f),
+                PathNode.QuadTo(656.3f, 264.7f, 634.6f, 263.7f),
+                PathNode.QuadTo(612.9f, 262.7f, 592.5f, 283.2f),
+                PathNode.LineTo(431.2f, 444.4f),
+                PathNode.QuadTo(419.4f, 456.2f, 419.6f, 468.6f),
+                PathNode.QuadTo(419.8f, 480.9f, 432.7f, 492.8f),
+                PathNode.LineTo(465.5f, 522.8f),
+                PathNode.QuadTo(490.6f, 546.1f, 514.4f, 521.8f),
+                PathNode.LineTo(617f, 419.1f),
+                PathNode.QuadTo(626.5f, 409.6f, 633.6f, 419.7f),
+                PathNode.LineTo(809.7f, 643.5f),
+                PathNode.QuadTo(820.1f, 656.9f, 832.7f, 658.4f),
+                PathNode.QuadTo(845.3f, 659.9f, 858.2f, 649.9f),
+                PathNode.Close,
+            ),
+            scale = 1f,
+            translationX = 2.1667f,
+            translationY = 1035.9046f,
+            autoMirror = false,
+        )
+        return _bookmarkedSurfaceDemibold!!
+    }
+
+private var _bookmarkedSurfaceDemibold: ImageVector? = null
+

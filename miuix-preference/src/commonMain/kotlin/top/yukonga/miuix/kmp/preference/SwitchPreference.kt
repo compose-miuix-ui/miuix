@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +41,6 @@ import top.yukonga.miuix.kmp.basic.SwitchDefaults
  * @param enabled Whether the [SwitchPreference] is clickable.
  */
 @Composable
-@NonRestartableComposable
 fun SwitchPreference(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -59,6 +58,11 @@ fun SwitchPreference(
     enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentChecked by rememberUpdatedState(checked)
+    val currentEnabled by rememberUpdatedState(enabled)
+    val onRowClick = remember {
+        { currentOnCheckedChange.takeIf { currentEnabled }?.invoke(!currentChecked) ?: Unit }
+    }
     BasicComponent(
         modifier = modifier,
         insideMargin = insideMargin,
@@ -84,9 +88,7 @@ fun SwitchPreference(
             )
         },
         bottomAction = bottomAction,
-        onClick = {
-            currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
-        },
+        onClick = onRowClick,
         role = Role.Switch,
         holdDownState = holdDownState,
         enabled = enabled,

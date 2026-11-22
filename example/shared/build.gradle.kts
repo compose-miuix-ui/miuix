@@ -1,6 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import com.mikepenz.aboutlibraries.plugin.AboutLibrariesTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -41,8 +42,6 @@ kotlin {
         it.binaries.framework {
             baseName = "shared"
             isStatic = true
-            binaryOption("smallBinary", "true")
-            binaryOption("preCodegenInlineThreshold", "40")
         }
     }
 
@@ -65,8 +64,11 @@ kotlin {
             dependencies {
                 api(projects.miuixUi)
                 api(projects.miuixPreference)
+                api(projects.miuixMaterial)
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.miuixBlur)
+                implementation(projects.miuixGlass)
+                implementation(projects.miuixGlassIcons)
                 implementation(projects.miuixSquircle)
                 implementation(projects.miuixIcons)
                 implementation(projects.miuixNav)
@@ -74,6 +76,9 @@ kotlin {
                 implementation(libs.aboutlibraries.core)
                 implementation(libs.kotlinx.serialization.core)
             }
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.metrics.performance)
         }
     }
 }
@@ -94,9 +99,20 @@ val generateVersionInfo =
 aboutLibraries {
     export {
         outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 
 tasks.named("generateComposeResClass").configure {
     dependsOn(generateVersionInfo)
+}
+
+val iosLibrariesOutputFile = layout.projectDirectory.file("src/iosMain/composeResources/files/aboutlibraries-ios.json")
+
+tasks.register<AboutLibrariesTask>("exportLibraryDefinitionsIos") {
+    description = "Exports dependency meta data for iOS."
+    collectAll.set(true)
+    filterVariants.set(listOf("iosArm64CompileKlibraries"))
+    configureOutputFile(providers.provider { iosLibrariesOutputFile })
+    configure()
 }

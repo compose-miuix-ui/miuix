@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
@@ -27,7 +26,6 @@ import top.yukonga.miuix.kmp.basic.TextButton
 
 fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
     item(key = "snackbar") {
-        SmallTitle(text = "Snackbar")
         val scope = rememberCoroutineScope()
         Card(
             modifier = Modifier
@@ -35,9 +33,7 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
                 .padding(bottom = 12.dp),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(vertical = 12.dp),
+                modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(

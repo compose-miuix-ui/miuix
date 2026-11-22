@@ -90,7 +90,16 @@ fun Scaffold(
     contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val safeInsets = remember(contentWindowInsets) { MutableWindowInsets(contentWindowInsets) }
+    val consumedInsets = remember { MutableWindowInsets() }
+    val safeInsets = remember(contentWindowInsets) {
+        contentWindowInsets.exclude(consumedInsets)
+    }
+    // Keep the callback stable across inset changes: movable content updates modifiers before
+    // reattachment, but Compose's insets observer traverses descendants when its callback changes.
+    val onConsumedInsetsChanged = remember {
+        { insets: WindowInsets -> consumedInsets.insets = insets }
+    }
+    val topAppBarInputTracker = remember { TopAppBarInputTracker() }
     val popupStates = remember { mutableStateListOf<MiuixPopupUtils.PopupState>() }
     val dialogStates = remember { mutableStateListOf<MiuixPopupUtils.DialogState>() }
     val parentRootDialogStates = LocalRootDialogStates.current
@@ -98,10 +107,9 @@ fun Scaffold(
     val parentRootPopupStates = LocalRootPopupStates.current
     val rootPopupStates = parentRootPopupStates ?: popupStates
     Surface(
-        modifier = modifier.onConsumedWindowInsetsChanged { consumedWindowInsets ->
-            // Exclude currently consumed window insets from user provided contentWindowInsets
-            safeInsets.insets = contentWindowInsets.exclude(consumedWindowInsets)
-        },
+        modifier = modifier
+            .then(TopAppBarInputTrackerElement(topAppBarInputTracker))
+            .onConsumedWindowInsetsChanged(onConsumedInsetsChanged),
         color = containerColor,
     ) {
         CompositionLocalProvider(
@@ -109,6 +117,7 @@ fun Scaffold(
             LocalDialogStates provides dialogStates,
             LocalRootDialogStates provides rootDialogStates,
             LocalRootPopupStates provides rootPopupStates,
+            LocalTopAppBarInputTracker provides topAppBarInputTracker,
         ) {
             ScaffoldLayout(
                 topBar = topBar,
@@ -544,5 +553,43 @@ value class ToolbarPosition internal constructor(@Suppress("unused") private val
         BottomEnd -> "ToolbarPosition.BottomEnd"
         TopCenter -> "ToolbarPosition.TopCenter"
         else -> "ToolbarPosition.BottomCenter"
+    }
+}
+
+private class TopAppBarInputTrackerElement(
+    private val tracker: TopAppBarInputTracker,
+) : androidx.compose.ui.node.ModifierNodeElement<TopAppBarInputTrackerNode>() {
+    override fun create() = TopAppBarInputTrackerNode(tracker)
+    override fun update(node: TopAppBarInputTrackerNode) {
+        node.tracker = tracker
+    }
+    override fun equals(other: Any?): Boolean = this === other || (other is TopAppBarInputTrackerElement && tracker === other.tracker)
+    override fun hashCode(): Int = tracker.hashCode()
+    override fun androidx.compose.ui.platform.InspectorInfo.inspectableProperties() {
+        name = "topAppBarInputTracker"
+    }
+}
+
+private class TopAppBarInputTrackerNode(
+    var tracker: TopAppBarInputTracker,
+) : Modifier.Node(),
+    androidx.compose.ui.node.PointerInputModifierNode {
+    override fun onPointerEvent(
+        pointerEvent: androidx.compose.ui.input.pointer.PointerEvent,
+        pass: androidx.compose.ui.input.pointer.PointerEventPass,
+        bounds: IntSize,
+    ) {
+        if (pass != androidx.compose.ui.input.pointer.PointerEventPass.Initial) return
+        if (pointerEvent.type == androidx.compose.ui.input.pointer.PointerEventType.Scroll) {
+            if (!pointerEvent.changes.any { it.pressed }) {
+                tracker.allowIdleSettle = true
+            }
+        } else if (pointerEvent.changes.any { it.pressed }) {
+            tracker.allowIdleSettle = false
+        }
+    }
+
+    override fun onCancelPointerInput() {
+        tracker.allowIdleSettle = false
     }
 }

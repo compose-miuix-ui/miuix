@@ -1,0 +1,378 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.glass
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
+import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.blur.BackdropEffectScope
+import top.yukonga.miuix.kmp.blur.BackdropPipeline
+import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.noiseDither
+import top.yukonga.miuix.kmp.glass.internal.GLASS_COLOR_BLEND_SHADER_KEY
+import top.yukonga.miuix.kmp.glass.internal.colorBlendEffect
+import top.yukonga.miuix.kmp.glass.internal.glassEffect
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassColorBlendMode
+import top.yukonga.miuix.kmp.material.GlassColorLayer
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassInner
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
+import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.GlassStyles
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.drawGlassEdge
+import top.yukonga.miuix.kmp.material.drawGlassMask
+import top.yukonga.miuix.kmp.material.drawGlassRim
+import top.yukonga.miuix.kmp.material.drawGlassShadow
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+/**
+ * Applies a glass surface over [backdrop].
+ *
+ * @param backdrop Content behind the glass. This modifier must be outside the subtree recorded by
+ *   the backdrop; placing it inside creates a sampling cycle.
+ * @param shape Surface silhouette used for clipping, [stroke], and rendering geometry.
+ * @param style Glass appearance. Use a predefined style from [GlassStyles] or [GlassDefaults.Style].
+ * @param alpha Opacity multiplier for colour layers, shading, and stroke.
+ * @param tint Overrides [GlassInner.tint]. Its alpha replaces the style tint strength.
+ *   [Color.Unspecified] retains the style tint.
+ * @param material Surface body: blur radius and colour layers. Its blur radius overrides [style].
+ *   `null` uses the blurred backdrop as the body.
+ * @param noiseCoefficient Noise dithering coefficient for backdrop blur. 0 disables dithering.
+ * @param stroke Optional bloom stroke along the silhouette. `null` disables it.
+ * @param contentBlendMode Blend mode for content drawn over the glass.
+ * @param enabled Whether the glass effect is active. When false, content draws without it.
+ * @param shading Whether to refract and shade the backdrop. Use `false` for bars and menus whose
+ *   body is supplied by [material].
+ */
+fun Modifier.glass(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle = GlassDefaults.Style,
+    alpha: Float = 1f,
+    tint: Color = Color.Unspecified,
+    material: GlassMaterial? = null,
+    noiseCoefficient: Float = GlassDefaults.NoiseCoefficient,
+    stroke: EdgeStroke? = null,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
+    enabled: Boolean = true,
+    shading: Boolean = true,
+): Modifier = glassImpl(
+    backdrop = backdrop,
+    shape = shape,
+    style = style,
+    alpha = alpha,
+    tint = tint,
+    material = material,
+    underlayMaterial = null,
+    noiseCoefficient = noiseCoefficient,
+    stroke = stroke,
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+    shading = shading,
+)
+
+/** Applies a child material over an action bar's blurred and colour-treated surface. */
+internal fun Modifier.glassOnActionBar(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle,
+    alpha: Float,
+    material: GlassMaterial?,
+    underlayMaterial: GlassMaterial,
+    stroke: EdgeStroke?,
+    enabled: Boolean = true,
+): Modifier = glassImpl(
+    backdrop = backdrop,
+    shape = shape,
+    style = style,
+    alpha = alpha,
+    tint = Color.Unspecified,
+    material = material,
+    underlayMaterial = underlayMaterial,
+    noiseCoefficient = GlassDefaults.NoiseCoefficient,
+    stroke = stroke,
+    contentBlendMode = BlendMode.SrcOver,
+    enabled = enabled,
+    shading = false,
+)
+
+private fun Modifier.glassImpl(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle,
+    alpha: Float,
+    tint: Color,
+    material: GlassMaterial?,
+    underlayMaterial: GlassMaterial?,
+    noiseCoefficient: Float,
+    stroke: EdgeStroke?,
+    contentBlendMode: BlendMode,
+    enabled: Boolean,
+    shading: Boolean,
+): Modifier = drawBackdrop(
+    backdrop = backdrop,
+    pipeline = GlassPipeline(
+        glassShape = shape,
+        style = style,
+        alpha = alpha,
+        tint = tint,
+        material = material,
+        underlayMaterial = underlayMaterial,
+        noiseCoefficient = noiseCoefficient,
+        stroke = stroke,
+        shading = shading,
+    ),
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+)
+
+/**
+ * Glass pipeline as a value: equal inputs keep the backdrop node, so a recomposition no longer
+ * rebuilds the blur, colour and shading passes.
+ */
+private class GlassPipeline(
+    private val glassShape: GlassShape,
+    private val style: GlassStyle,
+    private val alpha: Float,
+    private val tint: Color,
+    private val material: GlassMaterial?,
+    private val underlayMaterial: GlassMaterial?,
+    private val noiseCoefficient: Float,
+    private val stroke: EdgeStroke?,
+    private val shading: Boolean,
+) : BackdropPipeline {
+
+    override val shape: Shape get() = glassShape
+
+    override fun configureEffects(scope: BackdropEffectScope) {
+        with(scope) {
+            noiseDither(noiseCoefficient)
+            val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
+            blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
+            if (underlayMaterial != null) {
+                colorBlendEffect(underlayMaterial, 1f, "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar")
+            }
+            if (material != null) colorBlendEffect(material, alpha)
+            if (shading) glassEffect(style, glassShape, alpha, tint)
+        }
+    }
+    override fun drawFront(scope: DrawScope) {
+        with(scope) {
+            // Stroke and rim share one silhouette pass; the mask trims it afterwards.
+            val current = stroke
+            val fuse = current != null && shading &&
+                current.width.value > 0f &&
+                current.blendMode == BlendMode.Plus
+            if (current != null && fuse) {
+                drawGlassEdge(
+                    shape = glassShape,
+                    stroke = current,
+                    style = style,
+                    surface = if (tint.isSpecified) tint else style.inner.tint,
+                    alpha = alpha,
+                )
+                drawGlassMask(glassShape)
+            } else {
+                if (current != null) drawEdgeStroke(glassShape, current, alpha)
+                drawGlassMask(glassShape)
+                if (shading) {
+                    drawGlassRim(glassShape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+                }
+            }
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is GlassPipeline &&
+        other.glassShape == glassShape &&
+        other.style == style &&
+        other.alpha == alpha &&
+        other.tint == tint &&
+        other.material == material &&
+        other.underlayMaterial == underlayMaterial &&
+        other.noiseCoefficient == noiseCoefficient &&
+        other.stroke == stroke &&
+        other.shading == shading
+
+    override fun hashCode(): Int {
+        var result = glassShape.hashCode()
+        result = 31 * result + style.hashCode()
+        result = 31 * result + alpha.hashCode()
+        result = 31 * result + tint.hashCode()
+        result = 31 * result + material.hashCode()
+        result = 31 * result + underlayMaterial.hashCode()
+        result = 31 * result + noiseCoefficient.hashCode()
+        result = 31 * result + stroke.hashCode()
+        result = 31 * result + shading.hashCode()
+        return result
+    }
+}
+
+/**
+ * Draws [shadow] beneath this composable using [shape].
+ *
+ * @param shape Shadow silhouette. Use the same shape as the corresponding [glass] surface.
+ * @param shadow Shadow configuration. Use a value from [GlassShadows], or `null` to disable it.
+ * @param alpha Opacity multiplier for the shadow.
+ */
+fun Modifier.glassShadow(
+    shape: GlassShape,
+    shadow: GlassShadow? = GlassShadows.Regular,
+    alpha: Float = 1f,
+): Modifier = if (shadow == null) {
+    this
+} else if (isRuntimeShaderSupported()) {
+    this then GlassShadowElement(shape, shadow, alpha)
+} else {
+    fallbackGlassShadow(shape, shadow) { alpha }
+}
+
+internal fun Modifier.glassShadow(
+    shape: GlassShape,
+    shadow: GlassShadow?,
+    alpha: () -> Float,
+): Modifier = if (shadow == null) {
+    this
+} else if (isRuntimeShaderSupported()) {
+    this then DeferredGlassShadowElement(shape, shadow, alpha)
+} else {
+    fallbackGlassShadow(shape, shadow, alpha)
+}
+
+private class GlassShadowElement(
+    val shape: GlassShape,
+    val shadow: GlassShadow,
+    val alpha: Float,
+) : ModifierNodeElement<GlassShadowNode>() {
+    override fun create(): GlassShadowNode = GlassShadowNode(shape, shadow, alpha)
+
+    override fun update(node: GlassShadowNode) {
+        node.shape = shape
+        node.shadow = shadow
+        node.alpha = alpha
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassShadow"
+        properties["shape"] = shape
+        properties["shadow"] = shadow
+        properties["alpha"] = alpha
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GlassShadowElement) return false
+        return shape == other.shape && shadow == other.shadow && alpha == other.alpha
+    }
+
+    override fun hashCode(): Int {
+        var result = shape.hashCode()
+        result = 31 * result + shadow.hashCode()
+        result = 31 * result + alpha.hashCode()
+        return result
+    }
+}
+
+private class GlassShadowNode(
+    var shape: GlassShape,
+    var shadow: GlassShadow,
+    var alpha: Float,
+) : Modifier.Node(),
+    DrawModifierNode {
+    override fun ContentDrawScope.draw() {
+        drawGlassShadow(shape, shadow, alpha)
+        drawContent()
+    }
+}
+
+private class DeferredGlassShadowElement(
+    val shape: GlassShape,
+    val shadow: GlassShadow,
+    val alpha: () -> Float,
+) : ModifierNodeElement<DeferredGlassShadowNode>() {
+    override fun create(): DeferredGlassShadowNode = DeferredGlassShadowNode(shape, shadow, alpha)
+
+    override fun update(node: DeferredGlassShadowNode) {
+        node.shape = shape
+        node.shadow = shadow
+        node.alpha = alpha
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "glassShadow"
+        properties["shape"] = shape
+        properties["shadow"] = shadow
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DeferredGlassShadowElement) return false
+        return shape == other.shape && shadow == other.shadow && alpha === other.alpha
+    }
+
+    override fun hashCode(): Int {
+        var result = shape.hashCode()
+        result = 31 * result + shadow.hashCode()
+        result = 31 * result + alpha.hashCode()
+        return result
+    }
+}
+
+private class DeferredGlassShadowNode(
+    var shape: GlassShape,
+    var shadow: GlassShadow,
+    var alpha: () -> Float,
+) : Modifier.Node(),
+    DrawModifierNode {
+    override fun ContentDrawScope.draw() {
+        drawGlassShadow(shape, shadow, alpha())
+        drawContent()
+    }
+}
+
+/** Draw-based fallback; the blur kernel differs from the shader's dispersion curve. */
+internal fun Modifier.fallbackGlassShadow(
+    shape: GlassShape,
+    shadow: GlassShadow,
+    alpha: () -> Float,
+): Modifier = dropShadow(shape) {
+    val sourceScale = density / GlassDefaults.SourceDensity
+    radius = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    offset = Offset(shadow.offsetX * sourceScale, shadow.offsetY * sourceScale)
+    color = shadow.color
+    this.alpha = alpha().coerceIn(0f, 1f)
+}
+
+/** Tints the glass material with a container surface when appropriate. */
+@Composable
+internal fun dynamicGlassMaterial(
+    base: GlassMaterial,
+    tint: Color = MiuixTheme.colorScheme.surfaceContainerHigh,
+    alpha: Float = 0.6f,
+): GlassMaterial = if (MiuixTheme.isDynamicColor) {
+    remember(base, tint, alpha) {
+        base.copy(third = GlassColorLayer(tint.copy(alpha = alpha), GlassColorBlendMode.SrcOver))
+    }
+} else {
+    base
+}

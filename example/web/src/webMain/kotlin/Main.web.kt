@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.LaunchedEffect
@@ -17,8 +18,10 @@ import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.ComposeViewport
+import compose_miuix_ui.example.web.generated.resources.Res
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.withFontFamily
+import utils.LocalAboutLibrariesJsonLoader
 import webfont.installOnDemandWebFonts
 import webfont.queryParam
 
@@ -75,6 +78,11 @@ fun main() {
             withFrameNanos {} // let the first frame paint behind the overlay
             platformHideLoading()
         }
-        App(padding = safePadding, textStyles = textStyles)
+        val loadAboutLibrariesJson: suspend () -> String = remember {
+            { Res.readBytes("files/aboutlibraries.json").decodeToString() }
+        }
+        CompositionLocalProvider(LocalAboutLibrariesJsonLoader provides loadAboutLibrariesJson) {
+            App(padding = safePadding, textStyles = textStyles)
+        }
     }
 }

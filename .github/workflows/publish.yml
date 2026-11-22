@@ -8,8 +8,10 @@ on:
       - "miuix-core/**"
       - "miuix-ui/**"
       - "miuix-preference/**"
-      - "miuix-shader/**"
+      - "miuix-material/**"
       - "miuix-blur/**"
+      - "miuix-glass/**"
+      - "miuix-glass-icons/**"
       - "miuix-squircle/**"
       - "miuix-icons/**"
       - "miuix-nav/**"
@@ -43,10 +45,34 @@ jobs:
           java-version: "21"
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: ${{ runner.os }}-konan-
+      - name: Build and stage SNAPSHOT publications
+        run: ./gradlew --parallel --stacktrace publishAllPublicationsToLocalRepository --no-configuration-cache
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Publish SNAPSHOT to GitHub Packages
-        run: ./gradlew --no-daemon --no-parallel --stacktrace publishAllPublicationsToGithubRepository --no-configuration-cache
+        run: ./gradlew --no-parallel --stacktrace publishAllPublicationsToGithubRepository --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Clean up incomplete SNAPSHOT packages on failure or cancellation
+        if: failure() || cancelled()
+        run: bash .github/scripts/cleanup_packages.sh failed
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Prune old SNAPSHOT package versions
+        if: success()
+        run: bash .github/scripts/cleanup_packages.sh prune
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KEEP_SNAPSHOTS: "10"

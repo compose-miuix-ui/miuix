@@ -3,10 +3,12 @@
 
 package top.yukonga.miuix.kmp.window.internal
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+@Immutable
 internal data class MiuixWindowContentDecoration(
     val inset: Dp = 0.dp,
     val cornerRadius: Dp = 0.dp,

@@ -90,6 +90,7 @@ private fun mapAndroidStyleToThemePaletteStyle(styleName: String): ThemePaletteS
     "FIDELITY" -> ThemePaletteStyle.Fidelity
     "CONTENT" -> ThemePaletteStyle.Content
     "NEUTRAL" -> ThemePaletteStyle.Neutral
+    "CMF" -> ThemePaletteStyle.Cmf
     else -> ThemePaletteStyle.TonalSpot
 }
 

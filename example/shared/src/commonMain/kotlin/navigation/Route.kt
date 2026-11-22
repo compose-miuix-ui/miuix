@@ -16,10 +16,16 @@ sealed interface Route : NavKey {
     data object Main : Route
 
     @Serializable
+    data class Component(val demo: ComponentDemo) : Route
+
+    @Serializable
     data object PullToRefresh : Route
 
     @Serializable
     data object About : Route
+
+    @Serializable
+    data object ThemeSettings : Route
 
     @Serializable
     data object License : Route
@@ -35,4 +41,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object OverscrollLoadMore : Route
+
+    @Serializable
+    data object Glass : Route
 }

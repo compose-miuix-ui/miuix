@@ -3,171 +3,183 @@
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+            name="viewport"
     />
-    <meta name="color-scheme" content="light dark" />
+    <meta content="light dark" name="color-scheme"/>
     <title>Miuix</title>
-    <link rel="shortcut icon" href="./favicon.ico" />
-    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <link href="./favicon.ico" rel="shortcut icon"/>
+    <link href="styles.css" rel="stylesheet" type="text/css"/>
     <script type="application/javascript">
-      // Loading overlay: app/runtime bytes (tracked by hooking fetch below).
-      // Font subsets are loaded on demand via WebUnresolvedSymbolsRegistry in the background.
-      (function () {
-        var origFetch = window.fetch;
-        var loaded = 0;
-        var total = 0;
-        var sawLength = false;
-        var finished = false;
-        var indeterminate = false;
-        var startedFill = false;
-        var appBar = null;
-        var appPct = null;
-        var shownApp = 0,
-          targetApp = 0;
-
-        // Only track the heavy runtime payload (wasm + skiko side modules) for the app bar.
-        function shouldTrack(url) {
-          return /\.(wasm|mjs)(\?|#|$)/.test(url);
-        }
-
-        function setIndeterminate(on) {
-          if (indeterminate === on) return;
-          indeterminate = on;
-          var root = document.getElementById("loading");
-          if (root) root.classList.toggle("indeterminate", on);
-          if (on && appBar) appBar.style.width = ""; // hand width control to the CSS animation
-        }
-
-        function tick() {
-          if (finished) return;
-          if (!appBar) appBar = document.getElementById("loading-bar-fill-app");
-          if (!appPct) appPct = document.getElementById("loading-percent-app");
-
-          // App/runtime bar: downloaded bytes.
-          if (sawLength && total > 0) {
-            var fa = loaded / total;
-            if (fa > 1) fa = 1;
-            if (fa > targetApp) targetApp = fa;
+        // Loading overlay: app/runtime bytes (tracked by hooking fetch below).
+        // Font subsets are loaded on demand via WebUnresolvedSymbolsRegistry in the background.
+        (function () {
+          var origFetch = window.fetch;
+          var loaded = 0;
+          var total = 0;
+          var sawLength = false;
+          var finished = false;
+          var indeterminate = false;
+          var startedFill = false;
+          var reachedHundred = false;
+          var appBar = null;
+          var appPct = null;
+          var shownApp = 0,
+            targetApp = 0;
+          // Only track the heavy runtime payload (wasm + skiko side modules) for the app bar.
+          function shouldTrack(url) {
+            return /\.(wasm|mjs)(\?|#|$)/.test(url);
           }
-          shownApp += (targetApp - shownApp) * 0.12; // ease toward target, never step backwards
-          if (!indeterminate) {
-            if (appBar) appBar.style.width = (shownApp * 100).toFixed(1) + "%";
-            if (appPct) appPct.textContent = Math.round(shownApp * 100) + "%";
-          }
-          requestAnimationFrame(tick);
-        }
 
-        window.fetch = function (input, init) {
-          var url;
-          try {
-            url = typeof input === "string" ? input : input.url;
-          } catch (e) {
-            url = "";
-          }
-          if (url && url.startsWith("https://fonts.gstatic.com/s/")) {
-            return Promise.reject(new Error("Google font fallback disabled in favor of MiSans"));
-          }
-          if (!url || !shouldTrack(url)) return origFetch(input, init);
-          return origFetch(input, init).then(function (resp) {
-            try {
-              if (!resp || !resp.body || !resp.ok) return resp;
-              var len = resp.headers.get("content-length");
-              if (len) {
-                total += parseInt(len, 10) || 0;
-                sawLength = true;
-              }
-              var reader = resp.body.getReader();
-              var stream = new ReadableStream({
-                start: function (controller) {
-                  function pump() {
-                    reader
-                      .read()
-                      .then(function (r) {
-                        if (r.done) {
-                          controller.close();
-                          return;
-                        }
-                        loaded += r.value.byteLength;
-                        controller.enqueue(r.value);
-                        pump();
-                      })
-                      .catch(function (err) {
-                        controller.error(err);
-                      });
-                  }
-                  pump();
-                },
-              });
-              // Preserve headers (Content-Type: application/wasm is required by instantiateStreaming).
-              return new Response(stream, {
-                status: resp.status,
-                statusText: resp.statusText,
-                headers: resp.headers,
-              });
-            } catch (e) {
-              return resp; // never let progress tracking break asset loading
-            }
-          });
-        };
-
-        // If no Content-Length is ever seen (gzip / server quirk), fall back to an indeterminate app bar.
-        setTimeout(function () {
-          if (!finished && !sawLength) setIndeterminate(true);
-        }, 1200);
-
-        window.__miuixLoading = {
-          finish: function () {
-            finished = true;
-            indeterminate = false;
+          function setIndeterminate(on) {
+            if (indeterminate === on) return;
+            indeterminate = on;
             var root = document.getElementById("loading");
-            if (root) root.classList.remove("indeterminate");
-            var a = document.getElementById("loading-bar-fill-app");
-            var ap = document.getElementById("loading-percent-app");
-            if (a) a.style.width = "100%";
-            if (ap) ap.textContent = "100%";
-            if (root) {
-              root.classList.add("hidden");
-              setTimeout(function () {
-                if (root.parentNode) root.parentNode.removeChild(root);
-              }, 300);
-            }
-          },
-        };
+            if (root) root.classList.toggle("indeterminate", on);
+            if (on && appBar) appBar.style.width = ""; // hand width control to the CSS animation
+          }
 
-        if (!startedFill) {
-          startedFill = true;
-          requestAnimationFrame(tick);
-        }
-      })();
+          function tick() {
+            if (finished) return;
+            if (!appBar) appBar = document.getElementById("loading-bar-fill-app");
+            if (!appPct) appPct = document.getElementById("loading-percent-app");
+
+            // App/runtime bar: downloaded bytes.
+            if (sawLength && total > 0) {
+              var fa = loaded / total;
+              if (fa > 1) fa = 1;
+              if (fa > targetApp) targetApp = fa;
+            }
+            shownApp += (targetApp - shownApp) * 0.12; // ease toward target, never step backwards
+            if (!indeterminate) {
+              if (targetApp >= 1 && shownApp >= 0.995) {
+                shownApp = 1;
+                if (appBar) appBar.style.width = "100%";
+                if (appPct) appPct.textContent = "100%";
+                if (!reachedHundred) {
+                  reachedHundred = true;
+                  setTimeout(function () {
+                    if (!finished) setIndeterminate(true);
+                  }, 200);
+                }
+              } else {
+                if (appBar) appBar.style.width = (shownApp * 100).toFixed(1) + "%";
+                if (appPct) appPct.textContent = Math.round(shownApp * 100) + "%";
+              }
+            }
+            requestAnimationFrame(tick);
+          }
+
+          window.fetch = function (input, init) {
+            var url;
+            try {
+              url = typeof input === "string" ? input : input.url;
+            } catch (e) {
+              url = "";
+            }
+            if (url && url.startsWith("https://fonts.gstatic.com/s/")) {
+              return Promise.reject(new Error("Google font fallback disabled in favor of MiSans"));
+            }
+            if (!url || !shouldTrack(url)) return origFetch(input, init);
+            return origFetch(input, init).then(function (resp) {
+              try {
+                if (!resp || !resp.body || !resp.ok) return resp;
+                var len = resp.headers.get("content-length");
+                if (len) {
+                  total += parseInt(len, 10) || 0;
+                  sawLength = true;
+                }
+                var reader = resp.body.getReader();
+                var stream = new ReadableStream({
+                  start: function (controller) {
+                    function pump() {
+                      reader
+                        .read()
+                        .then(function (r) {
+                          if (r.done) {
+                            controller.close();
+                            return;
+                          }
+                          loaded += r.value.byteLength;
+                          controller.enqueue(r.value);
+                          pump();
+                        })
+                        .catch(function (err) {
+                          controller.error(err);
+                        });
+                    }
+                    pump();
+                  },
+                });
+                // Preserve headers (Content-Type: application/wasm is required by instantiateStreaming).
+                return new Response(stream, {
+                  status: resp.status,
+                  statusText: resp.statusText,
+                  headers: resp.headers,
+                });
+              } catch (e) {
+                return resp; // never let progress tracking break asset loading
+              }
+            });
+          };
+
+          // If no Content-Length is ever seen (gzip / server quirk), fall back to an indeterminate app bar.
+          setTimeout(function () {
+            if (!finished && !sawLength) setIndeterminate(true);
+          }, 1200);
+
+          window.__miuixLoading = {
+            finish: function () {
+              finished = true;
+              var root = document.getElementById("loading");
+              var a = document.getElementById("loading-bar-fill-app");
+              var ap = document.getElementById("loading-percent-app");
+              if (!indeterminate) {
+                if (a) a.style.width = "100%";
+                if (ap) ap.textContent = "100%";
+              }
+              if (root) {
+                root.classList.add("hidden");
+                setTimeout(function () {
+                  if (root.parentNode) root.parentNode.removeChild(root);
+                }, 300);
+              }
+            },
+          };
+
+          if (!startedFill) {
+            startedFill = true;
+            requestAnimationFrame(tick);
+          }
+        })();
     </script>
-  </head>
-  <body>
-    <div id="loading">
-      <div id="loading-card">
+</head>
+<body>
+<div id="loading">
+    <div id="loading-card">
         <img
-          id="loading-logo"
-          src="ic_launcher.png"
-          alt="Miuix"
-          width="72"
-          height="72"
+                alt="Miuix"
+                height="72"
+                id="loading-logo"
+                src="ic_launcher.png"
+                width="72"
         />
         <div id="loading-title">Miuix</div>
         <div class="loading-row">
-          <div class="loading-bar">
-            <div class="loading-bar-fill" id="loading-bar-fill-app"></div>
-          </div>
-          <div class="loading-status">
-            <span class="loading-label">App</span>
-            <span class="loading-percent" id="loading-percent-app">0%</span>
-          </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill" id="loading-bar-fill-app"></div>
+            </div>
+            <div class="loading-status">
+                <span class="loading-label">App</span>
+                <span class="loading-percent" id="loading-percent-app">0%</span>
+            </div>
         </div>
-      </div>
     </div>
-    <div id="composeApp"></div>
-  </body>
-  <script defer src="composeApp.js" type="application/javascript"></script>
+</div>
+<div id="composeApp"></div>
+</body>
+<script defer src="composeApp.js" type="application/javascript"></script>
 </html>

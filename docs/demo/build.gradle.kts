@@ -10,7 +10,8 @@ plugins {
 }
 
 kotlin {
-    js {
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
         outputModuleName = "demo"
         browser {
             commonWebpackConfig {
@@ -24,6 +25,8 @@ kotlin {
         commonMain.dependencies {
             api(projects.miuixUi)
             api(projects.miuixPreference)
+            implementation(projects.miuixGlass)
+            implementation(projects.miuixGlassIcons)
             implementation(projects.miuixIcons)
             implementation(projects.miuixNav)
         }

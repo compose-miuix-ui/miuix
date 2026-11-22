@@ -3,7 +3,7 @@
 
 package component
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -23,13 +23,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
@@ -69,6 +66,7 @@ import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import utils.SearchStatus
+import utils.rememberAppSafePadding
 
 // Search Pager Composable
 @Composable
@@ -96,10 +94,10 @@ fun SearchStatus.SearchPager(
             )
         }
     }
-    val systemBarsPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
+    val safePadding = rememberAppSafePadding()
     val topPadding by animateDpAsState(
         targetValue = if (searchStatus.shouldExpand()) {
-            systemBarsPadding + 12.dp
+            safePadding.calculateTopPadding() + 12.dp
         } else {
             max(offsetY, 0.dp)
         },
@@ -161,7 +159,7 @@ fun SearchStatus.SearchPager(
                     expandBar(searchStatus, onSearchStatusChange, searchBarTopPadding, capsuleColor)
                 }
             }
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = searchStatus.isExpand() || searchStatus.isAnimatingExpand(),
                 enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
@@ -195,7 +193,7 @@ fun SearchStatus.SearchPager(
                 )
             }
         }
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = searchStatus.isExpand(),
             modifier = Modifier
                 .fillMaxSize()
@@ -252,7 +250,7 @@ fun SearchBar(
             )
         },
         trailingIcon = {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 searchStatus.searchText.isNotEmpty(),
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut(),

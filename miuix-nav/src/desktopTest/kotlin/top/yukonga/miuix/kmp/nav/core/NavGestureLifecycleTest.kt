@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
@@ -29,6 +31,56 @@ private data object GestureRouteB : NavKey
  */
 @OptIn(ExperimentalTestApi::class)
 class NavGestureLifecycleTest {
+
+    @Test
+    fun consumedReleasePastCommitThreshold_keepsStackAndAllowsNextSwipe() = runComposeUiTest {
+        val backStack = navBackStackOf(GestureRouteA, GestureRouteB)
+        var consumeRelease = true
+        setContent {
+            NavDisplay(
+                backStack = backStack,
+                effects = NavDisplayEffects.None,
+                modifier = Modifier.pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            if (consumeRelease) event.changes.filter { !it.pressed }.forEach { it.consume() }
+                        }
+                    }
+                },
+            ) {
+                entry<GestureRouteA> { Box(Modifier.fillMaxSize()) { BasicText("page-a") } }
+                entry<GestureRouteB>(swipeDismiss = NavSwipeDirection.LeftToRight) {
+                    Box(Modifier.fillMaxSize()) { BasicText("page-b") }
+                }
+            }
+        }
+        waitForIdle()
+
+        // Android's ACTION_CANCEL becomes an already-consumed release in Compose. Desktop's
+        // cancel() does not reproduce that event, so consume a release explicitly to model it.
+        onRoot().performTouchInput {
+            down(Offset(width * 0.05f, centerY))
+            repeat(6) { step ->
+                moveTo(Offset(width * (0.05f + 0.12f * (step + 1)), centerY))
+            }
+            up()
+        }
+        waitForIdle()
+        assertEquals(listOf<NavKey>(GestureRouteA, GestureRouteB), backStack.toList())
+
+        // Cancellation must also leave the recognizer usable for a normal release.
+        runOnIdle { consumeRelease = false }
+        onRoot().performTouchInput {
+            down(Offset(width * 0.05f, centerY))
+            repeat(6) { step ->
+                moveTo(Offset(width * (0.05f + 0.12f * (step + 1)), centerY))
+            }
+            up()
+        }
+        waitForIdle()
+        assertEquals(listOf<NavKey>(GestureRouteA), backStack.toList())
+    }
 
     @Test
     fun topEntryHeldAtStartedWhileSwipeGestureActive() = runComposeUiTest {

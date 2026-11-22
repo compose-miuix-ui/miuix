@@ -32,6 +32,7 @@ import top.yukonga.miuix.kmp.window.LocalIsHitTestInCaptionBarState
 import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonClose
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.basic.rememberWindowsCaptionBarFontIconFamily
@@ -40,18 +41,22 @@ import java.awt.event.WindowEvent
 @Composable
 internal fun DialogWindowScope.WindowsMiuixDialogWindowFrame(
     resizable: Boolean,
-    properties: MiuixWindowProperties<ComposeDialog>,
+    properties: MiuixWindowProperties,
+    onResizeEdgeChange: (ComposeDialog, WindowResizeEdge) -> Unit,
     content: @Composable DialogWindowScope.() -> Unit,
 ) {
     val currentProperties by rememberUpdatedState(properties)
+    val currentOnResizeEdgeChange by rememberUpdatedState(onResizeEdgeChange)
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
     val iconFontFamily by rememberWindowsCaptionBarFontIconFamily()
     CompositionLocalProvider(
-        LocalMiuixWindowInfo provides MiuixWindowInfo(
-            captionBarHeight = properties.captionBarHeight,
-            captionButtonsAlign = CaptionButtonsAlign.End,
-            captionButtonsFullWidth = MiuixCaptionButtonWidth,
-        ),
+        LocalMiuixWindowInfo provides remember(properties.captionBarHeight) {
+            MiuixWindowInfo(
+                captionBarHeight = properties.captionBarHeight,
+                captionButtonsAlign = CaptionButtonsAlign.End,
+                captionButtonsFullWidth = MiuixCaptionButtonWidth,
+            )
+        },
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,
     ) {
         val windowClientInsets = remember { MutableWindowInsets() }
@@ -78,7 +83,7 @@ internal fun DialogWindowScope.WindowsMiuixDialogWindowFrame(
                     windowClientInsets.insets = windowInsets
                 },
                 onResizeEdgeChange = { edge ->
-                    currentProperties.onResizeEdgeChange(window, edge)
+                    currentOnResizeEdgeChange(window, edge)
                 },
             ).apply {
                 updateBorderAndShadow(true)

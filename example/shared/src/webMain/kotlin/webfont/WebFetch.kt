@@ -6,8 +6,6 @@ package webfont
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.js.ExperimentalWasmJsInterop
 
 @OptIn(ExperimentalWasmJsInterop::class)
 @JsFun(

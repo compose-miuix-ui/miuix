@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.RoundedCorner
-import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -58,6 +57,7 @@ actual fun platformDialogProperties(): DialogProperties = DialogProperties(
     dismissOnBackPress = false,
     usePlatformDefaultWidth = false,
     decorFitsSystemWindows = false,
+    scrimAlpha = 0f,
 )
 
 @Composable
@@ -65,10 +65,7 @@ actual fun RemovePlatformDialogDefaultEffects() {
     val parent = LocalView.current.parent
     DisposableEffect(parent) {
         val provider = parent as? DialogWindowProvider
-        val window = provider?.window
-        window?.setWindowAnimations(0)
-        window?.setDimAmount(0f)
-        window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        provider?.window?.setWindowAnimations(0)
         onDispose {
             // No-op
         }

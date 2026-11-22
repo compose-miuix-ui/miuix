@@ -3,7 +3,9 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,11 +51,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param onClickLabel Optional label describing the click action for accessibility services.
  * @param role The semantic [Role] of the [BasicComponent] for accessibility services.
- * @param holdDownState Used to determine whether it is in the pressed state.
+ * @param holdDownState Whether to show pressed feedback, even without [onClick].
  * @param enabled Whether the [BasicComponent] is enabled.
- * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
- *   The value should remain null or non-null for the lifetime of this component;
- *   switching across recompositions will allocate a new internal source and lose pending interactions.
+ * @param interactionSource Optional [MutableInteractionSource] for observing or emitting interactions.
  */
 @Composable
 fun BasicComponent(
@@ -115,11 +115,9 @@ fun BasicComponent(
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param onClickLabel Optional label describing the click action for accessibility services.
  * @param role The semantic [Role] of the [BasicComponent] for accessibility services.
- * @param holdDownState Used to determine whether it is in the pressed state.
+ * @param holdDownState Whether to show pressed feedback, even without [onClick].
  * @param enabled Whether the [BasicComponent] is enabled.
- * @param interactionSource The [MutableInteractionSource] for the [BasicComponent].
- *   The value should remain null or non-null for the lifetime of this component;
- *   switching across recompositions will allocate a new internal source and lose pending interactions.
+ * @param interactionSource Optional [MutableInteractionSource] for observing or emitting interactions.
  * @param content The content of the [BasicComponent].
  */
 @Composable
@@ -137,23 +135,35 @@ fun BasicComponent(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val currentOnClick by rememberUpdatedState(onClick)
+    val holdInteractionSource = interactionSource ?: run {
+        // Keep the source alive for the release animation.
+        val holdSource = remember { lazy(LazyThreadSafetyMode.NONE) { MutableInteractionSource() } }
+        if (holdDownState || holdSource.isInitialized()) holdSource.value else null
+    }
 
-    HoldDownObserver(holdDownState, interactionSource)
+    if (holdInteractionSource != null) {
+        HoldDownObserver(holdDownState, holdInteractionSource)
+    }
 
-    val clickableModifier = remember(enabled, onClick != null, interactionSource, role, onClickLabel) {
-        if (enabled && onClick != null) {
+    val clickableModifier = if (enabled && onClick != null) {
+        val currentOnClick by rememberUpdatedState(onClick)
+        remember(interactionSource, role, onClickLabel) {
             Modifier.clickable(
                 interactionSource = interactionSource,
                 onClickLabel = onClickLabel,
                 role = role,
-                onClick = { currentOnClick?.invoke() },
+                onClick = { currentOnClick() },
             )
-        } else {
-            Modifier
         }
+    } else {
+        Modifier
+    }
+
+    // An internal hold must not replace the clickable's existing interactions.
+    val holdIndication = if (enabled && holdInteractionSource != null && (onClick == null || interactionSource == null)) {
+        Modifier.indication(holdInteractionSource, LocalIndication.current)
+    } else {
+        Modifier
     }
 
     Column(
@@ -161,6 +171,7 @@ fun BasicComponent(
             .heightIn(min = 56.dp)
             .fillMaxWidth()
             .then(clickableModifier)
+            .then(holdIndication)
             .padding(insideMargin),
         verticalArrangement = Arrangement.Center,
     ) {
@@ -205,6 +216,7 @@ fun BasicComponent(
 
                 val maxWidth = constraints.maxWidth
                 val maxHeight = constraints.maxHeight
+                val hasBoundedWidth = constraints.hasBoundedWidth
 
                 val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
@@ -213,18 +225,24 @@ fun BasicComponent(
                 val startSpacerWidth = if (startWidth > 0) spacerPx else 0
                 val widthAfterStart = (maxWidth - startWidth - startSpacerWidth).coerceAtLeast(0)
 
-                val endIntrinsicWidth = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
-                val endHardCap = (widthAfterStart - spacerPx).coerceAtLeast(0) * 6 / 10
-                val endTargetWidth = endIntrinsicWidth.coerceAtMost(endHardCap)
-                val endPlaceable = endMeasurable?.measure(
-                    looseConstraints.copy(maxWidth = endTargetWidth),
-                )
+                val endPlaceable = if (hasBoundedWidth) {
+                    val endIntrinsicWidth = endMeasurable?.maxIntrinsicWidth(maxHeight) ?: 0
+                    val endHardCap = (widthAfterStart - spacerPx).coerceAtLeast(0) * 6 / 10
+                    val endTargetWidth = endIntrinsicWidth.coerceAtMost(endHardCap)
+                    endMeasurable?.measure(looseConstraints.copy(maxWidth = endTargetWidth))
+                } else {
+                    endMeasurable?.measure(looseConstraints)
+                }
                 val endActualWidth = endPlaceable?.width ?: 0
                 val endSpacerWidth = if (endActualWidth > 0) spacerPx else 0
 
-                val widthForCenter = (widthAfterStart - endActualWidth - endSpacerWidth).coerceAtLeast(0)
                 val centerPlaceable = centerMeasurable.measure(
-                    looseConstraints.copy(maxWidth = widthForCenter),
+                    if (hasBoundedWidth) {
+                        val widthForCenter = (widthAfterStart - endActualWidth - endSpacerWidth).coerceAtLeast(0)
+                        looseConstraints.copy(maxWidth = widthForCenter)
+                    } else {
+                        looseConstraints
+                    },
                 )
 
                 val startHeight = startPlaceable?.height ?: 0
@@ -232,8 +250,16 @@ fun BasicComponent(
                 val rowHeight = maxOf(startHeight, centerPlaceable.height, endHeight)
                 val layoutHeight = rowHeight
                     .coerceIn(constraints.minHeight, maxHeight.takeIf { it != Constraints.Infinity } ?: rowHeight)
+                val layoutWidth = if (hasBoundedWidth) {
+                    maxWidth
+                } else {
+                    (
+                        startWidth + startSpacerWidth + centerPlaceable.width +
+                            endSpacerWidth + endActualWidth
+                        ).coerceAtLeast(constraints.minWidth)
+                }
 
-                layout(width = maxWidth, height = layoutHeight) {
+                layout(width = layoutWidth, height = layoutHeight) {
                     val startTop = (rowHeight - startHeight).coerceAtLeast(0) / 2
                     val centerTop = (rowHeight - centerPlaceable.height) / 2
                     val endTop = (rowHeight - endHeight).coerceAtLeast(0) / 2
@@ -244,7 +270,7 @@ fun BasicComponent(
                     centerPlaceable.placeRelative(centerX, centerTop)
 
                     endPlaceable?.let {
-                        val endX = maxWidth - it.width
+                        val endX = layoutWidth - it.width
                         it.placeRelative(endX, endTop)
                     }
                 }

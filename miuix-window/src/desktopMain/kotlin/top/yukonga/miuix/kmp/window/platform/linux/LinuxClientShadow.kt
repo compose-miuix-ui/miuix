@@ -21,23 +21,25 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.window.WindowDecoration
-import com.sun.jna.Library
 import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.NativeLong
-import com.sun.jna.Pointer
 import com.sun.jna.platform.unix.X11
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import top.yukonga.miuix.kmp.window.platform.linux.x11.LinuxX11
+import top.yukonga.miuix.kmp.window.platform.linux.x11.LinuxXShape
 import java.awt.Color
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.Window
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import kotlin.math.roundToInt
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val MAX_WAIT_FOR_SHOWING_MS = 10_000L
@@ -114,7 +116,9 @@ internal object LinuxClientShadow {
      * fully undecorated.
      */
     @OptIn(ExperimentalComposeUiApi::class)
-    fun shouldUseClientShadow(decoration: WindowDecoration): Boolean = decoration == WindowDecoration.SystemDefault && isTranslucencySupported
+    fun shouldUseClientShadow(decoration: WindowDecoration): Boolean = decoration == WindowDecoration.SystemDefault &&
+        LinuxWindowBackend.current != LinuxWindowBackend.FallbackSystem &&
+        isTranslucencySupported
 
     /**
      * Sets or removes the `_GTK_FRAME_EXTENTS` property (left, right, top, bottom) so the window
@@ -127,7 +131,7 @@ internal object LinuxClientShadow {
         if (!window.isDisplayable) return false
 
         val x11 = try {
-            X11Ext.INSTANCE
+            LinuxX11.INSTANCE
         } catch (_: UnsatisfiedLinkError) {
             return false
         }
@@ -184,12 +188,12 @@ internal object LinuxClientShadow {
         if (!window.isDisplayable) return false
 
         val xext = try {
-            XextExt.INSTANCE
+            LinuxXShape.INSTANCE
         } catch (_: UnsatisfiedLinkError) {
             return false
         }
         val x11 = try {
-            X11Ext.INSTANCE
+            LinuxX11.INSTANCE
         } catch (_: UnsatisfiedLinkError) {
             return false
         }
@@ -202,8 +206,8 @@ internal object LinuxClientShadow {
             val transform = window.graphicsConfiguration?.defaultTransform
             val scaleX = transform?.scaleX ?: 1.0
             val scaleY = transform?.scaleY ?: 1.0
-            val widthPx = (window.width * scaleX).roundToInt()
-            val heightPx = (window.height * scaleY).roundToInt()
+            val widthPx = (window.width * scaleX).fastRoundToInt()
+            val heightPx = (window.height * scaleY).fastRoundToInt()
 
             val margin = marginPx.coerceIn(0, minOf(widthPx, heightPx) / 2)
             val contentX = margin
@@ -221,13 +225,13 @@ internal object LinuxClientShadow {
             xext.XShapeCombineRectangles(
                 display,
                 X11.Window(windowId),
-                XextExt.SHAPE_INPUT,
+                LinuxXShape.SHAPE_INPUT,
                 0,
                 0,
                 rectangle,
                 1,
-                XextExt.SHAPE_SET,
-                XextExt.UNSORTED,
+                LinuxXShape.SHAPE_SET,
+                LinuxXShape.UNSORTED,
             )
             x11.XFlush(display)
 
@@ -246,10 +250,14 @@ private val shadowBaseColor = androidx.compose.ui.graphics.Color.Black
  * Draws the client-drawn window shadow (see [LinuxClientShadow]): layered rounded rectangles
  * with a quadratic alpha falloff, extending into the transparent shadow margin.
  *
- * Must be applied before the background in the modifier chain.
+ * Must be applied before the background is drawn in the modifier chain. When [isBackgroundOpaque]
+ * is true, the background hides the interior shadow, so only the band containing the rounded
+ * corners and margin is drawn.
  */
 
-internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
+internal fun Modifier.linuxClientShadow(
+    isBackgroundOpaque: Boolean,
+): Modifier = drawWithCache {
     val cornerRadiusPx = LinuxClientShadow.cornerRadius.toPx()
     val contentRadiusPx = cornerRadiusPx.coerceAtMost(minOf(size.width, size.height) / 2)
     val contentBounds = Rect(Offset.Zero, size)
@@ -261,6 +269,47 @@ internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
     val offsetYPx = LinuxClientShadow.shadowOffsetY.toPx()
     val maxGrowPx = (LinuxClientShadow.margin - 2.dp).toPx().coerceAtLeast(1f)
     val maxAlpha = LinuxClientShadow.shadowAlpha
+    // Include the antialiased outer edge and the vertical shadow offset in every clip.
+    val shadowBounds = contentBounds.inflate(maxGrowPx + offsetYPx + 1f)
+    // Align shared clip edges to pixels so fractional density cannot blend a seam twice.
+    val opaqueBounds = Rect(
+        left = ceil(contentRadiusPx),
+        top = ceil(contentRadiusPx),
+        right = floor(size.width - contentRadiusPx),
+        bottom = floor(size.height - contentRadiusPx),
+    )
+    val shadowDrawBounds = if (isBackgroundOpaque && !opaqueBounds.isEmpty) {
+        // Disjoint rectangular clips let the GPU scissor away the opaque interior before shading.
+        // Keep a full corner-radius band so the existing rounded-edge blending remains unchanged.
+        listOf(
+            Rect(
+                left = shadowBounds.left,
+                top = shadowBounds.top,
+                right = shadowBounds.right,
+                bottom = opaqueBounds.top,
+            ),
+            Rect(
+                left = shadowBounds.left,
+                top = opaqueBounds.top,
+                right = opaqueBounds.left,
+                bottom = opaqueBounds.bottom,
+            ),
+            Rect(
+                left = opaqueBounds.right,
+                top = opaqueBounds.top,
+                right = shadowBounds.right,
+                bottom = opaqueBounds.bottom,
+            ),
+            Rect(
+                left = shadowBounds.left,
+                top = opaqueBounds.bottom,
+                right = shadowBounds.right,
+                bottom = shadowBounds.bottom,
+            ),
+        )
+    } else {
+        listOf(shadowBounds)
+    }
 
     onDrawWithContent {
         clipRect {
@@ -268,22 +317,31 @@ internal fun Modifier.linuxClientShadow(): Modifier = drawWithCache {
             drawPath(cornerCutout, shadowBaseColor, blendMode = BlendMode.DstOut)
         }
 
-        // Layered from outside in; per-layer alpha chosen so the cumulative alpha at normalized
-        // distance t from the content edge is maxAlpha * (1 - t)^2
-        val layers = 24
-        for (i in layers downTo 1) {
-            val t = i.toFloat() / layers
-            val tInner = (i - 1).toFloat() / layers
-            val alpha = maxAlpha * ((1 - tInner) * (1 - tInner) - (1 - t) * (1 - t))
-            val grow = maxGrowPx * t
-            drawRoundRect(
-                color = shadowBaseColor,
-                topLeft = Offset(-grow, -grow + offsetYPx),
-                size = Size(size.width + 2 * grow, size.height + 2 * grow),
-                cornerRadius = CornerRadius(cornerRadiusPx + grow),
-                alpha = alpha,
-                blendMode = BlendMode.DstOver,
-            )
+        for (bounds in shadowDrawBounds) {
+            clipRect(
+                left = bounds.left,
+                top = bounds.top,
+                right = bounds.right,
+                bottom = bounds.bottom,
+            ) {
+                // Layered from outside in; per-layer alpha chosen so the cumulative alpha at normalized
+                // distance t from the content edge is maxAlpha * (1 - t)^2
+                val layers = 24
+                for (i in layers downTo 1) {
+                    val t = i.toFloat() / layers
+                    val tInner = (i - 1).toFloat() / layers
+                    val alpha = maxAlpha * ((1 - tInner) * (1 - tInner) - (1 - t) * (1 - t))
+                    val grow = maxGrowPx * t
+                    drawRoundRect(
+                        color = shadowBaseColor,
+                        topLeft = Offset(-grow, -grow + offsetYPx),
+                        size = Size(size.width + 2 * grow, size.height + 2 * grow),
+                        cornerRadius = CornerRadius(cornerRadiusPx + grow),
+                        alpha = alpha,
+                        blendMode = BlendMode.DstOver,
+                    )
+                }
+            }
         }
     }
 }
@@ -335,31 +393,5 @@ internal fun LinuxClientShadowEffect(
             LinuxClientShadow.applyGtkFrameExtents(window, 0)
             LinuxClientShadow.updateInputShape(window, 0)
         }
-    }
-}
-
-/**
- * JNA bindings for the X11 shape (XFixes) extension in libXext.
- */
-@Suppress("FunctionName")
-internal interface XextExt : Library {
-    fun XShapeCombineRectangles(
-        display: X11.Display,
-        window: X11.Window,
-        destKind: Int,
-        xOffset: Int,
-        yOffset: Int,
-        rectangles: Pointer,
-        rectangleCount: Int,
-        operation: Int,
-        ordering: Int,
-    )
-
-    companion object {
-        const val SHAPE_INPUT = 2
-        const val SHAPE_SET = 0
-        const val UNSORTED = 0
-
-        val INSTANCE: XextExt = Native.load("Xext", XextExt::class.java)
     }
 }

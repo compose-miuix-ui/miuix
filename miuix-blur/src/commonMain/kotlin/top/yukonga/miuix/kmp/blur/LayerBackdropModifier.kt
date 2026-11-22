@@ -12,10 +12,9 @@ import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
-import top.yukonga.miuix.kmp.shader.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 
 /**
  * Captures the content of this composable into the given [LayerBackdrop]'s graphics layer.
@@ -56,8 +55,7 @@ private class LayerBackdropNode(
     GlobalPositionAwareModifierNode,
     CompositionLocalConsumerModifierNode {
 
-    private var lifecycle: Lifecycle? = null
-    private var lifecycleObserver: LifecycleEventObserver? = null
+    private var stopObservingResets: (() -> Unit)? = null
     private var coordinates: LayoutCoordinates? = null
 
     fun updateBackdrop(backdrop: LayerBackdrop) {
@@ -71,16 +69,9 @@ private class LayerBackdropNode(
 
     override fun onAttach() {
         val ownerLifecycle = graphicsResourceLifecycle() ?: return
-        lifecycle = ownerLifecycle
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                // Force recordLayer to capture a fresh recording after the platform graphics
-                // resources were invalidated while the app was paused.
-                invalidateDraw()
-            }
+        stopObservingResets = observeGraphicsResourceResets(ownerLifecycle) {
+            invalidateDraw()
         }
-        lifecycleObserver = observer
-        ownerLifecycle.addObserver(observer)
     }
 
     override fun ContentDrawScope.draw() {
@@ -96,9 +87,8 @@ private class LayerBackdropNode(
     }
 
     override fun onDetach() {
-        lifecycleObserver?.let { observer -> lifecycle?.removeObserver(observer) }
-        lifecycleObserver = null
-        lifecycle = null
+        stopObservingResets?.invoke()
+        stopObservingResets = null
         coordinates = null
         backdrop.layerCoordinates = null
     }

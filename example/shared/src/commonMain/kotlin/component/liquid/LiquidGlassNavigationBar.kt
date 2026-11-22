@@ -7,7 +7,9 @@ package component.liquid
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +30,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -83,13 +90,13 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
-import top.yukonga.miuix.kmp.blur.highlight.BloomStroke
-import top.yukonga.miuix.kmp.blur.highlight.Highlight
-import top.yukonga.miuix.kmp.blur.highlight.LightPosition
-import top.yukonga.miuix.kmp.blur.highlight.LightSource
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.blur.sensor.rememberDeviceTilt
+import top.yukonga.miuix.kmp.material.EdgeLightSource
+import top.yukonga.miuix.kmp.material.EdgePeak
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
+import top.yukonga.miuix.kmp.material.sensor.rememberDeviceTilt
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
@@ -105,27 +112,29 @@ import kotlin.math.sin
 
 private val LocalIosTabScale = staticCompositionLocalOf { { 1f } }
 
-private val iosIndicatorSpecular: Highlight = Highlight(
+private val iosIndicatorSpecular: EdgeStroke = EdgeStroke(
     width = 1.dp,
-    alpha = 1f,
-    style = BloomStroke(
-        color = Color.White.copy(alpha = 0.12f),
-        innerBlurRadius = 2.0.dp,
-        primaryLight = LightSource(
-            position = LightPosition(0.5f, -0.3f, -0.05f),
-            color = Color.White,
-            intensity = 1f,
-        ),
-        secondaryLight = LightSource(
-            position = LightPosition(0.5f, 0.8f, -0.5f),
-            color = Color.White,
-            intensity = 0.4f,
-        ),
-        dualPeak = true,
+    bevel = 2.0.dp,
+    color = Color.White.copy(alpha = 0.12f),
+    primary = EdgeLightSource(
+        x = 0.5f,
+        y = -0.3f,
+        z = -0.05f,
+        color = Color.White,
+        intensity = 1f,
     ),
+    secondary = EdgeLightSource(
+        x = 0.5f,
+        y = 0.8f,
+        z = -0.5f,
+        color = Color.White,
+        intensity = 0.4f,
+    ),
+    // The gravity-rotated lights sweep horizontally, so follow each light's own XY direction.
+    peak = EdgePeak.Axial,
 )
 
-// Mirrors HighlightStyle.kt's LIGHT_REF — keep in sync.
+// Mirrors the edge-stroke shader's LIGHT_REF — keep in sync.
 private const val LIGHT_REF_X = 0.5f
 private const val LIGHT_REF_Y = 0.7f
 private const val GRAVITY_DIR_THRESHOLD_SQ = 0.01f // |g_xy| > 0.1, ≈ 6° tilt
@@ -138,14 +147,14 @@ private const val GRAVITY_ANGLE_STEP_RAD = (3.0 * PI / 180.0).toFloat()
  *
  * Returned as [State] so the read can be deferred to the draw phase: the sensor writes tilt
  * state unthrottled (~50Hz), and a composition-time read would recompose the whole caller
- * scope on every tick. The derivedStateOf equality check then drops draw invalidations to
+ * scope on every tick. The computedStateOf equality check then drops draw invalidations to
  * quantization-step crossings.
  */
 @Composable
 private fun rememberQuantizedGravityAngle(): State<Float> {
     val tiltState = rememberDeviceTilt()
     return remember(tiltState) {
-        derivedStateOf {
+        computedStateOf {
             val tilt = tiltState.value
             val gx = tilt.gravityX
             val gy = tilt.gravityY
@@ -161,30 +170,31 @@ private fun rememberQuantizedGravityAngle(): State<Float> {
 }
 
 /**
- * [base] with its `dualPeak` primary light rotated to the gravity angle plus [extraDegrees].
+ * [base] with its two lights rotated to the gravity angle plus [extraDegrees]: the primary
+ * leads and the secondary sits 180° opposite, reproducing the removed `dualPeak` two-peak
+ * sweep under [EdgePeak.Axial]. Both keep their own `z`, colour and intensity.
+ *
  * Read `.value` only at draw time (see [rememberQuantizedGravityAngle]); the rotated copy is
  * cached, re-allocating only when the angle crosses a quantization step.
  */
 @Composable
-private fun rememberGravityRotatedHighlight(
-    base: Highlight,
+private fun rememberGravityRotatedStroke(
+    base: EdgeStroke,
     extraDegrees: Float,
-): State<Highlight> {
+): State<EdgeStroke> {
     val gravityAngle = rememberQuantizedGravityAngle()
     return remember(gravityAngle, base, extraDegrees) {
         derivedStateOf {
-            val baseStyle = base.style as BloomStroke
-            val basePrimary = baseStyle.primaryLight
             val rad = gravityAngle.value + (extraDegrees * PI / 180.0).toFloat()
+            val opposite = rad + PI.toFloat()
             base.copy(
-                style = baseStyle.copy(
-                    primaryLight = basePrimary.copy(
-                        position = LightPosition(
-                            x = LIGHT_REF_X + cos(rad),
-                            y = LIGHT_REF_Y + sin(rad),
-                            z = basePrimary.position.z,
-                        ),
-                    ),
+                primary = base.primary.copy(
+                    x = LIGHT_REF_X + cos(rad),
+                    y = LIGHT_REF_Y + sin(rad),
+                ),
+                secondary = base.secondary.copy(
+                    x = LIGHT_REF_X + cos(opposite),
+                    y = LIGHT_REF_Y + sin(opposite),
                 ),
             )
         }
@@ -220,7 +230,7 @@ internal fun IosLiquidGlassNavigationBar(
     val offsetAnimation = remember { Animatable(0f) }
     val rubberBandPx = with(density) { 4.dp.toPx() }
     val panelOffset by remember(rubberBandPx) {
-        derivedStateOf {
+        computedStateOf {
             if (totalWidthPx == 0f) {
                 0f
             } else {
@@ -319,19 +329,26 @@ internal fun IosLiquidGlassNavigationBar(
         )
     }
 
-    // Read .value only inside highlight lambdas (draw phase), never in composition.
-    val baseHighlight = rememberGravityRotatedHighlight(iosIndicatorSpecular, extraDegrees = -45f)
-    val pillHighlight = rememberGravityRotatedHighlight(iosIndicatorSpecular, extraDegrees = 90f)
+    // Read .value only inside draw-phase lambdas, never in composition.
+    val baseStroke = rememberGravityRotatedStroke(iosIndicatorSpecular, extraDegrees = -45f)
+    val pillStroke = rememberGravityRotatedStroke(iosIndicatorSpecular, extraDegrees = 90f)
 
     val combinedBackdrop = backdrop?.let { rememberCombinedBackdrop(it, tabsBackdrop) }
 
-    val navBarBottomPadding = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val bottomPaddingValue = when (platform()) {
-        Platform.IOS -> 20.dp
-
-        else -> {
-            if (navBarBottomPadding != 0.dp) 8.dp + navBarBottomPadding else 36.dp
-        }
+    val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+    val captionBarBottom = WindowInsets.captionBar.only(WindowInsetsSides.Bottom)
+        .asPaddingValues().calculateBottomPadding()
+    val animatedCaptionBarHeight by animateDpAsState(
+        targetValue = captionBarBottom.coerceAtLeast(0.dp),
+        animationSpec = tween(durationMillis = 300),
+        label = "iosLiquidNavigationCaptionBarHeight",
+    )
+    val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight)
+    val floatingMargin = when {
+        platform() == Platform.IOS -> 22.dp
+        systemBottom <= 16.dp -> 18.dp
+        systemBottom >= 26.dp -> systemBottom
+        else -> 12.dp + systemBottom
     }
 
     val tabsContent: @Composable RowScope.() -> Unit = {
@@ -391,7 +408,11 @@ internal fun IosLiquidGlassNavigationBar(
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
-                .padding(bottom = bottomPaddingValue, start = 24.dp, end = 24.dp)
+                .windowInsetsPadding(
+                    WindowInsets.displayCutout.union(WindowInsets.navigationBars)
+                        .only(WindowInsetsSides.Horizontal),
+                )
+                .padding(bottom = floatingMargin, start = 24.dp, end = 24.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -432,7 +453,15 @@ internal fun IosLiquidGlassNavigationBar(
                                             refractionAmount = 24.dp.toPx(),
                                         )
                                     },
-                                    highlight = { baseHighlight.value.copy(alpha = 0.75f) },
+                                    // Drawn at draw time, like the highlight it replaces: the
+                                    // stroke is a snapshot State read inside the draw phase.
+                                    onDrawFront = {
+                                        drawEdgeStroke(
+                                            shape = pillShape,
+                                            stroke = baseStroke.value,
+                                            alpha = 0.75f,
+                                        )
+                                    },
                                     layerBlock = {
                                         val width = size.width.coerceAtLeast(1f)
                                         val s = lerp(1f, 1f + 16.dp.toPx() / width, dampedDrag.pressProgress)
@@ -517,7 +546,13 @@ internal fun IosLiquidGlassNavigationBar(
                                         chromaticAberration = 0.5f,
                                     )
                                 },
-                                highlight = { pillHighlight.value.copy(alpha = dampedDrag.pressProgress) },
+                                onDrawFront = {
+                                    drawEdgeStroke(
+                                        shape = pillShape,
+                                        stroke = pillStroke.value,
+                                        alpha = dampedDrag.pressProgress,
+                                    )
+                                },
                                 layerBlock = {
                                     scaleX = dampedDrag.scaleX
                                     scaleY = dampedDrag.scaleY

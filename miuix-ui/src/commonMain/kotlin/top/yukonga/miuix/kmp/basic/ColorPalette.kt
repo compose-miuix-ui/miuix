@@ -3,12 +3,12 @@
 
 package top.yukonga.miuix.kmp.basic
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,8 +29,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
@@ -45,7 +47,6 @@ import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import kotlin.math.abs
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * A color palette component that allows users to select colors from a grid of HSV values.
@@ -99,7 +100,7 @@ fun ColorPalette(
             totalColumns - 1
         } else {
             val k = (h % 360f) / 360f * hueColumns
-            k.roundToInt().coerceIn(0, hueColumns - 1)
+            k.fastRoundToInt().coerceIn(0, hueColumns - 1)
         }
         val row = if (isGray) {
             indexOfNearestGrayV(v, grayV)
@@ -199,7 +200,7 @@ private fun PaletteCanvas(
     Box(
         modifier = Modifier
             .squircleClip(cornerRadius)
-            .onGloballyPositioned { sizePx = it.size }
+            .onSizeChanged { sizePx = it }
             .pointerInput(rows, hueColumns, includeGrayColumn, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown()
@@ -230,64 +231,62 @@ private fun PaletteCanvas(
             isRtl = isRtl,
         )
 
-        if (sizePx.width > 0 && sizePx.height > 0) {
-            val w = sizePx.width
-            val h = sizePx.height
-            val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
-            val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-            val start = colEdges[selectedCol]
-            val end = colEdges[selectedCol + 1]
-            val top = rowEdges[selectedRow]
-            val bottom = rowEdges[selectedRow + 1]
-            val cxPx = (start + end) / 2f
-            val cyPx = (top + bottom) / 2f
-
-            val indicatorSize = indicatorRadius * 2
-            val density = LocalDensity.current
-            val halfIndicatorPx = with(density) { (indicatorSize / 2).roundToPx() }
-            Box(
-                modifier = Modifier
-                    .offset {
+        val indicatorSize = indicatorRadius * 2
+        val density = LocalDensity.current
+        val halfIndicatorPx = with(density) { (indicatorSize / 2).roundToPx() }
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = if (sizePx.width > 0 && sizePx.height > 0) 1f else 0f
+                }
+                .offset {
+                    val w = sizePx.width
+                    val h = sizePx.height
+                    if (w <= 0 || h <= 0) {
+                        IntOffset.Zero
+                    } else {
+                        val start = (selectedCol * w) / totalColumns
+                        val end = ((selectedCol + 1) * w) / totalColumns
+                        val top = (selectedRow * h) / rows
+                        val bottom = ((selectedRow + 1) * h) / rows
+                        val cxPx = (start + end) / 2f
+                        val cyPx = (top + bottom) / 2f
                         IntOffset(
                             x = (cxPx - halfIndicatorPx).toInt(),
                             y = (cyPx - halfIndicatorPx).toInt(),
                         )
                     }
-                    .size(indicatorSize)
-                    .drawWithCache {
-                        val strokeWidth = 6.dp.toPx()
-                        val halfStroke = strokeWidth / 2f
-                        val glowSpread = 2.dp.toPx()
-                        val glowColor = Color.Black.copy(alpha = 0.25f)
+                }
+                .size(indicatorSize)
+                .drawWithCache {
+                    val strokeWidth = 6.dp.toPx()
+                    val halfStroke = strokeWidth / 2f
+                    val glowSpread = 2.dp.toPx()
+                    val glowColor = Color.Black.copy(alpha = 0.25f)
 
-                        val ringCenterRadius = (size.minDimension / 2f) - halfStroke
-                        val gradientRadius = ringCenterRadius + halfStroke + glowSpread
+                    val ringCenterRadius = (size.minDimension / 2f) - halfStroke
+                    val gradientRadius = ringCenterRadius + halfStroke + glowSpread
 
-                        val glowBrush = Brush.radialGradient(
-                            colorStops = listOf(
-                                ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
-                                ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
-                                ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
-                                ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
-                            ).toTypedArray(),
-                            radius = gradientRadius,
+                    val glowBrush = Brush.radialGradient(
+                        colorStops = listOf(
+                            ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
+                            ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
+                            ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
+                            ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
+                        ).toTypedArray(),
+                        radius = gradientRadius,
+                    )
+
+                    onDrawBehind {
+                        drawCircle(brush = glowBrush, radius = gradientRadius)
+                        drawCircle(
+                            color = Color.White,
+                            radius = ringCenterRadius,
+                            style = Stroke(width = strokeWidth),
                         )
-
-                        onDrawBehind {
-                            drawCircle(
-                                brush = glowBrush,
-                                radius = gradientRadius,
-                            )
-
-                            drawCircle(
-                                color = Color.White,
-                                radius = ringCenterRadius,
-                                style = Stroke(width = strokeWidth),
-                            )
-                        }
-                    },
-            )
-        }
+                    }
+                },
+        )
     }
 }
 
@@ -308,31 +307,36 @@ private fun PaletteGrid(
             }
         }
     }
-    Canvas(Modifier.fillMaxSize()) {
-        val w = size.width.toInt()
-        val h = size.height.toInt()
+    Spacer(
+        modifier = Modifier
+            .fillMaxSize()
+            .drawWithCache {
+                val w = size.width.toInt()
+                val h = size.height.toInt()
+                val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
+                val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
 
-        val colEdges = IntArray(totalColumns + 1) { i -> (i * w) / totalColumns }
-        val rowEdges = IntArray(rows + 1) { i -> (i * h) / rows }
-
-        for (r in 0 until rows) {
-            val top = rowEdges[r].toFloat()
-            val bottom = rowEdges[r + 1].toFloat()
-            val cellH = bottom - top
-            for (c in 0 until totalColumns) {
-                val start = colEdges[c].toFloat()
-                val end = colEdges[c + 1].toFloat()
-                val cellW = end - start
-                val color = precomputedColors[r][c]
-                val left = if (isRtl) size.width - end else start
-                drawRect(
-                    color = color,
-                    topLeft = Offset(left, top),
-                    size = Size(cellW, cellH),
-                )
-            }
-        }
-    }
+                onDrawBehind {
+                    for (r in 0 until rows) {
+                        val top = rowEdges[r].toFloat()
+                        val bottom = rowEdges[r + 1].toFloat()
+                        val cellH = bottom - top
+                        for (c in 0 until totalColumns) {
+                            val start = colEdges[c].toFloat()
+                            val end = colEdges[c + 1].toFloat()
+                            val cellW = end - start
+                            val color = precomputedColors[r][c]
+                            val left = if (isRtl) size.width - end else start
+                            drawRect(
+                                color = color,
+                                topLeft = Offset(left, top),
+                                size = Size(cellW, cellH),
+                            )
+                        }
+                    }
+                }
+            },
+    )
 }
 
 private fun buildRowSV(rows: Int): List<Pair<Float, Float>> {

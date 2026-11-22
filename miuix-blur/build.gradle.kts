@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
     id("module.kotlin-jvm-toolchain")
     id("module.publication")
@@ -30,6 +31,7 @@ kotlin {
         }
         minSdk = 33
         namespace = "${BuildConfig.LIBRARY_ID}.blur"
+        withHostTest {}
     }
 
     jvm("desktop")
@@ -51,7 +53,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.miuixShader)
+            api(projects.miuixMaterial)
             implementation(libs.jetbrains.compose.foundation)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.lifecycle.runtime.compose)

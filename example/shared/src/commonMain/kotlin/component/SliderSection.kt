@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.RangeSlider
+import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
@@ -29,9 +31,77 @@ import top.yukonga.miuix.kmp.basic.VerticalSlider
 import top.yukonga.miuix.kmp.preference.RangeSliderPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 
+/** Keeps standalone sliders' label and row spacing consistent with the preference demos. */
+fun LazyListScope.basicSliderSection() {
+    item(key = "basicSlider") {
+        SmallTitle(text = "Slider")
+        Card(
+            modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+            insideMargin = PaddingValues(16.dp),
+        ) {
+            var value by remember { mutableFloatStateOf(0.3f) }
+            Text(text = "Value: ${(value * 100).toInt()}%")
+            Slider(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+            )
+            var stepsValue by remember { mutableFloatStateOf(3f) }
+            Text(text = "Steps: ${stepsValue.toInt()}/8")
+            Slider(
+                value = stepsValue,
+                onValueChange = { stepsValue = it },
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+                valueRange = 0f..8f,
+                steps = 7,
+                showKeyPoints = true,
+            )
+            Text(text = "Disabled")
+            Slider(
+                value = 0.7f,
+                onValueChange = {},
+                modifier = Modifier.padding(top = 8.dp),
+                enabled = false,
+            )
+        }
+    }
+    item(key = "basicRangeSlider") {
+        SmallTitle(text = "RangeSlider")
+        Card(
+            modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+            insideMargin = PaddingValues(16.dp),
+        ) {
+            var value by remember { mutableStateOf(0.2f..0.8f) }
+            Text(text = "Range: ${(value.start * 100).toInt()}% - ${(value.endInclusive * 100).toInt()}%")
+            RangeSlider(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+            )
+            var stepsValue by remember { mutableStateOf(2f..6f) }
+            Text(text = "Steps: ${stepsValue.start.toInt()} - ${stepsValue.endInclusive.toInt()}")
+            RangeSlider(
+                value = stepsValue,
+                onValueChange = { stepsValue = it },
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+                valueRange = 0f..8f,
+                steps = 7,
+                showKeyPoints = true,
+            )
+            Text(text = "Disabled")
+            RangeSlider(
+                value = 0.3f..0.7f,
+                onValueChange = {},
+                modifier = Modifier.padding(top = 8.dp),
+                enabled = false,
+            )
+        }
+    }
+}
+
 fun LazyListScope.sliderSection() {
     item(key = "slider") {
-        SmallTitle(text = "Slider")
+        SmallTitle(text = "SliderPreference")
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
@@ -89,9 +159,12 @@ fun LazyListScope.sliderSection() {
                 enabled = false,
             )
         }
+    }
+}
 
-        // RangeSlider
-        SmallTitle(text = "RangeSlider")
+fun LazyListScope.rangeSliderSection() {
+    item(key = "rangeSlider") {
+        SmallTitle(text = "RangeSliderPreference")
         Card(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
@@ -138,8 +211,11 @@ fun LazyListScope.sliderSection() {
                 enabled = false,
             )
         }
+    }
+}
 
-        // VerticalSlider
+fun LazyListScope.verticalSliderSection() {
+    item(key = "verticalSlider") {
         SmallTitle(text = "VerticalSlider")
         Card(
             modifier = Modifier

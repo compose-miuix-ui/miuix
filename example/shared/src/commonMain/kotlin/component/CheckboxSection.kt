@@ -33,6 +33,18 @@ fun LazyListScope.checkboxSection() {
                 .padding(bottom = 12.dp),
         ) {
             CheckboxRow()
+        }
+    }
+}
+
+fun LazyListScope.checkboxPreferenceSection() {
+    item(key = "checkboxPreference") {
+        SmallTitle(text = "CheckboxPreference")
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 12.dp),
+        ) {
             CheckboxPreferenceEndDemo()
             CheckboxPreferenceDemo()
             CheckboxPreference(

@@ -7,9 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.serialization.Serializable
@@ -33,10 +29,10 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
@@ -100,9 +96,6 @@ fun NestedNavTestPage(padding: PaddingValues) {
         val contentPadding = pageContentPadding(
             innerPadding,
             padding,
-            true,
-            extraStart = if (isWideScreen) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr),
-            extraEnd = WindowInsets.displayCutout.asPaddingValues().calculateRightPadding(LayoutDirection.Ltr),
             extraBottom = 12.dp,
         )
         Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
@@ -166,6 +159,7 @@ fun NestedNavTestPage(padding: PaddingValues) {
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 trackPadding = contentPadding,
+                topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
             )
         }
     }

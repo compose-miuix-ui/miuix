@@ -26,6 +26,7 @@ fun MiuixTheme(
     textStyles: TextStyles = MiuixTheme.textStyles,
     content: @Composable () -> Unit,
 ) {
+    ProvideDisplayCutoutFix()
     val rawColors = controller.currentColors()
     val miuixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
     val miuixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
@@ -56,6 +57,7 @@ fun MiuixTheme(
     textStyles: TextStyles = MiuixTheme.textStyles,
     content: @Composable () -> Unit,
 ) {
+    ProvideDisplayCutoutFix()
     val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     val miuixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
     val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }

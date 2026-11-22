@@ -6,10 +6,8 @@ package component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,17 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.GlassDialog
+import top.yukonga.miuix.kmp.glass.GlassDialogButton
+import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
-fun LazyListScope.cardSection() {
+fun LazyListScope.cardSection(backdrop: Backdrop? = null) {
     item(key = "card") {
         SmallTitle(text = "Card")
         Card(
@@ -104,12 +103,12 @@ fun LazyListScope.cardSection() {
                 },
             )
         }
-        LongPressHoldDownCardDemo()
+        LongPressHoldDownCardDemo(backdrop = backdrop)
     }
 }
 
 @Composable
-private fun LongPressHoldDownCardDemo() {
+private fun LongPressHoldDownCardDemo(backdrop: Backdrop?) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var holdDown by rememberSaveable { mutableStateOf(false) }
 
@@ -141,29 +140,30 @@ private fun LongPressHoldDownCardDemo() {
         },
     )
 
-    OverlayDialog(
+    GlassDialog(
         show = showDialog,
+        backdrop = backdrop,
         title = "Long Press Action",
         summary = "Triggered by long pressing the card.",
         onDismissRequest = { showDialog = false },
         onDismissFinished = { holdDown = false },
-        content = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            GlassDialogButton(
+                onClick = { showDialog = false },
+                modifier = Modifier.weight(1f),
             ) {
-                TextButton(
-                    text = "Cancel",
-                    onClick = { showDialog = false },
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(20.dp))
-                TextButton(
-                    text = "Confirm",
-                    onClick = { showDialog = false },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.textButtonColorsPrimary(),
-                )
+                Text(text = "Cancel", style = MiuixTheme.textStyles.button)
             }
-        },
-    )
+            GlassDialogButton(
+                onClick = { showDialog = false },
+                modifier = Modifier.weight(1f),
+                role = GlassDialogButtonRole.Primary,
+            ) {
+                Text(text = "Confirm", style = MiuixTheme.textStyles.button)
+            }
+        }
+    }
 }

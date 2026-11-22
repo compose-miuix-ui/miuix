@@ -5,7 +5,7 @@ A UI library for Compose Multiplatform.
 > This library is experimental. APIs may change without notice.
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4.21-7F52FF)](https://kotlinlang.org/)
-[![Compose Multiplatform](https://img.shields.io/badge/compose-1.12.2-4285F4)](https://kotlinlang.org/compose-multiplatform/)
+[![Compose Multiplatform](https://img.shields.io/badge/compose-1.13.0--rc01-4285F4)](https://kotlinlang.org/compose-multiplatform/)
 [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix-ui)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
 [![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
 
@@ -24,15 +24,18 @@ A UI library for Compose Multiplatform.
 
 ### Modules
 
-| Module             | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| `miuix-ui`         | Core UI component library                            |
-| `miuix-preference` | Preference components library, depends on `miuix-ui` |
-| `miuix-icons`      | Extended icon library, can be used independently     |
-| `miuix-blur`       | Blur effect library, can be used independently       |
-| `miuix-squircle`   | Squircle shapes library, can be used independently   |
-| `miuix-nav`        | Navigation library, can be used independently        |
-| `miuix-shader`     | Low-level runtime shader / render effect abstraction |
+| Module              | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
+| `miuix-ui`          | Core UI component library                                  |
+| `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
+| `miuix-icons`       | Extended icon library, can be used independently           |
+| `miuix-glass-icons` | Glass icon library, can be used independently              |
+| `miuix-material`    | Render primitives and material definitions                 |
+| `miuix-blur`        | Blur effect library, can be used independently             |
+| `miuix-squircle`    | Squircle shapes library, can be used independently         |
+| `miuix-glass`       | Glass surfaces and components library                      |
+| `miuix-nav`         | Navigation library, can be used independently              |
+| `miuix-window`      | Desktop window & caption bar styling library (Desktop JVM) |
 
 ### Getting Started
 
@@ -45,13 +48,21 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            // Optional: Add miuix-glass-icons for the Glass icon set
+            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
             // Optional: Add miuix-blur for blur effects
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes
             implementation("top.yukonga.miuix.kmp:miuix-squircle:<version>")
+            // Optional: Add miuix-glass for the glass surfaces and components
+            implementation("top.yukonga.miuix.kmp:miuix-glass:<version>")
             // Optional: Add miuix-nav for navigation
             implementation("top.yukonga.miuix.kmp:miuix-nav:<version>")
             // Other dependencies...
+        }
+        // Optional: Add miuix-window for desktop window and caption bar styling (Desktop JVM)
+        desktopMain.dependencies {
+            implementation("top.yukonga.miuix.kmp:miuix-window:<version>")
         }
         // Other sourceSets...
     }

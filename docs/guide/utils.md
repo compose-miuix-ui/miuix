@@ -30,7 +30,7 @@ DialogLayout(
 }
 ```
 
-Normally, you don't need to use it actively. See the [OverlayDialog](../components/overlaydialog.md) or [OverlayBottomSheet](../components/overlaybottomsheet.md) documentation for details.
+Normally, you don't need to use it actively. See the [OverlayDialog](../components/basic/overlaydialog.md) or [OverlayBottomSheet](../components/basic/overlaybottomsheet.md) documentation for details.
 
 ### PopupLayout
 
@@ -51,7 +51,7 @@ PopupLayout(
 }
 ```
 
-Normally, you don't need to use it actively. See the [OverlayListPopup](../components/overlaylistpopup) documentation for details.
+Normally, you don't need to use it actively. See the [OverlayListPopup](../components/basic/overlaylistpopup) documentation for details.
 
 ## Overscroll Effects
 
@@ -78,16 +78,23 @@ Scope the rule to the Compose container, not the entire page. Browser-native tou
 ### Vertical Overscroll
 
 ```kotlin
+val scrollState = scrollBehavior.state
+val onOverscrollChanged: (Float) -> Unit = remember(scrollState) {
+    { scrollState.overscrollOffset = it }
+}
+
 LazyColumn(
     modifier = Modifier
         // Add overscroll effect
-        .overScrollVertical()
+        .overScrollVertical(onOffsetChanged = onOverscrollChanged)
         // If you want to bind the TopAppBar scroll behavior, please add it after the overscroll effect
         .nestedScroll(scrollBehavior.nestedScrollConnection)
 ) {
     // List content
 }
 ```
+
+Keep the app bar connection after the overscroll modifier: `contentOffset` records actual list scrolling, while `overscrollOffset` tracks damped displacement through dragging and spring rebound. Glass app bars read `overscrollOffset` alongside `isContentScrolled` to activate progressive blur and button materials during elastic rebound. Do not accumulate overscroll consumption into `contentOffset`: spring rebound does not generate inverse scroll events. When the list already owns the app bar connection, do not also pass the same behavior to an enclosing `PullToRefresh`.
 
 ### Horizontal Overscroll
 
@@ -106,7 +113,6 @@ You can customize the overscroll effect parameters as needed:
 ```kotlin
 LazyColumn(
     modifier = Modifier.overScrollVertical(
-        nestedScrollToParent = true, // Dispatch nested scroll events to parent, default true
         isEnabled = { true },        // Whether the effect is enabled, default true on all platforms
     ),
     overscrollEffect = null // It is recommended to set this parameter to null to disable the default effect
@@ -117,8 +123,10 @@ LazyColumn(
 
 **Parameter Explanations:**
 
-- `nestedScrollToParent`: Boolean, whether to dispatch nested scroll events to parent. Default: `true`.
+- `onOffsetChanged`: Optional `(Float) -> Unit` callback for damped displacement in pixels, coalesced by rounded pixel. Includes drag and spring updates. Reset, detach, and callback replacement clear the old receiver to zero; a new callback receives the current displacement. Default: `null`. Applies to all overscroll modifiers.
 - `isEnabled`: Lambda, whether to enable the overscroll effect. Default: enabled on all platforms.
+
+Explicit vertical overscroll yields to active pull-to-refresh and eligible BottomSheet dismissal gestures. Keep `enableNestedScroll` and `allowDismiss` enabled for sheet dismissal from content.
 
 ### Via OverscrollFactory (Theme-Level Integration)
 
@@ -256,7 +264,7 @@ The `PressFeedbackType` enum defines different types of visual feedback that can
 
 ## Pager Gesture Conflict Resolution (Modifier.pagerGestureOverride())
 
-Use `pagerGestureOverride` when a `HorizontalPager` contains vertical lists, so horizontal swipes can switch pages while a list is flinging or bouncing back.
+Use `pagerGestureOverride` for horizontal paging during a child list's fling or Miuix overscroll rebound; vertical swipes stay with the list. Rebound takeover supports Miuix overscroll modifiers and `MiuixOverscrollFactory`. Other overscroll implementations use ordinary gesture arbitration after their fling completes.
 
 ```kotlin
 val flingBehavior = PagerDefaults.flingBehavior(
@@ -290,7 +298,6 @@ Choose an interaction with the modifier's `mode` parameter:
 | :-------------------- | :---------------------------------------------------------------------------------------- |
 | `CrossAxis` (default) | Switch pages while a list is scrolling or bouncing back.                                  |
 | `Native`              | Use Compose's native pager gestures.                                                      |
-| `TapToHalt`           | During list momentum, the first horizontal swipe stops the list; the next switches pages. |
 
 To disable swipe navigation, set both the modifier's `enabled` and the pager's `userScrollEnabled` to `false`.
 
@@ -303,3 +310,9 @@ coroutineScope.launch {
     pagerState.springAnimateToPage(targetPage)
 }
 ```
+
+## Display Cutout Fix (`ProvideDisplayCutoutFix`)
+
+`ProvideDisplayCutoutFix` resolves display cutout dispatching bugs on certain OEM Android devices (e.g. tablets in landscape orientation and foldable devices) by supplementing missing cutout data from `WindowManager.currentWindowMetrics`.
+
+It is integrated automatically in `MiuixTheme`. For details, see the [Theme System](theme.md#display-cutout-adaptation-providedisplaycutoutfix) guide.

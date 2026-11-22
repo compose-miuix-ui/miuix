@@ -5,7 +5,9 @@ package component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlexBox
+import androidx.compose.foundation.layout.FlexJustifyContent
+import androidx.compose.foundation.layout.FlexWrap
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
@@ -35,9 +37,12 @@ fun LazyListScope.tooltipSection() {
                 modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                FlowRow(
+                FlexBox(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    config = {
+                        wrap(FlexWrap.Wrap)
+                        justifyContent(FlexJustifyContent.SpaceEvenly)
+                    },
                 ) {
                     TooltipBox(text = "Edit") {
                         IconButton(onClick = {}) {

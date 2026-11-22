@@ -4,15 +4,14 @@
 package top.yukonga.miuix.kmp.window
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.window.internal.DesktopOS
 import top.yukonga.miuix.kmp.window.platform.macos.MacOSWindowMetrics
-import java.awt.Window
-
 @Composable
 fun defaultCaptionBarHeight(): Dp = when {
     DesktopOS.isMacOS() -> MacOSWindowMetrics.defaultCaptionBarHeight
@@ -22,11 +21,9 @@ fun defaultCaptionBarHeight(): Dp = when {
 /**
  * Properties for configuring [MiuixWindow] and [MiuixDialogWindow].
  */
-@Stable
-data class MiuixWindowProperties<T : Window>(
+@Immutable
+data class MiuixWindowProperties(
     val minSize: DpSize = DpSize.Zero,
-    val onVisibleChange: (T, Boolean) -> Unit = { _, _ -> },
-    val onResizeEdgeChange: (T, WindowResizeEdge) -> Unit = { _, _ -> },
     val captionBarHeight: Dp = 32.dp,
     val captionButtonsVisible: Boolean = true,
     val captionButtonHeight: Dp = captionBarHeight,
@@ -41,10 +38,8 @@ data class MiuixWindowProperties<T : Window>(
 ) {
     companion object {
         @Composable
-        fun <T : Window> default(
+        fun default(
             minSize: DpSize = DpSize.Zero,
-            onVisibleChange: (T, Boolean) -> Unit = { _, _ -> },
-            onResizeEdgeChange: (T, WindowResizeEdge) -> Unit = { _, _ -> },
             captionBarHeight: Dp = defaultCaptionBarHeight(),
             captionButtonsVisible: Boolean = true,
             captionButtonHeight: Dp = captionBarHeight,
@@ -56,25 +51,38 @@ data class MiuixWindowProperties<T : Window>(
             minimizeButtonEnabled: Boolean = true,
             maximizeOrRestoreButtonEnabled: Boolean = true,
             moveable: Boolean = true,
-        ): MiuixWindowProperties<T> = MiuixWindowProperties(
-            minSize = minSize,
-            onVisibleChange = onVisibleChange,
-            onResizeEdgeChange = onResizeEdgeChange,
-            captionBarHeight = captionBarHeight,
-            captionButtonsVisible = captionButtonsVisible,
-            captionButtonHeight = captionButtonHeight,
-            captionButtonIsDarkTheme = captionButtonIsDarkTheme,
-            backgroundType = backgroundType,
-            backgroundIsDarkTheme = backgroundIsDarkTheme,
-            extraDisplayScale = extraDisplayScale,
-            extraFontScale = extraFontScale,
-            minimizeButtonEnabled = minimizeButtonEnabled,
-            maximizeOrRestoreButtonEnabled = maximizeOrRestoreButtonEnabled,
-            moveable = moveable,
-        )
+        ): MiuixWindowProperties = remember(
+            minSize,
+            captionBarHeight,
+            captionButtonsVisible,
+            captionButtonHeight,
+            captionButtonIsDarkTheme,
+            backgroundType,
+            backgroundIsDarkTheme,
+            extraDisplayScale,
+            extraFontScale,
+            minimizeButtonEnabled,
+            maximizeOrRestoreButtonEnabled,
+            moveable,
+        ) {
+            MiuixWindowProperties(
+                minSize = minSize,
+                captionBarHeight = captionBarHeight,
+                captionButtonsVisible = captionButtonsVisible,
+                captionButtonHeight = captionButtonHeight,
+                captionButtonIsDarkTheme = captionButtonIsDarkTheme,
+                backgroundType = backgroundType,
+                backgroundIsDarkTheme = backgroundIsDarkTheme,
+                extraDisplayScale = extraDisplayScale,
+                extraFontScale = extraFontScale,
+                minimizeButtonEnabled = minimizeButtonEnabled,
+                maximizeOrRestoreButtonEnabled = maximizeOrRestoreButtonEnabled,
+                moveable = moveable,
+            )
+        }
     }
 }
 
-val LocalMiuixWindowProperties = staticCompositionLocalOf {
-    MiuixWindowProperties<Window>()
+val LocalMiuixWindowProperties = compositionLocalOf {
+    MiuixWindowProperties()
 }

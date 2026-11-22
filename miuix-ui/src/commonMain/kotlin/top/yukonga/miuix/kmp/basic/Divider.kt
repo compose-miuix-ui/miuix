@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -73,5 +74,8 @@ object DividerDefaults {
     /**
      * Default color of the divider line.
      */
-    val DividerColor @Composable get() = MiuixTheme.colorScheme.dividerLine
+    val DividerColor
+        @Composable
+        @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.dividerLine
 }

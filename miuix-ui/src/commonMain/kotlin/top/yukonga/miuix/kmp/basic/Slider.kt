@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -153,9 +153,6 @@ fun Slider(
         }
     }
 
-    val currentLayoutWidth = layoutWidth
-    val currentLayoutHeight = layoutHeight
-
     Box(
         modifier = modifier
             .then(
@@ -179,13 +176,14 @@ fun Slider(
                                         continue
                                     }
 
-                                    val thumbRadius = currentLayoutHeight / 2f
-                                    val availableWidth = (currentLayoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val thumbRadius = layoutHeight / 2f
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val fraction = (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val fraction =
+                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
                                     val thumbX = thumbRadius + effectiveFraction * availableWidth
 
@@ -359,9 +357,6 @@ fun VerticalSlider(
         }
     }
 
-    val currentLayoutWidth = layoutWidth
-    val currentLayoutHeight = layoutHeight
-
     Box(
         modifier = modifier
             .then(
@@ -385,8 +380,8 @@ fun VerticalSlider(
                                         continue
                                     }
 
-                                    val thumbRadius = currentLayoutWidth / 2f
-                                    val availableHeight = (currentLayoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val thumbRadius = layoutWidth / 2f
+                                    val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
@@ -524,7 +519,7 @@ fun RangeSlider(
     var isDraggingEnd by remember { mutableStateOf(false) }
     var isHoveringStartThumb by remember { mutableStateOf(false) }
     var isHoveringEndThumb by remember { mutableStateOf(false) }
-    val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
+    val isDragging by remember { computedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     var lastDraggedIsStart by remember { mutableStateOf(true) }
@@ -557,7 +552,8 @@ fun RangeSlider(
         if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
         ThumbScaleAnimationSpec,
     )
-    val endThumbScaleState = animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val endThumbScaleState =
+        animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -580,9 +576,6 @@ fun RangeSlider(
             )
         }
     }
-
-    val currentLayoutWidth = layoutWidth
-    val currentLayoutHeight = layoutHeight
 
     Box(
         modifier = modifier
@@ -608,14 +601,16 @@ fun RangeSlider(
                                         continue
                                     }
 
-                                    val thumbRadius = currentLayoutHeight / 2f
-                                    val availableWidth = (currentLayoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val thumbRadius = layoutHeight / 2f
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val startFraction = (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val endFraction = (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val startFraction =
+                                        (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val endFraction =
+                                        (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                                     val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
                                     val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
                                     val startThumbX = thumbRadius + effectiveStartFraction * availableWidth

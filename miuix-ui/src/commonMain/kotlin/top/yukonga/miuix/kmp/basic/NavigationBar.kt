@@ -21,12 +21,15 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,6 +55,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.sp
@@ -98,6 +103,16 @@ fun NavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier.windowInsetsPadding(
+                            WindowInsets.displayCutout.union(WindowInsets.navigationBars)
+                                .only(WindowInsetsSides.Horizontal),
+                        )
+                    } else {
+                        Modifier
+                    },
+                )
                 .selectableGroup(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -107,16 +122,16 @@ fun NavigationBar(
             }
         }
         if (defaultWindowInsetsPadding) {
-            val navigationBarsPadding = if (platform() != Platform.IOS) {
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val navigationBarBottom = if (platform() != Platform.IOS) {
+                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
             } else {
-                20.dp
+                10.dp
             }
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .layout { measurable, constraints ->
-                        val totalHeight = (navigationBarsPadding + animatedCaptionBarHeight).roundToPx()
+                        val totalHeight = (navigationBarBottom + animatedCaptionBarHeight).roundToPx()
                         val fixedConstraints = constraints.copy(minHeight = totalHeight, maxHeight = totalHeight)
                         val placeable = measurable.measure(fixedConstraints)
                         layout(placeable.width, totalHeight) {
@@ -283,26 +298,41 @@ fun FloatingNavigationBar(
     defaultWindowInsetsPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
-
-    val navBarBottomPadding = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val bottomPaddingValue = when (platform()) {
-        Platform.IOS -> 36.dp
-
-        else -> {
-            if (navBarBottomPadding != 0.dp) 26.dp + navBarBottomPadding else 36.dp
+    val bottomPaddingProvider: (() -> Dp)? = if (defaultWindowInsetsPadding) {
+        val navigationBarBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+        val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
+        val animatedCaptionBarHeight = animateDpAsState(
+            targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
+            animationSpec = tween(durationMillis = 300),
+        )
+        remember(navigationBarBottom, animatedCaptionBarHeight) {
+            {
+                val systemBottom = maxOf(navigationBarBottom, animatedCaptionBarHeight.value)
+                when {
+                    platform() == Platform.IOS -> 28.dp
+                    systemBottom <= 16.dp -> 24.dp
+                    systemBottom >= 32.dp -> systemBottom
+                    else -> 12.dp + systemBottom
+                }
+            }
         }
+    } else {
+        null
     }
-
-    val captionBarBottomPaddingValue = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues().calculateBottomPadding()
-    val animatedCaptionBarHeight by animateDpAsState(
-        targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
-        animationSpec = tween(durationMillis = 300),
-    )
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (defaultWindowInsetsPadding) {
+                    Modifier.windowInsetsPadding(
+                        WindowInsets.displayCutout.union(WindowInsets.navigationBars)
+                            .only(WindowInsetsSides.Horizontal),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(
                 start = if (horizontalAlignment == Alignment.Start) horizontalOutSidePadding else 0.dp,
                 end = if (horizontalAlignment == Alignment.End) horizontalOutSidePadding else 0.dp,
@@ -311,15 +341,23 @@ fun FloatingNavigationBar(
         Row(
             modifier = Modifier
                 .selectableGroup()
-                .padding(bottom = bottomPaddingValue)
-                .defaultMinSize(minHeight = 52.dp)
                 .then(
-                    if (defaultWindowInsetsPadding) {
-                        Modifier.padding(bottom = animatedCaptionBarHeight)
+                    if (bottomPaddingProvider != null) {
+                        Modifier.layout { measurable, constraints ->
+                            val bottomPx = bottomPaddingProvider().roundToPx().coerceAtLeast(0)
+                            val placeable = measurable.measure(constraints.offset(vertical = -bottomPx))
+                            layout(
+                                constraints.constrainWidth(placeable.width),
+                                constraints.constrainHeight(placeable.height + bottomPx),
+                            ) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        }
                     } else {
                         Modifier
                     },
                 )
+                .defaultMinSize(minHeight = 52.dp)
                 .then(
                     if (showDivider) {
                         Modifier
@@ -335,7 +373,7 @@ fun FloatingNavigationBar(
                 .then(
                     if (shadowElevation > 0.dp) {
                         Modifier.dropShadow(
-                            shape = shape,
+                            shape = RoundedCornerShape(cornerRadius),
                             shadow = Shadow(
                                 radius = 10.dp,
                                 color = Color.Black,
@@ -525,12 +563,6 @@ object FloatingNavigationBarDefaults {
 
     /** The padding around the icon in [FloatingNavigationBar]. */
     val IconPadding = 10.dp
-
-    /** The alpha value for the selected item when pressed. */
-    val SelectedPressedAlpha = 0.5f
-
-    /** The alpha value for an unselected item when pressed. */
-    val UnselectedPressedAlpha = 0.6f
 
     /** The alpha value for an unselected item. */
     val UnselectedAlpha = 0.4f

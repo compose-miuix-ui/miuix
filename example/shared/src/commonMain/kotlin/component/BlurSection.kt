@@ -31,24 +31,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.blend.ColorBlendToken
+import component.edge.EdgeStrokeConfig
+import component.edge.rememberContainerEdgeStrokeState
 import component.effect.BgEffectBackground
-import component.highlight.HighlightConfig
-import component.highlight.rememberContainerHighlight
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
+import top.yukonga.miuix.kmp.material.edgeStroke
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
@@ -57,18 +57,23 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import ui.isInDarkTheme
 import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
-fun LazyListScope.blurSection() {
+fun LazyListScope.textureBlurSection() {
     if (!isRuntimeShaderSupported()) return
     item(key = "blur") {
-        SmallTitle(text = "Texture Blur")
         BlurDemo()
     }
+}
+
+fun LazyListScope.foregroundBlurSection() {
+    if (!isRuntimeShaderSupported()) return
     item(key = "foreground_blur") {
-        SmallTitle(text = "Foreground Blur")
         ForegroundBlurDemo()
     }
+}
+
+fun LazyListScope.progressiveBlurSection() {
+    if (!isRuntimeShaderSupported()) return
     item(key = "progressive_blur") {
-        SmallTitle(text = "Progressive Blur")
         ProgressiveBlurDemo()
     }
 }
@@ -116,9 +121,11 @@ private fun ProgressiveBlurDemo() {
     }
 
     val backdrop = rememberLayerBackdrop()
+    // Record the demo and controls, not the Scaffold-hosted dropdown popups.
+    val preferenceBackdrop = rememberLayerBackdrop()
 
     Column(
-        modifier = Modifier.padding(horizontal = 12.dp),
+        modifier = Modifier.padding(horizontal = 12.dp).layerBackdrop(preferenceBackdrop),
     ) {
         Card(
             modifier = Modifier.padding(bottom = 12.dp),
@@ -160,14 +167,16 @@ private fun ProgressiveBlurDemo() {
                 }
             }
 
-            OverlayDropdownPreference(
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
                 title = "Direction",
                 items = directionItems,
                 selectedIndex = directionIndex,
                 onSelectedIndexChange = { directionIndex = it },
             )
 
-            OverlayDropdownPreference(
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
                 title = "Blend Mode",
                 items = blendModeItems,
                 selectedIndex = blendModeIndex,
@@ -220,8 +229,9 @@ private fun ProgressiveBlurDemo() {
 
 @Composable
 private fun BlurDemo() {
-    var blurRadiusX by remember { mutableFloatStateOf(100f) }
-    var blurRadiusY by remember { mutableFloatStateOf(100f) }
+    var showBlur by remember { mutableStateOf(true) }
+    var blurRadiusX by remember { mutableFloatStateOf(40f) }
+    var blurRadiusY by remember { mutableFloatStateOf(40f) }
     var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
@@ -230,18 +240,21 @@ private fun BlurDemo() {
     val isInDark = isInDarkTheme()
 
     val backdrop = rememberLayerBackdrop()
+    val preferenceBackdrop = rememberLayerBackdrop()
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
 
     var tiltDriven by remember { mutableStateOf(true) }
-    val containers = HighlightConfig.Container.entries
+    val containers = EdgeStrokeConfig.Container.entries
     val containerItems = remember { containers.map { it.displayName } }
-    var containerIndex by remember { mutableIntStateOf(HighlightConfig.Container.Small.ordinal) }
+    var containerIndex by remember { mutableIntStateOf(EdgeStrokeConfig.Container.Small.ordinal) }
     val currentContainer = containers[containerIndex]
-    val highlight = rememberContainerHighlight(
+    val blurShape = RoundedCornerShape(24.dp)
+    val containerStrokeState = rememberContainerEdgeStrokeState(
         container = currentContainer,
         isDark = isInDark,
         tiltDriven = tiltDriven,
     )
+    val containerStrokeProvider = remember(containerStrokeState) { { containerStrokeState.value } }
 
     val blendConfigs = remember(isInDark, surface) {
         listOf(
@@ -263,7 +276,8 @@ private fun BlurDemo() {
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 12.dp)
+            .layerBackdrop(preferenceBackdrop),
     ) {
         // Preview area
         Card(
@@ -283,55 +297,65 @@ private fun BlurDemo() {
                     BlurBackground()
                 }
 
-                // Blur overlay
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(140.dp)
-                        .align(Alignment.Center)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedCornerShape(24.dp),
-                            blurRadiusX = blurRadiusX,
-                            blurRadiusY = blurRadiusY,
-                            noiseCoefficient = noiseCoefficient,
-                            colors = BlurDefaults.blurColors(
-                                blendColors = currentBlend.second,
-                                brightness = brightness,
-                                contrast = contrast,
-                                saturation = saturation,
-                            ),
-                            highlight = highlight,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Texture Blur | R=${blurRadiusX.toInt()}",
-                            style = MiuixTheme.textStyles.headline2,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "${currentBlend.first} | ${containerItems[containerIndex]}",
-                            style = MiuixTheme.textStyles.body2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                        )
+                // Toggle the overlay to exercise detaching and reattaching its graphics resources.
+                if (showBlur) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(140.dp)
+                            .align(Alignment.Center)
+                            .textureBlur(
+                                backdrop = backdrop,
+                                shape = blurShape,
+                                blurRadiusX = blurRadiusX,
+                                blurRadiusY = blurRadiusY,
+                                noiseCoefficient = noiseCoefficient,
+                                colors = BlurDefaults.blurColors(
+                                    blendColors = currentBlend.second,
+                                    brightness = brightness,
+                                    contrast = contrast,
+                                    saturation = saturation,
+                                ),
+                            )
+                            .edgeStroke(shape = blurShape, stroke = containerStrokeProvider),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Texture Blur | R=${blurRadiusX.toInt()}",
+                                style = MiuixTheme.textStyles.headline2,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "${currentBlend.first} | ${containerItems[containerIndex]}",
+                                style = MiuixTheme.textStyles.body2,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                            )
+                        }
                     }
                 }
             }
 
-            OverlayDropdownPreference(
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
                 title = "Blend Mode",
                 items = blendModeItems,
                 selectedIndex = blendModeIndex,
                 onSelectedIndexChange = { blendModeIndex = it },
             )
 
-            OverlayDropdownPreference(
-                title = "Highlight",
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
+                title = "Edge Stroke",
                 items = containerItems,
                 selectedIndex = containerIndex,
                 onSelectedIndexChange = { containerIndex = it },
+            )
+
+            SwitchPreference(
+                title = "Show Blur",
+                checked = showBlur,
+                onCheckedChange = { showBlur = it },
             )
 
             HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
@@ -339,10 +363,10 @@ private fun BlurDemo() {
             SliderPreference(
                 title = "Blur Radius",
                 valueText = "${blurRadiusX.toInt()}",
-                value = blurRadiusX / 200f,
+                value = blurRadiusX / 100f,
                 onValueChange = {
-                    blurRadiusX = it * 200f
-                    blurRadiusY = it * 200f
+                    blurRadiusX = it * 100f
+                    blurRadiusY = it * 100f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
@@ -383,8 +407,8 @@ private fun BlurDemo() {
 
 @Composable
 private fun ForegroundBlurDemo() {
-    var blurRadiusX by remember { mutableFloatStateOf(200f) }
-    var blurRadiusY by remember { mutableFloatStateOf(200f) }
+    var blurRadiusX by remember { mutableFloatStateOf(100f) }
+    var blurRadiusY by remember { mutableFloatStateOf(100f) }
     var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
     var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
@@ -394,6 +418,7 @@ private fun ForegroundBlurDemo() {
     val dynamicBackground = remember { mutableStateOf(true) }
 
     val backdrop = rememberLayerBackdrop()
+    val preferenceBackdrop = rememberLayerBackdrop()
     val onBackground = MiuixTheme.colorScheme.onBackground
     val logoBlend = remember(isInDark) {
         if (isInDark) {
@@ -428,7 +453,7 @@ private fun ForegroundBlurDemo() {
     var isOs3Effect by remember { mutableStateOf(true) }
 
     Column(
-        modifier = Modifier.padding(horizontal = 12.dp),
+        modifier = Modifier.padding(horizontal = 12.dp).layerBackdrop(preferenceBackdrop),
     ) {
         Card(
             modifier = Modifier.padding(bottom = 12.dp),
@@ -469,14 +494,16 @@ private fun ForegroundBlurDemo() {
             }
 
             val effectVariantOptions = listOf("OS2", "OS3")
-            OverlayDropdownPreference(
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
                 title = "Effect Variant",
                 items = effectVariantOptions,
                 selectedIndex = if (isOs3Effect) 1 else 0,
                 onSelectedIndexChange = { isOs3Effect = (it == 1) },
             )
 
-            OverlayDropdownPreference(
+            GlassDropdownPreference(
+                backdrop = preferenceBackdrop,
                 title = "Blend Mode",
                 items = blendModeItems,
                 selectedIndex = blendModeIndex,
@@ -494,10 +521,10 @@ private fun ForegroundBlurDemo() {
             SliderPreference(
                 title = "Blur Radius",
                 valueText = "${blurRadiusX.toInt()}",
-                value = blurRadiusX / 200f,
+                value = blurRadiusX / 100f,
                 onValueChange = {
-                    blurRadiusX = it * 200f
-                    blurRadiusY = it * 200f
+                    blurRadiusX = it * 100f
+                    blurRadiusY = it * 100f
                 },
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )

@@ -19,6 +19,10 @@ val extendedIconsSourceDir =
     rootProject.layout.projectDirectory
         .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
         .asFile
+val glassIconsSourceDir =
+    rootProject.layout.projectDirectory
+        .dir("miuix-glass-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .asFile
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
 val docFileZh = project.file("../zh_CN/guide/icons.md")
@@ -40,6 +44,8 @@ tasks.register<JavaExec>("generateIcons") {
             iconsSourceDir.absolutePath,
             "--src",
             extendedIconsSourceDir.absolutePath,
+            "--src",
+            glassIconsSourceDir.absolutePath,
             "--out",
             outputDir.absolutePath,
             "--light",

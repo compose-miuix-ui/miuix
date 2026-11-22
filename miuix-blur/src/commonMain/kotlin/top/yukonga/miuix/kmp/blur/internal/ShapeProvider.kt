@@ -21,7 +21,7 @@ internal class ShapeProvider(var shapeBlock: () -> Shape) {
     private var cachedOutline: Outline? = null
     private var cachedSize: Size = Size.Unspecified
     private var cachedLayoutDirection: LayoutDirection? = null
-    private var cachedDensity: Float? = null
+    private var cachedDensity: Float = Float.NaN
 
     val innerShape: Shape
         get() = shapeBlock()

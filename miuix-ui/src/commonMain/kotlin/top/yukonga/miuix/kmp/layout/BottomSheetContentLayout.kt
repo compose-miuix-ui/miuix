@@ -35,7 +35,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,6 +89,12 @@ import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 
+internal interface BottomSheetNestedScrollConnection : NestedScrollConnection {
+    fun canConsumePostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Boolean
+}
+
+internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<BottomSheetNestedScrollConnection?> { null }
+
 /**
  * Internal shared layout logic for [OverlayBottomSheet] and [WindowBottomSheet].
  *
@@ -112,6 +119,8 @@ import kotlin.math.abs
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param topInset Optional top inset override. If null, calculated from window insets.
+ * @param dimColor The unanimated dimming color.
+ * @param surface Optional replacement for the default surface, including the overscroll fill.
  * @param content The content of the bottom sheet.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -136,6 +145,8 @@ internal fun BottomSheetContentLayout(
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     topInset: Dp? = null,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
@@ -175,6 +186,18 @@ internal fun BottomSheetContentLayout(
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val dimAlpha = remember { mutableFloatStateOf(1f) }
+    val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, animationProgress) {
+        computedStateOf {
+            if (enableWindowDim) {
+                dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * animationProgress.value).coerceIn(0f, 1f))
+            } else {
+                Color.Transparent
+            }
+        }
+    }
+    val surfaceScope = remember(cornerRadius, scrimColor) {
+        BottomSheetSurfaceScope(cornerRadius, scrimColor, isOverscroll = false)
+    }
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
@@ -237,12 +260,11 @@ internal fun BottomSheetContentLayout(
         }
 
         if (enableWindowDim) {
-            val baseColor = MiuixTheme.colorScheme.windowDimming
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .drawBehind {
-                        drawRect(baseColor.copy(alpha = baseColor.alpha * dimAlpha.floatValue * animationProgress.value))
+                        drawRect(scrimColor.value)
                     },
             )
         }
@@ -304,6 +326,13 @@ internal fun BottomSheetContentLayout(
                 modifier = sheetModifier,
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
+                surface = surface?.let { sheetSurface -> { sheetSurface(surfaceScope) } },
+                overscrollSurface = surface?.let { sheetSurface ->
+                    {
+                        val scope = remember(scrimColor) { BottomSheetSurfaceScope(0.dp, scrimColor, isOverscroll = true) }
+                        sheetSurface(scope)
+                    }
+                },
                 startAction = startAction?.let { action ->
                     { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
                 },
@@ -342,6 +371,8 @@ internal fun BottomSheetContent(
     enableNestedScroll: Boolean = true,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
+    surface: (@Composable () -> Modifier)? = null,
+    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -398,10 +429,7 @@ internal fun BottomSheetContent(
             settlingJob.value = coroutineScope.launch {
                 val currentOffset = dragOffsetY.value
                 val dismissThresholdPx = with(density) { 150.dp.toPx() }
-                // Velocity comes from gesture pipeline as px/s; the threshold is intentionally
-                // expressed as a dp value converted to px so the trigger feels equivalent across
-                // densities (higher-density screens both demand and produce proportionally larger
-                // px/s values, which roughly cancels out).
+                // Convert the density-independent threshold to gesture velocity units (px/s).
                 val velocityThresholdPx = with(density) { 800.dp.toPx() }
                 val windowHeightPx = with(density) { currentWindowHeight.toPx() }
 
@@ -456,7 +484,10 @@ internal fun BottomSheetContent(
 
     // Nested scroll logic
     val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density) {
-        object : NestedScrollConnection {
+        object : BottomSheetNestedScrollConnection {
+            override fun canConsumePostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Boolean = enableNestedScroll && allowDismiss && source == NestedScrollSource.UserInput && available.y > 0f &&
+                if (isNestedScrollGestureStarted.value) canDragSheetFromNestedScroll.value else abs(consumed.y) < 0.5f
+
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (!enableNestedScroll || source != NestedScrollSource.UserInput) return Offset.Zero
 
@@ -489,9 +520,7 @@ internal fun BottomSheetContent(
                     canDragSheetFromNestedScroll.value = delta > 0 && abs(consumed.y) < 0.5f
                 }
 
-                if (delta > 0 && canDragSheetFromNestedScroll.value) {
-                    if (!allowDismiss) return Offset.Zero
-
+                if (canConsumePostScroll(consumed, available, source)) {
                     if (isSettling.value) {
                         settlingJob.value?.cancel()
                         isSettling.value = false
@@ -567,7 +596,13 @@ internal fun BottomSheetContent(
         onSettle = performSettle,
         onUpdateAlpha = updateDimAlpha,
         modifier = modifier,
-        content = content,
+        surface = surface,
+        overscrollSurface = overscrollSurface,
+        content = {
+            CompositionLocalProvider(LocalBottomSheetNestedScrollConnection provides nestedScrollConnection) {
+                content()
+            }
+        },
     )
 }
 
@@ -596,6 +631,8 @@ private fun BottomSheetColumn(
     onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    surface: (@Composable () -> Modifier)? = null,
+    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -610,6 +647,7 @@ private fun BottomSheetColumn(
             sheetMaxWidth = sheetMaxWidth,
             outsideMargin = outsideMargin,
             backgroundColor = backgroundColor,
+            surface = overscrollSurface,
         )
 
         Column(
@@ -630,12 +668,14 @@ private fun BottomSheetColumn(
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
                 .padding(horizontal = outsideMargin.width)
-                .squircleSurface(
-                    color = backgroundColor,
-                    topStart = cornerRadius,
-                    topEnd = cornerRadius,
-                    bottomEnd = 0.dp,
-                    bottomStart = 0.dp,
+                .then(
+                    surface?.invoke() ?: Modifier.squircleSurface(
+                        color = backgroundColor,
+                        topStart = cornerRadius,
+                        topEnd = cornerRadius,
+                        bottomEnd = 0.dp,
+                        bottomStart = 0.dp,
+                    ),
                 )
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
@@ -674,9 +714,10 @@ private fun BoxScope.OverscrollBackground(
     sheetMaxWidth: Dp,
     outsideMargin: DpSize,
     backgroundColor: Color,
+    surface: (@Composable () -> Modifier)? = null,
 ) {
     val density = LocalDensity.current
-    val overscrollOffsetPx by remember { derivedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
+    val overscrollOffsetPx by remember { computedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
     if (overscrollOffsetPx > 0f) {
         Box(
             modifier = Modifier
@@ -685,7 +726,7 @@ private fun BoxScope.OverscrollBackground(
                 .fillMaxWidth()
                 .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
                 .padding(horizontal = outsideMargin.width)
-                .background(backgroundColor),
+                .then(surface?.invoke() ?: Modifier.background(backgroundColor)),
         )
     }
 }

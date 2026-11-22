@@ -35,6 +35,7 @@ import top.yukonga.miuix.kmp.window.LocalMiuixWindowInfo
 import top.yukonga.miuix.kmp.window.LocalWindowState
 import top.yukonga.miuix.kmp.window.MiuixWindowInfo
 import top.yukonga.miuix.kmp.window.MiuixWindowProperties
+import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonClose
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMaximize
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonMinimize
@@ -46,13 +47,15 @@ import java.awt.event.WindowEvent
 @Composable
 internal fun FrameWindowScope.WindowsMiuixWindowFrame(
     resizable: Boolean,
-    properties: MiuixWindowProperties<ComposeWindow>,
+    properties: MiuixWindowProperties,
+    onResizeEdgeChange: (ComposeWindow, WindowResizeEdge) -> Unit,
     content: @Composable FrameWindowScope.() -> Unit,
 ) {
     val windowState = LocalWindowState.current
 
     val currentResizable by rememberUpdatedState(resizable)
     val currentProperties by rememberUpdatedState(properties)
+    val currentOnResizeEdgeChange by rememberUpdatedState(onResizeEdgeChange)
     val currentIsFullscreen by rememberUpdatedState(windowState.placement == WindowPlacement.Fullscreen)
 
     val isHitTestInCaptionBar = remember { mutableStateOf(false) }
@@ -60,11 +63,13 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
     val effectiveButtonsWidth = if (currentIsFullscreen || !properties.captionButtonsVisible) 0.dp else MiuixCaptionButtonWidth * 3f
     val iconFontFamily by rememberWindowsCaptionBarFontIconFamily()
     CompositionLocalProvider(
-        LocalMiuixWindowInfo provides MiuixWindowInfo(
-            captionBarHeight = effectiveCaptionBarHeight,
-            captionButtonsAlign = CaptionButtonsAlign.End,
-            captionButtonsFullWidth = effectiveButtonsWidth,
-        ),
+        LocalMiuixWindowInfo provides remember(effectiveCaptionBarHeight, effectiveButtonsWidth) {
+            MiuixWindowInfo(
+                captionBarHeight = effectiveCaptionBarHeight,
+                captionButtonsAlign = CaptionButtonsAlign.End,
+                captionButtonsFullWidth = effectiveButtonsWidth,
+            )
+        },
         LocalIsHitTestInCaptionBarState provides isHitTestInCaptionBar,
     ) {
         val windowClientInsets = remember { MutableWindowInsets() }
@@ -104,7 +109,7 @@ internal fun FrameWindowScope.WindowsMiuixWindowFrame(
                     windowClientInsets.insets = windowInsets
                 },
                 onResizeEdgeChange = { edge ->
-                    currentProperties.onResizeEdgeChange(window, edge)
+                    currentOnResizeEdgeChange(window, edge)
                 },
             )
         }

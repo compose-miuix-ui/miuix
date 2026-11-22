@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.window
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,7 +16,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -29,6 +29,7 @@ import top.yukonga.miuix.kmp.window.platform.windows.HitTestResult
 import top.yukonga.miuix.kmp.window.platform.windows.toWindowResizeEdge
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -38,7 +39,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultValues() {
-        val properties = MiuixWindowProperties<java.awt.Window>(
+        val properties = MiuixWindowProperties(
             captionBarHeight = 44.dp,
             captionButtonHeight = 44.dp,
             captionButtonsVisible = true,
@@ -55,7 +56,7 @@ class MiuixWindowTest {
 
     @Test
     fun testWindowPropertiesDefaultNullDarkTheme() {
-        val properties = MiuixWindowProperties<java.awt.Window>()
+        val properties = MiuixWindowProperties()
         kotlin.test.assertNull(properties.captionButtonIsDarkTheme)
         kotlin.test.assertNull(properties.backgroundIsDarkTheme)
     }
@@ -98,14 +99,14 @@ class MiuixWindowTest {
 
     @Test
     fun testLinuxResizeCursor() {
-        val wCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.W_RESIZE_CURSOR)
-        val eCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.E_RESIZE_CURSOR)
-        val nCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.N_RESIZE_CURSOR)
-        val sCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.S_RESIZE_CURSOR)
-        val nwCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.NW_RESIZE_CURSOR)
-        val seCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.SE_RESIZE_CURSOR)
-        val neCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.NE_RESIZE_CURSOR)
-        val swCursor = top.yukonga.miuix.kmp.window.platform.linux.LinuxResizeCursor.get(java.awt.Cursor.SW_RESIZE_CURSOR)
+        val wCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.W_RESIZE_CURSOR)
+        val eCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.E_RESIZE_CURSOR)
+        val nCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.N_RESIZE_CURSOR)
+        val sCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.S_RESIZE_CURSOR)
+        val nwCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.NW_RESIZE_CURSOR)
+        val seCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.SE_RESIZE_CURSOR)
+        val neCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.NE_RESIZE_CURSOR)
+        val swCursor = top.yukonga.miuix.kmp.window.platform.linux.window.LinuxResizeCursor.get(java.awt.Cursor.SW_RESIZE_CURSOR)
 
         val fallbackW = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.W_RESIZE_CURSOR).name
         val fallbackE = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.E_RESIZE_CURSOR).name
@@ -179,5 +180,73 @@ class MiuixWindowTest {
 
         val npe = NullPointerException()
         assertFalse(isIgnorableComposeDisposalException(npe))
+    }
+
+    @Test
+    fun testWindowDraggableAreaSingleActiveRegistration() = runDesktopComposeUiTest {
+        val registration = WindowDraggableAreaRegistration()
+        var showFirst by mutableStateOf(true)
+        var showSecond by mutableStateOf(false)
+
+        setContent {
+            CompositionLocalProvider(
+                LocalWindowDraggableAreaRegistration provides registration,
+                LocalMiuixWindowProperties provides MiuixWindowProperties.default(),
+                LocalMiuixWindowInfo provides MiuixWindowInfo(captionBarHeight = 32.dp),
+            ) {
+                if (showFirst) {
+                    WindowDraggableArea()
+                }
+                if (showSecond) {
+                    WindowDraggableArea()
+                }
+            }
+        }
+
+        assertTrue(registration.isRegistered)
+        runOnIdle { showFirst = false }
+        waitForIdle()
+        assertFalse(registration.isRegistered)
+
+        runOnIdle { showSecond = true }
+        waitForIdle()
+        assertTrue(registration.isRegistered)
+    }
+
+    @Test
+    fun testWindowDraggableAreaDuplicateRejected() = runDesktopComposeUiTest {
+        val registration = WindowDraggableAreaRegistration()
+        var duplicate by mutableStateOf(false)
+
+        setContent {
+            CompositionLocalProvider(
+                LocalWindowDraggableAreaRegistration provides registration,
+                LocalMiuixWindowProperties provides MiuixWindowProperties.default(),
+                LocalMiuixWindowInfo provides MiuixWindowInfo(captionBarHeight = 32.dp),
+            ) {
+                WindowDraggableArea()
+                if (duplicate) {
+                    WindowDraggableArea()
+                }
+            }
+        }
+
+        assertTrue(registration.isRegistered)
+
+        runOnIdle { duplicate = true }
+        val error = assertFailsWith<IllegalStateException> {
+            waitForIdle()
+        }
+        assertTrue(error.message.orEmpty().contains("Only one WindowDraggableArea"))
+    }
+
+    @Test
+    fun testWindowDraggableAreaRequiresRegistration() = runDesktopComposeUiTest {
+        val error = assertFailsWith<IllegalStateException> {
+            setContent {
+                WindowDraggableArea()
+            }
+        }
+        assertTrue(error.message.orEmpty().contains("WindowDraggableArea requires content hosted by a MiuixWindow or MiuixDialogWindow."))
     }
 }

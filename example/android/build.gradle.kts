@@ -1,9 +1,11 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import com.android.build.api.variant.HostTestBuilder
 import java.util.Properties
 
 plugins {
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.composeCompiler)
@@ -15,6 +17,7 @@ dependencies {
     implementation(projects.example.shared)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.hiddenapibypass)
     "baselineProfile"(projects.baselineprofile)
 }
 
@@ -31,10 +34,9 @@ android {
         applicationId = BuildConfig.APPLICATION_ID
         minSdk = BuildConfig.MIN_SDK
         targetSdk = BuildConfig.TARGET_SDK
-        versionName = BuildConfig.APPLICATION_VERSION_NAME
+        versionName = BuildConfig.APPLICATION_VERSION_NAME + "." + getGitHashShort()
         versionCode = getGitVersionCode()
     }
-    experimentalProperties["android.experimental.r8.dex-startup-optimization"] = true
     namespace = BuildConfig.APPLICATION_ID
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
@@ -69,6 +71,7 @@ android {
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
+            applicationIdSuffix = ".debug"
         }
         create("nonMinifiedRelease") {
             signingConfig = signingConfigs.getByName("debug")
@@ -87,12 +90,31 @@ android {
             excludes += "lib/*/libandroidx.graphics.path.so"
         }
     }
+    testOptions {
+        unitTests {
+            // Compose Preview needs the unit-test resource APK (b/572377862).
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 androidComponents {
+    // b/572377862: AGP 9.5 requires a unit-test component per Compose variant; the baseline
+    // profile plugin disables it for its extended build types.
+    beforeVariants(selector().all()) { builder ->
+        builder.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
+    }
     onVariants(selector().withBuildType("release")) {
         it.packaging.resources.excludes
             .add("**")
+    }
+}
+
+aboutLibraries {
+    export {
+        variant = "release"
+        outputFile = file("src/main/assets/aboutlibraries.json")
+        prettyPrint = true
     }
 }
 

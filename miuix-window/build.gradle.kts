@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinMultiplatform)
     id("module.kotlin-jvm-toolchain")
     id("module.publication")
@@ -33,9 +34,18 @@ kotlin {
         getByName("desktopTest") {
             dependencies {
                 implementation(kotlin("test"))
-                implementation(compose.desktop.currentOs)
                 implementation(libs.jetbrains.compose.ui.test)
             }
         }
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    if (System.getProperty("os.name").startsWith("Linux")) {
+        jvmArgs(
+            "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED",
+        )
     }
 }

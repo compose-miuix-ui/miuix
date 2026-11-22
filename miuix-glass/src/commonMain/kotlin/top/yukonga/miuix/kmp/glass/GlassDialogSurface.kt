@@ -1,0 +1,89 @@
+// Copyright 2026, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package top.yukonga.miuix.kmp.glass
+
+import androidx.compose.foundation.background
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
+import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
+import top.yukonga.miuix.kmp.material.EdgeStroke
+import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
+import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassMaterials
+import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+/** Default values for [GlassDialog] and [glassDialogSurface]. */
+object GlassDialogDefaults {
+
+    /** Scrim color before visibility and back-gesture progress are applied. */
+    val ScrimColor: Color = Color(0x33000000)
+
+    /** Dialog material for the current theme. */
+    @Composable
+    fun material(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.dialogGlass(
+            isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        ),
+        alpha = 0.72f,
+    )
+
+    /** Dialog bloom stroke for the current theme. */
+    @Composable
+    @ReadOnlyComposable
+    fun stroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
+        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        light = GlassEdgeStrokes.SmallLight,
+        dark = GlassEdgeStrokes.SmallDark,
+    )
+
+    /** Opaque fill used when there is no backdrop or runtime shader support. */
+    @Composable
+    @ReadOnlyComposable
+    fun containerColor(): Color = MiuixTheme.colorScheme.background
+}
+
+/**
+ * A glass surface for OverlayDialog's `surface` slot.
+ *
+ * The backdrop is dimmed before blur and remains screen-aligned as the dialog scales.
+ * Dialog content is not refracted.
+ *
+ * @param backdrop Page recording, including bars but excluding the dialog host and its scrim.
+ *   Null uses [containerColor]. Unsupported runtime shaders also use this opaque fallback.
+ * @param material The dialog's blur input and ordered color layers.
+ * @param stroke Optional full-resolution bloom stroke.
+ * @param containerColor Opaque fallback fill.
+ */
+@Composable
+fun glassDialogSurface(
+    backdrop: Backdrop?,
+    material: GlassMaterial = GlassDialogDefaults.material(),
+    stroke: EdgeStroke? = GlassDialogDefaults.stroke(),
+    containerColor: Color = GlassDialogDefaults.containerColor(),
+): @Composable DialogSurfaceScope.() -> Modifier = {
+    val effectiveBackdrop = if (backdrop != null && isRuntimeShaderSupported()) {
+        remember(backdrop, scrimColor, scale) { ScrimBackdrop(backdrop, scrimColor, scale) }
+    } else {
+        null
+    }
+    val shape = remember(cornerRadius) { GlassShape(cornerRadius) }
+    Modifier.glassPanel(
+        backdrop = effectiveBackdrop,
+        shape = shape,
+        material = material,
+        stroke = stroke,
+        shadow = null,
+        shading = false,
+        fallback = if (effectiveBackdrop == null) Modifier.clip(shape).background(containerColor) else null,
+    )
+}

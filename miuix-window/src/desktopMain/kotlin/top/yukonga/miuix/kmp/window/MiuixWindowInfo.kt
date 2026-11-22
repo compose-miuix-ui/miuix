@@ -3,10 +3,10 @@
 
 package top.yukonga.miuix.kmp.window
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -21,13 +21,14 @@ enum class CaptionButtonsAlign {
 /**
  * Geometric and layout information for the custom window caption bar.
  */
+@Immutable
 data class MiuixWindowInfo(
     val captionBarHeight: Dp = 32.dp,
     val captionButtonsAlign: CaptionButtonsAlign = CaptionButtonsAlign.End,
     val captionButtonsFullWidth: Dp = 0.dp,
 )
 
-val LocalMiuixWindowInfo = staticCompositionLocalOf {
+val LocalMiuixWindowInfo = compositionLocalOf {
     MiuixWindowInfo()
 }
 

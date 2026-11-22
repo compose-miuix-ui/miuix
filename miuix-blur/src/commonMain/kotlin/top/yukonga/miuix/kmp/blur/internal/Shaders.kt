@@ -3,27 +3,38 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-/** Builds a separable Blur shader with [tapCount] symmetric tap pairs (1..7). */
-internal fun buildBlurShader(tapCount: Int): String {
+/** Builds a 1D separable Blur shader with [tapCount] symmetric tap pairs (1..7) along [axis] (0=X, 1=Y). */
+internal fun buildBlurShader(tapCount: Int, axis: Int, unpremul: Boolean): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
+    val samplePair = if (axis == 0) {
+        "child.eval(float2(clamp(clampedXy.x + o, 0.5, in_maxCoord.x), clampedXy.y)) + child.eval(float2(clamp(clampedXy.x - o, 0.5, in_maxCoord.x), clampedXy.y))"
+    } else {
+        "child.eval(float2(clampedXy.x, clamp(clampedXy.y + o, 0.5, in_maxCoord.y))) + child.eval(float2(clampedXy.x, clamp(clampedXy.y - o, 0.5, in_maxCoord.y)))"
+    }
+    val tail = if (unpremul) {
+        """
+        if (color.a > 0.0039 && color.a < 0.996) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;"""
+    } else {
+        """
+        return color;"""
+    }
     return """
     uniform shader child;
-    uniform float2 in_blurOffset[$tapCount];
+    uniform float in_blurOffset[$tapCount];
     uniform float in_blurWeight[$tapCount];
+    uniform float in_centerWeight;
     uniform float2 in_maxCoord;
 
     half4 main(float2 xy) {
-        half4 color = half4(0);
+        float2 clampedXy = clamp(xy, float2(0.5), in_maxCoord);
+        half4 color = child.eval(clampedXy) * half(in_centerWeight);
         for (int i = 0; i < $tapCount; i++) {
-            float2 offset = in_blurOffset[i];
-            float2 c1 = clamp(xy + offset, float2(0.5), in_maxCoord);
-            float2 c2 = clamp(xy - offset, float2(0.5), in_maxCoord);
-            color += (child.eval(c1) + child.eval(c2)) * half(in_blurWeight[i]);
-        }
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0);
-        }
-        return color;
+            float o = in_blurOffset[i];
+            color += ($samplePair) * half(in_blurWeight[i]);
+        }$tail
     }
 """
 }
@@ -31,274 +42,354 @@ internal fun buildBlurShader(tapCount: Int): String {
 /** Maximum number of tap pairs for the Blur shader. */
 internal const val MAX_BLUR_TAPS = 7
 
-/** Pre-built per-tap-count shader sources; index 0 is unused. */
-internal val BLUR_SHADER_BY_TAP: Array<String> = Array(MAX_BLUR_TAPS + 1) { i ->
-    if (i == 0) "" else buildBlurShader(i)
+/** Lazy-built per-(tapCount, axis, unpremul) shader sources; tapCount 0 is unused. */
+private val BLUR_SHADER_CACHE = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * 4)
+
+internal fun blurShaderForTap(tapCount: Int, axis: Int, unpremul: Boolean): String {
+    val slot = (tapCount * 2 + (axis and 1)) * 2 + if (unpremul) 1 else 0
+    return BLUR_SHADER_CACHE[slot]
+        ?: buildBlurShader(tapCount, axis, unpremul).also { BLUR_SHADER_CACHE[slot] = it }
 }
 
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
 
-private const val PROGRESSIVE_MAX_DOWNSCALE_EXP = 4
+/**
+ * Curve specialization index for [buildProgressiveBlurShader]:
+ * `0` = linear (`curve == 1`), `1` = `sqrt` (`0.5`), `2` = `sqrt(sqrt)` (`0.25`), `3` = general `pow`.
+ */
+internal fun progressiveCurveKind(curve: Float): Int = when (curve) {
+    1f -> 0
+    0.5f -> 1
+    0.25f -> 2
+    else -> 3
+}
 
 /**
- * Builds the separable **progressive** Blur shader: each fragment derives a per-pixel radius from
- * the two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps
- * are merged into one bilinear fetch at their weight-averaged fractional offset (the per-pixel-σ
- * analogue of [buildBlurShader]'s static pair merge; child sampling is bilinear on both
- * platforms), sampled as symmetric ± pairs with the center hoisted out — halving the texture
- * fetches. The loop bound [maxTap] must be an EVEN compile-time constant (AGSL) — pick it via
- * [progressiveLoopTapBound] so a small max radius doesn't pay for [PROGRESSIVE_BLUR_MAX_TAP]
- * unrolled iterations per fragment.
+ * Builds the separable **progressive** Blur shader: each fragment derives its radius from the
+ * two-point gradient and runs a 1D Gaussian up to it (`σ = radius·0.5 + 0.5`). Adjacent taps merge
+ * into one bilinear fetch at their weight-averaged offset, sampled as symmetric ± pairs with the
+ * center hoisted out. [maxTap] must be an even compile-time constant (AGSL).
  *
- * The outermost tap feathers in over its last pixel of reach (`clamp(radius − i + 1, 0, 1)`),
- * keeping the kernel — its normalization AND the merged offsets — continuous in radius: a hard
- * cutoff drops taps with weight up to `e⁻² ≈ 0.135` as the per-pixel radius crosses integer
- * offsets, which reads as equal-radius stripes along the gradient. The feather also makes the
- * kernel collapse smoothly to identity at radius 0, so the early-exit is a pure fast path for
- * the clear plateau, not a visible switch.
- *
- * With [masked], the sharp overlay's clear-end cross-fade weight (`smoothstep(clamp(3·raw′ − 2))`
- * over its own `in_maskBand`/`in_maskCurve`) is folded into the output, saving the separate
- * [PROGRESSIVE_LEVEL_MASK_SHADER] pass; fully-masked fragments (the band bbox's reach margin,
- * where the radius is at its most expensive) skip the kernel outright.
+ * With [sharpBand], the gradient ramps across `[in_sharpThreshold, 1]` instead of `[0, 1]`. With
+ * [sharpMask], the cross-fade weight is folded into the output and fragments below
+ * [in_sharpThreshold] exit before sampling. [midDecay] tunes the falloff and fade window for the
+ * 2× intermediate bridge tier.
  */
-internal fun buildProgressiveBlurShader(maxTap: Int, masked: Boolean = false): String {
+internal fun buildProgressiveBlurShader(
+    maxTap: Int,
+    curveKind: Int = 3,
+    sharpBand: Boolean = false,
+    sharpMask: Boolean = false,
+    midDecay: Boolean = false,
+    unpremul: Boolean = true,
+    axis: Int = 0,
+    inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
+): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
-    val maskUniforms = if (masked) {
+    val maxCoordUniform = if (sharpBand) {
         """
-    uniform float2 in_maskBand;
-    uniform float in_maskCurve;
+    uniform float2 in_maxCoord;
 """
     } else {
         ""
     }
-    val maskWeight = if (masked) {
+    val curveUniform = if (curveKind == 3) {
         """
-        float mraw = clamp((p - in_maskBand.x) / (in_maskBand.y - in_maskBand.x), 0.0, 1.0);
-        mraw = pow(mraw * mraw * (3.0 - 2.0 * mraw), in_maskCurve);
-        float mw = clamp(mraw * 3.0 - 2.0, 0.0, 1.0);
-        mw = mw * mw * (3.0 - 2.0 * mw);
-        if (mw <= 0.0) {
-            return half4(0.0);
-        }
+    uniform float in_curve;
 """
     } else {
-        "        float mw = 1.0;"
+        ""
     }
-    return """
-    uniform shader child;
-    uniform float2 in_maxCoord;
-    uniform float2 in_step;
-    uniform float in_maxRadius;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
-    uniform float in_curve;
-$maskUniforms
+    val curveExpr = when (curveKind) {
+        0 -> ""
+        1 -> "\n        smoothRaw = sqrt(smoothRaw);"
+        2 -> "\n        smoothRaw = sqrt(sqrt(smoothRaw));"
+        else -> "\n        smoothRaw = pow(smoothRaw, in_curve);"
+    }
+    val sharpUniforms = if (sharpBand) {
+        """
+    uniform float in_sharpThreshold;
+    uniform float in_invSharpSpan;
+"""
+    } else {
+        ""
+    }
+    val maskSlope = if (midDecay) "1.8181818" else "1.5384615"
+    val radiusDecay = if (midDecay) {
+        """
+        float om = 1.0 - m;
+        float radius = in_maxRadius * om * sqrt(om);"""
+    } else {
+        """
+        float radius = in_maxRadius * (1.0 - m * m);"""
+    }
+    val bandRamp = if (sharpBand && sharpMask) {
+        """
+        float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
+        half mw = half(clamp(m * $maskSlope, 0.0, 1.0));
+        mw = mw * mw * (half(3.0) - half(2.0) * mw);
+        if (mw <= half(0.004)) {
+            return half4(0.0);
+        }$radiusDecay"""
+    } else if (sharpBand) {
+        """
+        float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);$radiusDecay"""
+    } else {
+        """
+        float radius = in_maxRadius * (1.0 - smoothRaw);"""
+    }
+    val centerCoord = if (sharpBand) "clamp(xy, float2(0.5), in_maxCoord)" else "xy"
+    fun axisSampleCoord(sign: String): String = when {
+        axis == 0 && sharpBand -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
+        axis == 0 -> "float2(xy.x $sign o, xy.y)"
+        sharpBand -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
+        else -> "float2(xy.x, xy.y $sign o)"
+    }
+    val tintUniform = if (inlineTint) "\n    uniform float4 in_tintColor;" else ""
+    val noiseUniform = if (inlineNoise) "\n    uniform float noise_coeff;" else ""
+    val maskSuffix = if (sharpMask) " * mw" else ""
+    fun ditherBlock(varName: String, indent: String): String = if (!inlineNoise) {
+        ""
+    } else {
+        """
+${indent}if ($varName.a > 0.001) {
+$indent    float3 p3 = fract(float3(xy.xyx) * float3(0.1031, 0.1030, 0.0973));
+$indent    p3 += dot(p3, p3.yxz + 33.33);
+$indent    float3 n = (fract((p3.xxy + p3.yzz) * p3.zyx) - 0.5) * noise_coeff * float($varName.a);
+$indent    $varName.rg += half2(n.x);
+$indent    $varName.rb += half2(n.y);
+$indent    $varName.gb += half2(n.z);
+$indent    $varName.rgb = clamp($varName.rgb, half3(0.0), half3($varName.a));
+$indent}"""
+    }
+    fun finishExpr(varName: String, indent: String): String = when {
+        inlineTint ->
+            """
+${indent}half4 src = ($varName.a > 0.0039 && $varName.a < 0.996) ? half4($varName.rgb / $varName.a, 1.0) : $varName;
+${indent}float rwF = 1.0 - smoothRaw;
+${indent}half rw = half(rwF * rwF * (3.0 - 2.0 * rwF));
+${indent}half4 outColor = src;
+${indent}if (rw > half(0.001)) {
+$indent    half4 tint = half4(in_tintColor);
+$indent    half4 tinted = tint + (half(1.0) - tint.a) * src;
+$indent    outColor = mix(src, tinted, rw);
+$indent}${ditherBlock("outColor", indent)}
+${indent}return outColor;"""
 
+        unpremul ->
+            """
+${indent}half4 outColor = ($varName.a > 0.0039 && $varName.a < 0.996) ? half4($varName.rgb / $varName.a, 1.0)$maskSuffix : $varName$maskSuffix;${ditherBlock("outColor", indent)}
+${indent}return outColor;"""
+
+        else -> "\n${indent}return $varName$maskSuffix;"
+    }
+    val earlyReturn = if (unpremul || inlineTint) {
+        "\n            half4 s = child.eval($centerCoord);${finishExpr("s", "            ")}"
+    } else {
+        "\n            return child.eval($centerCoord)$maskSuffix;"
+    }
+    val finalReturn = finishExpr("color", "        ")
+    return """
+    uniform shader child;$maxCoordUniform
+    uniform float in_maxRadius;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;$tintUniform$noiseUniform
+$curveUniform$sharpUniforms
     half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
-$maskWeight
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        float intensity = 1.0 - pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        float radius = in_maxRadius * intensity;
-        if (radius <= 0.0) {
-            half4 s = child.eval(clamp(xy, float2(0.5), in_maxCoord));
-            if (s.a > 0.0039) {
-                return half4(s.rgb / s.a, 1.0) * half(mw);
-            }
-            return s * half(mw);
+        float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
+        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr$bandRamp
+        if (radius <= 0.004) {$earlyReturn
         }
-        float inv2s2 = -1.0 / (2.0 * (radius * 0.5 + 0.5) * (radius * 0.5 + 0.5));
-        half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord));
-        float total = 1.0;
+        float sigma = radius * 0.5 + 0.5;
+        float posNegInv2s2Ln2 = -0.7213475 / (sigma * sigma);
+        float q = exp2(posNegInv2s2Ln2);
+        float q2 = q * q;
+        float gStep = q;
+        float g = 1.0;
+        float r1 = radius + 1.0;
+        half4 color = child.eval($centerCoord);
+        half wAcc = half(0.0);
+        float a = 1.0;
         for (int j = 0; j < ${maxTap / 2}; j++) {
-            float a = float(2 * j + 1);
-            float ra = clamp(radius - a + 1.0, 0.0, 1.0);
-            if (ra <= 0.0) continue;
-            float b = a + 1.0;
-            float wa = exp(a * a * inv2s2) * ra;
-            float wb = exp(b * b * inv2s2) * clamp(radius - b + 1.0, 0.0, 1.0);
-            float wsum = wa + wb;
-            float2 o = ((a * wa + b * wb) / wsum) * in_step;
-            color += (child.eval(clamp(xy + o, float2(0.5), in_maxCoord)) +
-                child.eval(clamp(xy - o, float2(0.5), in_maxCoord))) * half(wsum);
-            total += 2.0 * wsum;
+            half ra = half(clamp(r1 - a, 0.0, 1.0));
+            if (ra <= half(0.001)) break;
+            g *= gStep;
+            gStep *= q2;
+            half wa = ra * half(g);
+            half rb = half(clamp(r1 - (a + 1.0), 0.0, 1.0));
+            g *= gStep;
+            gStep *= q2;
+            half wb = rb * half(g);
+            half wsum = wa + wb;
+            float o = a + float(wb / wsum);
+            color += (child.eval(${axisSampleCoord("+")}) +
+                child.eval(${axisSampleCoord("-")})) * wsum;
+            wAcc += wsum;
+            a += 2.0;
         }
-        color = color / half(max(total, 0.0001));
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0) * half(mw);
-        }
-        return color * half(mw);
+        color = color / (half(1.0) + half(2.0) * wAcc);$finalReturn
     }
 """
 }
 
-/** Lazily built progressive Blur shader sources, indexed by tap bound; second array = masked. */
-private val PROGRESSIVE_BLUR_SHADER_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
-private val PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP = arrayOfNulls<String>(PROGRESSIVE_BLUR_MAX_TAP + 1)
+// 6 tap bounds (4..24 step 4) × 4 curveKinds × 7 variants × 2 axes = 336 cached shader strings.
+private val PROGRESSIVE_SHADER_CACHE = arrayOfNulls<String>(6 * 4 * 9 * 2)
 
-/** The progressive Blur shader source with loop bound [tapBound] (from [progressiveLoopTapBound]). */
-internal fun progressiveBlurShaderForTap(tapBound: Int, masked: Boolean = false): String {
-    val cache = if (masked) PROGRESSIVE_BLUR_SHADER_MASKED_BY_TAP else PROGRESSIVE_BLUR_SHADER_BY_TAP
-    return cache[tapBound] ?: buildProgressiveBlurShader(tapBound, masked).also { cache[tapBound] = it }
+/** The progressive Blur shader source for [tapBound], [curveKind], [axis], and band/unpremul flags. */
+internal fun progressiveBlurShaderForTap(
+    tapBound: Int,
+    curveKind: Int = 3,
+    sharpBand: Boolean = false,
+    sharpMask: Boolean = false,
+    midDecay: Boolean = false,
+    unpremul: Boolean = true,
+    axis: Int = 0,
+    inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
+): String {
+    require(!sharpBand || (!inlineTint && !inlineNoise)) { "inlineTint/inlineNoise cannot be combined with sharpBand" }
+    val tapIdx = ((tapBound / 4) - 1).coerceIn(0, 5)
+    val variant = when {
+        inlineTint && inlineNoise -> 8
+        unpremul && inlineNoise -> 7
+        inlineTint -> 6
+        sharpBand && midDecay && sharpMask -> 5
+        sharpBand && midDecay -> 4
+        sharpBand && sharpMask -> 3
+        sharpBand -> 2
+        unpremul -> 1
+        else -> 0
+    }
+    val slot = ((tapIdx * 4 + curveKind) * 9 + variant) * 2 + (axis and 1)
+    return PROGRESSIVE_SHADER_CACHE[slot] ?: buildProgressiveBlurShader(
+        maxTap = tapBound,
+        curveKind = curveKind,
+        sharpBand = sharpBand,
+        sharpMask = sharpMask,
+        midDecay = midDecay,
+        unpremul = unpremul,
+        axis = axis,
+        inlineTint = inlineTint,
+        inlineNoise = inlineNoise,
+    ).also { PROGRESSIVE_SHADER_CACHE[slot] = it }
 }
 
 /**
- * Compile-time loop bound for [maxRadius]: the next multiple of 4 covering it, capped at
- * [PROGRESSIVE_BLUR_MAX_TAP]. Quantizing keeps the shader-variant count small (and an animating
- * radius from recompiling per frame) while a small radius skips most of the unrolled iterations
- * the full bound would cost per fragment.
+ * Compile-time loop bound for [maxRadius]: the next multiple of 4, capped at
+ * [PROGRESSIVE_BLUR_MAX_TAP].
  */
 internal fun progressiveLoopTapBound(maxRadius: Float): Int {
     val needed = kotlin.math.ceil(maxRadius).toInt()
     return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
 }
 
-private val PROGRESSIVE_LOOP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
-    Array(PROGRESSIVE_MAX_DOWNSCALE_EXP + 1) { exp ->
-        Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
-            if (tap > 0 && tap % 4 == 0) {
-                "LMPGaussLoop_${if (axis == 0) 'H' else 'V'}_d${1 shl exp}_t$tap"
-            } else {
-                ""
-            }
-        }
+private const val PROGRESSIVE_LOOP_MODE_COUNT = 5
+private const val PROGRESSIVE_CURVE_KIND_COUNT = 4
+private const val PROGRESSIVE_TAP_COUNT = 6
+
+private val PROGRESSIVE_LOOP_KEYS = arrayOfNulls<String>(
+    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * PROGRESSIVE_TAP_COUNT,
+)
+
+private val PROGRESSIVE_SHARP_KEYS = arrayOfNulls<String>(
+    2 * 2 * 2 * PROGRESSIVE_CURVE_KIND_COUNT * PROGRESSIVE_TAP_COUNT,
+)
+
+internal fun progressiveLoopShaderKey(
+    axis: Int,
+    downScale: Float,
+    tap: Int,
+    curveKind: Int,
+    unpremul: Boolean = true,
+    inlineTint: Boolean = false,
+    inlineNoise: Boolean = false,
+): String {
+    val mode = when {
+        inlineTint && inlineNoise -> 4
+        unpremul && inlineNoise -> 3
+        inlineTint -> 2
+        unpremul -> 1
+        else -> 0
     }
+    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val slot = ((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) *
+        PROGRESSIVE_TAP_COUNT + tapIdx
+    return PROGRESSIVE_LOOP_KEYS[slot]
+        ?: "LMPGL_${axis}_${mode}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
 }
 
-internal fun progressiveLoopShaderKey(axis: Int, downScale: Int, tap: Int): String = PROGRESSIVE_LOOP_KEYS[axis][downScale.countTrailingZeroBits()][tap]
-
-private val PROGRESSIVE_SHARP_KEYS: Array<Array<Array<String>>> = Array(2) { axis ->
-    Array(2) { masked ->
-        Array(PROGRESSIVE_BLUR_MAX_TAP + 1) { tap ->
-            if (tap > 0 && tap % 4 == 0) {
-                "ProgSharpLoop_${if (axis == 0) 'H' else 'V'}_t$tap${if (masked == 1) "_m" else ""}"
-            } else {
-                ""
-            }
-        }
-    }
+internal fun progressiveSharpShaderKey(
+    axis: Int,
+    tap: Int,
+    curveKind: Int,
+    masked: Boolean,
+    midDecay: Boolean = false,
+): String {
+    val mid = if (midDecay) 1 else 0
+    val maskedIdx = if (masked) 1 else 0
+    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val slot = (((mid * 2 + axis) * 2 + maskedIdx) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * PROGRESSIVE_TAP_COUNT + tapIdx
+    return PROGRESSIVE_SHARP_KEYS[slot]
+        ?: "LMPSL_${mid}_${axis}_m${masked}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_SHARP_KEYS[slot] = it }
 }
 
-internal fun progressiveSharpShaderKey(axis: Int, tap: Int, masked: Boolean): String = PROGRESSIVE_SHARP_KEYS[axis][if (masked) 1 else 0][tap]
-
-/** Gaussian sigma fractions of the three graduated composite levels (`blur0` … `blur2`). */
-internal const val PROGRESSIVE_LEVEL_FRACTION_0 = 1.0f
-internal const val PROGRESSIVE_LEVEL_FRACTION_1 = 0.4f
-internal const val PROGRESSIVE_LEVEL_FRACTION_2 = 0.13f
-
 /**
- * Multi-level progressive composite (Skiko multi-child runtime shader): three graduated Gaussian
- * levels ([blur0] strongest … [blur2] lightest) interpolated along the gradient so the blur
- * strength itself ramps — graduated levels are what make the ramp read as progressive rather than
- * one blur cross-faded with sharp. Runs on the downscaled layer with [clearChild] bound to the
- * lightest level (degenerating the last mix segment; the true sharp end is a separate
- * full-resolution overlay masked by [PROGRESSIVE_LEVEL_MASK_SHADER]) — except at full resolution,
- * where [clearChild] binds the source and the blend to sharp completes in-stack. Android builds
- * the identical image as a blend-mode DAG of the same masks. Each segment's mix fraction is smoothstepped: the
- * walk's derivative kinks at the segment stops otherwise read as Mach-band stripes, and zeroing
- * the slope at the stops removes them without spatial noise (which would scale with the
- * downscale's texel size). Must stay in lockstep with [PROGRESSIVE_LEVEL_MASK_SHADER]'s weight
- * smoothstep — `s(1 − x) = 1 − s(x)` is what keeps the Android DAG identical to this mix chain.
+ * Single-pass 1-tap alpha-ramp mask for the `1×` clear-end overlay when the underlying `2×`
+ * layer is already near-sharp (`σ_1x <= ~3.2px`), avoiding 2 full-res blur passes.
  */
-internal const val PROGRESSIVE_COMPOSITE_SHADER = """
-    uniform shader clearChild;
-    uniform shader blur0;
-    uniform shader blur1;
-    uniform shader blur2;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
-    uniform float in_curve;
+internal fun progressiveSharpMaskShader(curveKind: Int): String = SHARP_MASK_SHADERS[curveKind]
+    ?: buildProgressiveSharpMaskShader(curveKind).also { SHARP_MASK_SHADERS[curveKind] = it }
 
-    half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        // raw: 0 at the full-strength end, 1 at the clear end. Walk the level stack
-        // [blur0 -> blur1 -> blur2 -> sharp] so blur strength decreases continuously.
-        float pos = raw * 3.0;
-        half4 color;
-        if (pos < 1.0) {
-            float f = pos * pos * (3.0 - 2.0 * pos);
-            color = mix(blur0.eval(xy), blur1.eval(xy), f);
-        } else if (pos < 2.0) {
-            float f = pos - 1.0;
-            f = f * f * (3.0 - 2.0 * f);
-            color = mix(blur1.eval(xy), blur2.eval(xy), f);
-        } else {
-            float f = pos - 2.0;
-            f = f * f * (3.0 - 2.0 * f);
-            color = mix(blur2.eval(xy), clearChild.eval(xy), f);
-        }
-        // Unpremul terminator (same rationale as buildBlurShader): the native level blurs mix
-        // the padding ring's transparency into the edges; without renormalizing to opaque, the
-        // sharp content below bleeds through the semi-transparent rim.
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0);
-        }
-        return color;
+private val SHARP_MASK_SHADERS = arrayOfNulls<String>(4)
+
+private val SHARP_MASK_KEYS = arrayOf(
+    "LMPSM_c0",
+    "LMPSM_c1",
+    "LMPSM_c2",
+    "LMPSM_c3",
+)
+
+internal fun progressiveSharpMaskShaderKey(curveKind: Int): String = SHARP_MASK_KEYS[curveKind]
+
+private fun buildProgressiveSharpMaskShader(curveKind: Int): String {
+    val curveUniform = if (curveKind == 3) "\n    uniform float in_curve;" else ""
+    val curveExpr = when (curveKind) {
+        0 -> ""
+        1 -> "\n        smoothRaw = sqrt(smoothRaw);"
+        2 -> "\n        smoothRaw = sqrt(sqrt(smoothRaw));"
+        else -> "\n        smoothRaw = pow(smoothRaw, in_curve);"
     }
-"""
-
-/**
- * Renormalizes a premultiplied blur result to opaque — [buildBlurShader]'s unpremul terminator as
- * a standalone pass. Chained after the Android progressive stack's unmasked base blur, the one
- * level whose alpha nothing else renormalizes (masked levels get it inline from
- * [PROGRESSIVE_LEVEL_MASK_SHADER]; the Skiko composite applies it as its own terminator).
- */
-internal const val UNPREMUL_SHADER = """
+    return """
     uniform shader child;
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;$curveUniform
+    uniform float in_sharpThreshold;
+    uniform float in_invSharpSpan;
 
     half4 main(float2 xy) {
-        half4 c = child.eval(xy);
-        if (c.a > 0.0039) {
-            return half4(c.rgb / c.a, 1.0);
+        float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
+        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
+        float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
+        half mw = half(clamp(m * 1.5384615, 0.0, 1.0));
+        mw = mw * mw * (half(3.0) - half(2.0) * mw);
+        if (mw <= half(0.004)) {
+            return half4(0.0);
         }
-        return c;
+        half4 s = child.eval(xy);
+        if (s.a > 0.0039 && s.a < 0.996) {
+            return half4(s.rgb / s.a, 1.0) * mw;
+        }
+        return s * mw;
     }
 """
-
-/**
- * Band mask for the progressive composite: weight `clamp(in_level − in_slope·raw, 0, 1)` of the
- * smoothstepped gradient. `in_slope = 3`, `in_level` ∈ {1, 2} = the level stops of the Android
- * stack DAG (≡ [PROGRESSIVE_COMPOSITE_SHADER]'s mix chain); `in_level = in_slope = 1` = the
- * continuous `1 − raw` ramp for the post-effect chain; `in_level = −2`, `in_slope = −3` = the
- * rising `clamp(3·raw − 2, 0, 1)` ramp masking the sharp end (the full-resolution overlay, or the
- * Android stack's native source level at full resolution). The clamped
- * weight is smoothstepped to match [PROGRESSIVE_COMPOSITE_SHADER]'s per-segment fractions:
- * `s(1 − x) = 1 − s(x)` keeps the Android level masks complementary to the mix chain, so both
- * platforms zero the walk's derivative at the segment stops alike. The child is renormalized to
- * opaque before weighting — this is the Android masked levels' unpremul terminator (their native
- * blurs mix in the padding ring's transparency), folded in here to save a pass; a no-op for the
- * already-opaque children of the other mask uses.
- */
-internal const val PROGRESSIVE_LEVEL_MASK_SHADER = """
-    uniform shader child;
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
-    uniform float in_curve;
-    uniform float in_level;
-    uniform float in_slope;
-
-    half4 main(float2 xy) {
-        float p = dot(xy, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        float w = clamp(in_level - raw * in_slope, 0.0, 1.0);
-        w = w * w * (3.0 - 2.0 * w);
-        half4 c = child.eval(xy);
-        if (c.a > 0.0039) {
-            c = half4(c.rgb / c.a, 1.0);
-        }
-        return c * half(w);
-    }
-"""
+}
 
 /**
  * Brightness / contrast / saturation adjustment.
  *
- * Brightness is applied in linear (gamma 2.2) space to avoid sRGB hue shift;
+ * Brightness is applied in approximate linear (gamma 2.0) space to avoid sRGB hue shift;
  * contrast and saturation are applied in sRGB space.
  *
  * Uniforms: `in_brightness ∈ [-1, +1]`, `in_contrast ∈ [0, +∞)`, `in_saturation ∈ [0, +∞)`.
@@ -317,13 +408,14 @@ internal const val COLOR_CONTROLS_SHADER = """
         half3 c = src.rgb / a;
 
         if (in_brightness != 0.0) {
-            c = pow(c, half3(2.2));
+            c = max(c, half3(0.0));
+            c = c * c;
             if (in_brightness > 0.0) {
                 c = mix(c, half3(1.0), half(in_brightness));
             } else {
                 c = c * half(1.0 + in_brightness);
             }
-            c = pow(c, half3(0.45454545));
+            c = sqrt(c);
         }
 
         if (in_contrast != 1.0) {
@@ -340,22 +432,21 @@ internal const val COLOR_CONTROLS_SHADER = """
     }
 """
 
-/** Noise dithering shader — 3-channel pseudo-random anti-banding. */
+/** Noise dithering shader — 3-channel sin-free hash anti-banding. */
 internal const val NOISE_DITHER_SHADER = """
     uniform shader child;
     uniform float noise_coeff;
 
     half4 main(float2 xy) {
-        float3 d = float3(
-            dot(xy, float2(6.9898, 78.233)),
-            dot(xy, float2(7.9898, 78.233)),
-            dot(xy, float2(8.9898, 78.233))
-        );
-        float3 n = (fract(sin(d) * float3(43734.5453, 43745.5453, 43767.5453)) - 0.5) * noise_coeff;
         half4 color = child.eval(xy);
+        if (color.a <= 0.001) return color;
+        float3 p3 = fract(float3(xy.xyx) * float3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yxz + 33.33);
+        float3 n = (fract((p3.xxy + p3.yzz) * p3.zyx) - 0.5) * noise_coeff * float(color.a);
         color.rg += half2(n.x);
         color.rb += half2(n.y);
         color.gb += half2(n.z);
+        color.rgb = clamp(color.rgb, half3(0.0), half3(color.a));
         return color;
     }
 """
@@ -375,183 +466,41 @@ internal const val DOWNSAMPLE_2X_SHADER = """
     }
 """
 
-/** 4× downsample — 4-tap ±0.75 dual-filter, 16-tap tent footprint. */
+/** 4× downsample — sample every texel in the 4×4 footprint before decimation. */
 internal const val DOWNSAMPLE_4X_SHADER = """
     uniform shader child;
     uniform float2 maxCoord;
     half4 main(float2 xy) {
         float2 minCoord = float2(0.5);
         half4 color = half4(0);
-        color += child.eval(clamp(xy + float2(-0.75, -0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2( 0.75, -0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2(-0.75,  0.75), minCoord, maxCoord));
-        color += child.eval(clamp(xy + float2( 0.75,  0.75), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2(-1.0, -1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 1.0, -1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2(-1.0,  1.0), minCoord, maxCoord));
+        color += child.eval(clamp(xy + float2( 1.0,  1.0), minCoord, maxCoord));
         return color * 0.25;
     }
 """
 
 /**
- * Edge bloom stroke shader. A rounded-rect SDF defines an outer mask + a stroke band,
- * then a 3D hemispheric normal is built along the rounded edge so that the directional
- * lights paint the inner halo.
+ * Builds the multi-layer blend mode shader.
  *
- * Two specializations selected at build time by [dualPeak]:
- *
- *  - `dualPeak = false`: each light's hemisphere is derived from its own projected XY
- *    direction (`normalize(lightDir.xy)`); a positive cosine factor between the rim
- *    normal and that hemisphere axis gates the light's contribution. Lights pointing
- *    purely along Z fall back to the upper / lower split `(0, ∓1, 0)` for backwards
- *    compatibility with overhead-only configurations. Single peak per light.
- *
- *  - `dualPeak = true`: each light contributes via `dot(N.xy, L.xy)²` (xy-only dot²),
- *    so a single light produces two rim peaks 180° apart (where `n.xy` aligns and
- *    anti-aligns with `L.xy`) and naturally drops to zero perpendicular to `L.xy` and
- *    on the interior surface (where `n.xy → 0`). Matches the specular rim model used
- *    by Apple-style Liquid Glass demos; pair with a zero-intensity second light to get
- *    the canonical "two opposing peaks rotating with the light direction".
- *
- * Selecting the path at build time lets the driver compile out the unused branch and
- * removes the `useDualPeak > 0.5` per-fragment comparison.
- *
- * Light directions are pre-normalized on the CPU side: `dir = normalize((srcX-0.5,
- * srcY-0.7, srcZ))`, where `(0.5, 0.7, 0)` is the reference origin.
- *
- * Output is suited for overlay compositing: `result.rgb` carries premultiplied bloom
- * contributions, `result.a = outMask`, all multiplied by the rounded-rect outer mask.
- * Compose `BlendMode.Plus` then adds these contributions onto the surface below.
+ * - `includeExtended = false` (all modes ≤ 28): only the Porter-Duff / separable / non-separable HSL
+ *   functions, the `doBlend` dispatch and a flat `main`. Dropping the Lab helpers and the
+ *   `getBlendModeColor` dispatch shrinks the program and frees the register budget the driver would
+ *   reserve for the longest path — this is the common case, and keeping it lean lifts occupancy on
+ *   Adreno / Mali.
+ * - `includeExtended = true` (any mode > 28): the full set.
+ * - `rampMix = true`: the progressive composite's folded post pass — one child eval, ramp-mixed over
+ *   the untouched source instead of the SrcOver branch form that evaluates the stack twice.
  */
-internal fun buildBloomStrokeShader(dualPeak: Boolean): String {
-    val axisUniforms = if (dualPeak) {
-        ""
-    } else {
-        """
-uniform float2 axis1;
-uniform float2 axis2;
-"""
-    }
-    val lightBlock = if (dualPeak) {
-        """
-    float l1 = dot(n.xy, lightDir1.xy);
-    rgb += half(l1 * l1 * lightIntensity1) * lightColor1.rgb;
-    float l2 = dot(n.xy, lightDir2.xy);
-    rgb += half(l2 * l2 * lightIntensity2) * lightColor2.rgb;
-"""
-    } else {
-        """
-    float falloff1 = max(dot(float3(axis1, 0.0), n), 0.0);
-    float light1 = clamp(dot(n, lightDir1) * falloff1, 0.0, 1.0);
-    rgb += half(light1 * light1 * lightIntensity1) * lightColor1.rgb;
-
-    float falloff2 = max(dot(float3(axis2, 0.0), n), 0.0);
-    float light2 = clamp(dot(n, lightDir2) * falloff2, 0.0, 1.0);
-    rgb += half(light2 * light2 * lightIntensity2) * lightColor2.rgb;
-"""
-    }
-    return """
-uniform float2 halfView;
-uniform float2 halfViewFloor;
-uniform float4 cornerRadii;
-uniform float strokeWidth;
-uniform float innerBlurRadius;
-uniform float innerBlurRadiusSq;
-uniform float highlightAlpha;
-
-layout(color) uniform half4 strokeColor;
-uniform float strokeAlphaMul;
-
-uniform float3 lightDir1;
-layout(color) uniform half4 lightColor1;
-uniform float lightIntensity1;
-
-uniform float3 lightDir2;
-layout(color) uniform half4 lightColor2;
-uniform float lightIntensity2;
-$axisUniforms
-float pickRadius(float2 fragCoord, float4 radii) {
-    float2 up = fragCoord.y < halfView.y ? radii.xy : radii.zw;
-    return fragCoord.x < halfView.x ? up.x : up.y;
-}
-
-// caller passes non-negative pos (already abs-folded), so skip the redundant abs.
-float roundedBoxSDF(float2 pos, float2 halfSize, float radius) {
-    radius = min(radius, min(halfSize.x, halfSize.y));
-    float2 d = pos - halfSize + radius;
-    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - radius;
-}
-
-float3 getNormal(float2 fragCoord, float sdf, float R) {
-    float2 xy = fragCoord - halfViewFloor;
-    float2 xy_a = abs(xy);
-    float t = smoothstep(-innerBlurRadius, 0.0, sdf);
-    float z = sqrt(max(innerBlurRadiusSq - t * t, 0.0));
-    float3 coord = float3(xy_a, -z);
-
-    float2 corner = halfView - R;
-    corner.x = min(corner.x, xy_a.x);
-    corner.y = min(corner.y, xy_a.y);
-
-    float2 dir = normalize(coord.xy - corner.xy);
-    corner += dir * (R - innerBlurRadius);
-
-    if (any(lessThan(xy_a, corner))) {
-        return float3(0.0, 0.0, -1.0);
-    }
-
-    float2 signal = sign(xy);
-    float3 n = normalize(coord - float3(corner, 0.0));
-    n.xy *= signal;
-    return n;
-}
-
-half4 main(float2 fragCoord) {
-    float2 xy = abs(fragCoord - halfView);
-
-    float originRadius = pickRadius(fragCoord, cornerRadii);
-    float R = max(originRadius, innerBlurRadius);
-
-    if (all(lessThan(xy, halfView - R))) {
-        return half4(0.0);
-    }
-
-    float sdf = roundedBoxSDF(xy, halfView, originRadius);
-    half outMask = half(smoothstep(0.0, -1.0, sdf));
-    float strokeAlpha = smoothstep(-strokeWidth, -strokeWidth + 1.0, sdf);
-
-    // Native: stroke = uStrokeColor * sa; result += stroke.rgb * stroke.a
-    //       = strokeColor.rgb * strokeColor.a * sa^2
-    half3 rgb = strokeColor.rgb * half(strokeAlphaMul * strokeAlpha * strokeAlpha);
-
-    float3 n = getNormal(fragCoord, sdf, R);
-$lightBlock
-    return half4(rgb * half(highlightAlpha), 1.0) * outMask;
-}
-"""
-}
-
-internal val BLOOM_STROKE_SHADER_SINGLE: String = buildBloomStrokeShader(dualPeak = false)
-internal val BLOOM_STROKE_SHADER_DUAL: String = buildBloomStrokeShader(dualPeak = true)
-
-/**
- * Builds the multi-layer blend mode shader, optionally including the extended-mode helpers.
- *
- * - `includeExtended = false` (all layers have `mode <= 28`): emits only the Porter-Duff /
- *   separable / non-separable HSL functions + `doBlend` dispatch + a flat `main` loop. The
- *   Lab color-space helpers, `pow()`-heavy conversions and the `getBlendModeColor` dispatch
- *   are omitted entirely, shrinking the program and freeing the register budget the driver
- *   would otherwise reserve for the longest path.
- * - `includeExtended = true` (any layer has `mode > 28`): emits the full set, identical to
- *   the prior monolithic shader.
- * - `rampMix = true`: the progressive composite's folded post pass — the blend chain runs on a
- *   single child eval and the result is ramp-mixed over the untouched source, replacing the
- *   SrcOver branch form that evaluates the stack below twice.
- *
- * The standard family is the common case — keeping it lean lifts move-GPU occupancy on
- * Adreno / Mali where Lab path register pressure otherwise capped warp parallelism.
- */
-internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = false): String = buildString {
+internal fun buildBlendModeShader(
+    includeExtended: Boolean,
+    rampMix: Boolean = false,
+    curveKind: Int = 3,
+): String = buildString {
     append(BLEND_MODE_SHADER_HEADER)
     if (includeExtended) append(BLEND_MODE_SHADER_EXTENDED_HELPERS)
-    if (rampMix) append(BLEND_MODE_SHADER_RAMP_UNIFORMS)
+    if (rampMix) append(buildBlendModeRampUniforms(curveKind))
     append(
         when {
             rampMix && includeExtended -> BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP
@@ -564,8 +513,15 @@ internal fun buildBlendModeShader(includeExtended: Boolean, rampMix: Boolean = f
 
 internal val BLEND_MODE_SHADER_STANDARD: String = buildBlendModeShader(includeExtended = false)
 internal val BLEND_MODE_SHADER_EXTENDED: String = buildBlendModeShader(includeExtended = true)
-internal val BLEND_MODE_SHADER_STANDARD_RAMP: String = buildBlendModeShader(includeExtended = false, rampMix = true)
-internal val BLEND_MODE_SHADER_EXTENDED_RAMP: String = buildBlendModeShader(includeExtended = true, rampMix = true)
+
+private val BLEND_MODE_RAMP_SHADERS = arrayOfNulls<String>(8)
+
+internal fun rampBlendModeShader(includeExtended: Boolean, curveKind: Int): String {
+    val slot = (if (includeExtended) 4 else 0) + curveKind
+    return BLEND_MODE_RAMP_SHADERS[slot]
+        ?: buildBlendModeShader(includeExtended = includeExtended, rampMix = true, curveKind = curveKind)
+            .also { BLEND_MODE_RAMP_SHADERS[slot] = it }
+}
 
 /** Uniforms, standard mode helpers (0-28), and `doBlend` dispatch — shared by both families. */
 private const val BLEND_MODE_SHADER_HEADER = """
@@ -1022,20 +978,26 @@ private const val BLEND_MODE_SHADER_EXTENDED_HELPERS = """
 """
 
 /** Ramp band uniforms + weight for the progressive composite's folded post pass. */
-private const val BLEND_MODE_SHADER_RAMP_UNIFORMS = """
-    uniform float2 in_gradAxis;
-    uniform float2 in_gradBand;
-    uniform float in_curve;
+private fun buildBlendModeRampUniforms(curveKind: Int): String {
+    val curveUniform = if (curveKind == 3) "\n    uniform float in_curve;" else ""
+    val curveExpr = when (curveKind) {
+        0 -> ""
+        1 -> "\n        raw = sqrt(raw);"
+        2 -> "\n        raw = sqrt(sqrt(raw));"
+        else -> "\n        raw = pow(raw, in_curve);"
+    }
+    return """
+    uniform float2 in_gradVec;
+    uniform float in_gradOffset;$curveUniform
 
-    float rampWeight(float2 fragCoord) {
-        float p = dot(fragCoord, in_gradAxis);
-        float raw = clamp((p - in_gradBand.x) / (in_gradBand.y - in_gradBand.x), 0.0, 1.0);
-        raw = pow(raw * raw * (3.0 - 2.0 * raw), in_curve);
-        float w = 1.0 - raw;
-        return w * w * (3.0 - 2.0 * w);
+    float evalRampRaw(float2 fragCoord) {
+        float raw = clamp(dot(fragCoord, in_gradVec) + in_gradOffset, 0.0, 1.0);
+        raw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
+        return raw;
     }
 
 """
+}
 
 /** Flat `main` — standard family only, no unpremul/premul roundtrip. */
 private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
@@ -1057,6 +1019,14 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD = """
 private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
     half4 main(float2 fragCoord) {
         half4 src = child.eval(fragCoord);
+        if (src.a > 0.0039 && src.a < 0.996) {
+            src = half4(src.rgb / src.a, 1.0);
+        }
+        float w = 1.0 - evalRampRaw(fragCoord);
+        half rw = half(w * w * (3.0 - 2.0 * w));
+        if (rw <= half(0.001)) {
+            return src;
+        }
         half4 currentColor = src;
         int count = int(layerCount);
 
@@ -1066,7 +1036,7 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
             int mode = int(blendModes[i]);
             currentColor = doBlend(mode, layerColor, currentColor);
         }
-        return mix(src, currentColor, half(rampWeight(fragCoord)));
+        return mix(src, currentColor, rw);
     }
 """
 
@@ -1074,6 +1044,14 @@ private const val BLEND_MODE_SHADER_MAIN_STANDARD_RAMP = """
 private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
     half4 main(float2 fragCoord) {
         half4 src = child.eval(fragCoord);
+        if (src.a > 0.0039 && src.a < 0.996) {
+            src = half4(src.rgb / src.a, 1.0);
+        }
+        float w = 1.0 - evalRampRaw(fragCoord);
+        half rw = half(w * w * (3.0 - 2.0 * w));
+        if (rw <= half(0.001)) {
+            return src;
+        }
         float4 currentColor = float4(src);
         int count = int(layerCount);
 
@@ -1102,7 +1080,7 @@ private const val BLEND_MODE_SHADER_MAIN_EXTENDED_RAMP = """
                 currentColor = float4(float3(blended.rgb) * outA, outA);
             }
         }
-        return mix(src, half4(currentColor), half(rampWeight(fragCoord)));
+        return mix(src, half4(currentColor), rw);
     }
 """
 
