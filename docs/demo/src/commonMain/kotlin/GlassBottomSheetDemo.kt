@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
+import top.yukonga.miuix.kmp.glass.GlassCard
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.glass
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -92,6 +93,7 @@ fun GlassBottomSheetDemo() {
                         .verticalScroll(rememberScrollState())
                         .padding(bottom = 24.dp),
                 ) {
+                    GlassCard(modifier = Modifier.fillMaxWidth()) {
                     SwitchPreference(
                         title = "Allow notifications",
                         checked = notificationsEnabled,
@@ -107,6 +109,7 @@ fun GlassBottomSheetDemo() {
                         checked = previewsEnabled,
                         onCheckedChange = { previewsEnabled = it },
                     )
+                    }
                 }
             }
         }
