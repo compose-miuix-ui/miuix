@@ -4,9 +4,9 @@
 package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.neverEqualPolicy
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
@@ -226,16 +227,16 @@ private class BackdropPipelineElement(
             node.invalidateMeasurement()
         }
         if (!enabled) {
-            node.invalidateDraw()
+            node.requestDraw()
             return
         }
         if (pipelineChanged || enabledChanged) {
             node.invalidateDrawCache()
         } else if (blendChanged) {
-            node.invalidateDraw()
+            node.requestDraw()
             node.invalidatePlacement()
         } else {
-            node.invalidateDraw()
+            node.requestDraw()
         }
     }
     override fun InspectorInfo.inspectableProperties() {
@@ -314,7 +315,7 @@ private class DrawBackdropElement(
         if (enabled) {
             node.invalidateDrawCache()
         } else {
-            node.invalidateDraw()
+            node.requestDraw()
         }
     }
 
@@ -655,7 +656,14 @@ private class DrawBackdropNode(
         }
     }
 
-    private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
+    private var layoutCoordinates: LayoutCoordinates? = null
+    private var lastPositionInWindow: Offset = Offset.Unspecified
+    private var drawVersion by mutableIntStateOf(0)
+
+    fun requestDraw() {
+        drawVersion++
+        invalidateDraw()
+    }
 
     private fun DrawScope.recordBackdrop(target: LevelTarget) {
         val scaleFactor = target.cascadeFirstStepScale
@@ -878,6 +886,9 @@ private class DrawBackdropNode(
     }
 
     override fun ContentDrawScope.draw() {
+        // Snapshot read ensures enclosing GraphicsLayer re-records draw() when update() runs pre-layout.
+        @Suppress("UNUSED_EXPRESSION")
+        drawVersion
         if (!enabled) {
             drawContent()
             return
@@ -910,12 +921,17 @@ private class DrawBackdropNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
+            layoutCoordinates = coordinates
             if (backdrop.isCoordinatesDependent) {
-                layoutCoordinates = coordinates
-            } else {
-                if (layoutCoordinates != null) {
-                    layoutCoordinates = null
+                val pos = coordinates.positionInWindow()
+                if (pos != lastPositionInWindow) {
+                    lastPositionInWindow = pos
+                    if (enabled) {
+                        invalidateDraw()
+                    }
                 }
+            } else {
+                lastPositionInWindow = Offset.Unspecified
             }
         }
     }
@@ -931,7 +947,7 @@ private class DrawBackdropNode(
             // placeWithLayer inside an ancestor GraphicsLayer (e.g. squircleSurface) can skip
             // re-recording draw() on invalidateDraw() alone, leaving stale padding/downscale in
             // mainLayer paired with the updated renderEffect.
-            invalidateDraw()
+            requestDraw()
             invalidatePlacement()
         }
     }
@@ -1088,21 +1104,23 @@ private class DrawBackdropNode(
         var padR = progBasePadRight
         var padB = progBasePadBottom
         if (pre == null && layerBlock == null) {
-            val layerCoords = (backdrop as? LayerBackdrop)?.layerCoordinates?.takeIf { it.isAttached }
-            val coords = layoutCoordinates?.takeIf { it.isAttached }
-            if (layerCoords != null && coords != null) {
-                val pos = try {
-                    layerCoords.localPositionOf(coords)
-                } catch (_: Exception) {
-                    null
-                }
-                if (pos != null) {
-                    val layerW = layerCoords.size.width.toFloat()
-                    val layerH = layerCoords.size.height.toFloat()
-                    padL = minOf(padL, pos.x.coerceAtLeast(0f))
-                    padT = minOf(padT, pos.y.coerceAtLeast(0f))
-                    padR = minOf(padR, (layerW - (pos.x + scope.size.width)).coerceAtLeast(0f))
-                    padB = minOf(padB, (layerH - (pos.y + scope.size.height)).coerceAtLeast(0f))
+            Snapshot.withoutReadObservation {
+                val layerCoords = (backdrop as? LayerBackdrop)?.layerCoordinates?.takeIf { it.isAttached }
+                val coords = layoutCoordinates?.takeIf { it.isAttached }
+                if (layerCoords != null && coords != null) {
+                    val pos = try {
+                        layerCoords.localPositionOf(coords)
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (pos != null) {
+                        val layerW = layerCoords.size.width.toFloat()
+                        val layerH = layerCoords.size.height.toFloat()
+                        padL = minOf(padL, pos.x.coerceAtLeast(0f))
+                        padT = minOf(padT, pos.y.coerceAtLeast(0f))
+                        padR = minOf(padR, (layerW - (pos.x + scope.size.width)).coerceAtLeast(0f))
+                        padB = minOf(padB, (layerH - (pos.y + scope.size.height)).coerceAtLeast(0f))
+                    }
                 }
             }
         }
@@ -1355,6 +1373,7 @@ private class DrawBackdropNode(
     override fun onDetach() {
         releaseGraphicsLayers()
         layoutCoordinates = null
+        lastPositionInWindow = Offset.Unspecified
         effectsSized = false
     }
 }
