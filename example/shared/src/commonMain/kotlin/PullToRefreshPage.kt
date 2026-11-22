@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -169,7 +170,7 @@ fun PullToRefreshPage(
                         overscrollEffect = null,
                         contentPadding = contentPadding,
                     ) {
-                        item(key = "progress_card") {
+                        item(key = "progress_card", contentType = "progress_card") {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -193,7 +194,8 @@ fun PullToRefreshPage(
                         }
                         items(
                             count = dropdownCount,
-                            key = { "dropdown_$it" },
+                            key = { it },
+                            contentType = { if (it % 2 == 0) "overlay_dropdown" else "window_dropdown" },
                         ) { i ->
                             val isFirst = i == 0
                             val isLast = i == dropdownCount - 1
@@ -265,7 +267,7 @@ fun PullToRefreshPage(
                     valueRange = 0f..1f,
                     steps = 99,
                     showKeyPoints = true,
-                    keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+                    keyPoints = ThresholdKeyPoints,
                 )
             }
             // The window-owned sheet excludes page/sidebar padding; overlapping safe areas use max.
@@ -285,9 +287,14 @@ fun PullToRefreshPage(
 private fun PullProgressText(
     progressProvider: () -> Float,
 ) {
+    val percent by remember(progressProvider) {
+        computedStateOf { (progressProvider() * 100).toInt() }
+    }
     Text(
-        text = "Pull Progress: ${(progressProvider() * 100).toInt()}%",
+        text = "Pull Progress: $percent%",
         style = MiuixTheme.textStyles.body1,
         color = MiuixTheme.colorScheme.onSurface,
     )
 }
+
+private val ThresholdKeyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f)

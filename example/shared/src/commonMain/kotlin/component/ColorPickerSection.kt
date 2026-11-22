@@ -143,15 +143,7 @@ private fun ColorHexTextField(
     TextField(
         state = hexState,
         lineLimits = TextFieldLineLimits.SingleLine,
-        inputTransformation = InputTransformation {
-            val filtered = asCharSequence()
-                .filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
-                .toString()
-                .uppercase()
-            if (asCharSequence().toString() != filtered) {
-                replace(0, length, filtered)
-            }
-        }.maxLengthReject(8),
+        inputTransformation = HexInputTransformation,
         leadingIcon = {
             Text(
                 "HEX: #",
@@ -162,3 +154,13 @@ private fun ColorHexTextField(
         modifier = Modifier.padding(top = 12.dp),
     )
 }
+
+private val HexInputTransformation = InputTransformation {
+    val filtered = asCharSequence()
+        .filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+        .toString()
+        .uppercase()
+    if (asCharSequence().toString() != filtered) {
+        replace(0, length, filtered)
+    }
+}.maxLengthReject(8)

@@ -8,7 +8,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
@@ -505,37 +505,53 @@ private fun ThemeModeIllustration(
     wide: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Canvas(
-        modifier = modifier.fillMaxWidth().aspectRatio(if (wide) 2f else 1f).squircleClip(20.dp),
-    ) {
-        drawRect(
-            brush = Brush.verticalGradient(listOf(Color(0xFF406EFF), Color(0xFF55B9FA))),
-        )
-        val illustrationWidth = size.width * if (wide) 0.7f else 1f
-        val start = (size.width - illustrationWidth) / 2f
-        val unitX = illustrationWidth / 680f
-        val unitY = size.height / 680f
-        val cornerUnit = minOf(unitX, unitY)
-        val panelColor = if (dark) Color.Black.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.2f)
-        val lineColor = if (dark) Color.White.copy(alpha = 0.35f) else Color(0xFF285ABC).copy(alpha = 0.6f)
-        for (top in listOf(148f, 356f)) {
-            drawRoundRect(
-                color = panelColor,
-                topLeft = Offset(start + 48f * unitX, top * unitY),
-                size = Size(584f * unitX, 176f * unitY),
-                cornerRadius = CornerRadius(44f * cornerUnit),
-            )
-            for ((offset, width) in listOf(52f to 460f, 100f to 312f)) {
-                drawRoundRect(
-                    color = lineColor,
-                    topLeft = Offset(start + 112f * unitX, (top + offset) * unitY),
-                    size = Size(width * unitX, 24f * unitY),
-                    cornerRadius = CornerRadius(12f * cornerUnit),
-                )
-            }
-        }
-    }
+    Spacer(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(if (wide) 2f else 1f)
+            .squircleClip(20.dp)
+            .drawWithCache {
+                val bgBrush = Brush.verticalGradient(ThemeIllustrationGradientColors)
+                val panelColor = if (dark) Color.Black.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.2f)
+                val lineColor = if (dark) Color.White.copy(alpha = 0.35f) else Color(0xFF285ABC).copy(alpha = 0.6f)
+                onDrawBehind {
+                    drawRect(brush = bgBrush)
+                    val illustrationWidth = size.width * if (wide) 0.7f else 1f
+                    val start = (size.width - illustrationWidth) / 2f
+                    val unitX = illustrationWidth / 680f
+                    val unitY = size.height / 680f
+                    val cornerUnit = minOf(unitX, unitY)
+                    val panelSize = Size(584f * unitX, 176f * unitY)
+                    val panelCorner = CornerRadius(44f * cornerUnit)
+                    val lineCorner = CornerRadius(12f * cornerUnit)
+                    val lineX = start + 112f * unitX
+                    val lineH = 24f * unitY
+                    for (i in ThemeIllustrationRowTops.indices) {
+                        val top = ThemeIllustrationRowTops[i]
+                        drawRoundRect(
+                            color = panelColor,
+                            topLeft = Offset(start + 48f * unitX, top * unitY),
+                            size = panelSize,
+                            cornerRadius = panelCorner,
+                        )
+                        for (j in ThemeIllustrationLineOffsets.indices) {
+                            drawRoundRect(
+                                color = lineColor,
+                                topLeft = Offset(lineX, (top + ThemeIllustrationLineOffsets[j]) * unitY),
+                                size = Size(ThemeIllustrationLineWidths[j] * unitX, lineH),
+                                cornerRadius = lineCorner,
+                            )
+                        }
+                    }
+                }
+            },
+    )
 }
+
+private val ThemeIllustrationGradientColors = listOf(Color(0xFF406EFF), Color(0xFF55B9FA))
+private val ThemeIllustrationRowTops = floatArrayOf(148f, 356f)
+private val ThemeIllustrationLineOffsets = floatArrayOf(52f, 100f)
+private val ThemeIllustrationLineWidths = floatArrayOf(460f, 312f)
 
 @Composable
 private fun GlobalScalePreference(

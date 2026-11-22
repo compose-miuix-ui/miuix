@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -70,7 +72,7 @@ fun LicensePage(
     val libraries by produceState<List<Library>?>(initialValue = null, loadAboutLibrariesJson) {
         try {
             val jsonString = loadAboutLibrariesJson()
-            val libs = SimpleJsonParser(jsonString).parseLibs()
+            val libs = withContext(Dispatchers.Default) { SimpleJsonParser(jsonString).parseLibs() }
             value = libs.libraries
         } catch (e: CancellationException) {
             throw e
@@ -116,7 +118,7 @@ fun LicensePage(
                 contentPadding = contentPadding,
             ) {
                 libraries?.let { libs ->
-                    items(libs, key = { it.uniqueId }) { library ->
+                    items(libs, key = { it.uniqueId }, contentType = { "license_item" }) { library ->
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)

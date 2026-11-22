@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,22 +61,24 @@ fun TextStylePage(
 
     val textStyles = MiuixTheme.textStyles
 
-    val styleEntries = listOf(
-        TextStyleEntry("title1", textStyles.title1, "32sp"),
-        TextStyleEntry("title2", textStyles.title2, "24sp"),
-        TextStyleEntry("title3", textStyles.title3, "20sp"),
-        TextStyleEntry("title4", textStyles.title4, "18sp"),
-        TextStyleEntry("headline1", textStyles.headline1, "17sp"),
-        TextStyleEntry("headline2", textStyles.headline2, "16sp"),
-        TextStyleEntry("subtitle", textStyles.subtitle, "14sp / Bold"),
-        TextStyleEntry("main", textStyles.main, "17sp"),
-        TextStyleEntry("paragraph", textStyles.paragraph, "17sp / lineHeight 1.2em"),
-        TextStyleEntry("body1", textStyles.body1, "16sp"),
-        TextStyleEntry("body2", textStyles.body2, "14sp"),
-        TextStyleEntry("button", textStyles.button, "17sp"),
-        TextStyleEntry("footnote1", textStyles.footnote1, "13sp"),
-        TextStyleEntry("footnote2", textStyles.footnote2, "11sp"),
-    )
+    val styleEntries = remember(textStyles) {
+        listOf(
+            TextStyleEntry("title1", textStyles.title1, "32sp"),
+            TextStyleEntry("title2", textStyles.title2, "24sp"),
+            TextStyleEntry("title3", textStyles.title3, "20sp"),
+            TextStyleEntry("title4", textStyles.title4, "18sp"),
+            TextStyleEntry("headline1", textStyles.headline1, "17sp"),
+            TextStyleEntry("headline2", textStyles.headline2, "16sp"),
+            TextStyleEntry("subtitle", textStyles.subtitle, "14sp / Bold"),
+            TextStyleEntry("main", textStyles.main, "17sp"),
+            TextStyleEntry("paragraph", textStyles.paragraph, "17sp / lineHeight 1.2em"),
+            TextStyleEntry("body1", textStyles.body1, "16sp"),
+            TextStyleEntry("body2", textStyles.body2, "14sp"),
+            TextStyleEntry("button", textStyles.button, "17sp"),
+            TextStyleEntry("footnote1", textStyles.footnote1, "13sp"),
+            TextStyleEntry("footnote2", textStyles.footnote2, "11sp"),
+        )
+    }
 
     val backdrop = rememberBlurBackdrop()
     val blurActive = backdrop != null
@@ -107,10 +110,10 @@ fun TextStylePage(
                 overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
-                item(key = "title_header") {
+                item(key = "title_header", contentType = "header") {
                     SmallTitle("Title Styles")
                 }
-                item(key = "title_card") {
+                item(key = "title_card", contentType = "card") {
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
@@ -125,10 +128,10 @@ fun TextStylePage(
                         }
                     }
                 }
-                item(key = "headline_header") {
+                item(key = "headline_header", contentType = "header") {
                     SmallTitle("Headline Styles")
                 }
-                item(key = "headline_card") {
+                item(key = "headline_card", contentType = "card") {
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
@@ -143,10 +146,10 @@ fun TextStylePage(
                         }
                     }
                 }
-                item(key = "body_header") {
+                item(key = "body_header", contentType = "header") {
                     SmallTitle("Body Styles")
                 }
-                item(key = "body_card") {
+                item(key = "body_card", contentType = "card") {
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
@@ -161,10 +164,10 @@ fun TextStylePage(
                         }
                     }
                 }
-                item(key = "footnote_header") {
+                item(key = "footnote_header", contentType = "header") {
                     SmallTitle("Footnote Styles")
                 }
-                item(key = "footnote_card") {
+                item(key = "footnote_card", contentType = "card") {
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
@@ -179,10 +182,10 @@ fun TextStylePage(
                         }
                     }
                 }
-                item(key = "all_header") {
+                item(key = "all_header", contentType = "header") {
                     SmallTitle("All Styles Overview")
                 }
-                item(key = "all_card") {
+                item(key = "all_card", contentType = "card") {
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),

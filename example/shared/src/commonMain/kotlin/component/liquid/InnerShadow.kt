@@ -8,6 +8,7 @@ package component.liquid
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
@@ -29,6 +30,7 @@ import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 @Immutable
@@ -96,23 +98,42 @@ private class InnerShadowNode(
     private val paint = Paint()
     private val clipPath = Path()
     private var prevRadius = Float.NaN
+    private var prevShape: Shape? = null
+    private var prevSize: Size = Size.Unspecified
+    private var prevLayoutDirection: LayoutDirection? = null
+    private var cachedOutline: Outline? = null
 
     override fun ContentDrawScope.draw() {
         drawContent()
 
         val shadow = shadow() ?: return
+        if (shadow.alpha <= 0f) return
         val layer = shadowLayer ?: return
 
         val radius = shadow.radius.toPx()
         val offsetX = shadow.offset.x.toPx()
         val offsetY = shadow.offset.y.toPx()
 
-        val outline = shape.createOutline(size, layoutDirection, this)
-        clipPath.reset()
-        when (outline) {
-            is Outline.Rectangle -> clipPath.addRect(outline.rect)
-            is Outline.Rounded -> clipPath.addRoundRect(outline.roundRect)
-            is Outline.Generic -> clipPath.addPath(outline.path)
+        val outline = if (
+            cachedOutline != null &&
+            prevShape == shape &&
+            prevSize == size &&
+            prevLayoutDirection == layoutDirection
+        ) {
+            cachedOutline!!
+        } else {
+            val created = shape.createOutline(size, layoutDirection, this)
+            cachedOutline = created
+            prevShape = shape
+            prevSize = size
+            prevLayoutDirection = layoutDirection
+            clipPath.reset()
+            when (created) {
+                is Outline.Rectangle -> clipPath.addRect(created.rect)
+                is Outline.Rounded -> clipPath.addRoundRect(created.roundRect)
+                is Outline.Generic -> clipPath.addPath(created.path)
+            }
+            created
         }
 
         paint.color = shadow.color
