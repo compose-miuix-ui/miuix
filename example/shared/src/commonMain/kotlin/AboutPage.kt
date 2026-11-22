@@ -205,7 +205,6 @@ private fun AboutContent(
     val dynamicBackground = remember { mutableStateOf(shaderSupported) }
     val isFullScreenBackground = remember { mutableStateOf(true) }
 
-    val cardBlend = if (isInDark) ColorBlendToken.Overlay_Thin_Light else ColorBlendToken.Pured_Regular_Light
     val logoBlend = remember(isInDark) {
         if (isInDark) {
             listOf(
@@ -359,30 +358,7 @@ private fun AboutContent(
                                     modifier = Modifier.padding(bottom = scrollPadding.calculateBottomPadding()),
                                 ) {
                                     Card(
-                                        modifier = Modifier.padding(horizontal = 12.dp)
-                                            .then(
-                                                if (backdrop != null) {
-                                                    Modifier
-                                                        .textureBlur(
-                                                            backdrop = backdrop,
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            blurRadius = blurRadius,
-                                                            noiseCoefficient = noiseCoefficient,
-                                                            colors = BlurDefaults.blurColors(
-                                                                blendColors = cardBlend,
-                                                                brightness = brightness,
-                                                                contrast = contrast,
-                                                                saturation = saturation,
-                                                            ),
-                                                        )
-                                                } else {
-                                                    Modifier
-                                                },
-                                            ),
-                                        colors = CardDefaults.defaultColors(
-                                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                                            Color.Transparent,
-                                        ),
+                                        modifier = Modifier.padding(horizontal = 12.dp),
                                     ) {
                                         ArrowPreference(
                                             title = "View Source",
@@ -410,30 +386,7 @@ private fun AboutContent(
                                     Card(
                                         modifier = Modifier
                                             .padding(horizontal = 12.dp)
-                                            .padding(top = 12.dp)
-                                            .then(
-                                                if (backdrop != null) {
-                                                    Modifier
-                                                        .textureBlur(
-                                                            backdrop = backdrop,
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            blurRadius = blurRadius,
-                                                            noiseCoefficient = noiseCoefficient,
-                                                            colors = BlurDefaults.blurColors(
-                                                                blendColors = cardBlend,
-                                                                brightness = brightness,
-                                                                contrast = contrast,
-                                                                saturation = saturation,
-                                                            ),
-                                                        )
-                                                } else {
-                                                    Modifier
-                                                },
-                                            ),
-                                        colors = CardDefaults.defaultColors(
-                                            if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                                            Color.Transparent,
-                                        ),
+                                            .padding(top = 12.dp),
                                     ) {
                                         ArrowPreference(
                                             title = "License",
