@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,7 +79,7 @@ fun ColorPage(
     val dynLight = platformDynamicColors(dark = false)
     val dynDark = platformDynamicColors(dark = true)
 
-    val currentRows = remember(currentColors) { buildColorBlockRows(currentColors) }
+    val currentRows by remember(currentColors) { derivedStateOf { buildColorBlockRows(currentColors) } }
     val lightRows = remember(lightColors) { buildColorBlockRows(lightColors) }
     val dynLightRows = remember(dynLight) { buildColorBlockRows(dynLight) }
     val darkRows = remember(darkColors) { buildColorBlockRows(darkColors) }
