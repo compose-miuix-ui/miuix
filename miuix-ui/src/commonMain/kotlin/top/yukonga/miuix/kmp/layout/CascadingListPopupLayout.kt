@@ -15,7 +15,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,8 +52,11 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.ListPopupLayoutInfo
+import top.yukonga.miuix.kmp.basic.PopupPlacementHolder
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
+import top.yukonga.miuix.kmp.basic.resolveLocalTransformOrigin
+import top.yukonga.miuix.kmp.basic.resolvePopupLayoutPosition
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -107,7 +109,7 @@ object CascadingPopupDefaults {
     )
 }
 
-private data class CascadingItemPosition(
+internal data class CascadingItemPosition(
     val entryIndex: Int,
     val itemIndex: Int,
 )
@@ -176,7 +178,7 @@ internal fun CascadingListPopupLayout(
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val coroutineScope = rememberCoroutineScope()
     // Defer enter until both are measured — otherwise transformOrigin and offset jump on frame 1.
-    var primarySize by remember { mutableStateOf(IntSize.Zero) }
+    var primaryReady by remember { mutableStateOf(false) }
     var hostPositionInWindow by remember { mutableStateOf(IntOffset.Zero) }
     var hostMeasured by remember { mutableStateOf(false) }
 
@@ -186,8 +188,8 @@ internal fun CascadingListPopupLayout(
             backEnterProgress.snapTo(0f)
             backExpandProgress.snapTo(0f)
             launch { dimProgress.animateTo(1f, ListPopupDefaults.DimEnterAnimationSpec) }
-            snapshotFlow { primarySize to hostMeasured }
-                .first { (size, ready) -> size != IntSize.Zero && ready }
+            snapshotFlow { primaryReady && hostMeasured }
+                .first { it }
             launch { enterFraction.animateTo(1f, ListPopupDefaults.FractionAnimationSpec) }
             launch { enterAlpha.animateTo(1f, ListPopupDefaults.AlphaEnterAnimationSpec) }
         } else {
@@ -257,12 +259,14 @@ internal fun CascadingListPopupLayout(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
-        popupContentSize = primarySize,
+        popupContentSize = IntSize.Zero,
         componentBounds = componentBounds,
     )
+    val placement = remember {
+        PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)
+    }
 
-    val anchorBoundsByPosition = remember { mutableStateMapOf<CascadingItemPosition, IntRect>() }
-
+    val anchorBoundsByPosition = remember { HashMap<CascadingItemPosition, IntRect>() }
     val onOutsideTap: () -> Unit = remember {
         {
             if (expandedItemPosition != null) {
@@ -314,7 +318,8 @@ internal fun CascadingListPopupLayout(
                 }
         }
 
-        CompositionLocalProvider(LocalDismissState provides { currentOnDismiss() }) {
+        val requestDismiss: () -> Unit = remember { { currentOnDismiss() } }
+        CompositionLocalProvider(LocalDismissState provides requestDismiss) {
             val dimColor = MiuixTheme.colorScheme.windowDimming
             val maskColor = remember(dimColor) {
                 dimColor.copy(alpha = (dimColor.alpha * 0.5f).coerceIn(0f, 1f))
@@ -346,7 +351,7 @@ internal fun CascadingListPopupLayout(
                         entries = entries,
                         expandedItem = expandedItem,
                         displayedItem = displayedItem,
-                        onExpand = { item -> expandedItemPosition = entries.positionOf(item) },
+                        onExpand = { position -> expandedItemPosition = position },
                         onCollapseSecondary = { expandedItemPosition = null },
                         onLeafSelected = { item ->
                             item.onClick?.invoke()
@@ -355,19 +360,18 @@ internal fun CascadingListPopupLayout(
                                 currentOnDismiss()
                             }
                         },
-                        getAnchorBounds = { item ->
-                            entries.positionOf(item)?.let(anchorBoundsByPosition::get)
-                        },
-                        setAnchorBounds = { item, bounds ->
+                        getAnchorBounds = { position -> anchorBoundsByPosition[position] },
+                        setAnchorBounds = { position, bounds ->
                             // Freeze the anchor once secondary is shown so primary's scale
                             // animation can't drift it via onGloballyPositioned.
                             if (displayedItem == null) {
-                                entries.positionOf(item)?.let { position ->
-                                    anchorBoundsByPosition[position] = bounds
-                                }
+                                anchorBoundsByPosition[position] = bounds
                             }
                         },
-                        onPrimarySizeChange = { primarySize = it },
+                        onPrimaryReady = { if (!primaryReady) primaryReady = true },
+                        placement = placement,
+                        expandedItemPosition = expandedItemPosition,
+                        displayedItemPosition = displayedItemPosition,
                         windowBounds = layoutInfo.windowBounds,
                         popupMargin = layoutInfo.popupMargin,
                         parentBounds = parentBounds,
@@ -412,12 +416,15 @@ private fun CascadingMorphSubLayout(
     entries: List<DropdownEntry>,
     expandedItem: DropdownItem?,
     displayedItem: DropdownItem?,
-    onExpand: (DropdownItem) -> Unit,
+    onExpand: (CascadingItemPosition) -> Unit,
     onCollapseSecondary: () -> Unit,
     onLeafSelected: (DropdownItem) -> Unit,
-    getAnchorBounds: (DropdownItem) -> IntRect?,
-    setAnchorBounds: (DropdownItem, IntRect) -> Unit,
-    onPrimarySizeChange: (IntSize) -> Unit,
+    getAnchorBounds: (CascadingItemPosition) -> IntRect?,
+    setAnchorBounds: (CascadingItemPosition, IntRect) -> Unit,
+    onPrimaryReady: () -> Unit,
+    placement: PopupPlacementHolder,
+    expandedItemPosition: CascadingItemPosition?,
+    displayedItemPosition: CascadingItemPosition?,
     windowBounds: IntRect,
     popupMargin: IntRect,
     parentBounds: IntRect,
@@ -459,7 +466,7 @@ private fun CascadingMorphSubLayout(
         // Secondary subcomposition tracks [displayedItem] so the morphing surface survives the
         // collapse spring; primary's mask/chevron use [expandedItem] for instant input feedback.
         val activeExpanded = displayedItem
-        val anchorRect = activeExpanded?.let { getAnchorBounds(it) }
+        val anchorRect = displayedItemPosition?.let(getAnchorBounds)
         val (anchorPaddingTopPx, _) = if (activeExpanded != null) {
             computeAnchorPaddingPx(activeExpanded, entries)
         } else {
@@ -482,8 +489,8 @@ private fun CascadingMorphSubLayout(
                 onAnchorBounds = setAnchorBounds,
                 enterFraction = enterFraction,
                 enterAlpha = enterAlpha,
-                popupLayoutPosition = layoutInfo.popupLayoutPosition,
-                transformOrigin = layoutInfo.localTransformOrigin,
+                popupLayoutPosition = { placement.popupLayoutPosition },
+                transformOrigin = { placement.localTransformOrigin },
                 surfaceColor = surfaceColor,
                 dropdownColors = dropdownColors,
                 primaryScale = primaryScale,
@@ -497,8 +504,9 @@ private fun CascadingMorphSubLayout(
         val primaryWidth = primaryPlaceables.maxOfOrZero { it.width }
         val primaryHeight = primaryPlaceables.sumOfOrZero { it.height }
         val primaryMeasuredSize = IntSize(primaryWidth, primaryHeight)
-        onPrimarySizeChange(primaryMeasuredSize)
-
+        if (primaryMeasuredSize != IntSize.Zero) {
+            onPrimaryReady()
+        }
         val primaryOffsetWindow = if (primaryMeasuredSize == IntSize.Zero) {
             IntOffset.Zero
         } else {
@@ -510,6 +518,16 @@ private fun CascadingMorphSubLayout(
                 popupMargin,
                 alignment,
             )
+        }
+        if (primaryMeasuredSize != IntSize.Zero) {
+            val resolvedPos = resolvePopupLayoutPosition(parentBounds, primaryMeasuredSize, primaryOffsetWindow)
+            val resolvedOrigin = resolveLocalTransformOrigin(resolvedPos)
+            if (placement.popupLayoutPosition != resolvedPos) {
+                placement.popupLayoutPosition = resolvedPos
+            }
+            if (placement.localTransformOrigin != resolvedOrigin) {
+                placement.localTransformOrigin = resolvedOrigin
+            }
         }
 
         // Probe secondary's natural size first so the union rect (primary ∪ secondary) is
@@ -583,8 +601,8 @@ private fun CascadingMorphSubLayout(
                             secondaryContentMaxHeight = primaryConstraints.maxHeight,
                             enterFraction = enterFraction,
                             enterAlpha = enterAlpha,
-                            popupLayoutPosition = layoutInfo.popupLayoutPosition,
-                            transformOrigin = layoutInfo.localTransformOrigin,
+                            popupLayoutPosition = { placement.popupLayoutPosition },
+                            transformOrigin = { placement.localTransformOrigin },
                             expandFraction = expandFraction,
                             arrowRotation = arrowRotation,
                             onCollapseSecondary = onCollapseSecondary,
