@@ -135,21 +135,23 @@ fun BasicComponent(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val holdInteractionSource = interactionSource ?: run {
+    val effectiveInteractionSource = interactionSource ?: if (onClick != null) {
+        remember { MutableInteractionSource() }
+    } else {
         // Keep the source alive for the release animation.
         val holdSource = remember { lazy(LazyThreadSafetyMode.NONE) { MutableInteractionSource() } }
         if (holdDownState || holdSource.isInitialized()) holdSource.value else null
     }
 
-    if (holdInteractionSource != null) {
-        HoldDownObserver(holdDownState, holdInteractionSource)
+    if (effectiveInteractionSource != null) {
+        HoldDownObserver(holdDownState, effectiveInteractionSource)
     }
 
     val clickableModifier = if (enabled && onClick != null) {
         val currentOnClick by rememberUpdatedState(onClick)
-        remember(interactionSource, role, onClickLabel) {
+        remember(effectiveInteractionSource, role, onClickLabel) {
             Modifier.clickable(
-                interactionSource = interactionSource,
+                interactionSource = effectiveInteractionSource,
                 onClickLabel = onClickLabel,
                 role = role,
                 onClick = { currentOnClick() },
@@ -160,8 +162,8 @@ fun BasicComponent(
     }
 
     // An internal hold must not replace the clickable's existing interactions.
-    val holdIndication = if (enabled && holdInteractionSource != null && (onClick == null || interactionSource == null)) {
-        Modifier.indication(holdInteractionSource, LocalIndication.current)
+    val holdIndication = if (enabled && effectiveInteractionSource != null && onClick == null) {
+        Modifier.indication(effectiveInteractionSource, LocalIndication.current)
     } else {
         Modifier
     }

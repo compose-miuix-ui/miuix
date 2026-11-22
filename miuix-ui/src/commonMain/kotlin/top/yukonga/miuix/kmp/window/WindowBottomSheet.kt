@@ -16,13 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.theme.LocalDismissState
-import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
-import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
  * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
@@ -31,7 +27,8 @@ import top.yukonga.miuix.kmp.utils.platformDialogProperties
  *
  * @param show Whether the [WindowBottomSheet] is shown.
  * @param modifier The modifier to be applied to the [WindowBottomSheet].
- * @param title Optional title to display at the top of the [WindowBottomSheet].
+ * @param title Optional title. The header takes up space if any of [title], [startAction], or
+ *   [endAction] is non-null (including `title = ""`). The drag handle is unaffected.
  * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
  * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [WindowBottomSheet].
@@ -88,19 +85,14 @@ fun WindowBottomSheet(
         dragHandleColor = dragHandleColor,
         popupHost = { visible, hostContent ->
             if (visible) {
-                Dialog(
+                WindowComponentHost(
                     onDismissRequest = {
                         if (allowDismiss) {
                             currentOnDismissRequest.value?.invoke()
                         }
                     },
-                    properties = platformDialogProperties(),
-                ) {
-                    RemovePlatformDialogDefaultEffects()
-                    WindowNavigationEventScope {
-                        hostContent()
-                    }
-                }
+                    content = hostContent,
+                )
             }
         },
         modifier = modifier,

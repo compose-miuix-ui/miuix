@@ -14,6 +14,7 @@ import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 
 /**
@@ -59,10 +60,12 @@ private class LayerBackdropNode(
     private var coordinates: LayoutCoordinates? = null
 
     fun updateBackdrop(backdrop: LayerBackdrop) {
+        val resetOnResume = graphicsResourcesResetOnResume
+        if (!resetOnResume && this.backdrop === backdrop) return
         if (this.backdrop !== backdrop) {
             this.backdrop.layerCoordinates = null
             this.backdrop = backdrop
-            backdrop.layerCoordinates = coordinates
+            if (resetOnResume) backdrop.layerCoordinates = coordinates
         }
         invalidateDraw()
     }
@@ -81,7 +84,7 @@ private class LayerBackdropNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
-            this.coordinates = coordinates
+            if (graphicsResourcesResetOnResume) this.coordinates = coordinates
             backdrop.layerCoordinates = coordinates
         }
     }

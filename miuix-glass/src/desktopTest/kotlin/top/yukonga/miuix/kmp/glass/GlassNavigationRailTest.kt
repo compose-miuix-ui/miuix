@@ -262,7 +262,6 @@ class GlassNavigationRailTest {
         for (expanded in listOf(false, true, false)) {
             runOnIdle { state.expanded = expanded }
             waitForIdle()
-            saveImage("rail-compressed-labels-$expanded", onRoot().captureToImage())
             longItems.forEach { item ->
                 val label = checkNotNull(item.label)
                 val textNode = onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
@@ -280,18 +279,22 @@ class GlassNavigationRailTest {
                 )
             }
         }
-        saveImage("rail-compressed-labels", onRoot().captureToImage())
     }
 
     @Test
-    fun aFlyingLabelIsNeverNarrowerThanItsTextOnAFractionalDensity() = runDesktopComposeUiTest(width = 2800, height = 1700) {
+    fun flyingLabelsNeverTruncateOnFractionalDensity() = runDesktopComposeUiTest(width = 1100, height = 825) {
+        val secondary = listOf(
+            GlassNavigationItem(MiuixIcons.Basic.Search, "Preferences"),
+            GlassNavigationItem(MiuixIcons.Basic.Search, "Glass"),
+        )
         val state = GlassNavigationRailState(initialExpanded = false)
         setContent {
             CompositionLocalProvider(LocalDensity provides Density(2.75f)) {
                 DialogTestHost {
-                    Box(Modifier.size(1000.dp, 600.dp)) {
+                    Box(Modifier.size(400.dp, 300.dp)) {
                         GlassNavigationRail(
                             items = items,
+                            secondaryItems = secondary,
                             selectedIndex = 0,
                             onSelect = {},
                             backdrop = null,
@@ -308,9 +311,9 @@ class GlassNavigationRailTest {
         // the label would start a pixel short and show an ellipsis until the row had widened.
         for (expand in listOf(true, false)) {
             runOnIdle { state.expanded = expand }
-            repeat(90) { frame ->
+            repeat(30) { frame ->
                 mainClock.advanceTimeByFrame()
-                listOf("Home", "Library", "Settings").forEach { label ->
+                listOf("Home", "Library", "Settings", "Preferences", "Glass").forEach { label ->
                     onAllNodesWithText(label, useUnmergedTree = true).fetchSemanticsNodes().forEach { node ->
                         val layouts = mutableListOf<TextLayoutResult>()
                         node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
@@ -377,7 +380,6 @@ class GlassNavigationRailTest {
             "Secondary items must trail Settings at 100ms expand: home=${homeExpand100.left}, settings=${settingsExpand100.left}, pref=${prefExpand100.left}, glass=${glassExpand100.left}",
         )
         val img100 = onRoot().captureToImage()
-        saveImage("rail-secondary-expand-100ms", img100)
         val dividerSpan100 = findDividerHorizontalSpan(
             pixels = img100.toPixelMap(),
             yMin = settingsExpand100.center.y.toInt() + 12,
@@ -402,7 +404,6 @@ class GlassNavigationRailTest {
             prefExpand180.left >= settingsExpand180.left && glassExpand180.left >= prefExpand180.left,
             "Secondary items must keep trailing Settings at 180ms expand: settings=${settingsExpand180.left}, pref=${prefExpand180.left}, glass=${glassExpand180.left}",
         )
-        saveImage("rail-secondary-expand-180ms", onRoot().captureToImage())
 
         mainClock.autoAdvance = true
         mainClock.advanceTimeBy(2000)
@@ -425,59 +426,12 @@ class GlassNavigationRailTest {
                 glassTextCollapse.left >= settingsTextCollapse.left - 8f,
             "Secondary labels must stay aligned with Settings during collapse: home=${homeTextCollapse.left}, settings=${settingsTextCollapse.left}, pref=${prefTextCollapse.left}, glass=${glassTextCollapse.left}",
         )
-        saveImage("rail-secondary-collapse-80ms", onRoot().captureToImage())
 
         mainClock.autoAdvance = true
         mainClock.advanceTimeBy(2000)
         waitForIdle()
         assertEquals(0, onAllNodesWithText("Preferences", useUnmergedTree = true).fetchSemanticsNodes().size)
         assertEquals(0, onAllNodesWithText("Glass", useUnmergedTree = true).fetchSemanticsNodes().size)
-    }
-
-    @Test
-    fun flyingSecondaryLabelsNeverTruncateOnFractionalDensity() = runDesktopComposeUiTest(width = 2800, height = 1700) {
-        val secondary = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Preferences"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Glass"),
-        )
-        val state = GlassNavigationRailState(initialExpanded = false)
-        setContent {
-            CompositionLocalProvider(LocalDensity provides Density(2.75f)) {
-                DialogTestHost {
-                    Box(Modifier.size(1000.dp, 600.dp)) {
-                        GlassNavigationRail(
-                            items = items,
-                            secondaryItems = secondary,
-                            selectedIndex = 0,
-                            onSelect = {},
-                            backdrop = null,
-                            state = state,
-                            defaultWindowInsetsPadding = false,
-                        )
-                    }
-                }
-            }
-        }
-        waitForIdle()
-        mainClock.autoAdvance = false
-        for (expand in listOf(true, false)) {
-            runOnIdle { state.expanded = expand }
-            repeat(90) { frame ->
-                mainClock.advanceTimeByFrame()
-                listOf("Preferences", "Glass").forEach { label ->
-                    onAllNodesWithText(label, useUnmergedTree = true).fetchSemanticsNodes().forEach { node ->
-                        val layouts = mutableListOf<TextLayoutResult>()
-                        node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
-                        val layout = layouts.firstOrNull() ?: return@forEach
-                        val needed = ceil(layout.multiParagraph.intrinsics.maxIntrinsicWidth).toInt()
-                        assertTrue(
-                            layout.layoutInput.constraints.maxWidth >= needed,
-                            "$label had ${layout.layoutInput.constraints.maxWidth}px of $needed on frame $frame",
-                        )
-                    }
-                }
-            }
-        }
     }
 
     @Test

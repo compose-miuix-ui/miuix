@@ -174,7 +174,6 @@ fun PullToRefreshPage(
                                     .fillMaxWidth()
                                     .padding(horizontal = 12.dp)
                                     .padding(bottom = 8.dp),
-                                cornerRadius = 12.dp,
                                 insideMargin = PaddingValues(16.dp),
                                 colors = CardDefaults.defaultColors(
                                     color = MiuixTheme.colorScheme.surfaceContainer,

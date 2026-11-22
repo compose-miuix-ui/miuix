@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -82,6 +83,7 @@ import kotlinx.coroutines.withTimeout
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 import kotlin.time.Duration.Companion.milliseconds
@@ -250,7 +252,7 @@ fun rememberTooltipState(
  * tween would discard that velocity and produce a stall-and-reverse hitch.
  */
 private val TooltipExitScaleSpec: FiniteAnimationSpec<Float> =
-    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.0001f)
+    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.001f)
 
 /**
  * A tooltip box that anchors a [tooltip] (a [PlainTooltip] or [RichTooltip]) to its [content].
@@ -350,19 +352,48 @@ private fun TooltipPopup(
     focusable: Boolean,
     content: @Composable () -> Unit,
 ) {
+    val bounds = windowComponentBounds()
+    val boundedPositionProvider = remember(positionProvider, bounds) {
+        if (bounds == null) positionProvider else constrainTooltipPosition(positionProvider, bounds)
+    }
+    val sizeModifier = if (bounds == null) {
+        Modifier
+    } else {
+        with(LocalDensity.current) { Modifier.sizeIn(maxWidth = bounds.width.toDp(), maxHeight = bounds.height.toDp()) }
+    }
     Popup(
-        popupPositionProvider = positionProvider,
+        popupPositionProvider = boundedPositionProvider,
         onDismissRequest = { if (state.isVisible) state.dismiss() },
         properties = PopupProperties(focusable = focusable),
     ) {
         Box(
-            modifier = Modifier.semantics {
+            modifier = sizeModifier.semantics {
                 liveRegion = LiveRegionMode.Assertive
                 paneTitle = TOOLTIP_PANE_TITLE
             },
         ) {
             content()
         }
+    }
+}
+
+private fun constrainTooltipPosition(provider: PopupPositionProvider, bounds: IntRect): PopupPositionProvider = object : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val origin = bounds.topLeft
+        val position = if (provider is TooltipPopupPositionProvider) {
+            origin + provider.calculatePosition(anchorBounds.translate(-origin), bounds.size, layoutDirection, popupContentSize)
+        } else {
+            provider.calculatePosition(anchorBounds, windowSize, layoutDirection, popupContentSize)
+        }
+        return IntOffset(
+            x = position.x.coerceIn(bounds.left, (bounds.right - popupContentSize.width).coerceAtLeast(bounds.left)),
+            y = position.y.coerceIn(bounds.top, (bounds.bottom - popupContentSize.height).coerceAtLeast(bounds.top)),
+        )
     }
 }
 
@@ -566,8 +597,9 @@ private fun TooltipScope.TooltipSurface(
                         val selfX = self.positionInWindow().x
                         val caretHalf = caretSize.width.toPx() / 2f
                         val cr = cornerRadius.toPx()
-                        val centerX = (anchorCenterX - selfX)
-                            .coerceIn(cr + caretHalf, size.width - cr - caretHalf)
+                        val minCenter = cr + caretHalf
+                        if (size.width < 2 * minCenter) return@drawBehind
+                        val centerX = (anchorCenterX - selfX).coerceIn(minCenter, size.width - minCenter)
                         val caretHeight = caretSize.height.toPx()
                         val path = Path()
                         if (caretOnTop) {

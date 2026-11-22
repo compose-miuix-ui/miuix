@@ -13,11 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
+import top.yukonga.miuix.kmp.glass.GlassCard
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
 import top.yukonga.miuix.kmp.material.EdgeStroke
@@ -50,13 +51,23 @@ internal fun GlassBottomSheetDemo(
                 .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Drag the handle or scroll the content to try the sheet material.", style = MiuixTheme.textStyles.body2)
-            repeat(24) { index ->
-                Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                    Text("Sheet item ${index + 1}", style = MiuixTheme.textStyles.main)
-                    Text("Content stays sharp above the blurred page.", style = MiuixTheme.textStyles.body2)
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                BasicComponent(
+                    title = "Drag or scroll",
+                    summary = "Drag the handle or scroll the content to try the sheet material.",
+                    onClick = {},
+                )
+            }
+            repeat(4) { group ->
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    repeat(4) { index ->
+                        BasicComponent(
+                            title = "Sheet item ${group * 4 + index + 1}",
+                            summary = "Content stays sharp above the blurred page.",
+                            onClick = {},
+                        )
+                    }
                 }
-                HorizontalDivider()
             }
             GlassDialogButton(
                 onClick = onDismissRequest,

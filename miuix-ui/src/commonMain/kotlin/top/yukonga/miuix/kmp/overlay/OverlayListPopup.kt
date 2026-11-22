@@ -15,6 +15,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.layout.ListPopupLayout
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 
 /**
  * A popup with a list of items.
@@ -63,6 +64,7 @@ fun OverlayListPopup(
                 hostContent()
             }
         },
+        componentBounds = windowComponentBounds(),
         popupModifier = popupModifier,
         popupPositionProvider = popupPositionProvider,
         alignment = alignment,

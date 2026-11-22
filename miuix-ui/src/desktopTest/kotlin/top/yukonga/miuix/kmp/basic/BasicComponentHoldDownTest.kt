@@ -53,6 +53,7 @@ class BasicComponentHoldDownTest {
         val heldBrightness = brightness()
         assertTrue(heldBrightness < focused, "A held row must show feedback")
         row.performKeyInput { pressKey(Key.Enter) }
+        mainClock.advanceTimeBy(250L)
         row.assertIsFocused()
         assertEquals(focused, brightness(), 1f / 255f, "Releasing the hold must preserve the existing focus highlight")
     }

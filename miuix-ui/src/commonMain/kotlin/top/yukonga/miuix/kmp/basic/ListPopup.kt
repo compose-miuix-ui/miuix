@@ -197,7 +197,7 @@ interface PopupPositionProvider {
 
 object ListPopupDefaults {
     /** Default animation spec driving the scale/clip-reveal fraction progress of the popup. */
-    val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
 
     /** Default animation spec driving the popup content alpha while entering. */
     val AlphaEnterAnimationSpec = tween<Float>(durationMillis = 200)
@@ -212,7 +212,7 @@ object ListPopupDefaults {
     val DimExitAnimationSpec = tween<Float>(durationMillis = 150, easing = SinOutEasing)
 
     /** Default animation spec used to settle the popup back to its resting state after a gesture. */
-    val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
 
     /**
      * Default minimum width of the popup. Also matches the lower clamp inside
@@ -401,6 +401,15 @@ fun rememberListPopupLayoutInfo(
     popupPositionProvider: PopupPositionProvider,
     parentBounds: IntRect,
     popupContentSize: IntSize,
+): ListPopupLayoutInfo = rememberListPopupLayoutInfo(alignment, popupPositionProvider, parentBounds, popupContentSize, componentBounds = null)
+
+@Composable
+internal fun rememberListPopupLayoutInfo(
+    alignment: PopupPositionProvider.Align,
+    popupPositionProvider: PopupPositionProvider,
+    parentBounds: IntRect,
+    popupContentSize: IntSize,
+    componentBounds: IntRect?,
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
@@ -424,7 +433,7 @@ fun rememberListPopupLayoutInfo(
 
     val containerSize = windowInfo.containerSize
 
-    val windowBounds = remember(
+    val windowBounds = componentBounds ?: remember(
         layoutDirection,
         density,
         displayCutout,

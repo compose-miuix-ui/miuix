@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.luminance
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 import top.yukonga.miuix.kmp.utils.MiuixOverscrollFactory
 
@@ -30,7 +31,16 @@ fun MiuixTheme(
     val rawColors = controller.currentColors()
     val miuixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
     val miuixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
-    val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
+    val isDark = miuixColors.background.luminance() < 0.5f
+    val miuixIndication =
+        remember(miuixColors.onBackground, isDark) {
+            MiuixIndication(
+                color = miuixColors.onBackground,
+                pressAlpha = if (isDark) 36f / 255f else 20f / 255f,
+                hoverAlpha = if (isDark) 0.06f else 0.08f,
+                focusAlpha = if (isDark) 0.12f else 0.08f,
+            )
+        }
     CompositionLocalProvider(
         LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,
@@ -60,7 +70,16 @@ fun MiuixTheme(
     ProvideDisplayCutoutFix()
     val miuixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     val miuixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
-    val miuixIndication = remember(miuixColors.onBackground) { MiuixIndication(color = miuixColors.onBackground) }
+    val isDark = miuixColors.background.luminance() < 0.5f
+    val miuixIndication =
+        remember(miuixColors.onBackground, isDark) {
+            MiuixIndication(
+                color = miuixColors.onBackground,
+                pressAlpha = if (isDark) 36f / 255f else 20f / 255f,
+                hoverAlpha = if (isDark) 0.06f else 0.08f,
+                focusAlpha = if (isDark) 0.12f else 0.08f,
+            )
+        }
     CompositionLocalProvider(
         LocalColors provides miuixColors,
         LocalTextStyles provides miuixTextStyles,

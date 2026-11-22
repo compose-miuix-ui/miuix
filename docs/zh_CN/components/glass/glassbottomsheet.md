@@ -92,13 +92,13 @@ Scaffold { padding ->
 | allowDismiss | Boolean | 允许外部点击、拖动或返回关闭 | true | 否 |
 | enableNestedScroll | Boolean | 在子内容滚动与抽屉拖动之间传递位移 | true | 否 |
 | renderInRootScaffold | Boolean | 使用最外层 Scaffold；false 使用当前 Scaffold | true | 否 |
-| title | String? | 标题栏标题 | null | 否 |
+| title | String? | 可选标题。`title`、`startAction`、`endAction` 任一非 `null`（包括 `title = ""`），标题栏就占位。拖拽手柄不受影响。 | null | 否 |
 | startAction | (@Composable () -> Unit)? | 标题栏前侧操作 | null | 否 |
 | endAction | (@Composable () -> Unit)? | 标题栏后侧操作 | null | 否 |
 | cornerRadius | Dp | 顶角半径；底角保持直角 | BottomSheetDefaults.cornerRadius | 否 |
 | sheetMaxWidth | Dp | 抽屉最大宽度 | BottomSheetDefaults.maxWidth | 否 |
 | outsideMargin | DpSize | `width` 用作水平外边距；不应用 `height` | BottomSheetDefaults.outsideMargin | 否 |
-| insideMargin | DpSize | `width` 用作水平内容内边距，`height` 用作底部内边距 | BottomSheetDefaults.insideMargin | 否 |
+| insideMargin | DpSize | `width` 用作水平内容内边距，`height` 用作底部内边距 | GlassBottomSheetDefaults.InsideMargin | 否 |
 | dragHandleColor | Color | 应用按压透明度之前的拖动手柄颜色 | BottomSheetDefaults.dragHandleColor() | 否 |
 | material | GlassMaterial | 模糊及有序颜色层 | GlassBottomSheetDefaults.material() | 否 |
 | stroke | EdgeStroke? | 辉光描边；null 移除描边 | GlassBottomSheetDefaults.stroke() | 否 |
@@ -125,6 +125,7 @@ Scaffold { padding ->
 | 常量名 | 类型 | 说明 | 值 |
 | --- | --- | --- | --- |
 | ScrimColor | Color | 宿主应用动画之前的遮罩颜色 | GlassDialogDefaults.ScrimColor（`Color(0x33000000)`） |
+| InsideMargin | DpSize | 默认面板内容内边距 | `DpSize(12.dp, 0.dp)` |
 
 #### 方法
 

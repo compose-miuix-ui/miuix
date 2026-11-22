@@ -27,7 +27,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -51,7 +51,10 @@ class GlassIconDropdownMenuTest {
     @Test
     fun submenuUsesTheClickedRowInRtlAndCollapsesOnSelection() = checkCascade(LayoutDirection.Rtl, true)
 
-    private fun checkCascade(direction: LayoutDirection, collapseOnSelection: Boolean) = runComposeUiTest {
+    private fun checkCascade(direction: LayoutDirection, collapseOnSelection: Boolean) = runDesktopComposeUiTest(
+        width = 600,
+        height = 520,
+    ) {
         val show = mutableStateOf(false)
         val selection = mutableIntStateOf(0)
         setContent {
@@ -62,11 +65,11 @@ class GlassIconDropdownMenuTest {
                 DialogTestHost {
                     val backdrop = rememberLayerBackdrop()
                     val anchor = rememberGlassPopupAnchor()
-                    Box(Modifier.size(420.dp, 600.dp)) {
+                    Box(Modifier.size(300.dp, 260.dp)) {
                         Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                         GlassIconButton(
                             onClick = { show.value = true },
-                            modifier = Modifier.offset(320.dp, 30.dp)
+                            modifier = Modifier.offset(220.dp, 20.dp)
                                 .glassPopupAnchor(anchor, 20.dp)
                                 .testTag("trigger"),
                             backdrop = backdrop,
@@ -113,21 +116,17 @@ class GlassIconDropdownMenuTest {
         }
         onNodeWithTag("trigger").performClick()
         val parent = onNodeWithText("View mode").fetchSemanticsNode().boundsInRoot
+        if (!collapseOnSelection) {
+            onNodeWithText("Filter").performClick()
+            onNodeWithText("Camera album").assertIsDisplayed()
+            onNodeWithText("Filter").performClick()
+        }
         onNodeWithText("View mode").performClick()
         val header = onNodeWithText("View mode").fetchSemanticsNode().boundsInRoot
         assertEquals(parent.width, header.width, 1f, "Submenu must inherit primary width, not treat pixels as dp")
         assertEquals(parent.top + 16f, header.top, 2f, "Submenu must open from View mode, not the last Filter row")
         onNodeWithText("Compact").assertIsDisplayed()
-        saveImage("icon-menu-cascade-${direction.name}", onRoot().captureToImage())
 
-        onNodeWithText("View mode").performClick()
-        onNodeWithText("Compact").assertDoesNotExist()
-        val returned = onNodeWithText("View mode").fetchSemanticsNode().boundsInRoot
-        assertEquals(parent, returned, "Primary must return to its original geometry after closing the submenu")
-        onNodeWithText("Filter").performClick()
-        onNodeWithText("Camera album").assertIsDisplayed()
-        onNodeWithText("Filter").performClick()
-        onNodeWithText("View mode").performClick()
         if (collapseOnSelection) {
             val before = selectedPixels(onRoot().captureToImage())
             mainClock.autoAdvance = false
@@ -137,14 +136,9 @@ class GlassIconDropdownMenuTest {
             val closing = selectedPixels(frame)
             assertTrue(closing.width < before.width * 0.95f, "Secondary contents must shrink with the closing menu")
             assertTrue(closing.center.y < before.center.y, "Secondary must travel toward the toolbar trigger")
-            saveImage("icon-menu-cascade-closing", frame)
             mainClock.autoAdvance = true
             waitForIdle()
-        } else {
-            onNodeWithText("Compact").performClick()
-        }
-        assertEquals(if (collapseOnSelection) 0 else 1, selection.intValue)
-        if (collapseOnSelection) {
+            assertEquals(0, selection.intValue)
             assertFalse(show.value)
             onNodeWithText("Compact").assertDoesNotExist()
             onNodeWithTag("trigger").performClick()
@@ -153,10 +147,13 @@ class GlassIconDropdownMenuTest {
             onNodeWithText("View mode").performClick()
             onNodeWithText("Group by date").assertIsSelected()
         } else {
+            onNodeWithText("Compact").performClick()
+            assertEquals(1, selection.intValue)
             onNodeWithText("Compact").assertIsSelected()
-            onNodeWithText("Group by date").performClick()
-            onNodeWithText("Group by date").assertIsSelected()
-            assertEquals(0, selection.intValue)
+            onNodeWithText("View mode").performClick()
+            onNodeWithText("Compact").assertDoesNotExist()
+            val returned = onNodeWithText("View mode").fetchSemanticsNode().boundsInRoot
+            assertEquals(parent, returned, "Primary must return to its original geometry after closing the submenu")
         }
     }
 

@@ -54,7 +54,6 @@ class GlassTopAppBarStateTest {
     fun compactRegularBarStaysCollapsedAndRestoresExpandableScrollState() = assertCompactBarState(glass = false)
 
     private fun assertCompactBarState(glass: Boolean) = runComposeUiTest {
-        val name = if (glass) "glass" else "regular"
         val expandable = mutableStateOf(false)
         val state = TopAppBarState(-1000f, -100f, 0f)
         lateinit var behavior: ScrollBehavior
@@ -98,7 +97,6 @@ class GlassTopAppBarStateTest {
         waitForIdle()
         assertEquals(compactBounds, onNodeWithTag("foreground").getUnclippedBoundsInRoot())
         assertEquals(bottomBounds, onNodeWithTag("bottom").getUnclippedBoundsInRoot())
-        saveImage("$name-topbar-compact", onRoot().captureToImage())
 
         // A wide-to-narrow switch restores collapse from content scroll, not the old height offset.
         runOnIdle { expandable.value = true }
@@ -121,7 +119,6 @@ class GlassTopAppBarStateTest {
             assertEquals(0f, state.contentOffset)
             assertEquals(0f, state.heightOffset)
         }
-        saveImage("$name-topbar-expanded", onRoot().captureToImage())
 
         runOnIdle { expandable.value = false }
         waitForIdle()

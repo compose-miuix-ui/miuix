@@ -8,11 +8,14 @@ rootProject.name = "build-logic"
 pluginManagement {
     repositories {
         google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
             }
+        }
+        if (System.getenv("CI") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
         }
         mavenCentral()
         gradlePluginPortal()
@@ -22,15 +25,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
+        google()
+        if (System.getenv("CI") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
         }
         mavenCentral()
-        gradlePluginPortal()
     }
 
     versionCatalogs {

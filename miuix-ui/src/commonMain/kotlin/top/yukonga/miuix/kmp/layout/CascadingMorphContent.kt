@@ -216,6 +216,7 @@ internal fun CascadingSecondaryContent(
     secondaryLocalInUnion: IntRect,
     anchorLocalInUnion: IntRect,
     anchorPaddingTopPx: Int,
+    isAnchorPopupFirst: Boolean,
     isAnchorPopupLast: Boolean,
     secondaryContentMaxHeight: Int,
     enterFraction: () -> Float,
@@ -248,10 +249,11 @@ internal fun CascadingSecondaryContent(
                 val innerPath = Path()
                 onDrawWithContent {
                     val frac = expandFraction()
-                    val rTop = cornerPx * frac
-                    // Last-row anchors share primary's rounded bottom — keep both bottom corners
-                    // full. Mid-list anchors must shrink uniformly into a flat internal row.
-                    val rBottom = if (isAnchorPopupLast) cornerPx else rTop
+                    val rAnim = cornerPx * frac
+                    // First/last-row anchors share primary's rounded top/bottom — keep those corners
+                    // full. Mid-list anchors shrink uniformly into a flat internal row.
+                    val rTop = if (isAnchorPopupFirst) cornerPx else rAnim
+                    val rBottom = if (isAnchorPopupLast) cornerPx else rAnim
                     val topRadius = CornerRadius(rTop, rTop)
                     val bottomRadius = CornerRadius(rBottom, rBottom)
                     innerPath.rewind()

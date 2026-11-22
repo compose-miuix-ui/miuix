@@ -73,7 +73,6 @@ class GlassNavigationRailInteractionTest {
         assertEquals(0, countFill(held, library, Color.Blue), "Expanded press must not show the capsule feedback")
         assertTrue(countFill(held, home, Color.Red) > 20, "Expanded selection must stay on the controlled destination")
         assertTrue(selections.isEmpty())
-        saveImage("rail-expanded-row-indication", held)
         onRoot().performTouchInput { up() }
         mainClock.advanceTimeBy(600)
         assertEquals(listOf(1), selections)
@@ -123,7 +122,6 @@ class GlassNavigationRailInteractionTest {
         val held = onRoot().captureToImage()
         assertTrue(countFill(held, slot, Color.Blue) > 20, "The held destination lost its pressed indicator")
         assertTrue(selections.isEmpty(), "A press must not select before release")
-        saveImage("rail-held-through-collapse", held)
 
         onRoot().performTouchInput { up() }
         mainClock.advanceTimeBy(600)

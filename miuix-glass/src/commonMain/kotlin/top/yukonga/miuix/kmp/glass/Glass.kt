@@ -164,6 +164,7 @@ private class GlassPipeline(
 ) : BackdropPipeline {
 
     override val shape: Shape get() = glassShape
+    override val requiresOffscreenCompositing: Boolean get() = true
 
     override fun configureEffects(scope: BackdropEffectScope) {
         with(scope) {

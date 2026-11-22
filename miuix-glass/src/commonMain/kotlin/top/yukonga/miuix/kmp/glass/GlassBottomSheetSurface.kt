@@ -9,8 +9,14 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.internal.ScrimBackdrop
@@ -20,12 +26,16 @@ import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
 import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.material.GlassMaterials
 import top.yukonga.miuix.kmp.material.GlassShape
+import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Default values for [GlassBottomSheet] and [glassBottomSheetSurface]. */
 object GlassBottomSheetDefaults {
     val ScrimColor: Color = GlassDialogDefaults.ScrimColor
+
+    /** Default panel content padding for [GlassBottomSheet]. */
+    val InsideMargin: DpSize = DpSize(12.dp, 0.dp)
 
     /** Bottom-sheet material for the current theme. */
     @Composable
@@ -80,13 +90,37 @@ fun glassBottomSheetSurface(
     val shape = remember(cornerRadius) {
         GlassShape(topStart = cornerRadius, topEnd = cornerRadius, bottomEnd = 0.dp, bottomStart = 0.dp)
     }
-    Modifier.glassPanel(
+    val panel = Modifier.glassPanel(
         backdrop = effectiveBackdrop,
         shape = shape,
         material = material,
-        stroke = if (isOverscroll) null else stroke,
+        stroke = null,
         shadow = null,
         shading = false,
         fallback = if (effectiveBackdrop == null) Modifier.clip(shape).background(containerColor) else null,
     )
+    if (isOverscroll || stroke == null) {
+        panel
+    } else {
+        panel.drawWithCache {
+            val extraBottomPx = (stroke.width + stroke.bevel).toPx() + 1f
+            val strokeSize = Size(size.width, size.height + extraBottomPx)
+            val strokeDrawScope = CanvasDrawScope()
+            onDrawWithContent {
+                drawContent()
+                clipRect {
+                    drawIntoCanvas { canvas ->
+                        strokeDrawScope.draw(
+                            density = this,
+                            layoutDirection = layoutDirection,
+                            canvas = canvas,
+                            size = strokeSize,
+                        ) {
+                            drawEdgeStroke(shape = shape, stroke = stroke)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

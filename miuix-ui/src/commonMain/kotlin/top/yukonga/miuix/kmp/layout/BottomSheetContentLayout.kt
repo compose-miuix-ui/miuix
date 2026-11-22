@@ -149,14 +149,16 @@ internal fun BottomSheetContentLayout(
     surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
-    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
+    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.001f) }
     val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    val blockTouches = remember { mutableStateOf(false) }
     val internalVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            blockTouches.value = true
             dragOffsetY.snapTo(0f)
             animationProgress.animateTo(
                 targetValue = 1f,
@@ -164,6 +166,10 @@ internal fun BottomSheetContentLayout(
             )
         } else {
             if (!internalVisible.value) return@LaunchedEffect
+            val touchReleaseJob = launch {
+                snapshotFlow { animationProgress.value <= 0.02f }.first { it }
+                blockTouches.value = false
+            }
             if (dragOffsetY.value > 0f) {
                 // Sheet already dragged off-screen — snap immediately
                 animationProgress.snapTo(0f)
@@ -175,6 +181,8 @@ internal fun BottomSheetContentLayout(
                 )
             }
             internalVisible.value = false
+            touchReleaseJob.cancel()
+            blockTouches.value = false
             currentOnDismissFinished?.invoke()
         }
     }
@@ -272,25 +280,32 @@ internal fun BottomSheetContentLayout(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
-                // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
-                .pointerInput(allowDismiss) {
-                    detectTapGestures(
-                        onTap = {
-                            if (allowDismiss) {
-                                requestDismiss()
+                .then(
+                    if (blockTouches.value) {
+                        Modifier
+                            // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
+                            // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
+                            .pointerInput(allowDismiss) {
+                                detectTapGestures(
+                                    onTap = {
+                                        if (allowDismiss) {
+                                            requestDismiss()
+                                        }
+                                    },
+                                )
                             }
-                        },
-                    )
-                }
-                .semantics {
-                    if (allowDismiss) {
-                        onClick(label = "Dismiss") {
-                            requestDismiss()
-                            true
-                        }
-                    }
-                },
+                            .semantics {
+                                if (allowDismiss) {
+                                    onClick(label = "Dismiss") {
+                                        requestDismiss()
+                                        true
+                                    }
+                                }
+                            }
+                    } else {
+                        Modifier
+                    },
+                ),
             contentAlignment = Alignment.BottomCenter,
         ) {
             // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
@@ -305,6 +320,7 @@ internal fun BottomSheetContentLayout(
                 .then(modifier)
 
             BottomSheetContent(
+                show = blockTouches.value,
                 title = title,
                 backgroundColor = backgroundColor,
                 cornerRadius = cornerRadius,
@@ -352,6 +368,7 @@ internal fun BottomSheetContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun BottomSheetContent(
+    show: Boolean,
     title: String?,
     backgroundColor: Color,
     cornerRadius: Dp,
@@ -574,6 +591,7 @@ internal fun BottomSheetContent(
     }
 
     BottomSheetColumn(
+        show = show,
         title = title,
         startAction = startAction,
         endAction = endAction,
@@ -609,6 +627,7 @@ internal fun BottomSheetContent(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 private fun BottomSheetColumn(
+    show: Boolean,
     title: String?,
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
@@ -652,7 +671,13 @@ private fun BottomSheetColumn(
 
         Column(
             modifier = modifier
-                .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
+                .then(
+                    if (show) {
+                        Modifier.pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
+                    } else {
+                        Modifier
+                    },
+                )
                 .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
@@ -841,6 +866,8 @@ private fun TitleAndActionsRow(
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
 ) {
+    if (title == null && startAction == null && endAction == null) return
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

@@ -16,7 +16,8 @@ internal val graphicsResourceResetRegistry = GraphicsResourceResetRegistry()
 internal val graphicsResourceGeneration: Any?
     get() = graphicsResourceResetRegistry.generation
 
-internal expect val graphicsResourcesResetOnResume: Boolean
+/** Internal device check shared by Miuix graphics components. */
+expect val graphicsResourcesResetOnResume: Boolean
 
 /**
  * Internal implementation shared by Miuix graphics nodes; not a supported public API.

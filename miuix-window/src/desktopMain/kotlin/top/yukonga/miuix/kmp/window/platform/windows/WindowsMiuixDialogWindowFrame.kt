@@ -36,6 +36,7 @@ import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonClose
 import top.yukonga.miuix.kmp.window.basic.MiuixCaptionButtonWidth
 import top.yukonga.miuix.kmp.window.basic.rememberWindowsCaptionBarFontIconFamily
+import top.yukonga.miuix.kmp.window.internal.ProvideWindowComponentFrame
 import java.awt.event.WindowEvent
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -116,7 +117,7 @@ internal fun DialogWindowScope.WindowsMiuixDialogWindowFrame(
                     },
             )
 
-            content()
+            ProvideWindowComponentFrame(windowClientInsets) { content() }
 
             if (properties.captionButtonsVisible) {
                 Row(

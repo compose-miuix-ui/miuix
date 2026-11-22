@@ -429,13 +429,20 @@ fun GlassPage(padding: PaddingValues) {
                 material = material ?: GlassDialogDefaults.material(),
                 stroke = stroke,
             ) {
+                var showNestedDialog by remember { mutableStateOf(false) }
                 val dialogTextState = rememberTextFieldState()
                 GlassTextField(
                     state = dialogTextState,
                     label = "Input something...",
                     useLabelAsPlaceholder = true,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                 )
+                GlassDialogButton(
+                    onClick = { showNestedDialog = true },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                ) {
+                    Text(text = "Show Another Dialog", style = MiuixTheme.textStyles.button)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     GlassDialogButton(
                         onClick = { overlayIndex = OVERLAY_NONE },
@@ -449,6 +456,23 @@ fun GlassPage(padding: PaddingValues) {
                         role = GlassDialogButtonRole.Primary,
                     ) {
                         Text(text = "Confirm", style = MiuixTheme.textStyles.button)
+                    }
+                }
+                GlassDialog(
+                    show = showNestedDialog,
+                    backdrop = pageBackdrop,
+                    title = "Another Glass Dialog",
+                    summary = "Stacked over the first dialog.",
+                    onDismissRequest = { showNestedDialog = false },
+                    material = material ?: GlassDialogDefaults.material(),
+                    stroke = stroke,
+                ) {
+                    GlassDialogButton(
+                        onClick = { showNestedDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        role = GlassDialogButtonRole.Primary,
+                    ) {
+                        Text(text = "Close", style = MiuixTheme.textStyles.button)
                     }
                 }
             }
@@ -566,12 +590,14 @@ fun GlassPage(padding: PaddingValues) {
                             )
                             ArrowPreference(
                                 title = "Show Dialog",
+                                holdDownState = overlayIndex == OVERLAY_DIALOG,
                                 onClick = {
                                     overlayIndex = OVERLAY_DIALOG
                                 },
                             )
                             ArrowPreference(
                                 title = "Show BottomSheet",
+                                holdDownState = overlayIndex == OVERLAY_BOTTOM_SHEET,
                                 onClick = {
                                     overlayIndex = OVERLAY_BOTTOM_SHEET
                                 },

@@ -74,7 +74,7 @@ Box {
 | enableWindowDim       | Boolean                     | Whether to dim the background when popup is shown.               | true                                       |
 | onDismissRequest      | (() -> Unit)?               | Called when the user requests dismissal (e.g., clicking outside) | null                                       |
 | onDismissFinished     | (() -> Unit)?               | Invoked after the hide animation completes; not invoked if the hide is cancelled mid-flight (e.g., `show` toggled back to true) | null         |
-| maxHeight             | Dp?                         | Maximum height of the popup content.                             | null                                       |
+| maxHeight             | Dp?                         | Maximum height of the popup. Available space after margins always caps it. | null                                       |
 | minWidth              | Dp                          | Minimum width of the popup content.                              | ListPopupDefaults.MinWidth                 |
 | content               | @Composable () -> Unit      | The content to display inside the popup.                         | -                                          |
 

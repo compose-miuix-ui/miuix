@@ -41,6 +41,7 @@ import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.node.invalidatePlacement
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
+import androidx.compose.ui.node.updateLayerBlock
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
@@ -65,6 +66,7 @@ import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 import top.yukonga.miuix.kmp.material.internal.refreshGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
@@ -169,6 +171,9 @@ interface BackdropPipeline {
 
     /** Draws above the content, such as a rim or mask. */
     fun drawFront(scope: DrawScope) {}
+
+    /** Whether [drawFront] uses destination blending that must be isolated from the parent canvas. */
+    val requiresOffscreenCompositing: Boolean get() = false
 
     /** Optional progressive gradient for multi-level composite rendering. */
     val progressiveGradient: ProgressiveBlur? get() = null
@@ -389,6 +394,7 @@ private class DrawBackdropNode(
 
     var pipelineRef: BackdropPipeline? = null
         private set
+    private var requiresOffscreenCompositing by mutableStateOf(false)
 
     private val pipelineShape: () -> Shape = { pipelineRef!!.shape }
     private val pipelineEffects: BackdropEffectScope.() -> Unit = { pipelineRef!!.configureEffects(this) }
@@ -396,6 +402,7 @@ private class DrawBackdropNode(
 
     fun updatePipeline(pipeline: BackdropPipeline) {
         pipelineRef = pipeline
+        requiresOffscreenCompositing = pipeline.requiresOffscreenCompositing
         shapeProvider.shapeBlock = pipelineShape
         effects = pipelineEffects
         onDrawFront = pipelineDrawFront
@@ -403,6 +410,7 @@ private class DrawBackdropNode(
 
     fun updateShape(shape: () -> Shape) {
         pipelineRef = null
+        requiresOffscreenCompositing = false
         shapeProvider.shapeBlock = shape
     }
     private val effectScope = object : BackdropEffectScopeImpl() {
@@ -655,7 +663,7 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || onDrawFront != null) {
+        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || requiresOffscreenCompositing) {
             CompositingStrategy.Offscreen
         } else {
             CompositingStrategy.Auto
@@ -945,12 +953,14 @@ private class DrawBackdropNode(
 
     private fun observeEffects() {
         observeReads {
-            val cache = currentValueOf(LocalRuntimeShaderCache)
-            if (effectScope.runtimeShaderCache !== cache) {
-                releaseGraphicsLayers()
-                effectScope.runtimeShaderCache = cache
+            if (graphicsResourcesResetOnResume) {
+                val cache = currentValueOf(LocalRuntimeShaderCache)
+                if (effectScope.runtimeShaderCache !== cache) {
+                    releaseGraphicsLayers()
+                    effectScope.runtimeShaderCache = cache
+                }
+                observeLifecycle(graphicsResourceLifecycle())
             }
-            observeLifecycle(graphicsResourceLifecycle())
             // No size at attach time: building here would create an effect from NaN dimensions.
             if (effectScope.size.width.isNaN() || effectScope.size.height.isNaN()) return@observeReads
             updateEffects()
@@ -976,9 +986,7 @@ private class DrawBackdropNode(
                 withFrameNanos { }
                 if (ownerLifecycle.currentState == Lifecycle.State.RESUMED) {
                     refreshGraphicsResourceGeneration(generation)
-                    releaseGraphicsLayers()
-                    invalidateMeasurement()
-                    invalidateDrawCache()
+                    recreateGraphicsResources()
                 }
             }
         }
@@ -993,9 +1001,13 @@ private class DrawBackdropNode(
     }
 
     private fun recreateGraphicsResources() {
+        if (!enabled) return
         releaseGraphicsLayers()
-        invalidateMeasurement()
-        invalidateDrawCache()
+        effectsSized = false
+        // Drop the layer that contains the drawn content so placement records it into a fresh layer.
+        updateLayerBlock(null)
+        invalidatePlacement()
+        invalidateDraw()
     }
 
     private fun updateEffects() {

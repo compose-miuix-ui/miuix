@@ -74,6 +74,7 @@ WindowDialog(
 | maxWidth                   | Dp                     | Maximum width of the dialog                                   | DialogDefaults.MaxWidth          | No       |
 | largeScreen                | Boolean?               | Overrides the large-screen presentation (centered scale/fade instead of bottom slide-in). When null, detected from the window size | null | No |
 | cornerRadius               | Dp?                    | Overrides the dialog corner radius. When null, DialogDefaults.CornerRadius for the centered presentation, or derived from the screen corner radius (clamped to 32dp..48dp) when bottom-attached | null | No |
+| motion                     | DialogMotion           | Enter and exit motion; see DialogMotion                       | DialogMotion.Default             | No       |
 | content                    | @Composable () -> Unit | Dialog content                                                | -                                      | Yes      |
 
 ### DialogDefaults
@@ -94,6 +95,15 @@ WindowDialog(
 | titleColor()      | Color       | Get default title color             |
 | summaryColor()    | Color       | Get default summary color           |
 | backgroundColor() | Color       | Get default dialog background color |
+
+### DialogMotion
+
+Presets for how the dialog opens and closes. Both cover the bottom-attached and the centered (large-screen) presentation.
+
+| Preset  | Description |
+| ------- | ----------- |
+| Default | HyperOS system dialog motion. Bottom-attached: slides up on a 0.82 / 0.3 s spring and leaves in 200 ms. Centered: scales up from slightly smaller and fades in on a 0.8 / 0.3 s spring, then reverses in 200 ms. The scrim fades in over 300 ms and out over 350 ms |
+| Glass   | HyperOS launcher glass dialog motion, used by `GlassDialog`. Bottom-attached: slides up on a 0.84 / 0.3 s spring and drops back on a 0.97 / 0.33 s spring. Centered: scales up from 0.75 on a 0.7 / 0.45 s spring while fading in, then fades out at full size. The scrim fades linearly over 100 ms |
 
 ### LocalDismissState
 

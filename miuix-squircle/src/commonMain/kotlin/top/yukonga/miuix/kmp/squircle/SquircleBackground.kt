@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
@@ -26,13 +27,13 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.layer.CompositingStrategy
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.asComposeShader
+import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.rememberGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
@@ -40,6 +41,7 @@ import top.yukonga.miuix.kmp.squircle.internal.makeAlphaImageBitmap
 import top.yukonga.miuix.kmp.squircle.internal.makeLinearShader
 import kotlin.math.ceil
 import kotlin.math.floor
+import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositingStrategy
 
 /**
  * Squircle solid background — fill-only, descendants are NOT clipped.
@@ -261,6 +263,8 @@ private fun Modifier.squircleShaderMask(
     brush: SquircleShaderBrush,
     fillColor: Color?,
 ): Modifier {
+    if (!graphicsResourcesResetOnResume) return cachedSquircleShaderMask(brush, fillColor)
+
     val resourceGeneration = brush.resourceGeneration
     val rebuildLayer = remember(resourceGeneration) { mutableStateOf(false) }
     LaunchedEffect(resourceGeneration) {
@@ -280,7 +284,7 @@ private fun Modifier.squircleShaderMask(
             val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
             val layerPaint = if (fastPath) null else Paint()
             val contentLayer = obtainGraphicsLayer().apply {
-                compositingStrategy = if (fastPath) CompositingStrategy.Offscreen else CompositingStrategy.Auto
+                compositingStrategy = if (fastPath) LayerCompositingStrategy.Offscreen else LayerCompositingStrategy.Auto
             }
             onDrawWithContent {
                 if (fastPath) {
@@ -297,6 +301,32 @@ private fun Modifier.squircleShaderMask(
             }
         }
 }
+
+private fun Modifier.cachedSquircleShaderMask(
+    brush: SquircleShaderBrush,
+    fillColor: Color?,
+): Modifier = this
+    .graphicsLayer {
+        compositingStrategy = if (maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX) {
+            CompositingStrategy.Offscreen
+        } else {
+            CompositingStrategy.Auto
+        }
+    }
+    .drawWithCache {
+        val layerPaint = Paint()
+        val contentLayer = obtainGraphicsLayer()
+        onDrawWithContent {
+            if (maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX) {
+                if (fillColor != null) drawRect(fillColor)
+                drawContent()
+                maskSquircleCorners(brush, top = true, bottom = true)
+            } else {
+                contentLayer.record { this@onDrawWithContent.drawContent() }
+                drawSquircleBanded(brush, fillColor, layerPaint, contentLayer)
+            }
+        }
+    }
 
 // Oversize path: replay recorded content per corner band so no single offscreen exceeds the texture
 // max; the straight middle draws with no offscreen at all.
@@ -404,7 +434,7 @@ private class SquircleShaderBrush(
     val resourceGeneration: Any?,
 ) : ShaderBrush() {
     private val runtimeShader = RuntimeShader(SQUIRCLE_SHADER)
-    private val cornerSdfShader = makeLinearShader(bakedSdfImage)
+    private val cornerSdfShader = if (graphicsResourcesResetOnResume) makeLinearShader(bakedSdfImage) else bakedSdfShader
     private val effectiveSizes = FloatArray(4)
     private val halfRanges = FloatArray(4)
     private val weights = FloatArray(4)
@@ -455,6 +485,8 @@ private const val BLEND_THRESHOLD_RATIO = 0.7853982f
 private val bakedSdfImage by lazy {
     makeAlphaImageBitmap(BakedSquircleSdf.SIZE, BakedSquircleSdf.bytes)
 }
+
+private val bakedSdfShader by lazy { makeLinearShader(bakedSdfImage) }
 
 private const val SQUIRCLE_SHADER = """
 uniform shader cornerSdf;

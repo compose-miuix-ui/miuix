@@ -16,7 +16,7 @@ import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
@@ -24,7 +24,8 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
  *
  * @param show Whether the [OverlayBottomSheet] is shown.
  * @param modifier The modifier to be applied to the [OverlayBottomSheet].
- * @param title Optional title to display at the top of the [OverlayBottomSheet].
+ * @param title Optional title. The header takes up space if any of [title], [startAction], or
+ *   [endAction] is non-null (including `title = ""`). The drag handle is unaffected.
  * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
  * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
  * @param backgroundColor The background color of the [OverlayBottomSheet].
@@ -83,13 +84,14 @@ fun OverlayBottomSheet(
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
             visibleState.value = visible
-            DialogLayout(
+            DialogLayoutImpl(
                 visible = visibleState,
                 enableWindowDim = false,
                 enterTransition = EnterTransition.None,
                 exitTransition = ExitTransition.None,
                 enableAutoLargeScreen = false,
                 renderInRootScaffold = renderInRootScaffold,
+                consumeBackgroundTouches = false,
             ) {
                 hostContent()
             }

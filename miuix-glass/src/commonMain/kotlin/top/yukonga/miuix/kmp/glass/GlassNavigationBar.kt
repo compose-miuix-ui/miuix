@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -98,6 +99,7 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.internal.rememberGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
@@ -253,6 +255,16 @@ fun GlassNavigationBar(
 ) {
     if (items.isEmpty()) return
     val index = selectedIndex.coerceIn(0, items.lastIndex)
+    val iconGeneration = rememberGraphicsResourceGeneration()
+    var refreshIcons by remember(iconGeneration) { mutableStateOf(false) }
+    if (iconGeneration != null) {
+        LaunchedEffect(iconGeneration) {
+            // HWUI may discard freshly recorded resources during the first resume frames.
+            withFrameNanos { }
+            withFrameNanos { }
+            refreshIcons = true
+        }
+    }
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val labelSize = with(density) {
@@ -605,12 +617,16 @@ fun GlassNavigationBar(
                                 verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
                             ) {
                                 BadgedBox(badge = { item.badge?.invoke() }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(item.icon),
-                                        tint = tintProducer,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
-                                    )
+                                    val painter = rememberVectorPainter(item.icon)
+                                    // Recreate the icon's draw cache and its tint layer after resume.
+                                    key(iconGeneration, refreshIcons) {
+                                        Icon(
+                                            painter = painter,
+                                            tint = tintProducer,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
+                                        )
+                                    }
                                 }
                                 if (item.label != null) {
                                     val baseLabelStyle = MiuixTheme.textStyles.footnote2

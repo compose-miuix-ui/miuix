@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.material.internal
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -14,15 +15,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 
-internal actual val graphicsResourcesResetOnResume: Boolean = true
+actual val graphicsResourcesResetOnResume: Boolean by lazy {
+    Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true) &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        Build.SOC_MANUFACTURER.equals("MediaTek", ignoreCase = true)
+}
 
 @Composable
 internal actual fun graphicsResourceLifecycle(): Lifecycle? {
+    if (!graphicsResourcesResetOnResume) return null
     val context = LocalContext.current
     return remember(context) { context.activityLifecycle() }
 }
 
-actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? = currentValueOf(LocalContext).activityLifecycle()
+actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? = if (graphicsResourcesResetOnResume) currentValueOf(LocalContext).activityLifecycle() else null
 
 private fun Context.activityLifecycle(): Lifecycle? {
     var context = this
