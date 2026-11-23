@@ -74,7 +74,7 @@ internal class NavExpandRenderer(
             val containerOrigin = Offset((size.width - revealSize.width) / 2f, 0f)
             val containerBounds = Rect(containerOrigin, revealSize)
             val source = anchor?.source
-            val sourceAvailable = source == null || source.hasLivePlacement
+            val sourceAvailable = source == null || (source.hasLivePlacement && frame.sourceVisible)
             val alpha = if (frame.hasSource && sourceAvailable) 1f else navExpandFraction(progress, 0f, 0.25f)
             withAlpha(alpha, containerBounds) {
                 val anchorColor = anchor?.containerColor ?: Color.Unspecified
@@ -136,9 +136,10 @@ internal class NavExpandRenderer(
                     val live = scope
                     val depth = live.relativeDepth
                     val progress = navExpandProgress(1f + depth)
+                    val frame = if (depth < 0f && live.layoutSize.width > 0 && live.layoutSize.height > 0) transition.frame(live) else null
                     when {
                         progress <= 0f -> NavSourceDrawing.InPlace
-                        depth < 0f && live.layoutSize.width > 0 && live.layoutSize.height > 0 && !transition.frame(live).hasSource -> NavSourceDrawing.InPlace
+                        frame != null && (!frame.hasSource || !frame.sourceVisible) -> NavSourceDrawing.InPlace
                         progress >= SOURCE_COVER_END -> NavSourceDrawing.Covered
                         else -> NavSourceDrawing.Handoff
                     }

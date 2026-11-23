@@ -64,6 +64,7 @@ internal class NavExpandTransition(
             windowToLocal = { it },
             sourceBounds = sourceBounds,
             visibleSourceBounds = if (returning) bounds?.visible else sourceBounds,
+            sourceVisible = bounds?.isLiveVisible != false,
         )
     }
 
@@ -121,7 +122,7 @@ internal class NavExpandTransition(
     }
 }
 
-internal data class NavExpandSourceBounds(val full: Rect, val visible: Rect)
+internal data class NavExpandSourceBounds(val full: Rect, val visible: Rect, val isLiveVisible: Boolean = true)
 
 /** Visible silhouette in host-local pixels; contents use one uniform [scale]. */
 internal data class NavExpandFrame(
@@ -134,6 +135,7 @@ internal data class NavExpandFrame(
     val sourceFraction: Float,
     val movingRadius: Float,
     val sourceBounds: Rect? = null,
+    val sourceVisible: Boolean = true,
 )
 
 internal fun navExpandFrame(
@@ -148,6 +150,7 @@ internal fun navExpandFrame(
     windowToLocal: (Offset) -> Offset = { it - layoutPosition },
     sourceBounds: Rect? = anchor?.bounds,
     visibleSourceBounds: Rect? = sourceBounds,
+    sourceVisible: Boolean = true,
 ): NavExpandFrame {
     val width = layoutSize.width.toFloat()
     val height = layoutSize.height.toFloat()
@@ -224,6 +227,7 @@ internal fun navExpandFrame(
         sourceFraction = sourceCornerFraction,
         movingRadius = movingRadius,
         sourceBounds = sourceBounds.takeIf { source != null },
+        sourceVisible = sourceVisible,
     )
 }
 

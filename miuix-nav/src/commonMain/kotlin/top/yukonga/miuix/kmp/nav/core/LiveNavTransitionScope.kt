@@ -56,6 +56,7 @@ internal class LiveNavTransitionScope(
     private var frameOwner: NavExpandTransition? = null
     private var expansionFrame: State<NavExpandFrame>? = null
     private var returnAnchor: NavTransitionAnchor? = null
+    private var returnHasSource: Boolean = false
     private var returnBounds: NavExpandSourceBounds? = null
 
     internal fun expansionFrame(owner: NavExpandTransition, create: () -> State<NavExpandFrame>): NavExpandFrame {
@@ -74,15 +75,26 @@ internal class LiveNavTransitionScope(
     internal fun expansionReturnBounds(anchor: NavTransitionAnchor, returning: Boolean = isReturningExpansion): NavExpandSourceBounds? {
         if (!returning) {
             returnAnchor = null
+            returnHasSource = false
             returnBounds = null
             return null
         }
-        // Keep the landing decision through gesture commit or cancel and the ensuing settle.
+        // Keep the initial decision (source vs centered fallback) across gesture/settle,
+        // while tracking live source bounds if the underlying content scrolls mid-return.
         if (returnAnchor !== anchor) {
             returnAnchor = anchor
-            returnBounds = anchor.visibleSourceBounds(this)
+            val initial = anchor.visibleSourceBounds(this)
+            returnHasSource = initial != null
+            returnBounds = initial
+            return initial
         }
-        return returnBounds
+        if (!returnHasSource) return null
+        val current = anchor.visibleSourceBounds(this)
+        if (current != null) {
+            returnBounds = current
+            return current
+        }
+        return returnBounds?.let { if (it.isLiveVisible) it.copy(isLiveVisible = false) else it }
     }
 
     override val change: NavChange get() = presentation.change

@@ -95,6 +95,7 @@ internal class NavTransitionAnchor(
     }
 
     internal fun visibleSourceBounds(scope: LiveNavTransitionScope): NavExpandSourceBounds? {
+        source?.observePlacement()
         val coordinates = source?.coordinates ?: return null
         val bounds = scope.boundsInHost(coordinates) ?: return null
         val visible = scope.visibleBoundsInHost(coordinates) ?: return null

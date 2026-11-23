@@ -691,4 +691,72 @@ class NavExpandRenderingTest {
         waitForIdle()
         assertEquals(listOf<NavKey>(ExpandRoot), stack.toList())
     }
+
+    @Test
+    fun returningExpansionTracksScrolledSourceBoundsAndHandlesOffscreenScroll() = runComposeUiTest {
+        val owner = object : NavigationEventDispatcherOwner {
+            override val navigationEventDispatcher = NavigationEventDispatcher()
+        }
+        val input = DirectNavigationEventInput().also { owner.navigationEventDispatcher.addInput(it) }
+        val stack = navBackStackOf(ExpandRoot)
+        val detail = ExpandDetail(1)
+        val scrollOffsetDp = mutableStateOf(160.dp)
+        var expansion: NavExpansionState? = null
+        var detailScope: LiveNavTransitionScope? = null
+        setContent {
+            CompositionLocalProvider(
+                LocalNavigationEventDispatcherOwner provides owner,
+                LocalDensity provides Density(1f),
+            ) {
+                NavDisplay(stack, modifier = Modifier.size(320.dp), effects = NavDisplayEffects.None, transition = NavTransitions.expansion(Color.Blue)) {
+                    entry<ExpandRoot> {
+                        expansion = LocalNavExpansionState.current
+                        Box(Modifier.fillMaxSize().clipToBounds()) {
+                            Box(
+                                Modifier.offset(y = scrollOffsetDp.value).size(80.dp)
+                                    .navTransitionSource(detail, containerColor = Color.Green)
+                                    .background(Color.Green),
+                            )
+                        }
+                    }
+                    entry<ExpandDetail> {
+                        detailScope = LocalNavTransitionScope.current as LiveNavTransitionScope
+                        Box(Modifier.fillMaxSize().background(Color.Blue))
+                    }
+                }
+            }
+        }
+        waitForIdle()
+        runOnIdle { stack.add(detail) }
+        waitForIdle()
+        val anchor = assertNotNull(assertNotNull(expansion).anchorState(detail).value)
+        val scope = assertNotNull(detailScope)
+        runOnIdle {
+            input.backStarted(NavigationEvent(progress = 0f, frameTimeMillis = 1000L))
+            input.backProgressed(NavigationEvent(progress = 0.4f, frameTimeMillis = 1100L))
+        }
+        waitForIdle()
+        runOnIdle {
+            val initialBounds = assertNotNull(scope.expansionReturnBounds(anchor))
+            assertEquals(Rect(0f, 160f, 80f, 240f), initialBounds.visible)
+            assertTrue(initialBounds.isLiveVisible)
+            scrollOffsetDp.value = 40.dp
+        }
+        waitForIdle()
+        runOnIdle {
+            val scrolledBounds = assertNotNull(scope.expansionReturnBounds(anchor))
+            assertEquals(Rect(0f, 40f, 80f, 120f), scrolledBounds.visible)
+            assertTrue(scrolledBounds.isLiveVisible)
+            scrollOffsetDp.value = (-120).dp
+        }
+        waitForIdle()
+        runOnIdle {
+            val offscreenBounds = assertNotNull(scope.expansionReturnBounds(anchor))
+            assertEquals(Rect(0f, 40f, 80f, 120f), offscreenBounds.visible)
+            assertFalse(offscreenBounds.isLiveVisible)
+            input.backCompleted()
+        }
+        waitForIdle()
+        assertEquals(ExpandRoot, stack.last())
+    }
 }
