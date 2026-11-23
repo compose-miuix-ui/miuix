@@ -6,6 +6,7 @@ PLtop/yukonga/miuix/kmp/preference/ArrowPreferenceDefaults;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/ArrowPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/preference/CheckboxLocation;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/CheckboxPreferenceKt**->**(**)**
+PLtop/yukonga/miuix/kmp/preference/ComposableSingletons;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/EndActionColors;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/OverlayDropdownPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/preference/OverlaySpinnerPreferenceKt**->**(**)**
@@ -14,7 +15,6 @@ PLtop/yukonga/miuix/kmp/preference/RadioButtonPreferenceColors;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/RadioButtonPreferenceDefaults;->**(**)**
 PLtop/yukonga/miuix/kmp/preference/RadioButtonPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/preference/SliderPreferenceKt**->**(**)**
+PLtop/yukonga/miuix/kmp/preference/SwitchPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/preference/WindowDropdownPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/preference/WindowSpinnerPreferenceKt**->**(**)**
-SPLtop/yukonga/miuix/kmp/preference/ComposableSingletons;->**(**)**
-SPLtop/yukonga/miuix/kmp/preference/SwitchPreferenceKt**->**(**)**

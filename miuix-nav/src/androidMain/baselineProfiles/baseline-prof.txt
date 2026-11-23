@@ -4,10 +4,15 @@ Ltop/yukonga/miuix/kmp/nav/core/NavKey;
 Ltop/yukonga/miuix/kmp/nav/runtime/NavSettleSink;
 Ltop/yukonga/miuix/kmp/nav/transition/NavGesture;
 Ltop/yukonga/miuix/kmp/nav/transition/NavTransitionScope;
+Ltop/yukonga/miuix/kmp/nav/transition/internal/NavHostTransition;
+Ltop/yukonga/miuix/kmp/nav/transition/internal/NavTransitionHostBinding;
 PLtop/yukonga/miuix/kmp/nav/runtime/NavDriverKt**->**(**)**
 PLtop/yukonga/miuix/kmp/nav/runtime/NavSettleState;->**(**)**
 PLtop/yukonga/miuix/kmp/nav/transition/NavSettlePhase;->**(**)**
-PLtop/yukonga/miuix/kmp/nav/transition/NavTransition;->**(**)**
+PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionCorners;->**(**)**
+PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionSourceElement;->**(**)**
+PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionSourceKt**->**(**)**
+PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionSourceNode;->**(**)**
 PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionsKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/ComposableSingletons;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/LiveNavTransitionScope;->**(**)**
@@ -20,6 +25,8 @@ SPLtop/yukonga/miuix/kmp/nav/core/NavEntryBuilder;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/NavPresentationState;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/NavSystemCornerRadius_androidKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/PredictiveBackOwnership;->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/core/RegisteredNavEntries;->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/gesture/NavReentryInputKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/gesture/NavSwipeDismissKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/gesture/NavigationEventFlowAdapter;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/gesture/PredictiveBackHandlerKt**->**(**)**
@@ -38,4 +45,9 @@ SPLtop/yukonga/miuix/kmp/nav/transition/NavMotion;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavRole;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavSettleSpec;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavSwipeDirection;->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/NavTransition;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavTransitionKt**->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionPreset;->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionState;->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionStateKt**->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavTransitionHostContext;->**(**)**

@@ -1,28 +1,16 @@
 # Squircle Shapes
 
-`miuix-squircle` is a standalone library that provides squircle (continuous-corner)
-rounded-rectangle shapes for Compose Multiplatform. It exposes `Modifier` extensions
-for fill / clip / border and a low-level `Path` builder. The library supports
-Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
+`miuix-squircle` is a standalone Compose Multiplatform library for squircle (continuous-curvature) rounded rectangles. It provides `Modifier` extensions for fill, clip, and border, plus a low-level `Path` builder across Android, Desktop (JVM), iOS, macOS, and Web (WasmJs/Js).
 
 ::: tip Squircle vs. RoundedCornerShape
-A `RoundedCornerShape` corner is a pure quarter circle, so the curvature jumps
-discontinuously at the point where the straight edge meets the arc. A squircle
-distributes the curvature along a wider corner zone, producing the smoother
-"continuous corner" look used by modern mobile app icons. Visual differences
-are most apparent at moderate to large radii.
+`RoundedCornerShape` uses circular arcs whose curvature jumps at straight-to-arc tangents. A squircle distributes curvature over a wider corner region for smoother continuous corners, most noticeable at medium to large radii.
 :::
 
 ::: warning Platform floor
-Shader-backed modifiers (`squircleBackground`, `squircleSurface`,
-`squircleClip`, `squircleBorder`) require Android API 33+. On older API levels
-they fall back to the matching `RoundedCornerShape` rendering — no crash, no
-manual gating. See [Global Toggle](#global-toggle) for the runtime opt-out.
+Shader-backed modifiers (`squircleBackground`, `squircleSurface`, `squircleClip`, and `absolute*` variants) require Android API 33+. On older APIs, they—along with `squircleBorder`—automatically fall back to matching `RoundedCornerShape` rendering without manual gating. See [Global Toggle](#global-toggle) for runtime opt-out.
 :::
 
 ## Setup
-
-Add the `miuix-squircle` dependency to your project:
 
 ```kotlin
 kotlin {
@@ -34,7 +22,7 @@ kotlin {
 }
 ```
 
-For Android-only projects:
+Android-only:
 
 ```kotlin
 dependencies {
@@ -44,43 +32,16 @@ dependencies {
 
 ## Platform Support
 
-| Platform      | Shader-backed modifiers                  | Path-based APIs |
-| ------------- | ---------------------------------------- | --------------- |
-| Android       | API 33+ (else falls back to rounded arc) | All API levels  |
-| Desktop (JVM) | Supported                                | Supported       |
-| iOS / macOS   | Supported                                | Supported       |
-| WasmJs / Js   | Supported                                | Supported       |
+| Platform | Shader modifiers (`Background` / `Surface` / `Clip`) | Path APIs (`squircleBorder`, `addSquircleRect`) |
+| --- | --- | --- |
+| Android | API 33+ (automatic `RoundedCornerShape` fallback below 33) | All API levels (`squircleBorder` follows `isSquircleEnabled()`) |
+| Desktop / iOS / macOS / WasmJs / Js | Supported | Supported |
 
-Fallback is automatic — call sites do not branch. The path-based
-`Path.addSquircleRect` works on every platform but accepts an explicit
-`squircleEnabled` flag so callers can mirror the modifier fallback when they
-need consistency.
+## Modifiers
 
-## Basic Usage
+### `squircleBackground` — fill only
 
-```kotlin
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.squircle.squircleBackground
-
-Box(
-    modifier = Modifier
-        .size(120.dp, 80.dp)
-        .squircleBackground(
-            color = MiuixTheme.colorScheme.primaryVariant,
-            cornerRadius = 20.dp,
-        ),
-)
-```
-
-## Variants
-
-### squircleBackground — fill only
-
-Fills the squircle silhouette with a solid color. Descendants are **not**
-clipped to the corner — useful when you want to paint a background but still
-let children overflow or paint their own corners.
+Fills the squircle silhouette without clipping descendants or allocating an offscreen layer.
 
 ```kotlin
 Modifier.squircleBackground(
@@ -89,11 +50,9 @@ Modifier.squircleBackground(
 )
 ```
 
-### squircleSurface — fill + clip
+### `squircleSurface` — fill + clip
 
-Drop-in replacement for `Modifier.clip(RoundedCornerShape(r)).background(color)`
-with a squircle outline. Children are clipped to the squircle silhouette in
-the same offscreen layer as the fill, so there is no double-pass cost.
+Drop-in replacement for `.clip(RoundedCornerShape(r)).background(color)` with a squircle outline. Fill and child clipping share one offscreen layer.
 
 ```kotlin
 Modifier.squircleSurface(
@@ -102,32 +61,27 @@ Modifier.squircleSurface(
 )
 ```
 
-### squircleClip — clip only
+### `squircleClip` — clip only
 
-Clips children to the squircle silhouette without drawing a fill. Useful when
-the fill is supplied by something else (an `Image`, another modifier chain,
-etc.).
+Clips descendants to the squircle silhouette without drawing a fill (e.g., around an `Image`).
 
 ```kotlin
 Modifier.squircleClip(cornerRadius = 16.dp)
 ```
 
 ::: warning Offscreen cost
-`squircleSurface` and `squircleClip` each open one offscreen GPU layer per
-node. The shader output is cached as long as size and parameters are stable;
-pass constants where you can and avoid driving `cornerRadius` from a
-continuously animating state if you don't have to.
+`squircleSurface` and `squircleClip` (including `absolute*` variants) composite children via a cached offscreen GPU layer per node:
+- Pure capsules (all corners `>=` half of the shorter side) bypass it with hardware `CircleShape` clipping.
+- Oversized nodes (either side `> 4096 px` or area `> 4096 × 2160`) fall back to cached `Path` clipping.
+
+Prefer constant radii where possible and avoid driving `cornerRadius` from frame-by-frame animations unnecessarily.
 :::
 
-### squircleBorder — stroke only
+### `squircleBorder` — stroke only
 
-Draws a squircle-outlined stroke around the layout, inset by half the stroke
-width so it lines up with a same-radius `squircleBackground` / `squircleSurface`.
-Path-based (no shader required); cheaper than the shader variants.
+Draws a path-based squircle stroke inset by half the stroke width to align with `squircleBackground` / `squircleSurface`. Includes a deferred-read overload (`width: () -> Dp`, `color: () -> Color`) to animate stroke properties in the draw phase without recomposition.
 
 ```kotlin
-import top.yukonga.miuix.kmp.squircle.squircleBorder
-
 Modifier.squircleBorder(
     width = 1.dp,
     color = MiuixTheme.colorScheme.outline,
@@ -135,11 +89,9 @@ Modifier.squircleBorder(
 )
 ```
 
-## Per-corner Radii
+## Per-corner & Absolute Radii
 
-Every shader-backed modifier has a per-corner overload that matches
-`RoundedCornerShape`'s parameter ordering (`topStart`, `topEnd`, `bottomEnd`,
-`bottomStart`):
+`squircleBackground`, `squircleSurface`, and `squircleClip` provide per-corner overloads (`topStart`, `topEnd`, `bottomEnd`, `bottomStart`) that mirror `RoundedCornerShape` and flip in RTL layouts:
 
 ```kotlin
 Modifier.squircleSurface(
@@ -151,37 +103,11 @@ Modifier.squircleSurface(
 )
 ```
 
-Mix and match to produce asymmetric shapes (a "card stuck to the top of the
-screen", an inset chip with one squared edge, and so on).
-
-## Absolute Corners (layout-direction-agnostic)
-
-`absoluteSquircleBackground`, `absoluteSquircleClip`, and `absoluteSquircleSurface`
-mirror the per-corner overloads but take physical corners (`topLeft`, `topRight`,
-`bottomRight`, `bottomLeft`, clockwise from top-left) that are **not** flipped by
-`LocalLayoutDirection` — the same relationship `AbsoluteRoundedCornerShape` has to
-`RoundedCornerShape`. Reach for these when corners must anchor to physical sides
-regardless of RTL/LTR (e.g. a transition reveal tied to a swipe edge).
-
-```kotlin
-Modifier.absoluteSquircleSurface(
-    color = MiuixTheme.colorScheme.surface,
-    topLeft = 24.dp,
-    topRight = 24.dp,
-    bottomRight = 0.dp,
-    bottomLeft = 0.dp,
-)
-```
+For layout-direction-agnostic physical corners (`topLeft`, `topRight`, `bottomRight`, `bottomLeft`), use `absoluteSquircleBackground`, `absoluteSquircleSurface`, and `absoluteSquircleClip`.
 
 ## Customizing the Curve
 
-`extension` controls how far the continuous-curvature zone extends from the
-corner. `1.0` matches a circular arc; the default `1.1` gives the standard
-squircle look.
-
-| Parameter   | Default | Range    | Effect                                                                    |
-| ----------- | :-----: | -------- | ------------------------------------------------------------------------- |
-| `extension` |  `1.1`  | `[1, 2]` | Corner-tile size as a multiple of `cornerRadius`. `1.0` is a circular arc. |
+`extension` controls how far the continuous-curvature region extends from each corner relative to `cornerRadius`. `1.0f` matches a circular arc; `1.1f` (`SquircleDefaults.Extension`) is the default.
 
 ```kotlin
 Modifier.squircleBackground(
@@ -191,18 +117,11 @@ Modifier.squircleBackground(
 )
 ```
 
-Reference the default via `SquircleDefaults.Extension`.
-
 ## Path API
 
-When you need a squircle outline outside the modifier pipeline (a `clipPath`
-reveal that rebuilds per frame, a custom `Canvas` draw, an `Outline` for a
-non-shader Shape, etc.), build the path directly:
+For custom `Canvas` drawing, `Outline` shapes, or per-frame animated clip paths, use `Path.addSquircleRect`. For static fills and clips, prefer the shader modifiers—they reuse a compile-time baked SDF texture decoded once per process.
 
 ```kotlin
-import androidx.compose.ui.graphics.Path
-import top.yukonga.miuix.kmp.squircle.addSquircleRect
-
 val path = Path().apply {
     addSquircleRect(
         width = sizePx.width,
@@ -212,26 +131,19 @@ val path = Path().apply {
 }
 ```
 
-For static fills and clips prefer the shader-backed modifiers — they cache
-their distance field once per process.
+A physical-corner overload replaces `cornerRadius` with `topLeft`, `topRight`, `bottomRight`, and `bottomLeft` (`Float`, in pixels).
 
 ## Global Toggle
 
-`LocalSquircleEnabled` (default `true`) gates every shader-backed squircle
-modifier. Set it to `false` to force the `RoundedCornerShape` fallback at
-runtime — useful for visual preferences or A/B comparisons:
+`LocalSquircleEnabled` (default `true`) controls all squircle modifiers (`squircleBackground`, `squircleSurface`, `squircleClip`, `squircleBorder`, and `absolute*` variants). Setting it to `false` switches them to `RoundedCornerShape` fallbacks at runtime:
 
 ```kotlin
-import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
-
-CompositionLocalProvider(LocalSquircleEnabled provides userPrefersRoundedRects) {
+CompositionLocalProvider(LocalSquircleEnabled provides userPrefersSquircle) {
     AppContent()
 }
 ```
 
-`isSquircleEnabled()` combines `LocalSquircleEnabled.current` with the runtime
-shader-support check. Use it inside `@Composable` to keep mixed shader+path
-visuals in sync — capture the boolean and pass it to `addSquircleRect`:
+`isSquircleEnabled()` combines `LocalSquircleEnabled.current` with `isRuntimeShaderSupported()`. Capture it inside `@Composable` and forward it to `addSquircleRect` when mixing path drawing with squircle modifiers:
 
 ```kotlin
 @Composable
@@ -256,45 +168,40 @@ fun OutlinedSurface(cornerRadius: Dp) {
 }
 ```
 
-## Properties
+## API Reference
 
-### squircleBackground / squircleSurface / squircleClip
+### `squircleBackground` / `squircleSurface` / `squircleClip`
 
-| Parameter      | Type    | Description                                              | Default                         |
-| -------------- | ------- | -------------------------------------------------------- | ------------------------------- |
-| `color`        | `Color` | Fill color (omit on `squircleClip`)                      | -                               |
-| `cornerRadius` | `Dp`    | Uniform corner radius                                    | -                               |
-| `topStart`     | `Dp`    | Per-corner radius (per-corner overload)                  | -                               |
-| `topEnd`       | `Dp`    | Per-corner radius (per-corner overload)                  | -                               |
-| `bottomEnd`    | `Dp`    | Per-corner radius (per-corner overload)                  | -                               |
-| `bottomStart`  | `Dp`    | Per-corner radius (per-corner overload)                  | -                               |
-| `extension`    | `Float` | Corner-tile size multiplier, clamped to `[1, 2]`         | `SquircleDefaults.Extension` = 1.1  |
+| Parameter | Type | Description | Default |
+| --- | --- | --- | --- |
+| `color` | `Color` | Fill color (omitted on `squircleClip`) | - |
+| `cornerRadius` | `Dp` | Uniform corner radius | - |
+| `topStart` / `topEnd` / `bottomEnd` / `bottomStart` | `Dp` | Per-corner radii (per-corner overload; `absolute*` uses `topLeft`, `topRight`, `bottomRight`, `bottomLeft`) | - |
+| `extension` | `Float` | Corner-tile multiplier, clamped to `[1.0, 2.0]` | `SquircleDefaults.Extension` (`1.1`) |
 
-### squircleBorder
+### `squircleBorder`
 
-| Parameter      | Type    | Description                                  | Default                         |
-| -------------- | ------- | -------------------------------------------- | ------------------------------- |
-| `width`        | `Dp`    | Stroke width                                 | -                               |
-| `color`        | `Color` | Stroke color                                 | -                               |
-| `cornerRadius` | `Dp`    | Uniform corner radius                        | -                               |
-| `extension`    | `Float` | Corner-tile size multiplier                  | `SquircleDefaults.Extension`    |
+| Parameter | Type | Description | Default |
+| --- | --- | --- | --- |
+| `width` | `Dp` / `() -> Dp` | Stroke width (direct or deferred-read lambda) | - |
+| `color` | `Color` / `() -> Color` | Stroke color (direct or deferred-read lambda) | - |
+| `cornerRadius` | `Dp` | Uniform corner radius | - |
+| `extension` | `Float` | Corner-tile multiplier, clamped to `[1.0, 2.0]` | `SquircleDefaults.Extension` (`1.1`) |
 
-### Path.addSquircleRect
+### `Path.addSquircleRect`
 
-The physical-corner overload replaces `cornerRadius` with four `Float` parameters: `topLeft`, `topRight`, `bottomRight`, and `bottomLeft`. Use `0f` for square joining corners in a group; `extension` and `squircleEnabled` work the same way.
+| Parameter | Type | Description | Default |
+| --- | --- | --- | --- |
+| `width` | `Float` | Path width in pixels | - |
+| `height` | `Float` | Path height in pixels | - |
+| `cornerRadius` | `Float` | Corner radius in pixels (or `topLeft`, `topRight`, `bottomRight`, `bottomLeft`) | - |
+| `extension` | `Float` | Corner-tile multiplier, clamped to `[1.0, 2.0]` | `SquircleDefaults.Extension` (`1.1`) |
+| `squircleEnabled` | `Boolean` | When `false`, appends a rounded-rect path instead | `true` |
 
-| Parameter         | Type      | Description                                                        | Default                         |
-| ----------------- | --------- | ------------------------------------------------------------------ | ------------------------------- |
-| `width`           | `Float`   | Path width in pixels                                               | -                               |
-| `height`          | `Float`   | Path height in pixels                                              | -                               |
-| `cornerRadius`    | `Float`   | Corner radius in pixels                                            | -                               |
-| `extension`       | `Float`   | Corner-tile size multiplier                                        | `SquircleDefaults.Extension`    |
-| `squircleEnabled` | `Boolean` | When `false`, appends a plain rounded rect of the same dimensions  | `true`                          |
+### `SquircleDefaults`
 
-### SquircleDefaults
-
-| Constant       | Type    | Description                          | Value  |
-| -------------- | ------- | ------------------------------------ | -----: |
-| `Extension`    | `Float` | Default corner-tile size multiplier  | `1.1`  |
-| `ExtensionMin` | `Float` | Lower bound for `Extension`          | `1.0`  |
-| `ExtensionMax` | `Float` | Upper bound for `Extension`          | `2.0`  |
+| Constant | Type | Description | Value |
+| --- | --- | --- | ---: |
+| `Extension` | `Float` | Default corner-tile multiplier | `1.1` |
+| `ExtensionMin` | `Float` | Lower bound for `Extension` | `1.0` |
+| `ExtensionMax` | `Float` | Upper bound for `Extension` | `2.0` |
