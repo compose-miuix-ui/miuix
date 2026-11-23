@@ -7,14 +7,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathNode
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 
-val MiuixIcons.Glass.XiaominListen: ImageVector
-    get() = MiuixIcons.Glass.Regular.XiaominListen
+val MiuixIcons.Glass.XiaomiListen: ImageVector
+    get() = MiuixIcons.Glass.Regular.XiaomiListen
 
-val MiuixIcons.Glass.Light.XiaominListen: ImageVector
+val MiuixIcons.Glass.Light.XiaomiListen: ImageVector
     get() {
-        if (_xiaominListenSurfaceLight != null) return _xiaominListenSurfaceLight!!
-        _xiaominListenSurfaceLight = buildHyperOSIcon(
-            name = "XiaominListen.Glass.Light",
+        if (_xiaomiListenSurfaceLight != null) return _xiaomiListenSurfaceLight!!
+        _xiaomiListenSurfaceLight = buildHyperOSIcon(
+            name = "XiaomiListen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(602.2f, 45.7f),
                 PathNode.LineTo(547.2f, 101.1f),
@@ -70,16 +70,16 @@ val MiuixIcons.Glass.Light.XiaominListen: ImageVector
             translationY = 1041.2909f,
             autoMirror = false,
         )
-        return _xiaominListenSurfaceLight!!
+        return _xiaomiListenSurfaceLight!!
     }
 
-private var _xiaominListenSurfaceLight: ImageVector? = null
+private var _xiaomiListenSurfaceLight: ImageVector? = null
 
-val MiuixIcons.Glass.Normal.XiaominListen: ImageVector
+val MiuixIcons.Glass.Normal.XiaomiListen: ImageVector
     get() {
-        if (_xiaominListenSurfaceNormal != null) return _xiaominListenSurfaceNormal!!
-        _xiaominListenSurfaceNormal = buildHyperOSIcon(
-            name = "XiaominListen.Glass.Normal",
+        if (_xiaomiListenSurfaceNormal != null) return _xiaomiListenSurfaceNormal!!
+        _xiaomiListenSurfaceNormal = buildHyperOSIcon(
+            name = "XiaomiListen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(606.2f, 43.8f),
                 PathNode.LineTo(551.2f, 99f),
@@ -135,16 +135,16 @@ val MiuixIcons.Glass.Normal.XiaominListen: ImageVector
             translationY = 1041.3642f,
             autoMirror = false,
         )
-        return _xiaominListenSurfaceNormal!!
+        return _xiaomiListenSurfaceNormal!!
     }
 
-private var _xiaominListenSurfaceNormal: ImageVector? = null
+private var _xiaomiListenSurfaceNormal: ImageVector? = null
 
-val MiuixIcons.Glass.Regular.XiaominListen: ImageVector
+val MiuixIcons.Glass.Regular.XiaomiListen: ImageVector
     get() {
-        if (_xiaominListenSurfaceRegular != null) return _xiaominListenSurfaceRegular!!
-        _xiaominListenSurfaceRegular = buildHyperOSIcon(
-            name = "XiaominListen.Glass.Regular",
+        if (_xiaomiListenSurfaceRegular != null) return _xiaomiListenSurfaceRegular!!
+        _xiaomiListenSurfaceRegular = buildHyperOSIcon(
+            name = "XiaomiListen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(608f, 43f),
                 PathNode.LineTo(553f, 98f),
@@ -200,16 +200,16 @@ val MiuixIcons.Glass.Regular.XiaominListen: ImageVector
             translationY = 1041.3974f,
             autoMirror = false,
         )
-        return _xiaominListenSurfaceRegular!!
+        return _xiaomiListenSurfaceRegular!!
     }
 
-private var _xiaominListenSurfaceRegular: ImageVector? = null
+private var _xiaomiListenSurfaceRegular: ImageVector? = null
 
-val MiuixIcons.Glass.Medium.XiaominListen: ImageVector
+val MiuixIcons.Glass.Medium.XiaomiListen: ImageVector
     get() {
-        if (_xiaominListenSurfaceMedium != null) return _xiaominListenSurfaceMedium!!
-        _xiaominListenSurfaceMedium = buildHyperOSIcon(
-            name = "XiaominListen.Glass.Medium",
+        if (_xiaomiListenSurfaceMedium != null) return _xiaomiListenSurfaceMedium!!
+        _xiaomiListenSurfaceMedium = buildHyperOSIcon(
+            name = "XiaomiListen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(612.9f, 42.5f),
                 PathNode.LineTo(559.5f, 98.5f),
@@ -265,16 +265,16 @@ val MiuixIcons.Glass.Medium.XiaominListen: ImageVector
             translationY = 1039.8402f,
             autoMirror = false,
         )
-        return _xiaominListenSurfaceMedium!!
+        return _xiaomiListenSurfaceMedium!!
     }
 
-private var _xiaominListenSurfaceMedium: ImageVector? = null
+private var _xiaomiListenSurfaceMedium: ImageVector? = null
 
-val MiuixIcons.Glass.Demibold.XiaominListen: ImageVector
+val MiuixIcons.Glass.Demibold.XiaomiListen: ImageVector
     get() {
-        if (_xiaominListenSurfaceDemibold != null) return _xiaominListenSurfaceDemibold!!
-        _xiaominListenSurfaceDemibold = buildHyperOSIcon(
-            name = "XiaominListen.Glass.Demibold",
+        if (_xiaomiListenSurfaceDemibold != null) return _xiaomiListenSurfaceDemibold!!
+        _xiaomiListenSurfaceDemibold = buildHyperOSIcon(
+            name = "XiaomiListen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(616.3f, 42.1f),
                 PathNode.LineTo(564f, 98.9f),
@@ -330,8 +330,8 @@ val MiuixIcons.Glass.Demibold.XiaominListen: ImageVector
             translationY = 1038.75f,
             autoMirror = false,
         )
-        return _xiaominListenSurfaceDemibold!!
+        return _xiaomiListenSurfaceDemibold!!
     }
 
-private var _xiaominListenSurfaceDemibold: ImageVector? = null
+private var _xiaomiListenSurfaceDemibold: ImageVector? = null
 
