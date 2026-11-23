@@ -109,6 +109,7 @@ private val availableComponents = listOf(
     AvailableComponent("GlassDropdownPreference", "glassDropdownPreference") { GlassDropdownPreferenceDemo() },
     AvailableComponent("GlassDialog", "glassDialog") { GlassDialogDemo() },
     AvailableComponent("GlassBottomSheet", "glassBottomSheet") { GlassBottomSheetDemo() },
+    AvailableComponent("Expand Navigation", "navExpand") { NavExpandDemo() },
     AvailableComponent("GlassCard", "glassCard") { GlassCardDemo() },
 )
 

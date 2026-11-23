@@ -46,9 +46,9 @@ class NavMaxLifecycleTest {
     }
 
     @Test
-    fun fullyExitedIsDestroyed() {
-        assertEquals(Lifecycle.State.DESTROYED, navMaxLifecycleFor(presentation(isRemoving = true), d = -1f, gestureActive = false))
-        assertEquals(Lifecycle.State.DESTROYED, navMaxLifecycleFor(presentation(isRemoving = false), d = -1.5f, gestureActive = false))
+    fun endpointHostStaysCreatedUntilDisposal() {
+        assertEquals(Lifecycle.State.CREATED, navMaxLifecycleFor(presentation(isRemoving = true), d = -1f, gestureActive = false))
+        assertEquals(Lifecycle.State.CREATED, navMaxLifecycleFor(presentation(isRemoving = false), d = -1.5f, gestureActive = false))
     }
 
     @Test
@@ -66,6 +66,6 @@ class NavMaxLifecycleTest {
         assertEquals(Lifecycle.State.STARTED, navMaxLifecycleFor(presentation(isRemoving = false), d = 1f, gestureActive = true))
         assertEquals(Lifecycle.State.STARTED, navMaxLifecycleFor(presentation(isRemoving = false), d = -0.8f, gestureActive = true))
         assertEquals(Lifecycle.State.CREATED, navMaxLifecycleFor(presentation(isRemoving = true), d = 0f, gestureActive = true))
-        assertEquals(Lifecycle.State.DESTROYED, navMaxLifecycleFor(presentation(isRemoving = false), d = -1.5f, gestureActive = true))
+        assertEquals(Lifecycle.State.CREATED, navMaxLifecycleFor(presentation(isRemoving = false), d = -1.5f, gestureActive = true))
     }
 }

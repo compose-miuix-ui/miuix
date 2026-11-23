@@ -281,6 +281,8 @@ fun OutlinedSurface(cornerRadius: Dp) {
 
 ### Path.addSquircleRect
 
+The physical-corner overload replaces `cornerRadius` with four `Float` parameters: `topLeft`, `topRight`, `bottomRight`, and `bottomLeft`. Use `0f` for square joining corners in a group; `extension` and `squircleEnabled` work the same way.
+
 | Parameter         | Type      | Description                                                        | Default                         |
 | ----------------- | --------- | ------------------------------------------------------------------ | ------------------------------- |
 | `width`           | `Float`   | Path width in pixels                                               | -                               |

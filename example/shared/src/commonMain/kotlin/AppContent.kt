@@ -328,6 +328,7 @@ fun AppContent(
         }
         val navTransition = when {
             suppressNavTransition -> InstantNavTransition
+            appState.navTransitionStyle == 2 -> NavTransitions.Expansion
             isCrossActivityStyle -> CrossActivityTransition
             else -> NavTransitions.MiuixDefault
         }
@@ -471,10 +472,13 @@ private fun AppNavHost(
             LicensePage(padding = padding)
         }
         entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
-            val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
+            val index = remember(route) {
+                backStack.filter { it is Route.Navigation || it is Route.ExpansionDetail }.indexOf(route) + 1
+            }
             NavTestPage(
                 index = index,
                 padding = padding,
+                route = route,
             )
         }
         entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
@@ -482,6 +486,12 @@ private fun AppNavHost(
         }
         entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
             NestedNavTestPage(padding = padding)
+        }
+        entry<Route.ExpansionDetail>(transition = NavTransitions.Expansion, swipeDismiss = swipeBackDirection) { route ->
+            val index = remember(route) {
+                backStack.filter { it is Route.Navigation || it is Route.ExpansionDetail }.indexOf(route) + 1
+            }
+            NavTestPage(index = index, padding = padding, route = route)
         }
         entry<Route.OverscrollLoadMore>(swipeDismiss = swipeBackDirection) {
             OverscrollLoadMorePage(padding = padding)

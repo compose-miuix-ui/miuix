@@ -270,6 +270,8 @@ fun OutlinedSurface(cornerRadius: Dp) {
 
 ### Path.addSquircleRect
 
+物理圆角重载将 `cornerRadius` 替换为四个 `Float` 参数：`topLeft`、`topRight`、`bottomRight` 和 `bottomLeft`。分组内衔接的直角传 `0f`；`extension` 和 `squircleEnabled` 的用法不变。
+
 | 参数              | 类型      | 说明                                                 | 默认值                          |
 | ----------------- | --------- | ---------------------------------------------------- | ------------------------------- |
 | `width`           | `Float`   | path 宽度（像素）                                    | -                               |

@@ -72,6 +72,8 @@ import top.yukonga.miuix.kmp.glass.GlassCard
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.shared.generated.resources.Res
@@ -401,6 +403,7 @@ private fun AboutContent(
                                         )
                                         ArrowPreference(
                                             title = "Third Party Licenses",
+                                            modifier = Modifier.navTransitionSource(Route.License, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(0.dp, 0.dp, 16.dp, 16.dp), sourceKey = "license"),
                                             onClick = { navigator.push(Route.License) },
                                         )
                                     }
