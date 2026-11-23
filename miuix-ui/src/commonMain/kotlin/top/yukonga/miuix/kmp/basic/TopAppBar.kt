@@ -108,7 +108,6 @@ import kotlin.math.abs
  * @param titlePadding The horizontal padding of the [TopAppBar]'s title & large title.
  * @param navigationIconPadding The start padding of the navigation icon.
  * @param actionIconPadding The end padding of the action icons.
- * @param titleAlpha A lambda returning the alpha of the title text.
  * @param bottomContent The [Composable] content displayed below the title bar area.
  */
 @Composable
@@ -130,7 +129,6 @@ fun TopAppBar(
     navigationIconPadding: Dp = TopAppBarDefaults.NavigationIconPadding,
     actionIconPadding: Dp = TopAppBarDefaults.ActionIconPadding,
     centerObstructionStart: Dp = Dp.Unspecified,
-    titleAlpha: () -> Float = { 1f },
     bottomContent: @Composable () -> Unit = {},
 ) {
     val actionsRow =
@@ -161,7 +159,6 @@ fun TopAppBar(
         modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         centerObstructionStart = centerObstructionStart,
-        titleAlpha = titleAlpha,
         bottomContent = bottomContent,
     )
 }

@@ -308,7 +308,6 @@ fun AdaptiveTopAppBar(
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = false,
             centerObstructionStart = centerObstructionStart,
-            titleAlpha = { titleAlpha() * chromeTitleAlpha() },
             navigationIcon = navigationIcon,
             actions = actions,
             bottomContent = bottomContent,

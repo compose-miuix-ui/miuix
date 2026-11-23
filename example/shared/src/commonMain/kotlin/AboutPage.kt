@@ -3,6 +3,8 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -127,8 +129,12 @@ fun AboutPage(
             } else {
                 if (collapsed) MiuixTheme.colorScheme.surface else Color.Transparent
             }
-            val titleAlpha = remember { { ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f) } }
-            val titleColor = MiuixTheme.colorScheme.onSurface
+            val showTitle by remember { computedStateOf { scrollProgress >= 0.45f } }
+            val titleAlpha by animateFloatAsState(
+                targetValue = if (showTitle) 1f else 0f,
+                animationSpec = tween(durationMillis = 200),
+            )
+            val titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = titleAlpha)
             Box(modifier = if (barBackdrop != null) Modifier.layerBackdrop(barBackdrop) else Modifier) {
                 BlurredBar(backdrop, blurActive) {
                     AdaptiveTopAppBar(
@@ -140,7 +146,6 @@ fun AboutPage(
                         isContentScrolled = contentUnderTopBar,
                         color = barColor,
                         titleColor = titleColor,
-                        titleAlpha = titleAlpha,
                         navigationIcon = {
                             BackNavigationIcon(
                                 onClick = { navigator.pop() },
