@@ -156,6 +156,7 @@ import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
 import utils.TopLayerHost
 import utils.TopLayerState
+import utils.isInMultiWindowMode
 import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
@@ -280,8 +281,8 @@ fun AppContent(
         LocalTopAppBarCenterObstructionStart provides topAppBarCenterObstructionStart,
         LocalAppPageInsets provides pageInsets,
     ) {
-        // Match platform screen corners; split panes have no outer corner.
-        val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
+        // Match platform screen corners; multi-window has no outer screen corner.
+        val navCornerRadius = if (isInMultiWindowMode()) 0.dp else rememberNavSystemCornerRadius()
         val isCrossActivityStyle = appState.navTransitionStyle == 1
         val backdropColor = MiuixTheme.colorScheme.surface
         val isDarkTheme = isInDarkTheme()

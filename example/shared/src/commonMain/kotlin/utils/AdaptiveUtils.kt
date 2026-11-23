@@ -58,3 +58,6 @@ fun shouldExpandNavigationRail(): Boolean {
         }
     }.value
 }
+
+@Composable
+expect fun isInMultiWindowMode(): Boolean
