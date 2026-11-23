@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import component.GlassBottomSheetDemo
 import component.GlassDemoDefaults
+import component.GlassHalfBottomSheetDemo
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
@@ -137,6 +138,7 @@ private const val OVERLAY_NONE = 0
 private const val OVERLAY_POPUP = 1
 private const val OVERLAY_DIALOG = 2
 private const val OVERLAY_BOTTOM_SHEET = 3
+private const val OVERLAY_HALF_BOTTOM_SHEET = 4
 
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
@@ -498,6 +500,15 @@ fun GlassPage(padding: PaddingValues) {
                 stroke = stroke,
             )
 
+            GlassHalfBottomSheetDemo(
+                onDismissRequest = { overlayIndex = OVERLAY_NONE },
+                show = overlayIndex == OVERLAY_HALF_BOTTOM_SHEET,
+                onDismissFinished = { sheetActive = false },
+                backdrop = pageBackdrop,
+                material = material ?: GlassBottomSheetDefaults.material(),
+                stroke = stroke,
+            )
+
             Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
                 Box(
                     modifier = Modifier
@@ -667,6 +678,14 @@ fun GlassPage(padding: PaddingValues) {
                                 onClick = {
                                     sheetActive = true
                                     overlayIndex = OVERLAY_BOTTOM_SHEET
+                                },
+                            )
+                            ArrowPreference(
+                                title = "Show Half BottomSheet",
+                                holdDownState = overlayIndex == OVERLAY_HALF_BOTTOM_SHEET,
+                                onClick = {
+                                    sheetActive = true
+                                    overlayIndex = OVERLAY_HALF_BOTTOM_SHEET
                                 },
                             )
                             HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
