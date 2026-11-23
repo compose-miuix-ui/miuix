@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WeightConversion: ImageVector
 
 val MiuixIcons.Glass.Light.WeightConversion: ImageVector
     get() {
-        if (_weightConversionSurfaceLight != null) return _weightConversionSurfaceLight!!
-        _weightConversionSurfaceLight = buildHyperOSIcon(
+        if (_weightConversionLight != null) return _weightConversionLight!!
+        _weightConversionLight = buildHyperOSIcon(
             name = "WeightConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(515.1f, 725.3f),
@@ -75,15 +75,15 @@ val MiuixIcons.Glass.Light.WeightConversion: ImageVector
             translationY = 1033.2221f,
             autoMirror = false,
         )
-        return _weightConversionSurfaceLight!!
+        return _weightConversionLight!!
     }
 
-private var _weightConversionSurfaceLight: ImageVector? = null
+private var _weightConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WeightConversion: ImageVector
     get() {
-        if (_weightConversionSurfaceNormal != null) return _weightConversionSurfaceNormal!!
-        _weightConversionSurfaceNormal = buildHyperOSIcon(
+        if (_weightConversionNormal != null) return _weightConversionNormal!!
+        _weightConversionNormal = buildHyperOSIcon(
             name = "WeightConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(507.5f, 727.2f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Normal.WeightConversion: ImageVector
             translationY = 1036.2775f,
             autoMirror = false,
         )
-        return _weightConversionSurfaceNormal!!
+        return _weightConversionNormal!!
     }
 
-private var _weightConversionSurfaceNormal: ImageVector? = null
+private var _weightConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WeightConversion: ImageVector
     get() {
-        if (_weightConversionSurfaceRegular != null) return _weightConversionSurfaceRegular!!
-        _weightConversionSurfaceRegular = buildHyperOSIcon(
+        if (_weightConversionRegular != null) return _weightConversionRegular!!
+        _weightConversionRegular = buildHyperOSIcon(
             name = "WeightConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(504f, 728f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Regular.WeightConversion: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _weightConversionSurfaceRegular!!
+        return _weightConversionRegular!!
     }
 
-private var _weightConversionSurfaceRegular: ImageVector? = null
+private var _weightConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WeightConversion: ImageVector
     get() {
-        if (_weightConversionSurfaceMedium != null) return _weightConversionSurfaceMedium!!
-        _weightConversionSurfaceMedium = buildHyperOSIcon(
+        if (_weightConversionMedium != null) return _weightConversionMedium!!
+        _weightConversionMedium = buildHyperOSIcon(
             name = "WeightConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(497.8f, 729.6f),
@@ -285,15 +285,15 @@ val MiuixIcons.Glass.Medium.WeightConversion: ImageVector
             translationY = 1040.3693f,
             autoMirror = false,
         )
-        return _weightConversionSurfaceMedium!!
+        return _weightConversionMedium!!
     }
 
-private var _weightConversionSurfaceMedium: ImageVector? = null
+private var _weightConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WeightConversion: ImageVector
     get() {
-        if (_weightConversionSurfaceDemibold != null) return _weightConversionSurfaceDemibold!!
-        _weightConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_weightConversionDemibold != null) return _weightConversionDemibold!!
+        _weightConversionDemibold = buildHyperOSIcon(
             name = "WeightConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(493.4f, 730.8f),
@@ -355,8 +355,8 @@ val MiuixIcons.Glass.Demibold.WeightConversion: ImageVector
             translationY = 1042.2614f,
             autoMirror = false,
         )
-        return _weightConversionSurfaceDemibold!!
+        return _weightConversionDemibold!!
     }
 
-private var _weightConversionSurfaceDemibold: ImageVector? = null
+private var _weightConversionDemibold: ImageVector? = null
 

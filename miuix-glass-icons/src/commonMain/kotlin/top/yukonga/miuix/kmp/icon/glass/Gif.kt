@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Gif: ImageVector
 
 val MiuixIcons.Glass.Light.Gif: ImageVector
     get() {
-        if (_gifLineLight != null) return _gifLineLight!!
-        _gifLineLight = buildHyperOSIcon(
+        if (_gifLight != null) return _gifLight!!
+        _gifLight = buildHyperOSIcon(
             name = "Gif.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(124.4f, 594.1f),
@@ -110,15 +110,15 @@ val MiuixIcons.Glass.Light.Gif: ImageVector
             translationY = 1067.5606f,
             autoMirror = false,
         )
-        return _gifLineLight!!
+        return _gifLight!!
     }
 
-private var _gifLineLight: ImageVector? = null
+private var _gifLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Gif: ImageVector
     get() {
-        if (_gifLineNormal != null) return _gifLineNormal!!
-        _gifLineNormal = buildHyperOSIcon(
+        if (_gifNormal != null) return _gifNormal!!
+        _gifNormal = buildHyperOSIcon(
             name = "Gif.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(118.6f, 600.2f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Normal.Gif: ImageVector
             translationY = 1066.945f,
             autoMirror = false,
         )
-        return _gifLineNormal!!
+        return _gifNormal!!
     }
 
-private var _gifLineNormal: ImageVector? = null
+private var _gifNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Gif: ImageVector
     get() {
-        if (_gifLineRegular != null) return _gifLineRegular!!
-        _gifLineRegular = buildHyperOSIcon(
+        if (_gifRegular != null) return _gifRegular!!
+        _gifRegular = buildHyperOSIcon(
             name = "Gif.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(116f, 603f),
@@ -320,15 +320,15 @@ val MiuixIcons.Glass.Regular.Gif: ImageVector
             translationY = 1066.6667f,
             autoMirror = false,
         )
-        return _gifLineRegular!!
+        return _gifRegular!!
     }
 
-private var _gifLineRegular: ImageVector? = null
+private var _gifRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Gif: ImageVector
     get() {
-        if (_gifLineMedium != null) return _gifLineMedium!!
-        _gifLineMedium = buildHyperOSIcon(
+        if (_gifMedium != null) return _gifMedium!!
+        _gifMedium = buildHyperOSIcon(
             name = "Gif.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(110.1f, 608.4f),
@@ -425,15 +425,15 @@ val MiuixIcons.Glass.Medium.Gif: ImageVector
             translationY = 1066.6667f,
             autoMirror = false,
         )
-        return _gifLineMedium!!
+        return _gifMedium!!
     }
 
-private var _gifLineMedium: ImageVector? = null
+private var _gifMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Gif: ImageVector
     get() {
-        if (_gifLineDemibold != null) return _gifLineDemibold!!
-        _gifLineDemibold = buildHyperOSIcon(
+        if (_gifDemibold != null) return _gifDemibold!!
+        _gifDemibold = buildHyperOSIcon(
             name = "Gif.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(105.9f, 612.2f),
@@ -530,8 +530,8 @@ val MiuixIcons.Glass.Demibold.Gif: ImageVector
             translationY = 1066.6667f,
             autoMirror = false,
         )
-        return _gifLineDemibold!!
+        return _gifDemibold!!
     }
 
-private var _gifLineDemibold: ImageVector? = null
+private var _gifDemibold: ImageVector? = null
 

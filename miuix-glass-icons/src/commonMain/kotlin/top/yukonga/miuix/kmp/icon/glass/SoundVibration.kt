@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SoundVibration: ImageVector
 
 val MiuixIcons.Glass.Light.SoundVibration: ImageVector
     get() {
-        if (_soundVibrationSurfaceLight != null) return _soundVibrationSurfaceLight!!
-        _soundVibrationSurfaceLight = buildHyperOSIcon(
+        if (_soundVibrationLight != null) return _soundVibrationLight!!
+        _soundVibrationLight = buildHyperOSIcon(
             name = "SoundVibration.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(696.4f, 834.4f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.SoundVibration: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundVibrationSurfaceLight!!
+        return _soundVibrationLight!!
     }
 
-private var _soundVibrationSurfaceLight: ImageVector? = null
+private var _soundVibrationLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SoundVibration: ImageVector
     get() {
-        if (_soundVibrationSurfaceNormal != null) return _soundVibrationSurfaceNormal!!
-        _soundVibrationSurfaceNormal = buildHyperOSIcon(
+        if (_soundVibrationNormal != null) return _soundVibrationNormal!!
+        _soundVibrationNormal = buildHyperOSIcon(
             name = "SoundVibration.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(687.9f, 834.1f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.SoundVibration: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundVibrationSurfaceNormal!!
+        return _soundVibrationNormal!!
     }
 
-private var _soundVibrationSurfaceNormal: ImageVector? = null
+private var _soundVibrationNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SoundVibration: ImageVector
     get() {
-        if (_soundVibrationSurfaceRegular != null) return _soundVibrationSurfaceRegular!!
-        _soundVibrationSurfaceRegular = buildHyperOSIcon(
+        if (_soundVibrationRegular != null) return _soundVibrationRegular!!
+        _soundVibrationRegular = buildHyperOSIcon(
             name = "SoundVibration.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(684f, 834f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.SoundVibration: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundVibrationSurfaceRegular!!
+        return _soundVibrationRegular!!
     }
 
-private var _soundVibrationSurfaceRegular: ImageVector? = null
+private var _soundVibrationRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SoundVibration: ImageVector
     get() {
-        if (_soundVibrationSurfaceMedium != null) return _soundVibrationSurfaceMedium!!
-        _soundVibrationSurfaceMedium = buildHyperOSIcon(
+        if (_soundVibrationMedium != null) return _soundVibrationMedium!!
+        _soundVibrationMedium = buildHyperOSIcon(
             name = "SoundVibration.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(677f, 837.5f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.SoundVibration: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundVibrationSurfaceMedium!!
+        return _soundVibrationMedium!!
     }
 
-private var _soundVibrationSurfaceMedium: ImageVector? = null
+private var _soundVibrationMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SoundVibration: ImageVector
     get() {
-        if (_soundVibrationSurfaceDemibold != null) return _soundVibrationSurfaceDemibold!!
-        _soundVibrationSurfaceDemibold = buildHyperOSIcon(
+        if (_soundVibrationDemibold != null) return _soundVibrationDemibold!!
+        _soundVibrationDemibold = buildHyperOSIcon(
             name = "SoundVibration.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(672.1f, 840f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.SoundVibration: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundVibrationSurfaceDemibold!!
+        return _soundVibrationDemibold!!
     }
 
-private var _soundVibrationSurfaceDemibold: ImageVector? = null
+private var _soundVibrationDemibold: ImageVector? = null
 

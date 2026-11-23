@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LengthConversion: ImageVector
 
 val MiuixIcons.Glass.Light.LengthConversion: ImageVector
     get() {
-        if (_lengthConversionSurfaceLight != null) return _lengthConversionSurfaceLight!!
-        _lengthConversionSurfaceLight = buildHyperOSIcon(
+        if (_lengthConversionLight != null) return _lengthConversionLight!!
+        _lengthConversionLight = buildHyperOSIcon(
             name = "LengthConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(289.7f, 836f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Light.LengthConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _lengthConversionSurfaceLight!!
+        return _lengthConversionLight!!
     }
 
-private var _lengthConversionSurfaceLight: ImageVector? = null
+private var _lengthConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LengthConversion: ImageVector
     get() {
-        if (_lengthConversionSurfaceNormal != null) return _lengthConversionSurfaceNormal!!
-        _lengthConversionSurfaceNormal = buildHyperOSIcon(
+        if (_lengthConversionNormal != null) return _lengthConversionNormal!!
+        _lengthConversionNormal = buildHyperOSIcon(
             name = "LengthConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(287.8f, 844.2f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Normal.LengthConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _lengthConversionSurfaceNormal!!
+        return _lengthConversionNormal!!
     }
 
-private var _lengthConversionSurfaceNormal: ImageVector? = null
+private var _lengthConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LengthConversion: ImageVector
     get() {
-        if (_lengthConversionSurfaceRegular != null) return _lengthConversionSurfaceRegular!!
-        _lengthConversionSurfaceRegular = buildHyperOSIcon(
+        if (_lengthConversionRegular != null) return _lengthConversionRegular!!
+        _lengthConversionRegular = buildHyperOSIcon(
             name = "LengthConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(287f, 848f),
@@ -383,15 +383,15 @@ val MiuixIcons.Glass.Regular.LengthConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _lengthConversionSurfaceRegular!!
+        return _lengthConversionRegular!!
     }
 
-private var _lengthConversionSurfaceRegular: ImageVector? = null
+private var _lengthConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LengthConversion: ImageVector
     get() {
-        if (_lengthConversionSurfaceMedium != null) return _lengthConversionSurfaceMedium!!
-        _lengthConversionSurfaceMedium = buildHyperOSIcon(
+        if (_lengthConversionMedium != null) return _lengthConversionMedium!!
+        _lengthConversionMedium = buildHyperOSIcon(
             name = "LengthConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(283.1f, 855.3f),
@@ -509,15 +509,15 @@ val MiuixIcons.Glass.Medium.LengthConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _lengthConversionSurfaceMedium!!
+        return _lengthConversionMedium!!
     }
 
-private var _lengthConversionSurfaceMedium: ImageVector? = null
+private var _lengthConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LengthConversion: ImageVector
     get() {
-        if (_lengthConversionSurfaceDemibold != null) return _lengthConversionSurfaceDemibold!!
-        _lengthConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_lengthConversionDemibold != null) return _lengthConversionDemibold!!
+        _lengthConversionDemibold = buildHyperOSIcon(
             name = "LengthConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(280.3f, 860.4f),
@@ -635,8 +635,8 @@ val MiuixIcons.Glass.Demibold.LengthConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _lengthConversionSurfaceDemibold!!
+        return _lengthConversionDemibold!!
     }
 
-private var _lengthConversionSurfaceDemibold: ImageVector? = null
+private var _lengthConversionDemibold: ImageVector? = null
 

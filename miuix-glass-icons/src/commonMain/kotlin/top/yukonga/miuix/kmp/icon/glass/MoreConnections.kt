@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MoreConnections: ImageVector
 
 val MiuixIcons.Glass.Light.MoreConnections: ImageVector
     get() {
-        if (_moreConnectionsSurfaceLight != null) return _moreConnectionsSurfaceLight!!
-        _moreConnectionsSurfaceLight = buildHyperOSIcon(
+        if (_moreConnectionsLight != null) return _moreConnectionsLight!!
+        _moreConnectionsLight = buildHyperOSIcon(
             name = "MoreConnections.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(467.8f, 86f),
@@ -93,15 +93,15 @@ val MiuixIcons.Glass.Light.MoreConnections: ImageVector
             translationY = 1041.5271f,
             autoMirror = false,
         )
-        return _moreConnectionsSurfaceLight!!
+        return _moreConnectionsLight!!
     }
 
-private var _moreConnectionsSurfaceLight: ImageVector? = null
+private var _moreConnectionsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MoreConnections: ImageVector
     get() {
-        if (_moreConnectionsSurfaceNormal != null) return _moreConnectionsSurfaceNormal!!
-        _moreConnectionsSurfaceNormal = buildHyperOSIcon(
+        if (_moreConnectionsNormal != null) return _moreConnectionsNormal!!
+        _moreConnectionsNormal = buildHyperOSIcon(
             name = "MoreConnections.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(466.6f, 75f),
@@ -181,15 +181,15 @@ val MiuixIcons.Glass.Normal.MoreConnections: ImageVector
             translationY = 1041.795f,
             autoMirror = false,
         )
-        return _moreConnectionsSurfaceNormal!!
+        return _moreConnectionsNormal!!
     }
 
-private var _moreConnectionsSurfaceNormal: ImageVector? = null
+private var _moreConnectionsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MoreConnections: ImageVector
     get() {
-        if (_moreConnectionsSurfaceRegular != null) return _moreConnectionsSurfaceRegular!!
-        _moreConnectionsSurfaceRegular = buildHyperOSIcon(
+        if (_moreConnectionsRegular != null) return _moreConnectionsRegular!!
+        _moreConnectionsRegular = buildHyperOSIcon(
             name = "MoreConnections.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(466f, 70f),
@@ -269,15 +269,15 @@ val MiuixIcons.Glass.Regular.MoreConnections: ImageVector
             translationY = 1041.9167f,
             autoMirror = false,
         )
-        return _moreConnectionsSurfaceRegular!!
+        return _moreConnectionsRegular!!
     }
 
-private var _moreConnectionsSurfaceRegular: ImageVector? = null
+private var _moreConnectionsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MoreConnections: ImageVector
     get() {
-        if (_moreConnectionsSurfaceMedium != null) return _moreConnectionsSurfaceMedium!!
-        _moreConnectionsSurfaceMedium = buildHyperOSIcon(
+        if (_moreConnectionsMedium != null) return _moreConnectionsMedium!!
+        _moreConnectionsMedium = buildHyperOSIcon(
             name = "MoreConnections.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(465.7f, 58.6f),
@@ -357,15 +357,15 @@ val MiuixIcons.Glass.Medium.MoreConnections: ImageVector
             translationY = 1041.7477f,
             autoMirror = false,
         )
-        return _moreConnectionsSurfaceMedium!!
+        return _moreConnectionsMedium!!
     }
 
-private var _moreConnectionsSurfaceMedium: ImageVector? = null
+private var _moreConnectionsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MoreConnections: ImageVector
     get() {
-        if (_moreConnectionsSurfaceDemibold != null) return _moreConnectionsSurfaceDemibold!!
-        _moreConnectionsSurfaceDemibold = buildHyperOSIcon(
+        if (_moreConnectionsDemibold != null) return _moreConnectionsDemibold!!
+        _moreConnectionsDemibold = buildHyperOSIcon(
             name = "MoreConnections.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(465.5f, 50.7f),
@@ -445,8 +445,8 @@ val MiuixIcons.Glass.Demibold.MoreConnections: ImageVector
             translationY = 1041.6295f,
             autoMirror = false,
         )
-        return _moreConnectionsSurfaceDemibold!!
+        return _moreConnectionsDemibold!!
     }
 
-private var _moreConnectionsSurfaceDemibold: ImageVector? = null
+private var _moreConnectionsDemibold: ImageVector? = null
 

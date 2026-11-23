@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RearScreen: ImageVector
 
 val MiuixIcons.Glass.Light.RearScreen: ImageVector
     get() {
-        if (_rearScreenSurfaceLight != null) return _rearScreenSurfaceLight!!
-        _rearScreenSurfaceLight = buildHyperOSIcon(
+        if (_rearScreenLight != null) return _rearScreenLight!!
+        _rearScreenLight = buildHyperOSIcon(
             name = "RearScreen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1018.1f, 780.3f),
@@ -62,15 +62,15 @@ val MiuixIcons.Glass.Light.RearScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _rearScreenSurfaceLight!!
+        return _rearScreenLight!!
     }
 
-private var _rearScreenSurfaceLight: ImageVector? = null
+private var _rearScreenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RearScreen: ImageVector
     get() {
-        if (_rearScreenSurfaceNormal != null) return _rearScreenSurfaceNormal!!
-        _rearScreenSurfaceNormal = buildHyperOSIcon(
+        if (_rearScreenNormal != null) return _rearScreenNormal!!
+        _rearScreenNormal = buildHyperOSIcon(
             name = "RearScreen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1024.2f, 782.2f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Normal.RearScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _rearScreenSurfaceNormal!!
+        return _rearScreenNormal!!
     }
 
-private var _rearScreenSurfaceNormal: ImageVector? = null
+private var _rearScreenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RearScreen: ImageVector
     get() {
-        if (_rearScreenSurfaceRegular != null) return _rearScreenSurfaceRegular!!
-        _rearScreenSurfaceRegular = buildHyperOSIcon(
+        if (_rearScreenRegular != null) return _rearScreenRegular!!
+        _rearScreenRegular = buildHyperOSIcon(
             name = "RearScreen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1027f, 783f),
@@ -176,15 +176,15 @@ val MiuixIcons.Glass.Regular.RearScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _rearScreenSurfaceRegular!!
+        return _rearScreenRegular!!
     }
 
-private var _rearScreenSurfaceRegular: ImageVector? = null
+private var _rearScreenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RearScreen: ImageVector
     get() {
-        if (_rearScreenSurfaceMedium != null) return _rearScreenSurfaceMedium!!
-        _rearScreenSurfaceMedium = buildHyperOSIcon(
+        if (_rearScreenMedium != null) return _rearScreenMedium!!
+        _rearScreenMedium = buildHyperOSIcon(
             name = "RearScreen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1032.1f, 784.4f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Medium.RearScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _rearScreenSurfaceMedium!!
+        return _rearScreenMedium!!
     }
 
-private var _rearScreenSurfaceMedium: ImageVector? = null
+private var _rearScreenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RearScreen: ImageVector
     get() {
-        if (_rearScreenSurfaceDemibold != null) return _rearScreenSurfaceDemibold!!
-        _rearScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_rearScreenDemibold != null) return _rearScreenDemibold!!
+        _rearScreenDemibold = buildHyperOSIcon(
             name = "RearScreen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1035.7f, 785.3f),
@@ -290,8 +290,8 @@ val MiuixIcons.Glass.Demibold.RearScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _rearScreenSurfaceDemibold!!
+        return _rearScreenDemibold!!
     }
 
-private var _rearScreenSurfaceDemibold: ImageVector? = null
+private var _rearScreenDemibold: ImageVector? = null
 

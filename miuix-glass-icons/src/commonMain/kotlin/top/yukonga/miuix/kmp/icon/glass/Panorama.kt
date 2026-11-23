@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Panorama: ImageVector
 
 val MiuixIcons.Glass.Light.Panorama: ImageVector
     get() {
-        if (_panoramaLineLight != null) return _panoramaLineLight!!
-        _panoramaLineLight = buildHyperOSIcon(
+        if (_panoramaLight != null) return _panoramaLight!!
+        _panoramaLight = buildHyperOSIcon(
             name = "Panorama.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(349.4f, 688f),
@@ -68,15 +68,15 @@ val MiuixIcons.Glass.Light.Panorama: ImageVector
             translationY = 1044.857f,
             autoMirror = false,
         )
-        return _panoramaLineLight!!
+        return _panoramaLight!!
     }
 
-private var _panoramaLineLight: ImageVector? = null
+private var _panoramaLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Panorama: ImageVector
     get() {
-        if (_panoramaLineNormal != null) return _panoramaLineNormal!!
-        _panoramaLineNormal = buildHyperOSIcon(
+        if (_panoramaNormal != null) return _panoramaNormal!!
+        _panoramaNormal = buildHyperOSIcon(
             name = "Panorama.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(351.9f, 696.2f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Normal.Panorama: ImageVector
             translationY = 1044.5466f,
             autoMirror = false,
         )
-        return _panoramaLineNormal!!
+        return _panoramaNormal!!
     }
 
-private var _panoramaLineNormal: ImageVector? = null
+private var _panoramaNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Panorama: ImageVector
     get() {
-        if (_panoramaLineRegular != null) return _panoramaLineRegular!!
-        _panoramaLineRegular = buildHyperOSIcon(
+        if (_panoramaRegular != null) return _panoramaRegular!!
+        _panoramaRegular = buildHyperOSIcon(
             name = "Panorama.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(353f, 700f),
@@ -194,15 +194,15 @@ val MiuixIcons.Glass.Regular.Panorama: ImageVector
             translationY = 1044.4052f,
             autoMirror = false,
         )
-        return _panoramaLineRegular!!
+        return _panoramaRegular!!
     }
 
-private var _panoramaLineRegular: ImageVector? = null
+private var _panoramaRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Panorama: ImageVector
     get() {
-        if (_panoramaLineMedium != null) return _panoramaLineMedium!!
-        _panoramaLineMedium = buildHyperOSIcon(
+        if (_panoramaMedium != null) return _panoramaMedium!!
+        _panoramaMedium = buildHyperOSIcon(
             name = "Panorama.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(358.7f, 707.8f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Medium.Panorama: ImageVector
             translationY = 1044.581f,
             autoMirror = false,
         )
-        return _panoramaLineMedium!!
+        return _panoramaMedium!!
     }
 
-private var _panoramaLineMedium: ImageVector? = null
+private var _panoramaMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Panorama: ImageVector
     get() {
-        if (_panoramaLineDemibold != null) return _panoramaLineDemibold!!
-        _panoramaLineDemibold = buildHyperOSIcon(
+        if (_panoramaDemibold != null) return _panoramaDemibold!!
+        _panoramaDemibold = buildHyperOSIcon(
             name = "Panorama.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(362.6f, 713.3f),
@@ -320,8 +320,8 @@ val MiuixIcons.Glass.Demibold.Panorama: ImageVector
             translationY = 1044.7089f,
             autoMirror = false,
         )
-        return _panoramaLineDemibold!!
+        return _panoramaDemibold!!
     }
 
-private var _panoramaLineDemibold: ImageVector? = null
+private var _panoramaDemibold: ImageVector? = null
 

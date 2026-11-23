@@ -12,8 +12,8 @@ val MiuixIcons.Glass.QuickNotes: ImageVector
 
 val MiuixIcons.Glass.Light.QuickNotes: ImageVector
     get() {
-        if (_quickNotesSurfaceLight != null) return _quickNotesSurfaceLight!!
-        _quickNotesSurfaceLight = buildHyperOSIcon(
+        if (_quickNotesLight != null) return _quickNotesLight!!
+        _quickNotesLight = buildHyperOSIcon(
             name = "QuickNotes.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(342f, -37f),
@@ -173,15 +173,15 @@ val MiuixIcons.Glass.Light.QuickNotes: ImageVector
             translationY = 1066.9444f,
             autoMirror = false,
         )
-        return _quickNotesSurfaceLight!!
+        return _quickNotesLight!!
     }
 
-private var _quickNotesSurfaceLight: ImageVector? = null
+private var _quickNotesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.QuickNotes: ImageVector
     get() {
-        if (_quickNotesSurfaceNormal != null) return _quickNotesSurfaceNormal!!
-        _quickNotesSurfaceNormal = buildHyperOSIcon(
+        if (_quickNotesNormal != null) return _quickNotesNormal!!
+        _quickNotesNormal = buildHyperOSIcon(
             name = "QuickNotes.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(344.7f, -45.2f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Normal.QuickNotes: ImageVector
             translationY = 1067.0972f,
             autoMirror = false,
         )
-        return _quickNotesSurfaceNormal!!
+        return _quickNotesNormal!!
     }
 
-private var _quickNotesSurfaceNormal: ImageVector? = null
+private var _quickNotesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.QuickNotes: ImageVector
     get() {
-        if (_quickNotesSurfaceRegular != null) return _quickNotesSurfaceRegular!!
-        _quickNotesSurfaceRegular = buildHyperOSIcon(
+        if (_quickNotesRegular != null) return _quickNotesRegular!!
+        _quickNotesRegular = buildHyperOSIcon(
             name = "QuickNotes.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(346f, -49f),
@@ -509,15 +509,15 @@ val MiuixIcons.Glass.Regular.QuickNotes: ImageVector
             translationY = 1067.1667f,
             autoMirror = false,
         )
-        return _quickNotesSurfaceRegular!!
+        return _quickNotesRegular!!
     }
 
-private var _quickNotesSurfaceRegular: ImageVector? = null
+private var _quickNotesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.QuickNotes: ImageVector
     get() {
-        if (_quickNotesSurfaceMedium != null) return _quickNotesSurfaceMedium!!
-        _quickNotesSurfaceMedium = buildHyperOSIcon(
+        if (_quickNotesMedium != null) return _quickNotesMedium!!
+        _quickNotesMedium = buildHyperOSIcon(
             name = "QuickNotes.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(347.9f, -54.7f),
@@ -677,15 +677,15 @@ val MiuixIcons.Glass.Medium.QuickNotes: ImageVector
             translationY = 1066.8964f,
             autoMirror = false,
         )
-        return _quickNotesSurfaceMedium!!
+        return _quickNotesMedium!!
     }
 
-private var _quickNotesSurfaceMedium: ImageVector? = null
+private var _quickNotesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.QuickNotes: ImageVector
     get() {
-        if (_quickNotesSurfaceDemibold != null) return _quickNotesSurfaceDemibold!!
-        _quickNotesSurfaceDemibold = buildHyperOSIcon(
+        if (_quickNotesDemibold != null) return _quickNotesDemibold!!
+        _quickNotesDemibold = buildHyperOSIcon(
             name = "QuickNotes.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(349.2f, -58.6f),
@@ -845,8 +845,8 @@ val MiuixIcons.Glass.Demibold.QuickNotes: ImageVector
             translationY = 1065.6157f,
             autoMirror = false,
         )
-        return _quickNotesSurfaceDemibold!!
+        return _quickNotesDemibold!!
     }
 
-private var _quickNotesSurfaceDemibold: ImageVector? = null
+private var _quickNotesDemibold: ImageVector? = null
 

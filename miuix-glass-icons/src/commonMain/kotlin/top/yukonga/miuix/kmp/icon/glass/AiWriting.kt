@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AiWriting: ImageVector
 
 val MiuixIcons.Glass.Light.AiWriting: ImageVector
     get() {
-        if (_aiWritingLineLight != null) return _aiWritingLineLight!!
-        _aiWritingLineLight = buildHyperOSIcon(
+        if (_aiWritingLight != null) return _aiWritingLight!!
+        _aiWritingLight = buildHyperOSIcon(
             name = "AiWriting.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(210.3f, 141.4f),
@@ -106,15 +106,15 @@ val MiuixIcons.Glass.Light.AiWriting: ImageVector
             translationY = 1042.1086f,
             autoMirror = false,
         )
-        return _aiWritingLineLight!!
+        return _aiWritingLight!!
     }
 
-private var _aiWritingLineLight: ImageVector? = null
+private var _aiWritingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AiWriting: ImageVector
     get() {
-        if (_aiWritingLineNormal != null) return _aiWritingLineNormal!!
-        _aiWritingLineNormal = buildHyperOSIcon(
+        if (_aiWritingNormal != null) return _aiWritingNormal!!
+        _aiWritingNormal = buildHyperOSIcon(
             name = "AiWriting.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(201.2f, 141.1f),
@@ -207,15 +207,15 @@ val MiuixIcons.Glass.Normal.AiWriting: ImageVector
             translationY = 1042.1124f,
             autoMirror = false,
         )
-        return _aiWritingLineNormal!!
+        return _aiWritingNormal!!
     }
 
-private var _aiWritingLineNormal: ImageVector? = null
+private var _aiWritingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AiWriting: ImageVector
     get() {
-        if (_aiWritingLineRegular != null) return _aiWritingLineRegular!!
-        _aiWritingLineRegular = buildHyperOSIcon(
+        if (_aiWritingRegular != null) return _aiWritingRegular!!
+        _aiWritingRegular = buildHyperOSIcon(
             name = "AiWriting.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(197f, 141f),
@@ -308,15 +308,15 @@ val MiuixIcons.Glass.Regular.AiWriting: ImageVector
             translationY = 1042.114f,
             autoMirror = false,
         )
-        return _aiWritingLineRegular!!
+        return _aiWritingRegular!!
     }
 
-private var _aiWritingLineRegular: ImageVector? = null
+private var _aiWritingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AiWriting: ImageVector
     get() {
-        if (_aiWritingLineMedium != null) return _aiWritingLineMedium!!
-        _aiWritingLineMedium = buildHyperOSIcon(
+        if (_aiWritingMedium != null) return _aiWritingMedium!!
+        _aiWritingMedium = buildHyperOSIcon(
             name = "AiWriting.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(188.9f, 140.7f),
@@ -409,15 +409,15 @@ val MiuixIcons.Glass.Medium.AiWriting: ImageVector
             translationY = 1043.3343f,
             autoMirror = false,
         )
-        return _aiWritingLineMedium!!
+        return _aiWritingMedium!!
     }
 
-private var _aiWritingLineMedium: ImageVector? = null
+private var _aiWritingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AiWriting: ImageVector
     get() {
-        if (_aiWritingLineDemibold != null) return _aiWritingLineDemibold!!
-        _aiWritingLineDemibold = buildHyperOSIcon(
+        if (_aiWritingDemibold != null) return _aiWritingDemibold!!
+        _aiWritingDemibold = buildHyperOSIcon(
             name = "AiWriting.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(183.2f, 140.5f),
@@ -510,8 +510,8 @@ val MiuixIcons.Glass.Demibold.AiWriting: ImageVector
             translationY = 1044.1883f,
             autoMirror = false,
         )
-        return _aiWritingLineDemibold!!
+        return _aiWritingDemibold!!
     }
 
-private var _aiWritingLineDemibold: ImageVector? = null
+private var _aiWritingDemibold: ImageVector? = null
 

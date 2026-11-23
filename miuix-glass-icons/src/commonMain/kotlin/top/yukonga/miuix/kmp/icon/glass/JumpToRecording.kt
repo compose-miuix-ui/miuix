@@ -12,8 +12,8 @@ val MiuixIcons.Glass.JumpToRecording: ImageVector
 
 val MiuixIcons.Glass.Light.JumpToRecording: ImageVector
     get() {
-        if (_jumpToRecordingLineLight != null) return _jumpToRecordingLineLight!!
-        _jumpToRecordingLineLight = buildHyperOSIcon(
+        if (_jumpToRecordingLight != null) return _jumpToRecordingLight!!
+        _jumpToRecordingLight = buildHyperOSIcon(
             name = "JumpToRecording.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(345.9f, -49.6f),
@@ -127,15 +127,15 @@ val MiuixIcons.Glass.Light.JumpToRecording: ImageVector
             translationY = 1028.4232f,
             autoMirror = false,
         )
-        return _jumpToRecordingLineLight!!
+        return _jumpToRecordingLight!!
     }
 
-private var _jumpToRecordingLineLight: ImageVector? = null
+private var _jumpToRecordingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.JumpToRecording: ImageVector
     get() {
-        if (_jumpToRecordingLineNormal != null) return _jumpToRecordingLineNormal!!
-        _jumpToRecordingLineNormal = buildHyperOSIcon(
+        if (_jumpToRecordingNormal != null) return _jumpToRecordingNormal!!
+        _jumpToRecordingNormal = buildHyperOSIcon(
             name = "JumpToRecording.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(367.3f, -44.4f),
@@ -249,15 +249,15 @@ val MiuixIcons.Glass.Normal.JumpToRecording: ImageVector
             translationY = 1028.5551f,
             autoMirror = false,
         )
-        return _jumpToRecordingLineNormal!!
+        return _jumpToRecordingNormal!!
     }
 
-private var _jumpToRecordingLineNormal: ImageVector? = null
+private var _jumpToRecordingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.JumpToRecording: ImageVector
     get() {
-        if (_jumpToRecordingLineRegular != null) return _jumpToRecordingLineRegular!!
-        _jumpToRecordingLineRegular = buildHyperOSIcon(
+        if (_jumpToRecordingRegular != null) return _jumpToRecordingRegular!!
+        _jumpToRecordingRegular = buildHyperOSIcon(
             name = "JumpToRecording.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(377f, -42f),
@@ -371,15 +371,15 @@ val MiuixIcons.Glass.Regular.JumpToRecording: ImageVector
             translationY = 1028.614f,
             autoMirror = false,
         )
-        return _jumpToRecordingLineRegular!!
+        return _jumpToRecordingRegular!!
     }
 
-private var _jumpToRecordingLineRegular: ImageVector? = null
+private var _jumpToRecordingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.JumpToRecording: ImageVector
     get() {
-        if (_jumpToRecordingLineMedium != null) return _jumpToRecordingLineMedium!!
-        _jumpToRecordingLineMedium = buildHyperOSIcon(
+        if (_jumpToRecordingMedium != null) return _jumpToRecordingMedium!!
+        _jumpToRecordingMedium = buildHyperOSIcon(
             name = "JumpToRecording.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(384.6f, -48.5f),
@@ -493,15 +493,15 @@ val MiuixIcons.Glass.Medium.JumpToRecording: ImageVector
             translationY = 1028.6408f,
             autoMirror = false,
         )
-        return _jumpToRecordingLineMedium!!
+        return _jumpToRecordingMedium!!
     }
 
-private var _jumpToRecordingLineMedium: ImageVector? = null
+private var _jumpToRecordingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.JumpToRecording: ImageVector
     get() {
-        if (_jumpToRecordingLineDemibold != null) return _jumpToRecordingLineDemibold!!
-        _jumpToRecordingLineDemibold = buildHyperOSIcon(
+        if (_jumpToRecordingDemibold != null) return _jumpToRecordingDemibold!!
+        _jumpToRecordingDemibold = buildHyperOSIcon(
             name = "JumpToRecording.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(389.9f, -53f),
@@ -615,8 +615,8 @@ val MiuixIcons.Glass.Demibold.JumpToRecording: ImageVector
             translationY = 1028.6532f,
             autoMirror = false,
         )
-        return _jumpToRecordingLineDemibold!!
+        return _jumpToRecordingDemibold!!
     }
 
-private var _jumpToRecordingLineDemibold: ImageVector? = null
+private var _jumpToRecordingDemibold: ImageVector? = null
 

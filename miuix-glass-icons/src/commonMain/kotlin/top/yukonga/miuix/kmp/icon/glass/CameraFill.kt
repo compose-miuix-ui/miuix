@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CameraFill: ImageVector
 
 val MiuixIcons.Glass.Light.CameraFill: ImageVector
     get() {
-        if (_cameraSurfaceLight != null) return _cameraSurfaceLight!!
-        _cameraSurfaceLight = buildHyperOSIcon(
+        if (_cameraFillLight != null) return _cameraFillLight!!
+        _cameraFillLight = buildHyperOSIcon(
             name = "CameraFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(487.1f, 341.1f),
@@ -96,15 +96,15 @@ val MiuixIcons.Glass.Light.CameraFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraSurfaceLight!!
+        return _cameraFillLight!!
     }
 
-private var _cameraSurfaceLight: ImageVector? = null
+private var _cameraFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CameraFill: ImageVector
     get() {
-        if (_cameraSurfaceNormal != null) return _cameraSurfaceNormal!!
-        _cameraSurfaceNormal = buildHyperOSIcon(
+        if (_cameraFillNormal != null) return _cameraFillNormal!!
+        _cameraFillNormal = buildHyperOSIcon(
             name = "CameraFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(493.2f, 341.7f),
@@ -187,15 +187,15 @@ val MiuixIcons.Glass.Normal.CameraFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraSurfaceNormal!!
+        return _cameraFillNormal!!
     }
 
-private var _cameraSurfaceNormal: ImageVector? = null
+private var _cameraFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CameraFill: ImageVector
     get() {
-        if (_cameraSurfaceRegular != null) return _cameraSurfaceRegular!!
-        _cameraSurfaceRegular = buildHyperOSIcon(
+        if (_cameraFillRegular != null) return _cameraFillRegular!!
+        _cameraFillRegular = buildHyperOSIcon(
             name = "CameraFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(496f, 342f),
@@ -278,15 +278,15 @@ val MiuixIcons.Glass.Regular.CameraFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraSurfaceRegular!!
+        return _cameraFillRegular!!
     }
 
-private var _cameraSurfaceRegular: ImageVector? = null
+private var _cameraFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CameraFill: ImageVector
     get() {
-        if (_cameraSurfaceMedium != null) return _cameraSurfaceMedium!!
-        _cameraSurfaceMedium = buildHyperOSIcon(
+        if (_cameraFillMedium != null) return _cameraFillMedium!!
+        _cameraFillMedium = buildHyperOSIcon(
             name = "CameraFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(511.7f, 342f),
@@ -369,15 +369,15 @@ val MiuixIcons.Glass.Medium.CameraFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraSurfaceMedium!!
+        return _cameraFillMedium!!
     }
 
-private var _cameraSurfaceMedium: ImageVector? = null
+private var _cameraFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CameraFill: ImageVector
     get() {
-        if (_cameraSurfaceDemibold != null) return _cameraSurfaceDemibold!!
-        _cameraSurfaceDemibold = buildHyperOSIcon(
+        if (_cameraFillDemibold != null) return _cameraFillDemibold!!
+        _cameraFillDemibold = buildHyperOSIcon(
             name = "CameraFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(522.6f, 342f),
@@ -460,8 +460,8 @@ val MiuixIcons.Glass.Demibold.CameraFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraSurfaceDemibold!!
+        return _cameraFillDemibold!!
     }
 
-private var _cameraSurfaceDemibold: ImageVector? = null
+private var _cameraFillDemibold: ImageVector? = null
 

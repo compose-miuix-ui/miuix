@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HandwritingCalculator: ImageVector
 
 val MiuixIcons.Glass.Light.HandwritingCalculator: ImageVector
     get() {
-        if (_handwritingCalculatorLineLight != null) return _handwritingCalculatorLineLight!!
-        _handwritingCalculatorLineLight = buildHyperOSIcon(
+        if (_handwritingCalculatorLight != null) return _handwritingCalculatorLight!!
+        _handwritingCalculatorLight = buildHyperOSIcon(
             name = "HandwritingCalculator.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(254.1f, 204.1f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Light.HandwritingCalculator: ImageVector
             translationY = 1085.7777f,
             autoMirror = false,
         )
-        return _handwritingCalculatorLineLight!!
+        return _handwritingCalculatorLight!!
     }
 
-private var _handwritingCalculatorLineLight: ImageVector? = null
+private var _handwritingCalculatorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HandwritingCalculator: ImageVector
     get() {
-        if (_handwritingCalculatorLineNormal != null) return _handwritingCalculatorLineNormal!!
-        _handwritingCalculatorLineNormal = buildHyperOSIcon(
+        if (_handwritingCalculatorNormal != null) return _handwritingCalculatorNormal!!
+        _handwritingCalculatorNormal = buildHyperOSIcon(
             name = "HandwritingCalculator.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(246.5f, 207.5f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Normal.HandwritingCalculator: ImageVector
             translationY = 1086.3888f,
             autoMirror = false,
         )
-        return _handwritingCalculatorLineNormal!!
+        return _handwritingCalculatorNormal!!
     }
 
-private var _handwritingCalculatorLineNormal: ImageVector? = null
+private var _handwritingCalculatorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HandwritingCalculator: ImageVector
     get() {
-        if (_handwritingCalculatorLineRegular != null) return _handwritingCalculatorLineRegular!!
-        _handwritingCalculatorLineRegular = buildHyperOSIcon(
+        if (_handwritingCalculatorRegular != null) return _handwritingCalculatorRegular!!
+        _handwritingCalculatorRegular = buildHyperOSIcon(
             name = "HandwritingCalculator.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(243f, 209f),
@@ -521,15 +521,15 @@ val MiuixIcons.Glass.Regular.HandwritingCalculator: ImageVector
             translationY = 1086.6667f,
             autoMirror = false,
         )
-        return _handwritingCalculatorLineRegular!!
+        return _handwritingCalculatorRegular!!
     }
 
-private var _handwritingCalculatorLineRegular: ImageVector? = null
+private var _handwritingCalculatorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HandwritingCalculator: ImageVector
     get() {
-        if (_handwritingCalculatorLineMedium != null) return _handwritingCalculatorLineMedium!!
-        _handwritingCalculatorLineMedium = buildHyperOSIcon(
+        if (_handwritingCalculatorMedium != null) return _handwritingCalculatorMedium!!
+        _handwritingCalculatorMedium = buildHyperOSIcon(
             name = "HandwritingCalculator.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(237.6f, 209.3f),
@@ -693,15 +693,15 @@ val MiuixIcons.Glass.Medium.HandwritingCalculator: ImageVector
             translationY = 1087.3423f,
             autoMirror = false,
         )
-        return _handwritingCalculatorLineMedium!!
+        return _handwritingCalculatorMedium!!
     }
 
-private var _handwritingCalculatorLineMedium: ImageVector? = null
+private var _handwritingCalculatorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HandwritingCalculator: ImageVector
     get() {
-        if (_handwritingCalculatorLineDemibold != null) return _handwritingCalculatorLineDemibold!!
-        _handwritingCalculatorLineDemibold = buildHyperOSIcon(
+        if (_handwritingCalculatorDemibold != null) return _handwritingCalculatorDemibold!!
+        _handwritingCalculatorDemibold = buildHyperOSIcon(
             name = "HandwritingCalculator.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(233.8f, 209.5f),
@@ -865,8 +865,8 @@ val MiuixIcons.Glass.Demibold.HandwritingCalculator: ImageVector
             translationY = 1087.8153f,
             autoMirror = false,
         )
-        return _handwritingCalculatorLineDemibold!!
+        return _handwritingCalculatorDemibold!!
     }
 
-private var _handwritingCalculatorLineDemibold: ImageVector? = null
+private var _handwritingCalculatorDemibold: ImageVector? = null
 

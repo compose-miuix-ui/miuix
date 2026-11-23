@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Ram: ImageVector
 
 val MiuixIcons.Glass.Light.Ram: ImageVector
     get() {
-        if (_ramLineLight != null) return _ramLineLight!!
-        _ramLineLight = buildHyperOSIcon(
+        if (_ramLight != null) return _ramLight!!
+        _ramLight = buildHyperOSIcon(
             name = "Ram.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(493.9f, 854.7f),
@@ -102,15 +102,15 @@ val MiuixIcons.Glass.Light.Ram: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _ramLineLight!!
+        return _ramLight!!
     }
 
-private var _ramLineLight: ImageVector? = null
+private var _ramLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Ram: ImageVector
     get() {
-        if (_ramLineNormal != null) return _ramLineNormal!!
-        _ramLineNormal = buildHyperOSIcon(
+        if (_ramNormal != null) return _ramNormal!!
+        _ramNormal = buildHyperOSIcon(
             name = "Ram.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(496f, 863.8f),
@@ -199,15 +199,15 @@ val MiuixIcons.Glass.Normal.Ram: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _ramLineNormal!!
+        return _ramNormal!!
     }
 
-private var _ramLineNormal: ImageVector? = null
+private var _ramNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Ram: ImageVector
     get() {
-        if (_ramLineRegular != null) return _ramLineRegular!!
-        _ramLineRegular = buildHyperOSIcon(
+        if (_ramRegular != null) return _ramRegular!!
+        _ramRegular = buildHyperOSIcon(
             name = "Ram.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(497f, 868f),
@@ -296,15 +296,15 @@ val MiuixIcons.Glass.Regular.Ram: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _ramLineRegular!!
+        return _ramRegular!!
     }
 
-private var _ramLineRegular: ImageVector? = null
+private var _ramRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Ram: ImageVector
     get() {
-        if (_ramLineMedium != null) return _ramLineMedium!!
-        _ramLineMedium = buildHyperOSIcon(
+        if (_ramMedium != null) return _ramMedium!!
+        _ramMedium = buildHyperOSIcon(
             name = "Ram.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(501.1f, 876.1f),
@@ -393,15 +393,15 @@ val MiuixIcons.Glass.Medium.Ram: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _ramLineMedium!!
+        return _ramMedium!!
     }
 
-private var _ramLineMedium: ImageVector? = null
+private var _ramMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Ram: ImageVector
     get() {
-        if (_ramLineDemibold != null) return _ramLineDemibold!!
-        _ramLineDemibold = buildHyperOSIcon(
+        if (_ramDemibold != null) return _ramDemibold!!
+        _ramDemibold = buildHyperOSIcon(
             name = "Ram.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(503.9f, 881.8f),
@@ -490,8 +490,8 @@ val MiuixIcons.Glass.Demibold.Ram: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _ramLineDemibold!!
+        return _ramDemibold!!
     }
 
-private var _ramLineDemibold: ImageVector? = null
+private var _ramDemibold: ImageVector? = null
 

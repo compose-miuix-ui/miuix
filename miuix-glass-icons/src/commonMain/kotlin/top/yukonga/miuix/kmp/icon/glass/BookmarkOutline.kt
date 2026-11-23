@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BookmarkOutline: ImageVector
 
 val MiuixIcons.Glass.Light.BookmarkOutline: ImageVector
     get() {
-        if (_bookmarkLineLight != null) return _bookmarkLineLight!!
-        _bookmarkLineLight = buildHyperOSIcon(
+        if (_bookmarkOutlineLight != null) return _bookmarkOutlineLight!!
+        _bookmarkOutlineLight = buildHyperOSIcon(
             name = "BookmarkOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(537.3f, -40.9f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.BookmarkOutline: ImageVector
             translationY = 1042.309f,
             autoMirror = false,
         )
-        return _bookmarkLineLight!!
+        return _bookmarkOutlineLight!!
     }
 
-private var _bookmarkLineLight: ImageVector? = null
+private var _bookmarkOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BookmarkOutline: ImageVector
     get() {
-        if (_bookmarkLineNormal != null) return _bookmarkLineNormal!!
-        _bookmarkLineNormal = buildHyperOSIcon(
+        if (_bookmarkOutlineNormal != null) return _bookmarkOutlineNormal!!
+        _bookmarkOutlineNormal = buildHyperOSIcon(
             name = "BookmarkOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(541.9f, -48.5f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.BookmarkOutline: ImageVector
             translationY = 1042.0652f,
             autoMirror = false,
         )
-        return _bookmarkLineNormal!!
+        return _bookmarkOutlineNormal!!
     }
 
-private var _bookmarkLineNormal: ImageVector? = null
+private var _bookmarkOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BookmarkOutline: ImageVector
     get() {
-        if (_bookmarkLineRegular != null) return _bookmarkLineRegular!!
-        _bookmarkLineRegular = buildHyperOSIcon(
+        if (_bookmarkOutlineRegular != null) return _bookmarkOutlineRegular!!
+        _bookmarkOutlineRegular = buildHyperOSIcon(
             name = "BookmarkOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(544f, -52f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.BookmarkOutline: ImageVector
             translationY = 1041.9471f,
             autoMirror = false,
         )
-        return _bookmarkLineRegular!!
+        return _bookmarkOutlineRegular!!
     }
 
-private var _bookmarkLineRegular: ImageVector? = null
+private var _bookmarkOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BookmarkOutline: ImageVector
     get() {
-        if (_bookmarkLineMedium != null) return _bookmarkLineMedium!!
-        _bookmarkLineMedium = buildHyperOSIcon(
+        if (_bookmarkOutlineMedium != null) return _bookmarkOutlineMedium!!
+        _bookmarkOutlineMedium = buildHyperOSIcon(
             name = "BookmarkOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(548.1f, -59f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.BookmarkOutline: ImageVector
             translationY = 1041.8176f,
             autoMirror = false,
         )
-        return _bookmarkLineMedium!!
+        return _bookmarkOutlineMedium!!
     }
 
-private var _bookmarkLineMedium: ImageVector? = null
+private var _bookmarkOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BookmarkOutline: ImageVector
     get() {
-        if (_bookmarkLineDemibold != null) return _bookmarkLineDemibold!!
-        _bookmarkLineDemibold = buildHyperOSIcon(
+        if (_bookmarkOutlineDemibold != null) return _bookmarkOutlineDemibold!!
+        _bookmarkOutlineDemibold = buildHyperOSIcon(
             name = "BookmarkOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(550.9f, -63.9f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.BookmarkOutline: ImageVector
             translationY = 1041.7268f,
             autoMirror = false,
         )
-        return _bookmarkLineDemibold!!
+        return _bookmarkOutlineDemibold!!
     }
 
-private var _bookmarkLineDemibold: ImageVector? = null
+private var _bookmarkOutlineDemibold: ImageVector? = null
 

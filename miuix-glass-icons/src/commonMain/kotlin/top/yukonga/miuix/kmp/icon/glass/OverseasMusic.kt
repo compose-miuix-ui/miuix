@@ -12,8 +12,8 @@ val MiuixIcons.Glass.OverseasMusic: ImageVector
 
 val MiuixIcons.Glass.Light.OverseasMusic: ImageVector
     get() {
-        if (_overseasMusicSurfaceLight != null) return _overseasMusicSurfaceLight!!
-        _overseasMusicSurfaceLight = buildHyperOSIcon(
+        if (_overseasMusicLight != null) return _overseasMusicLight!!
+        _overseasMusicLight = buildHyperOSIcon(
             name = "OverseasMusic.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(711.7f, 216f),
@@ -49,15 +49,15 @@ val MiuixIcons.Glass.Light.OverseasMusic: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _overseasMusicSurfaceLight!!
+        return _overseasMusicLight!!
     }
 
-private var _overseasMusicSurfaceLight: ImageVector? = null
+private var _overseasMusicLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.OverseasMusic: ImageVector
     get() {
-        if (_overseasMusicSurfaceNormal != null) return _overseasMusicSurfaceNormal!!
-        _overseasMusicSurfaceNormal = buildHyperOSIcon(
+        if (_overseasMusicNormal != null) return _overseasMusicNormal!!
+        _overseasMusicNormal = buildHyperOSIcon(
             name = "OverseasMusic.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(715.3f, 216f),
@@ -93,15 +93,15 @@ val MiuixIcons.Glass.Normal.OverseasMusic: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _overseasMusicSurfaceNormal!!
+        return _overseasMusicNormal!!
     }
 
-private var _overseasMusicSurfaceNormal: ImageVector? = null
+private var _overseasMusicNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.OverseasMusic: ImageVector
     get() {
-        if (_overseasMusicSurfaceRegular != null) return _overseasMusicSurfaceRegular!!
-        _overseasMusicSurfaceRegular = buildHyperOSIcon(
+        if (_overseasMusicRegular != null) return _overseasMusicRegular!!
+        _overseasMusicRegular = buildHyperOSIcon(
             name = "OverseasMusic.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(717f, 216f),
@@ -137,15 +137,15 @@ val MiuixIcons.Glass.Regular.OverseasMusic: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _overseasMusicSurfaceRegular!!
+        return _overseasMusicRegular!!
     }
 
-private var _overseasMusicSurfaceRegular: ImageVector? = null
+private var _overseasMusicRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.OverseasMusic: ImageVector
     get() {
-        if (_overseasMusicSurfaceMedium != null) return _overseasMusicSurfaceMedium!!
-        _overseasMusicSurfaceMedium = buildHyperOSIcon(
+        if (_overseasMusicMedium != null) return _overseasMusicMedium!!
+        _overseasMusicMedium = buildHyperOSIcon(
             name = "OverseasMusic.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(723.5f, 216f),
@@ -181,15 +181,15 @@ val MiuixIcons.Glass.Medium.OverseasMusic: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _overseasMusicSurfaceMedium!!
+        return _overseasMusicMedium!!
     }
 
-private var _overseasMusicSurfaceMedium: ImageVector? = null
+private var _overseasMusicMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.OverseasMusic: ImageVector
     get() {
-        if (_overseasMusicSurfaceDemibold != null) return _overseasMusicSurfaceDemibold!!
-        _overseasMusicSurfaceDemibold = buildHyperOSIcon(
+        if (_overseasMusicDemibold != null) return _overseasMusicDemibold!!
+        _overseasMusicDemibold = buildHyperOSIcon(
             name = "OverseasMusic.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(728f, 216f),
@@ -225,8 +225,8 @@ val MiuixIcons.Glass.Demibold.OverseasMusic: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _overseasMusicSurfaceDemibold!!
+        return _overseasMusicDemibold!!
     }
 
-private var _overseasMusicSurfaceDemibold: ImageVector? = null
+private var _overseasMusicDemibold: ImageVector? = null
 

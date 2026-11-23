@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WatchCapsule: ImageVector
 
 val MiuixIcons.Glass.Light.WatchCapsule: ImageVector
     get() {
-        if (_xiaomiSmartBandSurfaceLight != null) return _xiaomiSmartBandSurfaceLight!!
-        _xiaomiSmartBandSurfaceLight = buildHyperOSIcon(
+        if (_watchCapsuleLight != null) return _watchCapsuleLight!!
+        _watchCapsuleLight = buildHyperOSIcon(
             name = "WatchCapsule.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(471.8f, 568.6f),
@@ -80,15 +80,15 @@ val MiuixIcons.Glass.Light.WatchCapsule: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiSmartBandSurfaceLight!!
+        return _watchCapsuleLight!!
     }
 
-private var _xiaomiSmartBandSurfaceLight: ImageVector? = null
+private var _watchCapsuleLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WatchCapsule: ImageVector
     get() {
-        if (_xiaomiSmartBandSurfaceNormal != null) return _xiaomiSmartBandSurfaceNormal!!
-        _xiaomiSmartBandSurfaceNormal = buildHyperOSIcon(
+        if (_watchCapsuleNormal != null) return _watchCapsuleNormal!!
+        _watchCapsuleNormal = buildHyperOSIcon(
             name = "WatchCapsule.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(484.3f, 566.1f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Normal.WatchCapsule: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiSmartBandSurfaceNormal!!
+        return _watchCapsuleNormal!!
     }
 
-private var _xiaomiSmartBandSurfaceNormal: ImageVector? = null
+private var _watchCapsuleNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WatchCapsule: ImageVector
     get() {
-        if (_xiaomiSmartBandSurfaceRegular != null) return _xiaomiSmartBandSurfaceRegular!!
-        _xiaomiSmartBandSurfaceRegular = buildHyperOSIcon(
+        if (_watchCapsuleRegular != null) return _watchCapsuleRegular!!
+        _watchCapsuleRegular = buildHyperOSIcon(
             name = "WatchCapsule.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(490f, 565f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Regular.WatchCapsule: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiSmartBandSurfaceRegular!!
+        return _watchCapsuleRegular!!
     }
 
-private var _xiaomiSmartBandSurfaceRegular: ImageVector? = null
+private var _watchCapsuleRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WatchCapsule: ImageVector
     get() {
-        if (_xiaomiSmartBandSurfaceMedium != null) return _xiaomiSmartBandSurfaceMedium!!
-        _xiaomiSmartBandSurfaceMedium = buildHyperOSIcon(
+        if (_watchCapsuleMedium != null) return _watchCapsuleMedium!!
+        _watchCapsuleMedium = buildHyperOSIcon(
             name = "WatchCapsule.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(497f, 563.1f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Medium.WatchCapsule: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiSmartBandSurfaceMedium!!
+        return _watchCapsuleMedium!!
     }
 
-private var _xiaomiSmartBandSurfaceMedium: ImageVector? = null
+private var _watchCapsuleMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WatchCapsule: ImageVector
     get() {
-        if (_xiaomiSmartBandSurfaceDemibold != null) return _xiaomiSmartBandSurfaceDemibold!!
-        _xiaomiSmartBandSurfaceDemibold = buildHyperOSIcon(
+        if (_watchCapsuleDemibold != null) return _watchCapsuleDemibold!!
+        _watchCapsuleDemibold = buildHyperOSIcon(
             name = "WatchCapsule.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(501.9f, 561.8f),
@@ -380,8 +380,8 @@ val MiuixIcons.Glass.Demibold.WatchCapsule: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiSmartBandSurfaceDemibold!!
+        return _watchCapsuleDemibold!!
     }
 
-private var _xiaomiSmartBandSurfaceDemibold: ImageVector? = null
+private var _watchCapsuleDemibold: ImageVector? = null
 

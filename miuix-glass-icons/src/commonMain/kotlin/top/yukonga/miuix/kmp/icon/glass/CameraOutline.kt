@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CameraOutline: ImageVector
 
 val MiuixIcons.Glass.Light.CameraOutline: ImageVector
     get() {
-        if (_takePhotoLineLight != null) return _takePhotoLineLight!!
-        _takePhotoLineLight = buildHyperOSIcon(
+        if (_cameraOutlineLight != null) return _cameraOutlineLight!!
+        _cameraOutlineLight = buildHyperOSIcon(
             name = "CameraOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(817.7f, 729.6f),
@@ -124,15 +124,15 @@ val MiuixIcons.Glass.Light.CameraOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _takePhotoLineLight!!
+        return _cameraOutlineLight!!
     }
 
-private var _takePhotoLineLight: ImageVector? = null
+private var _cameraOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CameraOutline: ImageVector
     get() {
-        if (_takePhotoLineNormal != null) return _takePhotoLineNormal!!
-        _takePhotoLineNormal = buildHyperOSIcon(
+        if (_cameraOutlineNormal != null) return _cameraOutlineNormal!!
+        _cameraOutlineNormal = buildHyperOSIcon(
             name = "CameraOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(813.1f, 721.6f),
@@ -243,15 +243,15 @@ val MiuixIcons.Glass.Normal.CameraOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _takePhotoLineNormal!!
+        return _cameraOutlineNormal!!
     }
 
-private var _takePhotoLineNormal: ImageVector? = null
+private var _cameraOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CameraOutline: ImageVector
     get() {
-        if (_takePhotoLineRegular != null) return _takePhotoLineRegular!!
-        _takePhotoLineRegular = buildHyperOSIcon(
+        if (_cameraOutlineRegular != null) return _cameraOutlineRegular!!
+        _cameraOutlineRegular = buildHyperOSIcon(
             name = "CameraOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(811f, 718f),
@@ -362,15 +362,15 @@ val MiuixIcons.Glass.Regular.CameraOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _takePhotoLineRegular!!
+        return _cameraOutlineRegular!!
     }
 
-private var _takePhotoLineRegular: ImageVector? = null
+private var _cameraOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CameraOutline: ImageVector
     get() {
-        if (_takePhotoLineMedium != null) return _takePhotoLineMedium!!
-        _takePhotoLineMedium = buildHyperOSIcon(
+        if (_cameraOutlineMedium != null) return _cameraOutlineMedium!!
+        _cameraOutlineMedium = buildHyperOSIcon(
             name = "CameraOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(804.8f, 711f),
@@ -481,15 +481,15 @@ val MiuixIcons.Glass.Medium.CameraOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _takePhotoLineMedium!!
+        return _cameraOutlineMedium!!
     }
 
-private var _takePhotoLineMedium: ImageVector? = null
+private var _cameraOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CameraOutline: ImageVector
     get() {
-        if (_takePhotoLineDemibold != null) return _takePhotoLineDemibold!!
-        _takePhotoLineDemibold = buildHyperOSIcon(
+        if (_cameraOutlineDemibold != null) return _cameraOutlineDemibold!!
+        _cameraOutlineDemibold = buildHyperOSIcon(
             name = "CameraOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(800.4f, 706.1f),
@@ -600,8 +600,8 @@ val MiuixIcons.Glass.Demibold.CameraOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _takePhotoLineDemibold!!
+        return _cameraOutlineDemibold!!
     }
 
-private var _takePhotoLineDemibold: ImageVector? = null
+private var _cameraOutlineDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IcSmallWindowLandscape: ImageVector
 
 val MiuixIcons.Glass.Light.IcSmallWindowLandscape: ImageVector
     get() {
-        if (_icSmallWindowLandscapeLineLight != null) return _icSmallWindowLandscapeLineLight!!
-        _icSmallWindowLandscapeLineLight = buildHyperOSIcon(
+        if (_icSmallWindowLandscapeLight != null) return _icSmallWindowLandscapeLight!!
+        _icSmallWindowLandscapeLight = buildHyperOSIcon(
             name = "IcSmallWindowLandscape.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1052.8f, 3f),
@@ -116,15 +116,15 @@ val MiuixIcons.Glass.Light.IcSmallWindowLandscape: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLandscapeLineLight!!
+        return _icSmallWindowLandscapeLight!!
     }
 
-private var _icSmallWindowLandscapeLineLight: ImageVector? = null
+private var _icSmallWindowLandscapeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IcSmallWindowLandscape: ImageVector
     get() {
-        if (_icSmallWindowLandscapeLineNormal != null) return _icSmallWindowLandscapeLineNormal!!
-        _icSmallWindowLandscapeLineNormal = buildHyperOSIcon(
+        if (_icSmallWindowLandscapeNormal != null) return _icSmallWindowLandscapeNormal!!
+        _icSmallWindowLandscapeNormal = buildHyperOSIcon(
             name = "IcSmallWindowLandscape.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1057.1f, -5.2f),
@@ -227,15 +227,15 @@ val MiuixIcons.Glass.Normal.IcSmallWindowLandscape: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLandscapeLineNormal!!
+        return _icSmallWindowLandscapeNormal!!
     }
 
-private var _icSmallWindowLandscapeLineNormal: ImageVector? = null
+private var _icSmallWindowLandscapeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IcSmallWindowLandscape: ImageVector
     get() {
-        if (_icSmallWindowLandscapeLineRegular != null) return _icSmallWindowLandscapeLineRegular!!
-        _icSmallWindowLandscapeLineRegular = buildHyperOSIcon(
+        if (_icSmallWindowLandscapeRegular != null) return _icSmallWindowLandscapeRegular!!
+        _icSmallWindowLandscapeRegular = buildHyperOSIcon(
             name = "IcSmallWindowLandscape.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1059f, -9f),
@@ -338,15 +338,15 @@ val MiuixIcons.Glass.Regular.IcSmallWindowLandscape: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLandscapeLineRegular!!
+        return _icSmallWindowLandscapeRegular!!
     }
 
-private var _icSmallWindowLandscapeLineRegular: ImageVector? = null
+private var _icSmallWindowLandscapeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IcSmallWindowLandscape: ImageVector
     get() {
-        if (_icSmallWindowLandscapeLineMedium != null) return _icSmallWindowLandscapeLineMedium!!
-        _icSmallWindowLandscapeLineMedium = buildHyperOSIcon(
+        if (_icSmallWindowLandscapeMedium != null) return _icSmallWindowLandscapeMedium!!
+        _icSmallWindowLandscapeMedium = buildHyperOSIcon(
             name = "IcSmallWindowLandscape.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1062.8f, -16.3f),
@@ -449,15 +449,15 @@ val MiuixIcons.Glass.Medium.IcSmallWindowLandscape: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLandscapeLineMedium!!
+        return _icSmallWindowLandscapeMedium!!
     }
 
-private var _icSmallWindowLandscapeLineMedium: ImageVector? = null
+private var _icSmallWindowLandscapeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IcSmallWindowLandscape: ImageVector
     get() {
-        if (_icSmallWindowLandscapeLineDemibold != null) return _icSmallWindowLandscapeLineDemibold!!
-        _icSmallWindowLandscapeLineDemibold = buildHyperOSIcon(
+        if (_icSmallWindowLandscapeDemibold != null) return _icSmallWindowLandscapeDemibold!!
+        _icSmallWindowLandscapeDemibold = buildHyperOSIcon(
             name = "IcSmallWindowLandscape.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1065.4f, -21.4f),
@@ -560,8 +560,8 @@ val MiuixIcons.Glass.Demibold.IcSmallWindowLandscape: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLandscapeLineDemibold!!
+        return _icSmallWindowLandscapeDemibold!!
     }
 
-private var _icSmallWindowLandscapeLineDemibold: ImageVector? = null
+private var _icSmallWindowLandscapeDemibold: ImageVector? = null
 

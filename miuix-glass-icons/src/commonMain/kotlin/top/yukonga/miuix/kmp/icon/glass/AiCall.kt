@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AiCall: ImageVector
 
 val MiuixIcons.Glass.Light.AiCall: ImageVector
     get() {
-        if (_aiCallSurfaceLight != null) return _aiCallSurfaceLight!!
-        _aiCallSurfaceLight = buildHyperOSIcon(
+        if (_aiCallLight != null) return _aiCallLight!!
+        _aiCallLight = buildHyperOSIcon(
             name = "AiCall.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(252.2f, 804.7f),
@@ -102,15 +102,15 @@ val MiuixIcons.Glass.Light.AiCall: ImageVector
             translationY = 1044.8792f,
             autoMirror = false,
         )
-        return _aiCallSurfaceLight!!
+        return _aiCallLight!!
     }
 
-private var _aiCallSurfaceLight: ImageVector? = null
+private var _aiCallLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AiCall: ImageVector
     get() {
-        if (_aiCallSurfaceNormal != null) return _aiCallSurfaceNormal!!
-        _aiCallSurfaceNormal = buildHyperOSIcon(
+        if (_aiCallNormal != null) return _aiCallNormal!!
+        _aiCallNormal = buildHyperOSIcon(
             name = "AiCall.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(250.7f, 805.6f),
@@ -199,15 +199,15 @@ val MiuixIcons.Glass.Normal.AiCall: ImageVector
             translationY = 1043.0114f,
             autoMirror = false,
         )
-        return _aiCallSurfaceNormal!!
+        return _aiCallNormal!!
     }
 
-private var _aiCallSurfaceNormal: ImageVector? = null
+private var _aiCallNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AiCall: ImageVector
     get() {
-        if (_aiCallSurfaceRegular != null) return _aiCallSurfaceRegular!!
-        _aiCallSurfaceRegular = buildHyperOSIcon(
+        if (_aiCallRegular != null) return _aiCallRegular!!
+        _aiCallRegular = buildHyperOSIcon(
             name = "AiCall.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(250f, 806f),
@@ -296,15 +296,15 @@ val MiuixIcons.Glass.Regular.AiCall: ImageVector
             translationY = 1042.1622f,
             autoMirror = false,
         )
-        return _aiCallSurfaceRegular!!
+        return _aiCallRegular!!
     }
 
-private var _aiCallSurfaceRegular: ImageVector? = null
+private var _aiCallRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AiCall: ImageVector
     get() {
-        if (_aiCallSurfaceMedium != null) return _aiCallSurfaceMedium!!
-        _aiCallSurfaceMedium = buildHyperOSIcon(
+        if (_aiCallMedium != null) return _aiCallMedium!!
+        _aiCallMedium = buildHyperOSIcon(
             name = "AiCall.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(246.8f, 807.1f),
@@ -393,15 +393,15 @@ val MiuixIcons.Glass.Medium.AiCall: ImageVector
             translationY = 1043.1814f,
             autoMirror = false,
         )
-        return _aiCallSurfaceMedium!!
+        return _aiCallMedium!!
     }
 
-private var _aiCallSurfaceMedium: ImageVector? = null
+private var _aiCallMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AiCall: ImageVector
     get() {
-        if (_aiCallSurfaceDemibold != null) return _aiCallSurfaceDemibold!!
-        _aiCallSurfaceDemibold = buildHyperOSIcon(
+        if (_aiCallDemibold != null) return _aiCallDemibold!!
+        _aiCallDemibold = buildHyperOSIcon(
             name = "AiCall.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(244.5f, 807.8f),
@@ -490,8 +490,8 @@ val MiuixIcons.Glass.Demibold.AiCall: ImageVector
             translationY = 1043.9375f,
             autoMirror = false,
         )
-        return _aiCallSurfaceDemibold!!
+        return _aiCallDemibold!!
     }
 
-private var _aiCallSurfaceDemibold: ImageVector? = null
+private var _aiCallDemibold: ImageVector? = null
 

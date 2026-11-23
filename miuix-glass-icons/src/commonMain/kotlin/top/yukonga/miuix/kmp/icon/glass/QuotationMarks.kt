@@ -12,8 +12,8 @@ val MiuixIcons.Glass.QuotationMarks: ImageVector
 
 val MiuixIcons.Glass.Light.QuotationMarks: ImageVector
     get() {
-        if (_quotationMarksSurfaceLight != null) return _quotationMarksSurfaceLight!!
-        _quotationMarksSurfaceLight = buildHyperOSIcon(
+        if (_quotationMarksLight != null) return _quotationMarksLight!!
+        _quotationMarksLight = buildHyperOSIcon(
             name = "QuotationMarks.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(232.8f, 207.8f),
@@ -70,15 +70,15 @@ val MiuixIcons.Glass.Light.QuotationMarks: ImageVector
             translationY = 1095.0696f,
             autoMirror = false,
         )
-        return _quotationMarksSurfaceLight!!
+        return _quotationMarksLight!!
     }
 
-private var _quotationMarksSurfaceLight: ImageVector? = null
+private var _quotationMarksLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.QuotationMarks: ImageVector
     get() {
-        if (_quotationMarksSurfaceNormal != null) return _quotationMarksSurfaceNormal!!
-        _quotationMarksSurfaceNormal = buildHyperOSIcon(
+        if (_quotationMarksNormal != null) return _quotationMarksNormal!!
+        _quotationMarksNormal = buildHyperOSIcon(
             name = "QuotationMarks.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(226.1f, 206.6f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Normal.QuotationMarks: ImageVector
             translationY = 1097.585f,
             autoMirror = false,
         )
-        return _quotationMarksSurfaceNormal!!
+        return _quotationMarksNormal!!
     }
 
-private var _quotationMarksSurfaceNormal: ImageVector? = null
+private var _quotationMarksNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.QuotationMarks: ImageVector
     get() {
-        if (_quotationMarksSurfaceRegular != null) return _quotationMarksSurfaceRegular!!
-        _quotationMarksSurfaceRegular = buildHyperOSIcon(
+        if (_quotationMarksRegular != null) return _quotationMarksRegular!!
+        _quotationMarksRegular = buildHyperOSIcon(
             name = "QuotationMarks.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(223f, 206f),
@@ -200,15 +200,15 @@ val MiuixIcons.Glass.Regular.QuotationMarks: ImageVector
             translationY = 1098.7381f,
             autoMirror = false,
         )
-        return _quotationMarksSurfaceRegular!!
+        return _quotationMarksRegular!!
     }
 
-private var _quotationMarksSurfaceRegular: ImageVector? = null
+private var _quotationMarksRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.QuotationMarks: ImageVector
     get() {
-        if (_quotationMarksSurfaceMedium != null) return _quotationMarksSurfaceMedium!!
-        _quotationMarksSurfaceMedium = buildHyperOSIcon(
+        if (_quotationMarksMedium != null) return _quotationMarksMedium!!
+        _quotationMarksMedium = buildHyperOSIcon(
             name = "QuotationMarks.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(217.6f, 204.1f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Medium.QuotationMarks: ImageVector
             translationY = 1098.2636f,
             autoMirror = false,
         )
-        return _quotationMarksSurfaceMedium!!
+        return _quotationMarksMedium!!
     }
 
-private var _quotationMarksSurfaceMedium: ImageVector? = null
+private var _quotationMarksMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.QuotationMarks: ImageVector
     get() {
-        if (_quotationMarksSurfaceDemibold != null) return _quotationMarksSurfaceDemibold!!
-        _quotationMarksSurfaceDemibold = buildHyperOSIcon(
+        if (_quotationMarksDemibold != null) return _quotationMarksDemibold!!
+        _quotationMarksDemibold = buildHyperOSIcon(
             name = "QuotationMarks.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(213.8f, 202.8f),
@@ -330,8 +330,8 @@ val MiuixIcons.Glass.Demibold.QuotationMarks: ImageVector
             translationY = 1098.0742f,
             autoMirror = false,
         )
-        return _quotationMarksSurfaceDemibold!!
+        return _quotationMarksDemibold!!
     }
 
-private var _quotationMarksSurfaceDemibold: ImageVector? = null
+private var _quotationMarksDemibold: ImageVector? = null
 

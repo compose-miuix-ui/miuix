@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Stylus: ImageVector
 
 val MiuixIcons.Glass.Light.Stylus: ImageVector
     get() {
-        if (_stylusSurfaceLight != null) return _stylusSurfaceLight!!
-        _stylusSurfaceLight = buildHyperOSIcon(
+        if (_stylusLight != null) return _stylusLight!!
+        _stylusLight = buildHyperOSIcon(
             name = "Stylus.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(245f, 62f),
@@ -45,15 +45,15 @@ val MiuixIcons.Glass.Light.Stylus: ImageVector
             translationY = 1068.7911f,
             autoMirror = false,
         )
-        return _stylusSurfaceLight!!
+        return _stylusLight!!
     }
 
-private var _stylusSurfaceLight: ImageVector? = null
+private var _stylusLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Stylus: ImageVector
     get() {
-        if (_stylusSurfaceNormal != null) return _stylusSurfaceNormal!!
-        _stylusSurfaceNormal = buildHyperOSIcon(
+        if (_stylusNormal != null) return _stylusNormal!!
+        _stylusNormal = buildHyperOSIcon(
             name = "Stylus.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(239.5f, 67.5f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Normal.Stylus: ImageVector
             translationY = 1066.8397f,
             autoMirror = false,
         )
-        return _stylusSurfaceNormal!!
+        return _stylusNormal!!
     }
 
-private var _stylusSurfaceNormal: ImageVector? = null
+private var _stylusNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Stylus: ImageVector
     get() {
-        if (_stylusSurfaceRegular != null) return _stylusSurfaceRegular!!
-        _stylusSurfaceRegular = buildHyperOSIcon(
+        if (_stylusRegular != null) return _stylusRegular!!
+        _stylusRegular = buildHyperOSIcon(
             name = "Stylus.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(237f, 70f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Regular.Stylus: ImageVector
             translationY = 1065.9524f,
             autoMirror = false,
         )
-        return _stylusSurfaceRegular!!
+        return _stylusRegular!!
     }
 
-private var _stylusSurfaceRegular: ImageVector? = null
+private var _stylusRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Stylus: ImageVector
     get() {
-        if (_stylusSurfaceMedium != null) return _stylusSurfaceMedium!!
-        _stylusSurfaceMedium = buildHyperOSIcon(
+        if (_stylusMedium != null) return _stylusMedium!!
+        _stylusMedium = buildHyperOSIcon(
             name = "Stylus.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(235.6f, 77.6f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Medium.Stylus: ImageVector
             translationY = 1066.3434f,
             autoMirror = false,
         )
-        return _stylusSurfaceMedium!!
+        return _stylusMedium!!
     }
 
-private var _stylusSurfaceMedium: ImageVector? = null
+private var _stylusMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Stylus: ImageVector
     get() {
-        if (_stylusSurfaceDemibold != null) return _stylusSurfaceDemibold!!
-        _stylusSurfaceDemibold = buildHyperOSIcon(
+        if (_stylusDemibold != null) return _stylusDemibold!!
+        _stylusDemibold = buildHyperOSIcon(
             name = "Stylus.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(234.7f, 82.9f),
@@ -205,8 +205,8 @@ val MiuixIcons.Glass.Demibold.Stylus: ImageVector
             translationY = 1066.6168f,
             autoMirror = false,
         )
-        return _stylusSurfaceDemibold!!
+        return _stylusDemibold!!
     }
 
-private var _stylusSurfaceDemibold: ImageVector? = null
+private var _stylusDemibold: ImageVector? = null
 

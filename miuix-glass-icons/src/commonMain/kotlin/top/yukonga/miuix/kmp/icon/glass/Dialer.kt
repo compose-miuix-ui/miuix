@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Dialer: ImageVector
 
 val MiuixIcons.Glass.Light.Dialer: ImageVector
     get() {
-        if (_dialerSurfaceLight != null) return _dialerSurfaceLight!!
-        _dialerSurfaceLight = buildHyperOSIcon(
+        if (_dialerLight != null) return _dialerLight!!
+        _dialerLight = buildHyperOSIcon(
             name = "Dialer.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(244.3f, 28f),
@@ -112,15 +112,15 @@ val MiuixIcons.Glass.Light.Dialer: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dialerSurfaceLight!!
+        return _dialerLight!!
     }
 
-private var _dialerSurfaceLight: ImageVector? = null
+private var _dialerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Dialer: ImageVector
     get() {
-        if (_dialerSurfaceNormal != null) return _dialerSurfaceNormal!!
-        _dialerSurfaceNormal = buildHyperOSIcon(
+        if (_dialerNormal != null) return _dialerNormal!!
+        _dialerNormal = buildHyperOSIcon(
             name = "Dialer.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(235.2f, 28f),
@@ -219,15 +219,15 @@ val MiuixIcons.Glass.Normal.Dialer: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dialerSurfaceNormal!!
+        return _dialerNormal!!
     }
 
-private var _dialerSurfaceNormal: ImageVector? = null
+private var _dialerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Dialer: ImageVector
     get() {
-        if (_dialerSurfaceRegular != null) return _dialerSurfaceRegular!!
-        _dialerSurfaceRegular = buildHyperOSIcon(
+        if (_dialerRegular != null) return _dialerRegular!!
+        _dialerRegular = buildHyperOSIcon(
             name = "Dialer.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(231f, 28f),
@@ -326,15 +326,15 @@ val MiuixIcons.Glass.Regular.Dialer: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dialerSurfaceRegular!!
+        return _dialerRegular!!
     }
 
-private var _dialerSurfaceRegular: ImageVector? = null
+private var _dialerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Dialer: ImageVector
     get() {
-        if (_dialerSurfaceMedium != null) return _dialerSurfaceMedium!!
-        _dialerSurfaceMedium = buildHyperOSIcon(
+        if (_dialerMedium != null) return _dialerMedium!!
+        _dialerMedium = buildHyperOSIcon(
             name = "Dialer.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(222.9f, 28f),
@@ -433,15 +433,15 @@ val MiuixIcons.Glass.Medium.Dialer: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dialerSurfaceMedium!!
+        return _dialerMedium!!
     }
 
-private var _dialerSurfaceMedium: ImageVector? = null
+private var _dialerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Dialer: ImageVector
     get() {
-        if (_dialerSurfaceDemibold != null) return _dialerSurfaceDemibold!!
-        _dialerSurfaceDemibold = buildHyperOSIcon(
+        if (_dialerDemibold != null) return _dialerDemibold!!
+        _dialerDemibold = buildHyperOSIcon(
             name = "Dialer.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(217.2f, 28f),
@@ -540,8 +540,8 @@ val MiuixIcons.Glass.Demibold.Dialer: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dialerSurfaceDemibold!!
+        return _dialerDemibold!!
     }
 
-private var _dialerSurfaceDemibold: ImageVector? = null
+private var _dialerDemibold: ImageVector? = null
 

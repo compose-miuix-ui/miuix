@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HighlighterPen: ImageVector
 
 val MiuixIcons.Glass.Light.HighlighterPen: ImageVector
     get() {
-        if (_highlighterPenLineLight != null) return _highlighterPenLineLight!!
-        _highlighterPenLineLight = buildHyperOSIcon(
+        if (_highlighterPenLight != null) return _highlighterPenLight!!
+        _highlighterPenLight = buildHyperOSIcon(
             name = "HighlighterPen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(368.7f, -76.1f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.HighlighterPen: ImageVector
             translationY = 1044.9477f,
             autoMirror = false,
         )
-        return _highlighterPenLineLight!!
+        return _highlighterPenLight!!
     }
 
-private var _highlighterPenLineLight: ImageVector? = null
+private var _highlighterPenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HighlighterPen: ImageVector
     get() {
-        if (_highlighterPenLineNormal != null) return _highlighterPenLineNormal!!
-        _highlighterPenLineNormal = buildHyperOSIcon(
+        if (_highlighterPenNormal != null) return _highlighterPenNormal!!
+        _highlighterPenNormal = buildHyperOSIcon(
             name = "HighlighterPen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(377.8f, -79.5f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.HighlighterPen: ImageVector
             translationY = 1046.0428f,
             autoMirror = false,
         )
-        return _highlighterPenLineNormal!!
+        return _highlighterPenNormal!!
     }
 
-private var _highlighterPenLineNormal: ImageVector? = null
+private var _highlighterPenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HighlighterPen: ImageVector
     get() {
-        if (_highlighterPenLineRegular != null) return _highlighterPenLineRegular!!
-        _highlighterPenLineRegular = buildHyperOSIcon(
+        if (_highlighterPenRegular != null) return _highlighterPenRegular!!
+        _highlighterPenRegular = buildHyperOSIcon(
             name = "HighlighterPen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(382f, -81f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.HighlighterPen: ImageVector
             translationY = 1046.5447f,
             autoMirror = false,
         )
-        return _highlighterPenLineRegular!!
+        return _highlighterPenRegular!!
     }
 
-private var _highlighterPenLineRegular: ImageVector? = null
+private var _highlighterPenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HighlighterPen: ImageVector
     get() {
-        if (_highlighterPenLineMedium != null) return _highlighterPenLineMedium!!
-        _highlighterPenLineMedium = buildHyperOSIcon(
+        if (_highlighterPenMedium != null) return _highlighterPenMedium!!
+        _highlighterPenMedium = buildHyperOSIcon(
             name = "HighlighterPen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(390.1f, -85.3f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.HighlighterPen: ImageVector
             translationY = 1047.1152f,
             autoMirror = false,
         )
-        return _highlighterPenLineMedium!!
+        return _highlighterPenMedium!!
     }
 
-private var _highlighterPenLineMedium: ImageVector? = null
+private var _highlighterPenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HighlighterPen: ImageVector
     get() {
-        if (_highlighterPenLineDemibold != null) return _highlighterPenLineDemibold!!
-        _highlighterPenLineDemibold = buildHyperOSIcon(
+        if (_highlighterPenDemibold != null) return _highlighterPenDemibold!!
+        _highlighterPenDemibold = buildHyperOSIcon(
             name = "HighlighterPen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(395.8f, -88.4f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.HighlighterPen: ImageVector
             translationY = 1047.5234f,
             autoMirror = false,
         )
-        return _highlighterPenLineDemibold!!
+        return _highlighterPenDemibold!!
     }
 
-private var _highlighterPenLineDemibold: ImageVector? = null
+private var _highlighterPenDemibold: ImageVector? = null
 

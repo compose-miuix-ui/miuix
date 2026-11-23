@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WholeHouseAudio: ImageVector
 
 val MiuixIcons.Glass.Light.WholeHouseAudio: ImageVector
     get() {
-        if (_wholeHouseAudioSurfaceLight != null) return _wholeHouseAudioSurfaceLight!!
-        _wholeHouseAudioSurfaceLight = buildHyperOSIcon(
+        if (_wholeHouseAudioLight != null) return _wholeHouseAudioLight!!
+        _wholeHouseAudioLight = buildHyperOSIcon(
             name = "WholeHouseAudio.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(529.3f, 788f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Light.WholeHouseAudio: ImageVector
             translationY = 1042.5278f,
             autoMirror = false,
         )
-        return _wholeHouseAudioSurfaceLight!!
+        return _wholeHouseAudioLight!!
     }
 
-private var _wholeHouseAudioSurfaceLight: ImageVector? = null
+private var _wholeHouseAudioLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WholeHouseAudio: ImageVector
     get() {
-        if (_wholeHouseAudioSurfaceNormal != null) return _wholeHouseAudioSurfaceNormal!!
-        _wholeHouseAudioSurfaceNormal = buildHyperOSIcon(
+        if (_wholeHouseAudioNormal != null) return _wholeHouseAudioNormal!!
+        _wholeHouseAudioNormal = buildHyperOSIcon(
             name = "WholeHouseAudio.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(525.7f, 790.7f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Normal.WholeHouseAudio: ImageVector
             translationY = 1042.4514f,
             autoMirror = false,
         )
-        return _wholeHouseAudioSurfaceNormal!!
+        return _wholeHouseAudioNormal!!
     }
 
-private var _wholeHouseAudioSurfaceNormal: ImageVector? = null
+private var _wholeHouseAudioNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WholeHouseAudio: ImageVector
     get() {
-        if (_wholeHouseAudioSurfaceRegular != null) return _wholeHouseAudioSurfaceRegular!!
-        _wholeHouseAudioSurfaceRegular = buildHyperOSIcon(
+        if (_wholeHouseAudioRegular != null) return _wholeHouseAudioRegular!!
+        _wholeHouseAudioRegular = buildHyperOSIcon(
             name = "WholeHouseAudio.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(524f, 792f),
@@ -365,15 +365,15 @@ val MiuixIcons.Glass.Regular.WholeHouseAudio: ImageVector
             translationY = 1042.4167f,
             autoMirror = false,
         )
-        return _wholeHouseAudioSurfaceRegular!!
+        return _wholeHouseAudioRegular!!
     }
 
-private var _wholeHouseAudioSurfaceRegular: ImageVector? = null
+private var _wholeHouseAudioRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WholeHouseAudio: ImageVector
     get() {
-        if (_wholeHouseAudioSurfaceMedium != null) return _wholeHouseAudioSurfaceMedium!!
-        _wholeHouseAudioSurfaceMedium = buildHyperOSIcon(
+        if (_wholeHouseAudioMedium != null) return _wholeHouseAudioMedium!!
+        _wholeHouseAudioMedium = buildHyperOSIcon(
             name = "WholeHouseAudio.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(521f, 794.2f),
@@ -485,15 +485,15 @@ val MiuixIcons.Glass.Medium.WholeHouseAudio: ImageVector
             translationY = 1042.4509f,
             autoMirror = false,
         )
-        return _wholeHouseAudioSurfaceMedium!!
+        return _wholeHouseAudioMedium!!
     }
 
-private var _wholeHouseAudioSurfaceMedium: ImageVector? = null
+private var _wholeHouseAudioMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WholeHouseAudio: ImageVector
     get() {
-        if (_wholeHouseAudioSurfaceDemibold != null) return _wholeHouseAudioSurfaceDemibold!!
-        _wholeHouseAudioSurfaceDemibold = buildHyperOSIcon(
+        if (_wholeHouseAudioDemibold != null) return _wholeHouseAudioDemibold!!
+        _wholeHouseAudioDemibold = buildHyperOSIcon(
             name = "WholeHouseAudio.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(518.9f, 795.7f),
@@ -605,8 +605,8 @@ val MiuixIcons.Glass.Demibold.WholeHouseAudio: ImageVector
             translationY = 1042.4754f,
             autoMirror = false,
         )
-        return _wholeHouseAudioSurfaceDemibold!!
+        return _wholeHouseAudioDemibold!!
     }
 
-private var _wholeHouseAudioSurfaceDemibold: ImageVector? = null
+private var _wholeHouseAudioDemibold: ImageVector? = null
 

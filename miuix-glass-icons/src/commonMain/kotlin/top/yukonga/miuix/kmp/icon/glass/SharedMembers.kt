@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SharedMembers: ImageVector
 
 val MiuixIcons.Glass.Light.SharedMembers: ImageVector
     get() {
-        if (_sharedMembersSurfaceLight != null) return _sharedMembersSurfaceLight!!
-        _sharedMembersSurfaceLight = buildHyperOSIcon(
+        if (_sharedMembersLight != null) return _sharedMembersLight!!
+        _sharedMembersLight = buildHyperOSIcon(
             name = "SharedMembers.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(205.4f, 257.3f),
@@ -87,15 +87,15 @@ val MiuixIcons.Glass.Light.SharedMembers: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _sharedMembersSurfaceLight!!
+        return _sharedMembersLight!!
     }
 
-private var _sharedMembersSurfaceLight: ImageVector? = null
+private var _sharedMembersLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SharedMembers: ImageVector
     get() {
-        if (_sharedMembersSurfaceNormal != null) return _sharedMembersSurfaceNormal!!
-        _sharedMembersSurfaceNormal = buildHyperOSIcon(
+        if (_sharedMembersNormal != null) return _sharedMembersNormal!!
+        _sharedMembersNormal = buildHyperOSIcon(
             name = "SharedMembers.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(202.4f, 253.7f),
@@ -169,15 +169,15 @@ val MiuixIcons.Glass.Normal.SharedMembers: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _sharedMembersSurfaceNormal!!
+        return _sharedMembersNormal!!
     }
 
-private var _sharedMembersSurfaceNormal: ImageVector? = null
+private var _sharedMembersNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SharedMembers: ImageVector
     get() {
-        if (_sharedMembersSurfaceRegular != null) return _sharedMembersSurfaceRegular!!
-        _sharedMembersSurfaceRegular = buildHyperOSIcon(
+        if (_sharedMembersRegular != null) return _sharedMembersRegular!!
+        _sharedMembersRegular = buildHyperOSIcon(
             name = "SharedMembers.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(201f, 252f),
@@ -251,15 +251,15 @@ val MiuixIcons.Glass.Regular.SharedMembers: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _sharedMembersSurfaceRegular!!
+        return _sharedMembersRegular!!
     }
 
-private var _sharedMembersSurfaceRegular: ImageVector? = null
+private var _sharedMembersRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SharedMembers: ImageVector
     get() {
-        if (_sharedMembersSurfaceMedium != null) return _sharedMembersSurfaceMedium!!
-        _sharedMembersSurfaceMedium = buildHyperOSIcon(
+        if (_sharedMembersMedium != null) return _sharedMembersMedium!!
+        _sharedMembersMedium = buildHyperOSIcon(
             name = "SharedMembers.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(203.7f, 255.5f),
@@ -333,15 +333,15 @@ val MiuixIcons.Glass.Medium.SharedMembers: ImageVector
             translationY = 1044.9098f,
             autoMirror = false,
         )
-        return _sharedMembersSurfaceMedium!!
+        return _sharedMembersMedium!!
     }
 
-private var _sharedMembersSurfaceMedium: ImageVector? = null
+private var _sharedMembersMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SharedMembers: ImageVector
     get() {
-        if (_sharedMembersSurfaceDemibold != null) return _sharedMembersSurfaceDemibold!!
-        _sharedMembersSurfaceDemibold = buildHyperOSIcon(
+        if (_sharedMembersDemibold != null) return _sharedMembersDemibold!!
+        _sharedMembersDemibold = buildHyperOSIcon(
             name = "SharedMembers.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(205.6f, 258f),
@@ -415,8 +415,8 @@ val MiuixIcons.Glass.Demibold.SharedMembers: ImageVector
             translationY = 1047.1803f,
             autoMirror = false,
         )
-        return _sharedMembersSurfaceDemibold!!
+        return _sharedMembersDemibold!!
     }
 
-private var _sharedMembersSurfaceDemibold: ImageVector? = null
+private var _sharedMembersDemibold: ImageVector? = null
 

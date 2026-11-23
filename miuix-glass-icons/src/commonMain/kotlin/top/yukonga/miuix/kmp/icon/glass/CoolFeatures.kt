@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CoolFeatures: ImageVector
 
 val MiuixIcons.Glass.Light.CoolFeatures: ImageVector
     get() {
-        if (_coolFeaturesSurfaceLight != null) return _coolFeaturesSurfaceLight!!
-        _coolFeaturesSurfaceLight = buildHyperOSIcon(
+        if (_coolFeaturesLight != null) return _coolFeaturesLight!!
+        _coolFeaturesLight = buildHyperOSIcon(
             name = "CoolFeatures.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(756.2f, 303.7f),
@@ -110,15 +110,15 @@ val MiuixIcons.Glass.Light.CoolFeatures: ImageVector
             translationY = 1038.6667f,
             autoMirror = false,
         )
-        return _coolFeaturesSurfaceLight!!
+        return _coolFeaturesLight!!
     }
 
-private var _coolFeaturesSurfaceLight: ImageVector? = null
+private var _coolFeaturesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CoolFeatures: ImageVector
     get() {
-        if (_coolFeaturesSurfaceNormal != null) return _coolFeaturesSurfaceNormal!!
-        _coolFeaturesSurfaceNormal = buildHyperOSIcon(
+        if (_coolFeaturesNormal != null) return _coolFeaturesNormal!!
+        _coolFeaturesNormal = buildHyperOSIcon(
             name = "CoolFeatures.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(749.2f, 312.8f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Normal.CoolFeatures: ImageVector
             translationY = 1038.6667f,
             autoMirror = false,
         )
-        return _coolFeaturesSurfaceNormal!!
+        return _coolFeaturesNormal!!
     }
 
-private var _coolFeaturesSurfaceNormal: ImageVector? = null
+private var _coolFeaturesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CoolFeatures: ImageVector
     get() {
-        if (_coolFeaturesSurfaceRegular != null) return _coolFeaturesSurfaceRegular!!
-        _coolFeaturesSurfaceRegular = buildHyperOSIcon(
+        if (_coolFeaturesRegular != null) return _coolFeaturesRegular!!
+        _coolFeaturesRegular = buildHyperOSIcon(
             name = "CoolFeatures.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(746f, 317f),
@@ -320,15 +320,15 @@ val MiuixIcons.Glass.Regular.CoolFeatures: ImageVector
             translationY = 1038.6667f,
             autoMirror = false,
         )
-        return _coolFeaturesSurfaceRegular!!
+        return _coolFeaturesRegular!!
     }
 
-private var _coolFeaturesSurfaceRegular: ImageVector? = null
+private var _coolFeaturesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CoolFeatures: ImageVector
     get() {
-        if (_coolFeaturesSurfaceMedium != null) return _coolFeaturesSurfaceMedium!!
-        _coolFeaturesSurfaceMedium = buildHyperOSIcon(
+        if (_coolFeaturesMedium != null) return _coolFeaturesMedium!!
+        _coolFeaturesMedium = buildHyperOSIcon(
             name = "CoolFeatures.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(751.4f, 325.1f),
@@ -425,15 +425,15 @@ val MiuixIcons.Glass.Medium.CoolFeatures: ImageVector
             translationY = 1037.3839f,
             autoMirror = false,
         )
-        return _coolFeaturesSurfaceMedium!!
+        return _coolFeaturesMedium!!
     }
 
-private var _coolFeaturesSurfaceMedium: ImageVector? = null
+private var _coolFeaturesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CoolFeatures: ImageVector
     get() {
-        if (_coolFeaturesSurfaceDemibold != null) return _coolFeaturesSurfaceDemibold!!
-        _coolFeaturesSurfaceDemibold = buildHyperOSIcon(
+        if (_coolFeaturesDemibold != null) return _coolFeaturesDemibold!!
+        _coolFeaturesDemibold = buildHyperOSIcon(
             name = "CoolFeatures.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(755.2f, 330.8f),
@@ -530,8 +530,8 @@ val MiuixIcons.Glass.Demibold.CoolFeatures: ImageVector
             translationY = 1036.4869f,
             autoMirror = false,
         )
-        return _coolFeaturesSurfaceDemibold!!
+        return _coolFeaturesDemibold!!
     }
 
-private var _coolFeaturesSurfaceDemibold: ImageVector? = null
+private var _coolFeaturesDemibold: ImageVector? = null
 

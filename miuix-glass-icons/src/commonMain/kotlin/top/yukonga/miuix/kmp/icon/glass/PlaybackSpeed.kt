@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PlaybackSpeed: ImageVector
 
 val MiuixIcons.Glass.Light.PlaybackSpeed: ImageVector
     get() {
-        if (_playbackSpeedLineLight != null) return _playbackSpeedLineLight!!
-        _playbackSpeedLineLight = buildHyperOSIcon(
+        if (_playbackSpeedLight != null) return _playbackSpeedLight!!
+        _playbackSpeedLight = buildHyperOSIcon(
             name = "PlaybackSpeed.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1187.9f, 427.9f),
@@ -72,15 +72,15 @@ val MiuixIcons.Glass.Light.PlaybackSpeed: ImageVector
             translationY = 1047.9565f,
             autoMirror = false,
         )
-        return _playbackSpeedLineLight!!
+        return _playbackSpeedLight!!
     }
 
-private var _playbackSpeedLineLight: ImageVector? = null
+private var _playbackSpeedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PlaybackSpeed: ImageVector
     get() {
-        if (_playbackSpeedLineNormal != null) return _playbackSpeedLineNormal!!
-        _playbackSpeedLineNormal = buildHyperOSIcon(
+        if (_playbackSpeedNormal != null) return _playbackSpeedNormal!!
+        _playbackSpeedNormal = buildHyperOSIcon(
             name = "PlaybackSpeed.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1198.3f, 435.5f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Normal.PlaybackSpeed: ImageVector
             translationY = 1047.6687f,
             autoMirror = false,
         )
-        return _playbackSpeedLineNormal!!
+        return _playbackSpeedNormal!!
     }
 
-private var _playbackSpeedLineNormal: ImageVector? = null
+private var _playbackSpeedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PlaybackSpeed: ImageVector
     get() {
-        if (_playbackSpeedLineRegular != null) return _playbackSpeedLineRegular!!
-        _playbackSpeedLineRegular = buildHyperOSIcon(
+        if (_playbackSpeedRegular != null) return _playbackSpeedRegular!!
+        _playbackSpeedRegular = buildHyperOSIcon(
             name = "PlaybackSpeed.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1203f, 439f),
@@ -206,15 +206,15 @@ val MiuixIcons.Glass.Regular.PlaybackSpeed: ImageVector
             translationY = 1047.5381f,
             autoMirror = false,
         )
-        return _playbackSpeedLineRegular!!
+        return _playbackSpeedRegular!!
     }
 
-private var _playbackSpeedLineRegular: ImageVector? = null
+private var _playbackSpeedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PlaybackSpeed: ImageVector
     get() {
-        if (_playbackSpeedLineMedium != null) return _playbackSpeedLineMedium!!
-        _playbackSpeedLineMedium = buildHyperOSIcon(
+        if (_playbackSpeedMedium != null) return _playbackSpeedMedium!!
+        _playbackSpeedMedium = buildHyperOSIcon(
             name = "PlaybackSpeed.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1212.5f, 446f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Medium.PlaybackSpeed: ImageVector
             translationY = 1047.4286f,
             autoMirror = false,
         )
-        return _playbackSpeedLineMedium!!
+        return _playbackSpeedMedium!!
     }
 
-private var _playbackSpeedLineMedium: ImageVector? = null
+private var _playbackSpeedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PlaybackSpeed: ImageVector
     get() {
-        if (_playbackSpeedLineDemibold != null) return _playbackSpeedLineDemibold!!
-        _playbackSpeedLineDemibold = buildHyperOSIcon(
+        if (_playbackSpeedDemibold != null) return _playbackSpeedDemibold!!
+        _playbackSpeedDemibold = buildHyperOSIcon(
             name = "PlaybackSpeed.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1219.1f, 450.9f),
@@ -340,8 +340,8 @@ val MiuixIcons.Glass.Demibold.PlaybackSpeed: ImageVector
             translationY = 1047.4092f,
             autoMirror = false,
         )
-        return _playbackSpeedLineDemibold!!
+        return _playbackSpeedDemibold!!
     }
 
-private var _playbackSpeedLineDemibold: ImageVector? = null
+private var _playbackSpeedDemibold: ImageVector? = null
 

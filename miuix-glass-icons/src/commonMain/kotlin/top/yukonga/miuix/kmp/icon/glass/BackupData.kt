@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BackupData: ImageVector
 
 val MiuixIcons.Glass.Light.BackupData: ImageVector
     get() {
-        if (_backupDataSurfaceLight != null) return _backupDataSurfaceLight!!
-        _backupDataSurfaceLight = buildHyperOSIcon(
+        if (_backupDataLight != null) return _backupDataLight!!
+        _backupDataLight = buildHyperOSIcon(
             name = "BackupData.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(831.9f, 789.6f),
@@ -74,15 +74,15 @@ val MiuixIcons.Glass.Light.BackupData: ImageVector
             translationY = 1038.9999f,
             autoMirror = false,
         )
-        return _backupDataSurfaceLight!!
+        return _backupDataLight!!
     }
 
-private var _backupDataSurfaceLight: ImageVector? = null
+private var _backupDataLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BackupData: ImageVector
     get() {
-        if (_backupDataSurfaceNormal != null) return _backupDataSurfaceNormal!!
-        _backupDataSurfaceNormal = buildHyperOSIcon(
+        if (_backupDataNormal != null) return _backupDataNormal!!
+        _backupDataNormal = buildHyperOSIcon(
             name = "BackupData.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(825.8f, 784.4f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Normal.BackupData: ImageVector
             translationY = 1040.8332f,
             autoMirror = false,
         )
-        return _backupDataSurfaceNormal!!
+        return _backupDataNormal!!
     }
 
-private var _backupDataSurfaceNormal: ImageVector? = null
+private var _backupDataNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BackupData: ImageVector
     get() {
-        if (_backupDataSurfaceRegular != null) return _backupDataSurfaceRegular!!
-        _backupDataSurfaceRegular = buildHyperOSIcon(
+        if (_backupDataRegular != null) return _backupDataRegular!!
+        _backupDataRegular = buildHyperOSIcon(
             name = "BackupData.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(823f, 782f),
@@ -212,15 +212,15 @@ val MiuixIcons.Glass.Regular.BackupData: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _backupDataSurfaceRegular!!
+        return _backupDataRegular!!
     }
 
-private var _backupDataSurfaceRegular: ImageVector? = null
+private var _backupDataRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BackupData: ImageVector
     get() {
-        if (_backupDataSurfaceMedium != null) return _backupDataSurfaceMedium!!
-        _backupDataSurfaceMedium = buildHyperOSIcon(
+        if (_backupDataMedium != null) return _backupDataMedium!!
+        _backupDataMedium = buildHyperOSIcon(
             name = "BackupData.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(827.9f, 776.1f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Medium.BackupData: ImageVector
             translationY = 1039.9099f,
             autoMirror = false,
         )
-        return _backupDataSurfaceMedium!!
+        return _backupDataMedium!!
     }
 
-private var _backupDataSurfaceMedium: ImageVector? = null
+private var _backupDataMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BackupData: ImageVector
     get() {
-        if (_backupDataSurfaceDemibold != null) return _backupDataSurfaceDemibold!!
-        _backupDataSurfaceDemibold = buildHyperOSIcon(
+        if (_backupDataDemibold != null) return _backupDataDemibold!!
+        _backupDataDemibold = buildHyperOSIcon(
             name = "BackupData.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(831.3f, 771.9f),
@@ -350,8 +350,8 @@ val MiuixIcons.Glass.Demibold.BackupData: ImageVector
             translationY = 1038.6801f,
             autoMirror = false,
         )
-        return _backupDataSurfaceDemibold!!
+        return _backupDataDemibold!!
     }
 
-private var _backupDataSurfaceDemibold: ImageVector? = null
+private var _backupDataDemibold: ImageVector? = null
 

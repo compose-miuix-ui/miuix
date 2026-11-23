@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NotificationMuted: ImageVector
 
 val MiuixIcons.Glass.Light.NotificationMuted: ImageVector
     get() {
-        if (_notificationMutedSurfaceLight != null) return _notificationMutedSurfaceLight!!
-        _notificationMutedSurfaceLight = buildHyperOSIcon(
+        if (_notificationMutedLight != null) return _notificationMutedLight!!
+        _notificationMutedLight = buildHyperOSIcon(
             name = "NotificationMuted.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(877.3f, 707f),
@@ -74,15 +74,15 @@ val MiuixIcons.Glass.Light.NotificationMuted: ImageVector
             translationY = 1046.1448f,
             autoMirror = false,
         )
-        return _notificationMutedSurfaceLight!!
+        return _notificationMutedLight!!
     }
 
-private var _notificationMutedSurfaceLight: ImageVector? = null
+private var _notificationMutedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotificationMuted: ImageVector
     get() {
-        if (_notificationMutedSurfaceNormal != null) return _notificationMutedSurfaceNormal!!
-        _notificationMutedSurfaceNormal = buildHyperOSIcon(
+        if (_notificationMutedNormal != null) return _notificationMutedNormal!!
+        _notificationMutedNormal = buildHyperOSIcon(
             name = "NotificationMuted.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(868.2f, 707f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Normal.NotificationMuted: ImageVector
             translationY = 1043.9346f,
             autoMirror = false,
         )
-        return _notificationMutedSurfaceNormal!!
+        return _notificationMutedNormal!!
     }
 
-private var _notificationMutedSurfaceNormal: ImageVector? = null
+private var _notificationMutedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotificationMuted: ImageVector
     get() {
-        if (_notificationMutedSurfaceRegular != null) return _notificationMutedSurfaceRegular!!
-        _notificationMutedSurfaceRegular = buildHyperOSIcon(
+        if (_notificationMutedRegular != null) return _notificationMutedRegular!!
+        _notificationMutedRegular = buildHyperOSIcon(
             name = "NotificationMuted.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(864f, 707f),
@@ -212,15 +212,15 @@ val MiuixIcons.Glass.Regular.NotificationMuted: ImageVector
             translationY = 1042.9298f,
             autoMirror = false,
         )
-        return _notificationMutedSurfaceRegular!!
+        return _notificationMutedRegular!!
     }
 
-private var _notificationMutedSurfaceRegular: ImageVector? = null
+private var _notificationMutedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotificationMuted: ImageVector
     get() {
-        if (_notificationMutedSurfaceMedium != null) return _notificationMutedSurfaceMedium!!
-        _notificationMutedSurfaceMedium = buildHyperOSIcon(
+        if (_notificationMutedMedium != null) return _notificationMutedMedium!!
+        _notificationMutedMedium = buildHyperOSIcon(
             name = "NotificationMuted.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(855.9f, 707f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Medium.NotificationMuted: ImageVector
             translationY = 1042.0404f,
             autoMirror = false,
         )
-        return _notificationMutedSurfaceMedium!!
+        return _notificationMutedMedium!!
     }
 
-private var _notificationMutedSurfaceMedium: ImageVector? = null
+private var _notificationMutedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotificationMuted: ImageVector
     get() {
-        if (_notificationMutedSurfaceDemibold != null) return _notificationMutedSurfaceDemibold!!
-        _notificationMutedSurfaceDemibold = buildHyperOSIcon(
+        if (_notificationMutedDemibold != null) return _notificationMutedDemibold!!
+        _notificationMutedDemibold = buildHyperOSIcon(
             name = "NotificationMuted.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(850.2f, 707f),
@@ -350,8 +350,8 @@ val MiuixIcons.Glass.Demibold.NotificationMuted: ImageVector
             translationY = 1041.4183f,
             autoMirror = false,
         )
-        return _notificationMutedSurfaceDemibold!!
+        return _notificationMutedDemibold!!
     }
 
-private var _notificationMutedSurfaceDemibold: ImageVector? = null
+private var _notificationMutedDemibold: ImageVector? = null
 

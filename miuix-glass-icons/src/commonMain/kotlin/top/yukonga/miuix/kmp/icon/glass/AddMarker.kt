@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AddMarker: ImageVector
 
 val MiuixIcons.Glass.Light.AddMarker: ImageVector
     get() {
-        if (_addMarkerLineLight != null) return _addMarkerLineLight!!
-        _addMarkerLineLight = buildHyperOSIcon(
+        if (_addMarkerLight != null) return _addMarkerLight!!
+        _addMarkerLight = buildHyperOSIcon(
             name = "AddMarker.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(415.3f, 810.3f),
@@ -43,15 +43,15 @@ val MiuixIcons.Glass.Light.AddMarker: ImageVector
             translationY = 1040.9543f,
             autoMirror = false,
         )
-        return _addMarkerLineLight!!
+        return _addMarkerLight!!
     }
 
-private var _addMarkerLineLight: ImageVector? = null
+private var _addMarkerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AddMarker: ImageVector
     get() {
-        if (_addMarkerLineNormal != null) return _addMarkerLineNormal!!
-        _addMarkerLineNormal = buildHyperOSIcon(
+        if (_addMarkerNormal != null) return _addMarkerNormal!!
+        _addMarkerNormal = buildHyperOSIcon(
             name = "AddMarker.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(406.2f, 806.7f),
@@ -81,15 +81,15 @@ val MiuixIcons.Glass.Normal.AddMarker: ImageVector
             translationY = 1040.9037f,
             autoMirror = false,
         )
-        return _addMarkerLineNormal!!
+        return _addMarkerNormal!!
     }
 
-private var _addMarkerLineNormal: ImageVector? = null
+private var _addMarkerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AddMarker: ImageVector
     get() {
-        if (_addMarkerLineRegular != null) return _addMarkerLineRegular!!
-        _addMarkerLineRegular = buildHyperOSIcon(
+        if (_addMarkerRegular != null) return _addMarkerRegular!!
+        _addMarkerRegular = buildHyperOSIcon(
             name = "AddMarker.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(402f, 805f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Regular.AddMarker: ImageVector
             translationY = 1040.8809f,
             autoMirror = false,
         )
-        return _addMarkerLineRegular!!
+        return _addMarkerRegular!!
     }
 
-private var _addMarkerLineRegular: ImageVector? = null
+private var _addMarkerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AddMarker: ImageVector
     get() {
-        if (_addMarkerLineMedium != null) return _addMarkerLineMedium!!
-        _addMarkerLineMedium = buildHyperOSIcon(
+        if (_addMarkerMedium != null) return _addMarkerMedium!!
+        _addMarkerMedium = buildHyperOSIcon(
             name = "AddMarker.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(393.9f, 805f),
@@ -157,15 +157,15 @@ val MiuixIcons.Glass.Medium.AddMarker: ImageVector
             translationY = 1040.8598f,
             autoMirror = false,
         )
-        return _addMarkerLineMedium!!
+        return _addMarkerMedium!!
     }
 
-private var _addMarkerLineMedium: ImageVector? = null
+private var _addMarkerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AddMarker: ImageVector
     get() {
-        if (_addMarkerLineDemibold != null) return _addMarkerLineDemibold!!
-        _addMarkerLineDemibold = buildHyperOSIcon(
+        if (_addMarkerDemibold != null) return _addMarkerDemibold!!
+        _addMarkerDemibold = buildHyperOSIcon(
             name = "AddMarker.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(388.2f, 805f),
@@ -195,8 +195,8 @@ val MiuixIcons.Glass.Demibold.AddMarker: ImageVector
             translationY = 1040.8473f,
             autoMirror = false,
         )
-        return _addMarkerLineDemibold!!
+        return _addMarkerDemibold!!
     }
 
-private var _addMarkerLineDemibold: ImageVector? = null
+private var _addMarkerDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AreaConversion: ImageVector
 
 val MiuixIcons.Glass.Light.AreaConversion: ImageVector
     get() {
-        if (_areaConversionSurfaceLight != null) return _areaConversionSurfaceLight!!
-        _areaConversionSurfaceLight = buildHyperOSIcon(
+        if (_areaConversionLight != null) return _areaConversionLight!!
+        _areaConversionLight = buildHyperOSIcon(
             name = "AreaConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(357.8f, 633.2f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.AreaConversion: ImageVector
             translationY = 1042.6667f,
             autoMirror = false,
         )
-        return _areaConversionSurfaceLight!!
+        return _areaConversionLight!!
     }
 
-private var _areaConversionSurfaceLight: ImageVector? = null
+private var _areaConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AreaConversion: ImageVector
     get() {
-        if (_areaConversionSurfaceNormal != null) return _areaConversionSurfaceNormal!!
-        _areaConversionSurfaceNormal = buildHyperOSIcon(
+        if (_areaConversionNormal != null) return _areaConversionNormal!!
+        _areaConversionNormal = buildHyperOSIcon(
             name = "AreaConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(373.1f, 617.9f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.AreaConversion: ImageVector
             translationY = 1042.6667f,
             autoMirror = false,
         )
-        return _areaConversionSurfaceNormal!!
+        return _areaConversionNormal!!
     }
 
-private var _areaConversionSurfaceNormal: ImageVector? = null
+private var _areaConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AreaConversion: ImageVector
     get() {
-        if (_areaConversionSurfaceRegular != null) return _areaConversionSurfaceRegular!!
-        _areaConversionSurfaceRegular = buildHyperOSIcon(
+        if (_areaConversionRegular != null) return _areaConversionRegular!!
+        _areaConversionRegular = buildHyperOSIcon(
             name = "AreaConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(380f, 611f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.AreaConversion: ImageVector
             translationY = 1042.6667f,
             autoMirror = false,
         )
-        return _areaConversionSurfaceRegular!!
+        return _areaConversionRegular!!
     }
 
-private var _areaConversionSurfaceRegular: ImageVector? = null
+private var _areaConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AreaConversion: ImageVector
     get() {
-        if (_areaConversionSurfaceMedium != null) return _areaConversionSurfaceMedium!!
-        _areaConversionSurfaceMedium = buildHyperOSIcon(
+        if (_areaConversionMedium != null) return _areaConversionMedium!!
+        _areaConversionMedium = buildHyperOSIcon(
             name = "AreaConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(390.8f, 593.2f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.AreaConversion: ImageVector
             translationY = 1042.3964f,
             autoMirror = false,
         )
-        return _areaConversionSurfaceMedium!!
+        return _areaConversionMedium!!
     }
 
-private var _areaConversionSurfaceMedium: ImageVector? = null
+private var _areaConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AreaConversion: ImageVector
     get() {
-        if (_areaConversionSurfaceDemibold != null) return _areaConversionSurfaceDemibold!!
-        _areaConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_areaConversionDemibold != null) return _areaConversionDemibold!!
+        _areaConversionDemibold = buildHyperOSIcon(
             name = "AreaConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(398.4f, 580.7f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.AreaConversion: ImageVector
             translationY = 1042.2072f,
             autoMirror = false,
         )
-        return _areaConversionSurfaceDemibold!!
+        return _areaConversionDemibold!!
     }
 
-private var _areaConversionSurfaceDemibold: ImageVector? = null
+private var _areaConversionDemibold: ImageVector? = null
 

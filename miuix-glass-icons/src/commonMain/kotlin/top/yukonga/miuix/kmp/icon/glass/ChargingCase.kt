@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ChargingCase: ImageVector
 
 val MiuixIcons.Glass.Light.ChargingCase: ImageVector
     get() {
-        if (_chargingCaseSurfaceLight != null) return _chargingCaseSurfaceLight!!
-        _chargingCaseSurfaceLight = buildHyperOSIcon(
+        if (_chargingCaseLight != null) return _chargingCaseLight!!
+        _chargingCaseLight = buildHyperOSIcon(
             name = "ChargingCase.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(931.3f, 278.2f),
@@ -72,15 +72,15 @@ val MiuixIcons.Glass.Light.ChargingCase: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _chargingCaseSurfaceLight!!
+        return _chargingCaseLight!!
     }
 
-private var _chargingCaseSurfaceLight: ImageVector? = null
+private var _chargingCaseLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ChargingCase: ImageVector
     get() {
-        if (_chargingCaseSurfaceNormal != null) return _chargingCaseSurfaceNormal!!
-        _chargingCaseSurfaceNormal = buildHyperOSIcon(
+        if (_chargingCaseNormal != null) return _chargingCaseNormal!!
+        _chargingCaseNormal = buildHyperOSIcon(
             name = "ChargingCase.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(930.4f, 273.9f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Normal.ChargingCase: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _chargingCaseSurfaceNormal!!
+        return _chargingCaseNormal!!
     }
 
-private var _chargingCaseSurfaceNormal: ImageVector? = null
+private var _chargingCaseNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ChargingCase: ImageVector
     get() {
-        if (_chargingCaseSurfaceRegular != null) return _chargingCaseSurfaceRegular!!
-        _chargingCaseSurfaceRegular = buildHyperOSIcon(
+        if (_chargingCaseRegular != null) return _chargingCaseRegular!!
+        _chargingCaseRegular = buildHyperOSIcon(
             name = "ChargingCase.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(930f, 272f),
@@ -206,15 +206,15 @@ val MiuixIcons.Glass.Regular.ChargingCase: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _chargingCaseSurfaceRegular!!
+        return _chargingCaseRegular!!
     }
 
-private var _chargingCaseSurfaceRegular: ImageVector? = null
+private var _chargingCaseRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ChargingCase: ImageVector
     get() {
-        if (_chargingCaseSurfaceMedium != null) return _chargingCaseSurfaceMedium!!
-        _chargingCaseSurfaceMedium = buildHyperOSIcon(
+        if (_chargingCaseMedium != null) return _chargingCaseMedium!!
+        _chargingCaseMedium = buildHyperOSIcon(
             name = "ChargingCase.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(929.2f, 266.3f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Medium.ChargingCase: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _chargingCaseSurfaceMedium!!
+        return _chargingCaseMedium!!
     }
 
-private var _chargingCaseSurfaceMedium: ImageVector? = null
+private var _chargingCaseMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ChargingCase: ImageVector
     get() {
-        if (_chargingCaseSurfaceDemibold != null) return _chargingCaseSurfaceDemibold!!
-        _chargingCaseSurfaceDemibold = buildHyperOSIcon(
+        if (_chargingCaseDemibold != null) return _chargingCaseDemibold!!
+        _chargingCaseDemibold = buildHyperOSIcon(
             name = "ChargingCase.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(928.6f, 262.4f),
@@ -340,8 +340,8 @@ val MiuixIcons.Glass.Demibold.ChargingCase: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _chargingCaseSurfaceDemibold!!
+        return _chargingCaseDemibold!!
     }
 
-private var _chargingCaseSurfaceDemibold: ImageVector? = null
+private var _chargingCaseDemibold: ImageVector? = null
 

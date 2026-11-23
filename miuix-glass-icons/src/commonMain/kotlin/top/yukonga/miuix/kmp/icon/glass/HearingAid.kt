@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HearingAid: ImageVector
 
 val MiuixIcons.Glass.Light.HearingAid: ImageVector
     get() {
-        if (_hearingAidSurfaceLight != null) return _hearingAidSurfaceLight!!
-        _hearingAidSurfaceLight = buildHyperOSIcon(
+        if (_hearingAidLight != null) return _hearingAidLight!!
+        _hearingAidLight = buildHyperOSIcon(
             name = "HearingAid.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(997.3f, 556f),
@@ -86,15 +86,15 @@ val MiuixIcons.Glass.Light.HearingAid: ImageVector
             translationY = 1041.6462f,
             autoMirror = false,
         )
-        return _hearingAidSurfaceLight!!
+        return _hearingAidLight!!
     }
 
-private var _hearingAidSurfaceLight: ImageVector? = null
+private var _hearingAidLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HearingAid: ImageVector
     get() {
-        if (_hearingAidSurfaceNormal != null) return _hearingAidSurfaceNormal!!
-        _hearingAidSurfaceNormal = buildHyperOSIcon(
+        if (_hearingAidNormal != null) return _hearingAidNormal!!
+        _hearingAidNormal = buildHyperOSIcon(
             name = "HearingAid.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(988.2f, 556f),
@@ -167,15 +167,15 @@ val MiuixIcons.Glass.Normal.HearingAid: ImageVector
             translationY = 1041.6471f,
             autoMirror = false,
         )
-        return _hearingAidSurfaceNormal!!
+        return _hearingAidNormal!!
     }
 
-private var _hearingAidSurfaceNormal: ImageVector? = null
+private var _hearingAidNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HearingAid: ImageVector
     get() {
-        if (_hearingAidSurfaceRegular != null) return _hearingAidSurfaceRegular!!
-        _hearingAidSurfaceRegular = buildHyperOSIcon(
+        if (_hearingAidRegular != null) return _hearingAidRegular!!
+        _hearingAidRegular = buildHyperOSIcon(
             name = "HearingAid.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(984f, 556f),
@@ -248,15 +248,15 @@ val MiuixIcons.Glass.Regular.HearingAid: ImageVector
             translationY = 1041.6474f,
             autoMirror = false,
         )
-        return _hearingAidSurfaceRegular!!
+        return _hearingAidRegular!!
     }
 
-private var _hearingAidSurfaceRegular: ImageVector? = null
+private var _hearingAidRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HearingAid: ImageVector
     get() {
-        if (_hearingAidSurfaceMedium != null) return _hearingAidSurfaceMedium!!
-        _hearingAidSurfaceMedium = buildHyperOSIcon(
+        if (_hearingAidMedium != null) return _hearingAidMedium!!
+        _hearingAidMedium = buildHyperOSIcon(
             name = "HearingAid.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(978.6f, 556f),
@@ -329,15 +329,15 @@ val MiuixIcons.Glass.Medium.HearingAid: ImageVector
             translationY = 1041.6478f,
             autoMirror = false,
         )
-        return _hearingAidSurfaceMedium!!
+        return _hearingAidMedium!!
     }
 
-private var _hearingAidSurfaceMedium: ImageVector? = null
+private var _hearingAidMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HearingAid: ImageVector
     get() {
-        if (_hearingAidSurfaceDemibold != null) return _hearingAidSurfaceDemibold!!
-        _hearingAidSurfaceDemibold = buildHyperOSIcon(
+        if (_hearingAidDemibold != null) return _hearingAidDemibold!!
+        _hearingAidDemibold = buildHyperOSIcon(
             name = "HearingAid.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(974.8f, 556f),
@@ -410,8 +410,8 @@ val MiuixIcons.Glass.Demibold.HearingAid: ImageVector
             translationY = 1041.6481f,
             autoMirror = false,
         )
-        return _hearingAidSurfaceDemibold!!
+        return _hearingAidDemibold!!
     }
 
-private var _hearingAidSurfaceDemibold: ImageVector? = null
+private var _hearingAidDemibold: ImageVector? = null
 

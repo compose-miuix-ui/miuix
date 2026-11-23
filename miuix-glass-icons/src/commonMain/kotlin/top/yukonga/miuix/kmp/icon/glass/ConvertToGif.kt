@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ConvertToGif: ImageVector
 
 val MiuixIcons.Glass.Light.ConvertToGif: ImageVector
     get() {
-        if (_convertToGifLineLight != null) return _convertToGifLineLight!!
-        _convertToGifLineLight = buildHyperOSIcon(
+        if (_convertToGifLight != null) return _convertToGifLight!!
+        _convertToGifLight = buildHyperOSIcon(
             name = "ConvertToGif.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(677.9f, 56.9f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Light.ConvertToGif: ImageVector
             translationY = 1029.1667f,
             autoMirror = false,
         )
-        return _convertToGifLineLight!!
+        return _convertToGifLight!!
     }
 
-private var _convertToGifLineLight: ImageVector? = null
+private var _convertToGifLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ConvertToGif: ImageVector
     get() {
-        if (_convertToGifLineNormal != null) return _convertToGifLineNormal!!
-        _convertToGifLineNormal = buildHyperOSIcon(
+        if (_convertToGifNormal != null) return _convertToGifNormal!!
+        _convertToGifNormal = buildHyperOSIcon(
             name = "ConvertToGif.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(677.3f, 48f),
@@ -453,15 +453,15 @@ val MiuixIcons.Glass.Normal.ConvertToGif: ImageVector
             translationY = 1029.1667f,
             autoMirror = false,
         )
-        return _convertToGifLineNormal!!
+        return _convertToGifNormal!!
     }
 
-private var _convertToGifLineNormal: ImageVector? = null
+private var _convertToGifNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ConvertToGif: ImageVector
     get() {
-        if (_convertToGifLineRegular != null) return _convertToGifLineRegular!!
-        _convertToGifLineRegular = buildHyperOSIcon(
+        if (_convertToGifRegular != null) return _convertToGifRegular!!
+        _convertToGifRegular = buildHyperOSIcon(
             name = "ConvertToGif.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(677f, 44f),
@@ -677,15 +677,15 @@ val MiuixIcons.Glass.Regular.ConvertToGif: ImageVector
             translationY = 1029.1667f,
             autoMirror = false,
         )
-        return _convertToGifLineRegular!!
+        return _convertToGifRegular!!
     }
 
-private var _convertToGifLineRegular: ImageVector? = null
+private var _convertToGifRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ConvertToGif: ImageVector
     get() {
-        if (_convertToGifLineMedium != null) return _convertToGifLineMedium!!
-        _convertToGifLineMedium = buildHyperOSIcon(
+        if (_convertToGifMedium != null) return _convertToGifMedium!!
+        _convertToGifMedium = buildHyperOSIcon(
             name = "ConvertToGif.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(671.9f, 37.5f),
@@ -901,15 +901,15 @@ val MiuixIcons.Glass.Medium.ConvertToGif: ImageVector
             translationY = 1029.1667f,
             autoMirror = false,
         )
-        return _convertToGifLineMedium!!
+        return _convertToGifMedium!!
     }
 
-private var _convertToGifLineMedium: ImageVector? = null
+private var _convertToGifMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ConvertToGif: ImageVector
     get() {
-        if (_convertToGifLineDemibold != null) return _convertToGifLineDemibold!!
-        _convertToGifLineDemibold = buildHyperOSIcon(
+        if (_convertToGifDemibold != null) return _convertToGifDemibold!!
+        _convertToGifDemibold = buildHyperOSIcon(
             name = "ConvertToGif.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(668.3f, 33f),
@@ -1125,8 +1125,8 @@ val MiuixIcons.Glass.Demibold.ConvertToGif: ImageVector
             translationY = 1029.1667f,
             autoMirror = false,
         )
-        return _convertToGifLineDemibold!!
+        return _convertToGifDemibold!!
     }
 
-private var _convertToGifLineDemibold: ImageVector? = null
+private var _convertToGifDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Webcam: ImageVector
 
 val MiuixIcons.Glass.Light.Webcam: ImageVector
     get() {
-        if (_webcamSurfaceLight != null) return _webcamSurfaceLight!!
-        _webcamSurfaceLight = buildHyperOSIcon(
+        if (_webcamLight != null) return _webcamLight!!
+        _webcamLight = buildHyperOSIcon(
             name = "Webcam.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(275.9f, -125.3f),
@@ -81,15 +81,15 @@ val MiuixIcons.Glass.Light.Webcam: ImageVector
             translationY = 1035.722f,
             autoMirror = false,
         )
-        return _webcamSurfaceLight!!
+        return _webcamLight!!
     }
 
-private var _webcamSurfaceLight: ImageVector? = null
+private var _webcamLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Webcam: ImageVector
     get() {
-        if (_webcamSurfaceNormal != null) return _webcamSurfaceNormal!!
-        _webcamSurfaceNormal = buildHyperOSIcon(
+        if (_webcamNormal != null) return _webcamNormal!!
+        _webcamNormal = buildHyperOSIcon(
             name = "Webcam.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(269.8f, -127.2f),
@@ -157,15 +157,15 @@ val MiuixIcons.Glass.Normal.Webcam: ImageVector
             translationY = 1040.1524f,
             autoMirror = false,
         )
-        return _webcamSurfaceNormal!!
+        return _webcamNormal!!
     }
 
-private var _webcamSurfaceNormal: ImageVector? = null
+private var _webcamNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Webcam: ImageVector
     get() {
-        if (_webcamSurfaceRegular != null) return _webcamSurfaceRegular!!
-        _webcamSurfaceRegular = buildHyperOSIcon(
+        if (_webcamRegular != null) return _webcamRegular!!
+        _webcamRegular = buildHyperOSIcon(
             name = "Webcam.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(267f, -128f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Regular.Webcam: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _webcamSurfaceRegular!!
+        return _webcamRegular!!
     }
 
-private var _webcamSurfaceRegular: ImageVector? = null
+private var _webcamRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Webcam: ImageVector
     get() {
-        if (_webcamSurfaceMedium != null) return _webcamSurfaceMedium!!
-        _webcamSurfaceMedium = buildHyperOSIcon(
+        if (_webcamMedium != null) return _webcamMedium!!
+        _webcamMedium = buildHyperOSIcon(
             name = "Webcam.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(261.6f, -131.2f),
@@ -309,15 +309,15 @@ val MiuixIcons.Glass.Medium.Webcam: ImageVector
             translationY = 1040.5451f,
             autoMirror = false,
         )
-        return _webcamSurfaceMedium!!
+        return _webcamMedium!!
     }
 
-private var _webcamSurfaceMedium: ImageVector? = null
+private var _webcamMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Webcam: ImageVector
     get() {
-        if (_webcamSurfaceDemibold != null) return _webcamSurfaceDemibold!!
-        _webcamSurfaceDemibold = buildHyperOSIcon(
+        if (_webcamDemibold != null) return _webcamDemibold!!
+        _webcamDemibold = buildHyperOSIcon(
             name = "Webcam.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(257.8f, -133.5f),
@@ -385,8 +385,8 @@ val MiuixIcons.Glass.Demibold.Webcam: ImageVector
             translationY = 1039.4098f,
             autoMirror = false,
         )
-        return _webcamSurfaceDemibold!!
+        return _webcamDemibold!!
     }
 
-private var _webcamSurfaceDemibold: ImageVector? = null
+private var _webcamDemibold: ImageVector? = null
 

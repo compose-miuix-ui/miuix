@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PadDevice: ImageVector
 
 val MiuixIcons.Glass.Light.PadDevice: ImageVector
     get() {
-        if (_padDeviceLineLight != null) return _padDeviceLineLight!!
-        _padDeviceLineLight = buildHyperOSIcon(
+        if (_padDeviceLight != null) return _padDeviceLight!!
+        _padDeviceLight = buildHyperOSIcon(
             name = "PadDevice.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(184.8f, 76.1f),
@@ -88,15 +88,15 @@ val MiuixIcons.Glass.Light.PadDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padDeviceLineLight!!
+        return _padDeviceLight!!
     }
 
-private var _padDeviceLineLight: ImageVector? = null
+private var _padDeviceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PadDevice: ImageVector
     get() {
-        if (_padDeviceLineNormal != null) return _padDeviceLineNormal!!
-        _padDeviceLineNormal = buildHyperOSIcon(
+        if (_padDeviceNormal != null) return _padDeviceNormal!!
+        _padDeviceNormal = buildHyperOSIcon(
             name = "PadDevice.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(175.3f, 71.2f),
@@ -171,15 +171,15 @@ val MiuixIcons.Glass.Normal.PadDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padDeviceLineNormal!!
+        return _padDeviceNormal!!
     }
 
-private var _padDeviceLineNormal: ImageVector? = null
+private var _padDeviceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PadDevice: ImageVector
     get() {
-        if (_padDeviceLineRegular != null) return _padDeviceLineRegular!!
-        _padDeviceLineRegular = buildHyperOSIcon(
+        if (_padDeviceRegular != null) return _padDeviceRegular!!
+        _padDeviceRegular = buildHyperOSIcon(
             name = "PadDevice.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(171f, 69f),
@@ -254,15 +254,15 @@ val MiuixIcons.Glass.Regular.PadDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padDeviceLineRegular!!
+        return _padDeviceRegular!!
     }
 
-private var _padDeviceLineRegular: ImageVector? = null
+private var _padDeviceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PadDevice: ImageVector
     get() {
-        if (_padDeviceLineMedium != null) return _padDeviceLineMedium!!
-        _padDeviceLineMedium = buildHyperOSIcon(
+        if (_padDeviceMedium != null) return _padDeviceMedium!!
+        _padDeviceMedium = buildHyperOSIcon(
             name = "PadDevice.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(163.7f, 65.2f),
@@ -337,15 +337,15 @@ val MiuixIcons.Glass.Medium.PadDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padDeviceLineMedium!!
+        return _padDeviceMedium!!
     }
 
-private var _padDeviceLineMedium: ImageVector? = null
+private var _padDeviceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PadDevice: ImageVector
     get() {
-        if (_padDeviceLineDemibold != null) return _padDeviceLineDemibold!!
-        _padDeviceLineDemibold = buildHyperOSIcon(
+        if (_padDeviceDemibold != null) return _padDeviceDemibold!!
+        _padDeviceDemibold = buildHyperOSIcon(
             name = "PadDevice.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(158.6f, 62.6f),
@@ -420,8 +420,8 @@ val MiuixIcons.Glass.Demibold.PadDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padDeviceLineDemibold!!
+        return _padDeviceDemibold!!
     }
 
-private var _padDeviceLineDemibold: ImageVector? = null
+private var _padDeviceDemibold: ImageVector? = null
 

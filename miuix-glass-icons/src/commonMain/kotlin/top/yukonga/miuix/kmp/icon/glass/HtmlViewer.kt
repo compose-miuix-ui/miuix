@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HtmlViewer: ImageVector
 
 val MiuixIcons.Glass.Light.HtmlViewer: ImageVector
     get() {
-        if (_htmlViewerSurfaceLight != null) return _htmlViewerSurfaceLight!!
-        _htmlViewerSurfaceLight = buildHyperOSIcon(
+        if (_htmlViewerLight != null) return _htmlViewerLight!!
+        _htmlViewerLight = buildHyperOSIcon(
             name = "HtmlViewer.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(368.1f, 386.7f),
@@ -106,15 +106,15 @@ val MiuixIcons.Glass.Light.HtmlViewer: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _htmlViewerSurfaceLight!!
+        return _htmlViewerLight!!
     }
 
-private var _htmlViewerSurfaceLight: ImageVector? = null
+private var _htmlViewerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HtmlViewer: ImageVector
     get() {
-        if (_htmlViewerSurfaceNormal != null) return _htmlViewerSurfaceNormal!!
-        _htmlViewerSurfaceNormal = buildHyperOSIcon(
+        if (_htmlViewerNormal != null) return _htmlViewerNormal!!
+        _htmlViewerNormal = buildHyperOSIcon(
             name = "HtmlViewer.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(363.2f, 390.3f),
@@ -207,15 +207,15 @@ val MiuixIcons.Glass.Normal.HtmlViewer: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _htmlViewerSurfaceNormal!!
+        return _htmlViewerNormal!!
     }
 
-private var _htmlViewerSurfaceNormal: ImageVector? = null
+private var _htmlViewerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HtmlViewer: ImageVector
     get() {
-        if (_htmlViewerSurfaceRegular != null) return _htmlViewerSurfaceRegular!!
-        _htmlViewerSurfaceRegular = buildHyperOSIcon(
+        if (_htmlViewerRegular != null) return _htmlViewerRegular!!
+        _htmlViewerRegular = buildHyperOSIcon(
             name = "HtmlViewer.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(361f, 392f),
@@ -308,15 +308,15 @@ val MiuixIcons.Glass.Regular.HtmlViewer: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _htmlViewerSurfaceRegular!!
+        return _htmlViewerRegular!!
     }
 
-private var _htmlViewerSurfaceRegular: ImageVector? = null
+private var _htmlViewerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HtmlViewer: ImageVector
     get() {
-        if (_htmlViewerSurfaceMedium != null) return _htmlViewerSurfaceMedium!!
-        _htmlViewerSurfaceMedium = buildHyperOSIcon(
+        if (_htmlViewerMedium != null) return _htmlViewerMedium!!
+        _htmlViewerMedium = buildHyperOSIcon(
             name = "HtmlViewer.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(354.5f, 395.8f),
@@ -409,15 +409,15 @@ val MiuixIcons.Glass.Medium.HtmlViewer: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _htmlViewerSurfaceMedium!!
+        return _htmlViewerMedium!!
     }
 
-private var _htmlViewerSurfaceMedium: ImageVector? = null
+private var _htmlViewerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HtmlViewer: ImageVector
     get() {
-        if (_htmlViewerSurfaceDemibold != null) return _htmlViewerSurfaceDemibold!!
-        _htmlViewerSurfaceDemibold = buildHyperOSIcon(
+        if (_htmlViewerDemibold != null) return _htmlViewerDemibold!!
+        _htmlViewerDemibold = buildHyperOSIcon(
             name = "HtmlViewer.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(350f, 398.4f),
@@ -510,8 +510,8 @@ val MiuixIcons.Glass.Demibold.HtmlViewer: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _htmlViewerSurfaceDemibold!!
+        return _htmlViewerDemibold!!
     }
 
-private var _htmlViewerSurfaceDemibold: ImageVector? = null
+private var _htmlViewerDemibold: ImageVector? = null
 

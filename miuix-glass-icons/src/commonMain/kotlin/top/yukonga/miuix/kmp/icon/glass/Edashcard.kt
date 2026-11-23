@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Edashcard: ImageVector
 
 val MiuixIcons.Glass.Light.Edashcard: ImageVector
     get() {
-        if (_edashcardSurfaceLight != null) return _edashcardSurfaceLight!!
-        _edashcardSurfaceLight = buildHyperOSIcon(
+        if (_edashcardLight != null) return _edashcardLight!!
+        _edashcardLight = buildHyperOSIcon(
             name = "Edashcard.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(470.7f, 355f),
@@ -89,15 +89,15 @@ val MiuixIcons.Glass.Light.Edashcard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _edashcardSurfaceLight!!
+        return _edashcardLight!!
     }
 
-private var _edashcardSurfaceLight: ImageVector? = null
+private var _edashcardLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Edashcard: ImageVector
     get() {
-        if (_edashcardSurfaceNormal != null) return _edashcardSurfaceNormal!!
-        _edashcardSurfaceNormal = buildHyperOSIcon(
+        if (_edashcardNormal != null) return _edashcardNormal!!
+        _edashcardNormal = buildHyperOSIcon(
             name = "Edashcard.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(463.3f, 355f),
@@ -173,15 +173,15 @@ val MiuixIcons.Glass.Normal.Edashcard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _edashcardSurfaceNormal!!
+        return _edashcardNormal!!
     }
 
-private var _edashcardSurfaceNormal: ImageVector? = null
+private var _edashcardNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Edashcard: ImageVector
     get() {
-        if (_edashcardSurfaceRegular != null) return _edashcardSurfaceRegular!!
-        _edashcardSurfaceRegular = buildHyperOSIcon(
+        if (_edashcardRegular != null) return _edashcardRegular!!
+        _edashcardRegular = buildHyperOSIcon(
             name = "Edashcard.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(460f, 355f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Regular.Edashcard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _edashcardSurfaceRegular!!
+        return _edashcardRegular!!
     }
 
-private var _edashcardSurfaceRegular: ImageVector? = null
+private var _edashcardRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Edashcard: ImageVector
     get() {
-        if (_edashcardSurfaceMedium != null) return _edashcardSurfaceMedium!!
-        _edashcardSurfaceMedium = buildHyperOSIcon(
+        if (_edashcardMedium != null) return _edashcardMedium!!
+        _edashcardMedium = buildHyperOSIcon(
             name = "Edashcard.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(457.3f, 355f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Medium.Edashcard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _edashcardSurfaceMedium!!
+        return _edashcardMedium!!
     }
 
-private var _edashcardSurfaceMedium: ImageVector? = null
+private var _edashcardMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Edashcard: ImageVector
     get() {
-        if (_edashcardSurfaceDemibold != null) return _edashcardSurfaceDemibold!!
-        _edashcardSurfaceDemibold = buildHyperOSIcon(
+        if (_edashcardDemibold != null) return _edashcardDemibold!!
+        _edashcardDemibold = buildHyperOSIcon(
             name = "Edashcard.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(455.4f, 355f),
@@ -425,8 +425,8 @@ val MiuixIcons.Glass.Demibold.Edashcard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _edashcardSurfaceDemibold!!
+        return _edashcardDemibold!!
     }
 
-private var _edashcardSurfaceDemibold: ImageVector? = null
+private var _edashcardDemibold: ImageVector? = null
 

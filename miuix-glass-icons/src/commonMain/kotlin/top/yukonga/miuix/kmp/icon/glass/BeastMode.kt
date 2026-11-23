@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BeastMode: ImageVector
 
 val MiuixIcons.Glass.Light.BeastMode: ImageVector
     get() {
-        if (_beastModeSurfaceLight != null) return _beastModeSurfaceLight!!
-        _beastModeSurfaceLight = buildHyperOSIcon(
+        if (_beastModeLight != null) return _beastModeLight!!
+        _beastModeLight = buildHyperOSIcon(
             name = "BeastMode.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(677.1f, 657.8f),
@@ -62,15 +62,15 @@ val MiuixIcons.Glass.Light.BeastMode: ImageVector
             translationY = 1085.9243f,
             autoMirror = false,
         )
-        return _beastModeSurfaceLight!!
+        return _beastModeLight!!
     }
 
-private var _beastModeSurfaceLight: ImageVector? = null
+private var _beastModeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BeastMode: ImageVector
     get() {
-        if (_beastModeSurfaceNormal != null) return _beastModeSurfaceNormal!!
-        _beastModeSurfaceNormal = buildHyperOSIcon(
+        if (_beastModeNormal != null) return _beastModeNormal!!
+        _beastModeNormal = buildHyperOSIcon(
             name = "BeastMode.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(680.5f, 648.3f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Normal.BeastMode: ImageVector
             translationY = 1085.1374f,
             autoMirror = false,
         )
-        return _beastModeSurfaceNormal!!
+        return _beastModeNormal!!
     }
 
-private var _beastModeSurfaceNormal: ImageVector? = null
+private var _beastModeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BeastMode: ImageVector
     get() {
-        if (_beastModeSurfaceRegular != null) return _beastModeSurfaceRegular!!
-        _beastModeSurfaceRegular = buildHyperOSIcon(
+        if (_beastModeRegular != null) return _beastModeRegular!!
+        _beastModeRegular = buildHyperOSIcon(
             name = "BeastMode.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(682f, 644f),
@@ -176,15 +176,15 @@ val MiuixIcons.Glass.Regular.BeastMode: ImageVector
             translationY = 1084.7778f,
             autoMirror = false,
         )
-        return _beastModeSurfaceRegular!!
+        return _beastModeRegular!!
     }
 
-private var _beastModeSurfaceRegular: ImageVector? = null
+private var _beastModeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BeastMode: ImageVector
     get() {
-        if (_beastModeSurfaceMedium != null) return _beastModeSurfaceMedium!!
-        _beastModeSurfaceMedium = buildHyperOSIcon(
+        if (_beastModeMedium != null) return _beastModeMedium!!
+        _beastModeMedium = buildHyperOSIcon(
             name = "BeastMode.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(680.9f, 637.5f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Medium.BeastMode: ImageVector
             translationY = 1082.584f,
             autoMirror = false,
         )
-        return _beastModeSurfaceMedium!!
+        return _beastModeMedium!!
     }
 
-private var _beastModeSurfaceMedium: ImageVector? = null
+private var _beastModeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BeastMode: ImageVector
     get() {
-        if (_beastModeSurfaceDemibold != null) return _beastModeSurfaceDemibold!!
-        _beastModeSurfaceDemibold = buildHyperOSIcon(
+        if (_beastModeDemibold != null) return _beastModeDemibold!!
+        _beastModeDemibold = buildHyperOSIcon(
             name = "BeastMode.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(680.2f, 633f),
@@ -290,8 +290,8 @@ val MiuixIcons.Glass.Demibold.BeastMode: ImageVector
             translationY = 1081.0391f,
             autoMirror = false,
         )
-        return _beastModeSurfaceDemibold!!
+        return _beastModeDemibold!!
     }
 
-private var _beastModeSurfaceDemibold: ImageVector? = null
+private var _beastModeDemibold: ImageVector? = null
 

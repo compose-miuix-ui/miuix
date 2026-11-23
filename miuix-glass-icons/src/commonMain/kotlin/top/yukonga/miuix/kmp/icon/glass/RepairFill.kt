@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RepairFill: ImageVector
 
 val MiuixIcons.Glass.Light.RepairFill: ImageVector
     get() {
-        if (_repairSurfaceLight != null) return _repairSurfaceLight!!
-        _repairSurfaceLight = buildHyperOSIcon(
+        if (_repairFillLight != null) return _repairFillLight!!
+        _repairFillLight = buildHyperOSIcon(
             name = "RepairFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(851.8f, 516.9f),
@@ -55,15 +55,15 @@ val MiuixIcons.Glass.Light.RepairFill: ImageVector
             translationY = 1041.9157f,
             autoMirror = false,
         )
-        return _repairSurfaceLight!!
+        return _repairFillLight!!
     }
 
-private var _repairSurfaceLight: ImageVector? = null
+private var _repairFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RepairFill: ImageVector
     get() {
-        if (_repairSurfaceNormal != null) return _repairSurfaceNormal!!
-        _repairSurfaceNormal = buildHyperOSIcon(
+        if (_repairFillNormal != null) return _repairFillNormal!!
+        _repairFillNormal = buildHyperOSIcon(
             name = "RepairFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(858.8f, 516.3f),
@@ -105,15 +105,15 @@ val MiuixIcons.Glass.Normal.RepairFill: ImageVector
             translationY = 1041.7401f,
             autoMirror = false,
         )
-        return _repairSurfaceNormal!!
+        return _repairFillNormal!!
     }
 
-private var _repairSurfaceNormal: ImageVector? = null
+private var _repairFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RepairFill: ImageVector
     get() {
-        if (_repairSurfaceRegular != null) return _repairSurfaceRegular!!
-        _repairSurfaceRegular = buildHyperOSIcon(
+        if (_repairFillRegular != null) return _repairFillRegular!!
+        _repairFillRegular = buildHyperOSIcon(
             name = "RepairFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(862f, 516f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Regular.RepairFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairSurfaceRegular!!
+        return _repairFillRegular!!
     }
 
-private var _repairSurfaceRegular: ImageVector? = null
+private var _repairFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RepairFill: ImageVector
     get() {
-        if (_repairSurfaceMedium != null) return _repairSurfaceMedium!!
-        _repairSurfaceMedium = buildHyperOSIcon(
+        if (_repairFillMedium != null) return _repairFillMedium!!
+        _repairFillMedium = buildHyperOSIcon(
             name = "RepairFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(860.4f, 513.3f),
@@ -205,15 +205,15 @@ val MiuixIcons.Glass.Medium.RepairFill: ImageVector
             translationY = 1042.608f,
             autoMirror = false,
         )
-        return _repairSurfaceMedium!!
+        return _repairFillMedium!!
     }
 
-private var _repairSurfaceMedium: ImageVector? = null
+private var _repairFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RepairFill: ImageVector
     get() {
-        if (_repairSurfaceDemibold != null) return _repairSurfaceDemibold!!
-        _repairSurfaceDemibold = buildHyperOSIcon(
+        if (_repairFillDemibold != null) return _repairFillDemibold!!
+        _repairFillDemibold = buildHyperOSIcon(
             name = "RepairFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(859.2f, 511.4f),
@@ -255,8 +255,8 @@ val MiuixIcons.Glass.Demibold.RepairFill: ImageVector
             translationY = 1043.2672f,
             autoMirror = false,
         )
-        return _repairSurfaceDemibold!!
+        return _repairFillDemibold!!
     }
 
-private var _repairSurfaceDemibold: ImageVector? = null
+private var _repairFillDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Car: ImageVector
 
 val MiuixIcons.Glass.Light.Car: ImageVector
     get() {
-        if (_carSurfaceLight != null) return _carSurfaceLight!!
-        _carSurfaceLight = buildHyperOSIcon(
+        if (_carLight != null) return _carLight!!
+        _carLight = buildHyperOSIcon(
             name = "Car.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(471.8f, 744.9f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Light.Car: ImageVector
             translationY = 1030.6667f,
             autoMirror = false,
         )
-        return _carSurfaceLight!!
+        return _carLight!!
     }
 
-private var _carSurfaceLight: ImageVector? = null
+private var _carLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Car: ImageVector
     get() {
-        if (_carSurfaceNormal != null) return _carSurfaceNormal!!
-        _carSurfaceNormal = buildHyperOSIcon(
+        if (_carNormal != null) return _carNormal!!
+        _carNormal = buildHyperOSIcon(
             name = "Car.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(473.3f, 749.8f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Normal.Car: ImageVector
             translationY = 1030.6667f,
             autoMirror = false,
         )
-        return _carSurfaceNormal!!
+        return _carNormal!!
     }
 
-private var _carSurfaceNormal: ImageVector? = null
+private var _carNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Car: ImageVector
     get() {
-        if (_carSurfaceRegular != null) return _carSurfaceRegular!!
-        _carSurfaceRegular = buildHyperOSIcon(
+        if (_carRegular != null) return _carRegular!!
+        _carRegular = buildHyperOSIcon(
             name = "Car.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(474f, 752f),
@@ -359,15 +359,15 @@ val MiuixIcons.Glass.Regular.Car: ImageVector
             translationY = 1030.6667f,
             autoMirror = false,
         )
-        return _carSurfaceRegular!!
+        return _carRegular!!
     }
 
-private var _carSurfaceRegular: ImageVector? = null
+private var _carRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Car: ImageVector
     get() {
-        if (_carSurfaceMedium != null) return _carSurfaceMedium!!
-        _carSurfaceMedium = buildHyperOSIcon(
+        if (_carMedium != null) return _carMedium!!
+        _carMedium = buildHyperOSIcon(
             name = "Car.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(475.4f, 755.8f),
@@ -477,15 +477,15 @@ val MiuixIcons.Glass.Medium.Car: ImageVector
             translationY = 1030.6667f,
             autoMirror = false,
         )
-        return _carSurfaceMedium!!
+        return _carMedium!!
     }
 
-private var _carSurfaceMedium: ImageVector? = null
+private var _carMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Car: ImageVector
     get() {
-        if (_carSurfaceDemibold != null) return _carSurfaceDemibold!!
-        _carSurfaceDemibold = buildHyperOSIcon(
+        if (_carDemibold != null) return _carDemibold!!
+        _carDemibold = buildHyperOSIcon(
             name = "Car.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(476.3f, 758.4f),
@@ -595,8 +595,8 @@ val MiuixIcons.Glass.Demibold.Car: ImageVector
             translationY = 1030.6667f,
             autoMirror = false,
         )
-        return _carSurfaceDemibold!!
+        return _carDemibold!!
     }
 
-private var _carSurfaceDemibold: ImageVector? = null
+private var _carDemibold: ImageVector? = null
 

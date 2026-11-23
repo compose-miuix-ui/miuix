@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BottomSplitScreenOutline: ImageVector
 
 val MiuixIcons.Glass.Light.BottomSplitScreenOutline: ImageVector
     get() {
-        if (_bottomSplitScreenLineLight != null) return _bottomSplitScreenLineLight!!
-        _bottomSplitScreenLineLight = buildHyperOSIcon(
+        if (_bottomSplitScreenOutlineLight != null) return _bottomSplitScreenOutlineLight!!
+        _bottomSplitScreenOutlineLight = buildHyperOSIcon(
             name = "BottomSplitScreenOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(281f, 25.7f),
@@ -104,15 +104,15 @@ val MiuixIcons.Glass.Light.BottomSplitScreenOutline: ImageVector
             translationY = 1061.1111f,
             autoMirror = false,
         )
-        return _bottomSplitScreenLineLight!!
+        return _bottomSplitScreenOutlineLight!!
     }
 
-private var _bottomSplitScreenLineLight: ImageVector? = null
+private var _bottomSplitScreenOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BottomSplitScreenOutline: ImageVector
     get() {
-        if (_bottomSplitScreenLineNormal != null) return _bottomSplitScreenLineNormal!!
-        _bottomSplitScreenLineNormal = buildHyperOSIcon(
+        if (_bottomSplitScreenOutlineNormal != null) return _bottomSplitScreenOutlineNormal!!
+        _bottomSplitScreenOutlineNormal = buildHyperOSIcon(
             name = "BottomSplitScreenOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(272.8f, 21.1f),
@@ -203,15 +203,15 @@ val MiuixIcons.Glass.Normal.BottomSplitScreenOutline: ImageVector
             translationY = 1060.8056f,
             autoMirror = false,
         )
-        return _bottomSplitScreenLineNormal!!
+        return _bottomSplitScreenOutlineNormal!!
     }
 
-private var _bottomSplitScreenLineNormal: ImageVector? = null
+private var _bottomSplitScreenOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BottomSplitScreenOutline: ImageVector
     get() {
-        if (_bottomSplitScreenLineRegular != null) return _bottomSplitScreenLineRegular!!
-        _bottomSplitScreenLineRegular = buildHyperOSIcon(
+        if (_bottomSplitScreenOutlineRegular != null) return _bottomSplitScreenOutlineRegular!!
+        _bottomSplitScreenOutlineRegular = buildHyperOSIcon(
             name = "BottomSplitScreenOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(269f, 19f),
@@ -302,15 +302,15 @@ val MiuixIcons.Glass.Regular.BottomSplitScreenOutline: ImageVector
             translationY = 1060.6667f,
             autoMirror = false,
         )
-        return _bottomSplitScreenLineRegular!!
+        return _bottomSplitScreenOutlineRegular!!
     }
 
-private var _bottomSplitScreenLineRegular: ImageVector? = null
+private var _bottomSplitScreenOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BottomSplitScreenOutline: ImageVector
     get() {
-        if (_bottomSplitScreenLineMedium != null) return _bottomSplitScreenLineMedium!!
-        _bottomSplitScreenLineMedium = buildHyperOSIcon(
+        if (_bottomSplitScreenOutlineMedium != null) return _bottomSplitScreenOutlineMedium!!
+        _bottomSplitScreenOutlineMedium = buildHyperOSIcon(
             name = "BottomSplitScreenOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(261.7f, 15.2f),
@@ -401,15 +401,15 @@ val MiuixIcons.Glass.Medium.BottomSplitScreenOutline: ImageVector
             translationY = 1060.6667f,
             autoMirror = false,
         )
-        return _bottomSplitScreenLineMedium!!
+        return _bottomSplitScreenOutlineMedium!!
     }
 
-private var _bottomSplitScreenLineMedium: ImageVector? = null
+private var _bottomSplitScreenOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BottomSplitScreenOutline: ImageVector
     get() {
-        if (_bottomSplitScreenLineDemibold != null) return _bottomSplitScreenLineDemibold!!
-        _bottomSplitScreenLineDemibold = buildHyperOSIcon(
+        if (_bottomSplitScreenOutlineDemibold != null) return _bottomSplitScreenOutlineDemibold!!
+        _bottomSplitScreenOutlineDemibold = buildHyperOSIcon(
             name = "BottomSplitScreenOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(256.6f, 12.6f),
@@ -500,8 +500,8 @@ val MiuixIcons.Glass.Demibold.BottomSplitScreenOutline: ImageVector
             translationY = 1060.6667f,
             autoMirror = false,
         )
-        return _bottomSplitScreenLineDemibold!!
+        return _bottomSplitScreenOutlineDemibold!!
     }
 
-private var _bottomSplitScreenLineDemibold: ImageVector? = null
+private var _bottomSplitScreenOutlineDemibold: ImageVector? = null
 

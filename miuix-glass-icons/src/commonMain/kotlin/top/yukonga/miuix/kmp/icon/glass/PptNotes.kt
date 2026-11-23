@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PptNotes: ImageVector
 
 val MiuixIcons.Glass.Light.PptNotes: ImageVector
     get() {
-        if (_pptNotesLineLight != null) return _pptNotesLineLight!!
-        _pptNotesLineLight = buildHyperOSIcon(
+        if (_pptNotesLight != null) return _pptNotesLight!!
+        _pptNotesLight = buildHyperOSIcon(
             name = "PptNotes.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1130.9f, 789.7f),
@@ -124,15 +124,15 @@ val MiuixIcons.Glass.Light.PptNotes: ImageVector
             translationY = 1043.0556f,
             autoMirror = false,
         )
-        return _pptNotesLineLight!!
+        return _pptNotesLight!!
     }
 
-private var _pptNotesLineLight: ImageVector? = null
+private var _pptNotesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PptNotes: ImageVector
     get() {
-        if (_pptNotesLineNormal != null) return _pptNotesLineNormal!!
-        _pptNotesLineNormal = buildHyperOSIcon(
+        if (_pptNotesNormal != null) return _pptNotesNormal!!
+        _pptNotesNormal = buildHyperOSIcon(
             name = "PptNotes.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1133f, 798.8f),
@@ -243,15 +243,15 @@ val MiuixIcons.Glass.Normal.PptNotes: ImageVector
             translationY = 1042.4445f,
             autoMirror = false,
         )
-        return _pptNotesLineNormal!!
+        return _pptNotesNormal!!
     }
 
-private var _pptNotesLineNormal: ImageVector? = null
+private var _pptNotesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PptNotes: ImageVector
     get() {
-        if (_pptNotesLineRegular != null) return _pptNotesLineRegular!!
-        _pptNotesLineRegular = buildHyperOSIcon(
+        if (_pptNotesRegular != null) return _pptNotesRegular!!
+        _pptNotesRegular = buildHyperOSIcon(
             name = "PptNotes.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1134f, 803f),
@@ -362,15 +362,15 @@ val MiuixIcons.Glass.Regular.PptNotes: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _pptNotesLineRegular!!
+        return _pptNotesRegular!!
     }
 
-private var _pptNotesLineRegular: ImageVector? = null
+private var _pptNotesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PptNotes: ImageVector
     get() {
-        if (_pptNotesLineMedium != null) return _pptNotesLineMedium!!
-        _pptNotesLineMedium = buildHyperOSIcon(
+        if (_pptNotesMedium != null) return _pptNotesMedium!!
+        _pptNotesMedium = buildHyperOSIcon(
             name = "PptNotes.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1134f, 811.1f),
@@ -481,15 +481,15 @@ val MiuixIcons.Glass.Medium.PptNotes: ImageVector
             translationY = 1042.7072f,
             autoMirror = false,
         )
-        return _pptNotesLineMedium!!
+        return _pptNotesMedium!!
     }
 
-private var _pptNotesLineMedium: ImageVector? = null
+private var _pptNotesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PptNotes: ImageVector
     get() {
-        if (_pptNotesLineDemibold != null) return _pptNotesLineDemibold!!
-        _pptNotesLineDemibold = buildHyperOSIcon(
+        if (_pptNotesDemibold != null) return _pptNotesDemibold!!
+        _pptNotesDemibold = buildHyperOSIcon(
             name = "PptNotes.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1134f, 816.8f),
@@ -600,8 +600,8 @@ val MiuixIcons.Glass.Demibold.PptNotes: ImageVector
             translationY = 1043.0856f,
             autoMirror = false,
         )
-        return _pptNotesLineDemibold!!
+        return _pptNotesDemibold!!
     }
 
-private var _pptNotesLineDemibold: ImageVector? = null
+private var _pptNotesDemibold: ImageVector? = null
 

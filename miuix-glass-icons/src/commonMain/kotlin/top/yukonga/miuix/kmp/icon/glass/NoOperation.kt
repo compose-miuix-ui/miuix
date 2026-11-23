@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoOperation: ImageVector
 
 val MiuixIcons.Glass.Light.NoOperation: ImageVector
     get() {
-        if (_noOperationSurfaceLight != null) return _noOperationSurfaceLight!!
-        _noOperationSurfaceLight = buildHyperOSIcon(
+        if (_noOperationLight != null) return _noOperationLight!!
+        _noOperationLight = buildHyperOSIcon(
             name = "NoOperation.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(665f, -15.3f),
@@ -64,15 +64,15 @@ val MiuixIcons.Glass.Light.NoOperation: ImageVector
             translationY = 1042.1111f,
             autoMirror = false,
         )
-        return _noOperationSurfaceLight!!
+        return _noOperationLight!!
     }
 
-private var _noOperationSurfaceLight: ImageVector? = null
+private var _noOperationLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoOperation: ImageVector
     get() {
-        if (_noOperationSurfaceNormal != null) return _noOperationSurfaceNormal!!
-        _noOperationSurfaceNormal = buildHyperOSIcon(
+        if (_noOperationNormal != null) return _noOperationNormal!!
+        _noOperationNormal = buildHyperOSIcon(
             name = "NoOperation.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(665f, -6.2f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Normal.NoOperation: ImageVector
             translationY = 1041.8056f,
             autoMirror = false,
         )
-        return _noOperationSurfaceNormal!!
+        return _noOperationNormal!!
     }
 
-private var _noOperationSurfaceNormal: ImageVector? = null
+private var _noOperationNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoOperation: ImageVector
     get() {
-        if (_noOperationSurfaceRegular != null) return _noOperationSurfaceRegular!!
-        _noOperationSurfaceRegular = buildHyperOSIcon(
+        if (_noOperationRegular != null) return _noOperationRegular!!
+        _noOperationRegular = buildHyperOSIcon(
             name = "NoOperation.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(665f, -2f),
@@ -182,15 +182,15 @@ val MiuixIcons.Glass.Regular.NoOperation: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noOperationSurfaceRegular!!
+        return _noOperationRegular!!
     }
 
-private var _noOperationSurfaceRegular: ImageVector? = null
+private var _noOperationRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoOperation: ImageVector
     get() {
-        if (_noOperationSurfaceMedium != null) return _noOperationSurfaceMedium!!
-        _noOperationSurfaceMedium = buildHyperOSIcon(
+        if (_noOperationMedium != null) return _noOperationMedium!!
+        _noOperationMedium = buildHyperOSIcon(
             name = "NoOperation.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(665f, 6.1f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Medium.NoOperation: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noOperationSurfaceMedium!!
+        return _noOperationMedium!!
     }
 
-private var _noOperationSurfaceMedium: ImageVector? = null
+private var _noOperationMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoOperation: ImageVector
     get() {
-        if (_noOperationSurfaceDemibold != null) return _noOperationSurfaceDemibold!!
-        _noOperationSurfaceDemibold = buildHyperOSIcon(
+        if (_noOperationDemibold != null) return _noOperationDemibold!!
+        _noOperationDemibold = buildHyperOSIcon(
             name = "NoOperation.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(665f, 11.8f),
@@ -300,8 +300,8 @@ val MiuixIcons.Glass.Demibold.NoOperation: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noOperationSurfaceDemibold!!
+        return _noOperationDemibold!!
     }
 
-private var _noOperationSurfaceDemibold: ImageVector? = null
+private var _noOperationDemibold: ImageVector? = null
 

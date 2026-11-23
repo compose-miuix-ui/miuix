@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Slideshow: ImageVector
 
 val MiuixIcons.Glass.Light.Slideshow: ImageVector
     get() {
-        if (_slideshowLineLight != null) return _slideshowLineLight!!
-        _slideshowLineLight = buildHyperOSIcon(
+        if (_slideshowLight != null) return _slideshowLight!!
+        _slideshowLight = buildHyperOSIcon(
             name = "Slideshow.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(923.2f, -34.6f),
@@ -107,15 +107,15 @@ val MiuixIcons.Glass.Light.Slideshow: ImageVector
             translationY = 1067.7778f,
             autoMirror = false,
         )
-        return _slideshowLineLight!!
+        return _slideshowLight!!
     }
 
-private var _slideshowLineLight: ImageVector? = null
+private var _slideshowLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Slideshow: ImageVector
     get() {
-        if (_slideshowLineNormal != null) return _slideshowLineNormal!!
-        _slideshowLineNormal = buildHyperOSIcon(
+        if (_slideshowNormal != null) return _slideshowNormal!!
+        _slideshowNormal = buildHyperOSIcon(
             name = "Slideshow.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(927.2f, -43.1f),
@@ -209,15 +209,15 @@ val MiuixIcons.Glass.Normal.Slideshow: ImageVector
             translationY = 1067.0139f,
             autoMirror = false,
         )
-        return _slideshowLineNormal!!
+        return _slideshowNormal!!
     }
 
-private var _slideshowLineNormal: ImageVector? = null
+private var _slideshowNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Slideshow: ImageVector
     get() {
-        if (_slideshowLineRegular != null) return _slideshowLineRegular!!
-        _slideshowLineRegular = buildHyperOSIcon(
+        if (_slideshowRegular != null) return _slideshowRegular!!
+        _slideshowRegular = buildHyperOSIcon(
             name = "Slideshow.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(929f, -47f),
@@ -311,15 +311,15 @@ val MiuixIcons.Glass.Regular.Slideshow: ImageVector
             translationY = 1066.6667f,
             autoMirror = false,
         )
-        return _slideshowLineRegular!!
+        return _slideshowRegular!!
     }
 
-private var _slideshowLineRegular: ImageVector? = null
+private var _slideshowRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Slideshow: ImageVector
     get() {
-        if (_slideshowLineMedium != null) return _slideshowLineMedium!!
-        _slideshowLineMedium = buildHyperOSIcon(
+        if (_slideshowMedium != null) return _slideshowMedium!!
+        _slideshowMedium = buildHyperOSIcon(
             name = "Slideshow.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(924.1f, -54.6f),
@@ -413,15 +413,15 @@ val MiuixIcons.Glass.Medium.Slideshow: ImageVector
             translationY = 1069.3693f,
             autoMirror = false,
         )
-        return _slideshowLineMedium!!
+        return _slideshowMedium!!
     }
 
-private var _slideshowLineMedium: ImageVector? = null
+private var _slideshowMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Slideshow: ImageVector
     get() {
-        if (_slideshowLineDemibold != null) return _slideshowLineDemibold!!
-        _slideshowLineDemibold = buildHyperOSIcon(
+        if (_slideshowDemibold != null) return _slideshowDemibold!!
+        _slideshowDemibold = buildHyperOSIcon(
             name = "Slideshow.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(920.7f, -59.9f),
@@ -515,8 +515,8 @@ val MiuixIcons.Glass.Demibold.Slideshow: ImageVector
             translationY = 1071.2614f,
             autoMirror = false,
         )
-        return _slideshowLineDemibold!!
+        return _slideshowDemibold!!
     }
 
-private var _slideshowLineDemibold: ImageVector? = null
+private var _slideshowDemibold: ImageVector? = null
 

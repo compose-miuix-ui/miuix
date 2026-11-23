@@ -12,8 +12,8 @@ val MiuixIcons.Glass.DisplayBrightness: ImageVector
 
 val MiuixIcons.Glass.Light.DisplayBrightness: ImageVector
     get() {
-        if (_displayBrightnessSurfaceLight != null) return _displayBrightnessSurfaceLight!!
-        _displayBrightnessSurfaceLight = buildHyperOSIcon(
+        if (_displayBrightnessLight != null) return _displayBrightnessLight!!
+        _displayBrightnessLight = buildHyperOSIcon(
             name = "DisplayBrightness.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(635.3f, 887.9f),
@@ -148,15 +148,15 @@ val MiuixIcons.Glass.Light.DisplayBrightness: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _displayBrightnessSurfaceLight!!
+        return _displayBrightnessLight!!
     }
 
-private var _displayBrightnessSurfaceLight: ImageVector? = null
+private var _displayBrightnessLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.DisplayBrightness: ImageVector
     get() {
-        if (_displayBrightnessSurfaceNormal != null) return _displayBrightnessSurfaceNormal!!
-        _displayBrightnessSurfaceNormal = buildHyperOSIcon(
+        if (_displayBrightnessNormal != null) return _displayBrightnessNormal!!
+        _displayBrightnessNormal = buildHyperOSIcon(
             name = "DisplayBrightness.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(626.2f, 890f),
@@ -291,15 +291,15 @@ val MiuixIcons.Glass.Normal.DisplayBrightness: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _displayBrightnessSurfaceNormal!!
+        return _displayBrightnessNormal!!
     }
 
-private var _displayBrightnessSurfaceNormal: ImageVector? = null
+private var _displayBrightnessNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.DisplayBrightness: ImageVector
     get() {
-        if (_displayBrightnessSurfaceRegular != null) return _displayBrightnessSurfaceRegular!!
-        _displayBrightnessSurfaceRegular = buildHyperOSIcon(
+        if (_displayBrightnessRegular != null) return _displayBrightnessRegular!!
+        _displayBrightnessRegular = buildHyperOSIcon(
             name = "DisplayBrightness.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(622f, 891f),
@@ -434,15 +434,15 @@ val MiuixIcons.Glass.Regular.DisplayBrightness: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _displayBrightnessSurfaceRegular!!
+        return _displayBrightnessRegular!!
     }
 
-private var _displayBrightnessSurfaceRegular: ImageVector? = null
+private var _displayBrightnessRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.DisplayBrightness: ImageVector
     get() {
-        if (_displayBrightnessSurfaceMedium != null) return _displayBrightnessSurfaceMedium!!
-        _displayBrightnessSurfaceMedium = buildHyperOSIcon(
+        if (_displayBrightnessMedium != null) return _displayBrightnessMedium!!
+        _displayBrightnessMedium = buildHyperOSIcon(
             name = "DisplayBrightness.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(615.2f, 891f),
@@ -577,15 +577,15 @@ val MiuixIcons.Glass.Medium.DisplayBrightness: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _displayBrightnessSurfaceMedium!!
+        return _displayBrightnessMedium!!
     }
 
-private var _displayBrightnessSurfaceMedium: ImageVector? = null
+private var _displayBrightnessMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.DisplayBrightness: ImageVector
     get() {
-        if (_displayBrightnessSurfaceDemibold != null) return _displayBrightnessSurfaceDemibold!!
-        _displayBrightnessSurfaceDemibold = buildHyperOSIcon(
+        if (_displayBrightnessDemibold != null) return _displayBrightnessDemibold!!
+        _displayBrightnessDemibold = buildHyperOSIcon(
             name = "DisplayBrightness.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(610.5f, 891f),
@@ -720,8 +720,8 @@ val MiuixIcons.Glass.Demibold.DisplayBrightness: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _displayBrightnessSurfaceDemibold!!
+        return _displayBrightnessDemibold!!
     }
 
-private var _displayBrightnessSurfaceDemibold: ImageVector? = null
+private var _displayBrightnessDemibold: ImageVector? = null
 

@@ -85,6 +85,7 @@ import top.yukonga.miuix.kmp.icon.glass.Card2Dash2
 import top.yukonga.miuix.kmp.icon.glass.Card2DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Carrier
 import top.yukonga.miuix.kmp.icon.glass.ChargingCase
+import top.yukonga.miuix.kmp.icon.glass.CheckSelection
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
 import top.yukonga.miuix.kmp.icon.glass.ChevronForward
 import top.yukonga.miuix.kmp.icon.glass.Child

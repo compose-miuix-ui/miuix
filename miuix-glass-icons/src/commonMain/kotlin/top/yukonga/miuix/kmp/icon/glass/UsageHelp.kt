@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UsageHelp: ImageVector
 
 val MiuixIcons.Glass.Light.UsageHelp: ImageVector
     get() {
-        if (_usageHelpSurfaceLight != null) return _usageHelpSurfaceLight!!
-        _usageHelpSurfaceLight = buildHyperOSIcon(
+        if (_usageHelpLight != null) return _usageHelpLight!!
+        _usageHelpLight = buildHyperOSIcon(
             name = "UsageHelp.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(796.3f, 494.2f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.UsageHelp: ImageVector
             translationY = 1041.9444f,
             autoMirror = false,
         )
-        return _usageHelpSurfaceLight!!
+        return _usageHelpLight!!
     }
 
-private var _usageHelpSurfaceLight: ImageVector? = null
+private var _usageHelpLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UsageHelp: ImageVector
     get() {
-        if (_usageHelpSurfaceNormal != null) return _usageHelpSurfaceNormal!!
-        _usageHelpSurfaceNormal = buildHyperOSIcon(
+        if (_usageHelpNormal != null) return _usageHelpNormal!!
+        _usageHelpNormal = buildHyperOSIcon(
             name = "UsageHelp.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(800.9f, 492.7f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.UsageHelp: ImageVector
             translationY = 1042.0972f,
             autoMirror = false,
         )
-        return _usageHelpSurfaceNormal!!
+        return _usageHelpNormal!!
     }
 
-private var _usageHelpSurfaceNormal: ImageVector? = null
+private var _usageHelpNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UsageHelp: ImageVector
     get() {
-        if (_usageHelpSurfaceRegular != null) return _usageHelpSurfaceRegular!!
-        _usageHelpSurfaceRegular = buildHyperOSIcon(
+        if (_usageHelpRegular != null) return _usageHelpRegular!!
+        _usageHelpRegular = buildHyperOSIcon(
             name = "UsageHelp.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(803f, 492f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.UsageHelp: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _usageHelpSurfaceRegular!!
+        return _usageHelpRegular!!
     }
 
-private var _usageHelpSurfaceRegular: ImageVector? = null
+private var _usageHelpRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UsageHelp: ImageVector
     get() {
-        if (_usageHelpSurfaceMedium != null) return _usageHelpSurfaceMedium!!
-        _usageHelpSurfaceMedium = buildHyperOSIcon(
+        if (_usageHelpMedium != null) return _usageHelpMedium!!
+        _usageHelpMedium = buildHyperOSIcon(
             name = "UsageHelp.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(806.8f, 490.9f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.UsageHelp: ImageVector
             translationY = 1042.0315f,
             autoMirror = false,
         )
-        return _usageHelpSurfaceMedium!!
+        return _usageHelpMedium!!
     }
 
-private var _usageHelpSurfaceMedium: ImageVector? = null
+private var _usageHelpMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UsageHelp: ImageVector
     get() {
-        if (_usageHelpSurfaceDemibold != null) return _usageHelpSurfaceDemibold!!
-        _usageHelpSurfaceDemibold = buildHyperOSIcon(
+        if (_usageHelpDemibold != null) return _usageHelpDemibold!!
+        _usageHelpDemibold = buildHyperOSIcon(
             name = "UsageHelp.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(809.4f, 490.2f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.UsageHelp: ImageVector
             translationY = 1041.9369f,
             autoMirror = false,
         )
-        return _usageHelpSurfaceDemibold!!
+        return _usageHelpDemibold!!
     }
 
-private var _usageHelpSurfaceDemibold: ImageVector? = null
+private var _usageHelpDemibold: ImageVector? = null
 

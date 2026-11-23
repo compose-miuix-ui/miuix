@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FullScreen: ImageVector
 
 val MiuixIcons.Glass.Light.FullScreen: ImageVector
     get() {
-        if (_fullScreenSurfaceLight != null) return _fullScreenSurfaceLight!!
-        _fullScreenSurfaceLight = buildHyperOSIcon(
+        if (_fullScreenLight != null) return _fullScreenLight!!
+        _fullScreenLight = buildHyperOSIcon(
             name = "FullScreen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(959.4f, 724.9f),
@@ -64,15 +64,15 @@ val MiuixIcons.Glass.Light.FullScreen: ImageVector
             translationY = 1041.2222f,
             autoMirror = false,
         )
-        return _fullScreenSurfaceLight!!
+        return _fullScreenLight!!
     }
 
-private var _fullScreenSurfaceLight: ImageVector? = null
+private var _fullScreenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FullScreen: ImageVector
     get() {
-        if (_fullScreenSurfaceNormal != null) return _fullScreenSurfaceNormal!!
-        _fullScreenSurfaceNormal = buildHyperOSIcon(
+        if (_fullScreenNormal != null) return _fullScreenNormal!!
+        _fullScreenNormal = buildHyperOSIcon(
             name = "FullScreen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(959.1f, 716f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Normal.FullScreen: ImageVector
             translationY = 1041.5277f,
             autoMirror = false,
         )
-        return _fullScreenSurfaceNormal!!
+        return _fullScreenNormal!!
     }
 
-private var _fullScreenSurfaceNormal: ImageVector? = null
+private var _fullScreenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FullScreen: ImageVector
     get() {
-        if (_fullScreenSurfaceRegular != null) return _fullScreenSurfaceRegular!!
-        _fullScreenSurfaceRegular = buildHyperOSIcon(
+        if (_fullScreenRegular != null) return _fullScreenRegular!!
+        _fullScreenRegular = buildHyperOSIcon(
             name = "FullScreen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(959f, 712f),
@@ -182,15 +182,15 @@ val MiuixIcons.Glass.Regular.FullScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fullScreenSurfaceRegular!!
+        return _fullScreenRegular!!
     }
 
-private var _fullScreenSurfaceRegular: ImageVector? = null
+private var _fullScreenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FullScreen: ImageVector
     get() {
-        if (_fullScreenSurfaceMedium != null) return _fullScreenSurfaceMedium!!
-        _fullScreenSurfaceMedium = buildHyperOSIcon(
+        if (_fullScreenMedium != null) return _fullScreenMedium!!
+        _fullScreenMedium = buildHyperOSIcon(
             name = "FullScreen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(951.7f, 703.6f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Medium.FullScreen: ImageVector
             translationY = 1041.2613f,
             autoMirror = false,
         )
-        return _fullScreenSurfaceMedium!!
+        return _fullScreenMedium!!
     }
 
-private var _fullScreenSurfaceMedium: ImageVector? = null
+private var _fullScreenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FullScreen: ImageVector
     get() {
-        if (_fullScreenSurfaceDemibold != null) return _fullScreenSurfaceDemibold!!
-        _fullScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_fullScreenDemibold != null) return _fullScreenDemibold!!
+        _fullScreenDemibold = buildHyperOSIcon(
             name = "FullScreen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(946.6f, 697.8f),
@@ -300,8 +300,8 @@ val MiuixIcons.Glass.Demibold.FullScreen: ImageVector
             translationY = 1040.9774f,
             autoMirror = false,
         )
-        return _fullScreenSurfaceDemibold!!
+        return _fullScreenDemibold!!
     }
 
-private var _fullScreenSurfaceDemibold: ImageVector? = null
+private var _fullScreenDemibold: ImageVector? = null
 

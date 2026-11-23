@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PageUp: ImageVector
 
 val MiuixIcons.Glass.Light.PageUp: ImageVector
     get() {
-        if (_pageUpLineLight != null) return _pageUpLineLight!!
-        _pageUpLineLight = buildHyperOSIcon(
+        if (_pageUpLight != null) return _pageUpLight!!
+        _pageUpLight = buildHyperOSIcon(
             name = "PageUp.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(174.7f, 129.9f),
@@ -40,15 +40,15 @@ val MiuixIcons.Glass.Light.PageUp: ImageVector
             translationY = 1036.3541f,
             autoMirror = false,
         )
-        return _pageUpLineLight!!
+        return _pageUpLight!!
     }
 
-private var _pageUpLineLight: ImageVector? = null
+private var _pageUpLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PageUp: ImageVector
     get() {
-        if (_pageUpLineNormal != null) return _pageUpLineNormal!!
-        _pageUpLineNormal = buildHyperOSIcon(
+        if (_pageUpNormal != null) return _pageUpNormal!!
+        _pageUpNormal = buildHyperOSIcon(
             name = "PageUp.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(170.1f, 132f),
@@ -75,15 +75,15 @@ val MiuixIcons.Glass.Normal.PageUp: ImageVector
             translationY = 1039.4806f,
             autoMirror = false,
         )
-        return _pageUpLineNormal!!
+        return _pageUpNormal!!
     }
 
-private var _pageUpLineNormal: ImageVector? = null
+private var _pageUpNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PageUp: ImageVector
     get() {
-        if (_pageUpLineRegular != null) return _pageUpLineRegular!!
-        _pageUpLineRegular = buildHyperOSIcon(
+        if (_pageUpRegular != null) return _pageUpRegular!!
+        _pageUpRegular = buildHyperOSIcon(
             name = "PageUp.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(168f, 133f),
@@ -110,15 +110,15 @@ val MiuixIcons.Glass.Regular.PageUp: ImageVector
             translationY = 1040.9019f,
             autoMirror = false,
         )
-        return _pageUpLineRegular!!
+        return _pageUpRegular!!
     }
 
-private var _pageUpLineRegular: ImageVector? = null
+private var _pageUpRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PageUp: ImageVector
     get() {
-        if (_pageUpLineMedium != null) return _pageUpLineMedium!!
-        _pageUpLineMedium = buildHyperOSIcon(
+        if (_pageUpMedium != null) return _pageUpMedium!!
+        _pageUpMedium = buildHyperOSIcon(
             name = "PageUp.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(162.1f, 127.3f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Medium.PageUp: ImageVector
             translationY = 1040.9052f,
             autoMirror = false,
         )
-        return _pageUpLineMedium!!
+        return _pageUpMedium!!
     }
 
-private var _pageUpLineMedium: ImageVector? = null
+private var _pageUpMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PageUp: ImageVector
     get() {
-        if (_pageUpLineDemibold != null) return _pageUpLineDemibold!!
-        _pageUpLineDemibold = buildHyperOSIcon(
+        if (_pageUpDemibold != null) return _pageUpDemibold!!
+        _pageUpDemibold = buildHyperOSIcon(
             name = "PageUp.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(157.9f, 123.4f),
@@ -180,8 +180,8 @@ val MiuixIcons.Glass.Demibold.PageUp: ImageVector
             translationY = 1040.9068f,
             autoMirror = false,
         )
-        return _pageUpLineDemibold!!
+        return _pageUpDemibold!!
     }
 
-private var _pageUpLineDemibold: ImageVector? = null
+private var _pageUpDemibold: ImageVector? = null
 

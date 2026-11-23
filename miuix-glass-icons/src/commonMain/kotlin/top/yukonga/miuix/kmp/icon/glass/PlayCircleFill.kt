@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PlayCircleFill: ImageVector
 
 val MiuixIcons.Glass.Light.PlayCircleFill: ImageVector
     get() {
-        if (_weatherForecastPlaySurfaceLight != null) return _weatherForecastPlaySurfaceLight!!
-        _weatherForecastPlaySurfaceLight = buildHyperOSIcon(
+        if (_playCircleFillLight != null) return _playCircleFillLight!!
+        _playCircleFillLight = buildHyperOSIcon(
             name = "PlayCircleFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1152.9f, 375f),
@@ -48,15 +48,15 @@ val MiuixIcons.Glass.Light.PlayCircleFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _weatherForecastPlaySurfaceLight!!
+        return _playCircleFillLight!!
     }
 
-private var _weatherForecastPlaySurfaceLight: ImageVector? = null
+private var _playCircleFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PlayCircleFill: ImageVector
     get() {
-        if (_weatherForecastPlaySurfaceNormal != null) return _weatherForecastPlaySurfaceNormal!!
-        _weatherForecastPlaySurfaceNormal = buildHyperOSIcon(
+        if (_playCircleFillNormal != null) return _playCircleFillNormal!!
+        _playCircleFillNormal = buildHyperOSIcon(
             name = "PlayCircleFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1160.5f, 375f),
@@ -91,15 +91,15 @@ val MiuixIcons.Glass.Normal.PlayCircleFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _weatherForecastPlaySurfaceNormal!!
+        return _playCircleFillNormal!!
     }
 
-private var _weatherForecastPlaySurfaceNormal: ImageVector? = null
+private var _playCircleFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PlayCircleFill: ImageVector
     get() {
-        if (_weatherForecastPlaySurfaceRegular != null) return _weatherForecastPlaySurfaceRegular!!
-        _weatherForecastPlaySurfaceRegular = buildHyperOSIcon(
+        if (_playCircleFillRegular != null) return _playCircleFillRegular!!
+        _playCircleFillRegular = buildHyperOSIcon(
             name = "PlayCircleFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1164f, 375f),
@@ -134,15 +134,15 @@ val MiuixIcons.Glass.Regular.PlayCircleFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _weatherForecastPlaySurfaceRegular!!
+        return _playCircleFillRegular!!
     }
 
-private var _weatherForecastPlaySurfaceRegular: ImageVector? = null
+private var _playCircleFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PlayCircleFill: ImageVector
     get() {
-        if (_weatherForecastPlaySurfaceMedium != null) return _weatherForecastPlaySurfaceMedium!!
-        _weatherForecastPlaySurfaceMedium = buildHyperOSIcon(
+        if (_playCircleFillMedium != null) return _playCircleFillMedium!!
+        _playCircleFillMedium = buildHyperOSIcon(
             name = "PlayCircleFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1173.5f, 375.3f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Medium.PlayCircleFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _weatherForecastPlaySurfaceMedium!!
+        return _playCircleFillMedium!!
     }
 
-private var _weatherForecastPlaySurfaceMedium: ImageVector? = null
+private var _playCircleFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PlayCircleFill: ImageVector
     get() {
-        if (_weatherForecastPlaySurfaceDemibold != null) return _weatherForecastPlaySurfaceDemibold!!
-        _weatherForecastPlaySurfaceDemibold = buildHyperOSIcon(
+        if (_playCircleFillDemibold != null) return _playCircleFillDemibold!!
+        _playCircleFillDemibold = buildHyperOSIcon(
             name = "PlayCircleFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1180.1f, 375.5f),
@@ -220,8 +220,8 @@ val MiuixIcons.Glass.Demibold.PlayCircleFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _weatherForecastPlaySurfaceDemibold!!
+        return _playCircleFillDemibold!!
     }
 
-private var _weatherForecastPlaySurfaceDemibold: ImageVector? = null
+private var _playCircleFillDemibold: ImageVector? = null
 

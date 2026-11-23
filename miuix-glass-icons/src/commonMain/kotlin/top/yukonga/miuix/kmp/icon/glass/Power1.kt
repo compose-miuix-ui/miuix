@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Power1: ImageVector
 
 val MiuixIcons.Glass.Light.Power1: ImageVector
     get() {
-        if (_powerSurfaceLight != null) return _powerSurfaceLight!!
-        _powerSurfaceLight = buildHyperOSIcon(
+        if (_power1Light != null) return _power1Light!!
+        _power1Light = buildHyperOSIcon(
             name = "Power1.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(618.2f, 458.6f),
@@ -68,15 +68,15 @@ val MiuixIcons.Glass.Light.Power1: ImageVector
             translationY = 1041.2222f,
             autoMirror = false,
         )
-        return _powerSurfaceLight!!
+        return _power1Light!!
     }
 
-private var _powerSurfaceLight: ImageVector? = null
+private var _power1Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Power1: ImageVector
     get() {
-        if (_powerSurfaceNormal != null) return _powerSurfaceNormal!!
-        _powerSurfaceNormal = buildHyperOSIcon(
+        if (_power1Normal != null) return _power1Normal!!
+        _power1Normal = buildHyperOSIcon(
             name = "Power1.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(605.7f, 453.4f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Normal.Power1: ImageVector
             translationY = 1041.5277f,
             autoMirror = false,
         )
-        return _powerSurfaceNormal!!
+        return _power1Normal!!
     }
 
-private var _powerSurfaceNormal: ImageVector? = null
+private var _power1Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Power1: ImageVector
     get() {
-        if (_powerSurfaceRegular != null) return _powerSurfaceRegular!!
-        _powerSurfaceRegular = buildHyperOSIcon(
+        if (_power1Regular != null) return _power1Regular!!
+        _power1Regular = buildHyperOSIcon(
             name = "Power1.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(600f, 451f),
@@ -194,15 +194,15 @@ val MiuixIcons.Glass.Regular.Power1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _powerSurfaceRegular!!
+        return _power1Regular!!
     }
 
-private var _powerSurfaceRegular: ImageVector? = null
+private var _power1Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Power1: ImageVector
     get() {
-        if (_powerSurfaceMedium != null) return _powerSurfaceMedium!!
-        _powerSurfaceMedium = buildHyperOSIcon(
+        if (_power1Medium != null) return _power1Medium!!
+        _power1Medium = buildHyperOSIcon(
             name = "Power1.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(593.8f, 452.6f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Medium.Power1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _powerSurfaceMedium!!
+        return _power1Medium!!
     }
 
-private var _powerSurfaceMedium: ImageVector? = null
+private var _power1Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Power1: ImageVector
     get() {
-        if (_powerSurfaceDemibold != null) return _powerSurfaceDemibold!!
-        _powerSurfaceDemibold = buildHyperOSIcon(
+        if (_power1Demibold != null) return _power1Demibold!!
+        _power1Demibold = buildHyperOSIcon(
             name = "Power1.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(589.4f, 453.8f),
@@ -320,8 +320,8 @@ val MiuixIcons.Glass.Demibold.Power1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _powerSurfaceDemibold!!
+        return _power1Demibold!!
     }
 
-private var _powerSurfaceDemibold: ImageVector? = null
+private var _power1Demibold: ImageVector? = null
 

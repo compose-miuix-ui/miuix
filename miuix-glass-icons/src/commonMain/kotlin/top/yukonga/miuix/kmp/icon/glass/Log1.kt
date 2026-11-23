@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Log1: ImageVector
 
 val MiuixIcons.Glass.Light.Log1: ImageVector
     get() {
-        if (_logLineLight != null) return _logLineLight!!
-        _logLineLight = buildHyperOSIcon(
+        if (_log1Light != null) return _log1Light!!
+        _log1Light = buildHyperOSIcon(
             name = "Log1.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(767.7f, 375.1f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.Log1: ImageVector
             translationY = 1046.1112f,
             autoMirror = false,
         )
-        return _logLineLight!!
+        return _log1Light!!
     }
 
-private var _logLineLight: ImageVector? = null
+private var _log1Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Log1: ImageVector
     get() {
-        if (_logLineNormal != null) return _logLineNormal!!
-        _logLineNormal = buildHyperOSIcon(
+        if (_log1Normal != null) return _log1Normal!!
+        _log1Normal = buildHyperOSIcon(
             name = "Log1.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(776.8f, 375f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.Log1: ImageVector
             translationY = 1043.0558f,
             autoMirror = false,
         )
-        return _logLineNormal!!
+        return _log1Normal!!
     }
 
-private var _logLineNormal: ImageVector? = null
+private var _log1Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Log1: ImageVector
     get() {
-        if (_logLineRegular != null) return _logLineRegular!!
-        _logLineRegular = buildHyperOSIcon(
+        if (_log1Regular != null) return _log1Regular!!
+        _log1Regular = buildHyperOSIcon(
             name = "Log1.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(781f, 375f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.Log1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _logLineRegular!!
+        return _log1Regular!!
     }
 
-private var _logLineRegular: ImageVector? = null
+private var _log1Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Log1: ImageVector
     get() {
-        if (_logLineMedium != null) return _logLineMedium!!
-        _logLineMedium = buildHyperOSIcon(
+        if (_log1Medium != null) return _log1Medium!!
+        _log1Medium = buildHyperOSIcon(
             name = "Log1.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(787.5f, 375f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.Log1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _logLineMedium!!
+        return _log1Medium!!
     }
 
-private var _logLineMedium: ImageVector? = null
+private var _log1Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Log1: ImageVector
     get() {
-        if (_logLineDemibold != null) return _logLineDemibold!!
-        _logLineDemibold = buildHyperOSIcon(
+        if (_log1Demibold != null) return _log1Demibold!!
+        _log1Demibold = buildHyperOSIcon(
             name = "Log1.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(792f, 375f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.Log1: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _logLineDemibold!!
+        return _log1Demibold!!
     }
 
-private var _logLineDemibold: ImageVector? = null
+private var _log1Demibold: ImageVector? = null
 

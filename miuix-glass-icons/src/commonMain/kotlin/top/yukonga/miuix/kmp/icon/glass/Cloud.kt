@@ -17,8 +17,8 @@ val MiuixIcons.Glass.Cloud: ImageVector
 
 val MiuixIcons.Glass.Light.Cloud: ImageVector
     get() {
-        if (_cloudFillLight != null) return _cloudFillLight!!
-        _cloudFillLight = ImageVector.Builder(
+        if (_cloudLight != null) return _cloudLight!!
+        _cloudLight = ImageVector.Builder(
             name = "Cloud.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.Cloud: ImageVector
                 )
             }
         }.build()
-        return _cloudFillLight!!
+        return _cloudLight!!
     }
 
-private var _cloudFillLight: ImageVector? = null
+private var _cloudLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Cloud: ImageVector
     get() {
-        if (_cloudFillNormal != null) return _cloudFillNormal!!
-        _cloudFillNormal = ImageVector.Builder(
+        if (_cloudNormal != null) return _cloudNormal!!
+        _cloudNormal = ImageVector.Builder(
             name = "Cloud.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -124,15 +124,15 @@ val MiuixIcons.Glass.Normal.Cloud: ImageVector
                 )
             }
         }.build()
-        return _cloudFillNormal!!
+        return _cloudNormal!!
     }
 
-private var _cloudFillNormal: ImageVector? = null
+private var _cloudNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Cloud: ImageVector
     get() {
-        if (_cloudFillRegular != null) return _cloudFillRegular!!
-        _cloudFillRegular = ImageVector.Builder(
+        if (_cloudRegular != null) return _cloudRegular!!
+        _cloudRegular = ImageVector.Builder(
             name = "Cloud.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -181,15 +181,15 @@ val MiuixIcons.Glass.Regular.Cloud: ImageVector
                 )
             }
         }.build()
-        return _cloudFillRegular!!
+        return _cloudRegular!!
     }
 
-private var _cloudFillRegular: ImageVector? = null
+private var _cloudRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Cloud: ImageVector
     get() {
-        if (_cloudFillMedium != null) return _cloudFillMedium!!
-        _cloudFillMedium = ImageVector.Builder(
+        if (_cloudMedium != null) return _cloudMedium!!
+        _cloudMedium = ImageVector.Builder(
             name = "Cloud.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -238,15 +238,15 @@ val MiuixIcons.Glass.Medium.Cloud: ImageVector
                 )
             }
         }.build()
-        return _cloudFillMedium!!
+        return _cloudMedium!!
     }
 
-private var _cloudFillMedium: ImageVector? = null
+private var _cloudMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Cloud: ImageVector
     get() {
-        if (_cloudFillDemibold != null) return _cloudFillDemibold!!
-        _cloudFillDemibold = ImageVector.Builder(
+        if (_cloudDemibold != null) return _cloudDemibold!!
+        _cloudDemibold = ImageVector.Builder(
             name = "Cloud.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -295,7 +295,7 @@ val MiuixIcons.Glass.Demibold.Cloud: ImageVector
                 )
             }
         }.build()
-        return _cloudFillDemibold!!
+        return _cloudDemibold!!
     }
 
-private var _cloudFillDemibold: ImageVector? = null
+private var _cloudDemibold: ImageVector? = null

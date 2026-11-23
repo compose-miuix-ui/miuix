@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Battery90Charging: ImageVector
 
 val MiuixIcons.Glass.Light.Battery90Charging: ImageVector
     get() {
-        if (_batteryNew90ChargingOnSurfaceLight != null) return _batteryNew90ChargingOnSurfaceLight!!
-        _batteryNew90ChargingOnSurfaceLight = buildHyperOSIcon(
+        if (_battery90ChargingLight != null) return _battery90ChargingLight!!
+        _battery90ChargingLight = buildHyperOSIcon(
             name = "Battery90Charging.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1090.1f, 813.7f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Light.Battery90Charging: ImageVector
             translationY = 952.2921f,
             autoMirror = false,
         )
-        return _batteryNew90ChargingOnSurfaceLight!!
+        return _battery90ChargingLight!!
     }
 
-private var _batteryNew90ChargingOnSurfaceLight: ImageVector? = null
+private var _battery90ChargingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Battery90Charging: ImageVector
     get() {
-        if (_batteryNew90ChargingOnSurfaceNormal != null) return _batteryNew90ChargingOnSurfaceNormal!!
-        _batteryNew90ChargingOnSurfaceNormal = buildHyperOSIcon(
+        if (_battery90ChargingNormal != null) return _battery90ChargingNormal!!
+        _battery90ChargingNormal = buildHyperOSIcon(
             name = "Battery90Charging.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1093.5f, 825.6f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Normal.Battery90Charging: ImageVector
             translationY = 950.6518f,
             autoMirror = false,
         )
-        return _batteryNew90ChargingOnSurfaceNormal!!
+        return _battery90ChargingNormal!!
     }
 
-private var _batteryNew90ChargingOnSurfaceNormal: ImageVector? = null
+private var _battery90ChargingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Battery90Charging: ImageVector
     get() {
-        if (_batteryNew90ChargingOnSurfaceRegular != null) return _batteryNew90ChargingOnSurfaceRegular!!
-        _batteryNew90ChargingOnSurfaceRegular = buildHyperOSIcon(
+        if (_battery90ChargingRegular != null) return _battery90ChargingRegular!!
+        _battery90ChargingRegular = buildHyperOSIcon(
             name = "Battery90Charging.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1095f, 831f),
@@ -479,15 +479,15 @@ val MiuixIcons.Glass.Regular.Battery90Charging: ImageVector
             translationY = 949.8675f,
             autoMirror = false,
         )
-        return _batteryNew90ChargingOnSurfaceRegular!!
+        return _battery90ChargingRegular!!
     }
 
-private var _batteryNew90ChargingOnSurfaceRegular: ImageVector? = null
+private var _battery90ChargingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Battery90Charging: ImageVector
     get() {
-        if (_batteryNew90ChargingOnSurfaceMedium != null) return _batteryNew90ChargingOnSurfaceMedium!!
-        _batteryNew90ChargingOnSurfaceMedium = buildHyperOSIcon(
+        if (_battery90ChargingMedium != null) return _battery90ChargingMedium!!
+        _battery90ChargingMedium = buildHyperOSIcon(
             name = "Battery90Charging.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1092.3f, 836.4f),
@@ -637,15 +637,15 @@ val MiuixIcons.Glass.Medium.Battery90Charging: ImageVector
             translationY = 947.0936f,
             autoMirror = false,
         )
-        return _batteryNew90ChargingOnSurfaceMedium!!
+        return _battery90ChargingMedium!!
     }
 
-private var _batteryNew90ChargingOnSurfaceMedium: ImageVector? = null
+private var _battery90ChargingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Battery90Charging: ImageVector
     get() {
-        if (_batteryNew90ChargingOnSurfaceDemibold != null) return _batteryNew90ChargingOnSurfaceDemibold!!
-        _batteryNew90ChargingOnSurfaceDemibold = buildHyperOSIcon(
+        if (_battery90ChargingDemibold != null) return _battery90ChargingDemibold!!
+        _battery90ChargingDemibold = buildHyperOSIcon(
             name = "Battery90Charging.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1090.4f, 840.2f),
@@ -795,8 +795,8 @@ val MiuixIcons.Glass.Demibold.Battery90Charging: ImageVector
             translationY = 945.1814f,
             autoMirror = false,
         )
-        return _batteryNew90ChargingOnSurfaceDemibold!!
+        return _battery90ChargingDemibold!!
     }
 
-private var _batteryNew90ChargingOnSurfaceDemibold: ImageVector? = null
+private var _battery90ChargingDemibold: ImageVector? = null
 

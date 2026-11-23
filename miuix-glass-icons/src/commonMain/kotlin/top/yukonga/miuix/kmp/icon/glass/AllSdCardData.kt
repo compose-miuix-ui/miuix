@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AllSdCardData: ImageVector
 
 val MiuixIcons.Glass.Light.AllSdCardData: ImageVector
     get() {
-        if (_allSdCardDataSurfaceLight != null) return _allSdCardDataSurfaceLight!!
-        _allSdCardDataSurfaceLight = buildHyperOSIcon(
+        if (_allSdCardDataLight != null) return _allSdCardDataLight!!
+        _allSdCardDataLight = buildHyperOSIcon(
             name = "AllSdCardData.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(744.6f, 728.7f),
@@ -95,15 +95,15 @@ val MiuixIcons.Glass.Light.AllSdCardData: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _allSdCardDataSurfaceLight!!
+        return _allSdCardDataLight!!
     }
 
-private var _allSdCardDataSurfaceLight: ImageVector? = null
+private var _allSdCardDataLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AllSdCardData: ImageVector
     get() {
-        if (_allSdCardDataSurfaceNormal != null) return _allSdCardDataSurfaceNormal!!
-        _allSdCardDataSurfaceNormal = buildHyperOSIcon(
+        if (_allSdCardDataNormal != null) return _allSdCardDataNormal!!
+        _allSdCardDataNormal = buildHyperOSIcon(
             name = "AllSdCardData.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(750.4f, 726.8f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Normal.AllSdCardData: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _allSdCardDataSurfaceNormal!!
+        return _allSdCardDataNormal!!
     }
 
-private var _allSdCardDataSurfaceNormal: ImageVector? = null
+private var _allSdCardDataNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AllSdCardData: ImageVector
     get() {
-        if (_allSdCardDataSurfaceRegular != null) return _allSdCardDataSurfaceRegular!!
-        _allSdCardDataSurfaceRegular = buildHyperOSIcon(
+        if (_allSdCardDataRegular != null) return _allSdCardDataRegular!!
+        _allSdCardDataRegular = buildHyperOSIcon(
             name = "AllSdCardData.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(753f, 726f),
@@ -275,15 +275,15 @@ val MiuixIcons.Glass.Regular.AllSdCardData: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _allSdCardDataSurfaceRegular!!
+        return _allSdCardDataRegular!!
     }
 
-private var _allSdCardDataSurfaceRegular: ImageVector? = null
+private var _allSdCardDataRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AllSdCardData: ImageVector
     get() {
-        if (_allSdCardDataSurfaceMedium != null) return _allSdCardDataSurfaceMedium!!
-        _allSdCardDataSurfaceMedium = buildHyperOSIcon(
+        if (_allSdCardDataMedium != null) return _allSdCardDataMedium!!
+        _allSdCardDataMedium = buildHyperOSIcon(
             name = "AllSdCardData.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(763.8f, 729f),
@@ -365,15 +365,15 @@ val MiuixIcons.Glass.Medium.AllSdCardData: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _allSdCardDataSurfaceMedium!!
+        return _allSdCardDataMedium!!
     }
 
-private var _allSdCardDataSurfaceMedium: ImageVector? = null
+private var _allSdCardDataMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AllSdCardData: ImageVector
     get() {
-        if (_allSdCardDataSurfaceDemibold != null) return _allSdCardDataSurfaceDemibold!!
-        _allSdCardDataSurfaceDemibold = buildHyperOSIcon(
+        if (_allSdCardDataDemibold != null) return _allSdCardDataDemibold!!
+        _allSdCardDataDemibold = buildHyperOSIcon(
             name = "AllSdCardData.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(771.4f, 731.1f),
@@ -455,8 +455,8 @@ val MiuixIcons.Glass.Demibold.AllSdCardData: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _allSdCardDataSurfaceDemibold!!
+        return _allSdCardDataDemibold!!
     }
 
-private var _allSdCardDataSurfaceDemibold: ImageVector? = null
+private var _allSdCardDataDemibold: ImageVector? = null
 

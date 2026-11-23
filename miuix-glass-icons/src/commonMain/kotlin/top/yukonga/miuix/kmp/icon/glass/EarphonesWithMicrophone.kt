@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EarphonesWithMicrophone: ImageVector
 
 val MiuixIcons.Glass.Light.EarphonesWithMicrophone: ImageVector
     get() {
-        if (_earphonesWithMicrophoneLineLight != null) return _earphonesWithMicrophoneLineLight!!
-        _earphonesWithMicrophoneLineLight = buildHyperOSIcon(
+        if (_earphonesWithMicrophoneLight != null) return _earphonesWithMicrophoneLight!!
+        _earphonesWithMicrophoneLight = buildHyperOSIcon(
             name = "EarphonesWithMicrophone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(315.8f, 275.4f),
@@ -73,15 +73,15 @@ val MiuixIcons.Glass.Light.EarphonesWithMicrophone: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _earphonesWithMicrophoneLineLight!!
+        return _earphonesWithMicrophoneLight!!
     }
 
-private var _earphonesWithMicrophoneLineLight: ImageVector? = null
+private var _earphonesWithMicrophoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EarphonesWithMicrophone: ImageVector
     get() {
-        if (_earphonesWithMicrophoneLineNormal != null) return _earphonesWithMicrophoneLineNormal!!
-        _earphonesWithMicrophoneLineNormal = buildHyperOSIcon(
+        if (_earphonesWithMicrophoneNormal != null) return _earphonesWithMicrophoneNormal!!
+        _earphonesWithMicrophoneNormal = buildHyperOSIcon(
             name = "EarphonesWithMicrophone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(320.1f, 286.1f),
@@ -141,15 +141,15 @@ val MiuixIcons.Glass.Normal.EarphonesWithMicrophone: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _earphonesWithMicrophoneLineNormal!!
+        return _earphonesWithMicrophoneNormal!!
     }
 
-private var _earphonesWithMicrophoneLineNormal: ImageVector? = null
+private var _earphonesWithMicrophoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EarphonesWithMicrophone: ImageVector
     get() {
-        if (_earphonesWithMicrophoneLineRegular != null) return _earphonesWithMicrophoneLineRegular!!
-        _earphonesWithMicrophoneLineRegular = buildHyperOSIcon(
+        if (_earphonesWithMicrophoneRegular != null) return _earphonesWithMicrophoneRegular!!
+        _earphonesWithMicrophoneRegular = buildHyperOSIcon(
             name = "EarphonesWithMicrophone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(322f, 291f),
@@ -209,15 +209,15 @@ val MiuixIcons.Glass.Regular.EarphonesWithMicrophone: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _earphonesWithMicrophoneLineRegular!!
+        return _earphonesWithMicrophoneRegular!!
     }
 
-private var _earphonesWithMicrophoneLineRegular: ImageVector? = null
+private var _earphonesWithMicrophoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EarphonesWithMicrophone: ImageVector
     get() {
-        if (_earphonesWithMicrophoneLineMedium != null) return _earphonesWithMicrophoneLineMedium!!
-        _earphonesWithMicrophoneLineMedium = buildHyperOSIcon(
+        if (_earphonesWithMicrophoneMedium != null) return _earphonesWithMicrophoneMedium!!
+        _earphonesWithMicrophoneMedium = buildHyperOSIcon(
             name = "EarphonesWithMicrophone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(327.1f, 299.6f),
@@ -277,15 +277,15 @@ val MiuixIcons.Glass.Medium.EarphonesWithMicrophone: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _earphonesWithMicrophoneLineMedium!!
+        return _earphonesWithMicrophoneMedium!!
     }
 
-private var _earphonesWithMicrophoneLineMedium: ImageVector? = null
+private var _earphonesWithMicrophoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EarphonesWithMicrophone: ImageVector
     get() {
-        if (_earphonesWithMicrophoneLineDemibold != null) return _earphonesWithMicrophoneLineDemibold!!
-        _earphonesWithMicrophoneLineDemibold = buildHyperOSIcon(
+        if (_earphonesWithMicrophoneDemibold != null) return _earphonesWithMicrophoneDemibold!!
+        _earphonesWithMicrophoneDemibold = buildHyperOSIcon(
             name = "EarphonesWithMicrophone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(330.7f, 305.7f),
@@ -345,8 +345,8 @@ val MiuixIcons.Glass.Demibold.EarphonesWithMicrophone: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _earphonesWithMicrophoneLineDemibold!!
+        return _earphonesWithMicrophoneDemibold!!
     }
 
-private var _earphonesWithMicrophoneLineDemibold: ImageVector? = null
+private var _earphonesWithMicrophoneDemibold: ImageVector? = null
 

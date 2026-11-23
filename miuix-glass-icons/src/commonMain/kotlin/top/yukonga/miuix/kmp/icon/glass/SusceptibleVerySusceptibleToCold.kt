@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SusceptibleVerySusceptibleToCold: ImageVector
 
 val MiuixIcons.Glass.Light.SusceptibleVerySusceptibleToCold: ImageVector
     get() {
-        if (_susceptibleVerySusceptibleToColdLineLight != null) return _susceptibleVerySusceptibleToColdLineLight!!
-        _susceptibleVerySusceptibleToColdLineLight = buildHyperOSIcon(
+        if (_susceptibleVerySusceptibleToColdLight != null) return _susceptibleVerySusceptibleToColdLight!!
+        _susceptibleVerySusceptibleToColdLight = buildHyperOSIcon(
             name = "SusceptibleVerySusceptibleToCold.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(470.6f, 756.3f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.SusceptibleVerySusceptibleToCold: ImageVector
             translationY = 1043.1956f,
             autoMirror = false,
         )
-        return _susceptibleVerySusceptibleToColdLineLight!!
+        return _susceptibleVerySusceptibleToColdLight!!
     }
 
-private var _susceptibleVerySusceptibleToColdLineLight: ImageVector? = null
+private var _susceptibleVerySusceptibleToColdLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SusceptibleVerySusceptibleToCold: ImageVector
     get() {
-        if (_susceptibleVerySusceptibleToColdLineNormal != null) return _susceptibleVerySusceptibleToColdLineNormal!!
-        _susceptibleVerySusceptibleToColdLineNormal = buildHyperOSIcon(
+        if (_susceptibleVerySusceptibleToColdNormal != null) return _susceptibleVerySusceptibleToColdNormal!!
+        _susceptibleVerySusceptibleToColdNormal = buildHyperOSIcon(
             name = "SusceptibleVerySusceptibleToCold.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(462.6f, 760.9f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.SusceptibleVerySusceptibleToCold: ImageVector
             translationY = 1045.4123f,
             autoMirror = false,
         )
-        return _susceptibleVerySusceptibleToColdLineNormal!!
+        return _susceptibleVerySusceptibleToColdNormal!!
     }
 
-private var _susceptibleVerySusceptibleToColdLineNormal: ImageVector? = null
+private var _susceptibleVerySusceptibleToColdNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SusceptibleVerySusceptibleToCold: ImageVector
     get() {
-        if (_susceptibleVerySusceptibleToColdLineRegular != null) return _susceptibleVerySusceptibleToColdLineRegular!!
-        _susceptibleVerySusceptibleToColdLineRegular = buildHyperOSIcon(
+        if (_susceptibleVerySusceptibleToColdRegular != null) return _susceptibleVerySusceptibleToColdRegular!!
+        _susceptibleVerySusceptibleToColdRegular = buildHyperOSIcon(
             name = "SusceptibleVerySusceptibleToCold.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(459f, 763f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.SusceptibleVerySusceptibleToCold: ImageVector
             translationY = 1046.4204f,
             autoMirror = false,
         )
-        return _susceptibleVerySusceptibleToColdLineRegular!!
+        return _susceptibleVerySusceptibleToColdRegular!!
     }
 
-private var _susceptibleVerySusceptibleToColdLineRegular: ImageVector? = null
+private var _susceptibleVerySusceptibleToColdRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SusceptibleVerySusceptibleToCold: ImageVector
     get() {
-        if (_susceptibleVerySusceptibleToColdLineMedium != null) return _susceptibleVerySusceptibleToColdLineMedium!!
-        _susceptibleVerySusceptibleToColdLineMedium = buildHyperOSIcon(
+        if (_susceptibleVerySusceptibleToColdMedium != null) return _susceptibleVerySusceptibleToColdMedium!!
+        _susceptibleVerySusceptibleToColdMedium = buildHyperOSIcon(
             name = "SusceptibleVerySusceptibleToCold.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(452f, 767.1f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.SusceptibleVerySusceptibleToCold: ImageVector
             translationY = 1048.4472f,
             autoMirror = false,
         )
-        return _susceptibleVerySusceptibleToColdLineMedium!!
+        return _susceptibleVerySusceptibleToColdMedium!!
     }
 
-private var _susceptibleVerySusceptibleToColdLineMedium: ImageVector? = null
+private var _susceptibleVerySusceptibleToColdMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SusceptibleVerySusceptibleToCold: ImageVector
     get() {
-        if (_susceptibleVerySusceptibleToColdLineDemibold != null) return _susceptibleVerySusceptibleToColdLineDemibold!!
-        _susceptibleVerySusceptibleToColdLineDemibold = buildHyperOSIcon(
+        if (_susceptibleVerySusceptibleToColdDemibold != null) return _susceptibleVerySusceptibleToColdDemibold!!
+        _susceptibleVerySusceptibleToColdDemibold = buildHyperOSIcon(
             name = "SusceptibleVerySusceptibleToCold.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(447.1f, 769.9f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.SusceptibleVerySusceptibleToCold: ImageVector
             translationY = 1049.8662f,
             autoMirror = false,
         )
-        return _susceptibleVerySusceptibleToColdLineDemibold!!
+        return _susceptibleVerySusceptibleToColdDemibold!!
     }
 
-private var _susceptibleVerySusceptibleToColdLineDemibold: ImageVector? = null
+private var _susceptibleVerySusceptibleToColdDemibold: ImageVector? = null
 

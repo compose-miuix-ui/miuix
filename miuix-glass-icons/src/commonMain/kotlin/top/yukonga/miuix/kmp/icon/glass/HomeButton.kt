@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HomeButton: ImageVector
 
 val MiuixIcons.Glass.Light.HomeButton: ImageVector
     get() {
-        if (_homeButtonLineLight != null) return _homeButtonLineLight!!
-        _homeButtonLineLight = buildHyperOSIcon(
+        if (_homeButtonLight != null) return _homeButtonLight!!
+        _homeButtonLight = buildHyperOSIcon(
             name = "HomeButton.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(439.3f, 825.7f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.HomeButton: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _homeButtonLineLight!!
+        return _homeButtonLight!!
     }
 
-private var _homeButtonLineLight: ImageVector? = null
+private var _homeButtonLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HomeButton: ImageVector
     get() {
-        if (_homeButtonLineNormal != null) return _homeButtonLineNormal!!
-        _homeButtonLineNormal = buildHyperOSIcon(
+        if (_homeButtonNormal != null) return _homeButtonNormal!!
+        _homeButtonNormal = buildHyperOSIcon(
             name = "HomeButton.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(438.4f, 834.8f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.HomeButton: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _homeButtonLineNormal!!
+        return _homeButtonNormal!!
     }
 
-private var _homeButtonLineNormal: ImageVector? = null
+private var _homeButtonNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HomeButton: ImageVector
     get() {
-        if (_homeButtonLineRegular != null) return _homeButtonLineRegular!!
-        _homeButtonLineRegular = buildHyperOSIcon(
+        if (_homeButtonRegular != null) return _homeButtonRegular!!
+        _homeButtonRegular = buildHyperOSIcon(
             name = "HomeButton.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(438f, 839f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.HomeButton: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _homeButtonLineRegular!!
+        return _homeButtonRegular!!
     }
 
-private var _homeButtonLineRegular: ImageVector? = null
+private var _homeButtonRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HomeButton: ImageVector
     get() {
-        if (_homeButtonLineMedium != null) return _homeButtonLineMedium!!
-        _homeButtonLineMedium = buildHyperOSIcon(
+        if (_homeButtonMedium != null) return _homeButtonMedium!!
+        _homeButtonMedium = buildHyperOSIcon(
             name = "HomeButton.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(437.2f, 847.1f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.HomeButton: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _homeButtonLineMedium!!
+        return _homeButtonMedium!!
     }
 
-private var _homeButtonLineMedium: ImageVector? = null
+private var _homeButtonMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HomeButton: ImageVector
     get() {
-        if (_homeButtonLineDemibold != null) return _homeButtonLineDemibold!!
-        _homeButtonLineDemibold = buildHyperOSIcon(
+        if (_homeButtonDemibold != null) return _homeButtonDemibold!!
+        _homeButtonDemibold = buildHyperOSIcon(
             name = "HomeButton.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(436.6f, 852.8f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.HomeButton: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _homeButtonLineDemibold!!
+        return _homeButtonDemibold!!
     }
 
-private var _homeButtonLineDemibold: ImageVector? = null
+private var _homeButtonDemibold: ImageVector? = null
 

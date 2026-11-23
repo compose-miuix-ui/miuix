@@ -12,8 +12,8 @@ val MiuixIcons.Glass.TimeLapse: ImageVector
 
 val MiuixIcons.Glass.Light.TimeLapse: ImageVector
     get() {
-        if (_timeLapseLineLight != null) return _timeLapseLineLight!!
-        _timeLapseLineLight = buildHyperOSIcon(
+        if (_timeLapseLight != null) return _timeLapseLight!!
+        _timeLapseLight = buildHyperOSIcon(
             name = "TimeLapse.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(783.9f, -48.1f),
@@ -142,15 +142,15 @@ val MiuixIcons.Glass.Light.TimeLapse: ImageVector
             translationY = 1043.545f,
             autoMirror = false,
         )
-        return _timeLapseLineLight!!
+        return _timeLapseLight!!
     }
 
-private var _timeLapseLineLight: ImageVector? = null
+private var _timeLapseLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.TimeLapse: ImageVector
     get() {
-        if (_timeLapseLineNormal != null) return _timeLapseLineNormal!!
-        _timeLapseLineNormal = buildHyperOSIcon(
+        if (_timeLapseNormal != null) return _timeLapseNormal!!
+        _timeLapseNormal = buildHyperOSIcon(
             name = "TimeLapse.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(777.8f, -40.5f),
@@ -279,15 +279,15 @@ val MiuixIcons.Glass.Normal.TimeLapse: ImageVector
             translationY = 1043.5608f,
             autoMirror = false,
         )
-        return _timeLapseLineNormal!!
+        return _timeLapseNormal!!
     }
 
-private var _timeLapseLineNormal: ImageVector? = null
+private var _timeLapseNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.TimeLapse: ImageVector
     get() {
-        if (_timeLapseLineRegular != null) return _timeLapseLineRegular!!
-        _timeLapseLineRegular = buildHyperOSIcon(
+        if (_timeLapseRegular != null) return _timeLapseRegular!!
+        _timeLapseRegular = buildHyperOSIcon(
             name = "TimeLapse.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(775f, -37f),
@@ -416,15 +416,15 @@ val MiuixIcons.Glass.Regular.TimeLapse: ImageVector
             translationY = 1043.5666f,
             autoMirror = false,
         )
-        return _timeLapseLineRegular!!
+        return _timeLapseRegular!!
     }
 
-private var _timeLapseLineRegular: ImageVector? = null
+private var _timeLapseRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.TimeLapse: ImageVector
     get() {
-        if (_timeLapseLineMedium != null) return _timeLapseLineMedium!!
-        _timeLapseLineMedium = buildHyperOSIcon(
+        if (_timeLapseMedium != null) return _timeLapseMedium!!
+        _timeLapseMedium = buildHyperOSIcon(
             name = "TimeLapse.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(772f, -29.2f),
@@ -553,15 +553,15 @@ val MiuixIcons.Glass.Medium.TimeLapse: ImageVector
             translationY = 1043.5369f,
             autoMirror = false,
         )
-        return _timeLapseLineMedium!!
+        return _timeLapseMedium!!
     }
 
-private var _timeLapseLineMedium: ImageVector? = null
+private var _timeLapseMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.TimeLapse: ImageVector
     get() {
-        if (_timeLapseLineDemibold != null) return _timeLapseLineDemibold!!
-        _timeLapseLineDemibold = buildHyperOSIcon(
+        if (_timeLapseDemibold != null) return _timeLapseDemibold!!
+        _timeLapseDemibold = buildHyperOSIcon(
             name = "TimeLapse.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(769.9f, -23.7f),
@@ -690,8 +690,8 @@ val MiuixIcons.Glass.Demibold.TimeLapse: ImageVector
             translationY = 1043.516f,
             autoMirror = false,
         )
-        return _timeLapseLineDemibold!!
+        return _timeLapseDemibold!!
     }
 
-private var _timeLapseLineDemibold: ImageVector? = null
+private var _timeLapseDemibold: ImageVector? = null
 

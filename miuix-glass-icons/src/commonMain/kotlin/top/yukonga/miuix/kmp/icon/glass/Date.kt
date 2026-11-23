@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Date: ImageVector
 
 val MiuixIcons.Glass.Light.Date: ImageVector
     get() {
-        if (_dateSurfaceLight != null) return _dateSurfaceLight!!
-        _dateSurfaceLight = buildHyperOSIcon(
+        if (_dateLight != null) return _dateLight!!
+        _dateLight = buildHyperOSIcon(
             name = "Date.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1066.8f, -58f),
@@ -117,15 +117,15 @@ val MiuixIcons.Glass.Light.Date: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dateSurfaceLight!!
+        return _dateLight!!
     }
 
-private var _dateSurfaceLight: ImageVector? = null
+private var _dateLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Date: ImageVector
     get() {
-        if (_dateSurfaceNormal != null) return _dateSurfaceNormal!!
-        _dateSurfaceNormal = buildHyperOSIcon(
+        if (_dateNormal != null) return _dateNormal!!
+        _dateNormal = buildHyperOSIcon(
             name = "Date.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1071.1f, -66.2f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Normal.Date: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dateSurfaceNormal!!
+        return _dateNormal!!
     }
 
-private var _dateSurfaceNormal: ImageVector? = null
+private var _dateNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Date: ImageVector
     get() {
-        if (_dateSurfaceRegular != null) return _dateSurfaceRegular!!
-        _dateSurfaceRegular = buildHyperOSIcon(
+        if (_dateRegular != null) return _dateRegular!!
+        _dateRegular = buildHyperOSIcon(
             name = "Date.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1073f, -70f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Regular.Date: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dateSurfaceRegular!!
+        return _dateRegular!!
     }
 
-private var _dateSurfaceRegular: ImageVector? = null
+private var _dateRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Date: ImageVector
     get() {
-        if (_dateSurfaceMedium != null) return _dateSurfaceMedium!!
-        _dateSurfaceMedium = buildHyperOSIcon(
+        if (_dateMedium != null) return _dateMedium!!
+        _dateMedium = buildHyperOSIcon(
             name = "Date.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1076.8f, -77.3f),
@@ -453,15 +453,15 @@ val MiuixIcons.Glass.Medium.Date: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dateSurfaceMedium!!
+        return _dateMedium!!
     }
 
-private var _dateSurfaceMedium: ImageVector? = null
+private var _dateMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Date: ImageVector
     get() {
-        if (_dateSurfaceDemibold != null) return _dateSurfaceDemibold!!
-        _dateSurfaceDemibold = buildHyperOSIcon(
+        if (_dateDemibold != null) return _dateDemibold!!
+        _dateDemibold = buildHyperOSIcon(
             name = "Date.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1079.4f, -82.4f),
@@ -565,8 +565,8 @@ val MiuixIcons.Glass.Demibold.Date: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _dateSurfaceDemibold!!
+        return _dateDemibold!!
     }
 
-private var _dateSurfaceDemibold: ImageVector? = null
+private var _dateDemibold: ImageVector? = null
 

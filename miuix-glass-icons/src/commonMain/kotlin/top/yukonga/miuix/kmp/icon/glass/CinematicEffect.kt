@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CinematicEffect: ImageVector
 
 val MiuixIcons.Glass.Light.CinematicEffect: ImageVector
     get() {
-        if (_cinematicEffectLineLight != null) return _cinematicEffectLineLight!!
-        _cinematicEffectLineLight = buildHyperOSIcon(
+        if (_cinematicEffectLight != null) return _cinematicEffectLight!!
+        _cinematicEffectLight = buildHyperOSIcon(
             name = "CinematicEffect.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(590.8f, 344.4f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.CinematicEffect: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cinematicEffectLineLight!!
+        return _cinematicEffectLight!!
     }
 
-private var _cinematicEffectLineLight: ImageVector? = null
+private var _cinematicEffectLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CinematicEffect: ImageVector
     get() {
-        if (_cinematicEffectLineNormal != null) return _cinematicEffectLineNormal!!
-        _cinematicEffectLineNormal = buildHyperOSIcon(
+        if (_cinematicEffectNormal != null) return _cinematicEffectNormal!!
+        _cinematicEffectNormal = buildHyperOSIcon(
             name = "CinematicEffect.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(584.1f, 346.9f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.CinematicEffect: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cinematicEffectLineNormal!!
+        return _cinematicEffectNormal!!
     }
 
-private var _cinematicEffectLineNormal: ImageVector? = null
+private var _cinematicEffectNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CinematicEffect: ImageVector
     get() {
-        if (_cinematicEffectLineRegular != null) return _cinematicEffectLineRegular!!
-        _cinematicEffectLineRegular = buildHyperOSIcon(
+        if (_cinematicEffectRegular != null) return _cinematicEffectRegular!!
+        _cinematicEffectRegular = buildHyperOSIcon(
             name = "CinematicEffect.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(581f, 348f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.CinematicEffect: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cinematicEffectLineRegular!!
+        return _cinematicEffectRegular!!
     }
 
-private var _cinematicEffectLineRegular: ImageVector? = null
+private var _cinematicEffectRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CinematicEffect: ImageVector
     get() {
-        if (_cinematicEffectLineMedium != null) return _cinematicEffectLineMedium!!
-        _cinematicEffectLineMedium = buildHyperOSIcon(
+        if (_cinematicEffectMedium != null) return _cinematicEffectMedium!!
+        _cinematicEffectMedium = buildHyperOSIcon(
             name = "CinematicEffect.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(576.7f, 355f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.CinematicEffect: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cinematicEffectLineMedium!!
+        return _cinematicEffectMedium!!
     }
 
-private var _cinematicEffectLineMedium: ImageVector? = null
+private var _cinematicEffectMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CinematicEffect: ImageVector
     get() {
-        if (_cinematicEffectLineDemibold != null) return _cinematicEffectLineDemibold!!
-        _cinematicEffectLineDemibold = buildHyperOSIcon(
+        if (_cinematicEffectDemibold != null) return _cinematicEffectDemibold!!
+        _cinematicEffectDemibold = buildHyperOSIcon(
             name = "CinematicEffect.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(573.6f, 359.9f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.CinematicEffect: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cinematicEffectLineDemibold!!
+        return _cinematicEffectDemibold!!
     }
 
-private var _cinematicEffectLineDemibold: ImageVector? = null
+private var _cinematicEffectDemibold: ImageVector? = null
 

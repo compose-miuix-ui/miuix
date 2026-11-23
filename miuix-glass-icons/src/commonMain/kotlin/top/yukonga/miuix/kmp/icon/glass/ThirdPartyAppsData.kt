@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ThirdPartyAppsData: ImageVector
 
 val MiuixIcons.Glass.Light.ThirdPartyAppsData: ImageVector
     get() {
-        if (_thirdPartyAppsDataSurfaceLight != null) return _thirdPartyAppsDataSurfaceLight!!
-        _thirdPartyAppsDataSurfaceLight = buildHyperOSIcon(
+        if (_thirdPartyAppsDataLight != null) return _thirdPartyAppsDataLight!!
+        _thirdPartyAppsDataLight = buildHyperOSIcon(
             name = "ThirdPartyAppsData.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(813.1f, 730.3f),
@@ -77,15 +77,15 @@ val MiuixIcons.Glass.Light.ThirdPartyAppsData: ImageVector
             translationY = 1084.1111f,
             autoMirror = false,
         )
-        return _thirdPartyAppsDataSurfaceLight!!
+        return _thirdPartyAppsDataLight!!
     }
 
-private var _thirdPartyAppsDataSurfaceLight: ImageVector? = null
+private var _thirdPartyAppsDataLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ThirdPartyAppsData: ImageVector
     get() {
-        if (_thirdPartyAppsDataSurfaceNormal != null) return _thirdPartyAppsDataSurfaceNormal!!
-        _thirdPartyAppsDataSurfaceNormal = buildHyperOSIcon(
+        if (_thirdPartyAppsDataNormal != null) return _thirdPartyAppsDataNormal!!
+        _thirdPartyAppsDataNormal = buildHyperOSIcon(
             name = "ThirdPartyAppsData.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(802.7f, 726.7f),
@@ -149,15 +149,15 @@ val MiuixIcons.Glass.Normal.ThirdPartyAppsData: ImageVector
             translationY = 1083.8056f,
             autoMirror = false,
         )
-        return _thirdPartyAppsDataSurfaceNormal!!
+        return _thirdPartyAppsDataNormal!!
     }
 
-private var _thirdPartyAppsDataSurfaceNormal: ImageVector? = null
+private var _thirdPartyAppsDataNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ThirdPartyAppsData: ImageVector
     get() {
-        if (_thirdPartyAppsDataSurfaceRegular != null) return _thirdPartyAppsDataSurfaceRegular!!
-        _thirdPartyAppsDataSurfaceRegular = buildHyperOSIcon(
+        if (_thirdPartyAppsDataRegular != null) return _thirdPartyAppsDataRegular!!
+        _thirdPartyAppsDataRegular = buildHyperOSIcon(
             name = "ThirdPartyAppsData.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(798f, 725f),
@@ -221,15 +221,15 @@ val MiuixIcons.Glass.Regular.ThirdPartyAppsData: ImageVector
             translationY = 1083.6667f,
             autoMirror = false,
         )
-        return _thirdPartyAppsDataSurfaceRegular!!
+        return _thirdPartyAppsDataRegular!!
     }
 
-private var _thirdPartyAppsDataSurfaceRegular: ImageVector? = null
+private var _thirdPartyAppsDataRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ThirdPartyAppsData: ImageVector
     get() {
-        if (_thirdPartyAppsDataSurfaceMedium != null) return _thirdPartyAppsDataSurfaceMedium!!
-        _thirdPartyAppsDataSurfaceMedium = buildHyperOSIcon(
+        if (_thirdPartyAppsDataMedium != null) return _thirdPartyAppsDataMedium!!
+        _thirdPartyAppsDataMedium = buildHyperOSIcon(
             name = "ThirdPartyAppsData.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(789.9f, 725f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Medium.ThirdPartyAppsData: ImageVector
             translationY = 1083.6667f,
             autoMirror = false,
         )
-        return _thirdPartyAppsDataSurfaceMedium!!
+        return _thirdPartyAppsDataMedium!!
     }
 
-private var _thirdPartyAppsDataSurfaceMedium: ImageVector? = null
+private var _thirdPartyAppsDataMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ThirdPartyAppsData: ImageVector
     get() {
-        if (_thirdPartyAppsDataSurfaceDemibold != null) return _thirdPartyAppsDataSurfaceDemibold!!
-        _thirdPartyAppsDataSurfaceDemibold = buildHyperOSIcon(
+        if (_thirdPartyAppsDataDemibold != null) return _thirdPartyAppsDataDemibold!!
+        _thirdPartyAppsDataDemibold = buildHyperOSIcon(
             name = "ThirdPartyAppsData.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(784.2f, 725f),
@@ -365,8 +365,8 @@ val MiuixIcons.Glass.Demibold.ThirdPartyAppsData: ImageVector
             translationY = 1083.6667f,
             autoMirror = false,
         )
-        return _thirdPartyAppsDataSurfaceDemibold!!
+        return _thirdPartyAppsDataDemibold!!
     }
 
-private var _thirdPartyAppsDataSurfaceDemibold: ImageVector? = null
+private var _thirdPartyAppsDataDemibold: ImageVector? = null
 

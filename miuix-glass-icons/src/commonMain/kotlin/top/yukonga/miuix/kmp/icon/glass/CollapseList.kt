@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CollapseList: ImageVector
 
 val MiuixIcons.Glass.Light.CollapseList: ImageVector
     get() {
-        if (_collapseListLineLight != null) return _collapseListLineLight!!
-        _collapseListLineLight = buildHyperOSIcon(
+        if (_collapseListLight != null) return _collapseListLight!!
+        _collapseListLight = buildHyperOSIcon(
             name = "CollapseList.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(330.3f, 246.2f),
@@ -45,15 +45,15 @@ val MiuixIcons.Glass.Light.CollapseList: ImageVector
             translationY = 1074.3019f,
             autoMirror = false,
         )
-        return _collapseListLineLight!!
+        return _collapseListLight!!
     }
 
-private var _collapseListLineLight: ImageVector? = null
+private var _collapseListLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CollapseList: ImageVector
     get() {
-        if (_collapseListLineNormal != null) return _collapseListLineNormal!!
-        _collapseListLineNormal = buildHyperOSIcon(
+        if (_collapseListNormal != null) return _collapseListNormal!!
+        _collapseListNormal = buildHyperOSIcon(
             name = "CollapseList.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(323.9f, 239.2f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Normal.CollapseList: ImageVector
             translationY = 1073.6878f,
             autoMirror = false,
         )
-        return _collapseListLineNormal!!
+        return _collapseListNormal!!
     }
 
-private var _collapseListLineNormal: ImageVector? = null
+private var _collapseListNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CollapseList: ImageVector
     get() {
-        if (_collapseListLineRegular != null) return _collapseListLineRegular!!
-        _collapseListLineRegular = buildHyperOSIcon(
+        if (_collapseListRegular != null) return _collapseListRegular!!
+        _collapseListRegular = buildHyperOSIcon(
             name = "CollapseList.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(321f, 236f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Regular.CollapseList: ImageVector
             translationY = 1073.4086f,
             autoMirror = false,
         )
-        return _collapseListLineRegular!!
+        return _collapseListRegular!!
     }
 
-private var _collapseListLineRegular: ImageVector? = null
+private var _collapseListRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CollapseList: ImageVector
     get() {
-        if (_collapseListLineMedium != null) return _collapseListLineMedium!!
-        _collapseListLineMedium = buildHyperOSIcon(
+        if (_collapseListMedium != null) return _collapseListMedium!!
+        _collapseListMedium = buildHyperOSIcon(
             name = "CollapseList.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(312.4f, 233.3f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Medium.CollapseList: ImageVector
             translationY = 1072.3992f,
             autoMirror = false,
         )
-        return _collapseListLineMedium!!
+        return _collapseListMedium!!
     }
 
-private var _collapseListLineMedium: ImageVector? = null
+private var _collapseListMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CollapseList: ImageVector
     get() {
-        if (_collapseListLineDemibold != null) return _collapseListLineDemibold!!
-        _collapseListLineDemibold = buildHyperOSIcon(
+        if (_collapseListDemibold != null) return _collapseListDemibold!!
+        _collapseListDemibold = buildHyperOSIcon(
             name = "CollapseList.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(306.3f, 231.4f),
@@ -205,8 +205,8 @@ val MiuixIcons.Glass.Demibold.CollapseList: ImageVector
             translationY = 1071.6916f,
             autoMirror = false,
         )
-        return _collapseListLineDemibold!!
+        return _collapseListDemibold!!
     }
 
-private var _collapseListLineDemibold: ImageVector? = null
+private var _collapseListDemibold: ImageVector? = null
 

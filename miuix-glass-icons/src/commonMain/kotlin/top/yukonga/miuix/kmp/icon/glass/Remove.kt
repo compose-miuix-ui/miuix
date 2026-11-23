@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Remove: ImageVector
 
 val MiuixIcons.Glass.Light.Remove: ImageVector
     get() {
-        if (_removeLineLight != null) return _removeLineLight!!
-        _removeLineLight = buildHyperOSIcon(
+        if (_removeLight != null) return _removeLight!!
+        _removeLight = buildHyperOSIcon(
             name = "Remove.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(907.8f, 404.7f),
@@ -61,15 +61,15 @@ val MiuixIcons.Glass.Light.Remove: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _removeLineLight!!
+        return _removeLight!!
     }
 
-private var _removeLineLight: ImageVector? = null
+private var _removeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Remove: ImageVector
     get() {
-        if (_removeLineNormal != null) return _removeLineNormal!!
-        _removeLineNormal = buildHyperOSIcon(
+        if (_removeNormal != null) return _removeNormal!!
+        _removeNormal = buildHyperOSIcon(
             name = "Remove.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(903.8f, 413.8f),
@@ -117,15 +117,15 @@ val MiuixIcons.Glass.Normal.Remove: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _removeLineNormal!!
+        return _removeNormal!!
     }
 
-private var _removeLineNormal: ImageVector? = null
+private var _removeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Remove: ImageVector
     get() {
-        if (_removeLineRegular != null) return _removeLineRegular!!
-        _removeLineRegular = buildHyperOSIcon(
+        if (_removeRegular != null) return _removeRegular!!
+        _removeRegular = buildHyperOSIcon(
             name = "Remove.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(902f, 418f),
@@ -173,15 +173,15 @@ val MiuixIcons.Glass.Regular.Remove: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _removeLineRegular!!
+        return _removeRegular!!
     }
 
-private var _removeLineRegular: ImageVector? = null
+private var _removeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Remove: ImageVector
     get() {
-        if (_removeLineMedium != null) return _removeLineMedium!!
-        _removeLineMedium = buildHyperOSIcon(
+        if (_removeMedium != null) return _removeMedium!!
+        _removeMedium = buildHyperOSIcon(
             name = "Remove.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(902f, 426.1f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Medium.Remove: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _removeLineMedium!!
+        return _removeMedium!!
     }
 
-private var _removeLineMedium: ImageVector? = null
+private var _removeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Remove: ImageVector
     get() {
-        if (_removeLineDemibold != null) return _removeLineDemibold!!
-        _removeLineDemibold = buildHyperOSIcon(
+        if (_removeDemibold != null) return _removeDemibold!!
+        _removeDemibold = buildHyperOSIcon(
             name = "Remove.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(902f, 431.8f),
@@ -285,8 +285,8 @@ val MiuixIcons.Glass.Demibold.Remove: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _removeLineDemibold!!
+        return _removeDemibold!!
     }
 
-private var _removeLineDemibold: ImageVector? = null
+private var _removeDemibold: ImageVector? = null
 

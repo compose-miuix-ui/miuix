@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Iphone: ImageVector
 
 val MiuixIcons.Glass.Light.Iphone: ImageVector
     get() {
-        if (_iphoneSurfaceLight != null) return _iphoneSurfaceLight!!
-        _iphoneSurfaceLight = buildHyperOSIcon(
+        if (_iphoneLight != null) return _iphoneLight!!
+        _iphoneLight = buildHyperOSIcon(
             name = "Iphone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(950.3f, -150.2f),
@@ -132,15 +132,15 @@ val MiuixIcons.Glass.Light.Iphone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _iphoneSurfaceLight!!
+        return _iphoneLight!!
     }
 
-private var _iphoneSurfaceLight: ImageVector? = null
+private var _iphoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Iphone: ImageVector
     get() {
-        if (_iphoneSurfaceNormal != null) return _iphoneSurfaceNormal!!
-        _iphoneSurfaceNormal = buildHyperOSIcon(
+        if (_iphoneNormal != null) return _iphoneNormal!!
+        _iphoneNormal = buildHyperOSIcon(
             name = "Iphone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(954.9f, -159.7f),
@@ -259,15 +259,15 @@ val MiuixIcons.Glass.Normal.Iphone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _iphoneSurfaceNormal!!
+        return _iphoneNormal!!
     }
 
-private var _iphoneSurfaceNormal: ImageVector? = null
+private var _iphoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Iphone: ImageVector
     get() {
-        if (_iphoneSurfaceRegular != null) return _iphoneSurfaceRegular!!
-        _iphoneSurfaceRegular = buildHyperOSIcon(
+        if (_iphoneRegular != null) return _iphoneRegular!!
+        _iphoneRegular = buildHyperOSIcon(
             name = "Iphone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(957f, -164f),
@@ -386,15 +386,15 @@ val MiuixIcons.Glass.Regular.Iphone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _iphoneSurfaceRegular!!
+        return _iphoneRegular!!
     }
 
-private var _iphoneSurfaceRegular: ImageVector? = null
+private var _iphoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Iphone: ImageVector
     get() {
-        if (_iphoneSurfaceMedium != null) return _iphoneSurfaceMedium!!
-        _iphoneSurfaceMedium = buildHyperOSIcon(
+        if (_iphoneMedium != null) return _iphoneMedium!!
+        _iphoneMedium = buildHyperOSIcon(
             name = "Iphone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(959.4f, -168.9f),
@@ -513,15 +513,15 @@ val MiuixIcons.Glass.Medium.Iphone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _iphoneSurfaceMedium!!
+        return _iphoneMedium!!
     }
 
-private var _iphoneSurfaceMedium: ImageVector? = null
+private var _iphoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Iphone: ImageVector
     get() {
-        if (_iphoneSurfaceDemibold != null) return _iphoneSurfaceDemibold!!
-        _iphoneSurfaceDemibold = buildHyperOSIcon(
+        if (_iphoneDemibold != null) return _iphoneDemibold!!
+        _iphoneDemibold = buildHyperOSIcon(
             name = "Iphone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(961.1f, -172.3f),
@@ -640,8 +640,8 @@ val MiuixIcons.Glass.Demibold.Iphone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _iphoneSurfaceDemibold!!
+        return _iphoneDemibold!!
     }
 
-private var _iphoneSurfaceDemibold: ImageVector? = null
+private var _iphoneDemibold: ImageVector? = null
 

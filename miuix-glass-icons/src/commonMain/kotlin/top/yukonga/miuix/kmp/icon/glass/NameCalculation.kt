@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NameCalculation: ImageVector
 
 val MiuixIcons.Glass.Light.NameCalculation: ImageVector
     get() {
-        if (_nameCalculationSurfaceLight != null) return _nameCalculationSurfaceLight!!
-        _nameCalculationSurfaceLight = buildHyperOSIcon(
+        if (_nameCalculationLight != null) return _nameCalculationLight!!
+        _nameCalculationLight = buildHyperOSIcon(
             name = "NameCalculation.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(108.8f, 192.9f),
@@ -95,15 +95,15 @@ val MiuixIcons.Glass.Light.NameCalculation: ImageVector
             translationY = 1012.5553f,
             autoMirror = false,
         )
-        return _nameCalculationSurfaceLight!!
+        return _nameCalculationLight!!
     }
 
-private var _nameCalculationSurfaceLight: ImageVector? = null
+private var _nameCalculationLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NameCalculation: ImageVector
     get() {
-        if (_nameCalculationSurfaceNormal != null) return _nameCalculationSurfaceNormal!!
-        _nameCalculationSurfaceNormal = buildHyperOSIcon(
+        if (_nameCalculationNormal != null) return _nameCalculationNormal!!
+        _nameCalculationNormal = buildHyperOSIcon(
             name = "NameCalculation.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(107.6f, 197.8f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Normal.NameCalculation: ImageVector
             translationY = 1017.444f,
             autoMirror = false,
         )
-        return _nameCalculationSurfaceNormal!!
+        return _nameCalculationNormal!!
     }
 
-private var _nameCalculationSurfaceNormal: ImageVector? = null
+private var _nameCalculationNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NameCalculation: ImageVector
     get() {
-        if (_nameCalculationSurfaceRegular != null) return _nameCalculationSurfaceRegular!!
-        _nameCalculationSurfaceRegular = buildHyperOSIcon(
+        if (_nameCalculationRegular != null) return _nameCalculationRegular!!
+        _nameCalculationRegular = buildHyperOSIcon(
             name = "NameCalculation.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(107f, 200f),
@@ -275,15 +275,15 @@ val MiuixIcons.Glass.Regular.NameCalculation: ImageVector
             translationY = 1019.6667f,
             autoMirror = false,
         )
-        return _nameCalculationSurfaceRegular!!
+        return _nameCalculationRegular!!
     }
 
-private var _nameCalculationSurfaceRegular: ImageVector? = null
+private var _nameCalculationRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NameCalculation: ImageVector
     get() {
-        if (_nameCalculationSurfaceMedium != null) return _nameCalculationSurfaceMedium!!
-        _nameCalculationSurfaceMedium = buildHyperOSIcon(
+        if (_nameCalculationMedium != null) return _nameCalculationMedium!!
+        _nameCalculationMedium = buildHyperOSIcon(
             name = "NameCalculation.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(103.2f, 202.7f),
@@ -365,15 +365,15 @@ val MiuixIcons.Glass.Medium.NameCalculation: ImageVector
             translationY = 1017.3694f,
             autoMirror = false,
         )
-        return _nameCalculationSurfaceMedium!!
+        return _nameCalculationMedium!!
     }
 
-private var _nameCalculationSurfaceMedium: ImageVector? = null
+private var _nameCalculationMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NameCalculation: ImageVector
     get() {
-        if (_nameCalculationSurfaceDemibold != null) return _nameCalculationSurfaceDemibold!!
-        _nameCalculationSurfaceDemibold = buildHyperOSIcon(
+        if (_nameCalculationDemibold != null) return _nameCalculationDemibold!!
+        _nameCalculationDemibold = buildHyperOSIcon(
             name = "NameCalculation.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(100.6f, 204.6f),
@@ -455,8 +455,8 @@ val MiuixIcons.Glass.Demibold.NameCalculation: ImageVector
             translationY = 1015.7611f,
             autoMirror = false,
         )
-        return _nameCalculationSurfaceDemibold!!
+        return _nameCalculationDemibold!!
     }
 
-private var _nameCalculationSurfaceDemibold: ImageVector? = null
+private var _nameCalculationDemibold: ImageVector? = null
 

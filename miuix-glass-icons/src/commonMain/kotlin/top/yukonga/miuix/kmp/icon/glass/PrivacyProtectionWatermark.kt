@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PrivacyProtectionWatermark: ImageVector
 
 val MiuixIcons.Glass.Light.PrivacyProtectionWatermark: ImageVector
     get() {
-        if (_privacyProtectionWatermarkLineLight != null) return _privacyProtectionWatermarkLineLight!!
-        _privacyProtectionWatermarkLineLight = buildHyperOSIcon(
+        if (_privacyProtectionWatermarkLight != null) return _privacyProtectionWatermarkLight!!
+        _privacyProtectionWatermarkLight = buildHyperOSIcon(
             name = "PrivacyProtectionWatermark.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(681.8f, -156.7f),
@@ -69,15 +69,15 @@ val MiuixIcons.Glass.Light.PrivacyProtectionWatermark: ImageVector
             translationY = 1038.1667f,
             autoMirror = false,
         )
-        return _privacyProtectionWatermarkLineLight!!
+        return _privacyProtectionWatermarkLight!!
     }
 
-private var _privacyProtectionWatermarkLineLight: ImageVector? = null
+private var _privacyProtectionWatermarkLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PrivacyProtectionWatermark: ImageVector
     get() {
-        if (_privacyProtectionWatermarkLineNormal != null) return _privacyProtectionWatermarkLineNormal!!
-        _privacyProtectionWatermarkLineNormal = buildHyperOSIcon(
+        if (_privacyProtectionWatermarkNormal != null) return _privacyProtectionWatermarkNormal!!
+        _privacyProtectionWatermarkNormal = buildHyperOSIcon(
             name = "PrivacyProtectionWatermark.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(683.3f, -165.8f),
@@ -133,15 +133,15 @@ val MiuixIcons.Glass.Normal.PrivacyProtectionWatermark: ImageVector
             translationY = 1038.1667f,
             autoMirror = false,
         )
-        return _privacyProtectionWatermarkLineNormal!!
+        return _privacyProtectionWatermarkNormal!!
     }
 
-private var _privacyProtectionWatermarkLineNormal: ImageVector? = null
+private var _privacyProtectionWatermarkNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PrivacyProtectionWatermark: ImageVector
     get() {
-        if (_privacyProtectionWatermarkLineRegular != null) return _privacyProtectionWatermarkLineRegular!!
-        _privacyProtectionWatermarkLineRegular = buildHyperOSIcon(
+        if (_privacyProtectionWatermarkRegular != null) return _privacyProtectionWatermarkRegular!!
+        _privacyProtectionWatermarkRegular = buildHyperOSIcon(
             name = "PrivacyProtectionWatermark.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(684f, -170f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Regular.PrivacyProtectionWatermark: ImageVector
             translationY = 1038.1667f,
             autoMirror = false,
         )
-        return _privacyProtectionWatermarkLineRegular!!
+        return _privacyProtectionWatermarkRegular!!
     }
 
-private var _privacyProtectionWatermarkLineRegular: ImageVector? = null
+private var _privacyProtectionWatermarkRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PrivacyProtectionWatermark: ImageVector
     get() {
-        if (_privacyProtectionWatermarkLineMedium != null) return _privacyProtectionWatermarkLineMedium!!
-        _privacyProtectionWatermarkLineMedium = buildHyperOSIcon(
+        if (_privacyProtectionWatermarkMedium != null) return _privacyProtectionWatermarkMedium!!
+        _privacyProtectionWatermarkMedium = buildHyperOSIcon(
             name = "PrivacyProtectionWatermark.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(685.4f, -178.1f),
@@ -261,15 +261,15 @@ val MiuixIcons.Glass.Medium.PrivacyProtectionWatermark: ImageVector
             translationY = 1038.0991f,
             autoMirror = false,
         )
-        return _privacyProtectionWatermarkLineMedium!!
+        return _privacyProtectionWatermarkMedium!!
     }
 
-private var _privacyProtectionWatermarkLineMedium: ImageVector? = null
+private var _privacyProtectionWatermarkMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PrivacyProtectionWatermark: ImageVector
     get() {
-        if (_privacyProtectionWatermarkLineDemibold != null) return _privacyProtectionWatermarkLineDemibold!!
-        _privacyProtectionWatermarkLineDemibold = buildHyperOSIcon(
+        if (_privacyProtectionWatermarkDemibold != null) return _privacyProtectionWatermarkDemibold!!
+        _privacyProtectionWatermarkDemibold = buildHyperOSIcon(
             name = "PrivacyProtectionWatermark.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(686.3f, -183.8f),
@@ -325,8 +325,8 @@ val MiuixIcons.Glass.Demibold.PrivacyProtectionWatermark: ImageVector
             translationY = 1038.0518f,
             autoMirror = false,
         )
-        return _privacyProtectionWatermarkLineDemibold!!
+        return _privacyProtectionWatermarkDemibold!!
     }
 
-private var _privacyProtectionWatermarkLineDemibold: ImageVector? = null
+private var _privacyProtectionWatermarkDemibold: ImageVector? = null
 

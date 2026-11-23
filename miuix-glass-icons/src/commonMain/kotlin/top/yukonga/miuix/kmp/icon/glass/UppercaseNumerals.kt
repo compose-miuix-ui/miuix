@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UppercaseNumerals: ImageVector
 
 val MiuixIcons.Glass.Light.UppercaseNumerals: ImageVector
     get() {
-        if (_uppercaseNumeralsSurfaceLight != null) return _uppercaseNumeralsSurfaceLight!!
-        _uppercaseNumeralsSurfaceLight = buildHyperOSIcon(
+        if (_uppercaseNumeralsLight != null) return _uppercaseNumeralsLight!!
+        _uppercaseNumeralsLight = buildHyperOSIcon(
             name = "UppercaseNumerals.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1100.7f, 771f),
@@ -97,15 +97,15 @@ val MiuixIcons.Glass.Light.UppercaseNumerals: ImageVector
             translationY = 1035.9044f,
             autoMirror = false,
         )
-        return _uppercaseNumeralsSurfaceLight!!
+        return _uppercaseNumeralsLight!!
     }
 
-private var _uppercaseNumeralsSurfaceLight: ImageVector? = null
+private var _uppercaseNumeralsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UppercaseNumerals: ImageVector
     get() {
-        if (_uppercaseNumeralsSurfaceNormal != null) return _uppercaseNumeralsSurfaceNormal!!
-        _uppercaseNumeralsSurfaceNormal = buildHyperOSIcon(
+        if (_uppercaseNumeralsNormal != null) return _uppercaseNumeralsNormal!!
+        _uppercaseNumeralsNormal = buildHyperOSIcon(
             name = "UppercaseNumerals.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1104.3f, 771f),
@@ -189,15 +189,15 @@ val MiuixIcons.Glass.Normal.UppercaseNumerals: ImageVector
             translationY = 1035.4171f,
             autoMirror = false,
         )
-        return _uppercaseNumeralsSurfaceNormal!!
+        return _uppercaseNumeralsNormal!!
     }
 
-private var _uppercaseNumeralsSurfaceNormal: ImageVector? = null
+private var _uppercaseNumeralsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UppercaseNumerals: ImageVector
     get() {
-        if (_uppercaseNumeralsSurfaceRegular != null) return _uppercaseNumeralsSurfaceRegular!!
-        _uppercaseNumeralsSurfaceRegular = buildHyperOSIcon(
+        if (_uppercaseNumeralsRegular != null) return _uppercaseNumeralsRegular!!
+        _uppercaseNumeralsRegular = buildHyperOSIcon(
             name = "UppercaseNumerals.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1106f, 771f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Regular.UppercaseNumerals: ImageVector
             translationY = 1035.1961f,
             autoMirror = false,
         )
-        return _uppercaseNumeralsSurfaceRegular!!
+        return _uppercaseNumeralsRegular!!
     }
 
-private var _uppercaseNumeralsSurfaceRegular: ImageVector? = null
+private var _uppercaseNumeralsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UppercaseNumerals: ImageVector
     get() {
-        if (_uppercaseNumeralsSurfaceMedium != null) return _uppercaseNumeralsSurfaceMedium!!
-        _uppercaseNumeralsSurfaceMedium = buildHyperOSIcon(
+        if (_uppercaseNumeralsMedium != null) return _uppercaseNumeralsMedium!!
+        _uppercaseNumeralsMedium = buildHyperOSIcon(
             name = "UppercaseNumerals.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1106f, 769.6f),
@@ -373,15 +373,15 @@ val MiuixIcons.Glass.Medium.UppercaseNumerals: ImageVector
             translationY = 1034.9154f,
             autoMirror = false,
         )
-        return _uppercaseNumeralsSurfaceMedium!!
+        return _uppercaseNumeralsMedium!!
     }
 
-private var _uppercaseNumeralsSurfaceMedium: ImageVector? = null
+private var _uppercaseNumeralsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UppercaseNumerals: ImageVector
     get() {
-        if (_uppercaseNumeralsSurfaceDemibold != null) return _uppercaseNumeralsSurfaceDemibold!!
-        _uppercaseNumeralsSurfaceDemibold = buildHyperOSIcon(
+        if (_uppercaseNumeralsDemibold != null) return _uppercaseNumeralsDemibold!!
+        _uppercaseNumeralsDemibold = buildHyperOSIcon(
             name = "UppercaseNumerals.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1106f, 768.7f),
@@ -465,8 +465,8 @@ val MiuixIcons.Glass.Demibold.UppercaseNumerals: ImageVector
             translationY = 1034.7202f,
             autoMirror = false,
         )
-        return _uppercaseNumeralsSurfaceDemibold!!
+        return _uppercaseNumeralsDemibold!!
     }
 
-private var _uppercaseNumeralsSurfaceDemibold: ImageVector? = null
+private var _uppercaseNumeralsDemibold: ImageVector? = null
 

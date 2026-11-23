@@ -12,8 +12,8 @@ val MiuixIcons.Glass.VolumeConversion: ImageVector
 
 val MiuixIcons.Glass.Light.VolumeConversion: ImageVector
     get() {
-        if (_volumeConversionSurfaceLight != null) return _volumeConversionSurfaceLight!!
-        _volumeConversionSurfaceLight = buildHyperOSIcon(
+        if (_volumeConversionLight != null) return _volumeConversionLight!!
+        _volumeConversionLight = buildHyperOSIcon(
             name = "VolumeConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(687.8f, 910f),
@@ -75,15 +75,15 @@ val MiuixIcons.Glass.Light.VolumeConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _volumeConversionSurfaceLight!!
+        return _volumeConversionLight!!
     }
 
-private var _volumeConversionSurfaceLight: ImageVector? = null
+private var _volumeConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.VolumeConversion: ImageVector
     get() {
-        if (_volumeConversionSurfaceNormal != null) return _volumeConversionSurfaceNormal!!
-        _volumeConversionSurfaceNormal = buildHyperOSIcon(
+        if (_volumeConversionNormal != null) return _volumeConversionNormal!!
+        _volumeConversionNormal = buildHyperOSIcon(
             name = "VolumeConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(689.3f, 912.7f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Normal.VolumeConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _volumeConversionSurfaceNormal!!
+        return _volumeConversionNormal!!
     }
 
-private var _volumeConversionSurfaceNormal: ImageVector? = null
+private var _volumeConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.VolumeConversion: ImageVector
     get() {
-        if (_volumeConversionSurfaceRegular != null) return _volumeConversionSurfaceRegular!!
-        _volumeConversionSurfaceRegular = buildHyperOSIcon(
+        if (_volumeConversionRegular != null) return _volumeConversionRegular!!
+        _volumeConversionRegular = buildHyperOSIcon(
             name = "VolumeConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(690f, 914f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Regular.VolumeConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _volumeConversionSurfaceRegular!!
+        return _volumeConversionRegular!!
     }
 
-private var _volumeConversionSurfaceRegular: ImageVector? = null
+private var _volumeConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.VolumeConversion: ImageVector
     get() {
-        if (_volumeConversionSurfaceMedium != null) return _volumeConversionSurfaceMedium!!
-        _volumeConversionSurfaceMedium = buildHyperOSIcon(
+        if (_volumeConversionMedium != null) return _volumeConversionMedium!!
+        _volumeConversionMedium = buildHyperOSIcon(
             name = "VolumeConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(691.1f, 916.2f),
@@ -285,15 +285,15 @@ val MiuixIcons.Glass.Medium.VolumeConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _volumeConversionSurfaceMedium!!
+        return _volumeConversionMedium!!
     }
 
-private var _volumeConversionSurfaceMedium: ImageVector? = null
+private var _volumeConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.VolumeConversion: ImageVector
     get() {
-        if (_volumeConversionSurfaceDemibold != null) return _volumeConversionSurfaceDemibold!!
-        _volumeConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_volumeConversionDemibold != null) return _volumeConversionDemibold!!
+        _volumeConversionDemibold = buildHyperOSIcon(
             name = "VolumeConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(691.8f, 917.7f),
@@ -355,8 +355,8 @@ val MiuixIcons.Glass.Demibold.VolumeConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _volumeConversionSurfaceDemibold!!
+        return _volumeConversionDemibold!!
     }
 
-private var _volumeConversionSurfaceDemibold: ImageVector? = null
+private var _volumeConversionDemibold: ImageVector? = null
 

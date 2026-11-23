@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UniversalRemote: ImageVector
 
 val MiuixIcons.Glass.Light.UniversalRemote: ImageVector
     get() {
-        if (_universalRemoteSurfaceLight != null) return _universalRemoteSurfaceLight!!
-        _universalRemoteSurfaceLight = buildHyperOSIcon(
+        if (_universalRemoteLight != null) return _universalRemoteLight!!
+        _universalRemoteLight = buildHyperOSIcon(
             name = "UniversalRemote.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1138.4f, 374.6f),
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.UniversalRemote: ImageVector
             translationY = 1041f,
             autoMirror = false,
         )
-        return _universalRemoteSurfaceLight!!
+        return _universalRemoteLight!!
     }
 
-private var _universalRemoteSurfaceLight: ImageVector? = null
+private var _universalRemoteLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UniversalRemote: ImageVector
     get() {
-        if (_universalRemoteSurfaceNormal != null) return _universalRemoteSurfaceNormal!!
-        _universalRemoteSurfaceNormal = buildHyperOSIcon(
+        if (_universalRemoteNormal != null) return _universalRemoteNormal!!
+        _universalRemoteNormal = buildHyperOSIcon(
             name = "UniversalRemote.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1143.6f, 374.9f),
@@ -183,15 +183,15 @@ val MiuixIcons.Glass.Normal.UniversalRemote: ImageVector
             translationY = 1041.4583f,
             autoMirror = false,
         )
-        return _universalRemoteSurfaceNormal!!
+        return _universalRemoteNormal!!
     }
 
-private var _universalRemoteSurfaceNormal: ImageVector? = null
+private var _universalRemoteNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UniversalRemote: ImageVector
     get() {
-        if (_universalRemoteSurfaceRegular != null) return _universalRemoteSurfaceRegular!!
-        _universalRemoteSurfaceRegular = buildHyperOSIcon(
+        if (_universalRemoteRegular != null) return _universalRemoteRegular!!
+        _universalRemoteRegular = buildHyperOSIcon(
             name = "UniversalRemote.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1146f, 375f),
@@ -272,15 +272,15 @@ val MiuixIcons.Glass.Regular.UniversalRemote: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _universalRemoteSurfaceRegular!!
+        return _universalRemoteRegular!!
     }
 
-private var _universalRemoteSurfaceRegular: ImageVector? = null
+private var _universalRemoteRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UniversalRemote: ImageVector
     get() {
-        if (_universalRemoteSurfaceMedium != null) return _universalRemoteSurfaceMedium!!
-        _universalRemoteSurfaceMedium = buildHyperOSIcon(
+        if (_universalRemoteMedium != null) return _universalRemoteMedium!!
+        _universalRemoteMedium = buildHyperOSIcon(
             name = "UniversalRemote.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1150.1f, 374.7f),
@@ -361,15 +361,15 @@ val MiuixIcons.Glass.Medium.UniversalRemote: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _universalRemoteSurfaceMedium!!
+        return _universalRemoteMedium!!
     }
 
-private var _universalRemoteSurfaceMedium: ImageVector? = null
+private var _universalRemoteMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UniversalRemote: ImageVector
     get() {
-        if (_universalRemoteSurfaceDemibold != null) return _universalRemoteSurfaceDemibold!!
-        _universalRemoteSurfaceDemibold = buildHyperOSIcon(
+        if (_universalRemoteDemibold != null) return _universalRemoteDemibold!!
+        _universalRemoteDemibold = buildHyperOSIcon(
             name = "UniversalRemote.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1152.9f, 374.5f),
@@ -450,8 +450,8 @@ val MiuixIcons.Glass.Demibold.UniversalRemote: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _universalRemoteSurfaceDemibold!!
+        return _universalRemoteDemibold!!
     }
 
-private var _universalRemoteSurfaceDemibold: ImageVector? = null
+private var _universalRemoteDemibold: ImageVector? = null
 

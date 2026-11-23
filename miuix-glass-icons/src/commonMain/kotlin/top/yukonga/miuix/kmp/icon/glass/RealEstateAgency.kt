@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RealEstateAgency: ImageVector
 
 val MiuixIcons.Glass.Light.RealEstateAgency: ImageVector
     get() {
-        if (_realEstateAgencySurfaceLight != null) return _realEstateAgencySurfaceLight!!
-        _realEstateAgencySurfaceLight = buildHyperOSIcon(
+        if (_realEstateAgencyLight != null) return _realEstateAgencyLight!!
+        _realEstateAgencyLight = buildHyperOSIcon(
             name = "RealEstateAgency.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(455.9f, 617.4f),
@@ -70,15 +70,15 @@ val MiuixIcons.Glass.Light.RealEstateAgency: ImageVector
             translationY = 1022.7221f,
             autoMirror = false,
         )
-        return _realEstateAgencySurfaceLight!!
+        return _realEstateAgencyLight!!
     }
 
-private var _realEstateAgencySurfaceLight: ImageVector? = null
+private var _realEstateAgencyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RealEstateAgency: ImageVector
     get() {
-        if (_realEstateAgencySurfaceNormal != null) return _realEstateAgencySurfaceNormal!!
-        _realEstateAgencySurfaceNormal = buildHyperOSIcon(
+        if (_realEstateAgencyNormal != null) return _realEstateAgencyNormal!!
+        _realEstateAgencyNormal = buildHyperOSIcon(
             name = "RealEstateAgency.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(447f, 622.6f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Normal.RealEstateAgency: ImageVector
             translationY = 1025.7775f,
             autoMirror = false,
         )
-        return _realEstateAgencySurfaceNormal!!
+        return _realEstateAgencyNormal!!
     }
 
-private var _realEstateAgencySurfaceNormal: ImageVector? = null
+private var _realEstateAgencyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RealEstateAgency: ImageVector
     get() {
-        if (_realEstateAgencySurfaceRegular != null) return _realEstateAgencySurfaceRegular!!
-        _realEstateAgencySurfaceRegular = buildHyperOSIcon(
+        if (_realEstateAgencyRegular != null) return _realEstateAgencyRegular!!
+        _realEstateAgencyRegular = buildHyperOSIcon(
             name = "RealEstateAgency.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(443f, 625f),
@@ -200,15 +200,15 @@ val MiuixIcons.Glass.Regular.RealEstateAgency: ImageVector
             translationY = 1027.1667f,
             autoMirror = false,
         )
-        return _realEstateAgencySurfaceRegular!!
+        return _realEstateAgencyRegular!!
     }
 
-private var _realEstateAgencySurfaceRegular: ImageVector? = null
+private var _realEstateAgencyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RealEstateAgency: ImageVector
     get() {
-        if (_realEstateAgencySurfaceMedium != null) return _realEstateAgencySurfaceMedium!!
-        _realEstateAgencySurfaceMedium = buildHyperOSIcon(
+        if (_realEstateAgencyMedium != null) return _realEstateAgencyMedium!!
+        _realEstateAgencyMedium = buildHyperOSIcon(
             name = "RealEstateAgency.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(434.6f, 630.7f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Medium.RealEstateAgency: ImageVector
             translationY = 1030.8152f,
             autoMirror = false,
         )
-        return _realEstateAgencySurfaceMedium!!
+        return _realEstateAgencyMedium!!
     }
 
-private var _realEstateAgencySurfaceMedium: ImageVector? = null
+private var _realEstateAgencyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RealEstateAgency: ImageVector
     get() {
-        if (_realEstateAgencySurfaceDemibold != null) return _realEstateAgencySurfaceDemibold!!
-        _realEstateAgencySurfaceDemibold = buildHyperOSIcon(
+        if (_realEstateAgencyDemibold != null) return _realEstateAgencyDemibold!!
+        _realEstateAgencyDemibold = buildHyperOSIcon(
             name = "RealEstateAgency.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(428.8f, 634.6f),
@@ -330,8 +330,8 @@ val MiuixIcons.Glass.Demibold.RealEstateAgency: ImageVector
             translationY = 1033.3695f,
             autoMirror = false,
         )
-        return _realEstateAgencySurfaceDemibold!!
+        return _realEstateAgencyDemibold!!
     }
 
-private var _realEstateAgencySurfaceDemibold: ImageVector? = null
+private var _realEstateAgencyDemibold: ImageVector? = null
 

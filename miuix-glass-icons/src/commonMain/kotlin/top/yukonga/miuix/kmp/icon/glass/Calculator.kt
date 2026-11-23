@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Calculator: ImageVector
 
 val MiuixIcons.Glass.Light.Calculator: ImageVector
     get() {
-        if (_calculatorSurfaceLight != null) return _calculatorSurfaceLight!!
-        _calculatorSurfaceLight = buildHyperOSIcon(
+        if (_calculatorLight != null) return _calculatorLight!!
+        _calculatorLight = buildHyperOSIcon(
             name = "Calculator.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1169.2f, 794.8f),
@@ -167,15 +167,15 @@ val MiuixIcons.Glass.Light.Calculator: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _calculatorSurfaceLight!!
+        return _calculatorLight!!
     }
 
-private var _calculatorSurfaceLight: ImageVector? = null
+private var _calculatorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Calculator: ImageVector
     get() {
-        if (_calculatorSurfaceNormal != null) return _calculatorSurfaceNormal!!
-        _calculatorSurfaceNormal = buildHyperOSIcon(
+        if (_calculatorNormal != null) return _calculatorNormal!!
+        _calculatorNormal = buildHyperOSIcon(
             name = "Calculator.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1173.2f, 796.3f),
@@ -329,15 +329,15 @@ val MiuixIcons.Glass.Normal.Calculator: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _calculatorSurfaceNormal!!
+        return _calculatorNormal!!
     }
 
-private var _calculatorSurfaceNormal: ImageVector? = null
+private var _calculatorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Calculator: ImageVector
     get() {
-        if (_calculatorSurfaceRegular != null) return _calculatorSurfaceRegular!!
-        _calculatorSurfaceRegular = buildHyperOSIcon(
+        if (_calculatorRegular != null) return _calculatorRegular!!
+        _calculatorRegular = buildHyperOSIcon(
             name = "Calculator.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1175f, 797f),
@@ -491,15 +491,15 @@ val MiuixIcons.Glass.Regular.Calculator: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _calculatorSurfaceRegular!!
+        return _calculatorRegular!!
     }
 
-private var _calculatorSurfaceRegular: ImageVector? = null
+private var _calculatorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Calculator: ImageVector
     get() {
-        if (_calculatorSurfaceMedium != null) return _calculatorSurfaceMedium!!
-        _calculatorSurfaceMedium = buildHyperOSIcon(
+        if (_calculatorMedium != null) return _calculatorMedium!!
+        _calculatorMedium = buildHyperOSIcon(
             name = "Calculator.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1178.5f, 798.9f),
@@ -653,15 +653,15 @@ val MiuixIcons.Glass.Medium.Calculator: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _calculatorSurfaceMedium!!
+        return _calculatorMedium!!
     }
 
-private var _calculatorSurfaceMedium: ImageVector? = null
+private var _calculatorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Calculator: ImageVector
     get() {
-        if (_calculatorSurfaceDemibold != null) return _calculatorSurfaceDemibold!!
-        _calculatorSurfaceDemibold = buildHyperOSIcon(
+        if (_calculatorDemibold != null) return _calculatorDemibold!!
+        _calculatorDemibold = buildHyperOSIcon(
             name = "Calculator.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1181f, 800.2f),
@@ -815,8 +815,8 @@ val MiuixIcons.Glass.Demibold.Calculator: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _calculatorSurfaceDemibold!!
+        return _calculatorDemibold!!
     }
 
-private var _calculatorSurfaceDemibold: ImageVector? = null
+private var _calculatorDemibold: ImageVector? = null
 

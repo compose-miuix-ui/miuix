@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Computer: ImageVector
 
 val MiuixIcons.Glass.Light.Computer: ImageVector
     get() {
-        if (_computerSurfaceLight != null) return _computerSurfaceLight!!
-        _computerSurfaceLight = buildHyperOSIcon(
+        if (_computerLight != null) return _computerLight!!
+        _computerLight = buildHyperOSIcon(
             name = "Computer.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(351.1f, 559f),
@@ -79,15 +79,15 @@ val MiuixIcons.Glass.Light.Computer: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _computerSurfaceLight!!
+        return _computerLight!!
     }
 
-private var _computerSurfaceLight: ImageVector? = null
+private var _computerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Computer: ImageVector
     get() {
-        if (_computerSurfaceNormal != null) return _computerSurfaceNormal!!
-        _computerSurfaceNormal = buildHyperOSIcon(
+        if (_computerNormal != null) return _computerNormal!!
+        _computerNormal = buildHyperOSIcon(
             name = "Computer.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(354.5f, 559f),
@@ -153,15 +153,15 @@ val MiuixIcons.Glass.Normal.Computer: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _computerSurfaceNormal!!
+        return _computerNormal!!
     }
 
-private var _computerSurfaceNormal: ImageVector? = null
+private var _computerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Computer: ImageVector
     get() {
-        if (_computerSurfaceRegular != null) return _computerSurfaceRegular!!
-        _computerSurfaceRegular = buildHyperOSIcon(
+        if (_computerRegular != null) return _computerRegular!!
+        _computerRegular = buildHyperOSIcon(
             name = "Computer.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(356f, 559f),
@@ -227,15 +227,15 @@ val MiuixIcons.Glass.Regular.Computer: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _computerSurfaceRegular!!
+        return _computerRegular!!
     }
 
-private var _computerSurfaceRegular: ImageVector? = null
+private var _computerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Computer: ImageVector
     get() {
-        if (_computerSurfaceMedium != null) return _computerSurfaceMedium!!
-        _computerSurfaceMedium = buildHyperOSIcon(
+        if (_computerMedium != null) return _computerMedium!!
+        _computerMedium = buildHyperOSIcon(
             name = "Computer.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(362.2f, 555.8f),
@@ -301,15 +301,15 @@ val MiuixIcons.Glass.Medium.Computer: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _computerSurfaceMedium!!
+        return _computerMedium!!
     }
 
-private var _computerSurfaceMedium: ImageVector? = null
+private var _computerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Computer: ImageVector
     get() {
-        if (_computerSurfaceDemibold != null) return _computerSurfaceDemibold!!
-        _computerSurfaceDemibold = buildHyperOSIcon(
+        if (_computerDemibold != null) return _computerDemibold!!
+        _computerDemibold = buildHyperOSIcon(
             name = "Computer.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(366.6f, 553.5f),
@@ -375,8 +375,8 @@ val MiuixIcons.Glass.Demibold.Computer: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _computerSurfaceDemibold!!
+        return _computerDemibold!!
     }
 
-private var _computerSurfaceDemibold: ImageVector? = null
+private var _computerDemibold: ImageVector? = null
 

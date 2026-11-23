@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BluetoothHeadphones: ImageVector
 
 val MiuixIcons.Glass.Light.BluetoothHeadphones: ImageVector
     get() {
-        if (_bluetoothHeadphonesSurfaceLight != null) return _bluetoothHeadphonesSurfaceLight!!
-        _bluetoothHeadphonesSurfaceLight = buildHyperOSIcon(
+        if (_bluetoothHeadphonesLight != null) return _bluetoothHeadphonesLight!!
+        _bluetoothHeadphonesLight = buildHyperOSIcon(
             name = "BluetoothHeadphones.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(93.1f, 435.1f),
@@ -112,15 +112,15 @@ val MiuixIcons.Glass.Light.BluetoothHeadphones: ImageVector
             translationY = 1022.1687f,
             autoMirror = false,
         )
-        return _bluetoothHeadphonesSurfaceLight!!
+        return _bluetoothHeadphonesLight!!
     }
 
-private var _bluetoothHeadphonesSurfaceLight: ImageVector? = null
+private var _bluetoothHeadphonesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BluetoothHeadphones: ImageVector
     get() {
-        if (_bluetoothHeadphonesSurfaceNormal != null) return _bluetoothHeadphonesSurfaceNormal!!
-        _bluetoothHeadphonesSurfaceNormal = buildHyperOSIcon(
+        if (_bluetoothHeadphonesNormal != null) return _bluetoothHeadphonesNormal!!
+        _bluetoothHeadphonesNormal = buildHyperOSIcon(
             name = "BluetoothHeadphones.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(85.5f, 430.2f),
@@ -219,15 +219,15 @@ val MiuixIcons.Glass.Normal.BluetoothHeadphones: ImageVector
             translationY = 1022.3104f,
             autoMirror = false,
         )
-        return _bluetoothHeadphonesSurfaceNormal!!
+        return _bluetoothHeadphonesNormal!!
     }
 
-private var _bluetoothHeadphonesSurfaceNormal: ImageVector? = null
+private var _bluetoothHeadphonesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BluetoothHeadphones: ImageVector
     get() {
-        if (_bluetoothHeadphonesSurfaceRegular != null) return _bluetoothHeadphonesSurfaceRegular!!
-        _bluetoothHeadphonesSurfaceRegular = buildHyperOSIcon(
+        if (_bluetoothHeadphonesRegular != null) return _bluetoothHeadphonesRegular!!
+        _bluetoothHeadphonesRegular = buildHyperOSIcon(
             name = "BluetoothHeadphones.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(82f, 428f),
@@ -326,15 +326,15 @@ val MiuixIcons.Glass.Regular.BluetoothHeadphones: ImageVector
             translationY = 1022.375f,
             autoMirror = false,
         )
-        return _bluetoothHeadphonesSurfaceRegular!!
+        return _bluetoothHeadphonesRegular!!
     }
 
-private var _bluetoothHeadphonesSurfaceRegular: ImageVector? = null
+private var _bluetoothHeadphonesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BluetoothHeadphones: ImageVector
     get() {
-        if (_bluetoothHeadphonesSurfaceMedium != null) return _bluetoothHeadphonesSurfaceMedium!!
-        _bluetoothHeadphonesSurfaceMedium = buildHyperOSIcon(
+        if (_bluetoothHeadphonesMedium != null) return _bluetoothHeadphonesMedium!!
+        _bluetoothHeadphonesMedium = buildHyperOSIcon(
             name = "BluetoothHeadphones.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(77.1f, 425.6f),
@@ -433,15 +433,15 @@ val MiuixIcons.Glass.Medium.BluetoothHeadphones: ImageVector
             translationY = 1022.3658f,
             autoMirror = false,
         )
-        return _bluetoothHeadphonesSurfaceMedium!!
+        return _bluetoothHeadphonesMedium!!
     }
 
-private var _bluetoothHeadphonesSurfaceMedium: ImageVector? = null
+private var _bluetoothHeadphonesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BluetoothHeadphones: ImageVector
     get() {
-        if (_bluetoothHeadphonesSurfaceDemibold != null) return _bluetoothHeadphonesSurfaceDemibold!!
-        _bluetoothHeadphonesSurfaceDemibold = buildHyperOSIcon(
+        if (_bluetoothHeadphonesDemibold != null) return _bluetoothHeadphonesDemibold!!
+        _bluetoothHeadphonesDemibold = buildHyperOSIcon(
             name = "BluetoothHeadphones.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(73.7f, 423.9f),
@@ -540,8 +540,8 @@ val MiuixIcons.Glass.Demibold.BluetoothHeadphones: ImageVector
             translationY = 1022.3596f,
             autoMirror = false,
         )
-        return _bluetoothHeadphonesSurfaceDemibold!!
+        return _bluetoothHeadphonesDemibold!!
     }
 
-private var _bluetoothHeadphonesSurfaceDemibold: ImageVector? = null
+private var _bluetoothHeadphonesDemibold: ImageVector? = null
 

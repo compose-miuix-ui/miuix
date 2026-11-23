@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoContent: ImageVector
 
 val MiuixIcons.Glass.Light.NoContent: ImageVector
     get() {
-        if (_noContentSurfaceLight != null) return _noContentSurfaceLight!!
-        _noContentSurfaceLight = buildHyperOSIcon(
+        if (_noContentLight != null) return _noContentLight!!
+        _noContentLight = buildHyperOSIcon(
             name = "NoContent.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(331f, 850f),
@@ -60,15 +60,15 @@ val MiuixIcons.Glass.Light.NoContent: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noContentSurfaceLight!!
+        return _noContentLight!!
     }
 
-private var _noContentSurfaceLight: ImageVector? = null
+private var _noContentLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoContent: ImageVector
     get() {
-        if (_noContentSurfaceNormal != null) return _noContentSurfaceNormal!!
-        _noContentSurfaceNormal = buildHyperOSIcon(
+        if (_noContentNormal != null) return _noContentNormal!!
+        _noContentNormal = buildHyperOSIcon(
             name = "NoContent.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(328.3f, 855.5f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Normal.NoContent: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noContentSurfaceNormal!!
+        return _noContentNormal!!
     }
 
-private var _noContentSurfaceNormal: ImageVector? = null
+private var _noContentNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoContent: ImageVector
     get() {
-        if (_noContentSurfaceRegular != null) return _noContentSurfaceRegular!!
-        _noContentSurfaceRegular = buildHyperOSIcon(
+        if (_noContentRegular != null) return _noContentRegular!!
+        _noContentRegular = buildHyperOSIcon(
             name = "NoContent.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(327f, 858f),
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Regular.NoContent: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noContentSurfaceRegular!!
+        return _noContentRegular!!
     }
 
-private var _noContentSurfaceRegular: ImageVector? = null
+private var _noContentRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoContent: ImageVector
     get() {
-        if (_noContentSurfaceMedium != null) return _noContentSurfaceMedium!!
-        _noContentSurfaceMedium = buildHyperOSIcon(
+        if (_noContentMedium != null) return _noContentMedium!!
+        _noContentMedium = buildHyperOSIcon(
             name = "NoContent.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(324.6f, 862.9f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Medium.NoContent: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noContentSurfaceMedium!!
+        return _noContentMedium!!
     }
 
-private var _noContentSurfaceMedium: ImageVector? = null
+private var _noContentMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoContent: ImageVector
     get() {
-        if (_noContentSurfaceDemibold != null) return _noContentSurfaceDemibold!!
-        _noContentSurfaceDemibold = buildHyperOSIcon(
+        if (_noContentDemibold != null) return _noContentDemibold!!
+        _noContentDemibold = buildHyperOSIcon(
             name = "NoContent.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(322.9f, 866.3f),
@@ -280,8 +280,8 @@ val MiuixIcons.Glass.Demibold.NoContent: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _noContentSurfaceDemibold!!
+        return _noContentDemibold!!
     }
 
-private var _noContentSurfaceDemibold: ImageVector? = null
+private var _noContentDemibold: ImageVector? = null
 

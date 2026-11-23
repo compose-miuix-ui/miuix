@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SecurityStatus: ImageVector
 
 val MiuixIcons.Glass.Light.SecurityStatus: ImageVector
     get() {
-        if (_securityStatusSurfaceLight != null) return _securityStatusSurfaceLight!!
-        _securityStatusSurfaceLight = buildHyperOSIcon(
+        if (_securityStatusLight != null) return _securityStatusLight!!
+        _securityStatusLight = buildHyperOSIcon(
             name = "SecurityStatus.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(629.1f, 871f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.SecurityStatus: ImageVector
             translationY = 1042f,
             autoMirror = false,
         )
-        return _securityStatusSurfaceLight!!
+        return _securityStatusLight!!
     }
 
-private var _securityStatusSurfaceLight: ImageVector? = null
+private var _securityStatusLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SecurityStatus: ImageVector
     get() {
-        if (_securityStatusSurfaceNormal != null) return _securityStatusSurfaceNormal!!
-        _securityStatusSurfaceNormal = buildHyperOSIcon(
+        if (_securityStatusNormal != null) return _securityStatusNormal!!
+        _securityStatusNormal = buildHyperOSIcon(
             name = "SecurityStatus.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(627f, 876.5f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.SecurityStatus: ImageVector
             translationY = 1041.7708f,
             autoMirror = false,
         )
-        return _securityStatusSurfaceNormal!!
+        return _securityStatusNormal!!
     }
 
-private var _securityStatusSurfaceNormal: ImageVector? = null
+private var _securityStatusNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SecurityStatus: ImageVector
     get() {
-        if (_securityStatusSurfaceRegular != null) return _securityStatusSurfaceRegular!!
-        _securityStatusSurfaceRegular = buildHyperOSIcon(
+        if (_securityStatusRegular != null) return _securityStatusRegular!!
+        _securityStatusRegular = buildHyperOSIcon(
             name = "SecurityStatus.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(626f, 879f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.SecurityStatus: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _securityStatusSurfaceRegular!!
+        return _securityStatusRegular!!
     }
 
-private var _securityStatusSurfaceRegular: ImageVector? = null
+private var _securityStatusRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SecurityStatus: ImageVector
     get() {
-        if (_securityStatusSurfaceMedium != null) return _securityStatusSurfaceMedium!!
-        _securityStatusSurfaceMedium = buildHyperOSIcon(
+        if (_securityStatusMedium != null) return _securityStatusMedium!!
+        _securityStatusMedium = buildHyperOSIcon(
             name = "SecurityStatus.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(623.6f, 883.9f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.SecurityStatus: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _securityStatusSurfaceMedium!!
+        return _securityStatusMedium!!
     }
 
-private var _securityStatusSurfaceMedium: ImageVector? = null
+private var _securityStatusMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SecurityStatus: ImageVector
     get() {
-        if (_securityStatusSurfaceDemibold != null) return _securityStatusSurfaceDemibold!!
-        _securityStatusSurfaceDemibold = buildHyperOSIcon(
+        if (_securityStatusDemibold != null) return _securityStatusDemibold!!
+        _securityStatusDemibold = buildHyperOSIcon(
             name = "SecurityStatus.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(621.9f, 887.3f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.SecurityStatus: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _securityStatusSurfaceDemibold!!
+        return _securityStatusDemibold!!
     }
 
-private var _securityStatusSurfaceDemibold: ImageVector? = null
+private var _securityStatusDemibold: ImageVector? = null
 

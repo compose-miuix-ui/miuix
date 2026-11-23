@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuitableForCarWash: ImageVector
 
 val MiuixIcons.Glass.Light.SuitableForCarWash: ImageVector
     get() {
-        if (_suitableForCarWashLineLight != null) return _suitableForCarWashLineLight!!
-        _suitableForCarWashLineLight = buildHyperOSIcon(
+        if (_suitableForCarWashLight != null) return _suitableForCarWashLight!!
+        _suitableForCarWashLight = buildHyperOSIcon(
             name = "SuitableForCarWash.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(772.2f, 853.9f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Light.SuitableForCarWash: ImageVector
             translationY = 1100.9446f,
             autoMirror = false,
         )
-        return _suitableForCarWashLineLight!!
+        return _suitableForCarWashLight!!
     }
 
-private var _suitableForCarWashLineLight: ImageVector? = null
+private var _suitableForCarWashLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuitableForCarWash: ImageVector
     get() {
-        if (_suitableForCarWashLineNormal != null) return _suitableForCarWashLineNormal!!
-        _suitableForCarWashLineNormal = buildHyperOSIcon(
+        if (_suitableForCarWashNormal != null) return _suitableForCarWashNormal!!
+        _suitableForCarWashNormal = buildHyperOSIcon(
             name = "SuitableForCarWash.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(759.7f, 850.5f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Normal.SuitableForCarWash: ImageVector
             translationY = 1096.9726f,
             autoMirror = false,
         )
-        return _suitableForCarWashLineNormal!!
+        return _suitableForCarWashNormal!!
     }
 
-private var _suitableForCarWashLineNormal: ImageVector? = null
+private var _suitableForCarWashNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuitableForCarWash: ImageVector
     get() {
-        if (_suitableForCarWashLineRegular != null) return _suitableForCarWashLineRegular!!
-        _suitableForCarWashLineRegular = buildHyperOSIcon(
+        if (_suitableForCarWashRegular != null) return _suitableForCarWashRegular!!
+        _suitableForCarWashRegular = buildHyperOSIcon(
             name = "SuitableForCarWash.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(754f, 849f),
@@ -395,15 +395,15 @@ val MiuixIcons.Glass.Regular.SuitableForCarWash: ImageVector
             translationY = 1095.1667f,
             autoMirror = false,
         )
-        return _suitableForCarWashLineRegular!!
+        return _suitableForCarWashRegular!!
     }
 
-private var _suitableForCarWashLineRegular: ImageVector? = null
+private var _suitableForCarWashRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuitableForCarWash: ImageVector
     get() {
-        if (_suitableForCarWashLineMedium != null) return _suitableForCarWashLineMedium!!
-        _suitableForCarWashLineMedium = buildHyperOSIcon(
+        if (_suitableForCarWashMedium != null) return _suitableForCarWashMedium!!
+        _suitableForCarWashMedium = buildHyperOSIcon(
             name = "SuitableForCarWash.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(748.1f, 852.5f),
@@ -525,15 +525,15 @@ val MiuixIcons.Glass.Medium.SuitableForCarWash: ImageVector
             translationY = 1094.536f,
             autoMirror = false,
         )
-        return _suitableForCarWashLineMedium!!
+        return _suitableForCarWashMedium!!
     }
 
-private var _suitableForCarWashLineMedium: ImageVector? = null
+private var _suitableForCarWashMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuitableForCarWash: ImageVector
     get() {
-        if (_suitableForCarWashLineDemibold != null) return _suitableForCarWashLineDemibold!!
-        _suitableForCarWashLineDemibold = buildHyperOSIcon(
+        if (_suitableForCarWashDemibold != null) return _suitableForCarWashDemibold!!
+        _suitableForCarWashDemibold = buildHyperOSIcon(
             name = "SuitableForCarWash.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(743.9f, 855f),
@@ -655,8 +655,8 @@ val MiuixIcons.Glass.Demibold.SuitableForCarWash: ImageVector
             translationY = 1094.0945f,
             autoMirror = false,
         )
-        return _suitableForCarWashLineDemibold!!
+        return _suitableForCarWashDemibold!!
     }
 
-private var _suitableForCarWashLineDemibold: ImageVector? = null
+private var _suitableForCarWashDemibold: ImageVector? = null
 

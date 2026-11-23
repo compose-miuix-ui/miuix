@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Tv: ImageVector
 
 val MiuixIcons.Glass.Light.Tv: ImageVector
     get() {
-        if (_tvSurfaceLight != null) return _tvSurfaceLight!!
-        _tvSurfaceLight = buildHyperOSIcon(
+        if (_tvLight != null) return _tvLight!!
+        _tvLight = buildHyperOSIcon(
             name = "Tv.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1017.7f, 655.9f),
@@ -110,15 +110,15 @@ val MiuixIcons.Glass.Light.Tv: ImageVector
             translationY = 1007.1667f,
             autoMirror = false,
         )
-        return _tvSurfaceLight!!
+        return _tvLight!!
     }
 
-private var _tvSurfaceLight: ImageVector? = null
+private var _tvLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Tv: ImageVector
     get() {
-        if (_tvSurfaceNormal != null) return _tvSurfaceNormal!!
-        _tvSurfaceNormal = buildHyperOSIcon(
+        if (_tvNormal != null) return _tvNormal!!
+        _tvNormal = buildHyperOSIcon(
             name = "Tv.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1013.1f, 641.5f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Normal.Tv: ImageVector
             translationY = 1007.1667f,
             autoMirror = false,
         )
-        return _tvSurfaceNormal!!
+        return _tvNormal!!
     }
 
-private var _tvSurfaceNormal: ImageVector? = null
+private var _tvNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Tv: ImageVector
     get() {
-        if (_tvSurfaceRegular != null) return _tvSurfaceRegular!!
-        _tvSurfaceRegular = buildHyperOSIcon(
+        if (_tvRegular != null) return _tvRegular!!
+        _tvRegular = buildHyperOSIcon(
             name = "Tv.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1011f, 635f),
@@ -320,15 +320,15 @@ val MiuixIcons.Glass.Regular.Tv: ImageVector
             translationY = 1007.1667f,
             autoMirror = false,
         )
-        return _tvSurfaceRegular!!
+        return _tvRegular!!
     }
 
-private var _tvSurfaceRegular: ImageVector? = null
+private var _tvRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Tv: ImageVector
     get() {
-        if (_tvSurfaceMedium != null) return _tvSurfaceMedium!!
-        _tvSurfaceMedium = buildHyperOSIcon(
+        if (_tvMedium != null) return _tvMedium!!
+        _tvMedium = buildHyperOSIcon(
             name = "Tv.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1002.9f, 626.9f),
@@ -425,15 +425,15 @@ val MiuixIcons.Glass.Medium.Tv: ImageVector
             translationY = 1007.1667f,
             autoMirror = false,
         )
-        return _tvSurfaceMedium!!
+        return _tvMedium!!
     }
 
-private var _tvSurfaceMedium: ImageVector? = null
+private var _tvMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Tv: ImageVector
     get() {
-        if (_tvSurfaceDemibold != null) return _tvSurfaceDemibold!!
-        _tvSurfaceDemibold = buildHyperOSIcon(
+        if (_tvDemibold != null) return _tvDemibold!!
+        _tvDemibold = buildHyperOSIcon(
             name = "Tv.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(997.2f, 621.2f),
@@ -530,8 +530,8 @@ val MiuixIcons.Glass.Demibold.Tv: ImageVector
             translationY = 1007.1667f,
             autoMirror = false,
         )
-        return _tvSurfaceDemibold!!
+        return _tvDemibold!!
     }
 
-private var _tvSurfaceDemibold: ImageVector? = null
+private var _tvDemibold: ImageVector? = null
 

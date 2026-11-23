@@ -12,8 +12,8 @@ val MiuixIcons.Glass.DoodlePen: ImageVector
 
 val MiuixIcons.Glass.Light.DoodlePen: ImageVector
     get() {
-        if (_doodlePenLineLight != null) return _doodlePenLineLight!!
-        _doodlePenLineLight = buildHyperOSIcon(
+        if (_doodlePenLight != null) return _doodlePenLight!!
+        _doodlePenLight = buildHyperOSIcon(
             name = "DoodlePen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(648.2f, -87f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.DoodlePen: ImageVector
             translationY = 1039.5154f,
             autoMirror = false,
         )
-        return _doodlePenLineLight!!
+        return _doodlePenLight!!
     }
 
-private var _doodlePenLineLight: ImageVector? = null
+private var _doodlePenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.DoodlePen: ImageVector
     get() {
-        if (_doodlePenLineNormal != null) return _doodlePenLineNormal!!
-        _doodlePenLineNormal = buildHyperOSIcon(
+        if (_doodlePenNormal != null) return _doodlePenNormal!!
+        _doodlePenNormal = buildHyperOSIcon(
             name = "DoodlePen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(652.2f, -95.2f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.DoodlePen: ImageVector
             translationY = 1039.3709f,
             autoMirror = false,
         )
-        return _doodlePenLineNormal!!
+        return _doodlePenNormal!!
     }
 
-private var _doodlePenLineNormal: ImageVector? = null
+private var _doodlePenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.DoodlePen: ImageVector
     get() {
-        if (_doodlePenLineRegular != null) return _doodlePenLineRegular!!
-        _doodlePenLineRegular = buildHyperOSIcon(
+        if (_doodlePenRegular != null) return _doodlePenRegular!!
+        _doodlePenRegular = buildHyperOSIcon(
             name = "DoodlePen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(654f, -99f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.DoodlePen: ImageVector
             translationY = 1039.3052f,
             autoMirror = false,
         )
-        return _doodlePenLineRegular!!
+        return _doodlePenRegular!!
     }
 
-private var _doodlePenLineRegular: ImageVector? = null
+private var _doodlePenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.DoodlePen: ImageVector
     get() {
-        if (_doodlePenLineMedium != null) return _doodlePenLineMedium!!
-        _doodlePenLineMedium = buildHyperOSIcon(
+        if (_doodlePenMedium != null) return _doodlePenMedium!!
+        _doodlePenMedium = buildHyperOSIcon(
             name = "DoodlePen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(657.5f, -109f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.DoodlePen: ImageVector
             translationY = 1037.789f,
             autoMirror = false,
         )
-        return _doodlePenLineMedium!!
+        return _doodlePenMedium!!
     }
 
-private var _doodlePenLineMedium: ImageVector? = null
+private var _doodlePenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.DoodlePen: ImageVector
     get() {
-        if (_doodlePenLineDemibold != null) return _doodlePenLineDemibold!!
-        _doodlePenLineDemibold = buildHyperOSIcon(
+        if (_doodlePenDemibold != null) return _doodlePenDemibold!!
+        _doodlePenDemibold = buildHyperOSIcon(
             name = "DoodlePen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(660f, -116f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.DoodlePen: ImageVector
             translationY = 1036.7274f,
             autoMirror = false,
         )
-        return _doodlePenLineDemibold!!
+        return _doodlePenDemibold!!
     }
 
-private var _doodlePenLineDemibold: ImageVector? = null
+private var _doodlePenDemibold: ImageVector? = null
 

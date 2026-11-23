@@ -12,8 +12,8 @@ val MiuixIcons.Glass.TvStereo: ImageVector
 
 val MiuixIcons.Glass.Light.TvStereo: ImageVector
     get() {
-        if (_tvStereoSurfaceLight != null) return _tvStereoSurfaceLight!!
-        _tvStereoSurfaceLight = buildHyperOSIcon(
+        if (_tvStereoLight != null) return _tvStereoLight!!
+        _tvStereoLight = buildHyperOSIcon(
             name = "TvStereo.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(514.3f, 94.8f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Light.TvStereo: ImageVector
             translationY = 997.4444f,
             autoMirror = false,
         )
-        return _tvStereoSurfaceLight!!
+        return _tvStereoLight!!
     }
 
-private var _tvStereoSurfaceLight: ImageVector? = null
+private var _tvStereoLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.TvStereo: ImageVector
     get() {
-        if (_tvStereoSurfaceNormal != null) return _tvStereoSurfaceNormal!!
-        _tvStereoSurfaceNormal = buildHyperOSIcon(
+        if (_tvStereoNormal != null) return _tvStereoNormal!!
+        _tvStereoNormal = buildHyperOSIcon(
             name = "TvStereo.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(505.2f, 93.6f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Normal.TvStereo: ImageVector
             translationY = 997.5972f,
             autoMirror = false,
         )
-        return _tvStereoSurfaceNormal!!
+        return _tvStereoNormal!!
     }
 
-private var _tvStereoSurfaceNormal: ImageVector? = null
+private var _tvStereoNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.TvStereo: ImageVector
     get() {
-        if (_tvStereoSurfaceRegular != null) return _tvStereoSurfaceRegular!!
-        _tvStereoSurfaceRegular = buildHyperOSIcon(
+        if (_tvStereoRegular != null) return _tvStereoRegular!!
+        _tvStereoRegular = buildHyperOSIcon(
             name = "TvStereo.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(501f, 93f),
@@ -377,15 +377,15 @@ val MiuixIcons.Glass.Regular.TvStereo: ImageVector
             translationY = 997.6667f,
             autoMirror = false,
         )
-        return _tvStereoSurfaceRegular!!
+        return _tvStereoRegular!!
     }
 
-private var _tvStereoSurfaceRegular: ImageVector? = null
+private var _tvStereoRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.TvStereo: ImageVector
     get() {
-        if (_tvStereoSurfaceMedium != null) return _tvStereoSurfaceMedium!!
-        _tvStereoSurfaceMedium = buildHyperOSIcon(
+        if (_tvStereoMedium != null) return _tvStereoMedium!!
+        _tvStereoMedium = buildHyperOSIcon(
             name = "TvStereo.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(493.2f, 93f),
@@ -501,15 +501,15 @@ val MiuixIcons.Glass.Medium.TvStereo: ImageVector
             translationY = 996.7207f,
             autoMirror = false,
         )
-        return _tvStereoSurfaceMedium!!
+        return _tvStereoMedium!!
     }
 
-private var _tvStereoSurfaceMedium: ImageVector? = null
+private var _tvStereoMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.TvStereo: ImageVector
     get() {
-        if (_tvStereoSurfaceDemibold != null) return _tvStereoSurfaceDemibold!!
-        _tvStereoSurfaceDemibold = buildHyperOSIcon(
+        if (_tvStereoDemibold != null) return _tvStereoDemibold!!
+        _tvStereoDemibold = buildHyperOSIcon(
             name = "TvStereo.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(487.7f, 93f),
@@ -625,8 +625,8 @@ val MiuixIcons.Glass.Demibold.TvStereo: ImageVector
             translationY = 996.0585f,
             autoMirror = false,
         )
-        return _tvStereoSurfaceDemibold!!
+        return _tvStereoDemibold!!
     }
 
-private var _tvStereoSurfaceDemibold: ImageVector? = null
+private var _tvStereoDemibold: ImageVector? = null
 

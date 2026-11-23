@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Compress: ImageVector
 
 val MiuixIcons.Glass.Light.Compress: ImageVector
     get() {
-        if (_compressLineLight != null) return _compressLineLight!!
-        _compressLineLight = buildHyperOSIcon(
+        if (_compressLight != null) return _compressLight!!
+        _compressLight = buildHyperOSIcon(
             name = "Compress.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(699.8f, 73.9f),
@@ -156,15 +156,15 @@ val MiuixIcons.Glass.Light.Compress: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _compressLineLight!!
+        return _compressLight!!
     }
 
-private var _compressLineLight: ImageVector? = null
+private var _compressLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Compress: ImageVector
     get() {
-        if (_compressLineNormal != null) return _compressLineNormal!!
-        _compressLineNormal = buildHyperOSIcon(
+        if (_compressNormal != null) return _compressNormal!!
+        _compressNormal = buildHyperOSIcon(
             name = "Compress.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(704.1f, 76f),
@@ -307,15 +307,15 @@ val MiuixIcons.Glass.Normal.Compress: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _compressLineNormal!!
+        return _compressNormal!!
     }
 
-private var _compressLineNormal: ImageVector? = null
+private var _compressNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Compress: ImageVector
     get() {
-        if (_compressLineRegular != null) return _compressLineRegular!!
-        _compressLineRegular = buildHyperOSIcon(
+        if (_compressRegular != null) return _compressRegular!!
+        _compressRegular = buildHyperOSIcon(
             name = "Compress.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(706f, 77f),
@@ -458,15 +458,15 @@ val MiuixIcons.Glass.Regular.Compress: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _compressLineRegular!!
+        return _compressRegular!!
     }
 
-private var _compressLineRegular: ImageVector? = null
+private var _compressRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Compress: ImageVector
     get() {
-        if (_compressLineMedium != null) return _compressLineMedium!!
-        _compressLineMedium = buildHyperOSIcon(
+        if (_compressMedium != null) return _compressMedium!!
+        _compressMedium = buildHyperOSIcon(
             name = "Compress.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(712.5f, 85.6f),
@@ -609,15 +609,15 @@ val MiuixIcons.Glass.Medium.Compress: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _compressLineMedium!!
+        return _compressMedium!!
     }
 
-private var _compressLineMedium: ImageVector? = null
+private var _compressMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Compress: ImageVector
     get() {
-        if (_compressLineDemibold != null) return _compressLineDemibold!!
-        _compressLineDemibold = buildHyperOSIcon(
+        if (_compressDemibold != null) return _compressDemibold!!
+        _compressDemibold = buildHyperOSIcon(
             name = "Compress.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(717f, 91.7f),
@@ -760,8 +760,8 @@ val MiuixIcons.Glass.Demibold.Compress: ImageVector
             translationY = 1037.6667f,
             autoMirror = false,
         )
-        return _compressLineDemibold!!
+        return _compressDemibold!!
     }
 
-private var _compressLineDemibold: ImageVector? = null
+private var _compressDemibold: ImageVector? = null
 

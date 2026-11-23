@@ -12,8 +12,8 @@ val MiuixIcons.Glass.GesturePassword: ImageVector
 
 val MiuixIcons.Glass.Light.GesturePassword: ImageVector
     get() {
-        if (_gesturePasswordLineLight != null) return _gesturePasswordLineLight!!
-        _gesturePasswordLineLight = buildHyperOSIcon(
+        if (_gesturePasswordLight != null) return _gesturePasswordLight!!
+        _gesturePasswordLight = buildHyperOSIcon(
             name = "GesturePassword.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(973.3f, 755f),
@@ -114,15 +114,15 @@ val MiuixIcons.Glass.Light.GesturePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _gesturePasswordLineLight!!
+        return _gesturePasswordLight!!
     }
 
-private var _gesturePasswordLineLight: ImageVector? = null
+private var _gesturePasswordLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.GesturePassword: ImageVector
     get() {
-        if (_gesturePasswordLineNormal != null) return _gesturePasswordLineNormal!!
-        _gesturePasswordLineNormal = buildHyperOSIcon(
+        if (_gesturePasswordNormal != null) return _gesturePasswordNormal!!
+        _gesturePasswordNormal = buildHyperOSIcon(
             name = "GesturePassword.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(964.2f, 755f),
@@ -223,15 +223,15 @@ val MiuixIcons.Glass.Normal.GesturePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _gesturePasswordLineNormal!!
+        return _gesturePasswordNormal!!
     }
 
-private var _gesturePasswordLineNormal: ImageVector? = null
+private var _gesturePasswordNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.GesturePassword: ImageVector
     get() {
-        if (_gesturePasswordLineRegular != null) return _gesturePasswordLineRegular!!
-        _gesturePasswordLineRegular = buildHyperOSIcon(
+        if (_gesturePasswordRegular != null) return _gesturePasswordRegular!!
+        _gesturePasswordRegular = buildHyperOSIcon(
             name = "GesturePassword.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(960f, 755f),
@@ -332,15 +332,15 @@ val MiuixIcons.Glass.Regular.GesturePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _gesturePasswordLineRegular!!
+        return _gesturePasswordRegular!!
     }
 
-private var _gesturePasswordLineRegular: ImageVector? = null
+private var _gesturePasswordRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.GesturePassword: ImageVector
     get() {
-        if (_gesturePasswordLineMedium != null) return _gesturePasswordLineMedium!!
-        _gesturePasswordLineMedium = buildHyperOSIcon(
+        if (_gesturePasswordMedium != null) return _gesturePasswordMedium!!
+        _gesturePasswordMedium = buildHyperOSIcon(
             name = "GesturePassword.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(951.9f, 755f),
@@ -441,15 +441,15 @@ val MiuixIcons.Glass.Medium.GesturePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _gesturePasswordLineMedium!!
+        return _gesturePasswordMedium!!
     }
 
-private var _gesturePasswordLineMedium: ImageVector? = null
+private var _gesturePasswordMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.GesturePassword: ImageVector
     get() {
-        if (_gesturePasswordLineDemibold != null) return _gesturePasswordLineDemibold!!
-        _gesturePasswordLineDemibold = buildHyperOSIcon(
+        if (_gesturePasswordDemibold != null) return _gesturePasswordDemibold!!
+        _gesturePasswordDemibold = buildHyperOSIcon(
             name = "GesturePassword.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(946.2f, 755f),
@@ -550,8 +550,8 @@ val MiuixIcons.Glass.Demibold.GesturePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _gesturePasswordLineDemibold!!
+        return _gesturePasswordDemibold!!
     }
 
-private var _gesturePasswordLineDemibold: ImageVector? = null
+private var _gesturePasswordDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ChildSafetyMode: ImageVector
 
 val MiuixIcons.Glass.Light.ChildSafetyMode: ImageVector
     get() {
-        if (_childSafetyModeSurfaceLight != null) return _childSafetyModeSurfaceLight!!
-        _childSafetyModeSurfaceLight = buildHyperOSIcon(
+        if (_childSafetyModeLight != null) return _childSafetyModeLight!!
+        _childSafetyModeLight = buildHyperOSIcon(
             name = "ChildSafetyMode.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(691.8f, -52f),
@@ -57,15 +57,15 @@ val MiuixIcons.Glass.Light.ChildSafetyMode: ImageVector
             translationY = 1032.1306f,
             autoMirror = false,
         )
-        return _childSafetyModeSurfaceLight!!
+        return _childSafetyModeLight!!
     }
 
-private var _childSafetyModeSurfaceLight: ImageVector? = null
+private var _childSafetyModeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ChildSafetyMode: ImageVector
     get() {
-        if (_childSafetyModeSurfaceNormal != null) return _childSafetyModeSurfaceNormal!!
-        _childSafetyModeSurfaceNormal = buildHyperOSIcon(
+        if (_childSafetyModeNormal != null) return _childSafetyModeNormal!!
+        _childSafetyModeNormal = buildHyperOSIcon(
             name = "ChildSafetyMode.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(696.1f, -52f),
@@ -109,15 +109,15 @@ val MiuixIcons.Glass.Normal.ChildSafetyMode: ImageVector
             translationY = 1031.5104f,
             autoMirror = false,
         )
-        return _childSafetyModeSurfaceNormal!!
+        return _childSafetyModeNormal!!
     }
 
-private var _childSafetyModeSurfaceNormal: ImageVector? = null
+private var _childSafetyModeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ChildSafetyMode: ImageVector
     get() {
-        if (_childSafetyModeSurfaceRegular != null) return _childSafetyModeSurfaceRegular!!
-        _childSafetyModeSurfaceRegular = buildHyperOSIcon(
+        if (_childSafetyModeRegular != null) return _childSafetyModeRegular!!
+        _childSafetyModeRegular = buildHyperOSIcon(
             name = "ChildSafetyMode.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(698f, -52f),
@@ -161,15 +161,15 @@ val MiuixIcons.Glass.Regular.ChildSafetyMode: ImageVector
             translationY = 1031.2292f,
             autoMirror = false,
         )
-        return _childSafetyModeSurfaceRegular!!
+        return _childSafetyModeRegular!!
     }
 
-private var _childSafetyModeSurfaceRegular: ImageVector? = null
+private var _childSafetyModeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ChildSafetyMode: ImageVector
     get() {
-        if (_childSafetyModeSurfaceMedium != null) return _childSafetyModeSurfaceMedium!!
-        _childSafetyModeSurfaceMedium = buildHyperOSIcon(
+        if (_childSafetyModeMedium != null) return _childSafetyModeMedium!!
+        _childSafetyModeMedium = buildHyperOSIcon(
             name = "ChildSafetyMode.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(709.4f, -50.9f),
@@ -213,15 +213,15 @@ val MiuixIcons.Glass.Medium.ChildSafetyMode: ImageVector
             translationY = 1031.7606f,
             autoMirror = false,
         )
-        return _childSafetyModeSurfaceMedium!!
+        return _childSafetyModeMedium!!
     }
 
-private var _childSafetyModeSurfaceMedium: ImageVector? = null
+private var _childSafetyModeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ChildSafetyMode: ImageVector
     get() {
-        if (_childSafetyModeSurfaceDemibold != null) return _childSafetyModeSurfaceDemibold!!
-        _childSafetyModeSurfaceDemibold = buildHyperOSIcon(
+        if (_childSafetyModeDemibold != null) return _childSafetyModeDemibold!!
+        _childSafetyModeDemibold = buildHyperOSIcon(
             name = "ChildSafetyMode.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(717.3f, -50.2f),
@@ -265,8 +265,8 @@ val MiuixIcons.Glass.Demibold.ChildSafetyMode: ImageVector
             translationY = 1032.1342f,
             autoMirror = false,
         )
-        return _childSafetyModeSurfaceDemibold!!
+        return _childSafetyModeDemibold!!
     }
 
-private var _childSafetyModeSurfaceDemibold: ImageVector? = null
+private var _childSafetyModeDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Tags: ImageVector
 
 val MiuixIcons.Glass.Light.Tags: ImageVector
     get() {
-        if (_tagsSurfaceLight != null) return _tagsSurfaceLight!!
-        _tagsSurfaceLight = buildHyperOSIcon(
+        if (_tagsLight != null) return _tagsLight!!
+        _tagsLight = buildHyperOSIcon(
             name = "Tags.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(530.7f, 825.1f),
@@ -107,15 +107,15 @@ val MiuixIcons.Glass.Light.Tags: ImageVector
             translationY = 1018.2851f,
             autoMirror = false,
         )
-        return _tagsSurfaceLight!!
+        return _tagsLight!!
     }
 
-private var _tagsSurfaceLight: ImageVector? = null
+private var _tagsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Tags: ImageVector
     get() {
-        if (_tagsSurfaceNormal != null) return _tagsSurfaceNormal!!
-        _tagsSurfaceNormal = buildHyperOSIcon(
+        if (_tagsNormal != null) return _tagsNormal!!
+        _tagsNormal = buildHyperOSIcon(
             name = "Tags.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(528.8f, 834f),
@@ -209,15 +209,15 @@ val MiuixIcons.Glass.Normal.Tags: ImageVector
             translationY = 1018.2895f,
             autoMirror = false,
         )
-        return _tagsSurfaceNormal!!
+        return _tagsNormal!!
     }
 
-private var _tagsSurfaceNormal: ImageVector? = null
+private var _tagsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Tags: ImageVector
     get() {
-        if (_tagsSurfaceRegular != null) return _tagsSurfaceRegular!!
-        _tagsSurfaceRegular = buildHyperOSIcon(
+        if (_tagsRegular != null) return _tagsRegular!!
+        _tagsRegular = buildHyperOSIcon(
             name = "Tags.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(528f, 838f),
@@ -311,15 +311,15 @@ val MiuixIcons.Glass.Regular.Tags: ImageVector
             translationY = 1018.2917f,
             autoMirror = false,
         )
-        return _tagsSurfaceRegular!!
+        return _tagsRegular!!
     }
 
-private var _tagsSurfaceRegular: ImageVector? = null
+private var _tagsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Tags: ImageVector
     get() {
-        if (_tagsSurfaceMedium != null) return _tagsSurfaceMedium!!
-        _tagsSurfaceMedium = buildHyperOSIcon(
+        if (_tagsMedium != null) return _tagsMedium!!
+        _tagsMedium = buildHyperOSIcon(
             name = "Tags.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(526.4f, 845.8f),
@@ -413,15 +413,15 @@ val MiuixIcons.Glass.Medium.Tags: ImageVector
             translationY = 1018.1565f,
             autoMirror = false,
         )
-        return _tagsSurfaceMedium!!
+        return _tagsMedium!!
     }
 
-private var _tagsSurfaceMedium: ImageVector? = null
+private var _tagsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Tags: ImageVector
     get() {
-        if (_tagsSurfaceDemibold != null) return _tagsSurfaceDemibold!!
-        _tagsSurfaceDemibold = buildHyperOSIcon(
+        if (_tagsDemibold != null) return _tagsDemibold!!
+        _tagsDemibold = buildHyperOSIcon(
             name = "Tags.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(525.2f, 851.3f),
@@ -515,8 +515,8 @@ val MiuixIcons.Glass.Demibold.Tags: ImageVector
             translationY = 1018.0619f,
             autoMirror = false,
         )
-        return _tagsSurfaceDemibold!!
+        return _tagsDemibold!!
     }
 
-private var _tagsSurfaceDemibold: ImageVector? = null
+private var _tagsDemibold: ImageVector? = null
 

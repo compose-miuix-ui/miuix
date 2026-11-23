@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HapticIntensity: ImageVector
 
 val MiuixIcons.Glass.Light.HapticIntensity: ImageVector
     get() {
-        if (_hapticIntensitySurfaceLight != null) return _hapticIntensitySurfaceLight!!
-        _hapticIntensitySurfaceLight = buildHyperOSIcon(
+        if (_hapticIntensityLight != null) return _hapticIntensityLight!!
+        _hapticIntensityLight = buildHyperOSIcon(
             name = "HapticIntensity.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(339.9f, 940.2f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.HapticIntensity: ImageVector
             translationY = 1079.729f,
             autoMirror = false,
         )
-        return _hapticIntensitySurfaceLight!!
+        return _hapticIntensityLight!!
     }
 
-private var _hapticIntensitySurfaceLight: ImageVector? = null
+private var _hapticIntensityLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HapticIntensity: ImageVector
     get() {
-        if (_hapticIntensitySurfaceNormal != null) return _hapticIntensitySurfaceNormal!!
-        _hapticIntensitySurfaceNormal = buildHyperOSIcon(
+        if (_hapticIntensityNormal != null) return _hapticIntensityNormal!!
+        _hapticIntensityNormal = buildHyperOSIcon(
             name = "HapticIntensity.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(336.5f, 941.4f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.HapticIntensity: ImageVector
             translationY = 1077.2785f,
             autoMirror = false,
         )
-        return _hapticIntensitySurfaceNormal!!
+        return _hapticIntensityNormal!!
     }
 
-private var _hapticIntensitySurfaceNormal: ImageVector? = null
+private var _hapticIntensityNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HapticIntensity: ImageVector
     get() {
-        if (_hapticIntensitySurfaceRegular != null) return _hapticIntensitySurfaceRegular!!
-        _hapticIntensitySurfaceRegular = buildHyperOSIcon(
+        if (_hapticIntensityRegular != null) return _hapticIntensityRegular!!
+        _hapticIntensityRegular = buildHyperOSIcon(
             name = "HapticIntensity.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(335f, 942f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.HapticIntensity: ImageVector
             translationY = 1076.1667f,
             autoMirror = false,
         )
-        return _hapticIntensitySurfaceRegular!!
+        return _hapticIntensityRegular!!
     }
 
-private var _hapticIntensitySurfaceRegular: ImageVector? = null
+private var _hapticIntensityRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HapticIntensity: ImageVector
     get() {
-        if (_hapticIntensitySurfaceMedium != null) return _hapticIntensitySurfaceMedium!!
-        _hapticIntensitySurfaceMedium = buildHyperOSIcon(
+        if (_hapticIntensityMedium != null) return _hapticIntensityMedium!!
+        _hapticIntensityMedium = buildHyperOSIcon(
             name = "HapticIntensity.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(334.5f, 950.4f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.HapticIntensity: ImageVector
             translationY = 1076.0291f,
             autoMirror = false,
         )
-        return _hapticIntensitySurfaceMedium!!
+        return _hapticIntensityMedium!!
     }
 
-private var _hapticIntensitySurfaceMedium: ImageVector? = null
+private var _hapticIntensityMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HapticIntensity: ImageVector
     get() {
-        if (_hapticIntensitySurfaceDemibold != null) return _hapticIntensitySurfaceDemibold!!
-        _hapticIntensitySurfaceDemibold = buildHyperOSIcon(
+        if (_hapticIntensityDemibold != null) return _hapticIntensityDemibold!!
+        _hapticIntensityDemibold = buildHyperOSIcon(
             name = "HapticIntensity.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(334.1f, 956.2f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.HapticIntensity: ImageVector
             translationY = 1076.0581f,
             autoMirror = false,
         )
-        return _hapticIntensitySurfaceDemibold!!
+        return _hapticIntensityDemibold!!
     }
 
-private var _hapticIntensitySurfaceDemibold: ImageVector? = null
+private var _hapticIntensityDemibold: ImageVector? = null
 

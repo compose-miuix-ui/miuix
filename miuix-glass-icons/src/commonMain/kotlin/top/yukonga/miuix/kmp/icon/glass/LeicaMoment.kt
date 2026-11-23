@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LeicaMoment: ImageVector
 
 val MiuixIcons.Glass.Light.LeicaMoment: ImageVector
     get() {
-        if (_leicaMomentLineLight != null) return _leicaMomentLineLight!!
-        _leicaMomentLineLight = buildHyperOSIcon(
+        if (_leicaMomentLight != null) return _leicaMomentLight!!
+        _leicaMomentLight = buildHyperOSIcon(
             name = "LeicaMoment.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(361.3f, 265f),
@@ -216,15 +216,15 @@ val MiuixIcons.Glass.Light.LeicaMoment: ImageVector
             translationY = 1041.4444f,
             autoMirror = false,
         )
-        return _leicaMomentLineLight!!
+        return _leicaMomentLight!!
     }
 
-private var _leicaMomentLineLight: ImageVector? = null
+private var _leicaMomentLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LeicaMoment: ImageVector
     get() {
-        if (_leicaMomentLineNormal != null) return _leicaMomentLineNormal!!
-        _leicaMomentLineNormal = buildHyperOSIcon(
+        if (_leicaMomentNormal != null) return _leicaMomentNormal!!
+        _leicaMomentNormal = buildHyperOSIcon(
             name = "LeicaMoment.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(368.7f, 265f),
@@ -427,15 +427,15 @@ val MiuixIcons.Glass.Normal.LeicaMoment: ImageVector
             translationY = 1041.5972f,
             autoMirror = false,
         )
-        return _leicaMomentLineNormal!!
+        return _leicaMomentNormal!!
     }
 
-private var _leicaMomentLineNormal: ImageVector? = null
+private var _leicaMomentNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LeicaMoment: ImageVector
     get() {
-        if (_leicaMomentLineRegular != null) return _leicaMomentLineRegular!!
-        _leicaMomentLineRegular = buildHyperOSIcon(
+        if (_leicaMomentRegular != null) return _leicaMomentRegular!!
+        _leicaMomentRegular = buildHyperOSIcon(
             name = "LeicaMoment.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(372f, 265f),
@@ -638,15 +638,15 @@ val MiuixIcons.Glass.Regular.LeicaMoment: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _leicaMomentLineRegular!!
+        return _leicaMomentRegular!!
     }
 
-private var _leicaMomentLineRegular: ImageVector? = null
+private var _leicaMomentRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LeicaMoment: ImageVector
     get() {
-        if (_leicaMomentLineMedium != null) return _leicaMomentLineMedium!!
-        _leicaMomentLineMedium = buildHyperOSIcon(
+        if (_leicaMomentMedium != null) return _leicaMomentMedium!!
+        _leicaMomentMedium = buildHyperOSIcon(
             name = "LeicaMoment.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(364.4f, 265f),
@@ -849,15 +849,15 @@ val MiuixIcons.Glass.Medium.LeicaMoment: ImageVector
             translationY = 1041.9369f,
             autoMirror = false,
         )
-        return _leicaMomentLineMedium!!
+        return _leicaMomentMedium!!
     }
 
-private var _leicaMomentLineMedium: ImageVector? = null
+private var _leicaMomentMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LeicaMoment: ImageVector
     get() {
-        if (_leicaMomentLineDemibold != null) return _leicaMomentLineDemibold!!
-        _leicaMomentLineDemibold = buildHyperOSIcon(
+        if (_leicaMomentDemibold != null) return _leicaMomentDemibold!!
+        _leicaMomentDemibold = buildHyperOSIcon(
             name = "LeicaMoment.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(359.1f, 265f),
@@ -1060,8 +1060,8 @@ val MiuixIcons.Glass.Demibold.LeicaMoment: ImageVector
             translationY = 1042.1261f,
             autoMirror = false,
         )
-        return _leicaMomentLineDemibold!!
+        return _leicaMomentDemibold!!
     }
 
-private var _leicaMomentLineDemibold: ImageVector? = null
+private var _leicaMomentDemibold: ImageVector? = null
 

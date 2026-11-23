@@ -12,8 +12,8 @@ val MiuixIcons.Glass.TemperatureConversion: ImageVector
 
 val MiuixIcons.Glass.Light.TemperatureConversion: ImageVector
     get() {
-        if (_temperatureConversionSurfaceLight != null) return _temperatureConversionSurfaceLight!!
-        _temperatureConversionSurfaceLight = buildHyperOSIcon(
+        if (_temperatureConversionLight != null) return _temperatureConversionLight!!
+        _temperatureConversionLight = buildHyperOSIcon(
             name = "TemperatureConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(418.7f, 816.6f),
@@ -97,15 +97,15 @@ val MiuixIcons.Glass.Light.TemperatureConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _temperatureConversionSurfaceLight!!
+        return _temperatureConversionLight!!
     }
 
-private var _temperatureConversionSurfaceLight: ImageVector? = null
+private var _temperatureConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.TemperatureConversion: ImageVector
     get() {
-        if (_temperatureConversionSurfaceNormal != null) return _temperatureConversionSurfaceNormal!!
-        _temperatureConversionSurfaceNormal = buildHyperOSIcon(
+        if (_temperatureConversionNormal != null) return _temperatureConversionNormal!!
+        _temperatureConversionNormal = buildHyperOSIcon(
             name = "TemperatureConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(411.3f, 811.4f),
@@ -189,15 +189,15 @@ val MiuixIcons.Glass.Normal.TemperatureConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _temperatureConversionSurfaceNormal!!
+        return _temperatureConversionNormal!!
     }
 
-private var _temperatureConversionSurfaceNormal: ImageVector? = null
+private var _temperatureConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.TemperatureConversion: ImageVector
     get() {
-        if (_temperatureConversionSurfaceRegular != null) return _temperatureConversionSurfaceRegular!!
-        _temperatureConversionSurfaceRegular = buildHyperOSIcon(
+        if (_temperatureConversionRegular != null) return _temperatureConversionRegular!!
+        _temperatureConversionRegular = buildHyperOSIcon(
             name = "TemperatureConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(408f, 809f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Regular.TemperatureConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _temperatureConversionSurfaceRegular!!
+        return _temperatureConversionRegular!!
     }
 
-private var _temperatureConversionSurfaceRegular: ImageVector? = null
+private var _temperatureConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.TemperatureConversion: ImageVector
     get() {
-        if (_temperatureConversionSurfaceMedium != null) return _temperatureConversionSurfaceMedium!!
-        _temperatureConversionSurfaceMedium = buildHyperOSIcon(
+        if (_temperatureConversionMedium != null) return _temperatureConversionMedium!!
+        _temperatureConversionMedium = buildHyperOSIcon(
             name = "TemperatureConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(402.1f, 804.4f),
@@ -373,15 +373,15 @@ val MiuixIcons.Glass.Medium.TemperatureConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _temperatureConversionSurfaceMedium!!
+        return _temperatureConversionMedium!!
     }
 
-private var _temperatureConversionSurfaceMedium: ImageVector? = null
+private var _temperatureConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.TemperatureConversion: ImageVector
     get() {
-        if (_temperatureConversionSurfaceDemibold != null) return _temperatureConversionSurfaceDemibold!!
-        _temperatureConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_temperatureConversionDemibold != null) return _temperatureConversionDemibold!!
+        _temperatureConversionDemibold = buildHyperOSIcon(
             name = "TemperatureConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(397.9f, 801.2f),
@@ -465,8 +465,8 @@ val MiuixIcons.Glass.Demibold.TemperatureConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _temperatureConversionSurfaceDemibold!!
+        return _temperatureConversionDemibold!!
     }
 
-private var _temperatureConversionSurfaceDemibold: ImageVector? = null
+private var _temperatureConversionDemibold: ImageVector? = null
 

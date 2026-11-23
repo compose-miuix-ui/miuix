@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BluetoothMediaDevice: ImageVector
 
 val MiuixIcons.Glass.Light.BluetoothMediaDevice: ImageVector
     get() {
-        if (_bluetoothMediaDeviceSurfaceLight != null) return _bluetoothMediaDeviceSurfaceLight!!
-        _bluetoothMediaDeviceSurfaceLight = buildHyperOSIcon(
+        if (_bluetoothMediaDeviceLight != null) return _bluetoothMediaDeviceLight!!
+        _bluetoothMediaDeviceLight = buildHyperOSIcon(
             name = "BluetoothMediaDevice.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(613.9f, 801f),
@@ -96,15 +96,15 @@ val MiuixIcons.Glass.Light.BluetoothMediaDevice: ImageVector
             translationY = 1041.9391f,
             autoMirror = false,
         )
-        return _bluetoothMediaDeviceSurfaceLight!!
+        return _bluetoothMediaDeviceLight!!
     }
 
-private var _bluetoothMediaDeviceSurfaceLight: ImageVector? = null
+private var _bluetoothMediaDeviceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BluetoothMediaDevice: ImageVector
     get() {
-        if (_bluetoothMediaDeviceSurfaceNormal != null) return _bluetoothMediaDeviceSurfaceNormal!!
-        _bluetoothMediaDeviceSurfaceNormal = buildHyperOSIcon(
+        if (_bluetoothMediaDeviceNormal != null) return _bluetoothMediaDeviceNormal!!
+        _bluetoothMediaDeviceNormal = buildHyperOSIcon(
             name = "BluetoothMediaDevice.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(605f, 803.7f),
@@ -187,15 +187,15 @@ val MiuixIcons.Glass.Normal.BluetoothMediaDevice: ImageVector
             translationY = 1041.7871f,
             autoMirror = false,
         )
-        return _bluetoothMediaDeviceSurfaceNormal!!
+        return _bluetoothMediaDeviceNormal!!
     }
 
-private var _bluetoothMediaDeviceSurfaceNormal: ImageVector? = null
+private var _bluetoothMediaDeviceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BluetoothMediaDevice: ImageVector
     get() {
-        if (_bluetoothMediaDeviceSurfaceRegular != null) return _bluetoothMediaDeviceSurfaceRegular!!
-        _bluetoothMediaDeviceSurfaceRegular = buildHyperOSIcon(
+        if (_bluetoothMediaDeviceRegular != null) return _bluetoothMediaDeviceRegular!!
+        _bluetoothMediaDeviceRegular = buildHyperOSIcon(
             name = "BluetoothMediaDevice.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(601f, 805f),
@@ -278,15 +278,15 @@ val MiuixIcons.Glass.Regular.BluetoothMediaDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _bluetoothMediaDeviceSurfaceRegular!!
+        return _bluetoothMediaDeviceRegular!!
     }
 
-private var _bluetoothMediaDeviceSurfaceRegular: ImageVector? = null
+private var _bluetoothMediaDeviceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BluetoothMediaDevice: ImageVector
     get() {
-        if (_bluetoothMediaDeviceSurfaceMedium != null) return _bluetoothMediaDeviceSurfaceMedium!!
-        _bluetoothMediaDeviceSurfaceMedium = buildHyperOSIcon(
+        if (_bluetoothMediaDeviceMedium != null) return _bluetoothMediaDeviceMedium!!
+        _bluetoothMediaDeviceMedium = buildHyperOSIcon(
             name = "BluetoothMediaDevice.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(594f, 806.4f),
@@ -369,15 +369,15 @@ val MiuixIcons.Glass.Medium.BluetoothMediaDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _bluetoothMediaDeviceSurfaceMedium!!
+        return _bluetoothMediaDeviceMedium!!
     }
 
-private var _bluetoothMediaDeviceSurfaceMedium: ImageVector? = null
+private var _bluetoothMediaDeviceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BluetoothMediaDevice: ImageVector
     get() {
-        if (_bluetoothMediaDeviceSurfaceDemibold != null) return _bluetoothMediaDeviceSurfaceDemibold!!
-        _bluetoothMediaDeviceSurfaceDemibold = buildHyperOSIcon(
+        if (_bluetoothMediaDeviceDemibold != null) return _bluetoothMediaDeviceDemibold!!
+        _bluetoothMediaDeviceDemibold = buildHyperOSIcon(
             name = "BluetoothMediaDevice.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(589.1f, 807.3f),
@@ -460,8 +460,8 @@ val MiuixIcons.Glass.Demibold.BluetoothMediaDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _bluetoothMediaDeviceSurfaceDemibold!!
+        return _bluetoothMediaDeviceDemibold!!
     }
 
-private var _bluetoothMediaDeviceSurfaceDemibold: ImageVector? = null
+private var _bluetoothMediaDeviceDemibold: ImageVector? = null
 

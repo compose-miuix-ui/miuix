@@ -12,8 +12,8 @@ val MiuixIcons.Glass.TvSoundbar: ImageVector
 
 val MiuixIcons.Glass.Light.TvSoundbar: ImageVector
     get() {
-        if (_tvSoundbarSurfaceLight != null) return _tvSoundbarSurfaceLight!!
-        _tvSoundbarSurfaceLight = buildHyperOSIcon(
+        if (_tvSoundbarLight != null) return _tvSoundbarLight!!
+        _tvSoundbarLight = buildHyperOSIcon(
             name = "TvSoundbar.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(188.8f, 773f),
@@ -126,15 +126,15 @@ val MiuixIcons.Glass.Light.TvSoundbar: ImageVector
             translationY = 994.4444f,
             autoMirror = false,
         )
-        return _tvSoundbarSurfaceLight!!
+        return _tvSoundbarLight!!
     }
 
-private var _tvSoundbarSurfaceLight: ImageVector? = null
+private var _tvSoundbarLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.TvSoundbar: ImageVector
     get() {
-        if (_tvSoundbarSurfaceNormal != null) return _tvSoundbarSurfaceNormal!!
-        _tvSoundbarSurfaceNormal = buildHyperOSIcon(
+        if (_tvSoundbarNormal != null) return _tvSoundbarNormal!!
+        _tvSoundbarNormal = buildHyperOSIcon(
             name = "TvSoundbar.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(184.8f, 781.2f),
@@ -247,15 +247,15 @@ val MiuixIcons.Glass.Normal.TvSoundbar: ImageVector
             translationY = 995.9721f,
             autoMirror = false,
         )
-        return _tvSoundbarSurfaceNormal!!
+        return _tvSoundbarNormal!!
     }
 
-private var _tvSoundbarSurfaceNormal: ImageVector? = null
+private var _tvSoundbarNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.TvSoundbar: ImageVector
     get() {
-        if (_tvSoundbarSurfaceRegular != null) return _tvSoundbarSurfaceRegular!!
-        _tvSoundbarSurfaceRegular = buildHyperOSIcon(
+        if (_tvSoundbarRegular != null) return _tvSoundbarRegular!!
+        _tvSoundbarRegular = buildHyperOSIcon(
             name = "TvSoundbar.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(183f, 785f),
@@ -368,15 +368,15 @@ val MiuixIcons.Glass.Regular.TvSoundbar: ImageVector
             translationY = 996.6667f,
             autoMirror = false,
         )
-        return _tvSoundbarSurfaceRegular!!
+        return _tvSoundbarRegular!!
     }
 
-private var _tvSoundbarSurfaceRegular: ImageVector? = null
+private var _tvSoundbarRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.TvSoundbar: ImageVector
     get() {
-        if (_tvSoundbarSurfaceMedium != null) return _tvSoundbarSurfaceMedium!!
-        _tvSoundbarSurfaceMedium = buildHyperOSIcon(
+        if (_tvSoundbarMedium != null) return _tvSoundbarMedium!!
+        _tvSoundbarMedium = buildHyperOSIcon(
             name = "TvSoundbar.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(179.5f, 792.3f),
@@ -489,15 +489,15 @@ val MiuixIcons.Glass.Medium.TvSoundbar: ImageVector
             translationY = 999.7747f,
             autoMirror = false,
         )
-        return _tvSoundbarSurfaceMedium!!
+        return _tvSoundbarMedium!!
     }
 
-private var _tvSoundbarSurfaceMedium: ImageVector? = null
+private var _tvSoundbarMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.TvSoundbar: ImageVector
     get() {
-        if (_tvSoundbarSurfaceDemibold != null) return _tvSoundbarSurfaceDemibold!!
-        _tvSoundbarSurfaceDemibold = buildHyperOSIcon(
+        if (_tvSoundbarDemibold != null) return _tvSoundbarDemibold!!
+        _tvSoundbarDemibold = buildHyperOSIcon(
             name = "TvSoundbar.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(177f, 797.4f),
@@ -610,8 +610,8 @@ val MiuixIcons.Glass.Demibold.TvSoundbar: ImageVector
             translationY = 1001.9506f,
             autoMirror = false,
         )
-        return _tvSoundbarSurfaceDemibold!!
+        return _tvSoundbarDemibold!!
     }
 
-private var _tvSoundbarSurfaceDemibold: ImageVector? = null
+private var _tvSoundbarDemibold: ImageVector? = null
 

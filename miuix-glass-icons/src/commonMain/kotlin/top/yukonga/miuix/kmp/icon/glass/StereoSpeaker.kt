@@ -12,8 +12,8 @@ val MiuixIcons.Glass.StereoSpeaker: ImageVector
 
 val MiuixIcons.Glass.Light.StereoSpeaker: ImageVector
     get() {
-        if (_stereoSpeakerSurfaceLight != null) return _stereoSpeakerSurfaceLight!!
-        _stereoSpeakerSurfaceLight = buildHyperOSIcon(
+        if (_stereoSpeakerLight != null) return _stereoSpeakerLight!!
+        _stereoSpeakerLight = buildHyperOSIcon(
             name = "StereoSpeaker.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(779.2f, 449.9f),
@@ -148,15 +148,15 @@ val MiuixIcons.Glass.Light.StereoSpeaker: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _stereoSpeakerSurfaceLight!!
+        return _stereoSpeakerLight!!
     }
 
-private var _stereoSpeakerSurfaceLight: ImageVector? = null
+private var _stereoSpeakerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.StereoSpeaker: ImageVector
     get() {
-        if (_stereoSpeakerSurfaceNormal != null) return _stereoSpeakerSurfaceNormal!!
-        _stereoSpeakerSurfaceNormal = buildHyperOSIcon(
+        if (_stereoSpeakerNormal != null) return _stereoSpeakerNormal!!
+        _stereoSpeakerNormal = buildHyperOSIcon(
             name = "StereoSpeaker.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(783.2f, 457.5f),
@@ -291,15 +291,15 @@ val MiuixIcons.Glass.Normal.StereoSpeaker: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _stereoSpeakerSurfaceNormal!!
+        return _stereoSpeakerNormal!!
     }
 
-private var _stereoSpeakerSurfaceNormal: ImageVector? = null
+private var _stereoSpeakerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.StereoSpeaker: ImageVector
     get() {
-        if (_stereoSpeakerSurfaceRegular != null) return _stereoSpeakerSurfaceRegular!!
-        _stereoSpeakerSurfaceRegular = buildHyperOSIcon(
+        if (_stereoSpeakerRegular != null) return _stereoSpeakerRegular!!
+        _stereoSpeakerRegular = buildHyperOSIcon(
             name = "StereoSpeaker.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(785f, 461f),
@@ -434,15 +434,15 @@ val MiuixIcons.Glass.Regular.StereoSpeaker: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _stereoSpeakerSurfaceRegular!!
+        return _stereoSpeakerRegular!!
     }
 
-private var _stereoSpeakerSurfaceRegular: ImageVector? = null
+private var _stereoSpeakerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.StereoSpeaker: ImageVector
     get() {
-        if (_stereoSpeakerSurfaceMedium != null) return _stereoSpeakerSurfaceMedium!!
-        _stereoSpeakerSurfaceMedium = buildHyperOSIcon(
+        if (_stereoSpeakerMedium != null) return _stereoSpeakerMedium!!
+        _stereoSpeakerMedium = buildHyperOSIcon(
             name = "StereoSpeaker.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(780.7f, 464.5f),
@@ -577,15 +577,15 @@ val MiuixIcons.Glass.Medium.StereoSpeaker: ImageVector
             translationY = 1040.8153f,
             autoMirror = false,
         )
-        return _stereoSpeakerSurfaceMedium!!
+        return _stereoSpeakerMedium!!
     }
 
-private var _stereoSpeakerSurfaceMedium: ImageVector? = null
+private var _stereoSpeakerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.StereoSpeaker: ImageVector
     get() {
-        if (_stereoSpeakerSurfaceDemibold != null) return _stereoSpeakerSurfaceDemibold!!
-        _stereoSpeakerSurfaceDemibold = buildHyperOSIcon(
+        if (_stereoSpeakerDemibold != null) return _stereoSpeakerDemibold!!
+        _stereoSpeakerDemibold = buildHyperOSIcon(
             name = "StereoSpeaker.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(777.6f, 467f),
@@ -720,8 +720,8 @@ val MiuixIcons.Glass.Demibold.StereoSpeaker: ImageVector
             translationY = 1039.8693f,
             autoMirror = false,
         )
-        return _stereoSpeakerSurfaceDemibold!!
+        return _stereoSpeakerDemibold!!
     }
 
-private var _stereoSpeakerSurfaceDemibold: ImageVector? = null
+private var _stereoSpeakerDemibold: ImageVector? = null
 

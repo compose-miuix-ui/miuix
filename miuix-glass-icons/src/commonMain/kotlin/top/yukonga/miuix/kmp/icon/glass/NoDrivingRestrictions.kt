@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoDrivingRestrictions: ImageVector
 
 val MiuixIcons.Glass.Light.NoDrivingRestrictions: ImageVector
     get() {
-        if (_noDrivingRestrictionsLineLight != null) return _noDrivingRestrictionsLineLight!!
-        _noDrivingRestrictionsLineLight = buildHyperOSIcon(
+        if (_noDrivingRestrictionsLight != null) return _noDrivingRestrictionsLight!!
+        _noDrivingRestrictionsLight = buildHyperOSIcon(
             name = "NoDrivingRestrictions.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1013.2f, 459f),
@@ -99,15 +99,15 @@ val MiuixIcons.Glass.Light.NoDrivingRestrictions: ImageVector
             translationY = 957.6667f,
             autoMirror = false,
         )
-        return _noDrivingRestrictionsLineLight!!
+        return _noDrivingRestrictionsLight!!
     }
 
-private var _noDrivingRestrictionsLineLight: ImageVector? = null
+private var _noDrivingRestrictionsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoDrivingRestrictions: ImageVector
     get() {
-        if (_noDrivingRestrictionsLineNormal != null) return _noDrivingRestrictionsLineNormal!!
-        _noDrivingRestrictionsLineNormal = buildHyperOSIcon(
+        if (_noDrivingRestrictionsNormal != null) return _noDrivingRestrictionsNormal!!
+        _noDrivingRestrictionsNormal = buildHyperOSIcon(
             name = "NoDrivingRestrictions.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1008.9f, 450.8f),
@@ -193,15 +193,15 @@ val MiuixIcons.Glass.Normal.NoDrivingRestrictions: ImageVector
             translationY = 957.6667f,
             autoMirror = false,
         )
-        return _noDrivingRestrictionsLineNormal!!
+        return _noDrivingRestrictionsNormal!!
     }
 
-private var _noDrivingRestrictionsLineNormal: ImageVector? = null
+private var _noDrivingRestrictionsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoDrivingRestrictions: ImageVector
     get() {
-        if (_noDrivingRestrictionsLineRegular != null) return _noDrivingRestrictionsLineRegular!!
-        _noDrivingRestrictionsLineRegular = buildHyperOSIcon(
+        if (_noDrivingRestrictionsRegular != null) return _noDrivingRestrictionsRegular!!
+        _noDrivingRestrictionsRegular = buildHyperOSIcon(
             name = "NoDrivingRestrictions.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1007f, 447f),
@@ -287,15 +287,15 @@ val MiuixIcons.Glass.Regular.NoDrivingRestrictions: ImageVector
             translationY = 957.6667f,
             autoMirror = false,
         )
-        return _noDrivingRestrictionsLineRegular!!
+        return _noDrivingRestrictionsRegular!!
     }
 
-private var _noDrivingRestrictionsLineRegular: ImageVector? = null
+private var _noDrivingRestrictionsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoDrivingRestrictions: ImageVector
     get() {
-        if (_noDrivingRestrictionsLineMedium != null) return _noDrivingRestrictionsLineMedium!!
-        _noDrivingRestrictionsLineMedium = buildHyperOSIcon(
+        if (_noDrivingRestrictionsMedium != null) return _noDrivingRestrictionsMedium!!
+        _noDrivingRestrictionsMedium = buildHyperOSIcon(
             name = "NoDrivingRestrictions.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1004.6f, 442.1f),
@@ -381,15 +381,15 @@ val MiuixIcons.Glass.Medium.NoDrivingRestrictions: ImageVector
             translationY = 957.6667f,
             autoMirror = false,
         )
-        return _noDrivingRestrictionsLineMedium!!
+        return _noDrivingRestrictionsMedium!!
     }
 
-private var _noDrivingRestrictionsLineMedium: ImageVector? = null
+private var _noDrivingRestrictionsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoDrivingRestrictions: ImageVector
     get() {
-        if (_noDrivingRestrictionsLineDemibold != null) return _noDrivingRestrictionsLineDemibold!!
-        _noDrivingRestrictionsLineDemibold = buildHyperOSIcon(
+        if (_noDrivingRestrictionsDemibold != null) return _noDrivingRestrictionsDemibold!!
+        _noDrivingRestrictionsDemibold = buildHyperOSIcon(
             name = "NoDrivingRestrictions.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1002.9f, 438.7f),
@@ -475,8 +475,8 @@ val MiuixIcons.Glass.Demibold.NoDrivingRestrictions: ImageVector
             translationY = 957.6667f,
             autoMirror = false,
         )
-        return _noDrivingRestrictionsLineDemibold!!
+        return _noDrivingRestrictionsDemibold!!
     }
 
-private var _noDrivingRestrictionsLineDemibold: ImageVector? = null
+private var _noDrivingRestrictionsDemibold: ImageVector? = null
 

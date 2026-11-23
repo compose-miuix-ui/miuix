@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PenPouch: ImageVector
 
 val MiuixIcons.Glass.Light.PenPouch: ImageVector
     get() {
-        if (_penPouchLineLight != null) return _penPouchLineLight!!
-        _penPouchLineLight = buildHyperOSIcon(
+        if (_penPouchLight != null) return _penPouchLight!!
+        _penPouchLight = buildHyperOSIcon(
             name = "PenPouch.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(770.3f, 278.7f),
@@ -80,15 +80,15 @@ val MiuixIcons.Glass.Light.PenPouch: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _penPouchLineLight!!
+        return _penPouchLight!!
     }
 
-private var _penPouchLineLight: ImageVector? = null
+private var _penPouchLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PenPouch: ImageVector
     get() {
-        if (_penPouchLineNormal != null) return _penPouchLineNormal!!
-        _penPouchLineNormal = buildHyperOSIcon(
+        if (_penPouchNormal != null) return _penPouchNormal!!
+        _penPouchNormal = buildHyperOSIcon(
             name = "PenPouch.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(761.2f, 276.8f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Normal.PenPouch: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _penPouchLineNormal!!
+        return _penPouchNormal!!
     }
 
-private var _penPouchLineNormal: ImageVector? = null
+private var _penPouchNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PenPouch: ImageVector
     get() {
-        if (_penPouchLineRegular != null) return _penPouchLineRegular!!
-        _penPouchLineRegular = buildHyperOSIcon(
+        if (_penPouchRegular != null) return _penPouchRegular!!
+        _penPouchRegular = buildHyperOSIcon(
             name = "PenPouch.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(757f, 276f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Regular.PenPouch: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _penPouchLineRegular!!
+        return _penPouchRegular!!
     }
 
-private var _penPouchLineRegular: ImageVector? = null
+private var _penPouchRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PenPouch: ImageVector
     get() {
-        if (_penPouchLineMedium != null) return _penPouchLineMedium!!
-        _penPouchLineMedium = buildHyperOSIcon(
+        if (_penPouchMedium != null) return _penPouchMedium!!
+        _penPouchMedium = buildHyperOSIcon(
             name = "PenPouch.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(751.6f, 261.7f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Medium.PenPouch: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _penPouchLineMedium!!
+        return _penPouchMedium!!
     }
 
-private var _penPouchLineMedium: ImageVector? = null
+private var _penPouchMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PenPouch: ImageVector
     get() {
-        if (_penPouchLineDemibold != null) return _penPouchLineDemibold!!
-        _penPouchLineDemibold = buildHyperOSIcon(
+        if (_penPouchDemibold != null) return _penPouchDemibold!!
+        _penPouchDemibold = buildHyperOSIcon(
             name = "PenPouch.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(747.8f, 251.6f),
@@ -380,8 +380,8 @@ val MiuixIcons.Glass.Demibold.PenPouch: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _penPouchLineDemibold!!
+        return _penPouchDemibold!!
     }
 
-private var _penPouchLineDemibold: ImageVector? = null
+private var _penPouchDemibold: ImageVector? = null
 

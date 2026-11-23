@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RightEarbud: ImageVector
 
 val MiuixIcons.Glass.Light.RightEarbud: ImageVector
     get() {
-        if (_rightEarbudSurfaceLight != null) return _rightEarbudSurfaceLight!!
-        _rightEarbudSurfaceLight = buildHyperOSIcon(
+        if (_rightEarbudLight != null) return _rightEarbudLight!!
+        _rightEarbudLight = buildHyperOSIcon(
             name = "RightEarbud.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(128.9f, 470.1f),
@@ -66,15 +66,15 @@ val MiuixIcons.Glass.Light.RightEarbud: ImageVector
             translationY = 1057.1686f,
             autoMirror = false,
         )
-        return _rightEarbudSurfaceLight!!
+        return _rightEarbudLight!!
     }
 
-private var _rightEarbudSurfaceLight: ImageVector? = null
+private var _rightEarbudLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RightEarbud: ImageVector
     get() {
-        if (_rightEarbudSurfaceNormal != null) return _rightEarbudSurfaceNormal!!
-        _rightEarbudSurfaceNormal = buildHyperOSIcon(
+        if (_rightEarbudNormal != null) return _rightEarbudNormal!!
+        _rightEarbudNormal = buildHyperOSIcon(
             name = "RightEarbud.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(122.8f, 468f),
@@ -127,15 +127,15 @@ val MiuixIcons.Glass.Normal.RightEarbud: ImageVector
             translationY = 1060.0602f,
             autoMirror = false,
         )
-        return _rightEarbudSurfaceNormal!!
+        return _rightEarbudNormal!!
     }
 
-private var _rightEarbudSurfaceNormal: ImageVector? = null
+private var _rightEarbudNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RightEarbud: ImageVector
     get() {
-        if (_rightEarbudSurfaceRegular != null) return _rightEarbudSurfaceRegular!!
-        _rightEarbudSurfaceRegular = buildHyperOSIcon(
+        if (_rightEarbudRegular != null) return _rightEarbudRegular!!
+        _rightEarbudRegular = buildHyperOSIcon(
             name = "RightEarbud.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(120f, 467f),
@@ -188,15 +188,15 @@ val MiuixIcons.Glass.Regular.RightEarbud: ImageVector
             translationY = 1061.375f,
             autoMirror = false,
         )
-        return _rightEarbudSurfaceRegular!!
+        return _rightEarbudRegular!!
     }
 
-private var _rightEarbudSurfaceRegular: ImageVector? = null
+private var _rightEarbudRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RightEarbud: ImageVector
     get() {
-        if (_rightEarbudSurfaceMedium != null) return _rightEarbudSurfaceMedium!!
-        _rightEarbudSurfaceMedium = buildHyperOSIcon(
+        if (_rightEarbudMedium != null) return _rightEarbudMedium!!
+        _rightEarbudMedium = buildHyperOSIcon(
             name = "RightEarbud.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(116.8f, 464.8f),
@@ -249,15 +249,15 @@ val MiuixIcons.Glass.Medium.RightEarbud: ImageVector
             translationY = 1061.6361f,
             autoMirror = false,
         )
-        return _rightEarbudSurfaceMedium!!
+        return _rightEarbudMedium!!
     }
 
-private var _rightEarbudSurfaceMedium: ImageVector? = null
+private var _rightEarbudMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RightEarbud: ImageVector
     get() {
-        if (_rightEarbudSurfaceDemibold != null) return _rightEarbudSurfaceDemibold!!
-        _rightEarbudSurfaceDemibold = buildHyperOSIcon(
+        if (_rightEarbudDemibold != null) return _rightEarbudDemibold!!
+        _rightEarbudDemibold = buildHyperOSIcon(
             name = "RightEarbud.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(114.5f, 463.3f),
@@ -310,8 +310,8 @@ val MiuixIcons.Glass.Demibold.RightEarbud: ImageVector
             translationY = 1061.819f,
             autoMirror = false,
         )
-        return _rightEarbudSurfaceDemibold!!
+        return _rightEarbudDemibold!!
     }
 
-private var _rightEarbudSurfaceDemibold: ImageVector? = null
+private var _rightEarbudDemibold: ImageVector? = null
 

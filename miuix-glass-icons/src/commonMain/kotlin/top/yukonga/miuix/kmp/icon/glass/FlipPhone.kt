@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FlipPhone: ImageVector
 
 val MiuixIcons.Glass.Light.FlipPhone: ImageVector
     get() {
-        if (_flipPhoneSurfaceLight != null) return _flipPhoneSurfaceLight!!
-        _flipPhoneSurfaceLight = buildHyperOSIcon(
+        if (_flipPhoneLight != null) return _flipPhoneLight!!
+        _flipPhoneLight = buildHyperOSIcon(
             name = "FlipPhone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(950.3f, -150.2f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Light.FlipPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flipPhoneSurfaceLight!!
+        return _flipPhoneLight!!
     }
 
-private var _flipPhoneSurfaceLight: ImageVector? = null
+private var _flipPhoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FlipPhone: ImageVector
     get() {
-        if (_flipPhoneSurfaceNormal != null) return _flipPhoneSurfaceNormal!!
-        _flipPhoneSurfaceNormal = buildHyperOSIcon(
+        if (_flipPhoneNormal != null) return _flipPhoneNormal!!
+        _flipPhoneNormal = buildHyperOSIcon(
             name = "FlipPhone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(954.9f, -159.7f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Normal.FlipPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flipPhoneSurfaceNormal!!
+        return _flipPhoneNormal!!
     }
 
-private var _flipPhoneSurfaceNormal: ImageVector? = null
+private var _flipPhoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FlipPhone: ImageVector
     get() {
-        if (_flipPhoneSurfaceRegular != null) return _flipPhoneSurfaceRegular!!
-        _flipPhoneSurfaceRegular = buildHyperOSIcon(
+        if (_flipPhoneRegular != null) return _flipPhoneRegular!!
+        _flipPhoneRegular = buildHyperOSIcon(
             name = "FlipPhone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(957f, -164f),
@@ -407,15 +407,15 @@ val MiuixIcons.Glass.Regular.FlipPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flipPhoneSurfaceRegular!!
+        return _flipPhoneRegular!!
     }
 
-private var _flipPhoneSurfaceRegular: ImageVector? = null
+private var _flipPhoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FlipPhone: ImageVector
     get() {
-        if (_flipPhoneSurfaceMedium != null) return _flipPhoneSurfaceMedium!!
-        _flipPhoneSurfaceMedium = buildHyperOSIcon(
+        if (_flipPhoneMedium != null) return _flipPhoneMedium!!
+        _flipPhoneMedium = buildHyperOSIcon(
             name = "FlipPhone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(959.2f, -168.3f),
@@ -541,15 +541,15 @@ val MiuixIcons.Glass.Medium.FlipPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flipPhoneSurfaceMedium!!
+        return _flipPhoneMedium!!
     }
 
-private var _flipPhoneSurfaceMedium: ImageVector? = null
+private var _flipPhoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FlipPhone: ImageVector
     get() {
-        if (_flipPhoneSurfaceDemibold != null) return _flipPhoneSurfaceDemibold!!
-        _flipPhoneSurfaceDemibold = buildHyperOSIcon(
+        if (_flipPhoneDemibold != null) return _flipPhoneDemibold!!
+        _flipPhoneDemibold = buildHyperOSIcon(
             name = "FlipPhone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(960.7f, -171.4f),
@@ -675,8 +675,8 @@ val MiuixIcons.Glass.Demibold.FlipPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flipPhoneSurfaceDemibold!!
+        return _flipPhoneDemibold!!
     }
 
-private var _flipPhoneSurfaceDemibold: ImageVector? = null
+private var _flipPhoneDemibold: ImageVector? = null
 

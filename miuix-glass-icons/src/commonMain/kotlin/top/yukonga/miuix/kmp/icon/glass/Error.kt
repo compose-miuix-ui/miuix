@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Error: ImageVector
 
 val MiuixIcons.Glass.Light.Error: ImageVector
     get() {
-        if (_errorLineLight != null) return _errorLineLight!!
-        _errorLineLight = buildHyperOSIcon(
+        if (_errorLight != null) return _errorLight!!
+        _errorLight = buildHyperOSIcon(
             name = "Error.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1162.7f, 374.9f),
@@ -74,15 +74,15 @@ val MiuixIcons.Glass.Light.Error: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _errorLineLight!!
+        return _errorLight!!
     }
 
-private var _errorLineLight: ImageVector? = null
+private var _errorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Error: ImageVector
     get() {
-        if (_errorLineNormal != null) return _errorLineNormal!!
-        _errorLineNormal = buildHyperOSIcon(
+        if (_errorNormal != null) return _errorNormal!!
+        _errorNormal = buildHyperOSIcon(
             name = "Error.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1171.8f, 375f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Normal.Error: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _errorLineNormal!!
+        return _errorNormal!!
     }
 
-private var _errorLineNormal: ImageVector? = null
+private var _errorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Error: ImageVector
     get() {
-        if (_errorLineRegular != null) return _errorLineRegular!!
-        _errorLineRegular = buildHyperOSIcon(
+        if (_errorRegular != null) return _errorRegular!!
+        _errorRegular = buildHyperOSIcon(
             name = "Error.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1176f, 375f),
@@ -212,15 +212,15 @@ val MiuixIcons.Glass.Regular.Error: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _errorLineRegular!!
+        return _errorRegular!!
     }
 
-private var _errorLineRegular: ImageVector? = null
+private var _errorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Error: ImageVector
     get() {
-        if (_errorLineMedium != null) return _errorLineMedium!!
-        _errorLineMedium = buildHyperOSIcon(
+        if (_errorMedium != null) return _errorMedium!!
+        _errorMedium = buildHyperOSIcon(
             name = "Error.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1184.1f, 375f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Medium.Error: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _errorLineMedium!!
+        return _errorMedium!!
     }
 
-private var _errorLineMedium: ImageVector? = null
+private var _errorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Error: ImageVector
     get() {
-        if (_errorLineDemibold != null) return _errorLineDemibold!!
-        _errorLineDemibold = buildHyperOSIcon(
+        if (_errorDemibold != null) return _errorDemibold!!
+        _errorDemibold = buildHyperOSIcon(
             name = "Error.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1189.8f, 374.9f),
@@ -350,8 +350,8 @@ val MiuixIcons.Glass.Demibold.Error: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _errorLineDemibold!!
+        return _errorDemibold!!
     }
 
-private var _errorLineDemibold: ImageVector? = null
+private var _errorDemibold: ImageVector? = null
 

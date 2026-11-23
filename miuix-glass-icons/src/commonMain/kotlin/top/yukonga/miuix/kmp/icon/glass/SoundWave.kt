@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SoundWave: ImageVector
 
 val MiuixIcons.Glass.Light.SoundWave: ImageVector
     get() {
-        if (_soundWaveSurfaceLight != null) return _soundWaveSurfaceLight!!
-        _soundWaveSurfaceLight = buildHyperOSIcon(
+        if (_soundWaveLight != null) return _soundWaveLight!!
+        _soundWaveLight = buildHyperOSIcon(
             name = "SoundWave.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(594.7f, 27.1f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.SoundWave: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundWaveSurfaceLight!!
+        return _soundWaveLight!!
     }
 
-private var _soundWaveSurfaceLight: ImageVector? = null
+private var _soundWaveLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SoundWave: ImageVector
     get() {
-        if (_soundWaveSurfaceNormal != null) return _soundWaveSurfaceNormal!!
-        _soundWaveSurfaceNormal = buildHyperOSIcon(
+        if (_soundWaveNormal != null) return _soundWaveNormal!!
+        _soundWaveNormal = buildHyperOSIcon(
             name = "SoundWave.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(603.8f, 33.2f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.SoundWave: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundWaveSurfaceNormal!!
+        return _soundWaveNormal!!
     }
 
-private var _soundWaveSurfaceNormal: ImageVector? = null
+private var _soundWaveNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SoundWave: ImageVector
     get() {
-        if (_soundWaveSurfaceRegular != null) return _soundWaveSurfaceRegular!!
-        _soundWaveSurfaceRegular = buildHyperOSIcon(
+        if (_soundWaveRegular != null) return _soundWaveRegular!!
+        _soundWaveRegular = buildHyperOSIcon(
             name = "SoundWave.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(608f, 36f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.SoundWave: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundWaveSurfaceRegular!!
+        return _soundWaveRegular!!
     }
 
-private var _soundWaveSurfaceRegular: ImageVector? = null
+private var _soundWaveRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SoundWave: ImageVector
     get() {
-        if (_soundWaveSurfaceMedium != null) return _soundWaveSurfaceMedium!!
-        _soundWaveSurfaceMedium = buildHyperOSIcon(
+        if (_soundWaveMedium != null) return _soundWaveMedium!!
+        _soundWaveMedium = buildHyperOSIcon(
             name = "SoundWave.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(613.9f, 36f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.SoundWave: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundWaveSurfaceMedium!!
+        return _soundWaveMedium!!
     }
 
-private var _soundWaveSurfaceMedium: ImageVector? = null
+private var _soundWaveMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SoundWave: ImageVector
     get() {
-        if (_soundWaveSurfaceDemibold != null) return _soundWaveSurfaceDemibold!!
-        _soundWaveSurfaceDemibold = buildHyperOSIcon(
+        if (_soundWaveDemibold != null) return _soundWaveDemibold!!
+        _soundWaveDemibold = buildHyperOSIcon(
             name = "SoundWave.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(618.1f, 36f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.SoundWave: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _soundWaveSurfaceDemibold!!
+        return _soundWaveDemibold!!
     }
 
-private var _soundWaveSurfaceDemibold: ImageVector? = null
+private var _soundWaveDemibold: ImageVector? = null
 

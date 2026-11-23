@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UsbDriveBackupRestore: ImageVector
 
 val MiuixIcons.Glass.Light.UsbDriveBackupRestore: ImageVector
     get() {
-        if (_usbDriveBackupRestoreLineLight != null) return _usbDriveBackupRestoreLineLight!!
-        _usbDriveBackupRestoreLineLight = buildHyperOSIcon(
+        if (_usbDriveBackupRestoreLight != null) return _usbDriveBackupRestoreLight!!
+        _usbDriveBackupRestoreLight = buildHyperOSIcon(
             name = "UsbDriveBackupRestore.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(498.2f, 925f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.UsbDriveBackupRestore: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _usbDriveBackupRestoreLineLight!!
+        return _usbDriveBackupRestoreLight!!
     }
 
-private var _usbDriveBackupRestoreLineLight: ImageVector? = null
+private var _usbDriveBackupRestoreLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UsbDriveBackupRestore: ImageVector
     get() {
-        if (_usbDriveBackupRestoreLineNormal != null) return _usbDriveBackupRestoreLineNormal!!
-        _usbDriveBackupRestoreLineNormal = buildHyperOSIcon(
+        if (_usbDriveBackupRestoreNormal != null) return _usbDriveBackupRestoreNormal!!
+        _usbDriveBackupRestoreNormal = buildHyperOSIcon(
             name = "UsbDriveBackupRestore.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(493.9f, 933.2f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.UsbDriveBackupRestore: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _usbDriveBackupRestoreLineNormal!!
+        return _usbDriveBackupRestoreNormal!!
     }
 
-private var _usbDriveBackupRestoreLineNormal: ImageVector? = null
+private var _usbDriveBackupRestoreNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UsbDriveBackupRestore: ImageVector
     get() {
-        if (_usbDriveBackupRestoreLineRegular != null) return _usbDriveBackupRestoreLineRegular!!
-        _usbDriveBackupRestoreLineRegular = buildHyperOSIcon(
+        if (_usbDriveBackupRestoreRegular != null) return _usbDriveBackupRestoreRegular!!
+        _usbDriveBackupRestoreRegular = buildHyperOSIcon(
             name = "UsbDriveBackupRestore.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(492f, 937f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.UsbDriveBackupRestore: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _usbDriveBackupRestoreLineRegular!!
+        return _usbDriveBackupRestoreRegular!!
     }
 
-private var _usbDriveBackupRestoreLineRegular: ImageVector? = null
+private var _usbDriveBackupRestoreRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UsbDriveBackupRestore: ImageVector
     get() {
-        if (_usbDriveBackupRestoreLineMedium != null) return _usbDriveBackupRestoreLineMedium!!
-        _usbDriveBackupRestoreLineMedium = buildHyperOSIcon(
+        if (_usbDriveBackupRestoreMedium != null) return _usbDriveBackupRestoreMedium!!
+        _usbDriveBackupRestoreMedium = buildHyperOSIcon(
             name = "UsbDriveBackupRestore.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(488.2f, 944f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.UsbDriveBackupRestore: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _usbDriveBackupRestoreLineMedium!!
+        return _usbDriveBackupRestoreMedium!!
     }
 
-private var _usbDriveBackupRestoreLineMedium: ImageVector? = null
+private var _usbDriveBackupRestoreMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UsbDriveBackupRestore: ImageVector
     get() {
-        if (_usbDriveBackupRestoreLineDemibold != null) return _usbDriveBackupRestoreLineDemibold!!
-        _usbDriveBackupRestoreLineDemibold = buildHyperOSIcon(
+        if (_usbDriveBackupRestoreDemibold != null) return _usbDriveBackupRestoreDemibold!!
+        _usbDriveBackupRestoreDemibold = buildHyperOSIcon(
             name = "UsbDriveBackupRestore.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(485.6f, 948.9f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.UsbDriveBackupRestore: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _usbDriveBackupRestoreLineDemibold!!
+        return _usbDriveBackupRestoreDemibold!!
     }
 
-private var _usbDriveBackupRestoreLineDemibold: ImageVector? = null
+private var _usbDriveBackupRestoreDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LeftEarbud: ImageVector
 
 val MiuixIcons.Glass.Light.LeftEarbud: ImageVector
     get() {
-        if (_leftEarbudSurfaceLight != null) return _leftEarbudSurfaceLight!!
-        _leftEarbudSurfaceLight = buildHyperOSIcon(
+        if (_leftEarbudLight != null) return _leftEarbudLight!!
+        _leftEarbudLight = buildHyperOSIcon(
             name = "LeftEarbud.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(133.8f, 729.7f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.LeftEarbud: ImageVector
             translationY = 1057.1686f,
             autoMirror = false,
         )
-        return _leftEarbudSurfaceLight!!
+        return _leftEarbudLight!!
     }
 
-private var _leftEarbudSurfaceLight: ImageVector? = null
+private var _leftEarbudLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LeftEarbud: ImageVector
     get() {
-        if (_leftEarbudSurfaceNormal != null) return _leftEarbudSurfaceNormal!!
-        _leftEarbudSurfaceNormal = buildHyperOSIcon(
+        if (_leftEarbudNormal != null) return _leftEarbudNormal!!
+        _leftEarbudNormal = buildHyperOSIcon(
             name = "LeftEarbud.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(127.1f, 733.3f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.LeftEarbud: ImageVector
             translationY = 1060.0602f,
             autoMirror = false,
         )
-        return _leftEarbudSurfaceNormal!!
+        return _leftEarbudNormal!!
     }
 
-private var _leftEarbudSurfaceNormal: ImageVector? = null
+private var _leftEarbudNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LeftEarbud: ImageVector
     get() {
-        if (_leftEarbudSurfaceRegular != null) return _leftEarbudSurfaceRegular!!
-        _leftEarbudSurfaceRegular = buildHyperOSIcon(
+        if (_leftEarbudRegular != null) return _leftEarbudRegular!!
+        _leftEarbudRegular = buildHyperOSIcon(
             name = "LeftEarbud.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(124f, 735f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.LeftEarbud: ImageVector
             translationY = 1061.375f,
             autoMirror = false,
         )
-        return _leftEarbudSurfaceRegular!!
+        return _leftEarbudRegular!!
     }
 
-private var _leftEarbudSurfaceRegular: ImageVector? = null
+private var _leftEarbudRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LeftEarbud: ImageVector
     get() {
-        if (_leftEarbudSurfaceMedium != null) return _leftEarbudSurfaceMedium!!
-        _leftEarbudSurfaceMedium = buildHyperOSIcon(
+        if (_leftEarbudMedium != null) return _leftEarbudMedium!!
+        _leftEarbudMedium = buildHyperOSIcon(
             name = "LeftEarbud.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(119.9f, 738f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.LeftEarbud: ImageVector
             translationY = 1061.6361f,
             autoMirror = false,
         )
-        return _leftEarbudSurfaceMedium!!
+        return _leftEarbudMedium!!
     }
 
-private var _leftEarbudSurfaceMedium: ImageVector? = null
+private var _leftEarbudMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LeftEarbud: ImageVector
     get() {
-        if (_leftEarbudSurfaceDemibold != null) return _leftEarbudSurfaceDemibold!!
-        _leftEarbudSurfaceDemibold = buildHyperOSIcon(
+        if (_leftEarbudDemibold != null) return _leftEarbudDemibold!!
+        _leftEarbudDemibold = buildHyperOSIcon(
             name = "LeftEarbud.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(117.1f, 740.1f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.LeftEarbud: ImageVector
             translationY = 1061.819f,
             autoMirror = false,
         )
-        return _leftEarbudSurfaceDemibold!!
+        return _leftEarbudDemibold!!
     }
 
-private var _leftEarbudSurfaceDemibold: ImageVector? = null
+private var _leftEarbudDemibold: ImageVector? = null
 

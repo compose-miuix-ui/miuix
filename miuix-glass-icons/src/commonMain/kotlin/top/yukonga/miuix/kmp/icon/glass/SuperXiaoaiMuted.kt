@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuperXiaoaiMuted: ImageVector
 
 val MiuixIcons.Glass.Light.SuperXiaoaiMuted: ImageVector
     get() {
-        if (_superXiaoaiMutedSurfaceLight != null) return _superXiaoaiMutedSurfaceLight!!
-        _superXiaoaiMutedSurfaceLight = buildHyperOSIcon(
+        if (_superXiaoaiMutedLight != null) return _superXiaoaiMutedLight!!
+        _superXiaoaiMutedLight = buildHyperOSIcon(
             name = "SuperXiaoaiMuted.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(570.8f, -36.2f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Light.SuperXiaoaiMuted: ImageVector
             translationY = 1041.5717f,
             autoMirror = false,
         )
-        return _superXiaoaiMutedSurfaceLight!!
+        return _superXiaoaiMutedLight!!
     }
 
-private var _superXiaoaiMutedSurfaceLight: ImageVector? = null
+private var _superXiaoaiMutedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuperXiaoaiMuted: ImageVector
     get() {
-        if (_superXiaoaiMutedSurfaceNormal != null) return _superXiaoaiMutedSurfaceNormal!!
-        _superXiaoaiMutedSurfaceNormal = buildHyperOSIcon(
+        if (_superXiaoaiMutedNormal != null) return _superXiaoaiMutedNormal!!
+        _superXiaoaiMutedNormal = buildHyperOSIcon(
             name = "SuperXiaoaiMuted.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(572.3f, -31.9f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Normal.SuperXiaoaiMuted: ImageVector
             translationY = 1041.5716f,
             autoMirror = false,
         )
-        return _superXiaoaiMutedSurfaceNormal!!
+        return _superXiaoaiMutedNormal!!
     }
 
-private var _superXiaoaiMutedSurfaceNormal: ImageVector? = null
+private var _superXiaoaiMutedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuperXiaoaiMuted: ImageVector
     get() {
-        if (_superXiaoaiMutedSurfaceRegular != null) return _superXiaoaiMutedSurfaceRegular!!
-        _superXiaoaiMutedSurfaceRegular = buildHyperOSIcon(
+        if (_superXiaoaiMutedRegular != null) return _superXiaoaiMutedRegular!!
+        _superXiaoaiMutedRegular = buildHyperOSIcon(
             name = "SuperXiaoaiMuted.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(573f, -30f),
@@ -395,15 +395,15 @@ val MiuixIcons.Glass.Regular.SuperXiaoaiMuted: ImageVector
             translationY = 1041.5716f,
             autoMirror = false,
         )
-        return _superXiaoaiMutedSurfaceRegular!!
+        return _superXiaoaiMutedRegular!!
     }
 
-private var _superXiaoaiMutedSurfaceRegular: ImageVector? = null
+private var _superXiaoaiMutedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuperXiaoaiMuted: ImageVector
     get() {
-        if (_superXiaoaiMutedSurfaceMedium != null) return _superXiaoaiMutedSurfaceMedium!!
-        _superXiaoaiMutedSurfaceMedium = buildHyperOSIcon(
+        if (_superXiaoaiMutedMedium != null) return _superXiaoaiMutedMedium!!
+        _superXiaoaiMutedMedium = buildHyperOSIcon(
             name = "SuperXiaoaiMuted.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(589.5f, -33.2f),
@@ -525,15 +525,15 @@ val MiuixIcons.Glass.Medium.SuperXiaoaiMuted: ImageVector
             translationY = 1041.5673f,
             autoMirror = false,
         )
-        return _superXiaoaiMutedSurfaceMedium!!
+        return _superXiaoaiMutedMedium!!
     }
 
-private var _superXiaoaiMutedSurfaceMedium: ImageVector? = null
+private var _superXiaoaiMutedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuperXiaoaiMuted: ImageVector
     get() {
-        if (_superXiaoaiMutedSurfaceDemibold != null) return _superXiaoaiMutedSurfaceDemibold!!
-        _superXiaoaiMutedSurfaceDemibold = buildHyperOSIcon(
+        if (_superXiaoaiMutedDemibold != null) return _superXiaoaiMutedDemibold!!
+        _superXiaoaiMutedDemibold = buildHyperOSIcon(
             name = "SuperXiaoaiMuted.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(601f, -35.5f),
@@ -655,8 +655,8 @@ val MiuixIcons.Glass.Demibold.SuperXiaoaiMuted: ImageVector
             translationY = 1041.5642f,
             autoMirror = false,
         )
-        return _superXiaoaiMutedSurfaceDemibold!!
+        return _superXiaoaiMutedDemibold!!
     }
 
-private var _superXiaoaiMutedSurfaceDemibold: ImageVector? = null
+private var _superXiaoaiMutedDemibold: ImageVector? = null
 

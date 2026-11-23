@@ -12,8 +12,8 @@ val MiuixIcons.Glass.OuterScreenApps: ImageVector
 
 val MiuixIcons.Glass.Light.OuterScreenApps: ImageVector
     get() {
-        if (_outerScreenAppsSurfaceLight != null) return _outerScreenAppsSurfaceLight!!
-        _outerScreenAppsSurfaceLight = buildHyperOSIcon(
+        if (_outerScreenAppsLight != null) return _outerScreenAppsLight!!
+        _outerScreenAppsLight = buildHyperOSIcon(
             name = "OuterScreenApps.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(782.7f, 753.2f),
@@ -134,15 +134,15 @@ val MiuixIcons.Glass.Light.OuterScreenApps: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _outerScreenAppsSurfaceLight!!
+        return _outerScreenAppsLight!!
     }
 
-private var _outerScreenAppsSurfaceLight: ImageVector? = null
+private var _outerScreenAppsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.OuterScreenApps: ImageVector
     get() {
-        if (_outerScreenAppsSurfaceNormal != null) return _outerScreenAppsSurfaceNormal!!
-        _outerScreenAppsSurfaceNormal = buildHyperOSIcon(
+        if (_outerScreenAppsNormal != null) return _outerScreenAppsNormal!!
+        _outerScreenAppsNormal = buildHyperOSIcon(
             name = "OuterScreenApps.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(783.6f, 759.9f),
@@ -263,15 +263,15 @@ val MiuixIcons.Glass.Normal.OuterScreenApps: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _outerScreenAppsSurfaceNormal!!
+        return _outerScreenAppsNormal!!
     }
 
-private var _outerScreenAppsSurfaceNormal: ImageVector? = null
+private var _outerScreenAppsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.OuterScreenApps: ImageVector
     get() {
-        if (_outerScreenAppsSurfaceRegular != null) return _outerScreenAppsSurfaceRegular!!
-        _outerScreenAppsSurfaceRegular = buildHyperOSIcon(
+        if (_outerScreenAppsRegular != null) return _outerScreenAppsRegular!!
+        _outerScreenAppsRegular = buildHyperOSIcon(
             name = "OuterScreenApps.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(784f, 763f),
@@ -392,15 +392,15 @@ val MiuixIcons.Glass.Regular.OuterScreenApps: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _outerScreenAppsSurfaceRegular!!
+        return _outerScreenAppsRegular!!
     }
 
-private var _outerScreenAppsSurfaceRegular: ImageVector? = null
+private var _outerScreenAppsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.OuterScreenApps: ImageVector
     get() {
-        if (_outerScreenAppsSurfaceMedium != null) return _outerScreenAppsSurfaceMedium!!
-        _outerScreenAppsSurfaceMedium = buildHyperOSIcon(
+        if (_outerScreenAppsMedium != null) return _outerScreenAppsMedium!!
+        _outerScreenAppsMedium = buildHyperOSIcon(
             name = "OuterScreenApps.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(783.7f, 770.8f),
@@ -521,15 +521,15 @@ val MiuixIcons.Glass.Medium.OuterScreenApps: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _outerScreenAppsSurfaceMedium!!
+        return _outerScreenAppsMedium!!
     }
 
-private var _outerScreenAppsSurfaceMedium: ImageVector? = null
+private var _outerScreenAppsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.OuterScreenApps: ImageVector
     get() {
-        if (_outerScreenAppsSurfaceDemibold != null) return _outerScreenAppsSurfaceDemibold!!
-        _outerScreenAppsSurfaceDemibold = buildHyperOSIcon(
+        if (_outerScreenAppsDemibold != null) return _outerScreenAppsDemibold!!
+        _outerScreenAppsDemibold = buildHyperOSIcon(
             name = "OuterScreenApps.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(783.5f, 776.3f),
@@ -650,8 +650,8 @@ val MiuixIcons.Glass.Demibold.OuterScreenApps: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _outerScreenAppsSurfaceDemibold!!
+        return _outerScreenAppsDemibold!!
     }
 
-private var _outerScreenAppsSurfaceDemibold: ImageVector? = null
+private var _outerScreenAppsDemibold: ImageVector? = null
 

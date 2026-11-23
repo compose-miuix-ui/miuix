@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Keyboard: ImageVector
 
 val MiuixIcons.Glass.Light.Keyboard: ImageVector
     get() {
-        if (_keyboardSurfaceLight != null) return _keyboardSurfaceLight!!
-        _keyboardSurfaceLight = buildHyperOSIcon(
+        if (_keyboardLight != null) return _keyboardLight!!
+        _keyboardLight = buildHyperOSIcon(
             name = "Keyboard.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(208.1f, 786.7f),
@@ -178,15 +178,15 @@ val MiuixIcons.Glass.Light.Keyboard: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardSurfaceLight!!
+        return _keyboardLight!!
     }
 
-private var _keyboardSurfaceLight: ImageVector? = null
+private var _keyboardLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Keyboard: ImageVector
     get() {
-        if (_keyboardSurfaceNormal != null) return _keyboardSurfaceNormal!!
-        _keyboardSurfaceNormal = buildHyperOSIcon(
+        if (_keyboardNormal != null) return _keyboardNormal!!
+        _keyboardNormal = buildHyperOSIcon(
             name = "Keyboard.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(206.7f, 792.4f),
@@ -351,15 +351,15 @@ val MiuixIcons.Glass.Normal.Keyboard: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardSurfaceNormal!!
+        return _keyboardNormal!!
     }
 
-private var _keyboardSurfaceNormal: ImageVector? = null
+private var _keyboardNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Keyboard: ImageVector
     get() {
-        if (_keyboardSurfaceRegular != null) return _keyboardSurfaceRegular!!
-        _keyboardSurfaceRegular = buildHyperOSIcon(
+        if (_keyboardRegular != null) return _keyboardRegular!!
+        _keyboardRegular = buildHyperOSIcon(
             name = "Keyboard.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(206f, 795f),
@@ -524,15 +524,15 @@ val MiuixIcons.Glass.Regular.Keyboard: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardSurfaceRegular!!
+        return _keyboardRegular!!
     }
 
-private var _keyboardSurfaceRegular: ImageVector? = null
+private var _keyboardRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Keyboard: ImageVector
     get() {
-        if (_keyboardSurfaceMedium != null) return _keyboardSurfaceMedium!!
-        _keyboardSurfaceMedium = buildHyperOSIcon(
+        if (_keyboardMedium != null) return _keyboardMedium!!
+        _keyboardMedium = buildHyperOSIcon(
             name = "Keyboard.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(204.9f, 799.9f),
@@ -697,15 +697,15 @@ val MiuixIcons.Glass.Medium.Keyboard: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardSurfaceMedium!!
+        return _keyboardMedium!!
     }
 
-private var _keyboardSurfaceMedium: ImageVector? = null
+private var _keyboardMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Keyboard: ImageVector
     get() {
-        if (_keyboardSurfaceDemibold != null) return _keyboardSurfaceDemibold!!
-        _keyboardSurfaceDemibold = buildHyperOSIcon(
+        if (_keyboardDemibold != null) return _keyboardDemibold!!
+        _keyboardDemibold = buildHyperOSIcon(
             name = "Keyboard.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(204.2f, 803.3f),
@@ -870,8 +870,8 @@ val MiuixIcons.Glass.Demibold.Keyboard: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardSurfaceDemibold!!
+        return _keyboardDemibold!!
     }
 
-private var _keyboardSurfaceDemibold: ImageVector? = null
+private var _keyboardDemibold: ImageVector? = null
 
