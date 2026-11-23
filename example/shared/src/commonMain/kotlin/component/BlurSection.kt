@@ -229,7 +229,6 @@ private fun ProgressiveBlurDemo() {
 
 @Composable
 private fun BlurDemo() {
-    var showBlur by remember { mutableStateOf(true) }
     var blurRadiusX by remember { mutableFloatStateOf(40f) }
     var blurRadiusY by remember { mutableFloatStateOf(40f) }
     var noiseCoefficient by remember { mutableFloatStateOf(BlurDefaults.NoiseCoefficient) }
@@ -297,41 +296,39 @@ private fun BlurDemo() {
                     BlurBackground()
                 }
 
-                // Toggle the overlay to exercise detaching and reattaching its graphics resources.
-                if (showBlur) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .height(140.dp)
-                            .align(Alignment.Center)
-                            .textureBlur(
-                                backdrop = backdrop,
-                                shape = blurShape,
-                                blurRadiusX = blurRadiusX,
-                                blurRadiusY = blurRadiusY,
-                                noiseCoefficient = noiseCoefficient,
-                                colors = BlurDefaults.blurColors(
-                                    blendColors = currentBlend.second,
-                                    brightness = brightness,
-                                    contrast = contrast,
-                                    saturation = saturation,
-                                ),
-                            )
-                            .edgeStroke(shape = blurShape, stroke = containerStrokeProvider),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "Texture Blur | R=${blurRadiusX.toInt()}",
-                                style = MiuixTheme.textStyles.headline2,
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "${currentBlend.first} | ${containerItems[containerIndex]}",
-                                style = MiuixTheme.textStyles.body2,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                            )
-                        }
+                // Blur overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(140.dp)
+                        .align(Alignment.Center)
+                        .textureBlur(
+                            backdrop = backdrop,
+                            shape = blurShape,
+                            blurRadiusX = blurRadiusX,
+                            blurRadiusY = blurRadiusY,
+                            noiseCoefficient = noiseCoefficient,
+                            colors = BlurDefaults.blurColors(
+                                blendColors = currentBlend.second,
+                                brightness = brightness,
+                                contrast = contrast,
+                                saturation = saturation,
+                            ),
+                        )
+                        .edgeStroke(shape = blurShape, stroke = containerStrokeProvider),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Texture Blur | R=${blurRadiusX.toInt()}",
+                            style = MiuixTheme.textStyles.headline2,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "${currentBlend.first} | ${containerItems[containerIndex]}",
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        )
                     }
                 }
             }
@@ -350,12 +347,6 @@ private fun BlurDemo() {
                 items = containerItems,
                 selectedIndex = containerIndex,
                 onSelectedIndexChange = { containerIndex = it },
-            )
-
-            SwitchPreference(
-                title = "Show Blur",
-                checked = showBlur,
-                onCheckedChange = { showBlur = it },
             )
 
             HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
