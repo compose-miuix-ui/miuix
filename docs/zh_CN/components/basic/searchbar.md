@@ -2,6 +2,8 @@
 
 `SearchBar` 是 Miuix 中用于用户输入搜索内容的组件。它提供了一个直观且易用的搜索界面，支持展开/收起状态切换以及搜索建议展示。
 
+输入文本后，输入框末尾默认显示半透明的清除按钮，镂空的 × 会透出输入框背景。自定义 `trailingIcon` 时，可使用 `top.yukonga.miuix.kmp.basic` 下的 `SearchClearButton` 获得相同的样式和按压反馈。
+
 <div style="position: relative; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=searchBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>

@@ -13,7 +13,6 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -60,7 +58,6 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
-import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.hasFocusReassignBug
@@ -284,22 +281,14 @@ fun InputField(
                             enter = SearchCleanupEnterTransition,
                             exit = SearchCleanupExitTransition,
                         ) {
-                            Box(
+                            SearchClearButton(
+                                onClick = { currentOnQueryChange("") },
                                 modifier = Modifier.padding(
                                     start = SearchBarDefaults.TrailingIconStartPadding,
                                     end = SearchBarDefaults.TrailingIconEndPadding,
                                 ),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                Icon(
-                                    modifier = Modifier
-                                        .clip(capsuleShape)
-                                        .clickable { currentOnQueryChange("") },
-                                    imageVector = MiuixIcons.Basic.SearchCleanup,
-                                    tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-                                    contentDescription = "Search Cleanup",
-                                )
-                            }
+                                contentDescription = "Search Cleanup",
+                            )
                         }
                     }
                 }

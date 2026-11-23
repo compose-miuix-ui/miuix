@@ -59,10 +59,10 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InputField
+import top.yukonga.miuix.kmp.basic.SearchClearButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
-import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.SearchStatus
 import utils.rememberAppSafePadding
@@ -252,18 +252,12 @@ fun SearchBar(
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut(),
             ) {
-                Icon(
-                    imageVector = MiuixIcons.Basic.SearchCleanup,
-                    tint = MiuixTheme.colorScheme.onSurface,
-                    contentDescription = "Clean",
+                SearchClearButton(
+                    onClick = onClearSearch,
                     modifier = Modifier
                         .size(44.dp)
-                        .padding(start = 8.dp, end = 16.dp)
-                        .clickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = onClearSearch,
-                        ),
+                        .padding(start = 8.dp, end = 16.dp),
+                    contentDescription = "Clean",
                 )
             }
         },

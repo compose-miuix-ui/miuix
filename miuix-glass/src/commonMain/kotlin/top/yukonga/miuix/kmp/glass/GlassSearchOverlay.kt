@@ -80,6 +80,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.SearchClearButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
@@ -442,20 +443,13 @@ fun GlassSearchOverlay(
                                     field()
                                 }
                                 if (queryState.text.isNotEmpty()) {
-                                    IconButton(
+                                    SearchClearButton(
                                         onClick = {
                                             queryState.clearText()
                                             focusRequester.requestFocus()
                                         },
                                         modifier = Modifier.size(24.dp),
-                                    ) {
-                                        Icon(
-                                            closeIcon,
-                                            contentDescription = "Clear",
-                                            modifier = Modifier.size(16.dp * (7f / 6f)),
-                                            tint = mutedColor,
-                                        )
-                                    }
+                                    )
                                 }
                             }
                         }

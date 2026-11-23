@@ -2,6 +2,8 @@
 
 `GlassSearchOverlay` is a full-screen glass search overlay with a progressive blur header band, glassmorphic search input capsule, animated cancel button, and scrollable result area.
 
+When the input contains text, a translucent circular clear button appears. Its cutout reveals the input background.
+
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassSearchOverlay" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
@@ -85,7 +87,7 @@ Box(Modifier.fillMaxSize()) {
 | stroke | EdgeStroke? | GlassSearchOverlayDefaults.stroke() | Edge stroke along the glass capsules |
 | shadow | GlassShadow? | GlassSearchOverlayDefaults.shadow() | Drop shadow behind the glass capsules |
 | searchIcon | ImageVector | MiuixIcons.Basic.Search | Leading search icon |
-| closeIcon | ImageVector | MiuixIcons.Basic.Close | Clear and cancel icon |
+| closeIcon | ImageVector | MiuixIcons.Basic.Close | Cancel icon beside the input |
 | content | @Composable ColumnScope.(String) -> Unit | `{}` | Search result content receiving the current query string |
 
 ### GlassSearchOverlayDefaults
