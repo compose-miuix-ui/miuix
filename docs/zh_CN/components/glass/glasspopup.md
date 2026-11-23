@@ -83,6 +83,7 @@ GlassPopupItem(
 | visuals | GlassPopupVisuals | 面板外观 | GlassPopupDefaults.visuals() | 否 |
 | cornerRadius | Dp | 面板稳定状态的圆角 | GlassPopupDefaults.CornerRadius（24.dp） | 否 |
 | secondary | Boolean | 使用二级菜单几何；需要继承一级菜单材质时应使用 GlassSecondaryPopup | false | 否 |
+| horizontalAlignment | Alignment.Horizontal | 面板相对于 anchorBounds 的水平对齐方式 | Alignment.End | 否 |
 | contentPadding | PaddingValues | 菜单行周围的内边距 | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | 否 |
 | content | @Composable ColumnScope.() -> Unit | 菜单行 | - | 是 |
 

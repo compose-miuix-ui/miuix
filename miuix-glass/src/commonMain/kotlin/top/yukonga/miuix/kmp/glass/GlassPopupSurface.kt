@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -125,20 +126,29 @@ class GlassPopupPlacement internal constructor(
  * A top-edge anchor may use the margin space, but never cross the safe-area boundary.
  * All bounds, sizes and margins use window coordinates and pixel units.
  */
+internal fun alignPopupLeft(
+    anchorLeft: Float,
+    anchorRight: Float,
+    width: Float,
+    direction: LayoutDirection,
+    horizontalAlignment: Alignment.Horizontal,
+): Float = when (horizontalAlignment) {
+    Alignment.Start -> if (direction == LayoutDirection.Ltr) anchorLeft else anchorRight - width
+    Alignment.CenterHorizontally -> (anchorLeft + anchorRight - width) * 0.5f
+    else -> if (direction == LayoutDirection.Ltr) anchorRight - width else anchorLeft
+}
+
 internal fun placeGlassPopup(
     anchor: Rect,
     size: Size,
     margin: Float,
     window: Rect,
     direction: LayoutDirection,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
 ): GlassPopupPlacement {
-    val endAlignedLeft = if (direction == LayoutDirection.Ltr) {
-        anchor.right - size.width
-    } else {
-        anchor.left
-    }
+    val alignedLeft = alignPopupLeft(anchor.left, anchor.right, size.width, direction, horizontalAlignment)
     val minLeft = window.left + margin
-    val left = endAlignedLeft
+    val left = alignedLeft
         .coerceIn(minLeft, (window.right - size.width - margin).coerceAtLeast(minLeft))
     val minTop = minOf(window.top + margin, anchor.top).coerceAtLeast(window.top)
     val below = window.bottom - margin - anchor.top
@@ -207,6 +217,7 @@ internal fun GlassPopupSurface(
     contentLayer: GraphicsLayerScope.(end: Size, rect: Rect) -> Unit,
     modifier: Modifier = Modifier,
     reveal: Modifier = Modifier,
+    shadowAlpha: () -> Float = { visuals.alpha },
     surface: (@Composable BoxScope.(GlassShape) -> Unit)? = null,
     onMeasured: ((Size) -> Unit)? = null,
     interactive: Boolean = true,
@@ -279,7 +290,7 @@ internal fun GlassPopupSurface(
                 outsets = shadowOutsets
             }
             .then(reveal)
-            .glassShadow(shape, visuals.shadow, visuals.alpha)
+            .glassShadow(shape, visuals.shadow, shadowAlpha)
             .clip(shape)
             .drawWithContent {
                 drawContent()

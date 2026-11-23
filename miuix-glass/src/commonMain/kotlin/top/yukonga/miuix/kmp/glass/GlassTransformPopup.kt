@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -52,6 +53,7 @@ import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassStyle
 
 /**
@@ -216,6 +218,7 @@ internal data class GlassAnchorSurface(
     val underlayMaterial: GlassMaterial?,
     val stroke: EdgeStroke?,
     val fill: Color,
+    val shadow: GlassShadow?,
 )
 
 /** Marks the button's modifier so its renderer can publish the actual surface to this anchor. */
@@ -505,6 +508,7 @@ internal fun Modifier.glassPopupAnchorValue(anchor: GlassPopupAnchor, trackBound
  * @param stacked Whether a secondary menu is open. Scales down this panel and applies [maskColor].
  * @param maskColor Overlay color while [stacked].
  * @param sizing Panel size limits and window margin.
+ * @param horizontalAlignment Horizontal alignment of the expanded panel relative to [anchor].
  * @param visuals Expanded panel appearance, blended from a [GlassIconButton] anchor's surface.
  * @param anchorAlpha Background opacity for anchors without a shared button surface.
  * @param cornerRadius Expanded panel corner radius.
@@ -524,6 +528,7 @@ fun BoxScope.GlassTransformPopup(
     simplified: Boolean = false,
     stacked: Boolean = false,
     sizing: GlassPopupSizing = GlassPopupSizing(),
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     anchorAlpha: Float = 1f,
     maskColor: Color = GlassPopupDefaults.maskColor(),
@@ -625,12 +630,22 @@ fun BoxScope.GlassTransformPopup(
 
     val travel = remember { TransformTravel() }
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
+    val shadowAlpha = remember(anchorSurface, visuals.alpha, materialProgress) {
+        {
+            if (anchorSurface != null && anchorSurface.shadow == null) {
+                visuals.alpha * materialProgress.value
+            } else {
+                visuals.alpha
+            }
+        }
+    }
 
     GlassPopupSurface(
         onDismissRequest = onDismissRequest,
         backdrop = menuBackdrop,
         sizing = sizing,
         visuals = visuals,
+        shadowAlpha = shadowAlpha,
         contentPadding = contentPadding,
         panelLayer = {
             val rect = startRect()
@@ -651,29 +666,26 @@ fun BoxScope.GlassTransformPopup(
         },
         frame = { end, windowBounds ->
             val rect = startRect()
-            val frame = transformFrame(
-                anchor = rect,
-                end = end,
-                window = windowBounds,
-                margin = sizing.safeMargin.toPx(),
-                gap = gap.toPx(),
-                sizeFraction = geometryProgress(),
-                positionFraction = centerProgress(),
-                startRadius = anchor.cornerRadius,
-                endRadius = cornerRadius,
-                layoutDirection = layoutDirection,
-            )
             val settled = placeGlassPopup(
                 rect.translate(0f, gap.toPx()),
                 end,
                 sizing.safeMargin.toPx(),
                 windowBounds,
                 layoutDirection,
+                horizontalAlignment,
             )
             travel.endCenterX = settled.rect.center.x
             travel.endCenterY = settled.rect.center.y
             travel.endWidth = end.width
-            frame
+            transformFrame(
+                anchor = rect,
+                end = end,
+                placement = settled,
+                sizeFraction = geometryProgress(),
+                positionFraction = centerProgress(),
+                startRadius = anchor.cornerRadius,
+                endRadius = cornerRadius,
+            )
         },
         contentLayer = { end, _ ->
             val rect = startRect()
@@ -780,16 +792,12 @@ internal fun transformPanelAlpha(
 private fun transformFrame(
     anchor: Rect,
     end: Size,
-    window: Rect,
-    margin: Float,
-    gap: Float,
+    placement: GlassPopupPlacement,
     sizeFraction: Float,
     positionFraction: Float,
     startRadius: Dp,
     endRadius: Dp,
-    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
 ): GlassPopupFrame {
-    val placement = placeGlassPopup(anchor.translate(0f, gap), end, margin, window, layoutDirection)
     val width = anchor.width + (end.width - anchor.width) * sizeFraction
     val height = anchor.height + (end.height - anchor.height) * sizeFraction
     val centerX = anchor.center.x + (placement.rect.center.x - anchor.center.x) * positionFraction

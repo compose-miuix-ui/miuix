@@ -70,4 +70,25 @@ class GlassDropdownPopupTest {
         val result = placeGlassPopup(anchor, Size(100f, 200f), 12f, window, LayoutDirection.Ltr)
         assertEquals(4f, result.rect.top)
     }
+
+    @Test
+    fun horizontalAlignmentPlacesStartCenterAndEnd() {
+        val anchor = Rect(150f, 100f, 250f, 140f)
+        val panel = Size(200f, 120f)
+
+        val ltrStart = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Ltr, androidx.compose.ui.Alignment.Start)
+        assertEquals(150f, ltrStart.rect.left)
+
+        val rtlStart = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Rtl, androidx.compose.ui.Alignment.Start)
+        assertEquals(50f, rtlStart.rect.left)
+
+        val centered = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Ltr, androidx.compose.ui.Alignment.CenterHorizontally)
+        assertEquals(100f, centered.rect.left)
+
+        val ltrEnd = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Ltr, androidx.compose.ui.Alignment.End)
+        assertEquals(50f, ltrEnd.rect.left)
+
+        val rtlEnd = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Rtl, androidx.compose.ui.Alignment.End)
+        assertEquals(150f, rtlEnd.rect.left)
+    }
 }

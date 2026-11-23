@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -56,6 +57,7 @@ fun BoxScope.GlassIconDropdownMenu(
     modifier: Modifier = Modifier,
     secondaryBackdrop: Backdrop? = backdrop,
     sizing: GlassPopupSizing = GlassPopupSizing(),
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     collapseOnSelection: Boolean = entries.size <= 1,
 ) {
@@ -131,6 +133,7 @@ fun BoxScope.GlassIconDropdownMenu(
             modifier = modifier,
             stacked = submenuShown,
             sizing = sizing,
+            horizontalAlignment = horizontalAlignment,
             visuals = visuals,
             onMeasured = { primaryWidth = with(density) { it.width.toDp() } },
         ) {

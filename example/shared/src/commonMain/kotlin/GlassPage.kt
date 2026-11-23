@@ -97,6 +97,7 @@ import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Edit
 import top.yukonga.miuix.kmp.icon.glass.HomeOutline
 import top.yukonga.miuix.kmp.icon.glass.ImageOutline
+import top.yukonga.miuix.kmp.icon.glass.More
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
@@ -120,6 +121,7 @@ import utils.appPageHorizontalInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
 import utils.rememberAppSafePadding
+import kotlin.time.Duration.Companion.milliseconds
 
 private val NavItems: List<GlassNavigationItem> = listOf(
     GlassNavigationItem(MiuixIcons.Glass.HomeOutline, "Home"),
@@ -142,6 +144,8 @@ private val SortOrders = listOf("Updated", "Created", "Title")
 private val PrimaryTabTitles = listOf("Sound", "Haptics")
 private val NeutralTabTitles = listOf("Home", "Widget", "Theme", "Paper")
 private val SegmentedTabTitles = listOf("Privacy", "Security")
+private val AlignedPopupLabels = listOf("Start", "Center", "End")
+private val AlignedPopupModes = listOf(Alignment.Start, Alignment.CenterHorizontally, Alignment.End)
 
 /**
  * Demonstrates glass components on solid or wallpaper backgrounds.
@@ -198,15 +202,22 @@ fun GlassPage(padding: PaddingValues) {
     var joinedTab by remember { mutableIntStateOf(0) }
     var wallpaper by remember { mutableStateOf(false) }
     val menuAnchor = rememberGlassPopupAnchor()
+    val startPopupAnchor = rememberGlassPopupAnchor()
+    val centerPopupAnchor = rememberGlassPopupAnchor()
+    val endPopupAnchor = rememberGlassPopupAnchor()
+    val alignedAnchors = remember(startPopupAnchor, centerPopupAnchor, endPopupAnchor) {
+        listOf(startPopupAnchor, centerPopupAnchor, endPopupAnchor)
+    }
+    var alignedPopupIndex by remember { mutableIntStateOf(-1) }
     var logLevel by remember { mutableIntStateOf(2) }
     var dialogActive by remember { mutableStateOf(false) }
     var sheetActive by remember { mutableStateOf(false) }
     var popupActive by remember { mutableStateOf(false) }
-    LaunchedEffect(overlayIndex) {
-        if (overlayIndex == OVERLAY_POPUP) {
+    LaunchedEffect(overlayIndex, alignedPopupIndex) {
+        if (overlayIndex == OVERLAY_POPUP || alignedPopupIndex >= 0) {
             popupActive = true
         } else if (popupActive) {
-            delay(350L)
+            delay(350.milliseconds)
             popupActive = false
         }
     }
@@ -261,7 +272,7 @@ fun GlassPage(padding: PaddingValues) {
     // List tabs sample the wallpaper to avoid sampling their own recording layer.
     val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
     val pageBackdropActive by remember {
-        computedStateOf { overlayIndex != OVERLAY_NONE || dialogActive || sheetActive || popupActive }
+        computedStateOf { overlayIndex != OVERLAY_NONE || alignedPopupIndex >= 0 || dialogActive || sheetActive || popupActive }
     }
 
     GlassPageHost(modifier = Modifier.fillMaxSize()) {
@@ -529,6 +540,45 @@ fun GlassPage(padding: PaddingValues) {
                             )
                         }
                     }
+                    item(key = "glass-popup-title") { SmallTitle(text = "Popup") }
+                    item(key = "glass-popup") {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = horizontalPadding)
+                                .padding(bottom = 12.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                AlignedPopupLabels.forEachIndexed { index, label ->
+                                    GlassIconButton(
+                                        onClick = { alignedPopupIndex = index },
+                                        style = style,
+                                        material = material,
+                                        stroke = stroke,
+                                        shadow = null,
+                                        surfaceAlpha = alpha,
+                                        modifier = Modifier.glassPopupAnchor(
+                                            anchor = alignedAnchors[index],
+                                            cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
+                                            floating = true,
+                                        ),
+                                    ) {
+                                        Icon(
+                                            imageVector = MiuixIcons.Glass.More,
+                                            contentDescription = label,
+                                            modifier = Modifier.size(28.dp).glassPopupAnchorContent(alignedAnchors[index]),
+                                            tint = MiuixTheme.colorScheme.onSurface,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                     item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
                     item(key = "glass-dropdown") {
                         Card(
@@ -741,6 +791,35 @@ fun GlassPage(padding: PaddingValues) {
                         },
                         selected = position == sortOrder,
                     )
+                }
+            }
+            alignedAnchors.forEachIndexed { index, anchor ->
+                GlassTransformPopup(
+                    show = alignedPopupIndex == index,
+                    onDismissRequest = { alignedPopupIndex = -1 },
+                    anchor = anchor,
+                    backdrop = pageBackdrop,
+                    anchorContent = {
+                        Icon(
+                            imageVector = MiuixIcons.Glass.More,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MiuixTheme.colorScheme.onSurface,
+                        )
+                    },
+                    horizontalAlignment = AlignedPopupModes[index],
+                    visuals = popupVisuals,
+                ) {
+                    SortOrders.forEachIndexed { position, label ->
+                        GlassPopupItem(
+                            text = label,
+                            onClick = {
+                                sortOrder = position
+                                submenu = false
+                            },
+                            selected = position == sortOrder,
+                        )
+                    }
                 }
             }
         }

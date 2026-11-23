@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
@@ -198,6 +199,7 @@ object GlassPopupDefaults {
  * @param cornerRadius Expanded panel corner radius.
  * @param secondary Whether to use [GlassSecondaryPopup] geometry. Use that component directly
  *   to share the primary popup's appearance through `materialAnchor`.
+ * @param horizontalAlignment Horizontal alignment of the popup relative to [anchorBounds].
  * @param contentPadding Padding around the items.
  * @param content Menu items.
  */
@@ -212,6 +214,7 @@ fun BoxScope.GlassPopup(
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     cornerRadius: Dp = GlassPopupDefaults.CornerRadius,
     secondary: Boolean = false,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
     contentPadding: PaddingValues = PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical),
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -269,8 +272,8 @@ fun BoxScope.GlassPopup(
         panelLayer = {},
         overlay = {},
         frame = { end, windowBounds ->
-            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), windowBounds, layoutDirection)
-            directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection)
+            val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), windowBounds, layoutDirection, horizontalAlignment)
+            directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection, horizontalAlignment)
         },
         contentLayer = { _, _ ->
             val t = progress.value.coerceAtLeast(0f)
@@ -294,7 +297,8 @@ private fun directionFrame(
     progress: Float,
     startRadius: Dp,
     endRadius: Dp,
-    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+    layoutDirection: LayoutDirection,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
 ): GlassPopupFrame {
     // Keep the spring's overshoot so the silhouette and rows rebound together.
     val t = progress.coerceAtLeast(0f)
@@ -302,11 +306,7 @@ private fun directionFrame(
     val endRatio = if (end.width > 0f) end.height / end.width else 1f
     val ratio = GlassMotion.POPUP_START_RATIO + (endRatio - GlassMotion.POPUP_START_RATIO) * t
     val height = width * ratio
-    val left = if (layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr) {
-        placement.rect.right - width
-    } else {
-        placement.rect.left
-    }
+    val left = alignPopupLeft(placement.rect.left, placement.rect.right, width, layoutDirection, horizontalAlignment)
     val top = if (placement.alignTop) placement.rect.top else placement.rect.bottom - height
     return GlassPopupFrame(
         rect = Rect(left, top, left + width, top + height),

@@ -78,6 +78,7 @@ Without `glassPopupAnchorContent`, `anchorContent` represents the whole control 
 | simplified | Boolean | Omits the outgoing content copy during ordinary opening; the copy still participates in closing and predictive Back | false | No |
 | stacked | Boolean | Shrinks and masks this menu while a secondary menu is in front; its rows stop accepting input | false | No |
 | sizing | GlassPopupSizing | Width, height, and safe-margin limits | GlassPopupSizing() | No |
+| horizontalAlignment | Alignment.Horizontal | Horizontal alignment of the expanded panel relative to anchor | Alignment.End | No |
 | visuals | GlassPopupVisuals | Expanded panel appearance | GlassPopupDefaults.visuals() | No |
 | anchorAlpha | Float | Anchor background opacity when no shared button surface is available | 1f | No |
 | maskColor | Color | Wash over the primary menu while stacked | GlassPopupDefaults.maskColor() | No |

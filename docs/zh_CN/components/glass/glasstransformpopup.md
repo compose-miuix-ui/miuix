@@ -79,6 +79,7 @@ Box(Modifier.fillMaxSize()) {
 | simplified | Boolean | 普通展开时不绘制向外的内容副本；收起和预测性返回时副本仍参与变换 | false | 否 |
 | stacked | Boolean | 二级菜单位于前方时缩小并覆盖当前菜单，当前菜单行停止输入 | false | 否 |
 | sizing | GlassPopupSizing | 宽度、高度和安全边距限制 | GlassPopupSizing() | 否 |
+| horizontalAlignment | Alignment.Horizontal | 展开面板相对于 anchor 的水平对齐方式 | Alignment.End | 否 |
 | visuals | GlassPopupVisuals | 展开面板外观 | GlassPopupDefaults.visuals() | 否 |
 | anchorAlpha | Float | 没有共享按钮表面时的锚点背景透明度 | 1f | 否 |
 | maskColor | Color | 叠层时覆盖一级菜单的颜色 | GlassPopupDefaults.maskColor() | 否 |
