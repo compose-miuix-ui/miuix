@@ -62,7 +62,7 @@ WindowBottomSheet(
 | -------------------------- | ------------------------- | -------------------------------------------- | ------------------------------------------- | -------- |
 | show                       | Boolean                   | 是否显示底部抽屉                             | -                                           | 是       |
 | modifier                   | Modifier                  | 应用于底部抽屉的修饰符                       | Modifier                                    | 否       |
-| title                      | String?                   | 底部抽屉的标题                               | null                                        | 否       |
+| title | String? | 可选标题。`title`、`startAction`、`endAction` 任一非 `null`（包括 `title = ""`），标题栏就占位。拖拽手柄不受影响。 | null | 否 |
 | startAction                | @Composable (() -> Unit)? | 可选的左侧操作按钮(例如关闭按钮)             | null                                        | 否       |
 | endAction                  | @Composable (() -> Unit)? | 可选的右侧操作按钮(例如提交按钮)             | null                                        | 否       |
 | backgroundColor            | Color                     | 底部抽屉背景色                               | BottomSheetDefaults.backgroundColor() | 否       |

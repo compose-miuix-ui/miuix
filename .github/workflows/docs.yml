@@ -29,6 +29,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          gradle-home-cache-cleanup: true
       - name: Build Docs
         run: |
           ./gradlew dokkaGenerate -Prelease

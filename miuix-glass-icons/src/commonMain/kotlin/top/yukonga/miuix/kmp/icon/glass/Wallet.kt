@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Wallet: ImageVector
 
 val MiuixIcons.Glass.Light.Wallet: ImageVector
     get() {
-        if (_walletSurfaceLight != null) return _walletSurfaceLight!!
-        _walletSurfaceLight = buildHyperOSIcon(
+        if (_walletLight != null) return _walletLight!!
+        _walletLight = buildHyperOSIcon(
             name = "Wallet.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(188f, 50.4f),
@@ -83,15 +83,15 @@ val MiuixIcons.Glass.Light.Wallet: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _walletSurfaceLight!!
+        return _walletLight!!
     }
 
-private var _walletSurfaceLight: ImageVector? = null
+private var _walletLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Wallet: ImageVector
     get() {
-        if (_walletSurfaceNormal != null) return _walletSurfaceNormal!!
-        _walletSurfaceNormal = buildHyperOSIcon(
+        if (_walletNormal != null) return _walletNormal!!
+        _walletNormal = buildHyperOSIcon(
             name = "Wallet.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(185.3f, 50.1f),
@@ -161,15 +161,15 @@ val MiuixIcons.Glass.Normal.Wallet: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _walletSurfaceNormal!!
+        return _walletNormal!!
     }
 
-private var _walletSurfaceNormal: ImageVector? = null
+private var _walletNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Wallet: ImageVector
     get() {
-        if (_walletSurfaceRegular != null) return _walletSurfaceRegular!!
-        _walletSurfaceRegular = buildHyperOSIcon(
+        if (_walletRegular != null) return _walletRegular!!
+        _walletRegular = buildHyperOSIcon(
             name = "Wallet.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(184f, 50f),
@@ -239,15 +239,15 @@ val MiuixIcons.Glass.Regular.Wallet: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _walletSurfaceRegular!!
+        return _walletRegular!!
     }
 
-private var _walletSurfaceRegular: ImageVector? = null
+private var _walletRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Wallet: ImageVector
     get() {
-        if (_walletSurfaceMedium != null) return _walletSurfaceMedium!!
-        _walletSurfaceMedium = buildHyperOSIcon(
+        if (_walletMedium != null) return _walletMedium!!
+        _walletMedium = buildHyperOSIcon(
             name = "Wallet.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(182.1f, 49.7f),
@@ -317,15 +317,15 @@ val MiuixIcons.Glass.Medium.Wallet: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _walletSurfaceMedium!!
+        return _walletMedium!!
     }
 
-private var _walletSurfaceMedium: ImageVector? = null
+private var _walletMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Wallet: ImageVector
     get() {
-        if (_walletSurfaceDemibold != null) return _walletSurfaceDemibold!!
-        _walletSurfaceDemibold = buildHyperOSIcon(
+        if (_walletDemibold != null) return _walletDemibold!!
+        _walletDemibold = buildHyperOSIcon(
             name = "Wallet.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(180.8f, 49.5f),
@@ -395,8 +395,8 @@ val MiuixIcons.Glass.Demibold.Wallet: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _walletSurfaceDemibold!!
+        return _walletDemibold!!
     }
 
-private var _walletSurfaceDemibold: ImageVector? = null
+private var _walletDemibold: ImageVector? = null
 

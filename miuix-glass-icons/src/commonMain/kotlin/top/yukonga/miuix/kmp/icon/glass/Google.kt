@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Google: ImageVector
 
 val MiuixIcons.Glass.Light.Google: ImageVector
     get() {
-        if (_googleSurfaceLight != null) return _googleSurfaceLight!!
-        _googleSurfaceLight = buildHyperOSIcon(
+        if (_googleLight != null) return _googleLight!!
+        _googleLight = buildHyperOSIcon(
             name = "Google.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1141.2f, 424.8f),
@@ -60,15 +60,15 @@ val MiuixIcons.Glass.Light.Google: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _googleSurfaceLight!!
+        return _googleLight!!
     }
 
-private var _googleSurfaceLight: ImageVector? = null
+private var _googleLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Google: ImageVector
     get() {
-        if (_googleSurfaceNormal != null) return _googleSurfaceNormal!!
-        _googleSurfaceNormal = buildHyperOSIcon(
+        if (_googleNormal != null) return _googleNormal!!
+        _googleNormal = buildHyperOSIcon(
             name = "Google.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1145.2f, 431.8f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Normal.Google: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _googleSurfaceNormal!!
+        return _googleNormal!!
     }
 
-private var _googleSurfaceNormal: ImageVector? = null
+private var _googleNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Google: ImageVector
     get() {
-        if (_googleSurfaceRegular != null) return _googleSurfaceRegular!!
-        _googleSurfaceRegular = buildHyperOSIcon(
+        if (_googleRegular != null) return _googleRegular!!
+        _googleRegular = buildHyperOSIcon(
             name = "Google.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1147f, 435f),
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Regular.Google: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _googleSurfaceRegular!!
+        return _googleRegular!!
     }
 
-private var _googleSurfaceRegular: ImageVector? = null
+private var _googleRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Google: ImageVector
     get() {
-        if (_googleSurfaceMedium != null) return _googleSurfaceMedium!!
-        _googleSurfaceMedium = buildHyperOSIcon(
+        if (_googleMedium != null) return _googleMedium!!
+        _googleMedium = buildHyperOSIcon(
             name = "Google.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1155.1f, 435.8f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Medium.Google: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _googleSurfaceMedium!!
+        return _googleMedium!!
     }
 
-private var _googleSurfaceMedium: ImageVector? = null
+private var _googleMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Google: ImageVector
     get() {
-        if (_googleSurfaceDemibold != null) return _googleSurfaceDemibold!!
-        _googleSurfaceDemibold = buildHyperOSIcon(
+        if (_googleDemibold != null) return _googleDemibold!!
+        _googleDemibold = buildHyperOSIcon(
             name = "Google.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1160.8f, 436.4f),
@@ -280,8 +280,8 @@ val MiuixIcons.Glass.Demibold.Google: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _googleSurfaceDemibold!!
+        return _googleDemibold!!
     }
 
-private var _googleSurfaceDemibold: ImageVector? = null
+private var _googleDemibold: ImageVector? = null
 

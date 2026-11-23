@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuitableForWindbreaker: ImageVector
 
 val MiuixIcons.Glass.Light.SuitableForWindbreaker: ImageVector
     get() {
-        if (_suitableForWindbreakerLineLight != null) return _suitableForWindbreakerLineLight!!
-        _suitableForWindbreakerLineLight = buildHyperOSIcon(
+        if (_suitableForWindbreakerLight != null) return _suitableForWindbreakerLight!!
+        _suitableForWindbreakerLight = buildHyperOSIcon(
             name = "SuitableForWindbreaker.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(564.3f, 542f),
@@ -156,15 +156,15 @@ val MiuixIcons.Glass.Light.SuitableForWindbreaker: ImageVector
             translationY = 1067.5711f,
             autoMirror = false,
         )
-        return _suitableForWindbreakerLineLight!!
+        return _suitableForWindbreakerLight!!
     }
 
-private var _suitableForWindbreakerLineLight: ImageVector? = null
+private var _suitableForWindbreakerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuitableForWindbreaker: ImageVector
     get() {
-        if (_suitableForWindbreakerLineNormal != null) return _suitableForWindbreakerLineNormal!!
-        _suitableForWindbreakerLineNormal = buildHyperOSIcon(
+        if (_suitableForWindbreakerNormal != null) return _suitableForWindbreakerNormal!!
+        _suitableForWindbreakerNormal = buildHyperOSIcon(
             name = "SuitableForWindbreaker.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(555.2f, 542f),
@@ -307,15 +307,15 @@ val MiuixIcons.Glass.Normal.SuitableForWindbreaker: ImageVector
             translationY = 1067.5942f,
             autoMirror = false,
         )
-        return _suitableForWindbreakerLineNormal!!
+        return _suitableForWindbreakerNormal!!
     }
 
-private var _suitableForWindbreakerLineNormal: ImageVector? = null
+private var _suitableForWindbreakerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuitableForWindbreaker: ImageVector
     get() {
-        if (_suitableForWindbreakerLineRegular != null) return _suitableForWindbreakerLineRegular!!
-        _suitableForWindbreakerLineRegular = buildHyperOSIcon(
+        if (_suitableForWindbreakerRegular != null) return _suitableForWindbreakerRegular!!
+        _suitableForWindbreakerRegular = buildHyperOSIcon(
             name = "SuitableForWindbreaker.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(551f, 542f),
@@ -458,15 +458,15 @@ val MiuixIcons.Glass.Regular.SuitableForWindbreaker: ImageVector
             translationY = 1067.6042f,
             autoMirror = false,
         )
-        return _suitableForWindbreakerLineRegular!!
+        return _suitableForWindbreakerRegular!!
     }
 
-private var _suitableForWindbreakerLineRegular: ImageVector? = null
+private var _suitableForWindbreakerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuitableForWindbreaker: ImageVector
     get() {
-        if (_suitableForWindbreakerLineMedium != null) return _suitableForWindbreakerLineMedium!!
-        _suitableForWindbreakerLineMedium = buildHyperOSIcon(
+        if (_suitableForWindbreakerMedium != null) return _suitableForWindbreakerMedium!!
+        _suitableForWindbreakerMedium = buildHyperOSIcon(
             name = "SuitableForWindbreaker.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(537.5f, 546.6f),
@@ -609,15 +609,15 @@ val MiuixIcons.Glass.Medium.SuitableForWindbreaker: ImageVector
             translationY = 1069.0739f,
             autoMirror = false,
         )
-        return _suitableForWindbreakerLineMedium!!
+        return _suitableForWindbreakerMedium!!
     }
 
-private var _suitableForWindbreakerLineMedium: ImageVector? = null
+private var _suitableForWindbreakerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuitableForWindbreaker: ImageVector
     get() {
-        if (_suitableForWindbreakerLineDemibold != null) return _suitableForWindbreakerLineDemibold!!
-        _suitableForWindbreakerLineDemibold = buildHyperOSIcon(
+        if (_suitableForWindbreakerDemibold != null) return _suitableForWindbreakerDemibold!!
+        _suitableForWindbreakerDemibold = buildHyperOSIcon(
             name = "SuitableForWindbreaker.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(528f, 549.8f),
@@ -760,8 +760,8 @@ val MiuixIcons.Glass.Demibold.SuitableForWindbreaker: ImageVector
             translationY = 1069.8317f,
             autoMirror = false,
         )
-        return _suitableForWindbreakerLineDemibold!!
+        return _suitableForWindbreakerDemibold!!
     }
 
-private var _suitableForWindbreakerLineDemibold: ImageVector? = null
+private var _suitableForWindbreakerDemibold: ImageVector? = null
 

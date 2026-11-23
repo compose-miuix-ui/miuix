@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SwapSmallWindows: ImageVector
 
 val MiuixIcons.Glass.Light.SwapSmallWindows: ImageVector
     get() {
-        if (_swapSmallWindowsLineLight != null) return _swapSmallWindowsLineLight!!
-        _swapSmallWindowsLineLight = buildHyperOSIcon(
+        if (_swapSmallWindowsLight != null) return _swapSmallWindowsLight!!
+        _swapSmallWindowsLight = buildHyperOSIcon(
             name = "SwapSmallWindows.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(749.9f, 778.6f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Light.SwapSmallWindows: ImageVector
             translationY = 1034.6667f,
             autoMirror = false,
         )
-        return _swapSmallWindowsLineLight!!
+        return _swapSmallWindowsLight!!
     }
 
-private var _swapSmallWindowsLineLight: ImageVector? = null
+private var _swapSmallWindowsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SwapSmallWindows: ImageVector
     get() {
-        if (_swapSmallWindowsLineNormal != null) return _swapSmallWindowsLineNormal!!
-        _swapSmallWindowsLineNormal = buildHyperOSIcon(
+        if (_swapSmallWindowsNormal != null) return _swapSmallWindowsNormal!!
+        _swapSmallWindowsNormal = buildHyperOSIcon(
             name = "SwapSmallWindows.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(746.5f, 787.1f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Normal.SwapSmallWindows: ImageVector
             translationY = 1034.6667f,
             autoMirror = false,
         )
-        return _swapSmallWindowsLineNormal!!
+        return _swapSmallWindowsNormal!!
     }
 
-private var _swapSmallWindowsLineNormal: ImageVector? = null
+private var _swapSmallWindowsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SwapSmallWindows: ImageVector
     get() {
-        if (_swapSmallWindowsLineRegular != null) return _swapSmallWindowsLineRegular!!
-        _swapSmallWindowsLineRegular = buildHyperOSIcon(
+        if (_swapSmallWindowsRegular != null) return _swapSmallWindowsRegular!!
+        _swapSmallWindowsRegular = buildHyperOSIcon(
             name = "SwapSmallWindows.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(745f, 791f),
@@ -443,15 +443,15 @@ val MiuixIcons.Glass.Regular.SwapSmallWindows: ImageVector
             translationY = 1034.6667f,
             autoMirror = false,
         )
-        return _swapSmallWindowsLineRegular!!
+        return _swapSmallWindowsRegular!!
     }
 
-private var _swapSmallWindowsLineRegular: ImageVector? = null
+private var _swapSmallWindowsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SwapSmallWindows: ImageVector
     get() {
-        if (_swapSmallWindowsLineMedium != null) return _swapSmallWindowsLineMedium!!
-        _swapSmallWindowsLineMedium = buildHyperOSIcon(
+        if (_swapSmallWindowsMedium != null) return _swapSmallWindowsMedium!!
+        _swapSmallWindowsMedium = buildHyperOSIcon(
             name = "SwapSmallWindows.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(741.5f, 795.9f),
@@ -589,15 +589,15 @@ val MiuixIcons.Glass.Medium.SwapSmallWindows: ImageVector
             translationY = 1035.3423f,
             autoMirror = false,
         )
-        return _swapSmallWindowsLineMedium!!
+        return _swapSmallWindowsMedium!!
     }
 
-private var _swapSmallWindowsLineMedium: ImageVector? = null
+private var _swapSmallWindowsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SwapSmallWindows: ImageVector
     get() {
-        if (_swapSmallWindowsLineDemibold != null) return _swapSmallWindowsLineDemibold!!
-        _swapSmallWindowsLineDemibold = buildHyperOSIcon(
+        if (_swapSmallWindowsDemibold != null) return _swapSmallWindowsDemibold!!
+        _swapSmallWindowsDemibold = buildHyperOSIcon(
             name = "SwapSmallWindows.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(739f, 799.3f),
@@ -735,8 +735,8 @@ val MiuixIcons.Glass.Demibold.SwapSmallWindows: ImageVector
             translationY = 1035.8153f,
             autoMirror = false,
         )
-        return _swapSmallWindowsLineDemibold!!
+        return _swapSmallWindowsDemibold!!
     }
 
-private var _swapSmallWindowsLineDemibold: ImageVector? = null
+private var _swapSmallWindowsDemibold: ImageVector? = null
 

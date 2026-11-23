@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import component.GlassBottomSheetDemo
 import component.GlassDemoDefaults
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -99,8 +100,11 @@ import top.yukonga.miuix.kmp.icon.glass.ImageOutline
 import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
+import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.material.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
@@ -135,6 +139,9 @@ private const val OVERLAY_BOTTOM_SHEET = 3
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
 private val SortOrders = listOf("Updated", "Created", "Title")
+private val PrimaryTabTitles = listOf("Sound", "Haptics")
+private val NeutralTabTitles = listOf("Home", "Widget", "Theme", "Paper")
+private val SegmentedTabTitles = listOf("Privacy", "Security")
 
 /**
  * Demonstrates glass components on solid or wallpaper backgrounds.
@@ -172,10 +179,9 @@ fun GlassPage(padding: PaddingValues) {
     }
     val scrollBehavior = MiuixScrollBehavior()
     val listState = rememberLazyListState()
-    val contentUnderTopBar by remember(listState, scrollBehavior) {
+    val contentUnderTopBar = remember(listState, scrollBehavior) {
         computedStateOf { listState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
     }
-    val tabSurfaceAlpha = if (contentUnderTopBar) 1f else 0f
 
     var materialIndex by remember { mutableIntStateOf(0) }
     var strokeIndex by remember { mutableIntStateOf(2) }
@@ -193,6 +199,17 @@ fun GlassPage(padding: PaddingValues) {
     var wallpaper by remember { mutableStateOf(false) }
     val menuAnchor = rememberGlassPopupAnchor()
     var logLevel by remember { mutableIntStateOf(2) }
+    var dialogActive by remember { mutableStateOf(false) }
+    var sheetActive by remember { mutableStateOf(false) }
+    var popupActive by remember { mutableStateOf(false) }
+    LaunchedEffect(overlayIndex) {
+        if (overlayIndex == OVERLAY_POPUP) {
+            popupActive = true
+        } else if (popupActive) {
+            delay(350L)
+            popupActive = false
+        }
+    }
 
     val material = GlassDemoDefaults.material(materialIndex)
     val style = GlassDefaults.style(isInDark)
@@ -215,11 +232,17 @@ fun GlassPage(padding: PaddingValues) {
     }
     var menuWidth by remember { mutableStateOf(0.dp) }
     var sortOrder by remember { mutableIntStateOf(0) }
-    val openSearch: () -> Unit = {
-        submenu = false
-        overlayIndex = OVERLAY_NONE
-        searchExpanded = true
+    val openSearch: () -> Unit = remember {
+        {
+            submenu = false
+            overlayIndex = OVERLAY_NONE
+            searchExpanded = true
+        }
     }
+    val onPrimaryTabSelect: (Int) -> Unit = remember { { primaryTab = it } }
+    val onNeutralTabSelect: (Int) -> Unit = remember { { neutralTab = it } }
+    val onJoinedTabSelect: (Int) -> Unit = remember { { joinedTab = it } }
+    val contentUnderTopBarProvider: () -> Boolean = remember(contentUnderTopBar) { { contentUnderTopBar.value } }
     val density = LocalDensity.current
     val arrowTurn = CascadingPopupDefaults.arrowRotation(LocalLayoutDirection.current)
     val submenuArrowState = animateFloatAsState(
@@ -237,44 +260,8 @@ fun GlassPage(padding: PaddingValues) {
     }
     // List tabs sample the wallpaper to avoid sampling their own recording layer.
     val tabBackdrop = if (tabsInTopBar) backdrop else wallpaperBackdrop
-    val tabRows: @Composable (Modifier) -> Unit = { tabModifier ->
-        Column(modifier = tabModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GlassTabRow(
-                tabs = listOf("Sound", "Haptics"),
-                selectedIndex = primaryTab,
-                onSelect = { primaryTab = it },
-                backdrop = tabBackdrop,
-                style = style,
-                alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
-                stroke = stroke,
-                material = material ?: GlassTabRowDefaults.material(),
-            )
-            GlassTabRow(
-                tabs = listOf("Home", "Widget", "Theme", "Paper"),
-                selectedIndex = neutralTab,
-                onSelect = { neutralTab = it },
-                backdrop = tabBackdrop,
-                style = style,
-                alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
-                stroke = stroke,
-                material = material ?: GlassTabRowDefaults.material(),
-                height = GlassTabRowDefaults.NeutralHeight,
-                colors = GlassTabRowDefaults.neutralColors(),
-            )
-            GlassSegmentedTabRow(
-                tabs = listOf("Privacy", "Security"),
-                selectedIndex = joinedTab,
-                onSelect = { joinedTab = it },
-                backdrop = tabBackdrop,
-                style = style,
-                alpha = alpha,
-                surfaceAlpha = if (tabsInTopBar) tabSurfaceAlpha else 0f,
-                stroke = stroke,
-                material = material ?: GlassSegmentedTabRowDefaults.material(),
-            )
-        }
+    val pageBackdropActive by remember {
+        computedStateOf { overlayIndex != OVERLAY_NONE || dialogActive || sheetActive || popupActive }
     }
 
     GlassPageHost(modifier = Modifier.fillMaxSize()) {
@@ -283,7 +270,7 @@ fun GlassPage(padding: PaddingValues) {
                 .fillMaxSize()
                 .graphicsLayer { this.alpha = searchBarAlpha.value }
                 // Include page bars, excluding overlays and the route scrim.
-                .layerBackdrop(pageBackdrop)
+                .then(if (pageBackdropActive) Modifier.layerBackdrop(pageBackdrop) else Modifier)
                 .then(if (searchExpanded) Modifier.clearAndSetSemantics { } else Modifier),
             bottomBar = {
                 Column(
@@ -356,8 +343,8 @@ fun GlassPage(padding: PaddingValues) {
                         .appPageTopBarInsets(),
                     expandable = !isWideScreen,
                     defaultWindowInsetsPadding = false,
-                    isContentScrolled = contentUnderTopBar,
-                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current,
+                    isContentScrolled = contentUnderTopBar.value,
+                    centerObstructionStart = LocalTopAppBarCenterObstructionStart.current(),
                     backdrop = backdrop,
                     scrollBehavior = scrollBehavior,
                     progressiveBlur = topAppBarProgressiveBlur,
@@ -397,7 +384,7 @@ fun GlassPage(padding: PaddingValues) {
                                 modifier = Modifier.glassPopupAnchor(
                                     anchor = menuAnchor,
                                     cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
-                                    floating = contentUnderTopBar,
+                                    floating = contentUnderTopBar.value,
                                 ),
                             ) {
                                 Icon(
@@ -411,9 +398,22 @@ fun GlassPage(padding: PaddingValues) {
                     },
                     bottomContent = {
                         if (tabsInTopBar) {
-                            tabRows(
-                                Modifier
-                                    .padding(horizontal = horizontalPadding).padding(top = 6.dp, bottom = 12.dp),
+                            GlassPageTabRows(
+                                backdrop = tabBackdrop,
+                                style = style,
+                                alpha = alpha,
+                                stroke = stroke,
+                                material = material,
+                                primaryTab = primaryTab,
+                                onPrimaryTabSelect = onPrimaryTabSelect,
+                                neutralTab = neutralTab,
+                                onNeutralTabSelect = onNeutralTabSelect,
+                                joinedTab = joinedTab,
+                                onJoinedTabSelect = onJoinedTabSelect,
+                                modifier = Modifier
+                                    .padding(horizontal = horizontalPadding)
+                                    .padding(top = 6.dp, bottom = 12.dp),
+                                surfaceActive = contentUnderTopBarProvider,
                             )
                         }
                     },
@@ -426,16 +426,24 @@ fun GlassPage(padding: PaddingValues) {
                 title = "Glass Dialog",
                 summary = "Blurred background with the dialog's own three-layer material.",
                 onDismissRequest = { overlayIndex = OVERLAY_NONE },
+                onDismissFinished = { dialogActive = false },
                 material = material ?: GlassDialogDefaults.material(),
                 stroke = stroke,
             ) {
+                var showNestedDialog by remember { mutableStateOf(false) }
                 val dialogTextState = rememberTextFieldState()
                 GlassTextField(
                     state = dialogTextState,
                     label = "Input something...",
                     useLabelAsPlaceholder = true,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                 )
+                GlassDialogButton(
+                    onClick = { showNestedDialog = true },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                ) {
+                    Text(text = "Show Another Dialog", style = MiuixTheme.textStyles.button)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     GlassDialogButton(
                         onClick = { overlayIndex = OVERLAY_NONE },
@@ -451,11 +459,29 @@ fun GlassPage(padding: PaddingValues) {
                         Text(text = "Confirm", style = MiuixTheme.textStyles.button)
                     }
                 }
+                GlassDialog(
+                    show = showNestedDialog,
+                    backdrop = pageBackdrop,
+                    title = "Another Glass Dialog",
+                    summary = "Stacked over the first dialog.",
+                    onDismissRequest = { showNestedDialog = false },
+                    material = material ?: GlassDialogDefaults.material(),
+                    stroke = stroke,
+                ) {
+                    GlassDialogButton(
+                        onClick = { showNestedDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        role = GlassDialogButtonRole.Primary,
+                    ) {
+                        Text(text = "Close", style = MiuixTheme.textStyles.button)
+                    }
+                }
             }
 
             GlassBottomSheetDemo(
                 onDismissRequest = { overlayIndex = OVERLAY_NONE },
                 show = overlayIndex == OVERLAY_BOTTOM_SHEET,
+                onDismissFinished = { sheetActive = false },
                 backdrop = pageBackdrop,
                 material = material ?: GlassBottomSheetDefaults.material(),
                 stroke = stroke,
@@ -465,7 +491,7 @@ fun GlassPage(padding: PaddingValues) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .layerBackdrop(wallpaperBackdrop)
+                        .then(if (!tabsInTopBar) Modifier.layerBackdrop(wallpaperBackdrop) else Modifier)
                         .background(MiuixTheme.colorScheme.surface),
                 ) {
                     if (wallpaper) {
@@ -487,7 +513,20 @@ fun GlassPage(padding: PaddingValues) {
                     if (!tabsInTopBar) {
                         item(key = "glass-tabs-title") { SmallTitle(text = "TabRow") }
                         item(key = "glass-tabs") {
-                            tabRows(Modifier.padding(horizontal = horizontalPadding).padding(bottom = 12.dp))
+                            GlassPageTabRows(
+                                backdrop = tabBackdrop,
+                                style = style,
+                                alpha = alpha,
+                                stroke = stroke,
+                                material = material,
+                                primaryTab = primaryTab,
+                                onPrimaryTabSelect = onPrimaryTabSelect,
+                                neutralTab = neutralTab,
+                                onNeutralTabSelect = onNeutralTabSelect,
+                                joinedTab = joinedTab,
+                                onJoinedTabSelect = onJoinedTabSelect,
+                                modifier = Modifier.padding(horizontal = horizontalPadding).padding(bottom = 12.dp),
+                            )
                         }
                     }
                     item(key = "glass-dropdown-title") { SmallTitle(text = "Dropdown") }
@@ -566,13 +605,17 @@ fun GlassPage(padding: PaddingValues) {
                             )
                             ArrowPreference(
                                 title = "Show Dialog",
+                                holdDownState = overlayIndex == OVERLAY_DIALOG,
                                 onClick = {
+                                    dialogActive = true
                                     overlayIndex = OVERLAY_DIALOG
                                 },
                             )
                             ArrowPreference(
                                 title = "Show BottomSheet",
+                                holdDownState = overlayIndex == OVERLAY_BOTTOM_SHEET,
                                 onClick = {
+                                    sheetActive = true
                                     overlayIndex = OVERLAY_BOTTOM_SHEET
                                 },
                             )
@@ -606,7 +649,11 @@ fun GlassPage(padding: PaddingValues) {
         // Above the floating glass sidebar, which overlays the page in wide layouts.
         TopLayer {
             // Record the primary menu outside the page layer so the secondary samples both.
-            Box(modifier = Modifier.matchParentSize().layerBackdrop(primaryPopupBackdrop)) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .then(if (submenuPresent) Modifier.layerBackdrop(primaryPopupBackdrop) else Modifier),
+            ) {
                 GlassTransformPopup(
                     show = overlayIndex == OVERLAY_POPUP,
                     onDismissRequest = {
@@ -720,5 +767,61 @@ private fun GlassPageHost(
 ) {
     Scaffold(modifier = modifier, contentWindowInsets = WindowInsets(0)) {
         Box(modifier = Modifier.fillMaxSize(), content = content)
+    }
+}
+
+@Composable
+private fun GlassPageTabRows(
+    backdrop: Backdrop,
+    style: GlassStyle,
+    alpha: Float,
+    stroke: EdgeStroke?,
+    material: GlassMaterial?,
+    primaryTab: Int,
+    onPrimaryTabSelect: (Int) -> Unit,
+    neutralTab: Int,
+    onNeutralTabSelect: (Int) -> Unit,
+    joinedTab: Int,
+    onJoinedTabSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    surfaceActive: () -> Boolean = { false },
+) {
+    val tabSurfaceAlpha = if (surfaceActive()) 1f else 0f
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        GlassTabRow(
+            tabs = PrimaryTabTitles,
+            selectedIndex = primaryTab,
+            onSelect = onPrimaryTabSelect,
+            backdrop = backdrop,
+            style = style,
+            alpha = alpha,
+            surfaceAlpha = tabSurfaceAlpha,
+            stroke = stroke,
+            material = material ?: GlassTabRowDefaults.material(),
+        )
+        GlassTabRow(
+            tabs = NeutralTabTitles,
+            selectedIndex = neutralTab,
+            onSelect = onNeutralTabSelect,
+            backdrop = backdrop,
+            style = style,
+            alpha = alpha,
+            surfaceAlpha = tabSurfaceAlpha,
+            stroke = stroke,
+            material = material ?: GlassTabRowDefaults.material(),
+            height = GlassTabRowDefaults.NeutralHeight,
+            colors = GlassTabRowDefaults.neutralColors(),
+        )
+        GlassSegmentedTabRow(
+            tabs = SegmentedTabTitles,
+            selectedIndex = joinedTab,
+            onSelect = onJoinedTabSelect,
+            backdrop = backdrop,
+            style = style,
+            alpha = alpha,
+            surfaceAlpha = tabSurfaceAlpha,
+            stroke = stroke,
+            material = material ?: GlassSegmentedTabRowDefaults.material(),
+        )
     }
 }

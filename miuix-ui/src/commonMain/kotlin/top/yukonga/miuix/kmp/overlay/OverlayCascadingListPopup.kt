@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -102,9 +103,9 @@ fun OverlayCascadingListPopup(
 ) {
     CascadingListPopupLayout(
         show = show,
-        popupHost = { visible, hostContent ->
+        popupHost = { visible, _, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
-            visibleState.value = visible
+            SideEffect { visibleState.value = visible }
             PopupLayout(
                 visible = visibleState,
                 enableWindowDim = false,
@@ -116,6 +117,7 @@ fun OverlayCascadingListPopup(
                 hostContent()
             }
         },
+        useWindowComponentBounds = true,
         entries = entries,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

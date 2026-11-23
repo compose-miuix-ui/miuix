@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoSunProtectionNeeded: ImageVector
 
 val MiuixIcons.Glass.Light.NoSunProtectionNeeded: ImageVector
     get() {
-        if (_noSunProtectionNeededSurfaceLight != null) return _noSunProtectionNeededSurfaceLight!!
-        _noSunProtectionNeededSurfaceLight = buildHyperOSIcon(
+        if (_noSunProtectionNeededLight != null) return _noSunProtectionNeededLight!!
+        _noSunProtectionNeededLight = buildHyperOSIcon(
             name = "NoSunProtectionNeeded.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(635.3f, 889f),
@@ -148,15 +148,15 @@ val MiuixIcons.Glass.Light.NoSunProtectionNeeded: ImageVector
             translationY = 1042.2222f,
             autoMirror = false,
         )
-        return _noSunProtectionNeededSurfaceLight!!
+        return _noSunProtectionNeededLight!!
     }
 
-private var _noSunProtectionNeededSurfaceLight: ImageVector? = null
+private var _noSunProtectionNeededLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoSunProtectionNeeded: ImageVector
     get() {
-        if (_noSunProtectionNeededSurfaceNormal != null) return _noSunProtectionNeededSurfaceNormal!!
-        _noSunProtectionNeededSurfaceNormal = buildHyperOSIcon(
+        if (_noSunProtectionNeededNormal != null) return _noSunProtectionNeededNormal!!
+        _noSunProtectionNeededNormal = buildHyperOSIcon(
             name = "NoSunProtectionNeeded.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(626.2f, 891.7f),
@@ -291,15 +291,15 @@ val MiuixIcons.Glass.Normal.NoSunProtectionNeeded: ImageVector
             translationY = 1042.5277f,
             autoMirror = false,
         )
-        return _noSunProtectionNeededSurfaceNormal!!
+        return _noSunProtectionNeededNormal!!
     }
 
-private var _noSunProtectionNeededSurfaceNormal: ImageVector? = null
+private var _noSunProtectionNeededNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoSunProtectionNeeded: ImageVector
     get() {
-        if (_noSunProtectionNeededSurfaceRegular != null) return _noSunProtectionNeededSurfaceRegular!!
-        _noSunProtectionNeededSurfaceRegular = buildHyperOSIcon(
+        if (_noSunProtectionNeededRegular != null) return _noSunProtectionNeededRegular!!
+        _noSunProtectionNeededRegular = buildHyperOSIcon(
             name = "NoSunProtectionNeeded.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(622f, 893f),
@@ -434,15 +434,15 @@ val MiuixIcons.Glass.Regular.NoSunProtectionNeeded: ImageVector
             translationY = 1042.6667f,
             autoMirror = false,
         )
-        return _noSunProtectionNeededSurfaceRegular!!
+        return _noSunProtectionNeededRegular!!
     }
 
-private var _noSunProtectionNeededSurfaceRegular: ImageVector? = null
+private var _noSunProtectionNeededRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoSunProtectionNeeded: ImageVector
     get() {
-        if (_noSunProtectionNeededSurfaceMedium != null) return _noSunProtectionNeededSurfaceMedium!!
-        _noSunProtectionNeededSurfaceMedium = buildHyperOSIcon(
+        if (_noSunProtectionNeededMedium != null) return _noSunProtectionNeededMedium!!
+        _noSunProtectionNeededMedium = buildHyperOSIcon(
             name = "NoSunProtectionNeeded.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(615.2f, 892.5f),
@@ -577,15 +577,15 @@ val MiuixIcons.Glass.Medium.NoSunProtectionNeeded: ImageVector
             translationY = 1042.3964f,
             autoMirror = false,
         )
-        return _noSunProtectionNeededSurfaceMedium!!
+        return _noSunProtectionNeededMedium!!
     }
 
-private var _noSunProtectionNeededSurfaceMedium: ImageVector? = null
+private var _noSunProtectionNeededMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoSunProtectionNeeded: ImageVector
     get() {
-        if (_noSunProtectionNeededSurfaceDemibold != null) return _noSunProtectionNeededSurfaceDemibold!!
-        _noSunProtectionNeededSurfaceDemibold = buildHyperOSIcon(
+        if (_noSunProtectionNeededDemibold != null) return _noSunProtectionNeededDemibold!!
+        _noSunProtectionNeededDemibold = buildHyperOSIcon(
             name = "NoSunProtectionNeeded.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(610.5f, 892.1f),
@@ -720,8 +720,8 @@ val MiuixIcons.Glass.Demibold.NoSunProtectionNeeded: ImageVector
             translationY = 1042.2072f,
             autoMirror = false,
         )
-        return _noSunProtectionNeededSurfaceDemibold!!
+        return _noSunProtectionNeededDemibold!!
     }
 
-private var _noSunProtectionNeededSurfaceDemibold: ImageVector? = null
+private var _noSunProtectionNeededDemibold: ImageVector? = null
 

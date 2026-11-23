@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EyeProtection: ImageVector
 
 val MiuixIcons.Glass.Light.EyeProtection: ImageVector
     get() {
-        if (_eyeProtectionSurfaceLight != null) return _eyeProtectionSurfaceLight!!
-        _eyeProtectionSurfaceLight = buildHyperOSIcon(
+        if (_eyeProtectionLight != null) return _eyeProtectionLight!!
+        _eyeProtectionLight = buildHyperOSIcon(
             name = "EyeProtection.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1139f, 254.3f),
@@ -114,15 +114,15 @@ val MiuixIcons.Glass.Light.EyeProtection: ImageVector
             translationY = 1078.6112f,
             autoMirror = false,
         )
-        return _eyeProtectionSurfaceLight!!
+        return _eyeProtectionLight!!
     }
 
-private var _eyeProtectionSurfaceLight: ImageVector? = null
+private var _eyeProtectionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EyeProtection: ImageVector
     get() {
-        if (_eyeProtectionSurfaceNormal != null) return _eyeProtectionSurfaceNormal!!
-        _eyeProtectionSurfaceNormal = buildHyperOSIcon(
+        if (_eyeProtectionNormal != null) return _eyeProtectionNormal!!
+        _eyeProtectionNormal = buildHyperOSIcon(
             name = "EyeProtection.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1147.2f, 250.7f),
@@ -223,15 +223,15 @@ val MiuixIcons.Glass.Normal.EyeProtection: ImageVector
             translationY = 1075.5558f,
             autoMirror = false,
         )
-        return _eyeProtectionSurfaceNormal!!
+        return _eyeProtectionNormal!!
     }
 
-private var _eyeProtectionSurfaceNormal: ImageVector? = null
+private var _eyeProtectionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EyeProtection: ImageVector
     get() {
-        if (_eyeProtectionSurfaceRegular != null) return _eyeProtectionSurfaceRegular!!
-        _eyeProtectionSurfaceRegular = buildHyperOSIcon(
+        if (_eyeProtectionRegular != null) return _eyeProtectionRegular!!
+        _eyeProtectionRegular = buildHyperOSIcon(
             name = "EyeProtection.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1151f, 249f),
@@ -332,15 +332,15 @@ val MiuixIcons.Glass.Regular.EyeProtection: ImageVector
             translationY = 1074.1667f,
             autoMirror = false,
         )
-        return _eyeProtectionSurfaceRegular!!
+        return _eyeProtectionRegular!!
     }
 
-private var _eyeProtectionSurfaceRegular: ImageVector? = null
+private var _eyeProtectionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EyeProtection: ImageVector
     get() {
-        if (_eyeProtectionSurfaceMedium != null) return _eyeProtectionSurfaceMedium!!
-        _eyeProtectionSurfaceMedium = buildHyperOSIcon(
+        if (_eyeProtectionMedium != null) return _eyeProtectionMedium!!
+        _eyeProtectionMedium = buildHyperOSIcon(
             name = "EyeProtection.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1158.3f, 245.8f),
@@ -441,15 +441,15 @@ val MiuixIcons.Glass.Medium.EyeProtection: ImageVector
             translationY = 1074.572f,
             autoMirror = false,
         )
-        return _eyeProtectionSurfaceMedium!!
+        return _eyeProtectionMedium!!
     }
 
-private var _eyeProtectionSurfaceMedium: ImageVector? = null
+private var _eyeProtectionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EyeProtection: ImageVector
     get() {
-        if (_eyeProtectionSurfaceDemibold != null) return _eyeProtectionSurfaceDemibold!!
-        _eyeProtectionSurfaceDemibold = buildHyperOSIcon(
+        if (_eyeProtectionDemibold != null) return _eyeProtectionDemibold!!
+        _eyeProtectionDemibold = buildHyperOSIcon(
             name = "EyeProtection.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1163.4f, 243.5f),
@@ -550,8 +550,8 @@ val MiuixIcons.Glass.Demibold.EyeProtection: ImageVector
             translationY = 1074.8559f,
             autoMirror = false,
         )
-        return _eyeProtectionSurfaceDemibold!!
+        return _eyeProtectionDemibold!!
     }
 
-private var _eyeProtectionSurfaceDemibold: ImageVector? = null
+private var _eyeProtectionDemibold: ImageVector? = null
 

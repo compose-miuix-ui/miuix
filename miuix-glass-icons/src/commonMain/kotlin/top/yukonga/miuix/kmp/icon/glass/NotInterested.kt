@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NotInterested: ImageVector
 
 val MiuixIcons.Glass.Light.NotInterested: ImageVector
     get() {
-        if (_notInterestedLineLight != null) return _notInterestedLineLight!!
-        _notInterestedLineLight = buildHyperOSIcon(
+        if (_notInterestedLight != null) return _notInterestedLight!!
+        _notInterestedLight = buildHyperOSIcon(
             name = "NotInterested.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(226.2f, 433.1f),
@@ -89,15 +89,15 @@ val MiuixIcons.Glass.Light.NotInterested: ImageVector
             translationY = 1050.2471f,
             autoMirror = false,
         )
-        return _notInterestedLineLight!!
+        return _notInterestedLight!!
     }
 
-private var _notInterestedLineLight: ImageVector? = null
+private var _notInterestedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotInterested: ImageVector
     get() {
-        if (_notInterestedLineNormal != null) return _notInterestedLineNormal!!
-        _notInterestedLineNormal = buildHyperOSIcon(
+        if (_notInterestedNormal != null) return _notInterestedNormal!!
+        _notInterestedNormal = buildHyperOSIcon(
             name = "NotInterested.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(241.2f, 436.5f),
@@ -173,15 +173,15 @@ val MiuixIcons.Glass.Normal.NotInterested: ImageVector
             translationY = 1050.3643f,
             autoMirror = false,
         )
-        return _notInterestedLineNormal!!
+        return _notInterestedNormal!!
     }
 
-private var _notInterestedLineNormal: ImageVector? = null
+private var _notInterestedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotInterested: ImageVector
     get() {
-        if (_notInterestedLineRegular != null) return _notInterestedLineRegular!!
-        _notInterestedLineRegular = buildHyperOSIcon(
+        if (_notInterestedRegular != null) return _notInterestedRegular!!
+        _notInterestedRegular = buildHyperOSIcon(
             name = "NotInterested.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(248f, 438f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Regular.NotInterested: ImageVector
             translationY = 1050.4167f,
             autoMirror = false,
         )
-        return _notInterestedLineRegular!!
+        return _notInterestedRegular!!
     }
 
-private var _notInterestedLineRegular: ImageVector? = null
+private var _notInterestedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotInterested: ImageVector
     get() {
-        if (_notInterestedLineMedium != null) return _notInterestedLineMedium!!
-        _notInterestedLineMedium = buildHyperOSIcon(
+        if (_notInterestedMedium != null) return _notInterestedMedium!!
+        _notInterestedMedium = buildHyperOSIcon(
             name = "NotInterested.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(255f, 442.1f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Medium.NotInterested: ImageVector
             translationY = 1050.4496f,
             autoMirror = false,
         )
-        return _notInterestedLineMedium!!
+        return _notInterestedMedium!!
     }
 
-private var _notInterestedLineMedium: ImageVector? = null
+private var _notInterestedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotInterested: ImageVector
     get() {
-        if (_notInterestedLineDemibold != null) return _notInterestedLineDemibold!!
-        _notInterestedLineDemibold = buildHyperOSIcon(
+        if (_notInterestedDemibold != null) return _notInterestedDemibold!!
+        _notInterestedDemibold = buildHyperOSIcon(
             name = "NotInterested.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(259.9f, 444.9f),
@@ -425,8 +425,8 @@ val MiuixIcons.Glass.Demibold.NotInterested: ImageVector
             translationY = 1050.4719f,
             autoMirror = false,
         )
-        return _notInterestedLineDemibold!!
+        return _notInterestedDemibold!!
     }
 
-private var _notInterestedLineDemibold: ImageVector? = null
+private var _notInterestedDemibold: ImageVector? = null
 

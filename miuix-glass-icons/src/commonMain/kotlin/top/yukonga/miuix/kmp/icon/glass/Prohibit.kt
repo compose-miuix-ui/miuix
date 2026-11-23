@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Prohibit: ImageVector
 
 val MiuixIcons.Glass.Light.Prohibit: ImageVector
     get() {
-        if (_prohibitLineLight != null) return _prohibitLineLight!!
-        _prohibitLineLight = buildHyperOSIcon(
+        if (_prohibitLight != null) return _prohibitLight!!
+        _prohibitLight = buildHyperOSIcon(
             name = "Prohibit.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(324.7f, 378f),
@@ -56,15 +56,15 @@ val MiuixIcons.Glass.Light.Prohibit: ImageVector
             translationY = 1044.8889f,
             autoMirror = false,
         )
-        return _prohibitLineLight!!
+        return _prohibitLight!!
     }
 
-private var _prohibitLineLight: ImageVector? = null
+private var _prohibitLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Prohibit: ImageVector
     get() {
-        if (_prohibitLineNormal != null) return _prohibitLineNormal!!
-        _prohibitLineNormal = buildHyperOSIcon(
+        if (_prohibitNormal != null) return _prohibitNormal!!
+        _prohibitNormal = buildHyperOSIcon(
             name = "Prohibit.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(333.8f, 378f),
@@ -107,15 +107,15 @@ val MiuixIcons.Glass.Normal.Prohibit: ImageVector
             translationY = 1044.7361f,
             autoMirror = false,
         )
-        return _prohibitLineNormal!!
+        return _prohibitNormal!!
     }
 
-private var _prohibitLineNormal: ImageVector? = null
+private var _prohibitNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Prohibit: ImageVector
     get() {
-        if (_prohibitLineRegular != null) return _prohibitLineRegular!!
-        _prohibitLineRegular = buildHyperOSIcon(
+        if (_prohibitRegular != null) return _prohibitRegular!!
+        _prohibitRegular = buildHyperOSIcon(
             name = "Prohibit.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(338f, 378f),
@@ -158,15 +158,15 @@ val MiuixIcons.Glass.Regular.Prohibit: ImageVector
             translationY = 1044.6667f,
             autoMirror = false,
         )
-        return _prohibitLineRegular!!
+        return _prohibitRegular!!
     }
 
-private var _prohibitLineRegular: ImageVector? = null
+private var _prohibitRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Prohibit: ImageVector
     get() {
-        if (_prohibitLineMedium != null) return _prohibitLineMedium!!
-        _prohibitLineMedium = buildHyperOSIcon(
+        if (_prohibitMedium != null) return _prohibitMedium!!
+        _prohibitMedium = buildHyperOSIcon(
             name = "Prohibit.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(346.1f, 378f),
@@ -209,15 +209,15 @@ val MiuixIcons.Glass.Medium.Prohibit: ImageVector
             translationY = 1044.6667f,
             autoMirror = false,
         )
-        return _prohibitLineMedium!!
+        return _prohibitMedium!!
     }
 
-private var _prohibitLineMedium: ImageVector? = null
+private var _prohibitMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Prohibit: ImageVector
     get() {
-        if (_prohibitLineDemibold != null) return _prohibitLineDemibold!!
-        _prohibitLineDemibold = buildHyperOSIcon(
+        if (_prohibitDemibold != null) return _prohibitDemibold!!
+        _prohibitDemibold = buildHyperOSIcon(
             name = "Prohibit.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(351.8f, 378f),
@@ -260,8 +260,8 @@ val MiuixIcons.Glass.Demibold.Prohibit: ImageVector
             translationY = 1044.6667f,
             autoMirror = false,
         )
-        return _prohibitLineDemibold!!
+        return _prohibitDemibold!!
     }
 
-private var _prohibitLineDemibold: ImageVector? = null
+private var _prohibitDemibold: ImageVector? = null
 

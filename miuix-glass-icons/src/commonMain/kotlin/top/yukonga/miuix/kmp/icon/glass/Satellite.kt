@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Satellite: ImageVector
 
 val MiuixIcons.Glass.Light.Satellite: ImageVector
     get() {
-        if (_satelliteSurfaceLight != null) return _satelliteSurfaceLight!!
-        _satelliteSurfaceLight = buildHyperOSIcon(
+        if (_satelliteLight != null) return _satelliteLight!!
+        _satelliteLight = buildHyperOSIcon(
             name = "Satellite.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(633.3f, 253.2f),
@@ -109,15 +109,15 @@ val MiuixIcons.Glass.Light.Satellite: ImageVector
             translationY = 1061.0328f,
             autoMirror = false,
         )
-        return _satelliteSurfaceLight!!
+        return _satelliteLight!!
     }
 
-private var _satelliteSurfaceLight: ImageVector? = null
+private var _satelliteLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Satellite: ImageVector
     get() {
-        if (_satelliteSurfaceNormal != null) return _satelliteSurfaceNormal!!
-        _satelliteSurfaceNormal = buildHyperOSIcon(
+        if (_satelliteNormal != null) return _satelliteNormal!!
+        _satelliteNormal = buildHyperOSIcon(
             name = "Satellite.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(635.2f, 240.7f),
@@ -213,15 +213,15 @@ val MiuixIcons.Glass.Normal.Satellite: ImageVector
             translationY = 1060.4425f,
             autoMirror = false,
         )
-        return _satelliteSurfaceNormal!!
+        return _satelliteNormal!!
     }
 
-private var _satelliteSurfaceNormal: ImageVector? = null
+private var _satelliteNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Satellite: ImageVector
     get() {
-        if (_satelliteSurfaceRegular != null) return _satelliteSurfaceRegular!!
-        _satelliteSurfaceRegular = buildHyperOSIcon(
+        if (_satelliteRegular != null) return _satelliteRegular!!
+        _satelliteRegular = buildHyperOSIcon(
             name = "Satellite.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(636f, 235f),
@@ -317,15 +317,15 @@ val MiuixIcons.Glass.Regular.Satellite: ImageVector
             translationY = 1060.1667f,
             autoMirror = false,
         )
-        return _satelliteSurfaceRegular!!
+        return _satelliteRegular!!
     }
 
-private var _satelliteSurfaceRegular: ImageVector? = null
+private var _satelliteRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Satellite: ImageVector
     get() {
-        if (_satelliteSurfaceMedium != null) return _satelliteSurfaceMedium!!
-        _satelliteSurfaceMedium = buildHyperOSIcon(
+        if (_satelliteMedium != null) return _satelliteMedium!!
+        _satelliteMedium = buildHyperOSIcon(
             name = "Satellite.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(637.4f, 229.1f),
@@ -421,15 +421,15 @@ val MiuixIcons.Glass.Medium.Satellite: ImageVector
             translationY = 1061.2416f,
             autoMirror = false,
         )
-        return _satelliteSurfaceMedium!!
+        return _satelliteMedium!!
     }
 
-private var _satelliteSurfaceMedium: ImageVector? = null
+private var _satelliteMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Satellite: ImageVector
     get() {
-        if (_satelliteSurfaceDemibold != null) return _satelliteSurfaceDemibold!!
-        _satelliteSurfaceDemibold = buildHyperOSIcon(
+        if (_satelliteDemibold != null) return _satelliteDemibold!!
+        _satelliteDemibold = buildHyperOSIcon(
             name = "Satellite.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(638.3f, 224.9f),
@@ -525,8 +525,8 @@ val MiuixIcons.Glass.Demibold.Satellite: ImageVector
             translationY = 1061.9886f,
             autoMirror = false,
         )
-        return _satelliteSurfaceDemibold!!
+        return _satelliteDemibold!!
     }
 
-private var _satelliteSurfaceDemibold: ImageVector? = null
+private var _satelliteDemibold: ImageVector? = null
 

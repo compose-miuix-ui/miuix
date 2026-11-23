@@ -145,7 +145,6 @@ class GlassBottomSheetSurfaceTest {
         assertColorNear(Color(expected, expected, expected), center, tolerance = 4f / 255f)
         assertColorNear(center, pixels[8, pixels.height / 2], tolerance = 4f / 255f)
         assertEquals(GlassBottomSheetDefaults.ScrimColor, scope?.scrimColor?.value)
-        saveImage(if (isDark) "sheet-dark" else "sheet-light", onRoot().captureToImage())
         runOnIdle { dim.value = false }
         waitForIdle()
         val undimmed = onNodeWithTag("sheet").captureToImage().toPixelMap()
@@ -191,7 +190,6 @@ class GlassBottomSheetSurfaceTest {
         val openingTop = onNodeWithTag("sheet").fetchSemanticsNode().boundsInRoot.top
         val opening = onRoot().captureToImage().toPixelMap()
         assertColorNear(clean[x, y], opening[x, y], tolerance = 4f / 255f)
-        saveImage("sheet-opening", onRoot().captureToImage())
         mainClock.advanceTimeBy(1000)
         waitForIdle()
         val restingTop = onNodeWithTag("sheet").fetchSemanticsNode().boundsInRoot.top
@@ -241,7 +239,6 @@ class GlassBottomSheetSurfaceTest {
         val pixels = onRoot().captureToImage().toPixelMap()
         val expected = 206f / 255f
         assertColorNear(Color(expected, expected, expected), pixels[pixels.width / 2, pixels.height - 2], tolerance = 4f / 255f)
-        saveImage("sheet-overscroll", onRoot().captureToImage())
         sheet.performTouchInput { up() }
         waitForIdle()
         assertEquals(0, finished)

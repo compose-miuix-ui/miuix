@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FrequentlyUsed: ImageVector
 
 val MiuixIcons.Glass.Light.FrequentlyUsed: ImageVector
     get() {
-        if (_frequentlyUsedSurfaceLight != null) return _frequentlyUsedSurfaceLight!!
-        _frequentlyUsedSurfaceLight = buildHyperOSIcon(
+        if (_frequentlyUsedLight != null) return _frequentlyUsedLight!!
+        _frequentlyUsedLight = buildHyperOSIcon(
             name = "FrequentlyUsed.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(742.2f, 879.4f),
@@ -72,15 +72,15 @@ val MiuixIcons.Glass.Light.FrequentlyUsed: ImageVector
             translationY = 1054.8096f,
             autoMirror = false,
         )
-        return _frequentlyUsedSurfaceLight!!
+        return _frequentlyUsedLight!!
     }
 
-private var _frequentlyUsedSurfaceLight: ImageVector? = null
+private var _frequentlyUsedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FrequentlyUsed: ImageVector
     get() {
-        if (_frequentlyUsedSurfaceNormal != null) return _frequentlyUsedSurfaceNormal!!
-        _frequentlyUsedSurfaceNormal = buildHyperOSIcon(
+        if (_frequentlyUsedNormal != null) return _frequentlyUsedNormal!!
+        _frequentlyUsedNormal = buildHyperOSIcon(
             name = "FrequentlyUsed.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(735.2f, 884.6f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Normal.FrequentlyUsed: ImageVector
             translationY = 1051.7971f,
             autoMirror = false,
         )
-        return _frequentlyUsedSurfaceNormal!!
+        return _frequentlyUsedNormal!!
     }
 
-private var _frequentlyUsedSurfaceNormal: ImageVector? = null
+private var _frequentlyUsedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FrequentlyUsed: ImageVector
     get() {
-        if (_frequentlyUsedSurfaceRegular != null) return _frequentlyUsedSurfaceRegular!!
-        _frequentlyUsedSurfaceRegular = buildHyperOSIcon(
+        if (_frequentlyUsedRegular != null) return _frequentlyUsedRegular!!
+        _frequentlyUsedRegular = buildHyperOSIcon(
             name = "FrequentlyUsed.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(732f, 887f),
@@ -206,15 +206,15 @@ val MiuixIcons.Glass.Regular.FrequentlyUsed: ImageVector
             translationY = 1050.4254f,
             autoMirror = false,
         )
-        return _frequentlyUsedSurfaceRegular!!
+        return _frequentlyUsedRegular!!
     }
 
-private var _frequentlyUsedSurfaceRegular: ImageVector? = null
+private var _frequentlyUsedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FrequentlyUsed: ImageVector
     get() {
-        if (_frequentlyUsedSurfaceMedium != null) return _frequentlyUsedSurfaceMedium!!
-        _frequentlyUsedSurfaceMedium = buildHyperOSIcon(
+        if (_frequentlyUsedMedium != null) return _frequentlyUsedMedium!!
+        _frequentlyUsedMedium = buildHyperOSIcon(
             name = "FrequentlyUsed.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(728.5f, 891.1f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Medium.FrequentlyUsed: ImageVector
             translationY = 1050.1669f,
             autoMirror = false,
         )
-        return _frequentlyUsedSurfaceMedium!!
+        return _frequentlyUsedMedium!!
     }
 
-private var _frequentlyUsedSurfaceMedium: ImageVector? = null
+private var _frequentlyUsedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FrequentlyUsed: ImageVector
     get() {
-        if (_frequentlyUsedSurfaceDemibold != null) return _frequentlyUsedSurfaceDemibold!!
-        _frequentlyUsedSurfaceDemibold = buildHyperOSIcon(
+        if (_frequentlyUsedDemibold != null) return _frequentlyUsedDemibold!!
+        _frequentlyUsedDemibold = buildHyperOSIcon(
             name = "FrequentlyUsed.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(726f, 893.9f),
@@ -340,8 +340,8 @@ val MiuixIcons.Glass.Demibold.FrequentlyUsed: ImageVector
             translationY = 1049.9944f,
             autoMirror = false,
         )
-        return _frequentlyUsedSurfaceDemibold!!
+        return _frequentlyUsedDemibold!!
     }
 
-private var _frequentlyUsedSurfaceDemibold: ImageVector? = null
+private var _frequentlyUsedDemibold: ImageVector? = null
 

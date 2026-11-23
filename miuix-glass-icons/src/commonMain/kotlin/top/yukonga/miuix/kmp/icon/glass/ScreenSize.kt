@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ScreenSize: ImageVector
 
 val MiuixIcons.Glass.Light.ScreenSize: ImageVector
     get() {
-        if (_screenSizeLineLight != null) return _screenSizeLineLight!!
-        _screenSizeLineLight = buildHyperOSIcon(
+        if (_screenSizeLight != null) return _screenSizeLight!!
+        _screenSizeLight = buildHyperOSIcon(
             name = "ScreenSize.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(210.3f, 634f),
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.ScreenSize: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _screenSizeLineLight!!
+        return _screenSizeLight!!
     }
 
-private var _screenSizeLineLight: ImageVector? = null
+private var _screenSizeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ScreenSize: ImageVector
     get() {
-        if (_screenSizeLineNormal != null) return _screenSizeLineNormal!!
-        _screenSizeLineNormal = buildHyperOSIcon(
+        if (_screenSizeNormal != null) return _screenSizeNormal!!
+        _screenSizeNormal = buildHyperOSIcon(
             name = "ScreenSize.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(201.2f, 634f),
@@ -183,15 +183,15 @@ val MiuixIcons.Glass.Normal.ScreenSize: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _screenSizeLineNormal!!
+        return _screenSizeNormal!!
     }
 
-private var _screenSizeLineNormal: ImageVector? = null
+private var _screenSizeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ScreenSize: ImageVector
     get() {
-        if (_screenSizeLineRegular != null) return _screenSizeLineRegular!!
-        _screenSizeLineRegular = buildHyperOSIcon(
+        if (_screenSizeRegular != null) return _screenSizeRegular!!
+        _screenSizeRegular = buildHyperOSIcon(
             name = "ScreenSize.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(197f, 634f),
@@ -272,15 +272,15 @@ val MiuixIcons.Glass.Regular.ScreenSize: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _screenSizeLineRegular!!
+        return _screenSizeRegular!!
     }
 
-private var _screenSizeLineRegular: ImageVector? = null
+private var _screenSizeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ScreenSize: ImageVector
     get() {
-        if (_screenSizeLineMedium != null) return _screenSizeLineMedium!!
-        _screenSizeLineMedium = buildHyperOSIcon(
+        if (_screenSizeMedium != null) return _screenSizeMedium!!
+        _screenSizeMedium = buildHyperOSIcon(
             name = "ScreenSize.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(188.9f, 634f),
@@ -361,15 +361,15 @@ val MiuixIcons.Glass.Medium.ScreenSize: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _screenSizeLineMedium!!
+        return _screenSizeMedium!!
     }
 
-private var _screenSizeLineMedium: ImageVector? = null
+private var _screenSizeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ScreenSize: ImageVector
     get() {
-        if (_screenSizeLineDemibold != null) return _screenSizeLineDemibold!!
-        _screenSizeLineDemibold = buildHyperOSIcon(
+        if (_screenSizeDemibold != null) return _screenSizeDemibold!!
+        _screenSizeDemibold = buildHyperOSIcon(
             name = "ScreenSize.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(183.2f, 634f),
@@ -450,8 +450,8 @@ val MiuixIcons.Glass.Demibold.ScreenSize: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _screenSizeLineDemibold!!
+        return _screenSizeDemibold!!
     }
 
-private var _screenSizeLineDemibold: ImageVector? = null
+private var _screenSizeDemibold: ImageVector? = null
 

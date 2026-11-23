@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Ai: ImageVector
 
 val MiuixIcons.Glass.Light.Ai: ImageVector
     get() {
-        if (_aiSurfaceLight != null) return _aiSurfaceLight!!
-        _aiSurfaceLight = buildHyperOSIcon(
+        if (_aiLight != null) return _aiLight!!
+        _aiLight = buildHyperOSIcon(
             name = "Ai.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(276f, -18f),
@@ -61,15 +61,15 @@ val MiuixIcons.Glass.Light.Ai: ImageVector
             translationY = 1052.3889f,
             autoMirror = false,
         )
-        return _aiSurfaceLight!!
+        return _aiLight!!
     }
 
-private var _aiSurfaceLight: ImageVector? = null
+private var _aiLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Ai: ImageVector
     get() {
-        if (_aiSurfaceNormal != null) return _aiSurfaceNormal!!
-        _aiSurfaceNormal = buildHyperOSIcon(
+        if (_aiNormal != null) return _aiNormal!!
+        _aiNormal = buildHyperOSIcon(
             name = "Ai.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(284.2f, -20.7f),
@@ -117,15 +117,15 @@ val MiuixIcons.Glass.Normal.Ai: ImageVector
             translationY = 1050.8612f,
             autoMirror = false,
         )
-        return _aiSurfaceNormal!!
+        return _aiNormal!!
     }
 
-private var _aiSurfaceNormal: ImageVector? = null
+private var _aiNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Ai: ImageVector
     get() {
-        if (_aiSurfaceRegular != null) return _aiSurfaceRegular!!
-        _aiSurfaceRegular = buildHyperOSIcon(
+        if (_aiRegular != null) return _aiRegular!!
+        _aiRegular = buildHyperOSIcon(
             name = "Ai.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(288f, -22f),
@@ -173,15 +173,15 @@ val MiuixIcons.Glass.Regular.Ai: ImageVector
             translationY = 1050.1667f,
             autoMirror = false,
         )
-        return _aiSurfaceRegular!!
+        return _aiRegular!!
     }
 
-private var _aiSurfaceRegular: ImageVector? = null
+private var _aiRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Ai: ImageVector
     get() {
-        if (_aiSurfaceMedium != null) return _aiSurfaceMedium!!
-        _aiSurfaceMedium = buildHyperOSIcon(
+        if (_aiMedium != null) return _aiMedium!!
+        _aiMedium = buildHyperOSIcon(
             name = "Ai.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(290.7f, -23.9f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Medium.Ai: ImageVector
             translationY = 1050.1667f,
             autoMirror = false,
         )
-        return _aiSurfaceMedium!!
+        return _aiMedium!!
     }
 
-private var _aiSurfaceMedium: ImageVector? = null
+private var _aiMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Ai: ImageVector
     get() {
-        if (_aiSurfaceDemibold != null) return _aiSurfaceDemibold!!
-        _aiSurfaceDemibold = buildHyperOSIcon(
+        if (_aiDemibold != null) return _aiDemibold!!
+        _aiDemibold = buildHyperOSIcon(
             name = "Ai.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(292.6f, -25.2f),
@@ -285,8 +285,8 @@ val MiuixIcons.Glass.Demibold.Ai: ImageVector
             translationY = 1050.1667f,
             autoMirror = false,
         )
-        return _aiSurfaceDemibold!!
+        return _aiDemibold!!
     }
 
-private var _aiSurfaceDemibold: ImageVector? = null
+private var _aiDemibold: ImageVector? = null
 

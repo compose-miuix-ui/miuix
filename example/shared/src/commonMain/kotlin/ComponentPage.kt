@@ -174,6 +174,7 @@ private fun ComponentPageContent(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 content()

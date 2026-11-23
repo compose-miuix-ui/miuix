@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SecurityEmergency: ImageVector
 
 val MiuixIcons.Glass.Light.SecurityEmergency: ImageVector
     get() {
-        if (_securityEmergencySurfaceLight != null) return _securityEmergencySurfaceLight!!
-        _securityEmergencySurfaceLight = buildHyperOSIcon(
+        if (_securityEmergencyLight != null) return _securityEmergencyLight!!
+        _securityEmergencyLight = buildHyperOSIcon(
             name = "SecurityEmergency.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(953.8f, 459.1f),
@@ -57,15 +57,15 @@ val MiuixIcons.Glass.Light.SecurityEmergency: ImageVector
             translationY = 1074.6667f,
             autoMirror = false,
         )
-        return _securityEmergencySurfaceLight!!
+        return _securityEmergencyLight!!
     }
 
-private var _securityEmergencySurfaceLight: ImageVector? = null
+private var _securityEmergencyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SecurityEmergency: ImageVector
     get() {
-        if (_securityEmergencySurfaceNormal != null) return _securityEmergencySurfaceNormal!!
-        _securityEmergencySurfaceNormal = buildHyperOSIcon(
+        if (_securityEmergencyNormal != null) return _securityEmergencyNormal!!
+        _securityEmergencyNormal = buildHyperOSIcon(
             name = "SecurityEmergency.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(958.1f, 459.7f),
@@ -109,15 +109,15 @@ val MiuixIcons.Glass.Normal.SecurityEmergency: ImageVector
             translationY = 1074.6667f,
             autoMirror = false,
         )
-        return _securityEmergencySurfaceNormal!!
+        return _securityEmergencyNormal!!
     }
 
-private var _securityEmergencySurfaceNormal: ImageVector? = null
+private var _securityEmergencyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SecurityEmergency: ImageVector
     get() {
-        if (_securityEmergencySurfaceRegular != null) return _securityEmergencySurfaceRegular!!
-        _securityEmergencySurfaceRegular = buildHyperOSIcon(
+        if (_securityEmergencyRegular != null) return _securityEmergencyRegular!!
+        _securityEmergencyRegular = buildHyperOSIcon(
             name = "SecurityEmergency.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(960f, 460f),
@@ -161,15 +161,15 @@ val MiuixIcons.Glass.Regular.SecurityEmergency: ImageVector
             translationY = 1074.6667f,
             autoMirror = false,
         )
-        return _securityEmergencySurfaceRegular!!
+        return _securityEmergencyRegular!!
     }
 
-private var _securityEmergencySurfaceRegular: ImageVector? = null
+private var _securityEmergencyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SecurityEmergency: ImageVector
     get() {
-        if (_securityEmergencySurfaceMedium != null) return _securityEmergencySurfaceMedium!!
-        _securityEmergencySurfaceMedium = buildHyperOSIcon(
+        if (_securityEmergencyMedium != null) return _securityEmergencyMedium!!
+        _securityEmergencyMedium = buildHyperOSIcon(
             name = "SecurityEmergency.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(963.5f, 463.8f),
@@ -213,15 +213,15 @@ val MiuixIcons.Glass.Medium.SecurityEmergency: ImageVector
             translationY = 1074.6667f,
             autoMirror = false,
         )
-        return _securityEmergencySurfaceMedium!!
+        return _securityEmergencyMedium!!
     }
 
-private var _securityEmergencySurfaceMedium: ImageVector? = null
+private var _securityEmergencyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SecurityEmergency: ImageVector
     get() {
-        if (_securityEmergencySurfaceDemibold != null) return _securityEmergencySurfaceDemibold!!
-        _securityEmergencySurfaceDemibold = buildHyperOSIcon(
+        if (_securityEmergencyDemibold != null) return _securityEmergencyDemibold!!
+        _securityEmergencyDemibold = buildHyperOSIcon(
             name = "SecurityEmergency.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(966f, 466.4f),
@@ -265,8 +265,8 @@ val MiuixIcons.Glass.Demibold.SecurityEmergency: ImageVector
             translationY = 1074.6667f,
             autoMirror = false,
         )
-        return _securityEmergencySurfaceDemibold!!
+        return _securityEmergencyDemibold!!
     }
 
-private var _securityEmergencySurfaceDemibold: ImageVector? = null
+private var _securityEmergencyDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.KeyboardStylus: ImageVector
 
 val MiuixIcons.Glass.Light.KeyboardStylus: ImageVector
     get() {
-        if (_keyboardStylusSurfaceLight != null) return _keyboardStylusSurfaceLight!!
-        _keyboardStylusSurfaceLight = buildHyperOSIcon(
+        if (_keyboardStylusLight != null) return _keyboardStylusLight!!
+        _keyboardStylusLight = buildHyperOSIcon(
             name = "KeyboardStylus.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(306f, 672.9f),
@@ -166,15 +166,15 @@ val MiuixIcons.Glass.Light.KeyboardStylus: ImageVector
             translationY = 1038.5554f,
             autoMirror = false,
         )
-        return _keyboardStylusSurfaceLight!!
+        return _keyboardStylusLight!!
     }
 
-private var _keyboardStylusSurfaceLight: ImageVector? = null
+private var _keyboardStylusLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.KeyboardStylus: ImageVector
     get() {
-        if (_keyboardStylusSurfaceNormal != null) return _keyboardStylusSurfaceNormal!!
-        _keyboardStylusSurfaceNormal = buildHyperOSIcon(
+        if (_keyboardStylusNormal != null) return _keyboardStylusNormal!!
+        _keyboardStylusNormal = buildHyperOSIcon(
             name = "KeyboardStylus.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(308.7f, 664f),
@@ -327,15 +327,15 @@ val MiuixIcons.Glass.Normal.KeyboardStylus: ImageVector
             translationY = 1040.6942f,
             autoMirror = false,
         )
-        return _keyboardStylusSurfaceNormal!!
+        return _keyboardStylusNormal!!
     }
 
-private var _keyboardStylusSurfaceNormal: ImageVector? = null
+private var _keyboardStylusNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.KeyboardStylus: ImageVector
     get() {
-        if (_keyboardStylusSurfaceRegular != null) return _keyboardStylusSurfaceRegular!!
-        _keyboardStylusSurfaceRegular = buildHyperOSIcon(
+        if (_keyboardStylusRegular != null) return _keyboardStylusRegular!!
+        _keyboardStylusRegular = buildHyperOSIcon(
             name = "KeyboardStylus.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(310f, 660f),
@@ -488,15 +488,15 @@ val MiuixIcons.Glass.Regular.KeyboardStylus: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _keyboardStylusSurfaceRegular!!
+        return _keyboardStylusRegular!!
     }
 
-private var _keyboardStylusSurfaceRegular: ImageVector? = null
+private var _keyboardStylusRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.KeyboardStylus: ImageVector
     get() {
-        if (_keyboardStylusSurfaceMedium != null) return _keyboardStylusSurfaceMedium!!
-        _keyboardStylusSurfaceMedium = buildHyperOSIcon(
+        if (_keyboardStylusMedium != null) return _keyboardStylusMedium!!
+        _keyboardStylusMedium = buildHyperOSIcon(
             name = "KeyboardStylus.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(313.8f, 653.5f),
@@ -649,15 +649,15 @@ val MiuixIcons.Glass.Medium.KeyboardStylus: ImageVector
             translationY = 1041.1261f,
             autoMirror = false,
         )
-        return _keyboardStylusSurfaceMedium!!
+        return _keyboardStylusMedium!!
     }
 
-private var _keyboardStylusSurfaceMedium: ImageVector? = null
+private var _keyboardStylusMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.KeyboardStylus: ImageVector
     get() {
-        if (_keyboardStylusSurfaceDemibold != null) return _keyboardStylusSurfaceDemibold!!
-        _keyboardStylusSurfaceDemibold = buildHyperOSIcon(
+        if (_keyboardStylusDemibold != null) return _keyboardStylusDemibold!!
+        _keyboardStylusDemibold = buildHyperOSIcon(
             name = "KeyboardStylus.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(316.4f, 649f),
@@ -810,8 +810,8 @@ val MiuixIcons.Glass.Demibold.KeyboardStylus: ImageVector
             translationY = 1040.7477f,
             autoMirror = false,
         )
-        return _keyboardStylusSurfaceDemibold!!
+        return _keyboardStylusDemibold!!
     }
 
-private var _keyboardStylusSurfaceDemibold: ImageVector? = null
+private var _keyboardStylusDemibold: ImageVector? = null
 

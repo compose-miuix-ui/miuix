@@ -17,8 +17,8 @@ val MiuixIcons.Glass.FavoriteOutline: ImageVector
 
 val MiuixIcons.Glass.Light.FavoriteOutline: ImageVector
     get() {
-        if (_favoritesLight != null) return _favoritesLight!!
-        _favoritesLight = ImageVector.Builder(
+        if (_favoriteOutlineLight != null) return _favoriteOutlineLight!!
+        _favoriteOutlineLight = ImageVector.Builder(
             name = "FavoriteOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.FavoriteOutline: ImageVector
                 )
             }
         }.build()
-        return _favoritesLight!!
+        return _favoriteOutlineLight!!
     }
 
-private var _favoritesLight: ImageVector? = null
+private var _favoriteOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FavoriteOutline: ImageVector
     get() {
-        if (_favoritesNormal != null) return _favoritesNormal!!
-        _favoritesNormal = ImageVector.Builder(
+        if (_favoriteOutlineNormal != null) return _favoriteOutlineNormal!!
+        _favoriteOutlineNormal = ImageVector.Builder(
             name = "FavoriteOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -178,15 +178,15 @@ val MiuixIcons.Glass.Normal.FavoriteOutline: ImageVector
                 )
             }
         }.build()
-        return _favoritesNormal!!
+        return _favoriteOutlineNormal!!
     }
 
-private var _favoritesNormal: ImageVector? = null
+private var _favoriteOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FavoriteOutline: ImageVector
     get() {
-        if (_favoritesRegular != null) return _favoritesRegular!!
-        _favoritesRegular = ImageVector.Builder(
+        if (_favoriteOutlineRegular != null) return _favoriteOutlineRegular!!
+        _favoriteOutlineRegular = ImageVector.Builder(
             name = "FavoriteOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -262,15 +262,15 @@ val MiuixIcons.Glass.Regular.FavoriteOutline: ImageVector
                 )
             }
         }.build()
-        return _favoritesRegular!!
+        return _favoriteOutlineRegular!!
     }
 
-private var _favoritesRegular: ImageVector? = null
+private var _favoriteOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FavoriteOutline: ImageVector
     get() {
-        if (_favoritesMedium != null) return _favoritesMedium!!
-        _favoritesMedium = ImageVector.Builder(
+        if (_favoriteOutlineMedium != null) return _favoriteOutlineMedium!!
+        _favoriteOutlineMedium = ImageVector.Builder(
             name = "FavoriteOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -346,15 +346,15 @@ val MiuixIcons.Glass.Medium.FavoriteOutline: ImageVector
                 )
             }
         }.build()
-        return _favoritesMedium!!
+        return _favoriteOutlineMedium!!
     }
 
-private var _favoritesMedium: ImageVector? = null
+private var _favoriteOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FavoriteOutline: ImageVector
     get() {
-        if (_favoritesDemibold != null) return _favoritesDemibold!!
-        _favoritesDemibold = ImageVector.Builder(
+        if (_favoriteOutlineDemibold != null) return _favoriteOutlineDemibold!!
+        _favoriteOutlineDemibold = ImageVector.Builder(
             name = "FavoriteOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -430,7 +430,7 @@ val MiuixIcons.Glass.Demibold.FavoriteOutline: ImageVector
                 )
             }
         }.build()
-        return _favoritesDemibold!!
+        return _favoriteOutlineDemibold!!
     }
 
-private var _favoritesDemibold: ImageVector? = null
+private var _favoriteOutlineDemibold: ImageVector? = null

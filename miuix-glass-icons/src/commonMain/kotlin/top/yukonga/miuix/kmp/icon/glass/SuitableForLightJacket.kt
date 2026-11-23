@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuitableForLightJacket: ImageVector
 
 val MiuixIcons.Glass.Light.SuitableForLightJacket: ImageVector
     get() {
-        if (_suitableForLightJacketLineLight != null) return _suitableForLightJacketLineLight!!
-        _suitableForLightJacketLineLight = buildHyperOSIcon(
+        if (_suitableForLightJacketLight != null) return _suitableForLightJacketLight!!
+        _suitableForLightJacketLight = buildHyperOSIcon(
             name = "SuitableForLightJacket.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(827.6f, 775.9f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Light.SuitableForLightJacket: ImageVector
             translationY = 1032.1667f,
             autoMirror = false,
         )
-        return _suitableForLightJacketLineLight!!
+        return _suitableForLightJacketLight!!
     }
 
-private var _suitableForLightJacketLineLight: ImageVector? = null
+private var _suitableForLightJacketLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuitableForLightJacket: ImageVector
     get() {
-        if (_suitableForLightJacketLineNormal != null) return _suitableForLightJacketLineNormal!!
-        _suitableForLightJacketLineNormal = buildHyperOSIcon(
+        if (_suitableForLightJacketNormal != null) return _suitableForLightJacketNormal!!
+        _suitableForLightJacketNormal = buildHyperOSIcon(
             name = "SuitableForLightJacket.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(805.9f, 772.5f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Normal.SuitableForLightJacket: ImageVector
             translationY = 1032.1667f,
             autoMirror = false,
         )
-        return _suitableForLightJacketLineNormal!!
+        return _suitableForLightJacketNormal!!
     }
 
-private var _suitableForLightJacketLineNormal: ImageVector? = null
+private var _suitableForLightJacketNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuitableForLightJacket: ImageVector
     get() {
-        if (_suitableForLightJacketLineRegular != null) return _suitableForLightJacketLineRegular!!
-        _suitableForLightJacketLineRegular = buildHyperOSIcon(
+        if (_suitableForLightJacketRegular != null) return _suitableForLightJacketRegular!!
+        _suitableForLightJacketRegular = buildHyperOSIcon(
             name = "SuitableForLightJacket.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(796f, 771f),
@@ -359,15 +359,15 @@ val MiuixIcons.Glass.Regular.SuitableForLightJacket: ImageVector
             translationY = 1032.1667f,
             autoMirror = false,
         )
-        return _suitableForLightJacketLineRegular!!
+        return _suitableForLightJacketRegular!!
     }
 
-private var _suitableForLightJacketLineRegular: ImageVector? = null
+private var _suitableForLightJacketRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuitableForLightJacket: ImageVector
     get() {
-        if (_suitableForLightJacketLineMedium != null) return _suitableForLightJacketLineMedium!!
-        _suitableForLightJacketLineMedium = buildHyperOSIcon(
+        if (_suitableForLightJacketMedium != null) return _suitableForLightJacketMedium!!
+        _suitableForLightJacketMedium = buildHyperOSIcon(
             name = "SuitableForLightJacket.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(779.2f, 764.8f),
@@ -477,15 +477,15 @@ val MiuixIcons.Glass.Medium.SuitableForLightJacket: ImageVector
             translationY = 1032.1667f,
             autoMirror = false,
         )
-        return _suitableForLightJacketLineMedium!!
+        return _suitableForLightJacketMedium!!
     }
 
-private var _suitableForLightJacketLineMedium: ImageVector? = null
+private var _suitableForLightJacketMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuitableForLightJacket: ImageVector
     get() {
-        if (_suitableForLightJacketLineDemibold != null) return _suitableForLightJacketLineDemibold!!
-        _suitableForLightJacketLineDemibold = buildHyperOSIcon(
+        if (_suitableForLightJacketDemibold != null) return _suitableForLightJacketDemibold!!
+        _suitableForLightJacketDemibold = buildHyperOSIcon(
             name = "SuitableForLightJacket.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(767.5f, 760.4f),
@@ -595,8 +595,8 @@ val MiuixIcons.Glass.Demibold.SuitableForLightJacket: ImageVector
             translationY = 1032.1667f,
             autoMirror = false,
         )
-        return _suitableForLightJacketLineDemibold!!
+        return _suitableForLightJacketDemibold!!
     }
 
-private var _suitableForLightJacketLineDemibold: ImageVector? = null
+private var _suitableForLightJacketDemibold: ImageVector? = null
 

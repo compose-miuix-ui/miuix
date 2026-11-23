@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WiredHdmi: ImageVector
 
 val MiuixIcons.Glass.Light.WiredHdmi: ImageVector
     get() {
-        if (_wiredHdmiSurfaceLight != null) return _wiredHdmiSurfaceLight!!
-        _wiredHdmiSurfaceLight = buildHyperOSIcon(
+        if (_wiredHdmiLight != null) return _wiredHdmiLight!!
+        _wiredHdmiLight = buildHyperOSIcon(
             name = "WiredHdmi.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(909.3f, 616.7f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.WiredHdmi: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _wiredHdmiSurfaceLight!!
+        return _wiredHdmiLight!!
     }
 
-private var _wiredHdmiSurfaceLight: ImageVector? = null
+private var _wiredHdmiLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WiredHdmi: ImageVector
     get() {
-        if (_wiredHdmiSurfaceNormal != null) return _wiredHdmiSurfaceNormal!!
-        _wiredHdmiSurfaceNormal = buildHyperOSIcon(
+        if (_wiredHdmiNormal != null) return _wiredHdmiNormal!!
+        _wiredHdmiNormal = buildHyperOSIcon(
             name = "WiredHdmi.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(900.2f, 625.8f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.WiredHdmi: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _wiredHdmiSurfaceNormal!!
+        return _wiredHdmiNormal!!
     }
 
-private var _wiredHdmiSurfaceNormal: ImageVector? = null
+private var _wiredHdmiNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WiredHdmi: ImageVector
     get() {
-        if (_wiredHdmiSurfaceRegular != null) return _wiredHdmiSurfaceRegular!!
-        _wiredHdmiSurfaceRegular = buildHyperOSIcon(
+        if (_wiredHdmiRegular != null) return _wiredHdmiRegular!!
+        _wiredHdmiRegular = buildHyperOSIcon(
             name = "WiredHdmi.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(896f, 630f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.WiredHdmi: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _wiredHdmiSurfaceRegular!!
+        return _wiredHdmiRegular!!
     }
 
-private var _wiredHdmiSurfaceRegular: ImageVector? = null
+private var _wiredHdmiRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WiredHdmi: ImageVector
     get() {
-        if (_wiredHdmiSurfaceMedium != null) return _wiredHdmiSurfaceMedium!!
-        _wiredHdmiSurfaceMedium = buildHyperOSIcon(
+        if (_wiredHdmiMedium != null) return _wiredHdmiMedium!!
+        _wiredHdmiMedium = buildHyperOSIcon(
             name = "WiredHdmi.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(890.6f, 635.4f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.WiredHdmi: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _wiredHdmiSurfaceMedium!!
+        return _wiredHdmiMedium!!
     }
 
-private var _wiredHdmiSurfaceMedium: ImageVector? = null
+private var _wiredHdmiMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WiredHdmi: ImageVector
     get() {
-        if (_wiredHdmiSurfaceDemibold != null) return _wiredHdmiSurfaceDemibold!!
-        _wiredHdmiSurfaceDemibold = buildHyperOSIcon(
+        if (_wiredHdmiDemibold != null) return _wiredHdmiDemibold!!
+        _wiredHdmiDemibold = buildHyperOSIcon(
             name = "WiredHdmi.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(886.8f, 639.2f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.WiredHdmi: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _wiredHdmiSurfaceDemibold!!
+        return _wiredHdmiDemibold!!
     }
 
-private var _wiredHdmiSurfaceDemibold: ImageVector? = null
+private var _wiredHdmiDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Glasses: ImageVector
 
 val MiuixIcons.Glass.Light.Glasses: ImageVector
     get() {
-        if (_glassesLineLight != null) return _glassesLineLight!!
-        _glassesLineLight = buildHyperOSIcon(
+        if (_glassesLight != null) return _glassesLight!!
+        _glassesLight = buildHyperOSIcon(
             name = "Glasses.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(899f, 707f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Light.Glasses: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _glassesLineLight!!
+        return _glassesLight!!
     }
 
-private var _glassesLineLight: ImageVector? = null
+private var _glassesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Glasses: ImageVector
     get() {
-        if (_glassesLineNormal != null) return _glassesLineNormal!!
-        _glassesLineNormal = buildHyperOSIcon(
+        if (_glassesNormal != null) return _glassesNormal!!
+        _glassesNormal = buildHyperOSIcon(
             name = "Glasses.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(896.3f, 712.5f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Normal.Glasses: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _glassesLineNormal!!
+        return _glassesNormal!!
     }
 
-private var _glassesLineNormal: ImageVector? = null
+private var _glassesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Glasses: ImageVector
     get() {
-        if (_glassesLineRegular != null) return _glassesLineRegular!!
-        _glassesLineRegular = buildHyperOSIcon(
+        if (_glassesRegular != null) return _glassesRegular!!
+        _glassesRegular = buildHyperOSIcon(
             name = "Glasses.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(895f, 715f),
@@ -335,15 +335,15 @@ val MiuixIcons.Glass.Regular.Glasses: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _glassesLineRegular!!
+        return _glassesRegular!!
     }
 
-private var _glassesLineRegular: ImageVector? = null
+private var _glassesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Glasses: ImageVector
     get() {
-        if (_glassesLineMedium != null) return _glassesLineMedium!!
-        _glassesLineMedium = buildHyperOSIcon(
+        if (_glassesMedium != null) return _glassesMedium!!
+        _glassesMedium = buildHyperOSIcon(
             name = "Glasses.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(895.3f, 719.3f),
@@ -445,15 +445,15 @@ val MiuixIcons.Glass.Medium.Glasses: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _glassesLineMedium!!
+        return _glassesMedium!!
     }
 
-private var _glassesLineMedium: ImageVector? = null
+private var _glassesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Glasses: ImageVector
     get() {
-        if (_glassesLineDemibold != null) return _glassesLineDemibold!!
-        _glassesLineDemibold = buildHyperOSIcon(
+        if (_glassesDemibold != null) return _glassesDemibold!!
+        _glassesDemibold = buildHyperOSIcon(
             name = "Glasses.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(895.5f, 722.4f),
@@ -555,8 +555,8 @@ val MiuixIcons.Glass.Demibold.Glasses: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _glassesLineDemibold!!
+        return _glassesDemibold!!
     }
 
-private var _glassesLineDemibold: ImageVector? = null
+private var _glassesDemibold: ImageVector? = null
 

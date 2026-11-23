@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Blacklist: ImageVector
 
 val MiuixIcons.Glass.Light.Blacklist: ImageVector
     get() {
-        if (_blacklistSurfaceLight != null) return _blacklistSurfaceLight!!
-        _blacklistSurfaceLight = buildHyperOSIcon(
+        if (_blacklistLight != null) return _blacklistLight!!
+        _blacklistLight = buildHyperOSIcon(
             name = "Blacklist.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(340.4f, 851.4f),
@@ -74,15 +74,15 @@ val MiuixIcons.Glass.Light.Blacklist: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blacklistSurfaceLight!!
+        return _blacklistLight!!
     }
 
-private var _blacklistSurfaceLight: ImageVector? = null
+private var _blacklistLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Blacklist: ImageVector
     get() {
-        if (_blacklistSurfaceNormal != null) return _blacklistSurfaceNormal!!
-        _blacklistSurfaceNormal = buildHyperOSIcon(
+        if (_blacklistNormal != null) return _blacklistNormal!!
+        _blacklistNormal = buildHyperOSIcon(
             name = "Blacklist.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(340.1f, 853.9f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Normal.Blacklist: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blacklistSurfaceNormal!!
+        return _blacklistNormal!!
     }
 
-private var _blacklistSurfaceNormal: ImageVector? = null
+private var _blacklistNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Blacklist: ImageVector
     get() {
-        if (_blacklistSurfaceRegular != null) return _blacklistSurfaceRegular!!
-        _blacklistSurfaceRegular = buildHyperOSIcon(
+        if (_blacklistRegular != null) return _blacklistRegular!!
+        _blacklistRegular = buildHyperOSIcon(
             name = "Blacklist.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(340f, 855f),
@@ -212,15 +212,15 @@ val MiuixIcons.Glass.Regular.Blacklist: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blacklistSurfaceRegular!!
+        return _blacklistRegular!!
     }
 
-private var _blacklistSurfaceRegular: ImageVector? = null
+private var _blacklistRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Blacklist: ImageVector
     get() {
-        if (_blacklistSurfaceMedium != null) return _blacklistSurfaceMedium!!
-        _blacklistSurfaceMedium = buildHyperOSIcon(
+        if (_blacklistMedium != null) return _blacklistMedium!!
+        _blacklistMedium = buildHyperOSIcon(
             name = "Blacklist.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(339.7f, 856.9f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Medium.Blacklist: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blacklistSurfaceMedium!!
+        return _blacklistMedium!!
     }
 
-private var _blacklistSurfaceMedium: ImageVector? = null
+private var _blacklistMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Blacklist: ImageVector
     get() {
-        if (_blacklistSurfaceDemibold != null) return _blacklistSurfaceDemibold!!
-        _blacklistSurfaceDemibold = buildHyperOSIcon(
+        if (_blacklistDemibold != null) return _blacklistDemibold!!
+        _blacklistDemibold = buildHyperOSIcon(
             name = "Blacklist.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(339.5f, 858.2f),
@@ -350,8 +350,8 @@ val MiuixIcons.Glass.Demibold.Blacklist: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blacklistSurfaceDemibold!!
+        return _blacklistDemibold!!
     }
 
-private var _blacklistSurfaceDemibold: ImageVector? = null
+private var _blacklistDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Speaker: ImageVector
 
 val MiuixIcons.Glass.Light.Speaker: ImageVector
     get() {
-        if (_speakerSurfaceLight != null) return _speakerSurfaceLight!!
-        _speakerSurfaceLight = buildHyperOSIcon(
+        if (_speakerLight != null) return _speakerLight!!
+        _speakerLight = buildHyperOSIcon(
             name = "Speaker.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(386.6f, 868.6f),
@@ -121,15 +121,15 @@ val MiuixIcons.Glass.Light.Speaker: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _speakerSurfaceLight!!
+        return _speakerLight!!
     }
 
-private var _speakerSurfaceLight: ImageVector? = null
+private var _speakerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Speaker: ImageVector
     get() {
-        if (_speakerSurfaceNormal != null) return _speakerSurfaceNormal!!
-        _speakerSurfaceNormal = buildHyperOSIcon(
+        if (_speakerNormal != null) return _speakerNormal!!
+        _speakerNormal = buildHyperOSIcon(
             name = "Speaker.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(386.9f, 871.6f),
@@ -237,15 +237,15 @@ val MiuixIcons.Glass.Normal.Speaker: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _speakerSurfaceNormal!!
+        return _speakerNormal!!
     }
 
-private var _speakerSurfaceNormal: ImageVector? = null
+private var _speakerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Speaker: ImageVector
     get() {
-        if (_speakerSurfaceRegular != null) return _speakerSurfaceRegular!!
-        _speakerSurfaceRegular = buildHyperOSIcon(
+        if (_speakerRegular != null) return _speakerRegular!!
+        _speakerRegular = buildHyperOSIcon(
             name = "Speaker.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(387f, 873f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Regular.Speaker: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _speakerSurfaceRegular!!
+        return _speakerRegular!!
     }
 
-private var _speakerSurfaceRegular: ImageVector? = null
+private var _speakerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Speaker: ImageVector
     get() {
-        if (_speakerSurfaceMedium != null) return _speakerSurfaceMedium!!
-        _speakerSurfaceMedium = buildHyperOSIcon(
+        if (_speakerMedium != null) return _speakerMedium!!
+        _speakerMedium = buildHyperOSIcon(
             name = "Speaker.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(387.3f, 875.2f),
@@ -469,15 +469,15 @@ val MiuixIcons.Glass.Medium.Speaker: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _speakerSurfaceMedium!!
+        return _speakerMedium!!
     }
 
-private var _speakerSurfaceMedium: ImageVector? = null
+private var _speakerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Speaker: ImageVector
     get() {
-        if (_speakerSurfaceDemibold != null) return _speakerSurfaceDemibold!!
-        _speakerSurfaceDemibold = buildHyperOSIcon(
+        if (_speakerDemibold != null) return _speakerDemibold!!
+        _speakerDemibold = buildHyperOSIcon(
             name = "Speaker.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(387.5f, 876.7f),
@@ -585,8 +585,8 @@ val MiuixIcons.Glass.Demibold.Speaker: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _speakerSurfaceDemibold!!
+        return _speakerDemibold!!
     }
 
-private var _speakerSurfaceDemibold: ImageVector? = null
+private var _speakerDemibold: ImageVector? = null
 

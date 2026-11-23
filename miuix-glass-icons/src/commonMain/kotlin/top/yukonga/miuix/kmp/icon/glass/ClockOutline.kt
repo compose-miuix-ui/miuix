@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ClockOutline: ImageVector
 
 val MiuixIcons.Glass.Light.ClockOutline: ImageVector
     get() {
-        if (_waitingSurfaceLight != null) return _waitingSurfaceLight!!
-        _waitingSurfaceLight = buildHyperOSIcon(
+        if (_clockOutlineLight != null) return _clockOutlineLight!!
+        _clockOutlineLight = buildHyperOSIcon(
             name = "ClockOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(635.3f, 683.9f),
@@ -68,15 +68,15 @@ val MiuixIcons.Glass.Light.ClockOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _waitingSurfaceLight!!
+        return _clockOutlineLight!!
     }
 
-private var _waitingSurfaceLight: ImageVector? = null
+private var _clockOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ClockOutline: ImageVector
     get() {
-        if (_waitingSurfaceNormal != null) return _waitingSurfaceNormal!!
-        _waitingSurfaceNormal = buildHyperOSIcon(
+        if (_clockOutlineNormal != null) return _clockOutlineNormal!!
+        _clockOutlineNormal = buildHyperOSIcon(
             name = "ClockOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(626.2f, 677.8f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Normal.ClockOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _waitingSurfaceNormal!!
+        return _clockOutlineNormal!!
     }
 
-private var _waitingSurfaceNormal: ImageVector? = null
+private var _clockOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ClockOutline: ImageVector
     get() {
-        if (_waitingSurfaceRegular != null) return _waitingSurfaceRegular!!
-        _waitingSurfaceRegular = buildHyperOSIcon(
+        if (_clockOutlineRegular != null) return _clockOutlineRegular!!
+        _clockOutlineRegular = buildHyperOSIcon(
             name = "ClockOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(622f, 675f),
@@ -194,15 +194,15 @@ val MiuixIcons.Glass.Regular.ClockOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _waitingSurfaceRegular!!
+        return _clockOutlineRegular!!
     }
 
-private var _waitingSurfaceRegular: ImageVector? = null
+private var _clockOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ClockOutline: ImageVector
     get() {
-        if (_waitingSurfaceMedium != null) return _waitingSurfaceMedium!!
-        _waitingSurfaceMedium = buildHyperOSIcon(
+        if (_clockOutlineMedium != null) return _clockOutlineMedium!!
+        _clockOutlineMedium = buildHyperOSIcon(
             name = "ClockOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(613.9f, 672.3f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Medium.ClockOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _waitingSurfaceMedium!!
+        return _clockOutlineMedium!!
     }
 
-private var _waitingSurfaceMedium: ImageVector? = null
+private var _clockOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ClockOutline: ImageVector
     get() {
-        if (_waitingSurfaceDemibold != null) return _waitingSurfaceDemibold!!
-        _waitingSurfaceDemibold = buildHyperOSIcon(
+        if (_clockOutlineDemibold != null) return _clockOutlineDemibold!!
+        _clockOutlineDemibold = buildHyperOSIcon(
             name = "ClockOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(608.2f, 670.4f),
@@ -320,8 +320,8 @@ val MiuixIcons.Glass.Demibold.ClockOutline: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _waitingSurfaceDemibold!!
+        return _clockOutlineDemibold!!
     }
 
-private var _waitingSurfaceDemibold: ImageVector? = null
+private var _clockOutlineDemibold: ImageVector? = null
 

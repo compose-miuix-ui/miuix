@@ -46,6 +46,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
 import top.yukonga.miuix.kmp.anim.SinOutEasing
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -84,6 +85,7 @@ class MiuixPopupUtils {
         var dimExitTransition by mutableStateOf<ExitTransition?>(null)
         var dimAlpha by mutableStateOf<MutableState<Float>?>(null)
         var onDismissFinished by mutableStateOf<(() -> Unit)?>(null)
+        internal var consumeBackgroundTouches by mutableStateOf(true)
         var content by mutableStateOf<@Composable () -> Unit>({})
     }
 
@@ -104,10 +106,10 @@ class MiuixPopupUtils {
         private fun rememberDefaultDialogEnterTransition(largeScreen: Boolean): EnterTransition = remember(largeScreen) {
             if (largeScreen) {
                 fadeIn(
-                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.0001f),
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.001f),
                 ) + scaleIn(
                     initialScale = 0.8f,
-                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.0001f),
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 438.6f, visibilityThreshold = 0.001f),
                 )
             } else {
                 slideInVertically(
@@ -176,6 +178,37 @@ class MiuixPopupUtils {
             renderInRootScaffold: Boolean = true,
             content: (@Composable () -> Unit)? = null,
         ) {
+            DialogLayoutImpl(
+                visible = visible,
+                enterTransition = enterTransition,
+                exitTransition = exitTransition,
+                enableWindowDim = enableWindowDim,
+                enableAutoLargeScreen = enableAutoLargeScreen,
+                dimEnterTransition = dimEnterTransition,
+                dimExitTransition = dimExitTransition,
+                dimAlpha = dimAlpha,
+                onDismissFinished = onDismissFinished,
+                renderInRootScaffold = renderInRootScaffold,
+                consumeBackgroundTouches = true,
+                content = content,
+            )
+        }
+
+        @Composable
+        internal fun DialogLayoutImpl(
+            visible: MutableState<Boolean>,
+            enterTransition: EnterTransition? = null,
+            exitTransition: ExitTransition? = null,
+            enableWindowDim: Boolean = true,
+            enableAutoLargeScreen: Boolean = true,
+            dimEnterTransition: EnterTransition? = null,
+            dimExitTransition: ExitTransition? = null,
+            dimAlpha: MutableState<Float>? = null,
+            onDismissFinished: (() -> Unit)? = null,
+            renderInRootScaffold: Boolean = true,
+            consumeBackgroundTouches: Boolean = true,
+            content: (@Composable () -> Unit)? = null,
+        ) {
             if (content == null) {
                 if (visible.value) visible.value = false
                 return
@@ -199,6 +232,7 @@ class MiuixPopupUtils {
             val latestDimExit by rememberUpdatedState(dimExitTransition)
             val latestDimAlpha by rememberUpdatedState(dimAlpha)
             val latestOnDismissFinished by rememberUpdatedState(onDismissFinished)
+            val latestConsumeBackgroundTouches by rememberUpdatedState(consumeBackgroundTouches)
             val latestContent by rememberUpdatedState(content)
 
             SideEffect {
@@ -210,6 +244,7 @@ class MiuixPopupUtils {
                 state.dimExitTransition = latestDimExit
                 state.dimAlpha = latestDimAlpha
                 state.onDismissFinished = latestOnDismissFinished
+                state.consumeBackgroundTouches = latestConsumeBackgroundTouches
                 state.content = latestContent
             }
 
@@ -380,10 +415,12 @@ class MiuixPopupUtils {
                                 },
                         )
                     }
-                } else {
+                } else if (dialogState.consumeBackgroundTouches) {
                     AnimatedVisibility(
                         visibleState = visibleState,
                         modifier = Modifier.zIndex(dialogState.zIndex - 0.002f),
+                        enter = dialogState.dimEnterTransition ?: EnterTransition.None,
+                        exit = dialogState.dimExitTransition ?: ExitTransition.None,
                     ) {
                         Box(
                             modifier = Modifier
@@ -434,19 +471,26 @@ class MiuixPopupUtils {
             val visibleState = remember { MutableTransitionState(false) }
             var pendingOpen by remember { mutableStateOf(false) }
             var lastTarget by remember { mutableStateOf(false) }
+            var blockTouches by remember { mutableStateOf(false) }
             LaunchedEffect(popupState.showState.value) {
                 val newTarget = popupState.showState.value
                 if (newTarget) {
+                    blockTouches = true
                     if (!visibleState.isIdle && !lastTarget) {
                         pendingOpen = true
                     } else {
                         visibleState.targetState = true
                     }
+                    lastTarget = true
                 } else {
                     pendingOpen = false
                     visibleState.targetState = false
+                    lastTarget = false
+                    if (blockTouches) {
+                        delay(100)
+                        blockTouches = false
+                    }
                 }
-                lastTarget = newTarget
             }
             LaunchedEffect(visibleState.isIdle, pendingOpen) {
                 if (pendingOpen && visibleState.isIdle) {
@@ -467,19 +511,25 @@ class MiuixPopupUtils {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .pointerInput(Unit) {
-                                    awaitPointerEventScope {
-                                        while (true) {
-                                            val event = awaitPointerEvent()
-                                            var i = 0
-                                            val n = event.changes.size
-                                            while (i < n) {
-                                                event.changes[i].consume()
-                                                i++
+                                .then(
+                                    if (blockTouches) {
+                                        Modifier.pointerInput(Unit) {
+                                            awaitPointerEventScope {
+                                                while (true) {
+                                                    val event = awaitPointerEvent()
+                                                    var i = 0
+                                                    val n = event.changes.size
+                                                    while (i < n) {
+                                                        event.changes[i].consume()
+                                                        i++
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                }
+                                    } else {
+                                        Modifier
+                                    },
+                                )
                                 .background(MiuixTheme.colorScheme.windowDimming),
                         )
                     }
@@ -487,23 +537,31 @@ class MiuixPopupUtils {
                     AnimatedVisibility(
                         visibleState = visibleState,
                         modifier = Modifier.zIndex(popupState.zIndex - 0.002f),
+                        enter = popupState.dimEnterTransition ?: EnterTransition.None,
+                        exit = popupState.dimExitTransition ?: ExitTransition.None,
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .pointerInput(Unit) {
-                                    awaitPointerEventScope {
-                                        while (true) {
-                                            val event = awaitPointerEvent()
-                                            var i = 0
-                                            val n = event.changes.size
-                                            while (i < n) {
-                                                event.changes[i].consume()
-                                                i++
+                                .then(
+                                    if (blockTouches) {
+                                        Modifier.pointerInput(Unit) {
+                                            awaitPointerEventScope {
+                                                while (true) {
+                                                    val event = awaitPointerEvent()
+                                                    var i = 0
+                                                    val n = event.changes.size
+                                                    while (i < n) {
+                                                        event.changes[i].consume()
+                                                        i++
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                },
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                         )
                     }
                 }

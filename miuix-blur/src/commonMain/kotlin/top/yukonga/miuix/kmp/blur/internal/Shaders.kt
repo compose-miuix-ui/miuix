@@ -3,28 +3,38 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
-/** Builds a separable Blur shader with [tapCount] symmetric tap pairs (1..7). */
-internal fun buildBlurShader(tapCount: Int): String {
+/** Builds a 1D separable Blur shader with [tapCount] symmetric tap pairs (1..7) along [axis] (0=X, 1=Y). */
+internal fun buildBlurShader(tapCount: Int, axis: Int, unpremul: Boolean): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
+    val samplePair = if (axis == 0) {
+        "child.eval(float2(clamp(clampedXy.x + o, 0.5, in_maxCoord.x), clampedXy.y)) + child.eval(float2(clamp(clampedXy.x - o, 0.5, in_maxCoord.x), clampedXy.y))"
+    } else {
+        "child.eval(float2(clampedXy.x, clamp(clampedXy.y + o, 0.5, in_maxCoord.y))) + child.eval(float2(clampedXy.x, clamp(clampedXy.y - o, 0.5, in_maxCoord.y)))"
+    }
+    val tail = if (unpremul) {
+        """
+        if (color.a > 0.0039 && color.a < 0.996) {
+            return half4(color.rgb / color.a, 1.0);
+        }
+        return color;"""
+    } else {
+        """
+        return color;"""
+    }
     return """
     uniform shader child;
-    uniform float2 in_blurOffset[$tapCount];
+    uniform float in_blurOffset[$tapCount];
     uniform float in_blurWeight[$tapCount];
     uniform float in_centerWeight;
     uniform float2 in_maxCoord;
 
     half4 main(float2 xy) {
-        half4 color = child.eval(clamp(xy, float2(0.5), in_maxCoord)) * half(in_centerWeight);
+        float2 clampedXy = clamp(xy, float2(0.5), in_maxCoord);
+        half4 color = child.eval(clampedXy) * half(in_centerWeight);
         for (int i = 0; i < $tapCount; i++) {
-            float2 offset = in_blurOffset[i];
-            float2 c1 = clamp(xy + offset, float2(0.5), in_maxCoord);
-            float2 c2 = clamp(xy - offset, float2(0.5), in_maxCoord);
-            color += (child.eval(c1) + child.eval(c2)) * half(in_blurWeight[i]);
-        }
-        if (color.a > 0.0039) {
-            return half4(color.rgb / color.a, 1.0);
-        }
-        return color;
+            float o = in_blurOffset[i];
+            color += ($samplePair) * half(in_blurWeight[i]);
+        }$tail
     }
 """
 }
@@ -32,11 +42,14 @@ internal fun buildBlurShader(tapCount: Int): String {
 /** Maximum number of tap pairs for the Blur shader. */
 internal const val MAX_BLUR_TAPS = 7
 
-/** Lazy-built per-tap-count shader sources; index 0 is unused. */
-private val BLUR_SHADER_BY_TAP = arrayOfNulls<String>(MAX_BLUR_TAPS + 1)
+/** Lazy-built per-(tapCount, axis, unpremul) shader sources; tapCount 0 is unused. */
+private val BLUR_SHADER_CACHE = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * 4)
 
-internal fun blurShaderForTap(tapCount: Int): String = BLUR_SHADER_BY_TAP[tapCount]
-    ?: buildBlurShader(tapCount).also { BLUR_SHADER_BY_TAP[tapCount] = it }
+internal fun blurShaderForTap(tapCount: Int, axis: Int, unpremul: Boolean): String {
+    val slot = (tapCount * 2 + (axis and 1)) * 2 + if (unpremul) 1 else 0
+    return BLUR_SHADER_CACHE[slot]
+        ?: buildBlurShader(tapCount, axis, unpremul).also { BLUR_SHADER_CACHE[slot] = it }
+}
 
 /** Loop bound (± taps) for the progressive Blur shader; covers the max downscaled kernel radius. */
 internal const val PROGRESSIVE_BLUR_MAX_TAP = 24
@@ -75,13 +88,9 @@ internal fun buildProgressiveBlurShader(
     inlineNoise: Boolean = false,
 ): String {
     require(maxTap % 2 == 0) { "maxTap must be even for pair merging" }
-    val maxCoordUniform = if (sharpBand) {
-        """
+    val maxCoordUniform = """
     uniform float2 in_maxCoord;
 """
-    } else {
-        ""
-    }
     val curveUniform = if (curveKind == 3) {
         """
     uniform float in_curve;
@@ -127,12 +136,10 @@ internal fun buildProgressiveBlurShader(
         """
         float radius = in_maxRadius * (1.0 - smoothRaw);"""
     }
-    val centerCoord = if (sharpBand) "clamp(xy, float2(0.5), in_maxCoord)" else "xy"
-    fun axisSampleCoord(sign: String): String = when {
-        axis == 0 && sharpBand -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
-        axis == 0 -> "float2(xy.x $sign o, xy.y)"
-        sharpBand -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
-        else -> "float2(xy.x, xy.y $sign o)"
+    val centerCoord = "clamp(xy, float2(0.5), in_maxCoord)"
+    fun axisSampleCoord(sign: String): String = when (axis) {
+        0 -> "float2(clamp(xy.x $sign o, 0.5, in_maxCoord.x), xy.y)"
+        else -> "float2(xy.x, clamp(xy.y $sign o, 0.5, in_maxCoord.y))"
     }
     val tintUniform = if (inlineTint) "\n    uniform float4 in_tintColor;" else ""
     val noiseUniform = if (inlineNoise) "\n    uniform float noise_coeff;" else ""
@@ -277,7 +284,7 @@ private const val PROGRESSIVE_CURVE_KIND_COUNT = 4
 private const val PROGRESSIVE_TAP_COUNT = 6
 
 private val PROGRESSIVE_LOOP_KEYS = arrayOfNulls<String>(
-    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * LEVEL_BUCKETS * PROGRESSIVE_TAP_COUNT,
+    2 * PROGRESSIVE_LOOP_MODE_COUNT * PROGRESSIVE_CURVE_KIND_COUNT * PROGRESSIVE_TAP_COUNT,
 )
 
 private val PROGRESSIVE_SHARP_KEYS = arrayOfNulls<String>(
@@ -300,12 +307,11 @@ internal fun progressiveLoopShaderKey(
         unpremul -> 1
         else -> 0
     }
-    val bucket = levelBucket(downScale)
     val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
-    val slot = (((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * LEVEL_BUCKETS + bucket) *
+    val slot = ((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) *
         PROGRESSIVE_TAP_COUNT + tapIdx
     return PROGRESSIVE_LOOP_KEYS[slot]
-        ?: "LMPGL_${axis}_${mode}_c${curveKind}_b${bucket}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
+        ?: "LMPGL_${axis}_${mode}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_LOOP_KEYS[slot] = it }
 }
 
 internal fun progressiveSharpShaderKey(

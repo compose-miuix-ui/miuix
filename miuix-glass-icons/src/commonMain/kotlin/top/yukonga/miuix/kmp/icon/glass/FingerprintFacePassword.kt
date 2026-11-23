@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FingerprintFacePassword: ImageVector
 
 val MiuixIcons.Glass.Light.FingerprintFacePassword: ImageVector
     get() {
-        if (_fingerprintFacePasswordSurfaceLight != null) return _fingerprintFacePasswordSurfaceLight!!
-        _fingerprintFacePasswordSurfaceLight = buildHyperOSIcon(
+        if (_fingerprintFacePasswordLight != null) return _fingerprintFacePasswordLight!!
+        _fingerprintFacePasswordLight = buildHyperOSIcon(
             name = "FingerprintFacePassword.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(248.9f, 507f),
@@ -133,15 +133,15 @@ val MiuixIcons.Glass.Light.FingerprintFacePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fingerprintFacePasswordSurfaceLight!!
+        return _fingerprintFacePasswordLight!!
     }
 
-private var _fingerprintFacePasswordSurfaceLight: ImageVector? = null
+private var _fingerprintFacePasswordLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FingerprintFacePassword: ImageVector
     get() {
-        if (_fingerprintFacePasswordSurfaceNormal != null) return _fingerprintFacePasswordSurfaceNormal!!
-        _fingerprintFacePasswordSurfaceNormal = buildHyperOSIcon(
+        if (_fingerprintFacePasswordNormal != null) return _fingerprintFacePasswordNormal!!
+        _fingerprintFacePasswordNormal = buildHyperOSIcon(
             name = "FingerprintFacePassword.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(242.8f, 507f),
@@ -261,15 +261,15 @@ val MiuixIcons.Glass.Normal.FingerprintFacePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fingerprintFacePasswordSurfaceNormal!!
+        return _fingerprintFacePasswordNormal!!
     }
 
-private var _fingerprintFacePasswordSurfaceNormal: ImageVector? = null
+private var _fingerprintFacePasswordNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FingerprintFacePassword: ImageVector
     get() {
-        if (_fingerprintFacePasswordSurfaceRegular != null) return _fingerprintFacePasswordSurfaceRegular!!
-        _fingerprintFacePasswordSurfaceRegular = buildHyperOSIcon(
+        if (_fingerprintFacePasswordRegular != null) return _fingerprintFacePasswordRegular!!
+        _fingerprintFacePasswordRegular = buildHyperOSIcon(
             name = "FingerprintFacePassword.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(240f, 507f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Regular.FingerprintFacePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fingerprintFacePasswordSurfaceRegular!!
+        return _fingerprintFacePasswordRegular!!
     }
 
-private var _fingerprintFacePasswordSurfaceRegular: ImageVector? = null
+private var _fingerprintFacePasswordRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FingerprintFacePassword: ImageVector
     get() {
-        if (_fingerprintFacePasswordSurfaceMedium != null) return _fingerprintFacePasswordSurfaceMedium!!
-        _fingerprintFacePasswordSurfaceMedium = buildHyperOSIcon(
+        if (_fingerprintFacePasswordMedium != null) return _fingerprintFacePasswordMedium!!
+        _fingerprintFacePasswordMedium = buildHyperOSIcon(
             name = "FingerprintFacePassword.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(235.9f, 507f),
@@ -517,15 +517,15 @@ val MiuixIcons.Glass.Medium.FingerprintFacePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fingerprintFacePasswordSurfaceMedium!!
+        return _fingerprintFacePasswordMedium!!
     }
 
-private var _fingerprintFacePasswordSurfaceMedium: ImageVector? = null
+private var _fingerprintFacePasswordMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FingerprintFacePassword: ImageVector
     get() {
-        if (_fingerprintFacePasswordSurfaceDemibold != null) return _fingerprintFacePasswordSurfaceDemibold!!
-        _fingerprintFacePasswordSurfaceDemibold = buildHyperOSIcon(
+        if (_fingerprintFacePasswordDemibold != null) return _fingerprintFacePasswordDemibold!!
+        _fingerprintFacePasswordDemibold = buildHyperOSIcon(
             name = "FingerprintFacePassword.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(233.1f, 507f),
@@ -645,8 +645,8 @@ val MiuixIcons.Glass.Demibold.FingerprintFacePassword: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _fingerprintFacePasswordSurfaceDemibold!!
+        return _fingerprintFacePasswordDemibold!!
     }
 
-private var _fingerprintFacePasswordSurfaceDemibold: ImageVector? = null
+private var _fingerprintFacePasswordDemibold: ImageVector? = null
 

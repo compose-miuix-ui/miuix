@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Processor: ImageVector
 
 val MiuixIcons.Glass.Light.Processor: ImageVector
     get() {
-        if (_processorLineLight != null) return _processorLineLight!!
-        _processorLineLight = buildHyperOSIcon(
+        if (_processorLight != null) return _processorLight!!
+        _processorLight = buildHyperOSIcon(
             name = "Processor.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(268.3f, 576f),
@@ -122,15 +122,15 @@ val MiuixIcons.Glass.Light.Processor: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _processorLineLight!!
+        return _processorLight!!
     }
 
-private var _processorLineLight: ImageVector? = null
+private var _processorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Processor: ImageVector
     get() {
-        if (_processorLineNormal != null) return _processorLineNormal!!
-        _processorLineNormal = buildHyperOSIcon(
+        if (_processorNormal != null) return _processorNormal!!
+        _processorNormal = buildHyperOSIcon(
             name = "Processor.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(259.2f, 576f),
@@ -239,15 +239,15 @@ val MiuixIcons.Glass.Normal.Processor: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _processorLineNormal!!
+        return _processorNormal!!
     }
 
-private var _processorLineNormal: ImageVector? = null
+private var _processorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Processor: ImageVector
     get() {
-        if (_processorLineRegular != null) return _processorLineRegular!!
-        _processorLineRegular = buildHyperOSIcon(
+        if (_processorRegular != null) return _processorRegular!!
+        _processorRegular = buildHyperOSIcon(
             name = "Processor.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(255f, 576f),
@@ -356,15 +356,15 @@ val MiuixIcons.Glass.Regular.Processor: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _processorLineRegular!!
+        return _processorRegular!!
     }
 
-private var _processorLineRegular: ImageVector? = null
+private var _processorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Processor: ImageVector
     get() {
-        if (_processorLineMedium != null) return _processorLineMedium!!
-        _processorLineMedium = buildHyperOSIcon(
+        if (_processorMedium != null) return _processorMedium!!
+        _processorMedium = buildHyperOSIcon(
             name = "Processor.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(250.7f, 573.8f),
@@ -473,15 +473,15 @@ val MiuixIcons.Glass.Medium.Processor: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _processorLineMedium!!
+        return _processorMedium!!
     }
 
-private var _processorLineMedium: ImageVector? = null
+private var _processorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Processor: ImageVector
     get() {
-        if (_processorLineDemibold != null) return _processorLineDemibold!!
-        _processorLineDemibold = buildHyperOSIcon(
+        if (_processorDemibold != null) return _processorDemibold!!
+        _processorDemibold = buildHyperOSIcon(
             name = "Processor.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(247.6f, 572.3f),
@@ -590,8 +590,8 @@ val MiuixIcons.Glass.Demibold.Processor: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _processorLineDemibold!!
+        return _processorDemibold!!
     }
 
-private var _processorLineDemibold: ImageVector? = null
+private var _processorDemibold: ImageVector? = null
 

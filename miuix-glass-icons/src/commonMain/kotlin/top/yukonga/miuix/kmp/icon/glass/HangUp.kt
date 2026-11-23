@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HangUp: ImageVector
 
 val MiuixIcons.Glass.Light.HangUp: ImageVector
     get() {
-        if (_hangUpSurfaceLight != null) return _hangUpSurfaceLight!!
-        _hangUpSurfaceLight = buildHyperOSIcon(
+        if (_hangUpLight != null) return _hangUpLight!!
+        _hangUpLight = buildHyperOSIcon(
             name = "HangUp.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1259.2f, 362.6f),
@@ -53,15 +53,15 @@ val MiuixIcons.Glass.Light.HangUp: ImageVector
             translationY = 1111.1499f,
             autoMirror = false,
         )
-        return _hangUpSurfaceLight!!
+        return _hangUpLight!!
     }
 
-private var _hangUpSurfaceLight: ImageVector? = null
+private var _hangUpLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HangUp: ImageVector
     get() {
-        if (_hangUpSurfaceNormal != null) return _hangUpSurfaceNormal!!
-        _hangUpSurfaceNormal = buildHyperOSIcon(
+        if (_hangUpNormal != null) return _hangUpNormal!!
+        _hangUpNormal = buildHyperOSIcon(
             name = "HangUp.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1260.4f, 362.9f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Normal.HangUp: ImageVector
             translationY = 1111.1195f,
             autoMirror = false,
         )
-        return _hangUpSurfaceNormal!!
+        return _hangUpNormal!!
     }
 
-private var _hangUpSurfaceNormal: ImageVector? = null
+private var _hangUpNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HangUp: ImageVector
     get() {
-        if (_hangUpSurfaceRegular != null) return _hangUpSurfaceRegular!!
-        _hangUpSurfaceRegular = buildHyperOSIcon(
+        if (_hangUpRegular != null) return _hangUpRegular!!
+        _hangUpRegular = buildHyperOSIcon(
             name = "HangUp.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1261f, 363f),
@@ -149,15 +149,15 @@ val MiuixIcons.Glass.Regular.HangUp: ImageVector
             translationY = 1111.1057f,
             autoMirror = false,
         )
-        return _hangUpSurfaceRegular!!
+        return _hangUpRegular!!
     }
 
-private var _hangUpSurfaceRegular: ImageVector? = null
+private var _hangUpRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HangUp: ImageVector
     get() {
-        if (_hangUpSurfaceMedium != null) return _hangUpSurfaceMedium!!
-        _hangUpSurfaceMedium = buildHyperOSIcon(
+        if (_hangUpMedium != null) return _hangUpMedium!!
+        _hangUpMedium = buildHyperOSIcon(
             name = "HangUp.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1262.6f, 357.1f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Medium.HangUp: ImageVector
             translationY = 1110.5607f,
             autoMirror = false,
         )
-        return _hangUpSurfaceMedium!!
+        return _hangUpMedium!!
     }
 
-private var _hangUpSurfaceMedium: ImageVector? = null
+private var _hangUpMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HangUp: ImageVector
     get() {
-        if (_hangUpSurfaceDemibold != null) return _hangUpSurfaceDemibold!!
-        _hangUpSurfaceDemibold = buildHyperOSIcon(
+        if (_hangUpDemibold != null) return _hangUpDemibold!!
+        _hangUpDemibold = buildHyperOSIcon(
             name = "HangUp.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1263.8f, 352.9f),
@@ -245,8 +245,8 @@ val MiuixIcons.Glass.Demibold.HangUp: ImageVector
             translationY = 1110.181f,
             autoMirror = false,
         )
-        return _hangUpSurfaceDemibold!!
+        return _hangUpDemibold!!
     }
 
-private var _hangUpSurfaceDemibold: ImageVector? = null
+private var _hangUpDemibold: ImageVector? = null
 

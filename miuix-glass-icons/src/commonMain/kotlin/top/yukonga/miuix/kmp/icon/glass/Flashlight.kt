@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Flashlight: ImageVector
 
 val MiuixIcons.Glass.Light.Flashlight: ImageVector
     get() {
-        if (_flashlightSurfaceLight != null) return _flashlightSurfaceLight!!
-        _flashlightSurfaceLight = buildHyperOSIcon(
+        if (_flashlightLight != null) return _flashlightLight!!
+        _flashlightLight = buildHyperOSIcon(
             name = "Flashlight.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(628.6f, 306.6f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Light.Flashlight: ImageVector
             translationY = 1037.2221f,
             autoMirror = false,
         )
-        return _flashlightSurfaceLight!!
+        return _flashlightLight!!
     }
 
-private var _flashlightSurfaceLight: ImageVector? = null
+private var _flashlightLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Flashlight: ImageVector
     get() {
-        if (_flashlightSurfaceNormal != null) return _flashlightSurfaceNormal!!
-        _flashlightSurfaceNormal = buildHyperOSIcon(
+        if (_flashlightNormal != null) return _flashlightNormal!!
+        _flashlightNormal = buildHyperOSIcon(
             name = "Flashlight.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(623.4f, 306.9f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Normal.Flashlight: ImageVector
             translationY = 1040.2775f,
             autoMirror = false,
         )
-        return _flashlightSurfaceNormal!!
+        return _flashlightNormal!!
     }
 
-private var _flashlightSurfaceNormal: ImageVector? = null
+private var _flashlightNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Flashlight: ImageVector
     get() {
-        if (_flashlightSurfaceRegular != null) return _flashlightSurfaceRegular!!
-        _flashlightSurfaceRegular = buildHyperOSIcon(
+        if (_flashlightRegular != null) return _flashlightRegular!!
+        _flashlightRegular = buildHyperOSIcon(
             name = "Flashlight.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(621f, 307f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Regular.Flashlight: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _flashlightSurfaceRegular!!
+        return _flashlightRegular!!
     }
 
-private var _flashlightSurfaceRegular: ImageVector? = null
+private var _flashlightRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Flashlight: ImageVector
     get() {
-        if (_flashlightSurfaceMedium != null) return _flashlightSurfaceMedium!!
-        _flashlightSurfaceMedium = buildHyperOSIcon(
+        if (_flashlightMedium != null) return _flashlightMedium!!
+        _flashlightMedium = buildHyperOSIcon(
             name = "Flashlight.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(615.9f, 304.6f),
@@ -325,15 +325,15 @@ val MiuixIcons.Glass.Medium.Flashlight: ImageVector
             translationY = 1040.3153f,
             autoMirror = false,
         )
-        return _flashlightSurfaceMedium!!
+        return _flashlightMedium!!
     }
 
-private var _flashlightSurfaceMedium: ImageVector? = null
+private var _flashlightMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Flashlight: ImageVector
     get() {
-        if (_flashlightSurfaceDemibold != null) return _flashlightSurfaceDemibold!!
-        _flashlightSurfaceDemibold = buildHyperOSIcon(
+        if (_flashlightDemibold != null) return _flashlightDemibold!!
+        _flashlightDemibold = buildHyperOSIcon(
             name = "Flashlight.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(612.3f, 302.9f),
@@ -405,8 +405,8 @@ val MiuixIcons.Glass.Demibold.Flashlight: ImageVector
             translationY = 1039.3693f,
             autoMirror = false,
         )
-        return _flashlightSurfaceDemibold!!
+        return _flashlightDemibold!!
     }
 
-private var _flashlightSurfaceDemibold: ImageVector? = null
+private var _flashlightDemibold: ImageVector? = null
 

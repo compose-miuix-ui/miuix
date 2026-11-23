@@ -8,6 +8,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import kotlin.math.PI
 import kotlin.math.abs
@@ -16,7 +18,6 @@ import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -48,25 +49,22 @@ internal const val LEVEL_BUCKETS = 17
  * Gaussian shader-cache keys, `[tapCount][bucket]`: lazily populated so unused combinations do not
  * allocate at startup.
  */
-private val BLUR_H_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
-private val BLUR_V_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * LEVEL_BUCKETS)
+private val BLUR_H_KEYS = arrayOfNulls<String>((MAX_BLUR_TAPS + 1) * 2)
+private val BLUR_V_KEYS = arrayOfNulls<String>(MAX_BLUR_TAPS + 1)
 
-private fun blurHShaderKey(tapCount: Int, bucket: Int): String {
-    val slot = tapCount * LEVEL_BUCKETS + bucket
-    return BLUR_H_KEYS[slot] ?: "LMGauss${tapCount}_H_b$bucket".also { BLUR_H_KEYS[slot] = it }
+private fun blurHShaderKey(tapCount: Int, unpremul: Boolean): String {
+    val slot = tapCount * 2 + if (unpremul) 1 else 0
+    return BLUR_H_KEYS[slot] ?: (if (unpremul) "LMGauss${tapCount}_H_u" else "LMGauss${tapCount}_H").also { BLUR_H_KEYS[slot] = it }
 }
 
-private fun blurVShaderKey(tapCount: Int, bucket: Int): String {
-    val slot = tapCount * LEVEL_BUCKETS + bucket
-    return BLUR_V_KEYS[slot] ?: "LMGauss${tapCount}_V_b$bucket".also { BLUR_V_KEYS[slot] = it }
-}
+private fun blurVShaderKey(tapCount: Int): String = BLUR_V_KEYS[tapCount] ?: "LMGauss${tapCount}_V".also { BLUR_V_KEYS[tapCount] = it }
 
 private val LEVEL_SCALES = FloatArray(LEVEL_BUCKETS) { b ->
     2f.pow(b.toFloat() / BUCKETS_PER_OCTAVE)
 }
 
 /** Cache-key bucket for a level: log2(scale) in [BUCKETS_PER_OCTAVE]-ths, i.e. the grid index. */
-internal fun levelBucket(scale: Float): Int = ((ln(scale.coerceIn(1f, 16f)) / LN2) * BUCKETS_PER_OCTAVE).roundToInt().coerceIn(0, LEVEL_BUCKETS - 1)
+internal fun levelBucket(scale: Float): Int = ((ln(scale.fastCoerceIn(1f, 16f)) / LN2) * BUCKETS_PER_OCTAVE).fastRoundToInt().fastCoerceIn(0, LEVEL_BUCKETS - 1)
 
 /**
  * Builds the separable Blur [RenderEffect] (H then V) at [downScale] from variances already
@@ -92,78 +90,78 @@ internal fun createBlurEffect(
     val paramOffsets = scope.blurParamOffsets
     val paramWeights = scope.blurParamWeights
 
-    val bucket = levelBucket(downScale)
-
     var effect: RenderEffect? = null
 
     // H / V keep separate keys (each pass owns its shader instance); the bucket splits the levels
     // that can share a frame.
-    var cachedTapCount = -1
-    var cachedPairWeightSum = 0f
+    val hN = if (radiusX > 0f) computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights) else 0
+    var hOffsets: FloatArray? = null
+    var hWeights: FloatArray? = null
+    var hPairWeightSum = 0f
+    if (hN > 0) {
+        val shaderOffsets = scope.obtainShaderOffsetsBuffer(hN)
+        val shaderWeights = scope.obtainShaderWeightsBuffer(hN)
+        var pairWeightSum = 0f
+        for (i in 0 until hN) {
+            shaderOffsets[i] = paramOffsets[i]
+            shaderWeights[i] = paramWeights[i]
+            pairWeightSum += paramWeights[i]
+        }
+        hOffsets = shaderOffsets
+        hWeights = shaderWeights
+        hPairWeightSum = pairWeightSum
+    }
 
-    if (radiusX > 0f) {
-        val n = computeBlurParamsInto(adjustedVarianceX, rawScratch, paramOffsets, paramWeights)
-        cachedTapCount = n
-        if (n > 0) {
-            val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
-            val shaderWeights = scope.obtainShaderWeightsBuffer(n)
-            var pairWeightSum = 0f
-            for (i in 0 until n) {
-                shaderOffsets[i * 2] = paramOffsets[i]
-                shaderOffsets[i * 2 + 1] = 0f
+    val reuseFromX = radiusY > 0f && hN > 0 && adjustedVarianceX == adjustedVarianceY
+    val vN = when {
+        radiusY <= 0f -> 0
+        reuseFromX -> hN
+        else -> computeBlurParamsInto(adjustedVarianceY, rawScratch, paramOffsets, paramWeights)
+    }
+
+    if (hN > 0) {
+        val hUnpremul = vN <= 0
+        val hShader = scope.obtainRuntimeShader(
+            blurHShaderKey(hN, hUnpremul),
+            blurShaderForTap(hN, axis = 0, unpremul = hUnpremul),
+        ).apply {
+            setFloatUniform("in_blurOffset", hOffsets!!)
+            setFloatUniform("in_blurWeight", hWeights!!)
+            setFloatUniform("in_centerWeight", (1f - 2f * hPairWeightSum).coerceAtLeast(0f))
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
+        }
+        effect = runtimeShaderEffect(hShader, "child")
+    }
+
+    if (vN > 0) {
+        val shaderOffsets: FloatArray
+        val shaderWeights: FloatArray
+        var pairWeightSum: Float
+        if (reuseFromX) {
+            shaderOffsets = hOffsets!!
+            shaderWeights = hWeights!!
+            pairWeightSum = hPairWeightSum
+        } else {
+            shaderOffsets = scope.obtainShaderOffsetsBuffer(vN)
+            shaderWeights = scope.obtainShaderWeightsBuffer(vN)
+            pairWeightSum = 0f
+            for (i in 0 until vN) {
+                shaderOffsets[i] = paramOffsets[i]
                 shaderWeights[i] = paramWeights[i]
                 pairWeightSum += paramWeights[i]
             }
-            cachedPairWeightSum = pairWeightSum
-            val hShader = scope.obtainRuntimeShader(
-                blurHShaderKey(n, bucket),
-                blurShaderForTap(n),
-            ).apply {
-                setFloatUniform("in_blurOffset", shaderOffsets)
-                setFloatUniform("in_blurWeight", shaderWeights)
-                setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
-                setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
-            }
-            effect = runtimeShaderEffect(hShader, "child")
         }
-    }
-
-    if (radiusY > 0f) {
-        val reuseFromX = radiusX > 0f && adjustedVarianceX == adjustedVarianceY && cachedTapCount >= 0
-        val n = if (reuseFromX) {
-            cachedTapCount
-        } else {
-            computeBlurParamsInto(adjustedVarianceY, rawScratch, paramOffsets, paramWeights)
+        val vShader = scope.obtainRuntimeShader(
+            blurVShaderKey(vN),
+            blurShaderForTap(vN, axis = 1, unpremul = true),
+        ).apply {
+            setFloatUniform("in_blurOffset", shaderOffsets)
+            setFloatUniform("in_blurWeight", shaderWeights)
+            setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
         }
-        if (n > 0) {
-            val shaderOffsets = scope.obtainShaderOffsetsBuffer(n)
-            val shaderWeights = scope.obtainShaderWeightsBuffer(n)
-            var pairWeightSum = if (reuseFromX) cachedPairWeightSum else 0f
-            if (reuseFromX) {
-                for (i in 0 until n) {
-                    shaderOffsets[i * 2] = 0f
-                    shaderOffsets[i * 2 + 1] = paramOffsets[i]
-                }
-            } else {
-                for (i in 0 until n) {
-                    shaderOffsets[i * 2] = 0f
-                    shaderOffsets[i * 2 + 1] = paramOffsets[i]
-                    shaderWeights[i] = paramWeights[i]
-                    pairWeightSum += paramWeights[i]
-                }
-            }
-            val vShader = scope.obtainRuntimeShader(
-                blurVShaderKey(n, bucket),
-                blurShaderForTap(n),
-            ).apply {
-                setFloatUniform("in_blurOffset", shaderOffsets)
-                setFloatUniform("in_blurWeight", shaderWeights)
-                setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
-                setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
-            }
-            effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
-                ?: runtimeShaderEffect(vShader, "child")
-        }
+        effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
+            ?: runtimeShaderEffect(vShader, "child")
     }
     return effect
 }
@@ -216,6 +214,8 @@ internal fun createProgressiveBlurEffect(
     adjustedVarianceY: Float,
     padLeft: Float,
     padTop: Float,
+    padRight: Float,
+    padBottom: Float,
     compW: Float,
     compH: Float,
     angleDeg: Float,
@@ -244,6 +244,8 @@ internal fun createProgressiveBlurEffect(
     val gradVecY = scope.progGradVecY
     val gradOffset = scope.progGradOffset
     val clampedCurve = scope.progClampedCurve
+    val texW = ((compW + padLeft + padRight) / downScale).coerceAtLeast(1f)
+    val texH = ((compH + padTop + padBottom) / downScale).coerceAtLeast(1f)
     val curveKind = progressiveCurveKind(clampedCurve)
 
     // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
@@ -292,6 +294,7 @@ internal fun createProgressiveBlurEffect(
                 inlineNoise = hInlineNoise,
             ),
         ).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
@@ -324,6 +327,7 @@ internal fun createProgressiveBlurEffect(
                 inlineNoise = vInlineNoise,
             ),
         ).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)

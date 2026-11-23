@@ -50,7 +50,7 @@ fun SwitchPreference(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     startAction: @Composable (() -> Unit)? = null,
-    endActions: @Composable RowScope.() -> Unit = {},
+    endActions: @Composable RowScope.() -> Unit = EmptyEndActions,
     bottomAction: (@Composable () -> Unit)? = null,
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
@@ -72,13 +72,15 @@ fun SwitchPreference(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            Row(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .align(Alignment.CenterVertically)
-                    .weight(1f, fill = false),
-            ) {
-                endActions()
+            if (endActions !== EmptyEndActions) {
+                Row(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .weight(1f, fill = false),
+                ) {
+                    endActions()
+                }
             }
             SwitchPreferenceEndActions(
                 checked = checked,
@@ -109,3 +111,5 @@ private fun SwitchPreferenceEndActions(
         colors = switchColors,
     )
 }
+
+private val EmptyEndActions: @Composable RowScope.() -> Unit = {}

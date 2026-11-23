@@ -4,19 +4,13 @@
 package top.yukonga.miuix.kmp.window
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.layout.ListPopupLayout
-import top.yukonga.miuix.kmp.theme.LocalDismissState
-import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
-import top.yukonga.miuix.kmp.utils.WindowNavigationEventScope
-import top.yukonga.miuix.kmp.utils.platformDialogProperties
 
 /**
  * A popup with a list of items, rendered at window level without `Scaffold`.
@@ -53,17 +47,14 @@ fun WindowListPopup(
         show = show,
         popupHost = { visible, hostContent ->
             if (visible) {
-                Dialog(
+                WindowComponentHost(
                     onDismissRequest = { currentOnDismissRequest.value?.invoke() },
-                    properties = platformDialogProperties(),
-                ) {
-                    RemovePlatformDialogDefaultEffects()
-                    WindowNavigationEventScope {
-                        hostContent()
-                    }
-                }
+                    content = hostContent,
+                )
             }
         },
+        useWindowComponentBounds = true,
+        constrainHeightToViewport = true,
         popupModifier = popupModifier,
         popupPositionProvider = popupPositionProvider,
         alignment = alignment,
@@ -72,14 +63,6 @@ fun WindowListPopup(
         onDismissFinished = onDismissFinished,
         maxHeight = maxHeight,
         minWidth = minWidth,
-        content = {
-            CompositionLocalProvider(
-                LocalDismissState provides {
-                    currentOnDismissRequest.value?.invoke()
-                },
-            ) {
-                content()
-            }
-        },
+        content = content,
     )
 }

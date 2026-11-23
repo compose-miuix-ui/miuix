@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Underline: ImageVector
 
 val MiuixIcons.Glass.Light.Underline: ImageVector
     get() {
-        if (_underlineLineLight != null) return _underlineLineLight!!
-        _underlineLineLight = buildHyperOSIcon(
+        if (_underlineLight != null) return _underlineLight!!
+        _underlineLight = buildHyperOSIcon(
             name = "Underline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(964.9f, -16.3f),
@@ -64,15 +64,15 @@ val MiuixIcons.Glass.Light.Underline: ImageVector
             translationY = 1063.1667f,
             autoMirror = false,
         )
-        return _underlineLineLight!!
+        return _underlineLight!!
     }
 
-private var _underlineLineLight: ImageVector? = null
+private var _underlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Underline: ImageVector
     get() {
-        if (_underlineLineNormal != null) return _underlineLineNormal!!
-        _underlineLineNormal = buildHyperOSIcon(
+        if (_underlineNormal != null) return _underlineNormal!!
+        _underlineNormal = buildHyperOSIcon(
             name = "Underline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(967f, -7.2f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Normal.Underline: ImageVector
             translationY = 1063.1667f,
             autoMirror = false,
         )
-        return _underlineLineNormal!!
+        return _underlineNormal!!
     }
 
-private var _underlineLineNormal: ImageVector? = null
+private var _underlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Underline: ImageVector
     get() {
-        if (_underlineLineRegular != null) return _underlineLineRegular!!
-        _underlineLineRegular = buildHyperOSIcon(
+        if (_underlineRegular != null) return _underlineRegular!!
+        _underlineRegular = buildHyperOSIcon(
             name = "Underline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(968f, -3f),
@@ -182,15 +182,15 @@ val MiuixIcons.Glass.Regular.Underline: ImageVector
             translationY = 1063.1667f,
             autoMirror = false,
         )
-        return _underlineLineRegular!!
+        return _underlineRegular!!
     }
 
-private var _underlineLineRegular: ImageVector? = null
+private var _underlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Underline: ImageVector
     get() {
-        if (_underlineLineMedium != null) return _underlineLineMedium!!
-        _underlineLineMedium = buildHyperOSIcon(
+        if (_underlineMedium != null) return _underlineMedium!!
+        _underlineMedium = buildHyperOSIcon(
             name = "Underline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(966.6f, 1.6f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Medium.Underline: ImageVector
             translationY = 1060.8694f,
             autoMirror = false,
         )
-        return _underlineLineMedium!!
+        return _underlineMedium!!
     }
 
-private var _underlineLineMedium: ImageVector? = null
+private var _underlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Underline: ImageVector
     get() {
-        if (_underlineLineDemibold != null) return _underlineLineDemibold!!
-        _underlineLineDemibold = buildHyperOSIcon(
+        if (_underlineDemibold != null) return _underlineDemibold!!
+        _underlineDemibold = buildHyperOSIcon(
             name = "Underline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(965.7f, 4.8f),
@@ -300,8 +300,8 @@ val MiuixIcons.Glass.Demibold.Underline: ImageVector
             translationY = 1059.2611f,
             autoMirror = false,
         )
-        return _underlineLineDemibold!!
+        return _underlineDemibold!!
     }
 
-private var _underlineLineDemibold: ImageVector? = null
+private var _underlineDemibold: ImageVector? = null
 

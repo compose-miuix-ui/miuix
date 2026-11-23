@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BookmarkFill: ImageVector
 
 val MiuixIcons.Glass.Light.BookmarkFill: ImageVector
     get() {
-        if (_bookmarkSelectedSurfaceLight != null) return _bookmarkSelectedSurfaceLight!!
-        _bookmarkSelectedSurfaceLight = buildHyperOSIcon(
+        if (_bookmarkFillLight != null) return _bookmarkFillLight!!
+        _bookmarkFillLight = buildHyperOSIcon(
             name = "BookmarkFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(407.4f, 869.1f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.BookmarkFill: ImageVector
             translationY = 1035.7489f,
             autoMirror = false,
         )
-        return _bookmarkSelectedSurfaceLight!!
+        return _bookmarkFillLight!!
     }
 
-private var _bookmarkSelectedSurfaceLight: ImageVector? = null
+private var _bookmarkFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BookmarkFill: ImageVector
     get() {
-        if (_bookmarkSelectedSurfaceNormal != null) return _bookmarkSelectedSurfaceNormal!!
-        _bookmarkSelectedSurfaceNormal = buildHyperOSIcon(
+        if (_bookmarkFillNormal != null) return _bookmarkFillNormal!!
+        _bookmarkFillNormal = buildHyperOSIcon(
             name = "BookmarkFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(409.9f, 872.5f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.BookmarkFill: ImageVector
             translationY = 1035.6108f,
             autoMirror = false,
         )
-        return _bookmarkSelectedSurfaceNormal!!
+        return _bookmarkFillNormal!!
     }
 
-private var _bookmarkSelectedSurfaceNormal: ImageVector? = null
+private var _bookmarkFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BookmarkFill: ImageVector
     get() {
-        if (_bookmarkSelectedSurfaceRegular != null) return _bookmarkSelectedSurfaceRegular!!
-        _bookmarkSelectedSurfaceRegular = buildHyperOSIcon(
+        if (_bookmarkFillRegular != null) return _bookmarkFillRegular!!
+        _bookmarkFillRegular = buildHyperOSIcon(
             name = "BookmarkFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(411f, 874f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.BookmarkFill: ImageVector
             translationY = 1035.5524f,
             autoMirror = false,
         )
-        return _bookmarkSelectedSurfaceRegular!!
+        return _bookmarkFillRegular!!
     }
 
-private var _bookmarkSelectedSurfaceRegular: ImageVector? = null
+private var _bookmarkFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BookmarkFill: ImageVector
     get() {
-        if (_bookmarkSelectedSurfaceMedium != null) return _bookmarkSelectedSurfaceMedium!!
-        _bookmarkSelectedSurfaceMedium = buildHyperOSIcon(
+        if (_bookmarkFillMedium != null) return _bookmarkFillMedium!!
+        _bookmarkFillMedium = buildHyperOSIcon(
             name = "BookmarkFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(413.2f, 876.4f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.BookmarkFill: ImageVector
             translationY = 1035.6159f,
             autoMirror = false,
         )
-        return _bookmarkSelectedSurfaceMedium!!
+        return _bookmarkFillMedium!!
     }
 
-private var _bookmarkSelectedSurfaceMedium: ImageVector? = null
+private var _bookmarkFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BookmarkFill: ImageVector
     get() {
-        if (_bookmarkSelectedSurfaceDemibold != null) return _bookmarkSelectedSurfaceDemibold!!
-        _bookmarkSelectedSurfaceDemibold = buildHyperOSIcon(
+        if (_bookmarkFillDemibold != null) return _bookmarkFillDemibold!!
+        _bookmarkFillDemibold = buildHyperOSIcon(
             name = "BookmarkFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(414.7f, 878.1f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.BookmarkFill: ImageVector
             translationY = 1035.6665f,
             autoMirror = false,
         )
-        return _bookmarkSelectedSurfaceDemibold!!
+        return _bookmarkFillDemibold!!
     }
 
-private var _bookmarkSelectedSurfaceDemibold: ImageVector? = null
+private var _bookmarkFillDemibold: ImageVector? = null
 

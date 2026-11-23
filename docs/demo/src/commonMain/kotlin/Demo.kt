@@ -110,6 +110,7 @@ private val availableComponents = listOf(
     AvailableComponent("GlassDialog", "glassDialog") { GlassDialogDemo() },
     AvailableComponent("GlassBottomSheet", "glassBottomSheet") { GlassBottomSheetDemo() },
     AvailableComponent("Expand Navigation", "navExpand") { NavExpandDemo() },
+    AvailableComponent("GlassCard", "glassCard") { GlassCardDemo() },
 )
 
 @Composable

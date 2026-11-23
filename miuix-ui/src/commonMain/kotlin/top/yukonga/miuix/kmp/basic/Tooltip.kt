@@ -24,21 +24,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -54,6 +53,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -82,6 +82,7 @@ import kotlinx.coroutines.withTimeout
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 import kotlin.time.Duration.Companion.milliseconds
@@ -250,7 +251,7 @@ fun rememberTooltipState(
  * tween would discard that velocity and produce a stall-and-reverse hitch.
  */
 private val TooltipExitScaleSpec: FiniteAnimationSpec<Float> =
-    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.0001f)
+    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium, visibilityThreshold = 0.001f)
 
 /**
  * A tooltip box that anchors a [tooltip] (a [PlainTooltip] or [RichTooltip]) to its [content].
@@ -279,9 +280,9 @@ fun TooltipBox(
     enableUserInput: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    var anchorBounds by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val anchorBoundsRef = remember { Ref<LayoutCoordinates>() }
     val positioning = (positionProvider as? TooltipPopupPositionProvider)?.positioning ?: TooltipAnchorPosition.Below
-    val scope = remember(positioning) { TooltipScopeImpl(positioning) { anchorBounds } }
+    val scope = remember(positioning) { TooltipScopeImpl(positioning) { anchorBoundsRef.value } }
 
     TooltipBoxImpl(
         positionProvider = positionProvider,
@@ -297,7 +298,7 @@ fun TooltipBox(
             }
         },
         state = state,
-        modifier = modifier.onGloballyPositioned { anchorBounds = it },
+        modifier = modifier.onGloballyPositioned { anchorBoundsRef.value = it },
         focusable = focusable,
         enableUserInput = enableUserInput,
         content = content,
@@ -350,19 +351,48 @@ private fun TooltipPopup(
     focusable: Boolean,
     content: @Composable () -> Unit,
 ) {
+    val bounds = windowComponentBounds()
+    val boundedPositionProvider = remember(positionProvider, bounds) {
+        if (bounds == null) positionProvider else constrainTooltipPosition(positionProvider, bounds)
+    }
+    val sizeModifier = if (bounds == null) {
+        Modifier
+    } else {
+        with(LocalDensity.current) { Modifier.sizeIn(maxWidth = bounds.width.toDp(), maxHeight = bounds.height.toDp()) }
+    }
     Popup(
-        popupPositionProvider = positionProvider,
+        popupPositionProvider = boundedPositionProvider,
         onDismissRequest = { if (state.isVisible) state.dismiss() },
         properties = PopupProperties(focusable = focusable),
     ) {
         Box(
-            modifier = Modifier.semantics {
+            modifier = sizeModifier.semantics {
                 liveRegion = LiveRegionMode.Assertive
                 paneTitle = TOOLTIP_PANE_TITLE
             },
         ) {
             content()
         }
+    }
+}
+
+private fun constrainTooltipPosition(provider: PopupPositionProvider, bounds: IntRect): PopupPositionProvider = object : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val origin = bounds.topLeft
+        val position = if (provider is TooltipPopupPositionProvider) {
+            origin + provider.calculatePosition(anchorBounds.translate(-origin), bounds.size, layoutDirection, popupContentSize)
+        } else {
+            provider.calculatePosition(anchorBounds, windowSize, layoutDirection, popupContentSize)
+        }
+        return IntOffset(
+            x = position.x.coerceIn(bounds.left, (bounds.right - popupContentSize.width).coerceAtLeast(bounds.left)),
+            y = position.y.coerceIn(bounds.top, (bounds.bottom - popupContentSize.height).coerceAtLeast(bounds.top)),
+        )
     }
 }
 
@@ -550,38 +580,43 @@ private fun TooltipScope.TooltipSurface(
         (positioning == TooltipAnchorPosition.Above || positioning == TooltipAnchorPosition.Below)
     val caretOnTop = positioning == TooltipAnchorPosition.Below
     val caretSize = TooltipDefaults.caretSize
-    var selfBounds by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val selfBoundsRef = remember(drawCaret) { if (drawCaret) Ref<LayoutCoordinates>() else null }
 
     Box(
         modifier = modifier
             .widthIn(max = maxWidth)
-            .onGloballyPositioned { selfBounds = it }
             .then(
                 if (drawCaret) {
-                    Modifier.drawBehind {
-                        val anchor = obtainAnchorBounds() ?: return@drawBehind
-                        val self = selfBounds ?: return@drawBehind
-                        if (!anchor.isAttached || !self.isAttached) return@drawBehind
-                        val anchorCenterX = anchor.positionInWindow().x + anchor.size.width / 2f
-                        val selfX = self.positionInWindow().x
-                        val caretHalf = caretSize.width.toPx() / 2f
-                        val cr = cornerRadius.toPx()
-                        val centerX = (anchorCenterX - selfX)
-                            .coerceIn(cr + caretHalf, size.width - cr - caretHalf)
-                        val caretHeight = caretSize.height.toPx()
-                        val path = Path()
-                        if (caretOnTop) {
-                            path.moveTo(centerX, 0f)
-                            path.lineTo(centerX - caretHalf, caretHeight)
-                            path.lineTo(centerX + caretHalf, caretHeight)
-                        } else {
-                            path.moveTo(centerX, size.height)
-                            path.lineTo(centerX - caretHalf, size.height - caretHeight)
-                            path.lineTo(centerX + caretHalf, size.height - caretHeight)
+                    Modifier
+                        .onGloballyPositioned { selfBoundsRef?.value = it }
+                        .drawWithCache {
+                            val path = Path()
+                            onDrawBehind {
+                                val anchor = obtainAnchorBounds() ?: return@onDrawBehind
+                                val self = selfBoundsRef?.value ?: return@onDrawBehind
+                                if (!anchor.isAttached || !self.isAttached) return@onDrawBehind
+                                val anchorCenterX = anchor.positionInWindow().x + anchor.size.width / 2f
+                                val selfX = self.positionInWindow().x
+                                val caretHalf = caretSize.width.toPx() / 2f
+                                val cr = cornerRadius.toPx()
+                                val minCenter = cr + caretHalf
+                                if (size.width < 2 * minCenter) return@onDrawBehind
+                                val centerX = (anchorCenterX - selfX).coerceIn(minCenter, size.width - minCenter)
+                                val caretHeight = caretSize.height.toPx()
+                                path.rewind()
+                                if (caretOnTop) {
+                                    path.moveTo(centerX, 0f)
+                                    path.lineTo(centerX - caretHalf, caretHeight)
+                                    path.lineTo(centerX + caretHalf, caretHeight)
+                                } else {
+                                    path.moveTo(centerX, size.height)
+                                    path.lineTo(centerX - caretHalf, size.height - caretHeight)
+                                    path.lineTo(centerX + caretHalf, size.height - caretHeight)
+                                }
+                                path.close()
+                                drawPath(path, color = containerColor)
+                            }
                         }
-                        path.close()
-                        drawPath(path, color = containerColor)
-                    }
                 } else {
                     Modifier
                 },
@@ -834,11 +869,13 @@ object TooltipDefaults {
 
     /** The default container color of a plain tooltip (inverse surface). */
     val plainTooltipContainerColor: Color
-        @Composable get() = MiuixTheme.colorScheme.onSecondaryVariant
+        @Composable @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.onSecondaryVariant
 
     /** The default content color of a plain tooltip. */
     val plainTooltipContentColor: Color
-        @Composable get() = MiuixTheme.colorScheme.secondaryVariant
+        @Composable @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.secondaryVariant
 
     /** The default maximum width of a rich tooltip. */
     val RichTooltipMaxWidth = 320.dp

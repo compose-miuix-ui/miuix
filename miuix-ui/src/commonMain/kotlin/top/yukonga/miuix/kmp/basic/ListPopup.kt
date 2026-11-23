@@ -21,11 +21,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,6 +41,9 @@ import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -197,7 +203,7 @@ interface PopupPositionProvider {
 
 object ListPopupDefaults {
     /** Default animation spec driving the scale/clip-reveal fraction progress of the popup. */
-    val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val FractionAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
 
     /** Default animation spec driving the popup content alpha while entering. */
     val AlphaEnterAnimationSpec = tween<Float>(durationMillis = 200)
@@ -212,7 +218,7 @@ object ListPopupDefaults {
     val DimExitAnimationSpec = tween<Float>(durationMillis = 150, easing = SinOutEasing)
 
     /** Default animation spec used to settle the popup back to its resting state after a gesture. */
-    val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.0001f)
+    val ResetAnimationSpec = spring(dampingRatio = 0.82f, stiffness = 362.5f, visibilityThreshold = 0.001f)
 
     /**
      * Default minimum width of the popup. Also matches the lower clamp inside
@@ -344,7 +350,9 @@ object ListPopupDefaults {
             )
         }
 
-        override fun getMargins(): PaddingValues = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
+        private val ZeroMargins = PaddingValues(0.dp)
+
+        override fun getMargins(): PaddingValues = ZeroMargins
     }
 }
 
@@ -401,6 +409,15 @@ fun rememberListPopupLayoutInfo(
     popupPositionProvider: PopupPositionProvider,
     parentBounds: IntRect,
     popupContentSize: IntSize,
+): ListPopupLayoutInfo = rememberListPopupLayoutInfo(alignment, popupPositionProvider, parentBounds, popupContentSize, componentBounds = null)
+
+@Composable
+internal fun rememberListPopupLayoutInfo(
+    alignment: PopupPositionProvider.Align,
+    popupPositionProvider: PopupPositionProvider,
+    parentBounds: IntRect,
+    popupContentSize: IntSize,
+    componentBounds: IntRect?,
 ): ListPopupLayoutInfo {
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
@@ -424,7 +441,7 @@ fun rememberListPopupLayoutInfo(
 
     val containerSize = windowInfo.containerSize
 
-    val windowBounds = remember(
+    val windowBounds = componentBounds ?: remember(
         layoutDirection,
         density,
         displayCutout,
@@ -520,6 +537,10 @@ fun rememberListPopupLayoutInfo(
         }
     }
 
+    val localTransformOrigin = remember(popupLayoutPosition) {
+        resolveLocalTransformOrigin(popupLayoutPosition)
+    }
+
     val effectiveTransformOrigin = remember(
         popupContentSize,
         calculatedOffset,
@@ -553,21 +574,6 @@ fun rememberListPopupLayoutInfo(
         }
     }
 
-    val localTransformOrigin = remember(popupLayoutPosition) {
-        val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
-        val showMiddle = !showBelow && !showAbove
-
-        TransformOrigin(
-            pivotFractionX = if (isRightAligned) 1f else 0f,
-            pivotFractionY = when {
-                showMiddle -> 0.5f
-                showBelow -> 0f
-                showAbove -> 1f
-                else -> 0f
-            },
-        )
-    }
-
     return ListPopupLayoutInfo(
         windowBounds = windowBounds,
         popupMargin = popupMargin,
@@ -575,6 +581,48 @@ fun rememberListPopupLayoutInfo(
         localTransformOrigin = localTransformOrigin,
         popupLayoutPosition = popupLayoutPosition,
     )
+}
+
+internal fun resolvePopupLayoutPosition(
+    parentBounds: IntRect,
+    popupContentSize: IntSize,
+    calculatedOffset: IntOffset,
+): PopupLayoutPosition {
+    val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
+    val anchorCenterY = parentBounds.top + parentBounds.height / 2
+    val showBelow = popupCenterY > anchorCenterY
+    val showAbove = popupCenterY < anchorCenterY
+
+    val distLeft = abs(calculatedOffset.x - parentBounds.left)
+    val distRight = abs((calculatedOffset.x + popupContentSize.width) - parentBounds.right)
+    val isRightAligned = distRight < distLeft
+
+    return PopupLayoutPosition(showBelow = showBelow, showAbove = showAbove, isRightAligned = isRightAligned)
+}
+
+internal fun resolveLocalTransformOrigin(
+    popupLayoutPosition: PopupLayoutPosition,
+): TransformOrigin {
+    val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
+    val showMiddle = !showBelow && !showAbove
+
+    return TransformOrigin(
+        pivotFractionX = if (isRightAligned) 1f else 0f,
+        pivotFractionY = when {
+            showMiddle -> 0.5f
+            showBelow -> 0f
+            showAbove -> 1f
+            else -> 0f
+        },
+    )
+}
+
+internal class PopupPlacementHolder(
+    initialPosition: PopupLayoutPosition,
+    initialTransformOrigin: TransformOrigin,
+) {
+    var popupLayoutPosition by mutableStateOf(initialPosition)
+    var localTransformOrigin by mutableStateOf(initialTransformOrigin)
 }
 
 /**
@@ -601,6 +649,28 @@ fun ListPopupContent(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    ListPopupContentImpl(
+        fractionProgress = fractionProgress,
+        alphaProgress = alphaProgress,
+        popupLayoutPosition = { popupLayoutPosition },
+        localTransformOrigin = { localTransformOrigin },
+        modifier = modifier.onGloballyPositioned { coordinates ->
+            val size = coordinates.size
+            if (popupContentSize != size) onPopupContentSizeChange(size)
+        },
+        content = content,
+    )
+}
+
+@Composable
+internal fun ListPopupContentImpl(
+    fractionProgress: () -> Float,
+    alphaProgress: () -> Float,
+    popupLayoutPosition: () -> PopupLayoutPosition,
+    localTransformOrigin: () -> TransformOrigin,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
     val cornerRadius = 16.dp
     val backgroundColor = MiuixTheme.colorScheme.surfaceContainer
 
@@ -613,13 +683,9 @@ fun ListPopupContent(
                 scaleX = scale
                 scaleY = scale
                 alpha = alphaProgress()
-                transformOrigin = localTransformOrigin
+                transformOrigin = localTransformOrigin()
             }
             .then(modifier)
-            .onGloballyPositioned { coordinates ->
-                val size = coordinates.size
-                if (popupContentSize != size) onPopupContentSizeChange(size)
-            }
             .popupClipReveal(fractionProgress, popupLayoutPosition, cornerRadius, isSquircleEnabled())
             .background(color = backgroundColor),
     ) {
@@ -641,22 +707,91 @@ fun Modifier.popupClipReveal(
     popupLayoutPosition: PopupLayoutPosition,
     cornerRadius: Dp,
     squircleEnabled: Boolean,
-): Modifier = drawWithCache {
-    val path = Path()
-    val showBelow = popupLayoutPosition.showBelow
-    val showAbove = popupLayoutPosition.showAbove
-    onDrawWithContent {
+): Modifier = this then PopupClipRevealElement(
+    fractionProgress = fractionProgress,
+    popupLayoutPositionProvider = { popupLayoutPosition },
+    cornerRadius = cornerRadius,
+    squircleEnabled = squircleEnabled,
+)
+
+internal fun Modifier.popupClipReveal(
+    fractionProgress: () -> Float,
+    popupLayoutPosition: () -> PopupLayoutPosition,
+    cornerRadius: Dp,
+    squircleEnabled: Boolean,
+): Modifier = this then PopupClipRevealElement(
+    fractionProgress = fractionProgress,
+    popupLayoutPositionProvider = popupLayoutPosition,
+    cornerRadius = cornerRadius,
+    squircleEnabled = squircleEnabled,
+)
+
+private class PopupClipRevealElement(
+    private val fractionProgress: () -> Float,
+    private val popupLayoutPositionProvider: () -> PopupLayoutPosition,
+    private val cornerRadius: Dp,
+    private val squircleEnabled: Boolean,
+) : ModifierNodeElement<PopupClipRevealNode>() {
+    override fun create(): PopupClipRevealNode = PopupClipRevealNode(
+        fractionProgress = fractionProgress,
+        popupLayoutPositionProvider = popupLayoutPositionProvider,
+        cornerRadius = cornerRadius,
+        squircleEnabled = squircleEnabled,
+    )
+
+    override fun update(node: PopupClipRevealNode) {
+        node.fractionProgress = fractionProgress
+        node.popupLayoutPositionProvider = popupLayoutPositionProvider
+        node.cornerRadius = cornerRadius
+        node.squircleEnabled = squircleEnabled
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PopupClipRevealElement) return false
+        return fractionProgress === other.fractionProgress &&
+            popupLayoutPositionProvider === other.popupLayoutPositionProvider &&
+            cornerRadius == other.cornerRadius &&
+            squircleEnabled == other.squircleEnabled
+    }
+
+    override fun hashCode(): Int {
+        var result = fractionProgress.hashCode()
+        result = 31 * result + popupLayoutPositionProvider.hashCode()
+        result = 31 * result + cornerRadius.hashCode()
+        result = 31 * result + squircleEnabled.hashCode()
+        return result
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "popupClipReveal"
+        properties["cornerRadius"] = cornerRadius
+        properties["squircleEnabled"] = squircleEnabled
+    }
+}
+
+private class PopupClipRevealNode(
+    var fractionProgress: () -> Float,
+    var popupLayoutPositionProvider: () -> PopupLayoutPosition,
+    var cornerRadius: Dp,
+    var squircleEnabled: Boolean,
+) : Modifier.Node(),
+    DrawModifierNode {
+    private val path = Path()
+
+    override fun ContentDrawScope.draw() {
         // Clamp — source spring overshoots; an oversized reveal path would cut downstream content.
         val progress = fractionProgress().coerceIn(0f, 1f)
-        if (progress <= 0f) return@onDrawWithContent
+        if (progress <= 0f) return
 
         val height = size.height
         val visibleHeight = height * progress
-        if (visibleHeight <= 0f) return@onDrawWithContent
+        if (visibleHeight <= 0f) return
 
+        val layoutPosition = popupLayoutPositionProvider()
         val clipStart = when {
-            showBelow -> 0f
-            showAbove -> height * (1f - progress)
+            layoutPosition.showBelow -> 0f
+            layoutPosition.showAbove -> height * (1f - progress)
             else -> height * (0.5f - 0.5f * progress)
         }
 
@@ -669,13 +804,13 @@ fun Modifier.popupClipReveal(
         )
         if (clipStart == 0f) {
             clipPath(path) {
-                this@onDrawWithContent.drawContent()
+                this@draw.drawContent()
             }
         } else {
             translate(top = clipStart) {
                 clipPath(path) {
                     translate(top = -clipStart) {
-                        this@onDrawWithContent.drawContent()
+                        this@draw.drawContent()
                     }
                 }
             }

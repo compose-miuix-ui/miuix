@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MultiScreen: ImageVector
 
 val MiuixIcons.Glass.Light.MultiScreen: ImageVector
     get() {
-        if (_multiScreenSurfaceLight != null) return _multiScreenSurfaceLight!!
-        _multiScreenSurfaceLight = buildHyperOSIcon(
+        if (_multiScreenLight != null) return _multiScreenLight!!
+        _multiScreenLight = buildHyperOSIcon(
             name = "MultiScreen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(973.4f, 855.2f),
@@ -55,15 +55,15 @@ val MiuixIcons.Glass.Light.MultiScreen: ImageVector
             translationY = 1041.2257f,
             autoMirror = false,
         )
-        return _multiScreenSurfaceLight!!
+        return _multiScreenLight!!
     }
 
-private var _multiScreenSurfaceLight: ImageVector? = null
+private var _multiScreenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MultiScreen: ImageVector
     get() {
-        if (_multiScreenSurfaceNormal != null) return _multiScreenSurfaceNormal!!
-        _multiScreenSurfaceNormal = buildHyperOSIcon(
+        if (_multiScreenNormal != null) return _multiScreenNormal!!
+        _multiScreenNormal = buildHyperOSIcon(
             name = "MultiScreen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(973.1f, 864.7f),
@@ -105,15 +105,15 @@ val MiuixIcons.Glass.Normal.MultiScreen: ImageVector
             translationY = 1041.5357f,
             autoMirror = false,
         )
-        return _multiScreenSurfaceNormal!!
+        return _multiScreenNormal!!
     }
 
-private var _multiScreenSurfaceNormal: ImageVector? = null
+private var _multiScreenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MultiScreen: ImageVector
     get() {
-        if (_multiScreenSurfaceRegular != null) return _multiScreenSurfaceRegular!!
-        _multiScreenSurfaceRegular = buildHyperOSIcon(
+        if (_multiScreenRegular != null) return _multiScreenRegular!!
+        _multiScreenRegular = buildHyperOSIcon(
             name = "MultiScreen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(973f, 869f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Regular.MultiScreen: ImageVector
             translationY = 1041.6771f,
             autoMirror = false,
         )
-        return _multiScreenSurfaceRegular!!
+        return _multiScreenRegular!!
     }
 
-private var _multiScreenSurfaceRegular: ImageVector? = null
+private var _multiScreenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MultiScreen: ImageVector
     get() {
-        if (_multiScreenSurfaceMedium != null) return _multiScreenSurfaceMedium!!
-        _multiScreenSurfaceMedium = buildHyperOSIcon(
+        if (_multiScreenMedium != null) return _multiScreenMedium!!
+        _multiScreenMedium = buildHyperOSIcon(
             name = "MultiScreen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(973.3f, 876.8f),
@@ -205,15 +205,15 @@ val MiuixIcons.Glass.Medium.MultiScreen: ImageVector
             translationY = 1041.4063f,
             autoMirror = false,
         )
-        return _multiScreenSurfaceMedium!!
+        return _multiScreenMedium!!
     }
 
-private var _multiScreenSurfaceMedium: ImageVector? = null
+private var _multiScreenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MultiScreen: ImageVector
     get() {
-        if (_multiScreenSurfaceDemibold != null) return _multiScreenSurfaceDemibold!!
-        _multiScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_multiScreenDemibold != null) return _multiScreenDemibold!!
+        _multiScreenDemibold = buildHyperOSIcon(
             name = "MultiScreen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(973.5f, 882.3f),
@@ -255,8 +255,8 @@ val MiuixIcons.Glass.Demibold.MultiScreen: ImageVector
             translationY = 1041.2168f,
             autoMirror = false,
         )
-        return _multiScreenSurfaceDemibold!!
+        return _multiScreenDemibold!!
     }
 
-private var _multiScreenSurfaceDemibold: ImageVector? = null
+private var _multiScreenDemibold: ImageVector? = null
 

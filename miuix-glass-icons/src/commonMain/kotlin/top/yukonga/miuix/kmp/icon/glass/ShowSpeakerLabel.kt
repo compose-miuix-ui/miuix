@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ShowSpeakerLabel: ImageVector
 
 val MiuixIcons.Glass.Light.ShowSpeakerLabel: ImageVector
     get() {
-        if (_showSpeakerLabelLineLight != null) return _showSpeakerLabelLineLight!!
-        _showSpeakerLabelLineLight = buildHyperOSIcon(
+        if (_showSpeakerLabelLight != null) return _showSpeakerLabelLight!!
+        _showSpeakerLabelLight = buildHyperOSIcon(
             name = "ShowSpeakerLabel.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(107.3f, 375f),
@@ -105,15 +105,15 @@ val MiuixIcons.Glass.Light.ShowSpeakerLabel: ImageVector
             translationY = 1041.2758f,
             autoMirror = false,
         )
-        return _showSpeakerLabelLineLight!!
+        return _showSpeakerLabelLight!!
     }
 
-private var _showSpeakerLabelLineLight: ImageVector? = null
+private var _showSpeakerLabelLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ShowSpeakerLabel: ImageVector
     get() {
-        if (_showSpeakerLabelLineNormal != null) return _showSpeakerLabelLineNormal!!
-        _showSpeakerLabelLineNormal = buildHyperOSIcon(
+        if (_showSpeakerLabelNormal != null) return _showSpeakerLabelNormal!!
+        _showSpeakerLabelNormal = buildHyperOSIcon(
             name = "ShowSpeakerLabel.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(98.2f, 375f),
@@ -205,15 +205,15 @@ val MiuixIcons.Glass.Normal.ShowSpeakerLabel: ImageVector
             translationY = 1041.2012f,
             autoMirror = false,
         )
-        return _showSpeakerLabelLineNormal!!
+        return _showSpeakerLabelNormal!!
     }
 
-private var _showSpeakerLabelLineNormal: ImageVector? = null
+private var _showSpeakerLabelNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ShowSpeakerLabel: ImageVector
     get() {
-        if (_showSpeakerLabelLineRegular != null) return _showSpeakerLabelLineRegular!!
-        _showSpeakerLabelLineRegular = buildHyperOSIcon(
+        if (_showSpeakerLabelRegular != null) return _showSpeakerLabelRegular!!
+        _showSpeakerLabelRegular = buildHyperOSIcon(
             name = "ShowSpeakerLabel.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(94f, 375f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Regular.ShowSpeakerLabel: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _showSpeakerLabelLineRegular!!
+        return _showSpeakerLabelRegular!!
     }
 
-private var _showSpeakerLabelLineRegular: ImageVector? = null
+private var _showSpeakerLabelRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ShowSpeakerLabel: ImageVector
     get() {
-        if (_showSpeakerLabelLineMedium != null) return _showSpeakerLabelLineMedium!!
-        _showSpeakerLabelLineMedium = buildHyperOSIcon(
+        if (_showSpeakerLabelMedium != null) return _showSpeakerLabelMedium!!
+        _showSpeakerLabelMedium = buildHyperOSIcon(
             name = "ShowSpeakerLabel.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(85.9f, 375f),
@@ -405,15 +405,15 @@ val MiuixIcons.Glass.Medium.ShowSpeakerLabel: ImageVector
             translationY = 1040.491f,
             autoMirror = false,
         )
-        return _showSpeakerLabelLineMedium!!
+        return _showSpeakerLabelMedium!!
     }
 
-private var _showSpeakerLabelLineMedium: ImageVector? = null
+private var _showSpeakerLabelMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ShowSpeakerLabel: ImageVector
     get() {
-        if (_showSpeakerLabelLineDemibold != null) return _showSpeakerLabelLineDemibold!!
-        _showSpeakerLabelLineDemibold = buildHyperOSIcon(
+        if (_showSpeakerLabelDemibold != null) return _showSpeakerLabelDemibold!!
+        _showSpeakerLabelDemibold = buildHyperOSIcon(
             name = "ShowSpeakerLabel.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(80.2f, 375f),
@@ -505,8 +505,8 @@ val MiuixIcons.Glass.Demibold.ShowSpeakerLabel: ImageVector
             translationY = 1040.018f,
             autoMirror = false,
         )
-        return _showSpeakerLabelLineDemibold!!
+        return _showSpeakerLabelDemibold!!
     }
 
-private var _showSpeakerLabelLineDemibold: ImageVector? = null
+private var _showSpeakerLabelDemibold: ImageVector? = null
 

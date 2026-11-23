@@ -33,7 +33,6 @@ import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
-import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -78,78 +77,10 @@ class GlassTopAppBarBackdropTest {
     }
 
     @Test
-    fun progressiveButtonsSampleTheRenderedBandAndFollowItsOpacity() = assertProgressiveSampling(isDark = false)
-
-    @Test
-    fun progressiveButtonsSampleTheRenderedBandInDarkTheme() = assertProgressiveSampling(isDark = true)
-
-    @Test
     fun sceneButtonSamplesItsOwnBackdropWithoutTheBarUnderlay() = assertSceneSampling(isDark = false)
 
     @Test
     fun sceneButtonSamplesItsOwnBackdropInDarkTheme() = assertSceneSampling(isDark = true)
-
-    private fun assertProgressiveSampling(isDark: Boolean) = runComposeUiTest {
-        val progressive = mutableStateOf(true)
-        val bandAlpha = mutableFloatStateOf(1f)
-        setContent {
-            DialogTestHost {
-                MiuixTheme(colors = if (isDark) darkColorScheme() else lightColorScheme()) {
-                    val backdrop = rememberLayerBackdrop()
-                    Box(Modifier.size(500.dp)) {
-                        Box(Modifier.matchParentSize().layerBackdrop(backdrop).background(Color.Blue))
-                        GlassTopAppBar(
-                            title = "",
-                            isContentScrolled = true,
-                            progressiveBlur = progressive.value,
-                            backdrop = backdrop,
-                            bandBrush = SolidColor(Color.Transparent),
-                            material = GlassMaterial(0.dp, GlassColorLayer(Color.Transparent, GlassColorBlendMode.SrcOver)),
-                            backgroundAlpha = { bandAlpha.floatValue },
-                            buttonShadow = null,
-                            stroke = null,
-                            defaultWindowInsetsPadding = false,
-                            navigationIcon = {
-                                GlassIconButton(onClick = {}, modifier = Modifier.testTag("progressive-button")) { }
-                            },
-                            bottomContent = {
-                                GlassTabRow(
-                                    tabs = listOf("First", "Second"),
-                                    selectedIndex = 0,
-                                    onSelect = {},
-                                    backdrop = backdrop,
-                                    modifier = Modifier.testTag("tabs"),
-                                    stroke = null,
-                                    shadow = null,
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-        }
-        fun buttonColor(): Color {
-            val center = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot.center
-            return onRoot().captureToImage().toPixelMap()[center.x.roundToInt(), center.y.roundToInt()]
-        }
-
-        fun tabColor(): Color {
-            val bounds = onNodeWithTag("tabs").fetchSemanticsNode().boundsInRoot
-            return onRoot().captureToImage()
-                .toPixelMap()[(bounds.left + bounds.width * 0.75f).roundToInt(), (bounds.top + bounds.height * 0.2f).roundToInt()]
-        }
-
-        val button = onNodeWithTag("progressive-button").fetchSemanticsNode().boundsInRoot
-        val pixels = onRoot().captureToImage().toPixelMap()
-        val band = pixels[(button.right + button.width).roundToInt(), button.center.y.roundToInt()]
-        assertColorNear(band, buttonColor(), tolerance = 3f / 255f)
-        assertTrue(abs(band.blue - Color.Blue.blue) > 0.1f || band.red > 0.1f, "The visible band must differ from the raw blue page")
-        val tabBefore = tabColor()
-        runOnIdle { bandAlpha.floatValue = 0f }
-        assertColorNear(Color.Blue, buttonColor(), tolerance = 3f / 255f)
-        runOnIdle { progressive.value = false }
-        assertColorNear(tabBefore, tabColor())
-    }
 
     private fun assertSceneSampling(isDark: Boolean) = runComposeUiTest {
         setContent {

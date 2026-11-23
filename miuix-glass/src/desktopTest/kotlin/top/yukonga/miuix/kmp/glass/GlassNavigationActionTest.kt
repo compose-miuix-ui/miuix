@@ -157,7 +157,6 @@ class GlassNavigationActionTest {
             .fetchSemanticsNode().boundsInRoot
         val insetAction = onNodeWithTag("action").fetchSemanticsNode().boundsInRoot
         assertEquals(insetBar.center.y, insetAction.center.y, 1f)
-        saveImage("navigation-insets-enabled", onRoot().captureToImage())
 
         runOnIdle { applyInsets.value = false }
         val bareBar = onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
@@ -168,7 +167,6 @@ class GlassNavigationActionTest {
         assertEquals(bareBar.center.y, bareAction.center.y, 1f)
         assertEquals(insetBar.size, bareBar.size)
         assertEquals(insetAction.size, bareAction.size)
-        saveImage("navigation-insets-disabled", onRoot().captureToImage())
     }
 
     @Test
@@ -267,7 +265,6 @@ class GlassNavigationActionTest {
         assertEquals(1, searches)
         assertEquals(0, selections, "The action must be outside the destination gesture detector")
         onNodeWithContentDescription("Files").assertIsSelected()
-        saveImage("navigation-action", onRoot().captureToImage())
 
         runOnIdle { showAction.value = false }
         onNodeWithTag("action").assertDoesNotExist()
@@ -568,7 +565,6 @@ class GlassNavigationActionTest {
                 "Release must not pull the indicator toward the old selection",
             )
         }
-        saveImage("navigation-release", onRoot().captureToImage())
     }
 
     @Test
@@ -678,6 +674,5 @@ class GlassNavigationActionTest {
         assertTrue(lastTab.right <= action.left - with(density) { 12.dp.toPx() })
         assertTrue(action.right <= group.right)
         assertEquals(group.center.y, action.center.y, 1f)
-        saveImage("navigation-action-narrow", onRoot().captureToImage())
     }
 }

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CoverDisplay: ImageVector
 
 val MiuixIcons.Glass.Light.CoverDisplay: ImageVector
     get() {
-        if (_coverDisplaySurfaceLight != null) return _coverDisplaySurfaceLight!!
-        _coverDisplaySurfaceLight = buildHyperOSIcon(
+        if (_coverDisplayLight != null) return _coverDisplayLight!!
+        _coverDisplayLight = buildHyperOSIcon(
             name = "CoverDisplay.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(274.1f, 673.1f),
@@ -54,15 +54,15 @@ val MiuixIcons.Glass.Light.CoverDisplay: ImageVector
             translationY = 1037.8888f,
             autoMirror = false,
         )
-        return _coverDisplaySurfaceLight!!
+        return _coverDisplayLight!!
     }
 
-private var _coverDisplaySurfaceLight: ImageVector? = null
+private var _coverDisplayLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CoverDisplay: ImageVector
     get() {
-        if (_coverDisplaySurfaceNormal != null) return _coverDisplaySurfaceNormal!!
-        _coverDisplaySurfaceNormal = buildHyperOSIcon(
+        if (_coverDisplayNormal != null) return _coverDisplayNormal!!
+        _coverDisplayNormal = buildHyperOSIcon(
             name = "CoverDisplay.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(269.2f, 676.5f),
@@ -103,15 +103,15 @@ val MiuixIcons.Glass.Normal.CoverDisplay: ImageVector
             translationY = 1040.4859f,
             autoMirror = false,
         )
-        return _coverDisplaySurfaceNormal!!
+        return _coverDisplayNormal!!
     }
 
-private var _coverDisplaySurfaceNormal: ImageVector? = null
+private var _coverDisplayNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CoverDisplay: ImageVector
     get() {
-        if (_coverDisplaySurfaceRegular != null) return _coverDisplaySurfaceRegular!!
-        _coverDisplaySurfaceRegular = buildHyperOSIcon(
+        if (_coverDisplayRegular != null) return _coverDisplayRegular!!
+        _coverDisplayRegular = buildHyperOSIcon(
             name = "CoverDisplay.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(267f, 678f),
@@ -152,15 +152,15 @@ val MiuixIcons.Glass.Regular.CoverDisplay: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coverDisplaySurfaceRegular!!
+        return _coverDisplayRegular!!
     }
 
-private var _coverDisplaySurfaceRegular: ImageVector? = null
+private var _coverDisplayRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CoverDisplay: ImageVector
     get() {
-        if (_coverDisplaySurfaceMedium != null) return _coverDisplaySurfaceMedium!!
-        _coverDisplaySurfaceMedium = buildHyperOSIcon(
+        if (_coverDisplayMedium != null) return _coverDisplayMedium!!
+        _coverDisplayMedium = buildHyperOSIcon(
             name = "CoverDisplay.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(261.6f, 678.5f),
@@ -201,15 +201,15 @@ val MiuixIcons.Glass.Medium.CoverDisplay: ImageVector
             translationY = 1043.2882f,
             autoMirror = false,
         )
-        return _coverDisplaySurfaceMedium!!
+        return _coverDisplayMedium!!
     }
 
-private var _coverDisplaySurfaceMedium: ImageVector? = null
+private var _coverDisplayMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CoverDisplay: ImageVector
     get() {
-        if (_coverDisplaySurfaceDemibold != null) return _coverDisplaySurfaceDemibold!!
-        _coverDisplaySurfaceDemibold = buildHyperOSIcon(
+        if (_coverDisplayDemibold != null) return _coverDisplayDemibold!!
+        _coverDisplayDemibold = buildHyperOSIcon(
             name = "CoverDisplay.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(257.8f, 678.9f),
@@ -250,8 +250,8 @@ val MiuixIcons.Glass.Demibold.CoverDisplay: ImageVector
             translationY = 1044.4235f,
             autoMirror = false,
         )
-        return _coverDisplaySurfaceDemibold!!
+        return _coverDisplayDemibold!!
     }
 
-private var _coverDisplaySurfaceDemibold: ImageVector? = null
+private var _coverDisplayDemibold: ImageVector? = null
 

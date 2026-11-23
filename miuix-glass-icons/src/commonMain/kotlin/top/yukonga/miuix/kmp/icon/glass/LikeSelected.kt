@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LikeSelected: ImageVector
 
 val MiuixIcons.Glass.Light.LikeSelected: ImageVector
     get() {
-        if (_likeSelectedSurfaceLight != null) return _likeSelectedSurfaceLight!!
-        _likeSelectedSurfaceLight = buildHyperOSIcon(
+        if (_likeSelectedLight != null) return _likeSelectedLight!!
+        _likeSelectedLight = buildHyperOSIcon(
             name = "LikeSelected.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(520f, 777.7f),
@@ -60,15 +60,15 @@ val MiuixIcons.Glass.Light.LikeSelected: ImageVector
             translationY = 1064.9444f,
             autoMirror = false,
         )
-        return _likeSelectedSurfaceLight!!
+        return _likeSelectedLight!!
     }
 
-private var _likeSelectedSurfaceLight: ImageVector? = null
+private var _likeSelectedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LikeSelected: ImageVector
     get() {
-        if (_likeSelectedSurfaceNormal != null) return _likeSelectedSurfaceNormal!!
-        _likeSelectedSurfaceNormal = buildHyperOSIcon(
+        if (_likeSelectedNormal != null) return _likeSelectedNormal!!
+        _likeSelectedNormal = buildHyperOSIcon(
             name = "LikeSelected.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(522.7f, 781.3f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Normal.LikeSelected: ImageVector
             translationY = 1065.0972f,
             autoMirror = false,
         )
-        return _likeSelectedSurfaceNormal!!
+        return _likeSelectedNormal!!
     }
 
-private var _likeSelectedSurfaceNormal: ImageVector? = null
+private var _likeSelectedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LikeSelected: ImageVector
     get() {
-        if (_likeSelectedSurfaceRegular != null) return _likeSelectedSurfaceRegular!!
-        _likeSelectedSurfaceRegular = buildHyperOSIcon(
+        if (_likeSelectedRegular != null) return _likeSelectedRegular!!
+        _likeSelectedRegular = buildHyperOSIcon(
             name = "LikeSelected.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(524f, 783f),
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Regular.LikeSelected: ImageVector
             translationY = 1065.1667f,
             autoMirror = false,
         )
-        return _likeSelectedSurfaceRegular!!
+        return _likeSelectedRegular!!
     }
 
-private var _likeSelectedSurfaceRegular: ImageVector? = null
+private var _likeSelectedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LikeSelected: ImageVector
     get() {
-        if (_likeSelectedSurfaceMedium != null) return _likeSelectedSurfaceMedium!!
-        _likeSelectedSurfaceMedium = buildHyperOSIcon(
+        if (_likeSelectedMedium != null) return _likeSelectedMedium!!
+        _likeSelectedMedium = buildHyperOSIcon(
             name = "LikeSelected.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(527.2f, 786f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Medium.LikeSelected: ImageVector
             translationY = 1065.4369f,
             autoMirror = false,
         )
-        return _likeSelectedSurfaceMedium!!
+        return _likeSelectedMedium!!
     }
 
-private var _likeSelectedSurfaceMedium: ImageVector? = null
+private var _likeSelectedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LikeSelected: ImageVector
     get() {
-        if (_likeSelectedSurfaceDemibold != null) return _likeSelectedSurfaceDemibold!!
-        _likeSelectedSurfaceDemibold = buildHyperOSIcon(
+        if (_likeSelectedDemibold != null) return _likeSelectedDemibold!!
+        _likeSelectedDemibold = buildHyperOSIcon(
             name = "LikeSelected.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(529.5f, 788.1f),
@@ -280,8 +280,8 @@ val MiuixIcons.Glass.Demibold.LikeSelected: ImageVector
             translationY = 1065.6261f,
             autoMirror = false,
         )
-        return _likeSelectedSurfaceDemibold!!
+        return _likeSelectedDemibold!!
     }
 
-private var _likeSelectedSurfaceDemibold: ImageVector? = null
+private var _likeSelectedDemibold: ImageVector? = null
 

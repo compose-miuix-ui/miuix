@@ -17,8 +17,8 @@ val MiuixIcons.Glass.Power: ImageVector
 
 val MiuixIcons.Glass.Light.Power: ImageVector
     get() {
-        if (_close2Light != null) return _close2Light!!
-        _close2Light = ImageVector.Builder(
+        if (_powerLight != null) return _powerLight!!
+        _powerLight = ImageVector.Builder(
             name = "Power.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -82,15 +82,15 @@ val MiuixIcons.Glass.Light.Power: ImageVector
                 )
             }
         }.build()
-        return _close2Light!!
+        return _powerLight!!
     }
 
-private var _close2Light: ImageVector? = null
+private var _powerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Power: ImageVector
     get() {
-        if (_close2Normal != null) return _close2Normal!!
-        _close2Normal = ImageVector.Builder(
+        if (_powerNormal != null) return _powerNormal!!
+        _powerNormal = ImageVector.Builder(
             name = "Power.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -154,15 +154,15 @@ val MiuixIcons.Glass.Normal.Power: ImageVector
                 )
             }
         }.build()
-        return _close2Normal!!
+        return _powerNormal!!
     }
 
-private var _close2Normal: ImageVector? = null
+private var _powerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Power: ImageVector
     get() {
-        if (_close2Regular != null) return _close2Regular!!
-        _close2Regular = ImageVector.Builder(
+        if (_powerRegular != null) return _powerRegular!!
+        _powerRegular = ImageVector.Builder(
             name = "Power.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -226,15 +226,15 @@ val MiuixIcons.Glass.Regular.Power: ImageVector
                 )
             }
         }.build()
-        return _close2Regular!!
+        return _powerRegular!!
     }
 
-private var _close2Regular: ImageVector? = null
+private var _powerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Power: ImageVector
     get() {
-        if (_close2Medium != null) return _close2Medium!!
-        _close2Medium = ImageVector.Builder(
+        if (_powerMedium != null) return _powerMedium!!
+        _powerMedium = ImageVector.Builder(
             name = "Power.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -298,15 +298,15 @@ val MiuixIcons.Glass.Medium.Power: ImageVector
                 )
             }
         }.build()
-        return _close2Medium!!
+        return _powerMedium!!
     }
 
-private var _close2Medium: ImageVector? = null
+private var _powerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Power: ImageVector
     get() {
-        if (_close2Demibold != null) return _close2Demibold!!
-        _close2Demibold = ImageVector.Builder(
+        if (_powerDemibold != null) return _powerDemibold!!
+        _powerDemibold = ImageVector.Builder(
             name = "Power.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -370,7 +370,7 @@ val MiuixIcons.Glass.Demibold.Power: ImageVector
                 )
             }
         }.build()
-        return _close2Demibold!!
+        return _powerDemibold!!
     }
 
-private var _close2Demibold: ImageVector? = null
+private var _powerDemibold: ImageVector? = null

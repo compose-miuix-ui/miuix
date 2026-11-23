@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
@@ -66,7 +67,6 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
-import kotlin.math.roundToInt
 
 /**
  * Size limits and window margin for a glass popup.
@@ -268,8 +268,8 @@ internal fun GlassPopupSurface(
                 val placeable = measurable.measure(constraints)
                 layout(constraints.maxWidth, constraints.maxHeight) {
                     placeable.place(
-                        (measured.rect.left - hostOrigin.value.x).roundToInt(),
-                        (measured.rect.top - hostOrigin.value.y).roundToInt(),
+                        (measured.rect.left - hostOrigin.value.x).fastRoundToInt(),
+                        (measured.rect.top - hostOrigin.value.y).fastRoundToInt(),
                     )
                 }
             }
@@ -348,8 +348,8 @@ internal fun GlassPopupSurface(
         val current = frame(measured.end, placementBounds)
         measured.rect = current.rect
         measured.cornerRadius = current.cornerRadius
-        val panelWidth = current.rect.width.roundToInt().coerceAtLeast(0)
-        val panelHeight = current.rect.height.roundToInt().coerceAtLeast(0)
+        val panelWidth = current.rect.width.fastRoundToInt().coerceAtLeast(0)
+        val panelHeight = current.rect.height.fastRoundToInt().coerceAtLeast(0)
         val localLeft = current.rect.left - origin.x
         val localTop = current.rect.top - origin.y
         // Material and rim follow the animated silhouette; rows retain their settled size.
@@ -360,8 +360,8 @@ internal fun GlassPopupSurface(
                 transformOrigin = TransformOrigin(0f, 0f)
                 contentLayer(measured.end, measured.rect)
                 // Use this frame's bounds, including the scroll viewport, without rounding its motion.
-                translationX = localLeft - localLeft.roundToInt()
-                translationY = localTop - localTop.roundToInt()
+                translationX = localLeft - localLeft.fastRoundToInt()
+                translationY = localTop - localTop.fastRoundToInt()
             }
         }
     }

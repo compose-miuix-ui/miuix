@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HighRiskCall: ImageVector
 
 val MiuixIcons.Glass.Light.HighRiskCall: ImageVector
     get() {
-        if (_highRiskCallSurfaceLight != null) return _highRiskCallSurfaceLight!!
-        _highRiskCallSurfaceLight = buildHyperOSIcon(
+        if (_highRiskCallLight != null) return _highRiskCallLight!!
+        _highRiskCallLight = buildHyperOSIcon(
             name = "HighRiskCall.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(509.6f, 656.6f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.HighRiskCall: ImageVector
             translationY = 1061.3888f,
             autoMirror = false,
         )
-        return _highRiskCallSurfaceLight!!
+        return _highRiskCallLight!!
     }
 
-private var _highRiskCallSurfaceLight: ImageVector? = null
+private var _highRiskCallLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HighRiskCall: ImageVector
     get() {
-        if (_highRiskCallSurfaceNormal != null) return _highRiskCallSurfaceNormal!!
-        _highRiskCallSurfaceNormal = buildHyperOSIcon(
+        if (_highRiskCallNormal != null) return _highRiskCallNormal!!
+        _highRiskCallNormal = buildHyperOSIcon(
             name = "HighRiskCall.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(501.6f, 662.4f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.HighRiskCall: ImageVector
             translationY = 1062.611f,
             autoMirror = false,
         )
-        return _highRiskCallSurfaceNormal!!
+        return _highRiskCallNormal!!
     }
 
-private var _highRiskCallSurfaceNormal: ImageVector? = null
+private var _highRiskCallNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HighRiskCall: ImageVector
     get() {
-        if (_highRiskCallSurfaceRegular != null) return _highRiskCallSurfaceRegular!!
-        _highRiskCallSurfaceRegular = buildHyperOSIcon(
+        if (_highRiskCallRegular != null) return _highRiskCallRegular!!
+        _highRiskCallRegular = buildHyperOSIcon(
             name = "HighRiskCall.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(498f, 665f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.HighRiskCall: ImageVector
             translationY = 1063.1667f,
             autoMirror = false,
         )
-        return _highRiskCallSurfaceRegular!!
+        return _highRiskCallRegular!!
     }
 
-private var _highRiskCallSurfaceRegular: ImageVector? = null
+private var _highRiskCallRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HighRiskCall: ImageVector
     get() {
-        if (_highRiskCallSurfaceMedium != null) return _highRiskCallSurfaceMedium!!
-        _highRiskCallSurfaceMedium = buildHyperOSIcon(
+        if (_highRiskCallMedium != null) return _highRiskCallMedium!!
+        _highRiskCallMedium = buildHyperOSIcon(
             name = "HighRiskCall.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(491f, 668f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.HighRiskCall: ImageVector
             translationY = 1062.0856f,
             autoMirror = false,
         )
-        return _highRiskCallSurfaceMedium!!
+        return _highRiskCallMedium!!
     }
 
-private var _highRiskCallSurfaceMedium: ImageVector? = null
+private var _highRiskCallMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HighRiskCall: ImageVector
     get() {
-        if (_highRiskCallSurfaceDemibold != null) return _highRiskCallSurfaceDemibold!!
-        _highRiskCallSurfaceDemibold = buildHyperOSIcon(
+        if (_highRiskCallDemibold != null) return _highRiskCallDemibold!!
+        _highRiskCallDemibold = buildHyperOSIcon(
             name = "HighRiskCall.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(486.1f, 670.1f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.HighRiskCall: ImageVector
             translationY = 1061.3288f,
             autoMirror = false,
         )
-        return _highRiskCallSurfaceDemibold!!
+        return _highRiskCallDemibold!!
     }
 
-private var _highRiskCallSurfaceDemibold: ImageVector? = null
+private var _highRiskCallDemibold: ImageVector? = null
 

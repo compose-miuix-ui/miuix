@@ -103,14 +103,14 @@ fun TextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     onTextLayout: (Density.(getResult: () -> TextLayoutResult?) -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(colors.borderColor),
+    cursorBrush: Brush = remember(colors.borderColor) { SolidColor(colors.borderColor) },
     outputTransformation: OutputTransformation? = null,
     scrollState: ScrollState = rememberScrollState(),
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val labelState by remember(label, useLabelAsPlaceholder) {
+    val labelState by remember(state, label, useLabelAsPlaceholder) {
         computedStateOf {
             when {
                 label.isEmpty() -> LabelAnimState.Hidden
@@ -225,7 +225,7 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(colors.borderColor),
+    cursorBrush: Brush = remember(colors.borderColor) { SolidColor(colors.borderColor) },
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }

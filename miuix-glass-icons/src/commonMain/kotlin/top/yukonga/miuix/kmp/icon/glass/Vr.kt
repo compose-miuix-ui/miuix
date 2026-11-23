@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Vr: ImageVector
 
 val MiuixIcons.Glass.Light.Vr: ImageVector
     get() {
-        if (_vrSurfaceLight != null) return _vrSurfaceLight!!
-        _vrSurfaceLight = buildHyperOSIcon(
+        if (_vrLight != null) return _vrLight!!
+        _vrLight = buildHyperOSIcon(
             name = "Vr.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(207.2f, 548.9f),
@@ -79,15 +79,15 @@ val MiuixIcons.Glass.Light.Vr: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _vrSurfaceLight!!
+        return _vrLight!!
     }
 
-private var _vrSurfaceLight: ImageVector? = null
+private var _vrLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Vr: ImageVector
     get() {
-        if (_vrSurfaceNormal != null) return _vrSurfaceNormal!!
-        _vrSurfaceNormal = buildHyperOSIcon(
+        if (_vrNormal != null) return _vrNormal!!
+        _vrNormal = buildHyperOSIcon(
             name = "Vr.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(208.4f, 551f),
@@ -153,15 +153,15 @@ val MiuixIcons.Glass.Normal.Vr: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _vrSurfaceNormal!!
+        return _vrNormal!!
     }
 
-private var _vrSurfaceNormal: ImageVector? = null
+private var _vrNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Vr: ImageVector
     get() {
-        if (_vrSurfaceRegular != null) return _vrSurfaceRegular!!
-        _vrSurfaceRegular = buildHyperOSIcon(
+        if (_vrRegular != null) return _vrRegular!!
+        _vrRegular = buildHyperOSIcon(
             name = "Vr.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(209f, 552f),
@@ -227,15 +227,15 @@ val MiuixIcons.Glass.Regular.Vr: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _vrSurfaceRegular!!
+        return _vrRegular!!
     }
 
-private var _vrSurfaceRegular: ImageVector? = null
+private var _vrRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Vr: ImageVector
     get() {
-        if (_vrSurfaceMedium != null) return _vrSurfaceMedium!!
-        _vrSurfaceMedium = buildHyperOSIcon(
+        if (_vrMedium != null) return _vrMedium!!
+        _vrMedium = buildHyperOSIcon(
             name = "Vr.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(210.1f, 553.1f),
@@ -301,15 +301,15 @@ val MiuixIcons.Glass.Medium.Vr: ImageVector
             translationY = 1042.0315f,
             autoMirror = false,
         )
-        return _vrSurfaceMedium!!
+        return _vrMedium!!
     }
 
-private var _vrSurfaceMedium: ImageVector? = null
+private var _vrMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Vr: ImageVector
     get() {
-        if (_vrSurfaceDemibold != null) return _vrSurfaceDemibold!!
-        _vrSurfaceDemibold = buildHyperOSIcon(
+        if (_vrDemibold != null) return _vrDemibold!!
+        _vrDemibold = buildHyperOSIcon(
             name = "Vr.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(210.8f, 553.8f),
@@ -375,8 +375,8 @@ val MiuixIcons.Glass.Demibold.Vr: ImageVector
             translationY = 1041.9369f,
             autoMirror = false,
         )
-        return _vrSurfaceDemibold!!
+        return _vrDemibold!!
     }
 
-private var _vrSurfaceDemibold: ImageVector? = null
+private var _vrDemibold: ImageVector? = null
 

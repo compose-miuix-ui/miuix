@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IcSmallWindow: ImageVector
 
 val MiuixIcons.Glass.Light.IcSmallWindow: ImageVector
     get() {
-        if (_icSmallWindowLineLight != null) return _icSmallWindowLineLight!!
-        _icSmallWindowLineLight = buildHyperOSIcon(
+        if (_icSmallWindowLight != null) return _icSmallWindowLight!!
+        _icSmallWindowLight = buildHyperOSIcon(
             name = "IcSmallWindow.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(969.8f, -80f),
@@ -116,15 +116,15 @@ val MiuixIcons.Glass.Light.IcSmallWindow: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLineLight!!
+        return _icSmallWindowLight!!
     }
 
-private var _icSmallWindowLineLight: ImageVector? = null
+private var _icSmallWindowLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IcSmallWindow: ImageVector
     get() {
-        if (_icSmallWindowLineNormal != null) return _icSmallWindowLineNormal!!
-        _icSmallWindowLineNormal = buildHyperOSIcon(
+        if (_icSmallWindowNormal != null) return _icSmallWindowNormal!!
+        _icSmallWindowNormal = buildHyperOSIcon(
             name = "IcSmallWindow.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(974.1f, -88.2f),
@@ -227,15 +227,15 @@ val MiuixIcons.Glass.Normal.IcSmallWindow: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLineNormal!!
+        return _icSmallWindowNormal!!
     }
 
-private var _icSmallWindowLineNormal: ImageVector? = null
+private var _icSmallWindowNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IcSmallWindow: ImageVector
     get() {
-        if (_icSmallWindowLineRegular != null) return _icSmallWindowLineRegular!!
-        _icSmallWindowLineRegular = buildHyperOSIcon(
+        if (_icSmallWindowRegular != null) return _icSmallWindowRegular!!
+        _icSmallWindowRegular = buildHyperOSIcon(
             name = "IcSmallWindow.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(976f, -92f),
@@ -338,15 +338,15 @@ val MiuixIcons.Glass.Regular.IcSmallWindow: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLineRegular!!
+        return _icSmallWindowRegular!!
     }
 
-private var _icSmallWindowLineRegular: ImageVector? = null
+private var _icSmallWindowRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IcSmallWindow: ImageVector
     get() {
-        if (_icSmallWindowLineMedium != null) return _icSmallWindowLineMedium!!
-        _icSmallWindowLineMedium = buildHyperOSIcon(
+        if (_icSmallWindowMedium != null) return _icSmallWindowMedium!!
+        _icSmallWindowMedium = buildHyperOSIcon(
             name = "IcSmallWindow.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(979.8f, -99.3f),
@@ -449,15 +449,15 @@ val MiuixIcons.Glass.Medium.IcSmallWindow: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLineMedium!!
+        return _icSmallWindowMedium!!
     }
 
-private var _icSmallWindowLineMedium: ImageVector? = null
+private var _icSmallWindowMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IcSmallWindow: ImageVector
     get() {
-        if (_icSmallWindowLineDemibold != null) return _icSmallWindowLineDemibold!!
-        _icSmallWindowLineDemibold = buildHyperOSIcon(
+        if (_icSmallWindowDemibold != null) return _icSmallWindowDemibold!!
+        _icSmallWindowDemibold = buildHyperOSIcon(
             name = "IcSmallWindow.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(982.4f, -104.4f),
@@ -560,8 +560,8 @@ val MiuixIcons.Glass.Demibold.IcSmallWindow: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSmallWindowLineDemibold!!
+        return _icSmallWindowDemibold!!
     }
 
-private var _icSmallWindowLineDemibold: ImageVector? = null
+private var _icSmallWindowDemibold: ImageVector? = null
 

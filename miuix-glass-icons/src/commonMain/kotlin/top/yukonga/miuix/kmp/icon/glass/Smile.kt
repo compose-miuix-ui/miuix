@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Smile: ImageVector
 
 val MiuixIcons.Glass.Light.Smile: ImageVector
     get() {
-        if (_smileLineLight != null) return _smileLineLight!!
-        _smileLineLight = buildHyperOSIcon(
+        if (_smileLight != null) return _smileLight!!
+        _smileLight = buildHyperOSIcon(
             name = "Smile.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1161.7f, 386.9f),
@@ -96,15 +96,15 @@ val MiuixIcons.Glass.Light.Smile: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _smileLineLight!!
+        return _smileLight!!
     }
 
-private var _smileLineLight: ImageVector? = null
+private var _smileLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Smile: ImageVector
     get() {
-        if (_smileLineNormal != null) return _smileLineNormal!!
-        _smileLineNormal = buildHyperOSIcon(
+        if (_smileNormal != null) return _smileNormal!!
+        _smileNormal = buildHyperOSIcon(
             name = "Smile.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1170.8f, 387f),
@@ -187,15 +187,15 @@ val MiuixIcons.Glass.Normal.Smile: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _smileLineNormal!!
+        return _smileNormal!!
     }
 
-private var _smileLineNormal: ImageVector? = null
+private var _smileNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Smile: ImageVector
     get() {
-        if (_smileLineRegular != null) return _smileLineRegular!!
-        _smileLineRegular = buildHyperOSIcon(
+        if (_smileRegular != null) return _smileRegular!!
+        _smileRegular = buildHyperOSIcon(
             name = "Smile.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1175f, 387f),
@@ -278,15 +278,15 @@ val MiuixIcons.Glass.Regular.Smile: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _smileLineRegular!!
+        return _smileRegular!!
     }
 
-private var _smileLineRegular: ImageVector? = null
+private var _smileRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Smile: ImageVector
     get() {
-        if (_smileLineMedium != null) return _smileLineMedium!!
-        _smileLineMedium = buildHyperOSIcon(
+        if (_smileMedium != null) return _smileMedium!!
+        _smileMedium = buildHyperOSIcon(
             name = "Smile.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1183.1f, 387f),
@@ -369,15 +369,15 @@ val MiuixIcons.Glass.Medium.Smile: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _smileLineMedium!!
+        return _smileMedium!!
     }
 
-private var _smileLineMedium: ImageVector? = null
+private var _smileMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Smile: ImageVector
     get() {
-        if (_smileLineDemibold != null) return _smileLineDemibold!!
-        _smileLineDemibold = buildHyperOSIcon(
+        if (_smileDemibold != null) return _smileDemibold!!
+        _smileDemibold = buildHyperOSIcon(
             name = "Smile.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1188.8f, 387f),
@@ -460,8 +460,8 @@ val MiuixIcons.Glass.Demibold.Smile: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _smileLineDemibold!!
+        return _smileDemibold!!
     }
 
-private var _smileLineDemibold: ImageVector? = null
+private var _smileDemibold: ImageVector? = null
 

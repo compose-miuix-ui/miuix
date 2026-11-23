@@ -38,6 +38,8 @@ actual fun RuntimeShader.asComposeShader(): Shader = asSkikoRuntimeShader().make
 
 actual fun RuntimeShader.asBrush(): ShaderBrush = ShaderBrush(asComposeShader())
 
+actual fun isRuntimeShaderBrushImmutable(): Boolean = true
+
 /** Returns the underlying Skia [RuntimeShaderBuilder] for interop with native shader APIs. */
 fun RuntimeShader.asSkikoRuntimeShader(): RuntimeShaderBuilder = (this as SkikoRuntimeShader).shader
 

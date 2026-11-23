@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PrintFill: ImageVector
 
 val MiuixIcons.Glass.Light.PrintFill: ImageVector
     get() {
-        if (_printerSurfaceLight != null) return _printerSurfaceLight!!
-        _printerSurfaceLight = buildHyperOSIcon(
+        if (_printFillLight != null) return _printFillLight!!
+        _printFillLight = buildHyperOSIcon(
             name = "PrintFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(933f, 407.1f),
@@ -142,15 +142,15 @@ val MiuixIcons.Glass.Light.PrintFill: ImageVector
             translationY = 1036.3332f,
             autoMirror = false,
         )
-        return _printerSurfaceLight!!
+        return _printFillLight!!
     }
 
-private var _printerSurfaceLight: ImageVector? = null
+private var _printFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PrintFill: ImageVector
     get() {
-        if (_printerSurfaceNormal != null) return _printerSurfaceNormal!!
-        _printerSurfaceNormal = buildHyperOSIcon(
+        if (_printFillNormal != null) return _printFillNormal!!
+        _printFillNormal = buildHyperOSIcon(
             name = "PrintFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(924.8f, 391.2f),
@@ -279,15 +279,15 @@ val MiuixIcons.Glass.Normal.PrintFill: ImageVector
             translationY = 1039.9997f,
             autoMirror = false,
         )
-        return _printerSurfaceNormal!!
+        return _printFillNormal!!
     }
 
-private var _printerSurfaceNormal: ImageVector? = null
+private var _printFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PrintFill: ImageVector
     get() {
-        if (_printerSurfaceRegular != null) return _printerSurfaceRegular!!
-        _printerSurfaceRegular = buildHyperOSIcon(
+        if (_printFillRegular != null) return _printFillRegular!!
+        _printFillRegular = buildHyperOSIcon(
             name = "PrintFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(921f, 384f),
@@ -416,15 +416,15 @@ val MiuixIcons.Glass.Regular.PrintFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _printerSurfaceRegular!!
+        return _printFillRegular!!
     }
 
-private var _printerSurfaceRegular: ImageVector? = null
+private var _printFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PrintFill: ImageVector
     get() {
-        if (_printerSurfaceMedium != null) return _printerSurfaceMedium!!
-        _printerSurfaceMedium = buildHyperOSIcon(
+        if (_printFillMedium != null) return _printFillMedium!!
+        _printFillMedium = buildHyperOSIcon(
             name = "PrintFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(919.1f, 385.9f),
@@ -553,15 +553,15 @@ val MiuixIcons.Glass.Medium.PrintFill: ImageVector
             translationY = 1043.2882f,
             autoMirror = false,
         )
-        return _printerSurfaceMedium!!
+        return _printFillMedium!!
     }
 
-private var _printerSurfaceMedium: ImageVector? = null
+private var _printFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PrintFill: ImageVector
     get() {
-        if (_printerSurfaceDemibold != null) return _printerSurfaceDemibold!!
-        _printerSurfaceDemibold = buildHyperOSIcon(
+        if (_printFillDemibold != null) return _printFillDemibold!!
+        _printFillDemibold = buildHyperOSIcon(
             name = "PrintFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(917.8f, 387.2f),
@@ -690,8 +690,8 @@ val MiuixIcons.Glass.Demibold.PrintFill: ImageVector
             translationY = 1044.4235f,
             autoMirror = false,
         )
-        return _printerSurfaceDemibold!!
+        return _printFillDemibold!!
     }
 
-private var _printerSurfaceDemibold: ImageVector? = null
+private var _printFillDemibold: ImageVector? = null
 

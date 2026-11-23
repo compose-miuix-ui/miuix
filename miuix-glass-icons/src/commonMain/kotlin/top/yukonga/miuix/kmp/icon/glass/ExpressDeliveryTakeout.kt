@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ExpressDeliveryTakeout: ImageVector
 
 val MiuixIcons.Glass.Light.ExpressDeliveryTakeout: ImageVector
     get() {
-        if (_expressDeliveryTakeoutSurfaceLight != null) return _expressDeliveryTakeoutSurfaceLight!!
-        _expressDeliveryTakeoutSurfaceLight = buildHyperOSIcon(
+        if (_expressDeliveryTakeoutLight != null) return _expressDeliveryTakeoutLight!!
+        _expressDeliveryTakeoutLight = buildHyperOSIcon(
             name = "ExpressDeliveryTakeout.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(398.9f, 93f),
@@ -111,15 +111,15 @@ val MiuixIcons.Glass.Light.ExpressDeliveryTakeout: ImageVector
             translationY = 1043.1667f,
             autoMirror = false,
         )
-        return _expressDeliveryTakeoutSurfaceLight!!
+        return _expressDeliveryTakeoutLight!!
     }
 
-private var _expressDeliveryTakeoutSurfaceLight: ImageVector? = null
+private var _expressDeliveryTakeoutLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ExpressDeliveryTakeout: ImageVector
     get() {
-        if (_expressDeliveryTakeoutSurfaceNormal != null) return _expressDeliveryTakeoutSurfaceNormal!!
-        _expressDeliveryTakeoutSurfaceNormal = buildHyperOSIcon(
+        if (_expressDeliveryTakeoutNormal != null) return _expressDeliveryTakeoutNormal!!
+        _expressDeliveryTakeoutNormal = buildHyperOSIcon(
             name = "ExpressDeliveryTakeout.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(392.8f, 93f),
@@ -217,15 +217,15 @@ val MiuixIcons.Glass.Normal.ExpressDeliveryTakeout: ImageVector
             translationY = 1043.1667f,
             autoMirror = false,
         )
-        return _expressDeliveryTakeoutSurfaceNormal!!
+        return _expressDeliveryTakeoutNormal!!
     }
 
-private var _expressDeliveryTakeoutSurfaceNormal: ImageVector? = null
+private var _expressDeliveryTakeoutNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ExpressDeliveryTakeout: ImageVector
     get() {
-        if (_expressDeliveryTakeoutSurfaceRegular != null) return _expressDeliveryTakeoutSurfaceRegular!!
-        _expressDeliveryTakeoutSurfaceRegular = buildHyperOSIcon(
+        if (_expressDeliveryTakeoutRegular != null) return _expressDeliveryTakeoutRegular!!
+        _expressDeliveryTakeoutRegular = buildHyperOSIcon(
             name = "ExpressDeliveryTakeout.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(390f, 93f),
@@ -323,15 +323,15 @@ val MiuixIcons.Glass.Regular.ExpressDeliveryTakeout: ImageVector
             translationY = 1043.1667f,
             autoMirror = false,
         )
-        return _expressDeliveryTakeoutSurfaceRegular!!
+        return _expressDeliveryTakeoutRegular!!
     }
 
-private var _expressDeliveryTakeoutSurfaceRegular: ImageVector? = null
+private var _expressDeliveryTakeoutRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ExpressDeliveryTakeout: ImageVector
     get() {
-        if (_expressDeliveryTakeoutSurfaceMedium != null) return _expressDeliveryTakeoutSurfaceMedium!!
-        _expressDeliveryTakeoutSurfaceMedium = buildHyperOSIcon(
+        if (_expressDeliveryTakeoutMedium != null) return _expressDeliveryTakeoutMedium!!
+        _expressDeliveryTakeoutMedium = buildHyperOSIcon(
             name = "ExpressDeliveryTakeout.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(384.6f, 93f),
@@ -429,15 +429,15 @@ val MiuixIcons.Glass.Medium.ExpressDeliveryTakeout: ImageVector
             translationY = 1043.1667f,
             autoMirror = false,
         )
-        return _expressDeliveryTakeoutSurfaceMedium!!
+        return _expressDeliveryTakeoutMedium!!
     }
 
-private var _expressDeliveryTakeoutSurfaceMedium: ImageVector? = null
+private var _expressDeliveryTakeoutMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ExpressDeliveryTakeout: ImageVector
     get() {
-        if (_expressDeliveryTakeoutSurfaceDemibold != null) return _expressDeliveryTakeoutSurfaceDemibold!!
-        _expressDeliveryTakeoutSurfaceDemibold = buildHyperOSIcon(
+        if (_expressDeliveryTakeoutDemibold != null) return _expressDeliveryTakeoutDemibold!!
+        _expressDeliveryTakeoutDemibold = buildHyperOSIcon(
             name = "ExpressDeliveryTakeout.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(380.8f, 93f),
@@ -535,8 +535,8 @@ val MiuixIcons.Glass.Demibold.ExpressDeliveryTakeout: ImageVector
             translationY = 1043.1667f,
             autoMirror = false,
         )
-        return _expressDeliveryTakeoutSurfaceDemibold!!
+        return _expressDeliveryTakeoutDemibold!!
     }
 
-private var _expressDeliveryTakeoutSurfaceDemibold: ImageVector? = null
+private var _expressDeliveryTakeoutDemibold: ImageVector? = null
 

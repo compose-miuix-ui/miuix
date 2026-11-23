@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CircleDiamondFill: ImageVector
 
 val MiuixIcons.Glass.Light.CircleDiamondFill: ImageVector
     get() {
-        if (_loanPromotionSurfaceLight != null) return _loanPromotionSurfaceLight!!
-        _loanPromotionSurfaceLight = buildHyperOSIcon(
+        if (_circleDiamondFillLight != null) return _circleDiamondFillLight!!
+        _circleDiamondFillLight = buildHyperOSIcon(
             name = "CircleDiamondFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1153.3f, 375.4f),
@@ -50,15 +50,15 @@ val MiuixIcons.Glass.Light.CircleDiamondFill: ImageVector
             translationY = 1041.8889f,
             autoMirror = false,
         )
-        return _loanPromotionSurfaceLight!!
+        return _circleDiamondFillLight!!
     }
 
-private var _loanPromotionSurfaceLight: ImageVector? = null
+private var _circleDiamondFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CircleDiamondFill: ImageVector
     get() {
-        if (_loanPromotionSurfaceNormal != null) return _loanPromotionSurfaceNormal!!
-        _loanPromotionSurfaceNormal = buildHyperOSIcon(
+        if (_circleDiamondFillNormal != null) return _circleDiamondFillNormal!!
+        _circleDiamondFillNormal = buildHyperOSIcon(
             name = "CircleDiamondFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1160.7f, 375.1f),
@@ -95,15 +95,15 @@ val MiuixIcons.Glass.Normal.CircleDiamondFill: ImageVector
             translationY = 1041.7361f,
             autoMirror = false,
         )
-        return _loanPromotionSurfaceNormal!!
+        return _circleDiamondFillNormal!!
     }
 
-private var _loanPromotionSurfaceNormal: ImageVector? = null
+private var _circleDiamondFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CircleDiamondFill: ImageVector
     get() {
-        if (_loanPromotionSurfaceRegular != null) return _loanPromotionSurfaceRegular!!
-        _loanPromotionSurfaceRegular = buildHyperOSIcon(
+        if (_circleDiamondFillRegular != null) return _circleDiamondFillRegular!!
+        _circleDiamondFillRegular = buildHyperOSIcon(
             name = "CircleDiamondFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1164f, 375f),
@@ -140,15 +140,15 @@ val MiuixIcons.Glass.Regular.CircleDiamondFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _loanPromotionSurfaceRegular!!
+        return _circleDiamondFillRegular!!
     }
 
-private var _loanPromotionSurfaceRegular: ImageVector? = null
+private var _circleDiamondFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CircleDiamondFill: ImageVector
     get() {
-        if (_loanPromotionSurfaceMedium != null) return _loanPromotionSurfaceMedium!!
-        _loanPromotionSurfaceMedium = buildHyperOSIcon(
+        if (_circleDiamondFillMedium != null) return _circleDiamondFillMedium!!
+        _circleDiamondFillMedium = buildHyperOSIcon(
             name = "CircleDiamondFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1173.5f, 375f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Medium.CircleDiamondFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _loanPromotionSurfaceMedium!!
+        return _circleDiamondFillMedium!!
     }
 
-private var _loanPromotionSurfaceMedium: ImageVector? = null
+private var _circleDiamondFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CircleDiamondFill: ImageVector
     get() {
-        if (_loanPromotionSurfaceDemibold != null) return _loanPromotionSurfaceDemibold!!
-        _loanPromotionSurfaceDemibold = buildHyperOSIcon(
+        if (_circleDiamondFillDemibold != null) return _circleDiamondFillDemibold!!
+        _circleDiamondFillDemibold = buildHyperOSIcon(
             name = "CircleDiamondFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1180.1f, 375f),
@@ -230,8 +230,8 @@ val MiuixIcons.Glass.Demibold.CircleDiamondFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _loanPromotionSurfaceDemibold!!
+        return _circleDiamondFillDemibold!!
     }
 
-private var _loanPromotionSurfaceDemibold: ImageVector? = null
+private var _circleDiamondFillDemibold: ImageVector? = null
 

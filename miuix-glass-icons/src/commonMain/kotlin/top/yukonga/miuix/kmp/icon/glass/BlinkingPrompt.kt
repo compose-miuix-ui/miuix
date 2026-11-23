@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BlinkingPrompt: ImageVector
 
 val MiuixIcons.Glass.Light.BlinkingPrompt: ImageVector
     get() {
-        if (_blinkingPromptSurfaceLight != null) return _blinkingPromptSurfaceLight!!
-        _blinkingPromptSurfaceLight = buildHyperOSIcon(
+        if (_blinkingPromptLight != null) return _blinkingPromptLight!!
+        _blinkingPromptLight = buildHyperOSIcon(
             name = "BlinkingPrompt.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(949.1f, -100.7f),
@@ -80,15 +80,15 @@ val MiuixIcons.Glass.Light.BlinkingPrompt: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blinkingPromptSurfaceLight!!
+        return _blinkingPromptLight!!
     }
 
-private var _blinkingPromptSurfaceLight: ImageVector? = null
+private var _blinkingPromptLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BlinkingPrompt: ImageVector
     get() {
-        if (_blinkingPromptSurfaceNormal != null) return _blinkingPromptSurfaceNormal!!
-        _blinkingPromptSurfaceNormal = buildHyperOSIcon(
+        if (_blinkingPromptNormal != null) return _blinkingPromptNormal!!
+        _blinkingPromptNormal = buildHyperOSIcon(
             name = "BlinkingPrompt.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(952.5f, -104.3f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Normal.BlinkingPrompt: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blinkingPromptSurfaceNormal!!
+        return _blinkingPromptNormal!!
     }
 
-private var _blinkingPromptSurfaceNormal: ImageVector? = null
+private var _blinkingPromptNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BlinkingPrompt: ImageVector
     get() {
-        if (_blinkingPromptSurfaceRegular != null) return _blinkingPromptSurfaceRegular!!
-        _blinkingPromptSurfaceRegular = buildHyperOSIcon(
+        if (_blinkingPromptRegular != null) return _blinkingPromptRegular!!
+        _blinkingPromptRegular = buildHyperOSIcon(
             name = "BlinkingPrompt.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(954f, -106f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Regular.BlinkingPrompt: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blinkingPromptSurfaceRegular!!
+        return _blinkingPromptRegular!!
     }
 
-private var _blinkingPromptSurfaceRegular: ImageVector? = null
+private var _blinkingPromptRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BlinkingPrompt: ImageVector
     get() {
-        if (_blinkingPromptSurfaceMedium != null) return _blinkingPromptSurfaceMedium!!
-        _blinkingPromptSurfaceMedium = buildHyperOSIcon(
+        if (_blinkingPromptMedium != null) return _blinkingPromptMedium!!
+        _blinkingPromptMedium = buildHyperOSIcon(
             name = "BlinkingPrompt.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(957.8f, -113.3f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Medium.BlinkingPrompt: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blinkingPromptSurfaceMedium!!
+        return _blinkingPromptMedium!!
     }
 
-private var _blinkingPromptSurfaceMedium: ImageVector? = null
+private var _blinkingPromptMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BlinkingPrompt: ImageVector
     get() {
-        if (_blinkingPromptSurfaceDemibold != null) return _blinkingPromptSurfaceDemibold!!
-        _blinkingPromptSurfaceDemibold = buildHyperOSIcon(
+        if (_blinkingPromptDemibold != null) return _blinkingPromptDemibold!!
+        _blinkingPromptDemibold = buildHyperOSIcon(
             name = "BlinkingPrompt.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(960.4f, -118.4f),
@@ -380,8 +380,8 @@ val MiuixIcons.Glass.Demibold.BlinkingPrompt: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _blinkingPromptSurfaceDemibold!!
+        return _blinkingPromptDemibold!!
     }
 
-private var _blinkingPromptSurfaceDemibold: ImageVector? = null
+private var _blinkingPromptDemibold: ImageVector? = null
 

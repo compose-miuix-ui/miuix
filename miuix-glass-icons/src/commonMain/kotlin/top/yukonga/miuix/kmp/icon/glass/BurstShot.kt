@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BurstShot: ImageVector
 
 val MiuixIcons.Glass.Light.BurstShot: ImageVector
     get() {
-        if (_burstShotLineLight != null) return _burstShotLineLight!!
-        _burstShotLineLight = buildHyperOSIcon(
+        if (_burstShotLight != null) return _burstShotLight!!
+        _burstShotLight = buildHyperOSIcon(
             name = "BurstShot.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(716f, 316.7f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.BurstShot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _burstShotLineLight!!
+        return _burstShotLight!!
     }
 
-private var _burstShotLineLight: ImageVector? = null
+private var _burstShotLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BurstShot: ImageVector
     get() {
-        if (_burstShotLineNormal != null) return _burstShotLineNormal!!
-        _burstShotLineNormal = buildHyperOSIcon(
+        if (_burstShotNormal != null) return _burstShotNormal!!
+        _burstShotNormal = buildHyperOSIcon(
             name = "BurstShot.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(713.3f, 325.8f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.BurstShot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _burstShotLineNormal!!
+        return _burstShotNormal!!
     }
 
-private var _burstShotLineNormal: ImageVector? = null
+private var _burstShotNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BurstShot: ImageVector
     get() {
-        if (_burstShotLineRegular != null) return _burstShotLineRegular!!
-        _burstShotLineRegular = buildHyperOSIcon(
+        if (_burstShotRegular != null) return _burstShotRegular!!
+        _burstShotRegular = buildHyperOSIcon(
             name = "BurstShot.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(712f, 330f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.BurstShot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _burstShotLineRegular!!
+        return _burstShotRegular!!
     }
 
-private var _burstShotLineRegular: ImageVector? = null
+private var _burstShotRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BurstShot: ImageVector
     get() {
-        if (_burstShotLineMedium != null) return _burstShotLineMedium!!
-        _burstShotLineMedium = buildHyperOSIcon(
+        if (_burstShotMedium != null) return _burstShotMedium!!
+        _burstShotMedium = buildHyperOSIcon(
             name = "BurstShot.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(704.4f, 335.4f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.BurstShot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _burstShotLineMedium!!
+        return _burstShotMedium!!
     }
 
-private var _burstShotLineMedium: ImageVector? = null
+private var _burstShotMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BurstShot: ImageVector
     get() {
-        if (_burstShotLineDemibold != null) return _burstShotLineDemibold!!
-        _burstShotLineDemibold = buildHyperOSIcon(
+        if (_burstShotDemibold != null) return _burstShotDemibold!!
+        _burstShotDemibold = buildHyperOSIcon(
             name = "BurstShot.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(699.1f, 339.2f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.BurstShot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _burstShotLineDemibold!!
+        return _burstShotDemibold!!
     }
 
-private var _burstShotLineDemibold: ImageVector? = null
+private var _burstShotDemibold: ImageVector? = null
 

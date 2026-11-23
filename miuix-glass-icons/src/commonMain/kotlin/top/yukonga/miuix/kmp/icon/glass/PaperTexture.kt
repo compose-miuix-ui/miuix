@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PaperTexture: ImageVector
 
 val MiuixIcons.Glass.Light.PaperTexture: ImageVector
     get() {
-        if (_paperTextureSurfaceLight != null) return _paperTextureSurfaceLight!!
-        _paperTextureSurfaceLight = buildHyperOSIcon(
+        if (_paperTextureLight != null) return _paperTextureLight!!
+        _paperTextureLight = buildHyperOSIcon(
             name = "PaperTexture.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(876.3f, 817.7f),
@@ -62,15 +62,15 @@ val MiuixIcons.Glass.Light.PaperTexture: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _paperTextureSurfaceLight!!
+        return _paperTextureLight!!
     }
 
-private var _paperTextureSurfaceLight: ImageVector? = null
+private var _paperTextureLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PaperTexture: ImageVector
     get() {
-        if (_paperTextureSurfaceNormal != null) return _paperTextureSurfaceNormal!!
-        _paperTextureSurfaceNormal = buildHyperOSIcon(
+        if (_paperTextureNormal != null) return _paperTextureNormal!!
+        _paperTextureNormal = buildHyperOSIcon(
             name = "PaperTexture.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(861.7f, 826.8f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Normal.PaperTexture: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _paperTextureSurfaceNormal!!
+        return _paperTextureNormal!!
     }
 
-private var _paperTextureSurfaceNormal: ImageVector? = null
+private var _paperTextureNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PaperTexture: ImageVector
     get() {
-        if (_paperTextureSurfaceRegular != null) return _paperTextureSurfaceRegular!!
-        _paperTextureSurfaceRegular = buildHyperOSIcon(
+        if (_paperTextureRegular != null) return _paperTextureRegular!!
+        _paperTextureRegular = buildHyperOSIcon(
             name = "PaperTexture.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(855f, 831f),
@@ -176,15 +176,15 @@ val MiuixIcons.Glass.Regular.PaperTexture: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _paperTextureSurfaceRegular!!
+        return _paperTextureRegular!!
     }
 
-private var _paperTextureSurfaceRegular: ImageVector? = null
+private var _paperTextureRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PaperTexture: ImageVector
     get() {
-        if (_paperTextureSurfaceMedium != null) return _paperTextureSurfaceMedium!!
-        _paperTextureSurfaceMedium = buildHyperOSIcon(
+        if (_paperTextureMedium != null) return _paperTextureMedium!!
+        _paperTextureMedium = buildHyperOSIcon(
             name = "PaperTexture.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(859.3f, 839.1f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Medium.PaperTexture: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _paperTextureSurfaceMedium!!
+        return _paperTextureMedium!!
     }
 
-private var _paperTextureSurfaceMedium: ImageVector? = null
+private var _paperTextureMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PaperTexture: ImageVector
     get() {
-        if (_paperTextureSurfaceDemibold != null) return _paperTextureSurfaceDemibold!!
-        _paperTextureSurfaceDemibold = buildHyperOSIcon(
+        if (_paperTextureDemibold != null) return _paperTextureDemibold!!
+        _paperTextureDemibold = buildHyperOSIcon(
             name = "PaperTexture.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(862.4f, 844.8f),
@@ -290,8 +290,8 @@ val MiuixIcons.Glass.Demibold.PaperTexture: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _paperTextureSurfaceDemibold!!
+        return _paperTextureDemibold!!
     }
 
-private var _paperTextureSurfaceDemibold: ImageVector? = null
+private var _paperTextureDemibold: ImageVector? = null
 

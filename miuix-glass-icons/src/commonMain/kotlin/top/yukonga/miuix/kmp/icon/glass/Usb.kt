@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Usb: ImageVector
 
 val MiuixIcons.Glass.Light.Usb: ImageVector
     get() {
-        if (_usbSurfaceLight != null) return _usbSurfaceLight!!
-        _usbSurfaceLight = buildHyperOSIcon(
+        if (_usbLight != null) return _usbLight!!
+        _usbLight = buildHyperOSIcon(
             name = "Usb.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(567f, 720.3f),
@@ -114,15 +114,15 @@ val MiuixIcons.Glass.Light.Usb: ImageVector
             translationY = 1042.1111f,
             autoMirror = false,
         )
-        return _usbSurfaceLight!!
+        return _usbLight!!
     }
 
-private var _usbSurfaceLight: ImageVector? = null
+private var _usbLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Usb: ImageVector
     get() {
-        if (_usbSurfaceNormal != null) return _usbSurfaceNormal!!
-        _usbSurfaceNormal = buildHyperOSIcon(
+        if (_usbNormal != null) return _usbNormal!!
+        _usbNormal = buildHyperOSIcon(
             name = "Usb.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(567f, 711.2f),
@@ -223,15 +223,15 @@ val MiuixIcons.Glass.Normal.Usb: ImageVector
             translationY = 1042.1493f,
             autoMirror = false,
         )
-        return _usbSurfaceNormal!!
+        return _usbNormal!!
     }
 
-private var _usbSurfaceNormal: ImageVector? = null
+private var _usbNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Usb: ImageVector
     get() {
-        if (_usbSurfaceRegular != null) return _usbSurfaceRegular!!
-        _usbSurfaceRegular = buildHyperOSIcon(
+        if (_usbRegular != null) return _usbRegular!!
+        _usbRegular = buildHyperOSIcon(
             name = "Usb.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(567f, 707f),
@@ -332,15 +332,15 @@ val MiuixIcons.Glass.Regular.Usb: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _usbSurfaceRegular!!
+        return _usbRegular!!
     }
 
-private var _usbSurfaceRegular: ImageVector? = null
+private var _usbRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Usb: ImageVector
     get() {
-        if (_usbSurfaceMedium != null) return _usbSurfaceMedium!!
-        _usbSurfaceMedium = buildHyperOSIcon(
+        if (_usbMedium != null) return _usbMedium!!
+        _usbMedium = buildHyperOSIcon(
             name = "Usb.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(567f, 698.9f),
@@ -441,15 +441,15 @@ val MiuixIcons.Glass.Medium.Usb: ImageVector
             translationY = 1042.0991f,
             autoMirror = false,
         )
-        return _usbSurfaceMedium!!
+        return _usbMedium!!
     }
 
-private var _usbSurfaceMedium: ImageVector? = null
+private var _usbMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Usb: ImageVector
     get() {
-        if (_usbSurfaceDemibold != null) return _usbSurfaceDemibold!!
-        _usbSurfaceDemibold = buildHyperOSIcon(
+        if (_usbDemibold != null) return _usbDemibold!!
+        _usbDemibold = buildHyperOSIcon(
             name = "Usb.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(567f, 693.2f),
@@ -550,8 +550,8 @@ val MiuixIcons.Glass.Demibold.Usb: ImageVector
             translationY = 1042.0518f,
             autoMirror = false,
         )
-        return _usbSurfaceDemibold!!
+        return _usbDemibold!!
     }
 
-private var _usbSurfaceDemibold: ImageVector? = null
+private var _usbDemibold: ImageVector? = null
 

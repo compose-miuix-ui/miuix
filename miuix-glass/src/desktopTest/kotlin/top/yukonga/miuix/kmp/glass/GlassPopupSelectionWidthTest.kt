@@ -12,9 +12,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -56,11 +54,9 @@ class GlassPopupSelectionWidthTest {
         onNodeWithText(labels[1]).performClick()
         onNodeWithText(labels[1]).assertIsSelected()
         assertEquals(before, onNodeWithText(labels[1]).fetchSemanticsNode().boundsInRoot)
-        saveImage("popup-selection-long", onRoot().captureToImage())
         onNodeWithText(labels[1]).performClick()
         assertEquals(-1, selected.intValue)
         assertEquals(before, onNodeWithText(labels[1]).fetchSemanticsNode().boundsInRoot)
-        saveImage("popup-selection-none", onRoot().captureToImage())
         onNodeWithText(labels[0]).performClick()
         onNodeWithText(labels[0]).assertIsSelected()
         assertEquals(before, onNodeWithText(labels[1]).fetchSemanticsNode().boundsInRoot)

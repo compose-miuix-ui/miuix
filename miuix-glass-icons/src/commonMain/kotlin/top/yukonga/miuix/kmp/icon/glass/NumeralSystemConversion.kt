@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NumeralSystemConversion: ImageVector
 
 val MiuixIcons.Glass.Light.NumeralSystemConversion: ImageVector
     get() {
-        if (_numeralSystemConversionSurfaceLight != null) return _numeralSystemConversionSurfaceLight!!
-        _numeralSystemConversionSurfaceLight = buildHyperOSIcon(
+        if (_numeralSystemConversionLight != null) return _numeralSystemConversionLight!!
+        _numeralSystemConversionLight = buildHyperOSIcon(
             name = "NumeralSystemConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(417.9f, 373.6f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.NumeralSystemConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _numeralSystemConversionSurfaceLight!!
+        return _numeralSystemConversionLight!!
     }
 
-private var _numeralSystemConversionSurfaceLight: ImageVector? = null
+private var _numeralSystemConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NumeralSystemConversion: ImageVector
     get() {
-        if (_numeralSystemConversionSurfaceNormal != null) return _numeralSystemConversionSurfaceNormal!!
-        _numeralSystemConversionSurfaceNormal = buildHyperOSIcon(
+        if (_numeralSystemConversionNormal != null) return _numeralSystemConversionNormal!!
+        _numeralSystemConversionNormal = buildHyperOSIcon(
             name = "NumeralSystemConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(417.3f, 373.9f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.NumeralSystemConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _numeralSystemConversionSurfaceNormal!!
+        return _numeralSystemConversionNormal!!
     }
 
-private var _numeralSystemConversionSurfaceNormal: ImageVector? = null
+private var _numeralSystemConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NumeralSystemConversion: ImageVector
     get() {
-        if (_numeralSystemConversionSurfaceRegular != null) return _numeralSystemConversionSurfaceRegular!!
-        _numeralSystemConversionSurfaceRegular = buildHyperOSIcon(
+        if (_numeralSystemConversionRegular != null) return _numeralSystemConversionRegular!!
+        _numeralSystemConversionRegular = buildHyperOSIcon(
             name = "NumeralSystemConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(417f, 374f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.NumeralSystemConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _numeralSystemConversionSurfaceRegular!!
+        return _numeralSystemConversionRegular!!
     }
 
-private var _numeralSystemConversionSurfaceRegular: ImageVector? = null
+private var _numeralSystemConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NumeralSystemConversion: ImageVector
     get() {
-        if (_numeralSystemConversionSurfaceMedium != null) return _numeralSystemConversionSurfaceMedium!!
-        _numeralSystemConversionSurfaceMedium = buildHyperOSIcon(
+        if (_numeralSystemConversionMedium != null) return _numeralSystemConversionMedium!!
+        _numeralSystemConversionMedium = buildHyperOSIcon(
             name = "NumeralSystemConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(408.6f, 373.2f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.NumeralSystemConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _numeralSystemConversionSurfaceMedium!!
+        return _numeralSystemConversionMedium!!
     }
 
-private var _numeralSystemConversionSurfaceMedium: ImageVector? = null
+private var _numeralSystemConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NumeralSystemConversion: ImageVector
     get() {
-        if (_numeralSystemConversionSurfaceDemibold != null) return _numeralSystemConversionSurfaceDemibold!!
-        _numeralSystemConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_numeralSystemConversionDemibold != null) return _numeralSystemConversionDemibold!!
+        _numeralSystemConversionDemibold = buildHyperOSIcon(
             name = "NumeralSystemConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(402.8f, 372.6f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.NumeralSystemConversion: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _numeralSystemConversionSurfaceDemibold!!
+        return _numeralSystemConversionDemibold!!
     }
 
-private var _numeralSystemConversionSurfaceDemibold: ImageVector? = null
+private var _numeralSystemConversionDemibold: ImageVector? = null
 

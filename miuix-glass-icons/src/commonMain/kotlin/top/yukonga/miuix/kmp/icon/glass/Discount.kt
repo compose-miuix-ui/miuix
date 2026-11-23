@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Discount: ImageVector
 
 val MiuixIcons.Glass.Light.Discount: ImageVector
     get() {
-        if (_discountSurfaceLight != null) return _discountSurfaceLight!!
-        _discountSurfaceLight = buildHyperOSIcon(
+        if (_discountLight != null) return _discountLight!!
+        _discountLight = buildHyperOSIcon(
             name = "Discount.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(254.8f, 628.3f),
@@ -72,15 +72,15 @@ val MiuixIcons.Glass.Light.Discount: ImageVector
             translationY = 1019.32f,
             autoMirror = false,
         )
-        return _discountSurfaceLight!!
+        return _discountLight!!
     }
 
-private var _discountSurfaceLight: ImageVector? = null
+private var _discountLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Discount: ImageVector
     get() {
-        if (_discountSurfaceNormal != null) return _discountSurfaceNormal!!
-        _discountSurfaceNormal = buildHyperOSIcon(
+        if (_discountNormal != null) return _discountNormal!!
+        _discountNormal = buildHyperOSIcon(
             name = "Discount.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(250.8f, 627.4f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Normal.Discount: ImageVector
             translationY = 1019.6151f,
             autoMirror = false,
         )
-        return _discountSurfaceNormal!!
+        return _discountNormal!!
     }
 
-private var _discountSurfaceNormal: ImageVector? = null
+private var _discountNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Discount: ImageVector
     get() {
-        if (_discountSurfaceRegular != null) return _discountSurfaceRegular!!
-        _discountSurfaceRegular = buildHyperOSIcon(
+        if (_discountRegular != null) return _discountRegular!!
+        _discountRegular = buildHyperOSIcon(
             name = "Discount.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(249f, 627f),
@@ -206,15 +206,15 @@ val MiuixIcons.Glass.Regular.Discount: ImageVector
             translationY = 1019.75f,
             autoMirror = false,
         )
-        return _discountSurfaceRegular!!
+        return _discountRegular!!
     }
 
-private var _discountSurfaceRegular: ImageVector? = null
+private var _discountRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Discount: ImageVector
     get() {
-        if (_discountSurfaceMedium != null) return _discountSurfaceMedium!!
-        _discountSurfaceMedium = buildHyperOSIcon(
+        if (_discountMedium != null) return _discountMedium!!
+        _discountMedium = buildHyperOSIcon(
             name = "Discount.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(245.8f, 626.5f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Medium.Discount: ImageVector
             translationY = 1020.2471f,
             autoMirror = false,
         )
-        return _discountSurfaceMedium!!
+        return _discountMedium!!
     }
 
-private var _discountSurfaceMedium: ImageVector? = null
+private var _discountMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Discount: ImageVector
     get() {
-        if (_discountSurfaceDemibold != null) return _discountSurfaceDemibold!!
-        _discountSurfaceDemibold = buildHyperOSIcon(
+        if (_discountDemibold != null) return _discountDemibold!!
+        _discountDemibold = buildHyperOSIcon(
             name = "Discount.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(243.5f, 626.1f),
@@ -340,8 +340,8 @@ val MiuixIcons.Glass.Demibold.Discount: ImageVector
             translationY = 1020.5973f,
             autoMirror = false,
         )
-        return _discountSurfaceDemibold!!
+        return _discountDemibold!!
     }
 
-private var _discountSurfaceDemibold: ImageVector? = null
+private var _discountDemibold: ImageVector? = null
 

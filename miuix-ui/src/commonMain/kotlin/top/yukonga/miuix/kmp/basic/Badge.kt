@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.HorizontalRuler
 import androidx.compose.ui.layout.LastBaseline
@@ -82,12 +83,19 @@ fun BadgedBox(
         val totalWidth = anchorPlaceable.width
         val totalHeight = anchorPlaceable.height
 
+        val alignmentLines: Map<AlignmentLine, Int> =
+            if (firstBaseline == AlignmentLine.Unspecified && lastBaseline == AlignmentLine.Unspecified) {
+                emptyMap()
+            } else {
+                mapOf(FirstBaseline to firstBaseline, LastBaseline to lastBaseline)
+            }
+
         layout(
             width = totalWidth,
             height = totalHeight,
             // Provide custom baselines based only on the anchor content to avoid default baseline
             // calculations from including by any badge content.
-            alignmentLines = mapOf(FirstBaseline to firstBaseline, LastBaseline to lastBaseline),
+            alignmentLines = alignmentLines,
         ) {
             // Use the width of the badge to infer whether it has any content (based on radius used
             // in [Badge]) and determine its horizontal offset.
@@ -161,13 +169,13 @@ fun Badge(
             // Center the single-line label within an explicit line height so the digits are
             // vertically centered consistently across platforms (footnote2 alone carries no
             // line-height style, leaving placement to platform-dependent font metrics).
-            val style = MiuixTheme.textStyles.footnote2.copy(
-                lineHeight = 16.sp,
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.None,
-                ),
-            )
+            val baseStyle = MiuixTheme.textStyles.footnote2
+            val style = remember(baseStyle) {
+                baseStyle.copy(
+                    lineHeight = 16.sp,
+                    lineHeightStyle = BadgeLineHeightStyle,
+                )
+            }
             ProvideContentColorTextStyle(
                 contentColor = contentColor,
                 textStyle = style,
@@ -209,8 +217,9 @@ private fun ProvideContentColorTextStyle(
     content: @Composable () -> Unit,
 ) {
     val textStyles = LocalTextStyles.current
-    val badgeTextStyles = remember(textStyles, textStyle) {
-        textStyles.copy(main = textStyles.main.merge(textStyle))
+    val mainStyle = textStyles.main
+    val badgeTextStyles = remember(textStyles, mainStyle, textStyle) {
+        textStyles.copy(main = mainStyle.merge(textStyle))
     }
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
@@ -255,3 +264,8 @@ internal fun Modifier.badgeBounds() = this.layout { measurable, constraints ->
         placeable.place(0, 0)
     }
 }
+
+private val BadgeLineHeightStyle = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None,
+)

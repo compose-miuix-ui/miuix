@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WearableUniversal: ImageVector
 
 val MiuixIcons.Glass.Light.WearableUniversal: ImageVector
     get() {
-        if (_wearableUniversalSurfaceLight != null) return _wearableUniversalSurfaceLight!!
-        _wearableUniversalSurfaceLight = buildHyperOSIcon(
+        if (_wearableUniversalLight != null) return _wearableUniversalLight!!
+        _wearableUniversalLight = buildHyperOSIcon(
             name = "WearableUniversal.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(122.3f, 386.4f),
@@ -64,15 +64,15 @@ val MiuixIcons.Glass.Light.WearableUniversal: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _wearableUniversalSurfaceLight!!
+        return _wearableUniversalLight!!
     }
 
-private var _wearableUniversalSurfaceLight: ImageVector? = null
+private var _wearableUniversalLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WearableUniversal: ImageVector
     get() {
-        if (_wearableUniversalSurfaceNormal != null) return _wearableUniversalSurfaceNormal!!
-        _wearableUniversalSurfaceNormal = buildHyperOSIcon(
+        if (_wearableUniversalNormal != null) return _wearableUniversalNormal!!
+        _wearableUniversalNormal = buildHyperOSIcon(
             name = "WearableUniversal.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(113.2f, 386.1f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Normal.WearableUniversal: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _wearableUniversalSurfaceNormal!!
+        return _wearableUniversalNormal!!
     }
 
-private var _wearableUniversalSurfaceNormal: ImageVector? = null
+private var _wearableUniversalNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WearableUniversal: ImageVector
     get() {
-        if (_wearableUniversalSurfaceRegular != null) return _wearableUniversalSurfaceRegular!!
-        _wearableUniversalSurfaceRegular = buildHyperOSIcon(
+        if (_wearableUniversalRegular != null) return _wearableUniversalRegular!!
+        _wearableUniversalRegular = buildHyperOSIcon(
             name = "WearableUniversal.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(109f, 386f),
@@ -182,15 +182,15 @@ val MiuixIcons.Glass.Regular.WearableUniversal: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _wearableUniversalSurfaceRegular!!
+        return _wearableUniversalRegular!!
     }
 
-private var _wearableUniversalSurfaceRegular: ImageVector? = null
+private var _wearableUniversalRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WearableUniversal: ImageVector
     get() {
-        if (_wearableUniversalSurfaceMedium != null) return _wearableUniversalSurfaceMedium!!
-        _wearableUniversalSurfaceMedium = buildHyperOSIcon(
+        if (_wearableUniversalMedium != null) return _wearableUniversalMedium!!
+        _wearableUniversalMedium = buildHyperOSIcon(
             name = "WearableUniversal.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(100.9f, 385.9f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Medium.WearableUniversal: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _wearableUniversalSurfaceMedium!!
+        return _wearableUniversalMedium!!
     }
 
-private var _wearableUniversalSurfaceMedium: ImageVector? = null
+private var _wearableUniversalMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WearableUniversal: ImageVector
     get() {
-        if (_wearableUniversalSurfaceDemibold != null) return _wearableUniversalSurfaceDemibold!!
-        _wearableUniversalSurfaceDemibold = buildHyperOSIcon(
+        if (_wearableUniversalDemibold != null) return _wearableUniversalDemibold!!
+        _wearableUniversalDemibold = buildHyperOSIcon(
             name = "WearableUniversal.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(95.2f, 385.9f),
@@ -300,8 +300,8 @@ val MiuixIcons.Glass.Demibold.WearableUniversal: ImageVector
             translationY = 1053.1667f,
             autoMirror = false,
         )
-        return _wearableUniversalSurfaceDemibold!!
+        return _wearableUniversalDemibold!!
     }
 
-private var _wearableUniversalSurfaceDemibold: ImageVector? = null
+private var _wearableUniversalDemibold: ImageVector? = null
 

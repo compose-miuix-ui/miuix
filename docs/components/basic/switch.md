@@ -25,6 +25,10 @@ Switch(
 )
 ```
 
+### Interaction
+
+Besides tapping, the thumb can be dragged horizontally to preview its position. On release, the midpoint of the travel determines the requested state. When the thumb settles, it briefly overshoots its resting position and springs back.
+
 ## Component States
 
 ### Disabled State

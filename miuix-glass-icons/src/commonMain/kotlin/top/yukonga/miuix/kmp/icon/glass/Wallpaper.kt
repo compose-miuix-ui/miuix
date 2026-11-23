@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Wallpaper: ImageVector
 
 val MiuixIcons.Glass.Light.Wallpaper: ImageVector
     get() {
-        if (_wallpaperSurfaceLight != null) return _wallpaperSurfaceLight!!
-        _wallpaperSurfaceLight = buildHyperOSIcon(
+        if (_wallpaperLight != null) return _wallpaperLight!!
+        _wallpaperLight = buildHyperOSIcon(
             name = "Wallpaper.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(225.3f, 637.1f),
@@ -62,15 +62,15 @@ val MiuixIcons.Glass.Light.Wallpaper: ImageVector
             translationY = 1040.7777f,
             autoMirror = false,
         )
-        return _wallpaperSurfaceLight!!
+        return _wallpaperLight!!
     }
 
-private var _wallpaperSurfaceLight: ImageVector? = null
+private var _wallpaperLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Wallpaper: ImageVector
     get() {
-        if (_wallpaperSurfaceNormal != null) return _wallpaperSurfaceNormal!!
-        _wallpaperSurfaceNormal = buildHyperOSIcon(
+        if (_wallpaperNormal != null) return _wallpaperNormal!!
+        _wallpaperNormal = buildHyperOSIcon(
             name = "Wallpaper.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(221.7f, 637.7f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Normal.Wallpaper: ImageVector
             translationY = 1041.3888f,
             autoMirror = false,
         )
-        return _wallpaperSurfaceNormal!!
+        return _wallpaperNormal!!
     }
 
-private var _wallpaperSurfaceNormal: ImageVector? = null
+private var _wallpaperNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Wallpaper: ImageVector
     get() {
-        if (_wallpaperSurfaceRegular != null) return _wallpaperSurfaceRegular!!
-        _wallpaperSurfaceRegular = buildHyperOSIcon(
+        if (_wallpaperRegular != null) return _wallpaperRegular!!
+        _wallpaperRegular = buildHyperOSIcon(
             name = "Wallpaper.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(220f, 638f),
@@ -176,15 +176,15 @@ val MiuixIcons.Glass.Regular.Wallpaper: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _wallpaperSurfaceRegular!!
+        return _wallpaperRegular!!
     }
 
-private var _wallpaperSurfaceRegular: ImageVector? = null
+private var _wallpaperRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Wallpaper: ImageVector
     get() {
-        if (_wallpaperSurfaceMedium != null) return _wallpaperSurfaceMedium!!
-        _wallpaperSurfaceMedium = buildHyperOSIcon(
+        if (_wallpaperMedium != null) return _wallpaperMedium!!
+        _wallpaperMedium = buildHyperOSIcon(
             name = "Wallpaper.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(217f, 628.3f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Medium.Wallpaper: ImageVector
             translationY = 1041.8018f,
             autoMirror = false,
         )
-        return _wallpaperSurfaceMedium!!
+        return _wallpaperMedium!!
     }
 
-private var _wallpaperSurfaceMedium: ImageVector? = null
+private var _wallpaperMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Wallpaper: ImageVector
     get() {
-        if (_wallpaperSurfaceDemibold != null) return _wallpaperSurfaceDemibold!!
-        _wallpaperSurfaceDemibold = buildHyperOSIcon(
+        if (_wallpaperDemibold != null) return _wallpaperDemibold!!
+        _wallpaperDemibold = buildHyperOSIcon(
             name = "Wallpaper.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(214.9f, 621.5f),
@@ -290,8 +290,8 @@ val MiuixIcons.Glass.Demibold.Wallpaper: ImageVector
             translationY = 1041.8964f,
             autoMirror = false,
         )
-        return _wallpaperSurfaceDemibold!!
+        return _wallpaperDemibold!!
     }
 
-private var _wallpaperSurfaceDemibold: ImageVector? = null
+private var _wallpaperDemibold: ImageVector? = null
 

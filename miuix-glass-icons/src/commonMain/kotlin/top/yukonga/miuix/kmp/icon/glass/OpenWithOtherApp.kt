@@ -12,8 +12,8 @@ val MiuixIcons.Glass.OpenWithOtherApp: ImageVector
 
 val MiuixIcons.Glass.Light.OpenWithOtherApp: ImageVector
     get() {
-        if (_openWithOtherAppLineLight != null) return _openWithOtherAppLineLight!!
-        _openWithOtherAppLineLight = buildHyperOSIcon(
+        if (_openWithOtherAppLight != null) return _openWithOtherAppLight!!
+        _openWithOtherAppLight = buildHyperOSIcon(
             name = "OpenWithOtherApp.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(455f, 769.3f),
@@ -208,15 +208,15 @@ val MiuixIcons.Glass.Light.OpenWithOtherApp: ImageVector
             translationY = 1041.9444f,
             autoMirror = false,
         )
-        return _openWithOtherAppLineLight!!
+        return _openWithOtherAppLight!!
     }
 
-private var _openWithOtherAppLineLight: ImageVector? = null
+private var _openWithOtherAppLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.OpenWithOtherApp: ImageVector
     get() {
-        if (_openWithOtherAppLineNormal != null) return _openWithOtherAppLineNormal!!
-        _openWithOtherAppLineNormal = buildHyperOSIcon(
+        if (_openWithOtherAppNormal != null) return _openWithOtherAppNormal!!
+        _openWithOtherAppNormal = buildHyperOSIcon(
             name = "OpenWithOtherApp.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(455f, 760.2f),
@@ -411,15 +411,15 @@ val MiuixIcons.Glass.Normal.OpenWithOtherApp: ImageVector
             translationY = 1043.4721f,
             autoMirror = false,
         )
-        return _openWithOtherAppLineNormal!!
+        return _openWithOtherAppNormal!!
     }
 
-private var _openWithOtherAppLineNormal: ImageVector? = null
+private var _openWithOtherAppNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.OpenWithOtherApp: ImageVector
     get() {
-        if (_openWithOtherAppLineRegular != null) return _openWithOtherAppLineRegular!!
-        _openWithOtherAppLineRegular = buildHyperOSIcon(
+        if (_openWithOtherAppRegular != null) return _openWithOtherAppRegular!!
+        _openWithOtherAppRegular = buildHyperOSIcon(
             name = "OpenWithOtherApp.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(455f, 756f),
@@ -614,15 +614,15 @@ val MiuixIcons.Glass.Regular.OpenWithOtherApp: ImageVector
             translationY = 1044.1667f,
             autoMirror = false,
         )
-        return _openWithOtherAppLineRegular!!
+        return _openWithOtherAppRegular!!
     }
 
-private var _openWithOtherAppLineRegular: ImageVector? = null
+private var _openWithOtherAppRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.OpenWithOtherApp: ImageVector
     get() {
-        if (_openWithOtherAppLineMedium != null) return _openWithOtherAppLineMedium!!
-        _openWithOtherAppLineMedium = buildHyperOSIcon(
+        if (_openWithOtherAppMedium != null) return _openWithOtherAppMedium!!
+        _openWithOtherAppMedium = buildHyperOSIcon(
             name = "OpenWithOtherApp.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(449.3f, 754.1f),
@@ -817,15 +817,15 @@ val MiuixIcons.Glass.Medium.OpenWithOtherApp: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _openWithOtherAppLineMedium!!
+        return _openWithOtherAppMedium!!
     }
 
-private var _openWithOtherAppLineMedium: ImageVector? = null
+private var _openWithOtherAppMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.OpenWithOtherApp: ImageVector
     get() {
-        if (_openWithOtherAppLineDemibold != null) return _openWithOtherAppLineDemibold!!
-        _openWithOtherAppLineDemibold = buildHyperOSIcon(
+        if (_openWithOtherAppDemibold != null) return _openWithOtherAppDemibold!!
+        _openWithOtherAppDemibold = buildHyperOSIcon(
             name = "OpenWithOtherApp.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(445.4f, 752.8f),
@@ -1020,8 +1020,8 @@ val MiuixIcons.Glass.Demibold.OpenWithOtherApp: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _openWithOtherAppLineDemibold!!
+        return _openWithOtherAppDemibold!!
     }
 
-private var _openWithOtherAppLineDemibold: ImageVector? = null
+private var _openWithOtherAppDemibold: ImageVector? = null
 

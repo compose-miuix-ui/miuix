@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Thumbnail: ImageVector
 
 val MiuixIcons.Glass.Light.Thumbnail: ImageVector
     get() {
-        if (_thumbnailLineLight != null) return _thumbnailLineLight!!
-        _thumbnailLineLight = buildHyperOSIcon(
+        if (_thumbnailLight != null) return _thumbnailLight!!
+        _thumbnailLight = buildHyperOSIcon(
             name = "Thumbnail.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(291.2f, -37.1f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.Thumbnail: ImageVector
             translationY = 1045.889f,
             autoMirror = false,
         )
-        return _thumbnailLineLight!!
+        return _thumbnailLight!!
     }
 
-private var _thumbnailLineLight: ImageVector? = null
+private var _thumbnailLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Thumbnail: ImageVector
     get() {
-        if (_thumbnailLineNormal != null) return _thumbnailLineNormal!!
-        _thumbnailLineNormal = buildHyperOSIcon(
+        if (_thumbnailNormal != null) return _thumbnailNormal!!
+        _thumbnailNormal = buildHyperOSIcon(
             name = "Thumbnail.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(286.9f, -51.5f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.Thumbnail: ImageVector
             translationY = 1042.9864f,
             autoMirror = false,
         )
-        return _thumbnailLineNormal!!
+        return _thumbnailNormal!!
     }
 
-private var _thumbnailLineNormal: ImageVector? = null
+private var _thumbnailNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Thumbnail: ImageVector
     get() {
-        if (_thumbnailLineRegular != null) return _thumbnailLineRegular!!
-        _thumbnailLineRegular = buildHyperOSIcon(
+        if (_thumbnailRegular != null) return _thumbnailRegular!!
+        _thumbnailRegular = buildHyperOSIcon(
             name = "Thumbnail.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(285f, -58f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.Thumbnail: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _thumbnailLineRegular!!
+        return _thumbnailRegular!!
     }
 
-private var _thumbnailLineRegular: ImageVector? = null
+private var _thumbnailRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Thumbnail: ImageVector
     get() {
-        if (_thumbnailLineMedium != null) return _thumbnailLineMedium!!
-        _thumbnailLineMedium = buildHyperOSIcon(
+        if (_thumbnailMedium != null) return _thumbnailMedium!!
+        _thumbnailMedium = buildHyperOSIcon(
             name = "Thumbnail.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(281.2f, -68f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.Thumbnail: ImageVector
             translationY = 1040.3153f,
             autoMirror = false,
         )
-        return _thumbnailLineMedium!!
+        return _thumbnailMedium!!
     }
 
-private var _thumbnailLineMedium: ImageVector? = null
+private var _thumbnailMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Thumbnail: ImageVector
     get() {
-        if (_thumbnailLineDemibold != null) return _thumbnailLineDemibold!!
-        _thumbnailLineDemibold = buildHyperOSIcon(
+        if (_thumbnailDemibold != null) return _thumbnailDemibold!!
+        _thumbnailDemibold = buildHyperOSIcon(
             name = "Thumbnail.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(278.6f, -75f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.Thumbnail: ImageVector
             translationY = 1039.3693f,
             autoMirror = false,
         )
-        return _thumbnailLineDemibold!!
+        return _thumbnailDemibold!!
     }
 
-private var _thumbnailLineDemibold: ImageVector? = null
+private var _thumbnailDemibold: ImageVector? = null
 

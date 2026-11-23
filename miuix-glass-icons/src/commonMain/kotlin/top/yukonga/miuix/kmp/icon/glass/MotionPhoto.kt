@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MotionPhoto: ImageVector
 
 val MiuixIcons.Glass.Light.MotionPhoto: ImageVector
     get() {
-        if (_motionPhotoLineLight != null) return _motionPhotoLineLight!!
-        _motionPhotoLineLight = buildHyperOSIcon(
+        if (_motionPhotoLight != null) return _motionPhotoLight!!
+        _motionPhotoLight = buildHyperOSIcon(
             name = "MotionPhoto.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(633.4f, -120f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Light.MotionPhoto: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _motionPhotoLineLight!!
+        return _motionPhotoLight!!
     }
 
-private var _motionPhotoLineLight: ImageVector? = null
+private var _motionPhotoLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MotionPhoto: ImageVector
     get() {
-        if (_motionPhotoLineNormal != null) return _motionPhotoLineNormal!!
-        _motionPhotoLineNormal = buildHyperOSIcon(
+        if (_motionPhotoNormal != null) return _motionPhotoNormal!!
+        _motionPhotoNormal = buildHyperOSIcon(
             name = "MotionPhoto.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(627.6f, -120f),
@@ -455,15 +455,15 @@ val MiuixIcons.Glass.Normal.MotionPhoto: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _motionPhotoLineNormal!!
+        return _motionPhotoNormal!!
     }
 
-private var _motionPhotoLineNormal: ImageVector? = null
+private var _motionPhotoNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MotionPhoto: ImageVector
     get() {
-        if (_motionPhotoLineRegular != null) return _motionPhotoLineRegular!!
-        _motionPhotoLineRegular = buildHyperOSIcon(
+        if (_motionPhotoRegular != null) return _motionPhotoRegular!!
+        _motionPhotoRegular = buildHyperOSIcon(
             name = "MotionPhoto.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(625f, -120f),
@@ -680,15 +680,15 @@ val MiuixIcons.Glass.Regular.MotionPhoto: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _motionPhotoLineRegular!!
+        return _motionPhotoRegular!!
     }
 
-private var _motionPhotoLineRegular: ImageVector? = null
+private var _motionPhotoRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MotionPhoto: ImageVector
     get() {
-        if (_motionPhotoLineMedium != null) return _motionPhotoLineMedium!!
-        _motionPhotoLineMedium = buildHyperOSIcon(
+        if (_motionPhotoMedium != null) return _motionPhotoMedium!!
+        _motionPhotoMedium = buildHyperOSIcon(
             name = "MotionPhoto.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(616.9f, -120f),
@@ -905,15 +905,15 @@ val MiuixIcons.Glass.Medium.MotionPhoto: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _motionPhotoLineMedium!!
+        return _motionPhotoMedium!!
     }
 
-private var _motionPhotoLineMedium: ImageVector? = null
+private var _motionPhotoMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MotionPhoto: ImageVector
     get() {
-        if (_motionPhotoLineDemibold != null) return _motionPhotoLineDemibold!!
-        _motionPhotoLineDemibold = buildHyperOSIcon(
+        if (_motionPhotoDemibold != null) return _motionPhotoDemibold!!
+        _motionPhotoDemibold = buildHyperOSIcon(
             name = "MotionPhoto.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(611.2f, -120f),
@@ -1130,8 +1130,8 @@ val MiuixIcons.Glass.Demibold.MotionPhoto: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _motionPhotoLineDemibold!!
+        return _motionPhotoDemibold!!
     }
 
-private var _motionPhotoLineDemibold: ImageVector? = null
+private var _motionPhotoDemibold: ImageVector? = null
 

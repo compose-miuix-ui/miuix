@@ -12,8 +12,8 @@ val MiuixIcons.Glass.GeneratePdf: ImageVector
 
 val MiuixIcons.Glass.Light.GeneratePdf: ImageVector
     get() {
-        if (_generatePdfLineLight != null) return _generatePdfLineLight!!
-        _generatePdfLineLight = buildHyperOSIcon(
+        if (_generatePdfLight != null) return _generatePdfLight!!
+        _generatePdfLight = buildHyperOSIcon(
             name = "GeneratePdf.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(988.8f, -115f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Light.GeneratePdf: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _generatePdfLineLight!!
+        return _generatePdfLight!!
     }
 
-private var _generatePdfLineLight: ImageVector? = null
+private var _generatePdfLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.GeneratePdf: ImageVector
     get() {
-        if (_generatePdfLineNormal != null) return _generatePdfLineNormal!!
-        _generatePdfLineNormal = buildHyperOSIcon(
+        if (_generatePdfNormal != null) return _generatePdfNormal!!
+        _generatePdfNormal = buildHyperOSIcon(
             name = "GeneratePdf.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(993.1f, -123.2f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Normal.GeneratePdf: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _generatePdfLineNormal!!
+        return _generatePdfNormal!!
     }
 
-private var _generatePdfLineNormal: ImageVector? = null
+private var _generatePdfNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.GeneratePdf: ImageVector
     get() {
-        if (_generatePdfLineRegular != null) return _generatePdfLineRegular!!
-        _generatePdfLineRegular = buildHyperOSIcon(
+        if (_generatePdfRegular != null) return _generatePdfRegular!!
+        _generatePdfRegular = buildHyperOSIcon(
             name = "GeneratePdf.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(995f, -127f),
@@ -383,15 +383,15 @@ val MiuixIcons.Glass.Regular.GeneratePdf: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _generatePdfLineRegular!!
+        return _generatePdfRegular!!
     }
 
-private var _generatePdfLineRegular: ImageVector? = null
+private var _generatePdfRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.GeneratePdf: ImageVector
     get() {
-        if (_generatePdfLineMedium != null) return _generatePdfLineMedium!!
-        _generatePdfLineMedium = buildHyperOSIcon(
+        if (_generatePdfMedium != null) return _generatePdfMedium!!
+        _generatePdfMedium = buildHyperOSIcon(
             name = "GeneratePdf.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(998.8f, -134.3f),
@@ -509,15 +509,15 @@ val MiuixIcons.Glass.Medium.GeneratePdf: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _generatePdfLineMedium!!
+        return _generatePdfMedium!!
     }
 
-private var _generatePdfLineMedium: ImageVector? = null
+private var _generatePdfMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.GeneratePdf: ImageVector
     get() {
-        if (_generatePdfLineDemibold != null) return _generatePdfLineDemibold!!
-        _generatePdfLineDemibold = buildHyperOSIcon(
+        if (_generatePdfDemibold != null) return _generatePdfDemibold!!
+        _generatePdfDemibold = buildHyperOSIcon(
             name = "GeneratePdf.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1001.4f, -139.4f),
@@ -635,8 +635,8 @@ val MiuixIcons.Glass.Demibold.GeneratePdf: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _generatePdfLineDemibold!!
+        return _generatePdfDemibold!!
     }
 
-private var _generatePdfLineDemibold: ImageVector? = null
+private var _generatePdfDemibold: ImageVector? = null
 

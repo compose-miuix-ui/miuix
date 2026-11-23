@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LockFill: ImageVector
 
 val MiuixIcons.Glass.Light.LockFill: ImageVector
     get() {
-        if (_lockScreenSurfaceLight != null) return _lockScreenSurfaceLight!!
-        _lockScreenSurfaceLight = buildHyperOSIcon(
+        if (_lockFillLight != null) return _lockFillLight!!
+        _lockFillLight = buildHyperOSIcon(
             name = "LockFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(847.3f, 652f),
@@ -63,15 +63,15 @@ val MiuixIcons.Glass.Light.LockFill: ImageVector
             translationY = 1061.1667f,
             autoMirror = false,
         )
-        return _lockScreenSurfaceLight!!
+        return _lockFillLight!!
     }
 
-private var _lockScreenSurfaceLight: ImageVector? = null
+private var _lockFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LockFill: ImageVector
     get() {
-        if (_lockScreenSurfaceNormal != null) return _lockScreenSurfaceNormal!!
-        _lockScreenSurfaceNormal = buildHyperOSIcon(
+        if (_lockFillNormal != null) return _lockFillNormal!!
+        _lockFillNormal = buildHyperOSIcon(
             name = "LockFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(838.2f, 652f),
@@ -121,15 +121,15 @@ val MiuixIcons.Glass.Normal.LockFill: ImageVector
             translationY = 1061.1667f,
             autoMirror = false,
         )
-        return _lockScreenSurfaceNormal!!
+        return _lockFillNormal!!
     }
 
-private var _lockScreenSurfaceNormal: ImageVector? = null
+private var _lockFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LockFill: ImageVector
     get() {
-        if (_lockScreenSurfaceRegular != null) return _lockScreenSurfaceRegular!!
-        _lockScreenSurfaceRegular = buildHyperOSIcon(
+        if (_lockFillRegular != null) return _lockFillRegular!!
+        _lockFillRegular = buildHyperOSIcon(
             name = "LockFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(834f, 652f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Regular.LockFill: ImageVector
             translationY = 1061.1667f,
             autoMirror = false,
         )
-        return _lockScreenSurfaceRegular!!
+        return _lockFillRegular!!
     }
 
-private var _lockScreenSurfaceRegular: ImageVector? = null
+private var _lockFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LockFill: ImageVector
     get() {
-        if (_lockScreenSurfaceMedium != null) return _lockScreenSurfaceMedium!!
-        _lockScreenSurfaceMedium = buildHyperOSIcon(
+        if (_lockFillMedium != null) return _lockFillMedium!!
+        _lockFillMedium = buildHyperOSIcon(
             name = "LockFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(825.6f, 651.2f),
@@ -237,15 +237,15 @@ val MiuixIcons.Glass.Medium.LockFill: ImageVector
             translationY = 1061.1667f,
             autoMirror = false,
         )
-        return _lockScreenSurfaceMedium!!
+        return _lockFillMedium!!
     }
 
-private var _lockScreenSurfaceMedium: ImageVector? = null
+private var _lockFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LockFill: ImageVector
     get() {
-        if (_lockScreenSurfaceDemibold != null) return _lockScreenSurfaceDemibold!!
-        _lockScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_lockFillDemibold != null) return _lockFillDemibold!!
+        _lockFillDemibold = buildHyperOSIcon(
             name = "LockFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(819.8f, 650.6f),
@@ -295,8 +295,8 @@ val MiuixIcons.Glass.Demibold.LockFill: ImageVector
             translationY = 1061.1667f,
             autoMirror = false,
         )
-        return _lockScreenSurfaceDemibold!!
+        return _lockFillDemibold!!
     }
 
-private var _lockScreenSurfaceDemibold: ImageVector? = null
+private var _lockFillDemibold: ImageVector? = null
 

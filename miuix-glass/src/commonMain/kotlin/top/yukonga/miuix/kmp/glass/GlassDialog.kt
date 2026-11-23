@@ -10,12 +10,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.layout.DialogDefaults
+import top.yukonga.miuix.kmp.layout.DialogMotion
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 /**
  * A Scaffold-hosted glass dialog with an animated scrim and predictive-back support.
+ *
+ * It opens and closes with [DialogMotion.Glass], the HyperOS launcher's dialog motion.
  *
  * The [backdrop] must include the page and bars but exclude the dialog host and its scrim.
  * A `null` backdrop or unavailable runtime shaders use [containerColor]. Use [GlassDialogButton]
@@ -88,6 +91,7 @@ fun GlassDialog(
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
         dimColor = dimColor,
+        motion = DialogMotion.Glass,
         surface = glassDialogSurface(backdrop, material, stroke, containerColor),
         content = content,
     )

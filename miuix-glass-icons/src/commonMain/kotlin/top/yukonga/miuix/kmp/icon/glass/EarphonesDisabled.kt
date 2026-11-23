@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EarphonesDisabled: ImageVector
 
 val MiuixIcons.Glass.Light.EarphonesDisabled: ImageVector
     get() {
-        if (_earphonesDisabledSurfaceLight != null) return _earphonesDisabledSurfaceLight!!
-        _earphonesDisabledSurfaceLight = buildHyperOSIcon(
+        if (_earphonesDisabledLight != null) return _earphonesDisabledLight!!
+        _earphonesDisabledLight = buildHyperOSIcon(
             name = "EarphonesDisabled.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1222.9f, 58.7f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Light.EarphonesDisabled: ImageVector
             translationY = 1041.6801f,
             autoMirror = false,
         )
-        return _earphonesDisabledSurfaceLight!!
+        return _earphonesDisabledLight!!
     }
 
-private var _earphonesDisabledSurfaceLight: ImageVector? = null
+private var _earphonesDisabledLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EarphonesDisabled: ImageVector
     get() {
-        if (_earphonesDisabledSurfaceNormal != null) return _earphonesDisabledSurfaceNormal!!
-        _earphonesDisabledSurfaceNormal = buildHyperOSIcon(
+        if (_earphonesDisabledNormal != null) return _earphonesDisabledNormal!!
+        _earphonesDisabledNormal = buildHyperOSIcon(
             name = "EarphonesDisabled.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1225f, 67.8f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Normal.EarphonesDisabled: ImageVector
             translationY = 1041.6804f,
             autoMirror = false,
         )
-        return _earphonesDisabledSurfaceNormal!!
+        return _earphonesDisabledNormal!!
     }
 
-private var _earphonesDisabledSurfaceNormal: ImageVector? = null
+private var _earphonesDisabledNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EarphonesDisabled: ImageVector
     get() {
-        if (_earphonesDisabledSurfaceRegular != null) return _earphonesDisabledSurfaceRegular!!
-        _earphonesDisabledSurfaceRegular = buildHyperOSIcon(
+        if (_earphonesDisabledRegular != null) return _earphonesDisabledRegular!!
+        _earphonesDisabledRegular = buildHyperOSIcon(
             name = "EarphonesDisabled.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1226f, 72f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Regular.EarphonesDisabled: ImageVector
             translationY = 1041.6805f,
             autoMirror = false,
         )
-        return _earphonesDisabledSurfaceRegular!!
+        return _earphonesDisabledRegular!!
     }
 
-private var _earphonesDisabledSurfaceRegular: ImageVector? = null
+private var _earphonesDisabledRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EarphonesDisabled: ImageVector
     get() {
-        if (_earphonesDisabledSurfaceMedium != null) return _earphonesDisabledSurfaceMedium!!
-        _earphonesDisabledSurfaceMedium = buildHyperOSIcon(
+        if (_earphonesDisabledMedium != null) return _earphonesDisabledMedium!!
+        _earphonesDisabledMedium = buildHyperOSIcon(
             name = "EarphonesDisabled.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1229f, 80.6f),
@@ -325,15 +325,15 @@ val MiuixIcons.Glass.Medium.EarphonesDisabled: ImageVector
             translationY = 1041.6811f,
             autoMirror = false,
         )
-        return _earphonesDisabledSurfaceMedium!!
+        return _earphonesDisabledMedium!!
     }
 
-private var _earphonesDisabledSurfaceMedium: ImageVector? = null
+private var _earphonesDisabledMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EarphonesDisabled: ImageVector
     get() {
-        if (_earphonesDisabledSurfaceDemibold != null) return _earphonesDisabledSurfaceDemibold!!
-        _earphonesDisabledSurfaceDemibold = buildHyperOSIcon(
+        if (_earphonesDisabledDemibold != null) return _earphonesDisabledDemibold!!
+        _earphonesDisabledDemibold = buildHyperOSIcon(
             name = "EarphonesDisabled.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1231.1f, 86.7f),
@@ -405,8 +405,8 @@ val MiuixIcons.Glass.Demibold.EarphonesDisabled: ImageVector
             translationY = 1041.6816f,
             autoMirror = false,
         )
-        return _earphonesDisabledSurfaceDemibold!!
+        return _earphonesDisabledDemibold!!
     }
 
-private var _earphonesDisabledSurfaceDemibold: ImageVector? = null
+private var _earphonesDisabledDemibold: ImageVector? = null
 

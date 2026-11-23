@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CoolingFan: ImageVector
 
 val MiuixIcons.Glass.Light.CoolingFan: ImageVector
     get() {
-        if (_coolingFanSurfaceLight != null) return _coolingFanSurfaceLight!!
-        _coolingFanSurfaceLight = buildHyperOSIcon(
+        if (_coolingFanLight != null) return _coolingFanLight!!
+        _coolingFanLight = buildHyperOSIcon(
             name = "CoolingFan.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1083.9f, 111f),
@@ -92,15 +92,15 @@ val MiuixIcons.Glass.Light.CoolingFan: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coolingFanSurfaceLight!!
+        return _coolingFanLight!!
     }
 
-private var _coolingFanSurfaceLight: ImageVector? = null
+private var _coolingFanLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CoolingFan: ImageVector
     get() {
-        if (_coolingFanSurfaceNormal != null) return _coolingFanSurfaceNormal!!
-        _coolingFanSurfaceNormal = buildHyperOSIcon(
+        if (_coolingFanNormal != null) return _coolingFanNormal!!
+        _coolingFanNormal = buildHyperOSIcon(
             name = "CoolingFan.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1088.8f, 111f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Normal.CoolingFan: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coolingFanSurfaceNormal!!
+        return _coolingFanNormal!!
     }
 
-private var _coolingFanSurfaceNormal: ImageVector? = null
+private var _coolingFanNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CoolingFan: ImageVector
     get() {
-        if (_coolingFanSurfaceRegular != null) return _coolingFanSurfaceRegular!!
-        _coolingFanSurfaceRegular = buildHyperOSIcon(
+        if (_coolingFanRegular != null) return _coolingFanRegular!!
+        _coolingFanRegular = buildHyperOSIcon(
             name = "CoolingFan.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1091f, 111f),
@@ -266,15 +266,15 @@ val MiuixIcons.Glass.Regular.CoolingFan: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coolingFanSurfaceRegular!!
+        return _coolingFanRegular!!
     }
 
-private var _coolingFanSurfaceRegular: ImageVector? = null
+private var _coolingFanRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CoolingFan: ImageVector
     get() {
-        if (_coolingFanSurfaceMedium != null) return _coolingFanSurfaceMedium!!
-        _coolingFanSurfaceMedium = buildHyperOSIcon(
+        if (_coolingFanMedium != null) return _coolingFanMedium!!
+        _coolingFanMedium = buildHyperOSIcon(
             name = "CoolingFan.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1096.4f, 111f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Medium.CoolingFan: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coolingFanSurfaceMedium!!
+        return _coolingFanMedium!!
     }
 
-private var _coolingFanSurfaceMedium: ImageVector? = null
+private var _coolingFanMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CoolingFan: ImageVector
     get() {
-        if (_coolingFanSurfaceDemibold != null) return _coolingFanSurfaceDemibold!!
-        _coolingFanSurfaceDemibold = buildHyperOSIcon(
+        if (_coolingFanDemibold != null) return _coolingFanDemibold!!
+        _coolingFanDemibold = buildHyperOSIcon(
             name = "CoolingFan.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1100.2f, 111f),
@@ -440,8 +440,8 @@ val MiuixIcons.Glass.Demibold.CoolingFan: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _coolingFanSurfaceDemibold!!
+        return _coolingFanDemibold!!
     }
 
-private var _coolingFanSurfaceDemibold: ImageVector? = null
+private var _coolingFanDemibold: ImageVector? = null
 

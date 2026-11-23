@@ -84,8 +84,8 @@ import top.yukonga.miuix.kmp.icon.glass.Card1DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Card2Dash2
 import top.yukonga.miuix.kmp.icon.glass.Card2DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Carrier
-import top.yukonga.miuix.kmp.icon.glass.CeditSelection
 import top.yukonga.miuix.kmp.icon.glass.ChargingCase
+import top.yukonga.miuix.kmp.icon.glass.CheckSelection
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
 import top.yukonga.miuix.kmp.icon.glass.ChevronForward
 import top.yukonga.miuix.kmp.icon.glass.Child
@@ -512,7 +512,7 @@ import top.yukonga.miuix.kmp.icon.glass.WiFi6
 import top.yukonga.miuix.kmp.icon.glass.WiFi7
 import top.yukonga.miuix.kmp.icon.glass.Widget
 import top.yukonga.miuix.kmp.icon.glass.WiredHdmi
-import top.yukonga.miuix.kmp.icon.glass.XiaominListen
+import top.yukonga.miuix.kmp.icon.glass.XiaomiListen
 import top.yukonga.miuix.kmp.icon.glass.Years
 import top.yukonga.miuix.kmp.icon.glass.ZoomOut
 import top.yukonga.miuix.kmp.icon.glass.ZoomRing
@@ -599,7 +599,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.Card2DashselectedPlus,
             MiuixIcons.Glass.Light.CameraOutline,
             MiuixIcons.Glass.Light.Carrier,
-            MiuixIcons.Glass.Light.CeditSelection,
+            MiuixIcons.Glass.Light.CheckSelection,
             MiuixIcons.Glass.Light.ChargingCase,
             MiuixIcons.Glass.Light.ChevronBackward,
             MiuixIcons.Glass.Light.ChevronForward,
@@ -1027,7 +1027,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.WiFi7,
             MiuixIcons.Glass.Light.Widget,
             MiuixIcons.Glass.Light.WiredHdmi,
-            MiuixIcons.Glass.Light.XiaominListen,
+            MiuixIcons.Glass.Light.XiaomiListen,
             MiuixIcons.Glass.Light.Years,
             MiuixIcons.Glass.Light.ZoomOut,
             MiuixIcons.Glass.Light.ZoomRing,
@@ -1112,7 +1112,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.Card2DashselectedPlus,
             MiuixIcons.Glass.Normal.CameraOutline,
             MiuixIcons.Glass.Normal.Carrier,
-            MiuixIcons.Glass.Normal.CeditSelection,
+            MiuixIcons.Glass.Normal.CheckSelection,
             MiuixIcons.Glass.Normal.ChargingCase,
             MiuixIcons.Glass.Normal.ChevronBackward,
             MiuixIcons.Glass.Normal.ChevronForward,
@@ -1540,7 +1540,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.WiFi7,
             MiuixIcons.Glass.Normal.Widget,
             MiuixIcons.Glass.Normal.WiredHdmi,
-            MiuixIcons.Glass.Normal.XiaominListen,
+            MiuixIcons.Glass.Normal.XiaomiListen,
             MiuixIcons.Glass.Normal.Years,
             MiuixIcons.Glass.Normal.ZoomOut,
             MiuixIcons.Glass.Normal.ZoomRing,
@@ -1625,7 +1625,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.Card2DashselectedPlus,
             MiuixIcons.Glass.Regular.CameraOutline,
             MiuixIcons.Glass.Regular.Carrier,
-            MiuixIcons.Glass.Regular.CeditSelection,
+            MiuixIcons.Glass.Regular.CheckSelection,
             MiuixIcons.Glass.Regular.ChargingCase,
             MiuixIcons.Glass.Regular.ChevronBackward,
             MiuixIcons.Glass.Regular.ChevronForward,
@@ -2053,7 +2053,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.WiFi7,
             MiuixIcons.Glass.Regular.Widget,
             MiuixIcons.Glass.Regular.WiredHdmi,
-            MiuixIcons.Glass.Regular.XiaominListen,
+            MiuixIcons.Glass.Regular.XiaomiListen,
             MiuixIcons.Glass.Regular.Years,
             MiuixIcons.Glass.Regular.ZoomOut,
             MiuixIcons.Glass.Regular.ZoomRing,
@@ -2138,7 +2138,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.Card2DashselectedPlus,
             MiuixIcons.Glass.Medium.CameraOutline,
             MiuixIcons.Glass.Medium.Carrier,
-            MiuixIcons.Glass.Medium.CeditSelection,
+            MiuixIcons.Glass.Medium.CheckSelection,
             MiuixIcons.Glass.Medium.ChargingCase,
             MiuixIcons.Glass.Medium.ChevronBackward,
             MiuixIcons.Glass.Medium.ChevronForward,
@@ -2566,7 +2566,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.WiFi7,
             MiuixIcons.Glass.Medium.Widget,
             MiuixIcons.Glass.Medium.WiredHdmi,
-            MiuixIcons.Glass.Medium.XiaominListen,
+            MiuixIcons.Glass.Medium.XiaomiListen,
             MiuixIcons.Glass.Medium.Years,
             MiuixIcons.Glass.Medium.ZoomOut,
             MiuixIcons.Glass.Medium.ZoomRing,
@@ -2651,7 +2651,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.Card2DashselectedPlus,
             MiuixIcons.Glass.Demibold.CameraOutline,
             MiuixIcons.Glass.Demibold.Carrier,
-            MiuixIcons.Glass.Demibold.CeditSelection,
+            MiuixIcons.Glass.Demibold.CheckSelection,
             MiuixIcons.Glass.Demibold.ChargingCase,
             MiuixIcons.Glass.Demibold.ChevronBackward,
             MiuixIcons.Glass.Demibold.ChevronForward,
@@ -3079,7 +3079,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.WiFi7,
             MiuixIcons.Glass.Demibold.Widget,
             MiuixIcons.Glass.Demibold.WiredHdmi,
-            MiuixIcons.Glass.Demibold.XiaominListen,
+            MiuixIcons.Glass.Demibold.XiaomiListen,
             MiuixIcons.Glass.Demibold.Years,
             MiuixIcons.Glass.Demibold.ZoomOut,
             MiuixIcons.Glass.Demibold.ZoomRing,

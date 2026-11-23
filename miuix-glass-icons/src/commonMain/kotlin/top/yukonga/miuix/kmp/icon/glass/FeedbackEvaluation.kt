@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FeedbackEvaluation: ImageVector
 
 val MiuixIcons.Glass.Light.FeedbackEvaluation: ImageVector
     get() {
-        if (_usageExperienceEvaluationSurfaceLight != null) return _usageExperienceEvaluationSurfaceLight!!
-        _usageExperienceEvaluationSurfaceLight = buildHyperOSIcon(
+        if (_feedbackEvaluationLight != null) return _feedbackEvaluationLight!!
+        _feedbackEvaluationLight = buildHyperOSIcon(
             name = "FeedbackEvaluation.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(395.1f, 348.3f),
@@ -80,15 +80,15 @@ val MiuixIcons.Glass.Light.FeedbackEvaluation: ImageVector
             translationY = 1027.7778f,
             autoMirror = false,
         )
-        return _usageExperienceEvaluationSurfaceLight!!
+        return _feedbackEvaluationLight!!
     }
 
-private var _usageExperienceEvaluationSurfaceLight: ImageVector? = null
+private var _feedbackEvaluationLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FeedbackEvaluation: ImageVector
     get() {
-        if (_usageExperienceEvaluationSurfaceNormal != null) return _usageExperienceEvaluationSurfaceNormal!!
-        _usageExperienceEvaluationSurfaceNormal = buildHyperOSIcon(
+        if (_feedbackEvaluationNormal != null) return _feedbackEvaluationNormal!!
+        _feedbackEvaluationNormal = buildHyperOSIcon(
             name = "FeedbackEvaluation.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(390.2f, 344.7f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Normal.FeedbackEvaluation: ImageVector
             translationY = 1027.7014f,
             autoMirror = false,
         )
-        return _usageExperienceEvaluationSurfaceNormal!!
+        return _feedbackEvaluationNormal!!
     }
 
-private var _usageExperienceEvaluationSurfaceNormal: ImageVector? = null
+private var _feedbackEvaluationNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FeedbackEvaluation: ImageVector
     get() {
-        if (_usageExperienceEvaluationSurfaceRegular != null) return _usageExperienceEvaluationSurfaceRegular!!
-        _usageExperienceEvaluationSurfaceRegular = buildHyperOSIcon(
+        if (_feedbackEvaluationRegular != null) return _feedbackEvaluationRegular!!
+        _feedbackEvaluationRegular = buildHyperOSIcon(
             name = "FeedbackEvaluation.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(388f, 343f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Regular.FeedbackEvaluation: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _usageExperienceEvaluationSurfaceRegular!!
+        return _feedbackEvaluationRegular!!
     }
 
-private var _usageExperienceEvaluationSurfaceRegular: ImageVector? = null
+private var _feedbackEvaluationRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FeedbackEvaluation: ImageVector
     get() {
-        if (_usageExperienceEvaluationSurfaceMedium != null) return _usageExperienceEvaluationSurfaceMedium!!
-        _usageExperienceEvaluationSurfaceMedium = buildHyperOSIcon(
+        if (_feedbackEvaluationMedium != null) return _feedbackEvaluationMedium!!
+        _feedbackEvaluationMedium = buildHyperOSIcon(
             name = "FeedbackEvaluation.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(384.5f, 338.7f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Medium.FeedbackEvaluation: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _usageExperienceEvaluationSurfaceMedium!!
+        return _feedbackEvaluationMedium!!
     }
 
-private var _usageExperienceEvaluationSurfaceMedium: ImageVector? = null
+private var _feedbackEvaluationMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FeedbackEvaluation: ImageVector
     get() {
-        if (_usageExperienceEvaluationSurfaceDemibold != null) return _usageExperienceEvaluationSurfaceDemibold!!
-        _usageExperienceEvaluationSurfaceDemibold = buildHyperOSIcon(
+        if (_feedbackEvaluationDemibold != null) return _feedbackEvaluationDemibold!!
+        _feedbackEvaluationDemibold = buildHyperOSIcon(
             name = "FeedbackEvaluation.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(382f, 335.6f),
@@ -380,8 +380,8 @@ val MiuixIcons.Glass.Demibold.FeedbackEvaluation: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _usageExperienceEvaluationSurfaceDemibold!!
+        return _feedbackEvaluationDemibold!!
     }
 
-private var _usageExperienceEvaluationSurfaceDemibold: ImageVector? = null
+private var _feedbackEvaluationDemibold: ImageVector? = null
 

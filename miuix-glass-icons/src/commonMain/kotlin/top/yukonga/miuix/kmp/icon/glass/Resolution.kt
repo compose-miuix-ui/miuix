@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Resolution: ImageVector
 
 val MiuixIcons.Glass.Light.Resolution: ImageVector
     get() {
-        if (_resolutionLineLight != null) return _resolutionLineLight!!
-        _resolutionLineLight = buildHyperOSIcon(
+        if (_resolutionLight != null) return _resolutionLight!!
+        _resolutionLight = buildHyperOSIcon(
             name = "Resolution.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(924f, 829.7f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.Resolution: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _resolutionLineLight!!
+        return _resolutionLight!!
     }
 
-private var _resolutionLineLight: ImageVector? = null
+private var _resolutionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Resolution: ImageVector
     get() {
-        if (_resolutionLineNormal != null) return _resolutionLineNormal!!
-        _resolutionLineNormal = buildHyperOSIcon(
+        if (_resolutionNormal != null) return _resolutionNormal!!
+        _resolutionNormal = buildHyperOSIcon(
             name = "Resolution.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(924f, 838.8f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.Resolution: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _resolutionLineNormal!!
+        return _resolutionNormal!!
     }
 
-private var _resolutionLineNormal: ImageVector? = null
+private var _resolutionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Resolution: ImageVector
     get() {
-        if (_resolutionLineRegular != null) return _resolutionLineRegular!!
-        _resolutionLineRegular = buildHyperOSIcon(
+        if (_resolutionRegular != null) return _resolutionRegular!!
+        _resolutionRegular = buildHyperOSIcon(
             name = "Resolution.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(924f, 843f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.Resolution: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _resolutionLineRegular!!
+        return _resolutionRegular!!
     }
 
-private var _resolutionLineRegular: ImageVector? = null
+private var _resolutionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Resolution: ImageVector
     get() {
-        if (_resolutionLineMedium != null) return _resolutionLineMedium!!
-        _resolutionLineMedium = buildHyperOSIcon(
+        if (_resolutionMedium != null) return _resolutionMedium!!
+        _resolutionMedium = buildHyperOSIcon(
             name = "Resolution.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(924f, 851.1f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.Resolution: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _resolutionLineMedium!!
+        return _resolutionMedium!!
     }
 
-private var _resolutionLineMedium: ImageVector? = null
+private var _resolutionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Resolution: ImageVector
     get() {
-        if (_resolutionLineDemibold != null) return _resolutionLineDemibold!!
-        _resolutionLineDemibold = buildHyperOSIcon(
+        if (_resolutionDemibold != null) return _resolutionDemibold!!
+        _resolutionDemibold = buildHyperOSIcon(
             name = "Resolution.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(924f, 856.8f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.Resolution: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _resolutionLineDemibold!!
+        return _resolutionDemibold!!
     }
 
-private var _resolutionLineDemibold: ImageVector? = null
+private var _resolutionDemibold: ImageVector? = null
 

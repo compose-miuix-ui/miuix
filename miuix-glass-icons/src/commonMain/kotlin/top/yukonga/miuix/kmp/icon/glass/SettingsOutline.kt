@@ -17,8 +17,8 @@ val MiuixIcons.Glass.SettingsOutline: ImageVector
 
 val MiuixIcons.Glass.Light.SettingsOutline: ImageVector
     get() {
-        if (_settingsLight != null) return _settingsLight!!
-        _settingsLight = ImageVector.Builder(
+        if (_settingsOutlineLight != null) return _settingsOutlineLight!!
+        _settingsOutlineLight = ImageVector.Builder(
             name = "SettingsOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Light.SettingsOutline: ImageVector
                 )
             }
         }.build()
-        return _settingsLight!!
+        return _settingsOutlineLight!!
     }
 
-private var _settingsLight: ImageVector? = null
+private var _settingsOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SettingsOutline: ImageVector
     get() {
-        if (_settingsNormal != null) return _settingsNormal!!
-        _settingsNormal = ImageVector.Builder(
+        if (_settingsOutlineNormal != null) return _settingsOutlineNormal!!
+        _settingsOutlineNormal = ImageVector.Builder(
             name = "SettingsOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -240,15 +240,15 @@ val MiuixIcons.Glass.Normal.SettingsOutline: ImageVector
                 )
             }
         }.build()
-        return _settingsNormal!!
+        return _settingsOutlineNormal!!
     }
 
-private var _settingsNormal: ImageVector? = null
+private var _settingsOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SettingsOutline: ImageVector
     get() {
-        if (_settingsRegular != null) return _settingsRegular!!
-        _settingsRegular = ImageVector.Builder(
+        if (_settingsOutlineRegular != null) return _settingsOutlineRegular!!
+        _settingsOutlineRegular = ImageVector.Builder(
             name = "SettingsOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -355,15 +355,15 @@ val MiuixIcons.Glass.Regular.SettingsOutline: ImageVector
                 )
             }
         }.build()
-        return _settingsRegular!!
+        return _settingsOutlineRegular!!
     }
 
-private var _settingsRegular: ImageVector? = null
+private var _settingsOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SettingsOutline: ImageVector
     get() {
-        if (_settingsMedium != null) return _settingsMedium!!
-        _settingsMedium = ImageVector.Builder(
+        if (_settingsOutlineMedium != null) return _settingsOutlineMedium!!
+        _settingsOutlineMedium = ImageVector.Builder(
             name = "SettingsOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -470,15 +470,15 @@ val MiuixIcons.Glass.Medium.SettingsOutline: ImageVector
                 )
             }
         }.build()
-        return _settingsMedium!!
+        return _settingsOutlineMedium!!
     }
 
-private var _settingsMedium: ImageVector? = null
+private var _settingsOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SettingsOutline: ImageVector
     get() {
-        if (_settingsDemibold != null) return _settingsDemibold!!
-        _settingsDemibold = ImageVector.Builder(
+        if (_settingsOutlineDemibold != null) return _settingsOutlineDemibold!!
+        _settingsOutlineDemibold = ImageVector.Builder(
             name = "SettingsOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -585,7 +585,7 @@ val MiuixIcons.Glass.Demibold.SettingsOutline: ImageVector
                 )
             }
         }.build()
-        return _settingsDemibold!!
+        return _settingsOutlineDemibold!!
     }
 
-private var _settingsDemibold: ImageVector? = null
+private var _settingsOutlineDemibold: ImageVector? = null

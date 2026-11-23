@@ -394,7 +394,7 @@ private fun NavDisplayLayout(
     // stable contentKey -> back-stack-index map so the render loop never rebuilds NavEntry instances to
     // recover an index (no O(n^2)). Declared ahead of the gesture wiring: the settle physics
     // resolution below feeds the gesture callbacks.
-    val currentKeyList = backStack.toList()
+    val currentKeyList by remember(backStack) { computedStateOf { backStack.toList() } }
     // Covered entries stay composed, so clear their focus when the top entry changes.
     val previousTopKey = remember { arrayOfNulls<NavKey>(1) }
     SideEffect(currentKeyList.lastOrNull()) {
@@ -957,7 +957,7 @@ private fun NavEntryHost(
     val depthBuckets by remember(presentation, entryIndex, entry, effects) {
         computedStateOf {
             val d = presentation.animatedTop.value - entryIndex
-            var mask = navMaxLifecycleFor(entry.presentation, d, presentation.gesture != null).ordinal
+            var mask = navMaxLifecycleFor(entry.presentation, d, presentation.gestureActive).ordinal
             if (d <= 0f) mask = mask or DEPTH_BUCKET_GOVERNS_OWN
             if (effects.shouldClipCornersAt(d)) mask = mask or DEPTH_BUCKET_CLIP_CORNERS
             if (effects.shouldBlockInputAt(d)) mask = mask or DEPTH_BUCKET_BLOCK_INPUT
@@ -1064,34 +1064,13 @@ private fun NavEntryHost(
         Modifier
     }
 
-    val blockInputModifier = if ((depthBuckets and DEPTH_BUCKET_BLOCK_INPUT) != 0) {
-        Modifier.pointerInput(BLOCK_INPUT_KEY) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                    event.changes.fastForEach { it.consume() }
-                }
-            }
-        }
-    } else {
-        Modifier
-    }
-
-    // Pages are input-opaque within their bounds: a hit-testable but non-consuming filter keeps a
-    // touch on a blank region of this entry from falling through to the covered (invisible but
-    // still composed) entry below. In-page consumers and the container swipe are unaffected —
-    // this only removes lower SIBLINGS from the hit path.
-    val opaqueInputModifier = Modifier.pointerInput(OPAQUE_INPUT_KEY) {
-        awaitPointerEventScope {
-            while (true) awaitPointerEvent()
-        }
-    }
+    val blockInputModifier = if ((depthBuckets and DEPTH_BUCKET_BLOCK_INPUT) != 0) BlockInputModifier else Modifier
 
     Box(
         modifier = entryModifier
             .then(clipModifier)
             .then(blockInputModifier)
-            .then(opaqueInputModifier)
+            .then(OpaqueInputModifier)
             .then(contentModifier)
             .then(renderingModifier),
     ) {
@@ -1232,5 +1211,20 @@ internal fun NavDisplay(
             hostContext = hostContext,
             modifier = modifier,
         )
+    }
+}
+
+private val BlockInputModifier = Modifier.pointerInput(BLOCK_INPUT_KEY) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+            event.changes.fastForEach { it.consume() }
+        }
+    }
+}
+
+private val OpaqueInputModifier = Modifier.pointerInput(OPAQUE_INPUT_KEY) {
+    awaitPointerEventScope {
+        while (true) awaitPointerEvent()
     }
 }

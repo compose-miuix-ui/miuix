@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Vlog: ImageVector
 
 val MiuixIcons.Glass.Light.Vlog: ImageVector
     get() {
-        if (_vlogLineLight != null) return _vlogLineLight!!
-        _vlogLineLight = buildHyperOSIcon(
+        if (_vlogLight != null) return _vlogLight!!
+        _vlogLight = buildHyperOSIcon(
             name = "Vlog.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1025.8f, 765.3f),
@@ -72,15 +72,15 @@ val MiuixIcons.Glass.Light.Vlog: ImageVector
             translationY = 1041.6302f,
             autoMirror = false,
         )
-        return _vlogLineLight!!
+        return _vlogLight!!
     }
 
-private var _vlogLineLight: ImageVector? = null
+private var _vlogLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Vlog: ImageVector
     get() {
-        if (_vlogLineNormal != null) return _vlogLineNormal!!
-        _vlogLineNormal = buildHyperOSIcon(
+        if (_vlogNormal != null) return _vlogNormal!!
+        _vlogNormal = buildHyperOSIcon(
             name = "Vlog.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1030.1f, 772.7f),
@@ -139,15 +139,15 @@ val MiuixIcons.Glass.Normal.Vlog: ImageVector
             translationY = 1041.7446f,
             autoMirror = false,
         )
-        return _vlogLineNormal!!
+        return _vlogNormal!!
     }
 
-private var _vlogLineNormal: ImageVector? = null
+private var _vlogNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Vlog: ImageVector
     get() {
-        if (_vlogLineRegular != null) return _vlogLineRegular!!
-        _vlogLineRegular = buildHyperOSIcon(
+        if (_vlogRegular != null) return _vlogRegular!!
+        _vlogRegular = buildHyperOSIcon(
             name = "Vlog.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1032f, 776f),
@@ -206,15 +206,15 @@ val MiuixIcons.Glass.Regular.Vlog: ImageVector
             translationY = 1041.7966f,
             autoMirror = false,
         )
-        return _vlogLineRegular!!
+        return _vlogRegular!!
     }
 
-private var _vlogLineRegular: ImageVector? = null
+private var _vlogRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Vlog: ImageVector
     get() {
-        if (_vlogLineMedium != null) return _vlogLineMedium!!
-        _vlogLineMedium = buildHyperOSIcon(
+        if (_vlogMedium != null) return _vlogMedium!!
+        _vlogMedium = buildHyperOSIcon(
             name = "Vlog.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1036.1f, 783f),
@@ -273,15 +273,15 @@ val MiuixIcons.Glass.Medium.Vlog: ImageVector
             translationY = 1041.7626f,
             autoMirror = false,
         )
-        return _vlogLineMedium!!
+        return _vlogMedium!!
     }
 
-private var _vlogLineMedium: ImageVector? = null
+private var _vlogMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Vlog: ImageVector
     get() {
-        if (_vlogLineDemibold != null) return _vlogLineDemibold!!
-        _vlogLineDemibold = buildHyperOSIcon(
+        if (_vlogDemibold != null) return _vlogDemibold!!
+        _vlogDemibold = buildHyperOSIcon(
             name = "Vlog.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1038.9f, 787.9f),
@@ -340,8 +340,8 @@ val MiuixIcons.Glass.Demibold.Vlog: ImageVector
             translationY = 1041.7388f,
             autoMirror = false,
         )
-        return _vlogLineDemibold!!
+        return _vlogDemibold!!
     }
 
-private var _vlogLineDemibold: ImageVector? = null
+private var _vlogDemibold: ImageVector? = null
 

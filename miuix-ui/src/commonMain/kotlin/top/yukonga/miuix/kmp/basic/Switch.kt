@@ -4,7 +4,7 @@
 package top.yukonga.miuix.kmp.basic
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
@@ -12,8 +12,8 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -24,9 +24,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,20 +40,31 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.theme.LocalColors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import kotlin.math.absoluteValue
+
+private val ThumbStart = 4.dp
+private val ThumbTravel = 21.dp
+private val ThumbPositionSpring = folmeSpring(damping = 0.6f, response = 0.346f, visibilityThreshold = 0.001f)
+private val ThumbScaleSpring = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+private val TrackColorSpring = spring<Color>(dampingRatio = 0.99f, stiffness = 438.6f)
 
 /**
  * A [Switch] component with Miuix style.
@@ -71,37 +84,73 @@ fun Switch(
     enabled: Boolean = true,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val currentChecked by rememberUpdatedState(checked)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isDragged by interactionSource.collectIsDraggedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val hapticFeedback = LocalHapticFeedback.current
-    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
-    var hasVibrated by remember { mutableStateOf(false) }
-    var hasVibratedOnce by remember { mutableStateOf(false) }
-    var rawDragOffset by remember { mutableFloatStateOf(0f) }
-    var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
+    val currentHapticFeedback by rememberUpdatedState(LocalHapticFeedback.current)
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val hasCallback = onCheckedChange != null
+    val canDrag = enabled && hasCallback
+    var isDragging by remember { mutableStateOf(false) }
+    var dragPosition by remember { mutableFloatStateOf(Float.NaN) }
+    var completedDrags by remember { mutableIntStateOf(0) }
+    var startPosition by remember { mutableFloatStateOf(0f) }
+    var rawPosition by remember { mutableFloatStateOf(0f) }
+    var lastHaptic by remember { mutableStateOf<Boolean?>(null) }
+    val travelPx = with(LocalDensity.current) { ThumbTravel.toPx() }
 
     val capsuleShape = CircleShape
-    val thumbOffsetSpringSpec = remember { spring<Dp>(dampingRatio = 0.7f, stiffness = 987f) }
-    val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
 
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    val thumbOffsetState = animateDpAsState(
-        targetValue = (if (checked) 25.dp else 4.dp) + dragOffset.dp,
-        animationSpec = thumbOffsetSpringSpec,
-    )
+    val thumbPosition = remember { Animatable(if (checked) 1f else 0f) }
+    LaunchedEffect(checked, isDragging, canDrag, completedDrags) {
+        if (isDragging && canDrag) return@LaunchedEffect
+        if (!dragPosition.isNaN()) {
+            thumbPosition.snapTo(dragPosition)
+            dragPosition = Float.NaN
+        }
+        thumbPosition.animateTo(if (checked) 1f else 0f, ThumbPositionSpring)
+    }
+    val finishDrag by rememberUpdatedState<(Boolean) -> Unit> { released ->
+        if (isDragging) {
+            val position = dragPosition
+            isDragging = false
+            completedDrags++
+            if (released && canDrag) {
+                val target = position >= 0.5f
+                if (target != currentChecked) currentOnCheckedChange?.invoke(target)
+                if (lastHaptic != target && (position - startPosition).absoluteValue >= 1f / ThumbTravel.value) {
+                    currentHapticFeedback.performHapticFeedback(if (target) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+                }
+            }
+        }
+    }
+    val dragInteractionSource = remember(interactionSource) {
+        SwitchDragInteractionSource(interactionSource) { released -> finishDrag(released) }
+    }
+    val draggableState = rememberDraggableState { amount ->
+        if (isDragging) {
+            rawPosition += amount / travelPx
+            val previousPosition = dragPosition
+            dragPosition = rawPosition.fastCoerceIn(0f, 1f)
+            if (dragPosition != previousPosition && (dragPosition == 0f || dragPosition == 1f)) {
+                val reachedOn = dragPosition == 1f
+                currentHapticFeedback.performHapticFeedback(if (reachedOn) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+                lastHaptic = reachedOn
+            }
+        }
+    }
 
     val thumbScaleState = animateFloatAsState(
         targetValue = if (!enabled) {
             1f
-        } else if (isPressed || isDragged || isHovered) {
+        } else if (isPressed || isDragging || isHovered) {
             1.127f
         } else {
             1f
         },
-        animationSpec = thumbScaleSpringSpec,
+        animationSpec = ThumbScaleSpring,
     )
 
     val thumbColorState = animateColorAsState(
@@ -110,10 +159,9 @@ fun Switch(
 
     val backgroundColorState = animateColorAsState(
         if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
-        animationSpec = spring(dampingRatio = 0.99f, stiffness = 438.6f),
+        animationSpec = TrackColorSpring,
     )
 
-    val hasCallback = onCheckedChange != null
     val toggleableModifier = if (hasCallback) {
         remember(checked, enabled, interactionSource) {
             Modifier.toggleable(
@@ -156,68 +204,55 @@ fun Switch(
                 .size(20.dp)
                 .align(Alignment.CenterStart)
                 .offset {
-                    IntOffset(thumbOffsetState.value.roundToPx(), 0)
+                    // Keep spring overshoot in the rendered position. Only finger tracking is clamped.
+                    val position = if (dragPosition.isNaN()) thumbPosition.value else dragPosition
+                    IntOffset((ThumbStart.toPx() + position * ThumbTravel.toPx()).fastRoundToInt(), 0)
                 }
+                .draggable(
+                    state = draggableState,
+                    orientation = Orientation.Horizontal,
+                    enabled = canDrag,
+                    interactionSource = dragInteractionSource,
+                    reverseDirection = isRtl,
+                    onDragStarted = {
+                        startPosition = (if (dragPosition.isNaN()) thumbPosition.value else dragPosition).fastCoerceIn(0f, 1f)
+                        rawPosition = startPosition
+                        dragPosition = startPosition
+                        lastHaptic = null
+                        isDragging = true
+                    },
+                )
                 .graphicsLayer {
                     scaleX = thumbScaleState.value
                     scaleY = thumbScaleState.value
                 }
                 .drawBehind {
                     drawCircle(color = thumbColorState.value)
-                }
-                .then(
-                    if (enabled) {
-                        Modifier.draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { dragAmount ->
-                                rawDragOffset += dragAmount / 2f
-                                dragOffset = if (checked) {
-                                    rawDragOffset.coerceIn(-21f, 0f)
-                                } else {
-                                    rawDragOffset.coerceIn(0f, 21f)
-                                }
-
-                                if (dragOffset in -11f..-10f || dragOffset in 10f..11f) {
-                                    hasVibratedOnce = false
-                                } else if (dragOffset in -20f..-1f || dragOffset in 1f..20f) {
-                                    hasVibrated = false
-                                } else if (!hasVibrated) {
-                                    if ((checked && dragOffset == -21f) || (!checked && dragOffset == 0f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                        hasVibrated = true
-                                        hasVibratedOnce = true
-                                    } else if ((checked && dragOffset == 0f) || (!checked && dragOffset == 21f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                        hasVibrated = true
-                                        hasVibratedOnce = true
-                                    }
-                                }
-                            },
-                            onDragStarted = { _ ->
-                                currentDragInteraction = DragInteraction.Start().also { interactionSource.tryEmit(it) }
-                                hasVibrated = true
-                                hasVibratedOnce = false
-                                rawDragOffset = 0f
-                            },
-                            onDragStopped = {
-                                if (dragOffset.absoluteValue > 21f / 2f) currentOnCheckedChange?.invoke(!checked)
-                                if (!hasVibratedOnce && dragOffset.absoluteValue >= 1f) {
-                                    if ((checked && dragOffset <= -11f) || (!checked && dragOffset <= 10f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                    } else if ((checked && dragOffset >= -10f) || (!checked && dragOffset >= 11f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                    }
-                                }
-                                currentDragInteraction?.let { interactionSource.tryEmit(DragInteraction.Stop(it)) }
-                                dragOffset = 0f
-                                rawDragOffset = 0f
-                            },
-                        )
-                    } else {
-                        Modifier
-                    },
-                ),
+                },
         )
+    }
+}
+
+// Draggable calls onDragStopped for both release and cancellation. Its interactions carry the outcome.
+private class SwitchDragInteractionSource(
+    private val source: MutableInteractionSource,
+    private val finishDrag: (Boolean) -> Unit,
+) : MutableInteractionSource by source {
+    override suspend fun emit(interaction: Interaction) {
+        onDragInteraction(interaction)
+        source.emit(interaction)
+    }
+
+    override fun tryEmit(interaction: Interaction): Boolean {
+        onDragInteraction(interaction)
+        return source.tryEmit(interaction)
+    }
+
+    private fun onDragInteraction(interaction: Interaction) {
+        when (interaction) {
+            is DragInteraction.Stop -> finishDrag(true)
+            is DragInteraction.Cancel -> finishDrag(false)
+        }
     }
 }
 

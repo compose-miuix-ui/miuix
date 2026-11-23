@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IndoorSports: ImageVector
 
 val MiuixIcons.Glass.Light.IndoorSports: ImageVector
     get() {
-        if (_indoorSportsLineLight != null) return _indoorSportsLineLight!!
-        _indoorSportsLineLight = buildHyperOSIcon(
+        if (_indoorSportsLight != null) return _indoorSportsLight!!
+        _indoorSportsLight = buildHyperOSIcon(
             name = "IndoorSports.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(359.4f, 544.8f),
@@ -146,15 +146,15 @@ val MiuixIcons.Glass.Light.IndoorSports: ImageVector
             translationY = 1048.2221f,
             autoMirror = false,
         )
-        return _indoorSportsLineLight!!
+        return _indoorSportsLight!!
     }
 
-private var _indoorSportsLineLight: ImageVector? = null
+private var _indoorSportsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IndoorSports: ImageVector
     get() {
-        if (_indoorSportsLineNormal != null) return _indoorSportsLineNormal!!
-        _indoorSportsLineNormal = buildHyperOSIcon(
+        if (_indoorSportsNormal != null) return _indoorSportsNormal!!
+        _indoorSportsNormal = buildHyperOSIcon(
             name = "IndoorSports.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(353.6f, 551.8f),
@@ -287,15 +287,15 @@ val MiuixIcons.Glass.Normal.IndoorSports: ImageVector
             translationY = 1051.2775f,
             autoMirror = false,
         )
-        return _indoorSportsLineNormal!!
+        return _indoorSportsNormal!!
     }
 
-private var _indoorSportsLineNormal: ImageVector? = null
+private var _indoorSportsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IndoorSports: ImageVector
     get() {
-        if (_indoorSportsLineRegular != null) return _indoorSportsLineRegular!!
-        _indoorSportsLineRegular = buildHyperOSIcon(
+        if (_indoorSportsRegular != null) return _indoorSportsRegular!!
+        _indoorSportsRegular = buildHyperOSIcon(
             name = "IndoorSports.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(351f, 555f),
@@ -428,15 +428,15 @@ val MiuixIcons.Glass.Regular.IndoorSports: ImageVector
             translationY = 1052.6667f,
             autoMirror = false,
         )
-        return _indoorSportsLineRegular!!
+        return _indoorSportsRegular!!
     }
 
-private var _indoorSportsLineRegular: ImageVector? = null
+private var _indoorSportsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IndoorSports: ImageVector
     get() {
-        if (_indoorSportsLineMedium != null) return _indoorSportsLineMedium!!
-        _indoorSportsLineMedium = buildHyperOSIcon(
+        if (_indoorSportsMedium != null) return _indoorSportsMedium!!
+        _indoorSportsMedium = buildHyperOSIcon(
             name = "IndoorSports.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(346.7f, 560.1f),
@@ -569,15 +569,15 @@ val MiuixIcons.Glass.Medium.IndoorSports: ImageVector
             translationY = 1055.3693f,
             autoMirror = false,
         )
-        return _indoorSportsLineMedium!!
+        return _indoorSportsMedium!!
     }
 
-private var _indoorSportsLineMedium: ImageVector? = null
+private var _indoorSportsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IndoorSports: ImageVector
     get() {
-        if (_indoorSportsLineDemibold != null) return _indoorSportsLineDemibold!!
-        _indoorSportsLineDemibold = buildHyperOSIcon(
+        if (_indoorSportsDemibold != null) return _indoorSportsDemibold!!
+        _indoorSportsDemibold = buildHyperOSIcon(
             name = "IndoorSports.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(343.6f, 563.7f),
@@ -710,8 +710,8 @@ val MiuixIcons.Glass.Demibold.IndoorSports: ImageVector
             translationY = 1057.2614f,
             autoMirror = false,
         )
-        return _indoorSportsLineDemibold!!
+        return _indoorSportsDemibold!!
     }
 
-private var _indoorSportsLineDemibold: ImageVector? = null
+private var _indoorSportsDemibold: ImageVector? = null
 

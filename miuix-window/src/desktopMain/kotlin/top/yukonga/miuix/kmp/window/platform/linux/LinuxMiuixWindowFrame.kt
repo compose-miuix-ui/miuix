@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import top.yukonga.miuix.kmp.window.MiuixWindowProperties
 import top.yukonga.miuix.kmp.window.WindowResizeEdge
 import top.yukonga.miuix.kmp.window.internal.LocalMiuixWindowContentDecoration
 import top.yukonga.miuix.kmp.window.internal.MiuixWindowContentDecoration
+import top.yukonga.miuix.kmp.window.internal.ProvideWindowComponentFrame
 import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowGestures
 import top.yukonga.miuix.kmp.window.platform.linux.input.LinuxWindowInputEffect
 import top.yukonga.miuix.kmp.window.platform.linux.input.LocalLinuxWindowGestures
@@ -169,7 +171,12 @@ internal fun FrameWindowScope.LinuxMiuixWindowFrame(
                         clipToBounds().background(backgroundColor)
                     },
             ) {
-                content()
+                val decoration = LocalMiuixWindowContentDecoration.current
+                val clientInsets = remember(decoration.inset) {
+                    val inset = decoration.inset
+                    WindowInsets(inset, inset, inset, inset)
+                }
+                ProvideWindowComponentFrame(clientInsets, decoration.cornerRadius) { content() }
 
                 if (properties.captionButtonsVisible && !isFullscreen) {
                     DisposableEffect(captionBarHitTest) {

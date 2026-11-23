@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Music1: ImageVector
 
 val MiuixIcons.Glass.Light.Music1: ImageVector
     get() {
-        if (_musicSurfaceLight != null) return _musicSurfaceLight!!
-        _musicSurfaceLight = buildHyperOSIcon(
+        if (_music1Light != null) return _music1Light!!
+        _music1Light = buildHyperOSIcon(
             name = "Music1.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(484.8f, 840.7f),
@@ -53,15 +53,15 @@ val MiuixIcons.Glass.Light.Music1: ImageVector
             translationY = 1076.4321f,
             autoMirror = false,
         )
-        return _musicSurfaceLight!!
+        return _music1Light!!
     }
 
-private var _musicSurfaceLight: ImageVector? = null
+private var _music1Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Music1: ImageVector
     get() {
-        if (_musicSurfaceNormal != null) return _musicSurfaceNormal!!
-        _musicSurfaceNormal = buildHyperOSIcon(
+        if (_music1Normal != null) return _music1Normal!!
+        _music1Normal = buildHyperOSIcon(
             name = "Music1.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(483.6f, 841.6f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Normal.Music1: ImageVector
             translationY = 1080.8141f,
             autoMirror = false,
         )
-        return _musicSurfaceNormal!!
+        return _music1Normal!!
     }
 
-private var _musicSurfaceNormal: ImageVector? = null
+private var _music1Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Music1: ImageVector
     get() {
-        if (_musicSurfaceRegular != null) return _musicSurfaceRegular!!
-        _musicSurfaceRegular = buildHyperOSIcon(
+        if (_music1Regular != null) return _music1Regular!!
+        _music1Regular = buildHyperOSIcon(
             name = "Music1.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(483f, 842f),
@@ -149,15 +149,15 @@ val MiuixIcons.Glass.Regular.Music1: ImageVector
             translationY = 1082.8095f,
             autoMirror = false,
         )
-        return _musicSurfaceRegular!!
+        return _music1Regular!!
     }
 
-private var _musicSurfaceRegular: ImageVector? = null
+private var _music1Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Music1: ImageVector
     get() {
-        if (_musicSurfaceMedium != null) return _musicSurfaceMedium!!
-        _musicSurfaceMedium = buildHyperOSIcon(
+        if (_music1Medium != null) return _music1Medium!!
+        _music1Medium = buildHyperOSIcon(
             name = "Music1.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(487.6f, 846.1f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Medium.Music1: ImageVector
             translationY = 1087.7747f,
             autoMirror = false,
         )
-        return _musicSurfaceMedium!!
+        return _music1Medium!!
     }
 
-private var _musicSurfaceMedium: ImageVector? = null
+private var _music1Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Music1: ImageVector
     get() {
-        if (_musicSurfaceDemibold != null) return _musicSurfaceDemibold!!
-        _musicSurfaceDemibold = buildHyperOSIcon(
+        if (_music1Demibold != null) return _music1Demibold!!
+        _music1Demibold = buildHyperOSIcon(
             name = "Music1.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(490.8f, 848.9f),
@@ -245,8 +245,8 @@ val MiuixIcons.Glass.Demibold.Music1: ImageVector
             translationY = 1091.2683f,
             autoMirror = false,
         )
-        return _musicSurfaceDemibold!!
+        return _music1Demibold!!
     }
 
-private var _musicSurfaceDemibold: ImageVector? = null
+private var _music1Demibold: ImageVector? = null
 

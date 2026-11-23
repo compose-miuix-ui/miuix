@@ -63,3 +63,37 @@ fun Modifier.glassPanel(
             shading = shading,
         )
 }
+
+/**
+ * Applies a glass surface and shadow over [backdrop], reading [stroke] during the draw phase so
+ * animated or sensor-driven strokes do not trigger recomposition or rebuild backdrop blur effects.
+ */
+fun Modifier.glassPanel(
+    backdrop: Backdrop?,
+    shape: GlassShape,
+    style: GlassStyle = GlassDefaults.Style,
+    alpha: Float = 1f,
+    material: GlassMaterial? = null,
+    stroke: () -> EdgeStroke?,
+    shadow: GlassShadow? = GlassShadows.Regular,
+    shading: Boolean = true,
+    fallback: Modifier? = null,
+): Modifier = if (backdrop == null || !isRuntimeShaderSupported()) {
+    this
+        .graphicsLayer { this.alpha = alpha }
+        .glassShadow(shape, shadow)
+        .then(fallback ?: Modifier.clip(shape))
+        .edgeStroke(shape, stroke)
+} else {
+    this
+        .glassShadow(shape, shadow, alpha)
+        .glass(
+            backdrop = backdrop,
+            shape = shape,
+            style = style,
+            alpha = alpha,
+            material = material,
+            stroke = stroke,
+            shading = shading,
+        )
+}

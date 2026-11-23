@@ -17,8 +17,8 @@ val MiuixIcons.Glass.FolderOutline: ImageVector
 
 val MiuixIcons.Glass.Light.FolderOutline: ImageVector
     get() {
-        if (_folderLight != null) return _folderLight!!
-        _folderLight = ImageVector.Builder(
+        if (_folderOutlineLight != null) return _folderOutlineLight!!
+        _folderOutlineLight = ImageVector.Builder(
             name = "FolderOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -112,15 +112,15 @@ val MiuixIcons.Glass.Light.FolderOutline: ImageVector
                 )
             }
         }.build()
-        return _folderLight!!
+        return _folderOutlineLight!!
     }
 
-private var _folderLight: ImageVector? = null
+private var _folderOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FolderOutline: ImageVector
     get() {
-        if (_folderNormal != null) return _folderNormal!!
-        _folderNormal = ImageVector.Builder(
+        if (_folderOutlineNormal != null) return _folderOutlineNormal!!
+        _folderOutlineNormal = ImageVector.Builder(
             name = "FolderOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -214,15 +214,15 @@ val MiuixIcons.Glass.Normal.FolderOutline: ImageVector
                 )
             }
         }.build()
-        return _folderNormal!!
+        return _folderOutlineNormal!!
     }
 
-private var _folderNormal: ImageVector? = null
+private var _folderOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FolderOutline: ImageVector
     get() {
-        if (_folderRegular != null) return _folderRegular!!
-        _folderRegular = ImageVector.Builder(
+        if (_folderOutlineRegular != null) return _folderOutlineRegular!!
+        _folderOutlineRegular = ImageVector.Builder(
             name = "FolderOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -316,15 +316,15 @@ val MiuixIcons.Glass.Regular.FolderOutline: ImageVector
                 )
             }
         }.build()
-        return _folderRegular!!
+        return _folderOutlineRegular!!
     }
 
-private var _folderRegular: ImageVector? = null
+private var _folderOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FolderOutline: ImageVector
     get() {
-        if (_folderMedium != null) return _folderMedium!!
-        _folderMedium = ImageVector.Builder(
+        if (_folderOutlineMedium != null) return _folderOutlineMedium!!
+        _folderOutlineMedium = ImageVector.Builder(
             name = "FolderOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -418,15 +418,15 @@ val MiuixIcons.Glass.Medium.FolderOutline: ImageVector
                 )
             }
         }.build()
-        return _folderMedium!!
+        return _folderOutlineMedium!!
     }
 
-private var _folderMedium: ImageVector? = null
+private var _folderOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FolderOutline: ImageVector
     get() {
-        if (_folderDemibold != null) return _folderDemibold!!
-        _folderDemibold = ImageVector.Builder(
+        if (_folderOutlineDemibold != null) return _folderOutlineDemibold!!
+        _folderOutlineDemibold = ImageVector.Builder(
             name = "FolderOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -520,7 +520,7 @@ val MiuixIcons.Glass.Demibold.FolderOutline: ImageVector
                 )
             }
         }.build()
-        return _folderDemibold!!
+        return _folderOutlineDemibold!!
     }
 
-private var _folderDemibold: ImageVector? = null
+private var _folderOutlineDemibold: ImageVector? = null

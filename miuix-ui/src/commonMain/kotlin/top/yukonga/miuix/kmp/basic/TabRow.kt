@@ -141,7 +141,7 @@ fun TabRow(
         Box(
             Modifier
                 .offset { IntOffset((config.tabPosition(selectedTabIndex.toFloat()) - scrollOffset).fastRoundToInt(), 0) }
-                .tabWidth(config::tabWidth)
+                .then(config.tabWidthModifier)
                 .fillMaxHeight()
                 .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
         )
@@ -164,7 +164,7 @@ fun TabRow(
                     isSelected = selectedTabIndex == index,
                     onClick = { currentOnTabSelected.invoke(index) },
                     cornerRadius = config.cornerRadius,
-                    width = config::tabWidth,
+                    tabWidthModifier = config.tabWidthModifier,
                     color = colors.contentColor(selectedTabIndex == index),
                     contentAlignment = contentAlignment,
                     interactionSource = interactionSource,
@@ -265,7 +265,7 @@ fun TabRowWithContour(
         Box(
             Modifier
                 .offset { IntOffset((config.tabPosition(indicatorPosition.value) - scrollOffset).fastRoundToInt(), 0) }
-                .tabWidth(config::tabWidth)
+                .then(config.tabWidthModifier)
                 .fillMaxHeight()
                 .squircleBackground(color = colors.backgroundColor(true), cornerRadius = config.cornerRadius),
         )
@@ -288,7 +288,7 @@ fun TabRowWithContour(
                     isSelected = selectedTabIndex == index,
                     onClick = { currentOnTabSelected.invoke(index) },
                     cornerRadius = config.cornerRadius,
-                    width = config::tabWidth,
+                    tabWidthModifier = config.tabWidthModifier,
                     color = colors.contentColor(selectedTabIndex == index),
                     contentAlignment = contentAlignment,
                     interactionSource = interactionSource,
@@ -331,7 +331,7 @@ private fun TabItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
-    width: () -> Int,
+    tabWidthModifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
     interactionSource: MutableInteractionSource? = null,
@@ -341,11 +341,17 @@ private fun TabItem(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .tabWidth(width)
-            .squircleBorder(
-                width = { if (isSelected) 0.dp else 1.dp },
-                color = { outlineColor },
-                cornerRadius = cornerRadius,
+            .then(tabWidthModifier)
+            .then(
+                if (!isSelected) {
+                    Modifier.squircleBorder(
+                        width = 1.dp,
+                        color = outlineColor,
+                        cornerRadius = cornerRadius,
+                    )
+                } else {
+                    Modifier
+                },
             )
             // Clip only when an indication is supplied, to skip squircleClip's offscreen layer by default.
             .then(if (indication != null) Modifier.squircleClip(cornerRadius) else Modifier)
@@ -385,7 +391,7 @@ private fun TabItemWithContour(
     isSelected: Boolean,
     onClick: () -> Unit,
     cornerRadius: Dp,
-    width: () -> Int,
+    tabWidthModifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     contentAlignment: Alignment = Alignment.Center,
     interactionSource: MutableInteractionSource? = null,
@@ -394,7 +400,7 @@ private fun TabItemWithContour(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .tabWidth(width)
+            .then(tabWidthModifier)
             // Clip only when an indication is supplied, to skip squircleClip's offscreen layer by default.
             .then(if (indication != null) Modifier.squircleClip(cornerRadius) else Modifier)
             .selectable(
@@ -459,6 +465,12 @@ private class TabRowConfig(
         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
     }
 
+    val tabWidthModifier: Modifier = Modifier.layout { measurable, constraints ->
+        val width = tabWidth().coerceAtLeast(0)
+        val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    }
+
     fun tabWidth(): Int = calculateTabWidth(tabCount, minWidthPx, maxWidthPx, spacingPx, availableWidth.toFloat()).fastRoundToInt()
 
     /** [position] may be fractional. */
@@ -516,12 +528,6 @@ private fun rememberTabRowConfig(
             )
         }
     }
-}
-
-private fun Modifier.tabWidth(width: () -> Int): Modifier = layout { measurable, constraints ->
-    val tabWidth = width().coerceAtLeast(0)
-    val placeable = measurable.measure(constraints.copy(minWidth = tabWidth, maxWidth = tabWidth))
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }
 
 private fun calculateTabWidth(

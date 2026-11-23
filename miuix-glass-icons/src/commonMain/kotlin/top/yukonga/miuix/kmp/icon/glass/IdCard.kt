@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IdCard: ImageVector
 
 val MiuixIcons.Glass.Light.IdCard: ImageVector
     get() {
-        if (_idCardLineLight != null) return _idCardLineLight!!
-        _idCardLineLight = buildHyperOSIcon(
+        if (_idCardLight != null) return _idCardLight!!
+        _idCardLight = buildHyperOSIcon(
             name = "IdCard.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(699.8f, 318.8f),
@@ -105,15 +105,15 @@ val MiuixIcons.Glass.Light.IdCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _idCardLineLight!!
+        return _idCardLight!!
     }
 
-private var _idCardLineLight: ImageVector? = null
+private var _idCardLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IdCard: ImageVector
     get() {
-        if (_idCardLineNormal != null) return _idCardLineNormal!!
-        _idCardLineNormal = buildHyperOSIcon(
+        if (_idCardNormal != null) return _idCardNormal!!
+        _idCardNormal = buildHyperOSIcon(
             name = "IdCard.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(698.6f, 320.3f),
@@ -205,15 +205,15 @@ val MiuixIcons.Glass.Normal.IdCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _idCardLineNormal!!
+        return _idCardNormal!!
     }
 
-private var _idCardLineNormal: ImageVector? = null
+private var _idCardNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IdCard: ImageVector
     get() {
-        if (_idCardLineRegular != null) return _idCardLineRegular!!
-        _idCardLineRegular = buildHyperOSIcon(
+        if (_idCardRegular != null) return _idCardRegular!!
+        _idCardRegular = buildHyperOSIcon(
             name = "IdCard.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(698f, 321f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Regular.IdCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _idCardLineRegular!!
+        return _idCardRegular!!
     }
 
-private var _idCardLineRegular: ImageVector? = null
+private var _idCardRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IdCard: ImageVector
     get() {
-        if (_idCardLineMedium != null) return _idCardLineMedium!!
-        _idCardLineMedium = buildHyperOSIcon(
+        if (_idCardMedium != null) return _idCardMedium!!
+        _idCardMedium = buildHyperOSIcon(
             name = "IdCard.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(697.2f, 322.1f),
@@ -405,15 +405,15 @@ val MiuixIcons.Glass.Medium.IdCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _idCardLineMedium!!
+        return _idCardMedium!!
     }
 
-private var _idCardLineMedium: ImageVector? = null
+private var _idCardMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IdCard: ImageVector
     get() {
-        if (_idCardLineDemibold != null) return _idCardLineDemibold!!
-        _idCardLineDemibold = buildHyperOSIcon(
+        if (_idCardDemibold != null) return _idCardDemibold!!
+        _idCardDemibold = buildHyperOSIcon(
             name = "IdCard.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(696.6f, 322.8f),
@@ -505,8 +505,8 @@ val MiuixIcons.Glass.Demibold.IdCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _idCardLineDemibold!!
+        return _idCardDemibold!!
     }
 
-private var _idCardLineDemibold: ImageVector? = null
+private var _idCardDemibold: ImageVector? = null
 

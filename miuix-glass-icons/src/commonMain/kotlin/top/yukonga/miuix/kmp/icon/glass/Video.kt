@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Video: ImageVector
 
 val MiuixIcons.Glass.Light.Video: ImageVector
     get() {
-        if (_videoLineLight != null) return _videoLineLight!!
-        _videoLineLight = buildHyperOSIcon(
+        if (_videoLight != null) return _videoLight!!
+        _videoLight = buildHyperOSIcon(
             name = "Video.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1064.8f, -15f),
@@ -104,15 +104,15 @@ val MiuixIcons.Glass.Light.Video: ImageVector
             translationY = 1043.6667f,
             autoMirror = false,
         )
-        return _videoLineLight!!
+        return _videoLight!!
     }
 
-private var _videoLineLight: ImageVector? = null
+private var _videoLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Video: ImageVector
     get() {
-        if (_videoLineNormal != null) return _videoLineNormal!!
-        _videoLineNormal = buildHyperOSIcon(
+        if (_videoNormal != null) return _videoNormal!!
+        _videoNormal = buildHyperOSIcon(
             name = "Video.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1069.1f, -23.2f),
@@ -203,15 +203,15 @@ val MiuixIcons.Glass.Normal.Video: ImageVector
             translationY = 1043.6667f,
             autoMirror = false,
         )
-        return _videoLineNormal!!
+        return _videoNormal!!
     }
 
-private var _videoLineNormal: ImageVector? = null
+private var _videoNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Video: ImageVector
     get() {
-        if (_videoLineRegular != null) return _videoLineRegular!!
-        _videoLineRegular = buildHyperOSIcon(
+        if (_videoRegular != null) return _videoRegular!!
+        _videoRegular = buildHyperOSIcon(
             name = "Video.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1071f, -27f),
@@ -302,15 +302,15 @@ val MiuixIcons.Glass.Regular.Video: ImageVector
             translationY = 1043.6667f,
             autoMirror = false,
         )
-        return _videoLineRegular!!
+        return _videoRegular!!
     }
 
-private var _videoLineRegular: ImageVector? = null
+private var _videoRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Video: ImageVector
     get() {
-        if (_videoLineMedium != null) return _videoLineMedium!!
-        _videoLineMedium = buildHyperOSIcon(
+        if (_videoMedium != null) return _videoMedium!!
+        _videoMedium = buildHyperOSIcon(
             name = "Video.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1074.8f, -34.3f),
@@ -401,15 +401,15 @@ val MiuixIcons.Glass.Medium.Video: ImageVector
             translationY = 1043.6667f,
             autoMirror = false,
         )
-        return _videoLineMedium!!
+        return _videoMedium!!
     }
 
-private var _videoLineMedium: ImageVector? = null
+private var _videoMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Video: ImageVector
     get() {
-        if (_videoLineDemibold != null) return _videoLineDemibold!!
-        _videoLineDemibold = buildHyperOSIcon(
+        if (_videoDemibold != null) return _videoDemibold!!
+        _videoDemibold = buildHyperOSIcon(
             name = "Video.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1077.4f, -39.4f),
@@ -500,8 +500,8 @@ val MiuixIcons.Glass.Demibold.Video: ImageVector
             translationY = 1043.6667f,
             autoMirror = false,
         )
-        return _videoLineDemibold!!
+        return _videoDemibold!!
     }
 
-private var _videoLineDemibold: ImageVector? = null
+private var _videoDemibold: ImageVector? = null
 

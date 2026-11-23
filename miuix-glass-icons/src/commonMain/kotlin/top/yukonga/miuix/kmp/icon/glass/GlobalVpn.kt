@@ -12,8 +12,8 @@ val MiuixIcons.Glass.GlobalVpn: ImageVector
 
 val MiuixIcons.Glass.Light.GlobalVpn: ImageVector
     get() {
-        if (_globalVpnSurfaceLight != null) return _globalVpnSurfaceLight!!
-        _globalVpnSurfaceLight = buildHyperOSIcon(
+        if (_globalVpnLight != null) return _globalVpnLight!!
+        _globalVpnLight = buildHyperOSIcon(
             name = "GlobalVpn.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(162.9f, 375f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.GlobalVpn: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _globalVpnSurfaceLight!!
+        return _globalVpnLight!!
     }
 
-private var _globalVpnSurfaceLight: ImageVector? = null
+private var _globalVpnLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.GlobalVpn: ImageVector
     get() {
-        if (_globalVpnSurfaceNormal != null) return _globalVpnSurfaceNormal!!
-        _globalVpnSurfaceNormal = buildHyperOSIcon(
+        if (_globalVpnNormal != null) return _globalVpnNormal!!
+        _globalVpnNormal = buildHyperOSIcon(
             name = "GlobalVpn.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(156.8f, 375f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.GlobalVpn: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _globalVpnSurfaceNormal!!
+        return _globalVpnNormal!!
     }
 
-private var _globalVpnSurfaceNormal: ImageVector? = null
+private var _globalVpnNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.GlobalVpn: ImageVector
     get() {
-        if (_globalVpnSurfaceRegular != null) return _globalVpnSurfaceRegular!!
-        _globalVpnSurfaceRegular = buildHyperOSIcon(
+        if (_globalVpnRegular != null) return _globalVpnRegular!!
+        _globalVpnRegular = buildHyperOSIcon(
             name = "GlobalVpn.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(154f, 375f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.GlobalVpn: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _globalVpnSurfaceRegular!!
+        return _globalVpnRegular!!
     }
 
-private var _globalVpnSurfaceRegular: ImageVector? = null
+private var _globalVpnRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.GlobalVpn: ImageVector
     get() {
-        if (_globalVpnSurfaceMedium != null) return _globalVpnSurfaceMedium!!
-        _globalVpnSurfaceMedium = buildHyperOSIcon(
+        if (_globalVpnMedium != null) return _globalVpnMedium!!
+        _globalVpnMedium = buildHyperOSIcon(
             name = "GlobalVpn.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(148.9f, 375f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.GlobalVpn: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _globalVpnSurfaceMedium!!
+        return _globalVpnMedium!!
     }
 
-private var _globalVpnSurfaceMedium: ImageVector? = null
+private var _globalVpnMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.GlobalVpn: ImageVector
     get() {
-        if (_globalVpnSurfaceDemibold != null) return _globalVpnSurfaceDemibold!!
-        _globalVpnSurfaceDemibold = buildHyperOSIcon(
+        if (_globalVpnDemibold != null) return _globalVpnDemibold!!
+        _globalVpnDemibold = buildHyperOSIcon(
             name = "GlobalVpn.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(145.3f, 375f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.GlobalVpn: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _globalVpnSurfaceDemibold!!
+        return _globalVpnDemibold!!
     }
 
-private var _globalVpnSurfaceDemibold: ImageVector? = null
+private var _globalVpnDemibold: ImageVector? = null
 

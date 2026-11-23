@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HomeOutline: ImageVector
 
 val MiuixIcons.Glass.Light.HomeOutline: ImageVector
     get() {
-        if (_desktopLineLight != null) return _desktopLineLight!!
-        _desktopLineLight = buildHyperOSIcon(
+        if (_homeOutlineLight != null) return _homeOutlineLight!!
+        _homeOutlineLight = buildHyperOSIcon(
             name = "HomeOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1081.3f, 402f),
@@ -76,15 +76,15 @@ val MiuixIcons.Glass.Light.HomeOutline: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _desktopLineLight!!
+        return _homeOutlineLight!!
     }
 
-private var _desktopLineLight: ImageVector? = null
+private var _homeOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HomeOutline: ImageVector
     get() {
-        if (_desktopLineNormal != null) return _desktopLineNormal!!
-        _desktopLineNormal = buildHyperOSIcon(
+        if (_homeOutlineNormal != null) return _homeOutlineNormal!!
+        _homeOutlineNormal = buildHyperOSIcon(
             name = "HomeOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1069.4f, 402f),
@@ -147,15 +147,15 @@ val MiuixIcons.Glass.Normal.HomeOutline: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _desktopLineNormal!!
+        return _homeOutlineNormal!!
     }
 
-private var _desktopLineNormal: ImageVector? = null
+private var _homeOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HomeOutline: ImageVector
     get() {
-        if (_desktopLineRegular != null) return _desktopLineRegular!!
-        _desktopLineRegular = buildHyperOSIcon(
+        if (_homeOutlineRegular != null) return _homeOutlineRegular!!
+        _homeOutlineRegular = buildHyperOSIcon(
             name = "HomeOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1064f, 402f),
@@ -218,15 +218,15 @@ val MiuixIcons.Glass.Regular.HomeOutline: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _desktopLineRegular!!
+        return _homeOutlineRegular!!
     }
 
-private var _desktopLineRegular: ImageVector? = null
+private var _homeOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HomeOutline: ImageVector
     get() {
-        if (_desktopLineMedium != null) return _desktopLineMedium!!
-        _desktopLineMedium = buildHyperOSIcon(
+        if (_homeOutlineMedium != null) return _homeOutlineMedium!!
+        _homeOutlineMedium = buildHyperOSIcon(
             name = "HomeOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1055.9f, 402f),
@@ -289,15 +289,15 @@ val MiuixIcons.Glass.Medium.HomeOutline: ImageVector
             translationY = 1041.3018f,
             autoMirror = false,
         )
-        return _desktopLineMedium!!
+        return _homeOutlineMedium!!
     }
 
-private var _desktopLineMedium: ImageVector? = null
+private var _homeOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HomeOutline: ImageVector
     get() {
-        if (_desktopLineDemibold != null) return _desktopLineDemibold!!
-        _desktopLineDemibold = buildHyperOSIcon(
+        if (_homeOutlineDemibold != null) return _homeOutlineDemibold!!
+        _homeOutlineDemibold = buildHyperOSIcon(
             name = "HomeOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1050.2f, 402f),
@@ -360,8 +360,8 @@ val MiuixIcons.Glass.Demibold.HomeOutline: ImageVector
             translationY = 1041.3964f,
             autoMirror = false,
         )
-        return _desktopLineDemibold!!
+        return _homeOutlineDemibold!!
     }
 
-private var _desktopLineDemibold: ImageVector? = null
+private var _homeOutlineDemibold: ImageVector? = null
 

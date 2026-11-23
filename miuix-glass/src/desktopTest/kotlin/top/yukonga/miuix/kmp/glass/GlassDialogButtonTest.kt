@@ -4,8 +4,6 @@
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.graphics.compositeOver
@@ -45,7 +42,6 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassDialogButtonTest {
@@ -117,61 +113,6 @@ class GlassDialogButtonTest {
             assertColor(disabledFills[i], pixels[8, pixels.height / 2])
             assertColor(disabledContent[i].compositeOver(disabledFills[i]), pixels[pixels.width / 2, pixels.height / 2])
         }
-    }
-
-    @Test
-    fun lightPressCoversFillAndContentAndClearsOnReleaseCancelAndDisable() = assertPress(isDark = false)
-
-    @Test
-    fun darkPressCoversFillAndContentAndClearsOnReleaseCancelAndDisable() = assertPress(isDark = true)
-
-    private fun assertPress(isDark: Boolean) = runComposeUiTest {
-        val source = MutableInteractionSource()
-        val enabled = mutableStateOf(true)
-        setContent {
-            MiuixTheme(colors = if (isDark) darkColorScheme() else lightColorScheme()) {
-                Box(Modifier.background(Color(0xFF8090A0)).padding(16.dp)) {
-                    GlassDialogButton(
-                        onClick = {},
-                        modifier = Modifier.width(160.dp).testTag("action"),
-                        enabled = enabled.value,
-                        role = GlassDialogButtonRole.Primary,
-                        interactionSource = source,
-                    ) {
-                        Box(Modifier.size(16.dp).background(LocalContentColor.current))
-                    }
-                }
-            }
-        }
-        waitForIdle()
-        val node = onNodeWithTag("action")
-        val idle = node.captureToImage().toPixelMap()
-        val overlay = if (isDark) Color(0x24FFFFFF) else Color(0x1F000000)
-        val press = PressInteraction.Press(Offset.Zero)
-        runOnIdle { assertTrue(source.tryEmit(press)) }
-        waitForIdle()
-        val pressed = node.captureToImage().toPixelMap()
-        assertColor(overlay.compositeOver(idle[8, idle.height / 2]), pressed[8, pressed.height / 2])
-        assertColor(overlay.compositeOver(idle[idle.width / 2, idle.height / 2]), pressed[pressed.width / 2, pressed.height / 2])
-        assertColor(idle[0, 0], pressed[0, 0]) // The overlay shares the rounded clipping.
-        val secondPress = PressInteraction.Press(Offset.Zero)
-        runOnIdle {
-            assertTrue(source.tryEmit(secondPress))
-            assertTrue(source.tryEmit(PressInteraction.Release(press)))
-        }
-        waitForIdle()
-        assertColor(pressed[8, pressed.height / 2], node.captureToImage().toPixelMap()[8, pressed.height / 2])
-        runOnIdle { assertTrue(source.tryEmit(PressInteraction.Cancel(secondPress))) }
-        waitForIdle()
-        assertColor(idle[8, idle.height / 2], node.captureToImage().toPixelMap()[8, idle.height / 2])
-
-        runOnIdle { assertTrue(source.tryEmit(PressInteraction.Press(Offset.Zero))) }
-        waitForIdle()
-        runOnIdle { enabled.value = false }
-        node.assertIsNotEnabled()
-        runOnIdle { enabled.value = true }
-        waitForIdle()
-        assertColor(idle[8, idle.height / 2], node.captureToImage().toPixelMap()[8, idle.height / 2])
     }
 
     @Test

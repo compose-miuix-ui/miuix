@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PersonalIncomeTaxCalculator: ImageVector
 
 val MiuixIcons.Glass.Light.PersonalIncomeTaxCalculator: ImageVector
     get() {
-        if (_personalIncomeTaxCalculatorSurfaceLight != null) return _personalIncomeTaxCalculatorSurfaceLight!!
-        _personalIncomeTaxCalculatorSurfaceLight = buildHyperOSIcon(
+        if (_personalIncomeTaxCalculatorLight != null) return _personalIncomeTaxCalculatorLight!!
+        _personalIncomeTaxCalculatorLight = buildHyperOSIcon(
             name = "PersonalIncomeTaxCalculator.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(803.6f, 25f),
@@ -121,15 +121,15 @@ val MiuixIcons.Glass.Light.PersonalIncomeTaxCalculator: ImageVector
             translationY = 1014.5554f,
             autoMirror = false,
         )
-        return _personalIncomeTaxCalculatorSurfaceLight!!
+        return _personalIncomeTaxCalculatorLight!!
     }
 
-private var _personalIncomeTaxCalculatorSurfaceLight: ImageVector? = null
+private var _personalIncomeTaxCalculatorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PersonalIncomeTaxCalculator: ImageVector
     get() {
-        if (_personalIncomeTaxCalculatorSurfaceNormal != null) return _personalIncomeTaxCalculatorSurfaceNormal!!
-        _personalIncomeTaxCalculatorSurfaceNormal = buildHyperOSIcon(
+        if (_personalIncomeTaxCalculatorNormal != null) return _personalIncomeTaxCalculatorNormal!!
+        _personalIncomeTaxCalculatorNormal = buildHyperOSIcon(
             name = "PersonalIncomeTaxCalculator.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(787.4f, 33.2f),
@@ -237,15 +237,15 @@ val MiuixIcons.Glass.Normal.PersonalIncomeTaxCalculator: ImageVector
             translationY = 1016.6942f,
             autoMirror = false,
         )
-        return _personalIncomeTaxCalculatorSurfaceNormal!!
+        return _personalIncomeTaxCalculatorNormal!!
     }
 
-private var _personalIncomeTaxCalculatorSurfaceNormal: ImageVector? = null
+private var _personalIncomeTaxCalculatorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PersonalIncomeTaxCalculator: ImageVector
     get() {
-        if (_personalIncomeTaxCalculatorSurfaceRegular != null) return _personalIncomeTaxCalculatorSurfaceRegular!!
-        _personalIncomeTaxCalculatorSurfaceRegular = buildHyperOSIcon(
+        if (_personalIncomeTaxCalculatorRegular != null) return _personalIncomeTaxCalculatorRegular!!
+        _personalIncomeTaxCalculatorRegular = buildHyperOSIcon(
             name = "PersonalIncomeTaxCalculator.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(780f, 37f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Regular.PersonalIncomeTaxCalculator: ImageVector
             translationY = 1017.6667f,
             autoMirror = false,
         )
-        return _personalIncomeTaxCalculatorSurfaceRegular!!
+        return _personalIncomeTaxCalculatorRegular!!
     }
 
-private var _personalIncomeTaxCalculatorSurfaceRegular: ImageVector? = null
+private var _personalIncomeTaxCalculatorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PersonalIncomeTaxCalculator: ImageVector
     get() {
-        if (_personalIncomeTaxCalculatorSurfaceMedium != null) return _personalIncomeTaxCalculatorSurfaceMedium!!
-        _personalIncomeTaxCalculatorSurfaceMedium = buildHyperOSIcon(
+        if (_personalIncomeTaxCalculatorMedium != null) return _personalIncomeTaxCalculatorMedium!!
+        _personalIncomeTaxCalculatorMedium = buildHyperOSIcon(
             name = "PersonalIncomeTaxCalculator.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(766.2f, 36.7f),
@@ -469,15 +469,15 @@ val MiuixIcons.Glass.Medium.PersonalIncomeTaxCalculator: ImageVector
             translationY = 1017.2613f,
             autoMirror = false,
         )
-        return _personalIncomeTaxCalculatorSurfaceMedium!!
+        return _personalIncomeTaxCalculatorMedium!!
     }
 
-private var _personalIncomeTaxCalculatorSurfaceMedium: ImageVector? = null
+private var _personalIncomeTaxCalculatorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PersonalIncomeTaxCalculator: ImageVector
     get() {
-        if (_personalIncomeTaxCalculatorSurfaceDemibold != null) return _personalIncomeTaxCalculatorSurfaceDemibold!!
-        _personalIncomeTaxCalculatorSurfaceDemibold = buildHyperOSIcon(
+        if (_personalIncomeTaxCalculatorDemibold != null) return _personalIncomeTaxCalculatorDemibold!!
+        _personalIncomeTaxCalculatorDemibold = buildHyperOSIcon(
             name = "PersonalIncomeTaxCalculator.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(756.6f, 36.5f),
@@ -585,8 +585,8 @@ val MiuixIcons.Glass.Demibold.PersonalIncomeTaxCalculator: ImageVector
             translationY = 1016.9774f,
             autoMirror = false,
         )
-        return _personalIncomeTaxCalculatorSurfaceDemibold!!
+        return _personalIncomeTaxCalculatorDemibold!!
     }
 
-private var _personalIncomeTaxCalculatorSurfaceDemibold: ImageVector? = null
+private var _personalIncomeTaxCalculatorDemibold: ImageVector? = null
 

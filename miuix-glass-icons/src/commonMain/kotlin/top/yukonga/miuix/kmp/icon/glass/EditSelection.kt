@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EditSelection: ImageVector
 
 val MiuixIcons.Glass.Light.EditSelection: ImageVector
     get() {
-        if (_editSelectionSurfaceLight != null) return _editSelectionSurfaceLight!!
-        _editSelectionSurfaceLight = buildHyperOSIcon(
+        if (_editSelectionLight != null) return _editSelectionLight!!
+        _editSelectionLight = buildHyperOSIcon(
             name = "EditSelection.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(713.7f, -56.8f),
@@ -46,15 +46,15 @@ val MiuixIcons.Glass.Light.EditSelection: ImageVector
             translationY = 1002.2221f,
             autoMirror = false,
         )
-        return _editSelectionSurfaceLight!!
+        return _editSelectionLight!!
     }
 
-private var _editSelectionSurfaceLight: ImageVector? = null
+private var _editSelectionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EditSelection: ImageVector
     get() {
-        if (_editSelectionSurfaceNormal != null) return _editSelectionSurfaceNormal!!
-        _editSelectionSurfaceNormal = buildHyperOSIcon(
+        if (_editSelectionNormal != null) return _editSelectionNormal!!
+        _editSelectionNormal = buildHyperOSIcon(
             name = "EditSelection.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(722.8f, -52.8f),
@@ -87,15 +87,15 @@ val MiuixIcons.Glass.Normal.EditSelection: ImageVector
             translationY = 1005.2775f,
             autoMirror = false,
         )
-        return _editSelectionSurfaceNormal!!
+        return _editSelectionNormal!!
     }
 
-private var _editSelectionSurfaceNormal: ImageVector? = null
+private var _editSelectionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EditSelection: ImageVector
     get() {
-        if (_editSelectionSurfaceRegular != null) return _editSelectionSurfaceRegular!!
-        _editSelectionSurfaceRegular = buildHyperOSIcon(
+        if (_editSelectionRegular != null) return _editSelectionRegular!!
+        _editSelectionRegular = buildHyperOSIcon(
             name = "EditSelection.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(727f, -51f),
@@ -128,15 +128,15 @@ val MiuixIcons.Glass.Regular.EditSelection: ImageVector
             translationY = 1006.6667f,
             autoMirror = false,
         )
-        return _editSelectionSurfaceRegular!!
+        return _editSelectionRegular!!
     }
 
-private var _editSelectionSurfaceRegular: ImageVector? = null
+private var _editSelectionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EditSelection: ImageVector
     get() {
-        if (_editSelectionSurfaceMedium != null) return _editSelectionSurfaceMedium!!
-        _editSelectionSurfaceMedium = buildHyperOSIcon(
+        if (_editSelectionMedium != null) return _editSelectionMedium!!
+        _editSelectionMedium = buildHyperOSIcon(
             name = "EditSelection.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(735.1f, -51f),
@@ -169,15 +169,15 @@ val MiuixIcons.Glass.Medium.EditSelection: ImageVector
             translationY = 1006.6667f,
             autoMirror = false,
         )
-        return _editSelectionSurfaceMedium!!
+        return _editSelectionMedium!!
     }
 
-private var _editSelectionSurfaceMedium: ImageVector? = null
+private var _editSelectionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EditSelection: ImageVector
     get() {
-        if (_editSelectionSurfaceDemibold != null) return _editSelectionSurfaceDemibold!!
-        _editSelectionSurfaceDemibold = buildHyperOSIcon(
+        if (_editSelectionDemibold != null) return _editSelectionDemibold!!
+        _editSelectionDemibold = buildHyperOSIcon(
             name = "EditSelection.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(740.8f, -51f),
@@ -210,8 +210,8 @@ val MiuixIcons.Glass.Demibold.EditSelection: ImageVector
             translationY = 1006.6667f,
             autoMirror = false,
         )
-        return _editSelectionSurfaceDemibold!!
+        return _editSelectionDemibold!!
     }
 
-private var _editSelectionSurfaceDemibold: ImageVector? = null
+private var _editSelectionDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FeedbackMy: ImageVector
 
 val MiuixIcons.Glass.Light.FeedbackMy: ImageVector
     get() {
-        if (_myFeedbackSurfaceLight != null) return _myFeedbackSurfaceLight!!
-        _myFeedbackSurfaceLight = buildHyperOSIcon(
+        if (_feedbackMyLight != null) return _feedbackMyLight!!
+        _feedbackMyLight = buildHyperOSIcon(
             name = "FeedbackMy.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(695.9f, -47.4f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.FeedbackMy: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _myFeedbackSurfaceLight!!
+        return _feedbackMyLight!!
     }
 
-private var _myFeedbackSurfaceLight: ImageVector? = null
+private var _feedbackMyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FeedbackMy: ImageVector
     get() {
-        if (_myFeedbackSurfaceNormal != null) return _myFeedbackSurfaceNormal!!
-        _myFeedbackSurfaceNormal = buildHyperOSIcon(
+        if (_feedbackMyNormal != null) return _feedbackMyNormal!!
+        _feedbackMyNormal = buildHyperOSIcon(
             name = "FeedbackMy.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(703.5f, -52.6f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.FeedbackMy: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _myFeedbackSurfaceNormal!!
+        return _feedbackMyNormal!!
     }
 
-private var _myFeedbackSurfaceNormal: ImageVector? = null
+private var _feedbackMyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FeedbackMy: ImageVector
     get() {
-        if (_myFeedbackSurfaceRegular != null) return _myFeedbackSurfaceRegular!!
-        _myFeedbackSurfaceRegular = buildHyperOSIcon(
+        if (_feedbackMyRegular != null) return _feedbackMyRegular!!
+        _feedbackMyRegular = buildHyperOSIcon(
             name = "FeedbackMy.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(707f, -55f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.FeedbackMy: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _myFeedbackSurfaceRegular!!
+        return _feedbackMyRegular!!
     }
 
-private var _myFeedbackSurfaceRegular: ImageVector? = null
+private var _feedbackMyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FeedbackMy: ImageVector
     get() {
-        if (_myFeedbackSurfaceMedium != null) return _myFeedbackSurfaceMedium!!
-        _myFeedbackSurfaceMedium = buildHyperOSIcon(
+        if (_feedbackMyMedium != null) return _feedbackMyMedium!!
+        _feedbackMyMedium = buildHyperOSIcon(
             name = "FeedbackMy.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(713.8f, -59.6f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.FeedbackMy: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _myFeedbackSurfaceMedium!!
+        return _feedbackMyMedium!!
     }
 
-private var _myFeedbackSurfaceMedium: ImageVector? = null
+private var _feedbackMyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FeedbackMy: ImageVector
     get() {
-        if (_myFeedbackSurfaceDemibold != null) return _myFeedbackSurfaceDemibold!!
-        _myFeedbackSurfaceDemibold = buildHyperOSIcon(
+        if (_feedbackMyDemibold != null) return _feedbackMyDemibold!!
+        _feedbackMyDemibold = buildHyperOSIcon(
             name = "FeedbackMy.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(718.5f, -62.8f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.FeedbackMy: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _myFeedbackSurfaceDemibold!!
+        return _feedbackMyDemibold!!
     }
 
-private var _myFeedbackSurfaceDemibold: ImageVector? = null
+private var _feedbackMyDemibold: ImageVector? = null
 

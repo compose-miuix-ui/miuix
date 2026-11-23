@@ -3,12 +3,9 @@
 
 package top.yukonga.miuix.kmp.glass
 
-import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,25 +15,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.node.DelegatableNode
-import androidx.compose.ui.node.DrawModifierNode
-import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ButtonColors
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.MiuixIndication
 
 /** Visual roles for dialog actions. */
 enum class GlassDialogButtonRole {
@@ -80,7 +72,9 @@ fun GlassDialogButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     val shape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
-    val indication = remember(pressedColor) { DialogButtonIndication(pressedColor) }
+    val indication = remember(pressedColor) {
+        MiuixIndication(color = pressedColor.copy(alpha = 1f), pressAlpha = pressedColor.alpha)
+    }
     val containerColor = if (enabled) colors.color else colors.disabledColor
     val contentColor = if (enabled) colors.contentColor else colors.disabledContentColor
     CompositionLocalProvider(LocalContentColor provides contentColor) {
@@ -147,41 +141,5 @@ object GlassDialogButtonDefaults {
     fun pressedColor(): Color {
         val scheme = MiuixTheme.colorScheme
         return scheme.onBackground.copy(alpha = if (scheme.background.luminance() < 0.5f) 36f / 255f else 31f / 255f)
-    }
-}
-
-@Immutable
-private data class DialogButtonIndication(val color: Color) : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode = DialogButtonIndicationNode(interactionSource, color)
-}
-
-private class DialogButtonIndicationNode(
-    private val interactionSource: InteractionSource,
-    private val color: Color,
-) : Modifier.Node(),
-    DrawModifierNode {
-    private val presses = mutableSetOf<PressInteraction.Press>()
-
-    override fun onAttach() {
-        coroutineScope.launch {
-            interactionSource.interactions.collect { interaction ->
-                when (interaction) {
-                    is PressInteraction.Press -> presses.add(interaction)
-                    is PressInteraction.Release -> presses.remove(interaction.press)
-                    is PressInteraction.Cancel -> presses.remove(interaction.press)
-                    else -> return@collect
-                }
-                invalidateDraw()
-            }
-        }
-    }
-
-    override fun onDetach() {
-        presses.clear()
-    }
-
-    override fun ContentDrawScope.draw() {
-        drawContent()
-        if (presses.isNotEmpty()) drawRect(color)
     }
 }

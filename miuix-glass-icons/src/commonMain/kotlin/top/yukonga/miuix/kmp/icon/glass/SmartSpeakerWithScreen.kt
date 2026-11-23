@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SmartSpeakerWithScreen: ImageVector
 
 val MiuixIcons.Glass.Light.SmartSpeakerWithScreen: ImageVector
     get() {
-        if (_smartSpeakerWithScreenSurfaceLight != null) return _smartSpeakerWithScreenSurfaceLight!!
-        _smartSpeakerWithScreenSurfaceLight = buildHyperOSIcon(
+        if (_smartSpeakerWithScreenLight != null) return _smartSpeakerWithScreenLight!!
+        _smartSpeakerWithScreenLight = buildHyperOSIcon(
             name = "SmartSpeakerWithScreen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1002.8f, 656.3f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.SmartSpeakerWithScreen: ImageVector
             translationY = 1020.1667f,
             autoMirror = false,
         )
-        return _smartSpeakerWithScreenSurfaceLight!!
+        return _smartSpeakerWithScreenLight!!
     }
 
-private var _smartSpeakerWithScreenSurfaceLight: ImageVector? = null
+private var _smartSpeakerWithScreenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SmartSpeakerWithScreen: ImageVector
     get() {
-        if (_smartSpeakerWithScreenSurfaceNormal != null) return _smartSpeakerWithScreenSurfaceNormal!!
-        _smartSpeakerWithScreenSurfaceNormal = buildHyperOSIcon(
+        if (_smartSpeakerWithScreenNormal != null) return _smartSpeakerWithScreenNormal!!
+        _smartSpeakerWithScreenNormal = buildHyperOSIcon(
             name = "SmartSpeakerWithScreen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(998.8f, 641.7f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.SmartSpeakerWithScreen: ImageVector
             translationY = 1020.1667f,
             autoMirror = false,
         )
-        return _smartSpeakerWithScreenSurfaceNormal!!
+        return _smartSpeakerWithScreenNormal!!
     }
 
-private var _smartSpeakerWithScreenSurfaceNormal: ImageVector? = null
+private var _smartSpeakerWithScreenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SmartSpeakerWithScreen: ImageVector
     get() {
-        if (_smartSpeakerWithScreenSurfaceRegular != null) return _smartSpeakerWithScreenSurfaceRegular!!
-        _smartSpeakerWithScreenSurfaceRegular = buildHyperOSIcon(
+        if (_smartSpeakerWithScreenRegular != null) return _smartSpeakerWithScreenRegular!!
+        _smartSpeakerWithScreenRegular = buildHyperOSIcon(
             name = "SmartSpeakerWithScreen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(997f, 635f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.SmartSpeakerWithScreen: ImageVector
             translationY = 1020.1667f,
             autoMirror = false,
         )
-        return _smartSpeakerWithScreenSurfaceRegular!!
+        return _smartSpeakerWithScreenRegular!!
     }
 
-private var _smartSpeakerWithScreenSurfaceRegular: ImageVector? = null
+private var _smartSpeakerWithScreenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SmartSpeakerWithScreen: ImageVector
     get() {
-        if (_smartSpeakerWithScreenSurfaceMedium != null) return _smartSpeakerWithScreenSurfaceMedium!!
-        _smartSpeakerWithScreenSurfaceMedium = buildHyperOSIcon(
+        if (_smartSpeakerWithScreenMedium != null) return _smartSpeakerWithScreenMedium!!
+        _smartSpeakerWithScreenMedium = buildHyperOSIcon(
             name = "SmartSpeakerWithScreen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(988.4f, 626.9f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.SmartSpeakerWithScreen: ImageVector
             translationY = 1020.1667f,
             autoMirror = false,
         )
-        return _smartSpeakerWithScreenSurfaceMedium!!
+        return _smartSpeakerWithScreenMedium!!
     }
 
-private var _smartSpeakerWithScreenSurfaceMedium: ImageVector? = null
+private var _smartSpeakerWithScreenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SmartSpeakerWithScreen: ImageVector
     get() {
-        if (_smartSpeakerWithScreenSurfaceDemibold != null) return _smartSpeakerWithScreenSurfaceDemibold!!
-        _smartSpeakerWithScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_smartSpeakerWithScreenDemibold != null) return _smartSpeakerWithScreenDemibold!!
+        _smartSpeakerWithScreenDemibold = buildHyperOSIcon(
             name = "SmartSpeakerWithScreen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(982.3f, 621.2f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.SmartSpeakerWithScreen: ImageVector
             translationY = 1020.1667f,
             autoMirror = false,
         )
-        return _smartSpeakerWithScreenSurfaceDemibold!!
+        return _smartSpeakerWithScreenDemibold!!
     }
 
-private var _smartSpeakerWithScreenSurfaceDemibold: ImageVector? = null
+private var _smartSpeakerWithScreenDemibold: ImageVector? = null
 

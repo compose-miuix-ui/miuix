@@ -64,7 +64,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Search
 import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import utils.SearchStatus
 import utils.rememberAppSafePadding
 
@@ -209,9 +208,7 @@ fun SearchStatus.SearchPager(
                 SearchStatus.ResultStatus.LOAD -> {}
 
                 SearchStatus.ResultStatus.SHOW -> LazyColumn(
-                    Modifier
-                        .fillMaxSize()
-                        .overScrollVertical(),
+                    Modifier.fillMaxSize(),
                 ) {
                     result()
                 }

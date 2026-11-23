@@ -10,22 +10,11 @@ import androidx.compose.ui.node.requireDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toIntSize
 
-// inline so the caller's [block] isn't allocated per frame; it must be crossinline because it is
-// forwarded into record()'s own (non-inline) lambda, leaving just that one unavoidable allocation.
 context(node: DelegatableNode)
-internal inline fun DrawScope.recordLayer(
+internal fun DrawScope.recordLayer(
     layer: GraphicsLayer,
     size: IntSize = this.size.toIntSize(),
-    crossinline block: DrawScope.() -> Unit,
+    block: DrawScope.() -> Unit,
 ) {
-    val density = node.requireDensity()
-    layer.record(size) {
-        val prevDensity = drawContext.density
-        drawContext.density = density
-        try {
-            this.block()
-        } finally {
-            drawContext.density = prevDensity
-        }
-    }
+    layer.record(node.requireDensity(), layoutDirection, size, block)
 }

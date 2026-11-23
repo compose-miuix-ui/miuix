@@ -124,7 +124,7 @@ fun OverscrollLoadMorePage(
                     ),
                 contentPadding = contentPadding,
             ) {
-                item(key = "hint") {
+                item(key = "hint", contentType = "hint") {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -152,7 +152,8 @@ fun OverscrollLoadMorePage(
                 }
                 items(
                     count = itemCount,
-                    key = { "row_$it" },
+                    key = { it },
+                    contentType = { "row" },
                 ) { i ->
                     val isFirst = i == 0
                     val isLast = i == itemCount - 1 && !loadingMore

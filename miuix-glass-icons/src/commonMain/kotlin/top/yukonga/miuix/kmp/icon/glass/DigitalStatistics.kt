@@ -12,8 +12,8 @@ val MiuixIcons.Glass.DigitalStatistics: ImageVector
 
 val MiuixIcons.Glass.Light.DigitalStatistics: ImageVector
     get() {
-        if (_digitalStatisticsLineLight != null) return _digitalStatisticsLineLight!!
-        _digitalStatisticsLineLight = buildHyperOSIcon(
+        if (_digitalStatisticsLight != null) return _digitalStatisticsLight!!
+        _digitalStatisticsLight = buildHyperOSIcon(
             name = "DigitalStatistics.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(555.2f, -59.9f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.DigitalStatistics: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _digitalStatisticsLineLight!!
+        return _digitalStatisticsLight!!
     }
 
-private var _digitalStatisticsLineLight: ImageVector? = null
+private var _digitalStatisticsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.DigitalStatistics: ImageVector
     get() {
-        if (_digitalStatisticsLineNormal != null) return _digitalStatisticsLineNormal!!
-        _digitalStatisticsLineNormal = buildHyperOSIcon(
+        if (_digitalStatisticsNormal != null) return _digitalStatisticsNormal!!
+        _digitalStatisticsNormal = buildHyperOSIcon(
             name = "DigitalStatistics.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(564.7f, -62f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.DigitalStatistics: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _digitalStatisticsLineNormal!!
+        return _digitalStatisticsNormal!!
     }
 
-private var _digitalStatisticsLineNormal: ImageVector? = null
+private var _digitalStatisticsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.DigitalStatistics: ImageVector
     get() {
-        if (_digitalStatisticsLineRegular != null) return _digitalStatisticsLineRegular!!
-        _digitalStatisticsLineRegular = buildHyperOSIcon(
+        if (_digitalStatisticsRegular != null) return _digitalStatisticsRegular!!
+        _digitalStatisticsRegular = buildHyperOSIcon(
             name = "DigitalStatistics.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(569f, -63f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.DigitalStatistics: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _digitalStatisticsLineRegular!!
+        return _digitalStatisticsRegular!!
     }
 
-private var _digitalStatisticsLineRegular: ImageVector? = null
+private var _digitalStatisticsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.DigitalStatistics: ImageVector
     get() {
-        if (_digitalStatisticsLineMedium != null) return _digitalStatisticsLineMedium!!
-        _digitalStatisticsLineMedium = buildHyperOSIcon(
+        if (_digitalStatisticsMedium != null) return _digitalStatisticsMedium!!
+        _digitalStatisticsMedium = buildHyperOSIcon(
             name = "DigitalStatistics.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(577.1f, -58.4f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.DigitalStatistics: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _digitalStatisticsLineMedium!!
+        return _digitalStatisticsMedium!!
     }
 
-private var _digitalStatisticsLineMedium: ImageVector? = null
+private var _digitalStatisticsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.DigitalStatistics: ImageVector
     get() {
-        if (_digitalStatisticsLineDemibold != null) return _digitalStatisticsLineDemibold!!
-        _digitalStatisticsLineDemibold = buildHyperOSIcon(
+        if (_digitalStatisticsDemibold != null) return _digitalStatisticsDemibold!!
+        _digitalStatisticsDemibold = buildHyperOSIcon(
             name = "DigitalStatistics.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(582.8f, -55.2f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.DigitalStatistics: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _digitalStatisticsLineDemibold!!
+        return _digitalStatisticsDemibold!!
     }
 
-private var _digitalStatisticsLineDemibold: ImageVector? = null
+private var _digitalStatisticsDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.WatchRound: ImageVector
 
 val MiuixIcons.Glass.Light.WatchRound: ImageVector
     get() {
-        if (_xiaomiWatchRoundSurfaceLight != null) return _xiaomiWatchRoundSurfaceLight!!
-        _xiaomiWatchRoundSurfaceLight = buildHyperOSIcon(
+        if (_watchRoundLight != null) return _watchRoundLight!!
+        _watchRoundLight = buildHyperOSIcon(
             name = "WatchRound.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(373.1f, 375.6f),
@@ -74,15 +74,15 @@ val MiuixIcons.Glass.Light.WatchRound: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiWatchRoundSurfaceLight!!
+        return _watchRoundLight!!
     }
 
-private var _xiaomiWatchRoundSurfaceLight: ImageVector? = null
+private var _watchRoundLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.WatchRound: ImageVector
     get() {
-        if (_xiaomiWatchRoundSurfaceNormal != null) return _xiaomiWatchRoundSurfaceNormal!!
-        _xiaomiWatchRoundSurfaceNormal = buildHyperOSIcon(
+        if (_watchRoundNormal != null) return _watchRoundNormal!!
+        _watchRoundNormal = buildHyperOSIcon(
             name = "WatchRound.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(382f, 375.9f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Normal.WatchRound: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiWatchRoundSurfaceNormal!!
+        return _watchRoundNormal!!
     }
 
-private var _xiaomiWatchRoundSurfaceNormal: ImageVector? = null
+private var _watchRoundNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.WatchRound: ImageVector
     get() {
-        if (_xiaomiWatchRoundSurfaceRegular != null) return _xiaomiWatchRoundSurfaceRegular!!
-        _xiaomiWatchRoundSurfaceRegular = buildHyperOSIcon(
+        if (_watchRoundRegular != null) return _watchRoundRegular!!
+        _watchRoundRegular = buildHyperOSIcon(
             name = "WatchRound.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(386f, 376f),
@@ -212,15 +212,15 @@ val MiuixIcons.Glass.Regular.WatchRound: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiWatchRoundSurfaceRegular!!
+        return _watchRoundRegular!!
     }
 
-private var _xiaomiWatchRoundSurfaceRegular: ImageVector? = null
+private var _watchRoundRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.WatchRound: ImageVector
     get() {
-        if (_xiaomiWatchRoundSurfaceMedium != null) return _xiaomiWatchRoundSurfaceMedium!!
-        _xiaomiWatchRoundSurfaceMedium = buildHyperOSIcon(
+        if (_watchRoundMedium != null) return _watchRoundMedium!!
+        _watchRoundMedium = buildHyperOSIcon(
             name = "WatchRound.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(391.7f, 375.7f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Medium.WatchRound: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiWatchRoundSurfaceMedium!!
+        return _watchRoundMedium!!
     }
 
-private var _xiaomiWatchRoundSurfaceMedium: ImageVector? = null
+private var _watchRoundMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.WatchRound: ImageVector
     get() {
-        if (_xiaomiWatchRoundSurfaceDemibold != null) return _xiaomiWatchRoundSurfaceDemibold!!
-        _xiaomiWatchRoundSurfaceDemibold = buildHyperOSIcon(
+        if (_watchRoundDemibold != null) return _watchRoundDemibold!!
+        _watchRoundDemibold = buildHyperOSIcon(
             name = "WatchRound.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(395.6f, 375.4f),
@@ -350,8 +350,8 @@ val MiuixIcons.Glass.Demibold.WatchRound: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _xiaomiWatchRoundSurfaceDemibold!!
+        return _watchRoundDemibold!!
     }
 
-private var _xiaomiWatchRoundSurfaceDemibold: ImageVector? = null
+private var _watchRoundDemibold: ImageVector? = null
 

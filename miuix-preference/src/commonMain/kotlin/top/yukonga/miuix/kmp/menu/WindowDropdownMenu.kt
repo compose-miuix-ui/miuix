@@ -99,7 +99,7 @@ fun WindowDropdownMenu(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val hasEntries = nonEmptyEntries.isNotEmpty()
     val actualEnabled = enabled && hasEntries
     val actionColor = if (actualEnabled) {
@@ -119,6 +119,8 @@ fun WindowDropdownMenu(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     BasicComponent(
         modifier = modifier,
@@ -135,8 +137,8 @@ fun WindowDropdownMenu(
                 WindowDropdownPopup(
                     entries = nonEmptyEntries,
                     show = isDropdownExpanded.value,
-                    onDismiss = { setExpanded(false) },
-                    onDismissFinished = { isHoldDown.value = false },
+                    onDismiss = onDismissPopup,
+                    onDismissFinished = onDismissFinishedPopup,
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     collapseOnSelection = collapseOnSelection,

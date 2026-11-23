@@ -39,7 +39,6 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
@@ -209,8 +208,7 @@ private fun BottomSheetContent(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
-            .scrollEndHaptic()
-            .overScrollVertical(),
+            .scrollEndHaptic(),
     ) {
         item {
             SmallTitle(

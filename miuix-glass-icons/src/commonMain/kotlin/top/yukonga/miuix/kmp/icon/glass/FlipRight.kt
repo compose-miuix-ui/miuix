@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FlipRight: ImageVector
 
 val MiuixIcons.Glass.Light.FlipRight: ImageVector
     get() {
-        if (_flipRightLineLight != null) return _flipRightLineLight!!
-        _flipRightLineLight = buildHyperOSIcon(
+        if (_flipRightLight != null) return _flipRightLight!!
+        _flipRightLight = buildHyperOSIcon(
             name = "FlipRight.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(474.9f, 585.8f),
@@ -91,15 +91,15 @@ val MiuixIcons.Glass.Light.FlipRight: ImageVector
             translationY = 1043.096f,
             autoMirror = true,
         )
-        return _flipRightLineLight!!
+        return _flipRightLight!!
     }
 
-private var _flipRightLineLight: ImageVector? = null
+private var _flipRightLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FlipRight: ImageVector
     get() {
-        if (_flipRightLineNormal != null) return _flipRightLineNormal!!
-        _flipRightLineNormal = buildHyperOSIcon(
+        if (_flipRightNormal != null) return _flipRightNormal!!
+        _flipRightNormal = buildHyperOSIcon(
             name = "FlipRight.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(471.5f, 592.8f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Normal.FlipRight: ImageVector
             translationY = 1044.827f,
             autoMirror = true,
         )
-        return _flipRightLineNormal!!
+        return _flipRightNormal!!
     }
 
-private var _flipRightLineNormal: ImageVector? = null
+private var _flipRightNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FlipRight: ImageVector
     get() {
-        if (_flipRightLineRegular != null) return _flipRightLineRegular!!
-        _flipRightLineRegular = buildHyperOSIcon(
+        if (_flipRightRegular != null) return _flipRightRegular!!
+        _flipRightRegular = buildHyperOSIcon(
             name = "FlipRight.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(470f, 596f),
@@ -263,15 +263,15 @@ val MiuixIcons.Glass.Regular.FlipRight: ImageVector
             translationY = 1045.614f,
             autoMirror = true,
         )
-        return _flipRightLineRegular!!
+        return _flipRightRegular!!
     }
 
-private var _flipRightLineRegular: ImageVector? = null
+private var _flipRightRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FlipRight: ImageVector
     get() {
-        if (_flipRightLineMedium != null) return _flipRightLineMedium!!
-        _flipRightLineMedium = buildHyperOSIcon(
+        if (_flipRightMedium != null) return _flipRightMedium!!
+        _flipRightMedium = buildHyperOSIcon(
             name = "FlipRight.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(466.5f, 603.3f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Medium.FlipRight: ImageVector
             translationY = 1051.2891f,
             autoMirror = true,
         )
-        return _flipRightLineMedium!!
+        return _flipRightMedium!!
     }
 
-private var _flipRightLineMedium: ImageVector? = null
+private var _flipRightMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FlipRight: ImageVector
     get() {
-        if (_flipRightLineDemibold != null) return _flipRightLineDemibold!!
-        _flipRightLineDemibold = buildHyperOSIcon(
+        if (_flipRightDemibold != null) return _flipRightDemibold!!
+        _flipRightDemibold = buildHyperOSIcon(
             name = "FlipRight.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(464f, 608.4f),
@@ -435,8 +435,8 @@ val MiuixIcons.Glass.Demibold.FlipRight: ImageVector
             translationY = 1055.2622f,
             autoMirror = true,
         )
-        return _flipRightLineDemibold!!
+        return _flipRightDemibold!!
     }
 
-private var _flipRightLineDemibold: ImageVector? = null
+private var _flipRightDemibold: ImageVector? = null
 

@@ -3,17 +3,21 @@
 
 package top.yukonga.miuix.kmp.basic
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,10 +69,25 @@ fun IconButton(
         }
     }
 
+    val isCircle = cornerRadius * 2 >= minOf(minWidth, minHeight)
+    val surfaceModifier = if (isCircle) {
+        Modifier
+            .clip(CircleShape)
+            .then(
+                if (backgroundColor.isSpecified && backgroundColor.alpha > 0f) {
+                    Modifier.background(backgroundColor)
+                } else {
+                    Modifier
+                },
+            )
+    } else {
+        Modifier.squircleSurface(color = backgroundColor, cornerRadius = cornerRadius)
+    }
+
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minWidth, minHeight = minHeight)
-            .squircleSurface(color = backgroundColor, cornerRadius = cornerRadius)
+            .then(surfaceModifier)
             .then(clickableModifier),
         contentAlignment = Alignment.Center,
     ) {

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Card1Dash2: ImageVector
 
 val MiuixIcons.Glass.Light.Card1Dash2: ImageVector
     get() {
-        if (_card1Dash2SurfaceLight != null) return _card1Dash2SurfaceLight!!
-        _card1Dash2SurfaceLight = buildHyperOSIcon(
+        if (_card1Dash2Light != null) return _card1Dash2Light!!
+        _card1Dash2Light = buildHyperOSIcon(
             name = "Card1Dash2.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1016.8f, -108f),
@@ -75,15 +75,15 @@ val MiuixIcons.Glass.Light.Card1Dash2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _card1Dash2SurfaceLight!!
+        return _card1Dash2Light!!
     }
 
-private var _card1Dash2SurfaceLight: ImageVector? = null
+private var _card1Dash2Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Card1Dash2: ImageVector
     get() {
-        if (_card1Dash2SurfaceNormal != null) return _card1Dash2SurfaceNormal!!
-        _card1Dash2SurfaceNormal = buildHyperOSIcon(
+        if (_card1Dash2Normal != null) return _card1Dash2Normal!!
+        _card1Dash2Normal = buildHyperOSIcon(
             name = "Card1Dash2.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1021.1f, -116.2f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Normal.Card1Dash2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _card1Dash2SurfaceNormal!!
+        return _card1Dash2Normal!!
     }
 
-private var _card1Dash2SurfaceNormal: ImageVector? = null
+private var _card1Dash2Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Card1Dash2: ImageVector
     get() {
-        if (_card1Dash2SurfaceRegular != null) return _card1Dash2SurfaceRegular!!
-        _card1Dash2SurfaceRegular = buildHyperOSIcon(
+        if (_card1Dash2Regular != null) return _card1Dash2Regular!!
+        _card1Dash2Regular = buildHyperOSIcon(
             name = "Card1Dash2.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1023f, -120f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Regular.Card1Dash2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _card1Dash2SurfaceRegular!!
+        return _card1Dash2Regular!!
     }
 
-private var _card1Dash2SurfaceRegular: ImageVector? = null
+private var _card1Dash2Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Card1Dash2: ImageVector
     get() {
-        if (_card1Dash2SurfaceMedium != null) return _card1Dash2SurfaceMedium!!
-        _card1Dash2SurfaceMedium = buildHyperOSIcon(
+        if (_card1Dash2Medium != null) return _card1Dash2Medium!!
+        _card1Dash2Medium = buildHyperOSIcon(
             name = "Card1Dash2.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1026.8f, -127.3f),
@@ -285,15 +285,15 @@ val MiuixIcons.Glass.Medium.Card1Dash2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _card1Dash2SurfaceMedium!!
+        return _card1Dash2Medium!!
     }
 
-private var _card1Dash2SurfaceMedium: ImageVector? = null
+private var _card1Dash2Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Card1Dash2: ImageVector
     get() {
-        if (_card1Dash2SurfaceDemibold != null) return _card1Dash2SurfaceDemibold!!
-        _card1Dash2SurfaceDemibold = buildHyperOSIcon(
+        if (_card1Dash2Demibold != null) return _card1Dash2Demibold!!
+        _card1Dash2Demibold = buildHyperOSIcon(
             name = "Card1Dash2.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1029.4f, -132.4f),
@@ -355,8 +355,8 @@ val MiuixIcons.Glass.Demibold.Card1Dash2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _card1Dash2SurfaceDemibold!!
+        return _card1Dash2Demibold!!
     }
 
-private var _card1Dash2SurfaceDemibold: ImageVector? = null
+private var _card1Dash2Demibold: ImageVector? = null
 

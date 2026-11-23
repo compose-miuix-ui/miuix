@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NewWindow: ImageVector
 
 val MiuixIcons.Glass.Light.NewWindow: ImageVector
     get() {
-        if (_newWindowSurfaceLight != null) return _newWindowSurfaceLight!!
-        _newWindowSurfaceLight = buildHyperOSIcon(
+        if (_newWindowLight != null) return _newWindowLight!!
+        _newWindowLight = buildHyperOSIcon(
             name = "NewWindow.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(472.1f, 829f),
@@ -112,15 +112,15 @@ val MiuixIcons.Glass.Light.NewWindow: ImageVector
             translationY = 1007.5f,
             autoMirror = false,
         )
-        return _newWindowSurfaceLight!!
+        return _newWindowLight!!
     }
 
-private var _newWindowSurfaceLight: ImageVector? = null
+private var _newWindowLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NewWindow: ImageVector
     get() {
-        if (_newWindowSurfaceNormal != null) return _newWindowSurfaceNormal!!
-        _newWindowSurfaceNormal = buildHyperOSIcon(
+        if (_newWindowNormal != null) return _newWindowNormal!!
+        _newWindowNormal = buildHyperOSIcon(
             name = "NewWindow.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(467.2f, 837.2f),
@@ -219,15 +219,15 @@ val MiuixIcons.Glass.Normal.NewWindow: ImageVector
             translationY = 1007.9583f,
             autoMirror = false,
         )
-        return _newWindowSurfaceNormal!!
+        return _newWindowNormal!!
     }
 
-private var _newWindowSurfaceNormal: ImageVector? = null
+private var _newWindowNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NewWindow: ImageVector
     get() {
-        if (_newWindowSurfaceRegular != null) return _newWindowSurfaceRegular!!
-        _newWindowSurfaceRegular = buildHyperOSIcon(
+        if (_newWindowRegular != null) return _newWindowRegular!!
+        _newWindowRegular = buildHyperOSIcon(
             name = "NewWindow.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(465f, 841f),
@@ -326,15 +326,15 @@ val MiuixIcons.Glass.Regular.NewWindow: ImageVector
             translationY = 1008.1667f,
             autoMirror = false,
         )
-        return _newWindowSurfaceRegular!!
+        return _newWindowRegular!!
     }
 
-private var _newWindowSurfaceRegular: ImageVector? = null
+private var _newWindowRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NewWindow: ImageVector
     get() {
-        if (_newWindowSurfaceMedium != null) return _newWindowSurfaceMedium!!
-        _newWindowSurfaceMedium = buildHyperOSIcon(
+        if (_newWindowMedium != null) return _newWindowMedium!!
+        _newWindowMedium = buildHyperOSIcon(
             name = "NewWindow.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(465.3f, 850.2f),
@@ -433,15 +433,15 @@ val MiuixIcons.Glass.Medium.NewWindow: ImageVector
             translationY = 1009.9234f,
             autoMirror = false,
         )
-        return _newWindowSurfaceMedium!!
+        return _newWindowMedium!!
     }
 
-private var _newWindowSurfaceMedium: ImageVector? = null
+private var _newWindowMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NewWindow: ImageVector
     get() {
-        if (_newWindowSurfaceDemibold != null) return _newWindowSurfaceDemibold!!
-        _newWindowSurfaceDemibold = buildHyperOSIcon(
+        if (_newWindowDemibold != null) return _newWindowDemibold!!
+        _newWindowDemibold = buildHyperOSIcon(
             name = "NewWindow.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(465.5f, 856.6f),
@@ -540,8 +540,8 @@ val MiuixIcons.Glass.Demibold.NewWindow: ImageVector
             translationY = 1011.1532f,
             autoMirror = false,
         )
-        return _newWindowSurfaceDemibold!!
+        return _newWindowDemibold!!
     }
 
-private var _newWindowSurfaceDemibold: ImageVector? = null
+private var _newWindowDemibold: ImageVector? = null
 

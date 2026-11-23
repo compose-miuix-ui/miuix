@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuperXiaoai: ImageVector
 
 val MiuixIcons.Glass.Light.SuperXiaoai: ImageVector
     get() {
-        if (_superXiaoaiSurfaceLight != null) return _superXiaoaiSurfaceLight!!
-        _superXiaoaiSurfaceLight = buildHyperOSIcon(
+        if (_superXiaoaiLight != null) return _superXiaoaiLight!!
+        _superXiaoaiLight = buildHyperOSIcon(
             name = "SuperXiaoai.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(347.2f, 641.8f),
@@ -132,15 +132,15 @@ val MiuixIcons.Glass.Light.SuperXiaoai: ImageVector
             translationY = 1041.4564f,
             autoMirror = false,
         )
-        return _superXiaoaiSurfaceLight!!
+        return _superXiaoaiLight!!
     }
 
-private var _superXiaoaiSurfaceLight: ImageVector? = null
+private var _superXiaoaiLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuperXiaoai: ImageVector
     get() {
-        if (_superXiaoaiSurfaceNormal != null) return _superXiaoaiSurfaceNormal!!
-        _superXiaoaiSurfaceNormal = buildHyperOSIcon(
+        if (_superXiaoaiNormal != null) return _superXiaoaiNormal!!
+        _superXiaoaiNormal = buildHyperOSIcon(
             name = "SuperXiaoai.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(342.9f, 643.3f),
@@ -259,15 +259,15 @@ val MiuixIcons.Glass.Normal.SuperXiaoai: ImageVector
             translationY = 1041.5238f,
             autoMirror = false,
         )
-        return _superXiaoaiSurfaceNormal!!
+        return _superXiaoaiNormal!!
     }
 
-private var _superXiaoaiSurfaceNormal: ImageVector? = null
+private var _superXiaoaiNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuperXiaoai: ImageVector
     get() {
-        if (_superXiaoaiSurfaceRegular != null) return _superXiaoaiSurfaceRegular!!
-        _superXiaoaiSurfaceRegular = buildHyperOSIcon(
+        if (_superXiaoaiRegular != null) return _superXiaoaiRegular!!
+        _superXiaoaiRegular = buildHyperOSIcon(
             name = "SuperXiaoai.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(341f, 644f),
@@ -386,15 +386,15 @@ val MiuixIcons.Glass.Regular.SuperXiaoai: ImageVector
             translationY = 1041.5544f,
             autoMirror = false,
         )
-        return _superXiaoaiSurfaceRegular!!
+        return _superXiaoaiRegular!!
     }
 
-private var _superXiaoaiSurfaceRegular: ImageVector? = null
+private var _superXiaoaiRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuperXiaoai: ImageVector
     get() {
-        if (_superXiaoaiSurfaceMedium != null) return _superXiaoaiSurfaceMedium!!
-        _superXiaoaiSurfaceMedium = buildHyperOSIcon(
+        if (_superXiaoaiMedium != null) return _superXiaoaiMedium!!
+        _superXiaoaiMedium = buildHyperOSIcon(
             name = "SuperXiaoai.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(335.9f, 645.9f),
@@ -513,15 +513,15 @@ val MiuixIcons.Glass.Medium.SuperXiaoai: ImageVector
             translationY = 1041.5845f,
             autoMirror = false,
         )
-        return _superXiaoaiSurfaceMedium!!
+        return _superXiaoaiMedium!!
     }
 
-private var _superXiaoaiSurfaceMedium: ImageVector? = null
+private var _superXiaoaiMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuperXiaoai: ImageVector
     get() {
-        if (_superXiaoaiSurfaceDemibold != null) return _superXiaoaiSurfaceDemibold!!
-        _superXiaoaiSurfaceDemibold = buildHyperOSIcon(
+        if (_superXiaoaiDemibold != null) return _superXiaoaiDemibold!!
+        _superXiaoaiDemibold = buildHyperOSIcon(
             name = "SuperXiaoai.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(332.3f, 647.2f),
@@ -640,8 +640,8 @@ val MiuixIcons.Glass.Demibold.SuperXiaoai: ImageVector
             translationY = 1041.6057f,
             autoMirror = false,
         )
-        return _superXiaoaiSurfaceDemibold!!
+        return _superXiaoaiDemibold!!
     }
 
-private var _superXiaoaiSurfaceDemibold: ImageVector? = null
+private var _superXiaoaiDemibold: ImageVector? = null
 

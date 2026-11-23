@@ -88,11 +88,12 @@ fun LazyListScope.groupedCardItems(
     outerBottomPadding: Dp = 6.dp,
     outerHorizontalPadding: Dp = 12.dp,
     insidePadding: PaddingValues = PaddingValues(0.dp),
+    contentType: Any? = "card_segment",
 ) {
     if (items.isEmpty()) return
     val lastIndex = items.lastIndex
     items.forEachIndexed { index, cardItem ->
-        item(key = "$keyPrefix:${cardItem.key}") {
+        item(key = "$keyPrefix:${cardItem.key}", contentType = contentType) {
             CardSegment(
                 isFirst = index == 0,
                 isLast = index == lastIndex,

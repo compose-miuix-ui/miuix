@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FreezePanes: ImageVector
 
 val MiuixIcons.Glass.Light.FreezePanes: ImageVector
     get() {
-        if (_freezePanesLineLight != null) return _freezePanesLineLight!!
-        _freezePanesLineLight = buildHyperOSIcon(
+        if (_freezePanesLight != null) return _freezePanesLight!!
+        _freezePanesLight = buildHyperOSIcon(
             name = "FreezePanes.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(300.2f, 817f),
@@ -91,15 +91,15 @@ val MiuixIcons.Glass.Light.FreezePanes: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _freezePanesLineLight!!
+        return _freezePanesLight!!
     }
 
-private var _freezePanesLineLight: ImageVector? = null
+private var _freezePanesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FreezePanes: ImageVector
     get() {
-        if (_freezePanesLineNormal != null) return _freezePanesLineNormal!!
-        _freezePanesLineNormal = buildHyperOSIcon(
+        if (_freezePanesNormal != null) return _freezePanesNormal!!
+        _freezePanesNormal = buildHyperOSIcon(
             name = "FreezePanes.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(295.9f, 825.2f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Normal.FreezePanes: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _freezePanesLineNormal!!
+        return _freezePanesNormal!!
     }
 
-private var _freezePanesLineNormal: ImageVector? = null
+private var _freezePanesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FreezePanes: ImageVector
     get() {
-        if (_freezePanesLineRegular != null) return _freezePanesLineRegular!!
-        _freezePanesLineRegular = buildHyperOSIcon(
+        if (_freezePanesRegular != null) return _freezePanesRegular!!
+        _freezePanesRegular = buildHyperOSIcon(
             name = "FreezePanes.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(294f, 829f),
@@ -263,15 +263,15 @@ val MiuixIcons.Glass.Regular.FreezePanes: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _freezePanesLineRegular!!
+        return _freezePanesRegular!!
     }
 
-private var _freezePanesLineRegular: ImageVector? = null
+private var _freezePanesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FreezePanes: ImageVector
     get() {
-        if (_freezePanesLineMedium != null) return _freezePanesLineMedium!!
-        _freezePanesLineMedium = buildHyperOSIcon(
+        if (_freezePanesMedium != null) return _freezePanesMedium!!
+        _freezePanesMedium = buildHyperOSIcon(
             name = "FreezePanes.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(290.2f, 836.3f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Medium.FreezePanes: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _freezePanesLineMedium!!
+        return _freezePanesMedium!!
     }
 
-private var _freezePanesLineMedium: ImageVector? = null
+private var _freezePanesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FreezePanes: ImageVector
     get() {
-        if (_freezePanesLineDemibold != null) return _freezePanesLineDemibold!!
-        _freezePanesLineDemibold = buildHyperOSIcon(
+        if (_freezePanesDemibold != null) return _freezePanesDemibold!!
+        _freezePanesDemibold = buildHyperOSIcon(
             name = "FreezePanes.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(287.6f, 841.4f),
@@ -435,8 +435,8 @@ val MiuixIcons.Glass.Demibold.FreezePanes: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _freezePanesLineDemibold!!
+        return _freezePanesDemibold!!
     }
 
-private var _freezePanesLineDemibold: ImageVector? = null
+private var _freezePanesDemibold: ImageVector? = null
 

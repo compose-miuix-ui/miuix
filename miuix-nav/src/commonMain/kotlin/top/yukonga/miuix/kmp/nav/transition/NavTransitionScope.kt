@@ -43,7 +43,24 @@ class NavGesture(
     val swipeEdge: NavSwipeEdge,
     val touchY: Float,
     val initialTouchY: Float = touchY,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NavGesture) return false
+        return progress == other.progress &&
+            swipeEdge == other.swipeEdge &&
+            touchY == other.touchY &&
+            initialTouchY == other.initialTouchY
+    }
+
+    override fun hashCode(): Int {
+        var result = progress.hashCode()
+        result = 31 * result + swipeEdge.hashCode()
+        result = 31 * result + touchY.hashCode()
+        result = 31 * result + initialTouchY.hashCode()
+        return result
+    }
+}
 
 /** Which release path started the current settle. */
 enum class NavSettlePhase {

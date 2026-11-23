@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UnfoldMore: ImageVector
 
 val MiuixIcons.Glass.Light.UnfoldMore: ImageVector
     get() {
-        if (_expandMoreLineLight != null) return _expandMoreLineLight!!
-        _expandMoreLineLight = buildHyperOSIcon(
+        if (_unfoldMoreLight != null) return _unfoldMoreLight!!
+        _unfoldMoreLight = buildHyperOSIcon(
             name = "UnfoldMore.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(337.1f, 271.4f),
@@ -62,15 +62,15 @@ val MiuixIcons.Glass.Light.UnfoldMore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _expandMoreLineLight!!
+        return _unfoldMoreLight!!
     }
 
-private var _expandMoreLineLight: ImageVector? = null
+private var _unfoldMoreLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UnfoldMore: ImageVector
     get() {
-        if (_expandMoreLineNormal != null) return _expandMoreLineNormal!!
-        _expandMoreLineNormal = buildHyperOSIcon(
+        if (_unfoldMoreNormal != null) return _unfoldMoreNormal!!
+        _unfoldMoreNormal = buildHyperOSIcon(
             name = "UnfoldMore.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(332.2f, 279.4f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Normal.UnfoldMore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _expandMoreLineNormal!!
+        return _unfoldMoreNormal!!
     }
 
-private var _expandMoreLineNormal: ImageVector? = null
+private var _unfoldMoreNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UnfoldMore: ImageVector
     get() {
-        if (_expandMoreLineRegular != null) return _expandMoreLineRegular!!
-        _expandMoreLineRegular = buildHyperOSIcon(
+        if (_unfoldMoreRegular != null) return _unfoldMoreRegular!!
+        _unfoldMoreRegular = buildHyperOSIcon(
             name = "UnfoldMore.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(330f, 283f),
@@ -176,15 +176,15 @@ val MiuixIcons.Glass.Regular.UnfoldMore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _expandMoreLineRegular!!
+        return _unfoldMoreRegular!!
     }
 
-private var _expandMoreLineRegular: ImageVector? = null
+private var _unfoldMoreRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UnfoldMore: ImageVector
     get() {
-        if (_expandMoreLineMedium != null) return _expandMoreLineMedium!!
-        _expandMoreLineMedium = buildHyperOSIcon(
+        if (_unfoldMoreMedium != null) return _unfoldMoreMedium!!
+        _unfoldMoreMedium = buildHyperOSIcon(
             name = "UnfoldMore.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(327.8f, 292.7f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Medium.UnfoldMore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _expandMoreLineMedium!!
+        return _unfoldMoreMedium!!
     }
 
-private var _expandMoreLineMedium: ImageVector? = null
+private var _unfoldMoreMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UnfoldMore: ImageVector
     get() {
-        if (_expandMoreLineDemibold != null) return _expandMoreLineDemibold!!
-        _expandMoreLineDemibold = buildHyperOSIcon(
+        if (_unfoldMoreDemibold != null) return _unfoldMoreDemibold!!
+        _unfoldMoreDemibold = buildHyperOSIcon(
             name = "UnfoldMore.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(326.3f, 299.5f),
@@ -290,8 +290,8 @@ val MiuixIcons.Glass.Demibold.UnfoldMore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _expandMoreLineDemibold!!
+        return _unfoldMoreDemibold!!
     }
 
-private var _expandMoreLineDemibold: ImageVector? = null
+private var _unfoldMoreDemibold: ImageVector? = null
 

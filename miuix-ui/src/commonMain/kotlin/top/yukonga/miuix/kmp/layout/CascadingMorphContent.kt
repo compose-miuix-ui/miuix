@@ -60,13 +60,13 @@ private val CascadeShadow: Shadow = Shadow(
 internal fun CascadingPrimaryContent(
     entries: List<DropdownEntry>,
     expandedItem: DropdownItem?,
-    onExpand: (DropdownItem) -> Unit,
+    onExpand: (CascadingItemPosition) -> Unit,
     onLeafSelected: (DropdownItem) -> Unit,
-    onAnchorBounds: (DropdownItem, IntRect) -> Unit,
+    onAnchorBounds: (CascadingItemPosition, IntRect) -> Unit,
     enterFraction: () -> Float,
     enterAlpha: () -> Float,
-    popupLayoutPosition: PopupLayoutPosition,
-    transformOrigin: TransformOrigin,
+    popupLayoutPosition: () -> PopupLayoutPosition,
+    transformOrigin: () -> TransformOrigin,
     surfaceColor: Color,
     dropdownColors: DropdownColors,
     primaryScale: () -> Float,
@@ -84,13 +84,13 @@ internal fun CascadingPrimaryContent(
                 scaleX = s
                 scaleY = s
                 alpha = enterAlpha()
-                this.transformOrigin = transformOrigin
+                this.transformOrigin = transformOrigin()
             }
             .graphicsLayer {
                 val s = primaryScale()
                 scaleX = s
                 scaleY = s
-                this.transformOrigin = transformOrigin
+                this.transformOrigin = transformOrigin()
             }
             .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius, isSquircleEnabled())
             .then(
@@ -106,9 +106,11 @@ internal fun CascadingPrimaryContent(
                     val isFirstEntry = entryIndex == 0
                     val isLastEntry = entryIndex == lastEntryIdx
                     entry.items.forEachIndexed { itemIndex, item ->
+                        val position = CascadingItemPosition(entryIndex, itemIndex)
                         key(entry, item) {
                             CascadingPrimaryRow(
                                 item = item,
+                                position = position,
                                 optionSize = entry.items.size,
                                 index = itemIndex,
                                 entryEnabled = entry.enabled,
@@ -127,7 +129,7 @@ internal fun CascadingPrimaryContent(
                                                     " deeper children are ignored.",
                                             )
                                         }
-                                        onExpand(item)
+                                        onExpand(position)
                                     } else {
                                         onLeafSelected(item)
                                     }
@@ -165,6 +167,7 @@ internal fun CascadingPrimaryContent(
 @Composable
 private fun CascadingPrimaryRow(
     item: DropdownItem,
+    position: CascadingItemPosition,
     optionSize: Int,
     index: Int,
     entryEnabled: Boolean,
@@ -172,24 +175,31 @@ private fun CascadingPrimaryRow(
     isLast: Boolean,
     dropdownColors: DropdownColors,
     onClick: () -> Unit,
-    onAnchorBounds: (DropdownItem, IntRect) -> Unit,
+    onAnchorBounds: (CascadingItemPosition, IntRect) -> Unit,
 ) {
     val rowEnabled = entryEnabled && item.enabled
+    val hasSubmenu = !item.children.isNullOrEmpty()
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .onGloballyPositioned { coords ->
-                val pos = coords.positionInWindow()
-                onAnchorBounds(
-                    item,
-                    IntRect(
-                        left = pos.x.toInt(),
-                        top = pos.y.toInt(),
-                        right = pos.x.toInt() + coords.size.width,
-                        bottom = pos.y.toInt() + coords.size.height,
-                    ),
-                )
-            },
+            .then(
+                if (hasSubmenu) {
+                    Modifier.onGloballyPositioned { coords ->
+                        val pos = coords.positionInWindow()
+                        onAnchorBounds(
+                            position,
+                            IntRect(
+                                left = pos.x.toInt(),
+                                top = pos.y.toInt(),
+                                right = pos.x.toInt() + coords.size.width,
+                                bottom = pos.y.toInt() + coords.size.height,
+                            ),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            ),
         propagateMinConstraints = true,
     ) {
         DropdownImpl(
@@ -199,7 +209,7 @@ private fun CascadingPrimaryRow(
             index = index,
             dropdownColors = dropdownColors,
             enabled = rowEnabled,
-            hasSubmenu = !item.children.isNullOrEmpty(),
+            hasSubmenu = hasSubmenu,
             isFirst = isFirst,
             isLast = isLast,
             onSelectedIndexChange = { onClick() },
@@ -216,12 +226,13 @@ internal fun CascadingSecondaryContent(
     secondaryLocalInUnion: IntRect,
     anchorLocalInUnion: IntRect,
     anchorPaddingTopPx: Int,
+    isAnchorPopupFirst: Boolean,
     isAnchorPopupLast: Boolean,
     secondaryContentMaxHeight: Int,
     enterFraction: () -> Float,
     enterAlpha: () -> Float,
-    popupLayoutPosition: PopupLayoutPosition,
-    transformOrigin: TransformOrigin,
+    popupLayoutPosition: () -> PopupLayoutPosition,
+    transformOrigin: () -> TransformOrigin,
     expandFraction: () -> Float,
     arrowRotation: () -> Float,
     onCollapseSecondary: () -> Unit,
@@ -241,17 +252,18 @@ internal fun CascadingSecondaryContent(
                 scaleX = s
                 scaleY = s
                 alpha = enterAlpha()
-                this.transformOrigin = transformOrigin
+                this.transformOrigin = transformOrigin()
             }
             .popupClipReveal(enterFraction, popupLayoutPosition, CascadingPopupCornerRadius, isSquircleEnabled())
             .drawWithCache {
                 val innerPath = Path()
                 onDrawWithContent {
                     val frac = expandFraction()
-                    val rTop = cornerPx * frac
-                    // Last-row anchors share primary's rounded bottom — keep both bottom corners
-                    // full. Mid-list anchors must shrink uniformly into a flat internal row.
-                    val rBottom = if (isAnchorPopupLast) cornerPx else rTop
+                    val rAnim = cornerPx * frac
+                    // First/last-row anchors share primary's rounded top/bottom — keep those corners
+                    // full. Mid-list anchors shrink uniformly into a flat internal row.
+                    val rTop = if (isAnchorPopupFirst) cornerPx else rAnim
+                    val rBottom = if (isAnchorPopupLast) cornerPx else rAnim
                     val topRadius = CornerRadius(rTop, rTop)
                     val bottomRadius = CornerRadius(rBottom, rBottom)
                     innerPath.rewind()

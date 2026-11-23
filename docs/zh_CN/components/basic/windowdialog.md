@@ -74,6 +74,7 @@ WindowDialog(
 | maxWidth                   | Dp                     | 对话框最大宽度                                 | DialogDefaults.MaxWidth          | 否       |
 | largeScreen                | Boolean?               | 覆盖大屏呈现样式（居中缩放淡入而非底部滑入）。为 null 时根据窗口尺寸自动检测 | null | 否 |
 | cornerRadius               | Dp?                    | 覆盖对话框圆角。为 null 时，居中样式使用 DialogDefaults.CornerRadius，底部贴边样式由屏幕圆角推导（限制在 32dp..48dp） | null | 否 |
+| motion                     | DialogMotion           | 进入和退出动效，见 DialogMotion                | DialogMotion.Default             | 否       |
 | content                    | @Composable () -> Unit | 对话框内容                                     | -                                      | 是       |
 
 ### DialogDefaults
@@ -94,6 +95,15 @@ WindowDialog(
 | titleColor()      | Color    | 获取默认标题颜色       |
 | summaryColor()    | Color    | 获取默认摘要颜色       |
 | backgroundColor() | Color    | 获取默认对话框背景颜色 |
+
+### DialogMotion
+
+对话框显隐动效预设，同时覆盖底部贴边和居中（大屏）两种样式。
+
+| 预设    | 说明 |
+| ------- | ---- |
+| Default | HyperOS 系统对话框动效。底部贴边：以 0.82 / 0.3 s 弹簧上滑进入，200 ms 退出。居中：以 0.8 / 0.3 s 弹簧从略小尺寸放大并淡入，200 ms 反向退出。遮罩 300 ms 淡入、350 ms 淡出 |
+| Glass   | HyperOS 桌面玻璃对话框动效，`GlassDialog` 使用此预设。底部贴边：以 0.84 / 0.3 s 弹簧上滑进入，以 0.97 / 0.33 s 弹簧下落退出。居中：以 0.7 / 0.45 s 弹簧从 0.75 放大并淡入，退出时保持原尺寸淡出。遮罩 100 ms 线性淡入淡出 |
 
 ### LocalDismissState
 

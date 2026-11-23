@@ -106,8 +106,8 @@ fun SearchBar(
             }
             CapturedAnimatedVisibility(
                 visible = expanded,
-                enter = expandHorizontally() + slideInHorizontally(initialOffsetX = { it }),
-                exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it }),
+                enter = SearchBarEnterTransition,
+                exit = SearchBarExitTransition,
             ) {
                 outsideEndAction?.invoke()
             }
@@ -176,40 +176,7 @@ fun InputField(
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
     val capsuleShape = CircleShape
-
-    val actualLeadingIcon = leadingIcon ?: {
-        Icon(
-            modifier = Modifier.padding(start = SearchBarDefaults.LeadingIconStartPadding, end = SearchBarDefaults.LeadingIconEndPadding),
-            imageVector = MiuixIcons.Basic.Search,
-            tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
-            contentDescription = "Search",
-        )
-    }
-
-    val actualTrailingIcon = trailingIcon ?: {
-        CapturedAnimatedVisibility(
-            visible = query.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            Box(
-                modifier = Modifier.padding(
-                    start = SearchBarDefaults.TrailingIconStartPadding,
-                    end = SearchBarDefaults.TrailingIconEndPadding,
-                ),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .clip(capsuleShape)
-                        .clickable { currentOnQueryChange("") },
-                    imageVector = MiuixIcons.Basic.SearchCleanup,
-                    tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
-                    contentDescription = "Search Cleanup",
-                )
-            }
-        }
-    }
+    val currentQuery by rememberUpdatedState(query)
 
     val focused = internalInteractionSource.collectIsFocusedAsState().value
     val focusRequester = remember { FocusRequester() }
@@ -217,12 +184,17 @@ fun InputField(
     val textAlpha = remember { Animatable(1f) }
 
     val textColor = LocalContentColor.current
-    val inputTextStyle = MiuixTheme.textStyles.main
-        .copy(fontWeight = FontWeight.Medium)
-        .merge(textStyle)
-        .copy(color = textColor)
+    val baseMainStyle = MiuixTheme.textStyles.main
+    val inputTextStyle = remember(baseMainStyle, textStyle, textColor) {
+        baseMainStyle
+            .copy(fontWeight = FontWeight.Medium)
+            .merge(textStyle)
+            .copy(color = textColor)
+    }
 
-    val cursorBrush = SolidColor(MiuixTheme.colorScheme.primary)
+    val primaryColor = MiuixTheme.colorScheme.primary
+    val cursorBrush = remember(primaryColor) { SolidColor(primaryColor) }
+    val keyboardActions = remember { KeyboardActions(onSearch = { currentOnSearch(currentQuery) }) }
     val labelText by remember(query, expanded, label) {
         computedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
     }
@@ -255,8 +227,8 @@ fun InputField(
         singleLine = true,
         textStyle = inputTextStyle,
         cursorBrush = cursorBrush,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { currentOnSearch(query) }),
+        keyboardOptions = SearchKeyboardOptions,
+        keyboardActions = keyboardActions,
         interactionSource = internalInteractionSource,
         decorationBox = { innerTextField ->
             Box(
@@ -271,7 +243,19 @@ fun InputField(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    actualLeadingIcon()
+                    if (leadingIcon != null) {
+                        leadingIcon()
+                    } else {
+                        Icon(
+                            modifier = Modifier.padding(
+                                start = SearchBarDefaults.LeadingIconStartPadding,
+                                end = SearchBarDefaults.LeadingIconEndPadding,
+                            ),
+                            imageVector = MiuixIcons.Basic.Search,
+                            tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
+                            contentDescription = "Search",
+                        )
+                    }
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -292,7 +276,32 @@ fun InputField(
                             innerTextField()
                         }
                     }
-                    actualTrailingIcon()
+                    if (trailingIcon != null) {
+                        trailingIcon()
+                    } else {
+                        CapturedAnimatedVisibility(
+                            visible = query.isNotEmpty(),
+                            enter = SearchCleanupEnterTransition,
+                            exit = SearchCleanupExitTransition,
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(
+                                    start = SearchBarDefaults.TrailingIconStartPadding,
+                                    end = SearchBarDefaults.TrailingIconEndPadding,
+                                ),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .clip(capsuleShape)
+                                        .clickable { currentOnQueryChange("") },
+                                    imageVector = MiuixIcons.Basic.SearchCleanup,
+                                    tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
+                                    contentDescription = "Search Cleanup",
+                                )
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -339,3 +348,9 @@ object SearchBarDefaults {
     /** The end padding for the default trailing icon. */
     val TrailingIconEndPadding = 16.dp
 }
+
+private val SearchBarEnterTransition = expandHorizontally() + slideInHorizontally(initialOffsetX = { it })
+private val SearchBarExitTransition = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it })
+private val SearchCleanupEnterTransition = fadeIn()
+private val SearchCleanupExitTransition = fadeOut()
+private val SearchKeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)

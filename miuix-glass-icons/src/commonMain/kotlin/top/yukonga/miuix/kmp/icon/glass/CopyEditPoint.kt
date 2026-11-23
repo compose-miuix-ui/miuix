@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CopyEditPoint: ImageVector
 
 val MiuixIcons.Glass.Light.CopyEditPoint: ImageVector
     get() {
-        if (_copyEditPointLineLight != null) return _copyEditPointLineLight!!
-        _copyEditPointLineLight = buildHyperOSIcon(
+        if (_copyEditPointLight != null) return _copyEditPointLight!!
+        _copyEditPointLight = buildHyperOSIcon(
             name = "CopyEditPoint.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(820.8f, 115f),
@@ -154,15 +154,15 @@ val MiuixIcons.Glass.Light.CopyEditPoint: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _copyEditPointLineLight!!
+        return _copyEditPointLight!!
     }
 
-private var _copyEditPointLineLight: ImageVector? = null
+private var _copyEditPointLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CopyEditPoint: ImageVector
     get() {
-        if (_copyEditPointLineNormal != null) return _copyEditPointLineNormal!!
-        _copyEditPointLineNormal = buildHyperOSIcon(
+        if (_copyEditPointNormal != null) return _copyEditPointNormal!!
+        _copyEditPointNormal = buildHyperOSIcon(
             name = "CopyEditPoint.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(827.8f, 112.3f),
@@ -303,15 +303,15 @@ val MiuixIcons.Glass.Normal.CopyEditPoint: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _copyEditPointLineNormal!!
+        return _copyEditPointNormal!!
     }
 
-private var _copyEditPointLineNormal: ImageVector? = null
+private var _copyEditPointNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CopyEditPoint: ImageVector
     get() {
-        if (_copyEditPointLineRegular != null) return _copyEditPointLineRegular!!
-        _copyEditPointLineRegular = buildHyperOSIcon(
+        if (_copyEditPointRegular != null) return _copyEditPointRegular!!
+        _copyEditPointRegular = buildHyperOSIcon(
             name = "CopyEditPoint.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(831f, 111f),
@@ -452,15 +452,15 @@ val MiuixIcons.Glass.Regular.CopyEditPoint: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _copyEditPointLineRegular!!
+        return _copyEditPointRegular!!
     }
 
-private var _copyEditPointLineRegular: ImageVector? = null
+private var _copyEditPointRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CopyEditPoint: ImageVector
     get() {
-        if (_copyEditPointLineMedium != null) return _copyEditPointLineMedium!!
-        _copyEditPointLineMedium = buildHyperOSIcon(
+        if (_copyEditPointMedium != null) return _copyEditPointMedium!!
+        _copyEditPointMedium = buildHyperOSIcon(
             name = "CopyEditPoint.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(838.3f, 111.5f),
@@ -601,15 +601,15 @@ val MiuixIcons.Glass.Medium.CopyEditPoint: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _copyEditPointLineMedium!!
+        return _copyEditPointMedium!!
     }
 
-private var _copyEditPointLineMedium: ImageVector? = null
+private var _copyEditPointMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CopyEditPoint: ImageVector
     get() {
-        if (_copyEditPointLineDemibold != null) return _copyEditPointLineDemibold!!
-        _copyEditPointLineDemibold = buildHyperOSIcon(
+        if (_copyEditPointDemibold != null) return _copyEditPointDemibold!!
+        _copyEditPointDemibold = buildHyperOSIcon(
             name = "CopyEditPoint.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(843.4f, 111.9f),
@@ -750,8 +750,8 @@ val MiuixIcons.Glass.Demibold.CopyEditPoint: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _copyEditPointLineDemibold!!
+        return _copyEditPointDemibold!!
     }
 
-private var _copyEditPointLineDemibold: ImageVector? = null
+private var _copyEditPointDemibold: ImageVector? = null
 

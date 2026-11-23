@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
-import kotlin.math.roundToInt
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
 
 private const val POPUP_PROBE_COUNT = 8
 
@@ -124,7 +125,7 @@ private object PopupColumnMeasurePolicy : MeasurePolicy {
                 if (placeables[index] != null) continue
                 val measurable = measurables[index]
                 val data = measurable.parentData as PopupColumnData
-                val allocated = (remaining * data.weight / totalWeight).roundToInt().coerceIn(0, remaining)
+                val allocated = (remaining * data.weight / totalWeight).fastRoundToInt().fastCoerceIn(0, remaining)
                 remaining -= allocated
                 totalWeight -= data.weight
                 val child = measurable.measure(

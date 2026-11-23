@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Hd: ImageVector
 
 val MiuixIcons.Glass.Light.Hd: ImageVector
     get() {
-        if (_hdLineLight != null) return _hdLineLight!!
-        _hdLineLight = buildHyperOSIcon(
+        if (_hdLight != null) return _hdLight!!
+        _hdLight = buildHyperOSIcon(
             name = "Hd.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(203.3f, 660f),
@@ -128,15 +128,15 @@ val MiuixIcons.Glass.Light.Hd: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hdLineLight!!
+        return _hdLight!!
     }
 
-private var _hdLineLight: ImageVector? = null
+private var _hdLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Hd: ImageVector
     get() {
-        if (_hdLineNormal != null) return _hdLineNormal!!
-        _hdLineNormal = buildHyperOSIcon(
+        if (_hdNormal != null) return _hdNormal!!
+        _hdNormal = buildHyperOSIcon(
             name = "Hd.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(194.2f, 660f),
@@ -251,15 +251,15 @@ val MiuixIcons.Glass.Normal.Hd: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hdLineNormal!!
+        return _hdNormal!!
     }
 
-private var _hdLineNormal: ImageVector? = null
+private var _hdNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Hd: ImageVector
     get() {
-        if (_hdLineRegular != null) return _hdLineRegular!!
-        _hdLineRegular = buildHyperOSIcon(
+        if (_hdRegular != null) return _hdRegular!!
+        _hdRegular = buildHyperOSIcon(
             name = "Hd.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(190f, 660f),
@@ -374,15 +374,15 @@ val MiuixIcons.Glass.Regular.Hd: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hdLineRegular!!
+        return _hdRegular!!
     }
 
-private var _hdLineRegular: ImageVector? = null
+private var _hdRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Hd: ImageVector
     get() {
-        if (_hdLineMedium != null) return _hdLineMedium!!
-        _hdLineMedium = buildHyperOSIcon(
+        if (_hdMedium != null) return _hdMedium!!
+        _hdMedium = buildHyperOSIcon(
             name = "Hd.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(181.9f, 660f),
@@ -497,15 +497,15 @@ val MiuixIcons.Glass.Medium.Hd: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hdLineMedium!!
+        return _hdMedium!!
     }
 
-private var _hdLineMedium: ImageVector? = null
+private var _hdMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Hd: ImageVector
     get() {
-        if (_hdLineDemibold != null) return _hdLineDemibold!!
-        _hdLineDemibold = buildHyperOSIcon(
+        if (_hdDemibold != null) return _hdDemibold!!
+        _hdDemibold = buildHyperOSIcon(
             name = "Hd.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(176.2f, 660f),
@@ -620,8 +620,8 @@ val MiuixIcons.Glass.Demibold.Hd: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hdLineDemibold!!
+        return _hdDemibold!!
     }
 
-private var _hdLineDemibold: ImageVector? = null
+private var _hdDemibold: ImageVector? = null
 

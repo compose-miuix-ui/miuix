@@ -12,8 +12,8 @@ val MiuixIcons.Glass.GameConsole: ImageVector
 
 val MiuixIcons.Glass.Light.GameConsole: ImageVector
     get() {
-        if (_gameConsoleSurfaceLight != null) return _gameConsoleSurfaceLight!!
-        _gameConsoleSurfaceLight = buildHyperOSIcon(
+        if (_gameConsoleLight != null) return _gameConsoleLight!!
+        _gameConsoleLight = buildHyperOSIcon(
             name = "GameConsole.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(466.1f, 803.2f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Light.GameConsole: ImageVector
             translationY = 1040.9946f,
             autoMirror = false,
         )
-        return _gameConsoleSurfaceLight!!
+        return _gameConsoleLight!!
     }
 
-private var _gameConsoleSurfaceLight: ImageVector? = null
+private var _gameConsoleLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.GameConsole: ImageVector
     get() {
-        if (_gameConsoleSurfaceNormal != null) return _gameConsoleSurfaceNormal!!
-        _gameConsoleSurfaceNormal = buildHyperOSIcon(
+        if (_gameConsoleNormal != null) return _gameConsoleNormal!!
+        _gameConsoleNormal = buildHyperOSIcon(
             name = "GameConsole.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(466.7f, 809.9f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Normal.GameConsole: ImageVector
             translationY = 1040.7778f,
             autoMirror = false,
         )
-        return _gameConsoleSurfaceNormal!!
+        return _gameConsoleNormal!!
     }
 
-private var _gameConsoleSurfaceNormal: ImageVector? = null
+private var _gameConsoleNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.GameConsole: ImageVector
     get() {
-        if (_gameConsoleSurfaceRegular != null) return _gameConsoleSurfaceRegular!!
-        _gameConsoleSurfaceRegular = buildHyperOSIcon(
+        if (_gameConsoleRegular != null) return _gameConsoleRegular!!
+        _gameConsoleRegular = buildHyperOSIcon(
             name = "GameConsole.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(467f, 813f),
@@ -395,15 +395,15 @@ val MiuixIcons.Glass.Regular.GameConsole: ImageVector
             translationY = 1040.6788f,
             autoMirror = false,
         )
-        return _gameConsoleSurfaceRegular!!
+        return _gameConsoleRegular!!
     }
 
-private var _gameConsoleSurfaceRegular: ImageVector? = null
+private var _gameConsoleRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.GameConsole: ImageVector
     get() {
-        if (_gameConsoleSurfaceMedium != null) return _gameConsoleSurfaceMedium!!
-        _gameConsoleSurfaceMedium = buildHyperOSIcon(
+        if (_gameConsoleMedium != null) return _gameConsoleMedium!!
+        _gameConsoleMedium = buildHyperOSIcon(
             name = "GameConsole.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(466.5f, 822.2f),
@@ -525,15 +525,15 @@ val MiuixIcons.Glass.Medium.GameConsole: ImageVector
             translationY = 1040.6712f,
             autoMirror = false,
         )
-        return _gameConsoleSurfaceMedium!!
+        return _gameConsoleMedium!!
     }
 
-private var _gameConsoleSurfaceMedium: ImageVector? = null
+private var _gameConsoleMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.GameConsole: ImageVector
     get() {
-        if (_gameConsoleSurfaceDemibold != null) return _gameConsoleSurfaceDemibold!!
-        _gameConsoleSurfaceDemibold = buildHyperOSIcon(
+        if (_gameConsoleDemibold != null) return _gameConsoleDemibold!!
+        _gameConsoleDemibold = buildHyperOSIcon(
             name = "GameConsole.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(466.1f, 828.6f),
@@ -655,8 +655,8 @@ val MiuixIcons.Glass.Demibold.GameConsole: ImageVector
             translationY = 1040.6652f,
             autoMirror = false,
         )
-        return _gameConsoleSurfaceDemibold!!
+        return _gameConsoleDemibold!!
     }
 
-private var _gameConsoleSurfaceDemibold: ImageVector? = null
+private var _gameConsoleDemibold: ImageVector? = null
 

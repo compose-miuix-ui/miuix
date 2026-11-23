@@ -57,6 +57,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          gradle-home-cache-cleanup: true
       - name: Cache Kotlin/Native toolchain
         if: runner.os == 'macOS'
         uses: actions/cache@v6
@@ -91,6 +92,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          gradle-home-cache-cleanup: true
       - name: Cache Kotlin/Native toolchain
         uses: actions/cache@v6
         with:
@@ -140,6 +142,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          gradle-home-cache-cleanup: true
       - name: Decode android signing key
         run: echo ${{ secrets.SIGNING_KEY }} | base64 -d > keystore.jks
       - name: Build android universal platform
@@ -187,6 +190,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          gradle-home-cache-cleanup: true
       - name: Setup MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1

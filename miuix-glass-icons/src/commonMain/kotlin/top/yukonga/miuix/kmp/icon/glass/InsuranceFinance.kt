@@ -12,8 +12,8 @@ val MiuixIcons.Glass.InsuranceFinance: ImageVector
 
 val MiuixIcons.Glass.Light.InsuranceFinance: ImageVector
     get() {
-        if (_insuranceFinanceSurfaceLight != null) return _insuranceFinanceSurfaceLight!!
-        _insuranceFinanceSurfaceLight = buildHyperOSIcon(
+        if (_insuranceFinanceLight != null) return _insuranceFinanceLight!!
+        _insuranceFinanceLight = buildHyperOSIcon(
             name = "InsuranceFinance.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1152.9f, 375f),
@@ -65,15 +65,15 @@ val MiuixIcons.Glass.Light.InsuranceFinance: ImageVector
             translationY = 1041.9444f,
             autoMirror = false,
         )
-        return _insuranceFinanceSurfaceLight!!
+        return _insuranceFinanceLight!!
     }
 
-private var _insuranceFinanceSurfaceLight: ImageVector? = null
+private var _insuranceFinanceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.InsuranceFinance: ImageVector
     get() {
-        if (_insuranceFinanceSurfaceNormal != null) return _insuranceFinanceSurfaceNormal!!
-        _insuranceFinanceSurfaceNormal = buildHyperOSIcon(
+        if (_insuranceFinanceNormal != null) return _insuranceFinanceNormal!!
+        _insuranceFinanceNormal = buildHyperOSIcon(
             name = "InsuranceFinance.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1160.5f, 375f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Normal.InsuranceFinance: ImageVector
             translationY = 1042.0972f,
             autoMirror = false,
         )
-        return _insuranceFinanceSurfaceNormal!!
+        return _insuranceFinanceNormal!!
     }
 
-private var _insuranceFinanceSurfaceNormal: ImageVector? = null
+private var _insuranceFinanceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.InsuranceFinance: ImageVector
     get() {
-        if (_insuranceFinanceSurfaceRegular != null) return _insuranceFinanceSurfaceRegular!!
-        _insuranceFinanceSurfaceRegular = buildHyperOSIcon(
+        if (_insuranceFinanceRegular != null) return _insuranceFinanceRegular!!
+        _insuranceFinanceRegular = buildHyperOSIcon(
             name = "InsuranceFinance.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1164f, 375f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Regular.InsuranceFinance: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _insuranceFinanceSurfaceRegular!!
+        return _insuranceFinanceRegular!!
     }
 
-private var _insuranceFinanceSurfaceRegular: ImageVector? = null
+private var _insuranceFinanceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.InsuranceFinance: ImageVector
     get() {
-        if (_insuranceFinanceSurfaceMedium != null) return _insuranceFinanceSurfaceMedium!!
-        _insuranceFinanceSurfaceMedium = buildHyperOSIcon(
+        if (_insuranceFinanceMedium != null) return _insuranceFinanceMedium!!
+        _insuranceFinanceMedium = buildHyperOSIcon(
             name = "InsuranceFinance.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1172.1f, 376.6f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Medium.InsuranceFinance: ImageVector
             translationY = 1043.7882f,
             autoMirror = false,
         )
-        return _insuranceFinanceSurfaceMedium!!
+        return _insuranceFinanceMedium!!
     }
 
-private var _insuranceFinanceSurfaceMedium: ImageVector? = null
+private var _insuranceFinanceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.InsuranceFinance: ImageVector
     get() {
-        if (_insuranceFinanceSurfaceDemibold != null) return _insuranceFinanceSurfaceDemibold!!
-        _insuranceFinanceSurfaceDemibold = buildHyperOSIcon(
+        if (_insuranceFinanceDemibold != null) return _insuranceFinanceDemibold!!
+        _insuranceFinanceDemibold = buildHyperOSIcon(
             name = "InsuranceFinance.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1177.8f, 377.8f),
@@ -305,8 +305,8 @@ val MiuixIcons.Glass.Demibold.InsuranceFinance: ImageVector
             translationY = 1044.9235f,
             autoMirror = false,
         )
-        return _insuranceFinanceSurfaceDemibold!!
+        return _insuranceFinanceDemibold!!
     }
 
-private var _insuranceFinanceSurfaceDemibold: ImageVector? = null
+private var _insuranceFinanceDemibold: ImageVector? = null
 

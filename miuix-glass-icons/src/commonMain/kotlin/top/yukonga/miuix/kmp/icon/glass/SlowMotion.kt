@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SlowMotion: ImageVector
 
 val MiuixIcons.Glass.Light.SlowMotion: ImageVector
     get() {
-        if (_slowMotionLineLight != null) return _slowMotionLineLight!!
-        _slowMotionLineLight = buildHyperOSIcon(
+        if (_slowMotionLight != null) return _slowMotionLight!!
+        _slowMotionLight = buildHyperOSIcon(
             name = "SlowMotion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1104.1f, 392.4f),
@@ -102,15 +102,15 @@ val MiuixIcons.Glass.Light.SlowMotion: ImageVector
             translationY = 1042.0153f,
             autoMirror = false,
         )
-        return _slowMotionLineLight!!
+        return _slowMotionLight!!
     }
 
-private var _slowMotionLineLight: ImageVector? = null
+private var _slowMotionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SlowMotion: ImageVector
     get() {
-        if (_slowMotionLineNormal != null) return _slowMotionLineNormal!!
-        _slowMotionLineNormal = buildHyperOSIcon(
+        if (_slowMotionNormal != null) return _slowMotionNormal!!
+        _slowMotionNormal = buildHyperOSIcon(
             name = "SlowMotion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1104.7f, 408.6f),
@@ -199,15 +199,15 @@ val MiuixIcons.Glass.Normal.SlowMotion: ImageVector
             translationY = 1041.9527f,
             autoMirror = false,
         )
-        return _slowMotionLineNormal!!
+        return _slowMotionNormal!!
     }
 
-private var _slowMotionLineNormal: ImageVector? = null
+private var _slowMotionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SlowMotion: ImageVector
     get() {
-        if (_slowMotionLineRegular != null) return _slowMotionLineRegular!!
-        _slowMotionLineRegular = buildHyperOSIcon(
+        if (_slowMotionRegular != null) return _slowMotionRegular!!
+        _slowMotionRegular = buildHyperOSIcon(
             name = "SlowMotion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1105f, 416f),
@@ -296,15 +296,15 @@ val MiuixIcons.Glass.Regular.SlowMotion: ImageVector
             translationY = 1041.9234f,
             autoMirror = false,
         )
-        return _slowMotionLineRegular!!
+        return _slowMotionRegular!!
     }
 
-private var _slowMotionLineRegular: ImageVector? = null
+private var _slowMotionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SlowMotion: ImageVector
     get() {
-        if (_slowMotionLineMedium != null) return _slowMotionLineMedium!!
-        _slowMotionLineMedium = buildHyperOSIcon(
+        if (_slowMotionMedium != null) return _slowMotionMedium!!
+        _slowMotionMedium = buildHyperOSIcon(
             name = "SlowMotion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1112f, 417.9f),
@@ -393,15 +393,15 @@ val MiuixIcons.Glass.Medium.SlowMotion: ImageVector
             translationY = 1040.6839f,
             autoMirror = false,
         )
-        return _slowMotionLineMedium!!
+        return _slowMotionMedium!!
     }
 
-private var _slowMotionLineMedium: ImageVector? = null
+private var _slowMotionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SlowMotion: ImageVector
     get() {
-        if (_slowMotionLineDemibold != null) return _slowMotionLineDemibold!!
-        _slowMotionLineDemibold = buildHyperOSIcon(
+        if (_slowMotionDemibold != null) return _slowMotionDemibold!!
+        _slowMotionDemibold = buildHyperOSIcon(
             name = "SlowMotion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1116.9f, 419.2f),
@@ -490,8 +490,8 @@ val MiuixIcons.Glass.Demibold.SlowMotion: ImageVector
             translationY = 1039.7964f,
             autoMirror = false,
         )
-        return _slowMotionLineDemibold!!
+        return _slowMotionDemibold!!
     }
 
-private var _slowMotionLineDemibold: ImageVector? = null
+private var _slowMotionDemibold: ImageVector? = null
 

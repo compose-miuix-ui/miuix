@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RepairMode: ImageVector
 
 val MiuixIcons.Glass.Light.RepairMode: ImageVector
     get() {
-        if (_repairModeSurfaceLight != null) return _repairModeSurfaceLight!!
-        _repairModeSurfaceLight = buildHyperOSIcon(
+        if (_repairModeLight != null) return _repairModeLight!!
+        _repairModeLight = buildHyperOSIcon(
             name = "RepairMode.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(572.6f, -13f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.RepairMode: ImageVector
             translationY = 1037.9166f,
             autoMirror = false,
         )
-        return _repairModeSurfaceLight!!
+        return _repairModeLight!!
     }
 
-private var _repairModeSurfaceLight: ImageVector? = null
+private var _repairModeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RepairMode: ImageVector
     get() {
-        if (_repairModeSurfaceNormal != null) return _repairModeSurfaceNormal!!
-        _repairModeSurfaceNormal = buildHyperOSIcon(
+        if (_repairModeNormal != null) return _repairModeNormal!!
+        _repairModeNormal = buildHyperOSIcon(
             name = "RepairMode.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(575.6f, -13f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.RepairMode: ImageVector
             translationY = 1038.6041f,
             autoMirror = false,
         )
-        return _repairModeSurfaceNormal!!
+        return _repairModeNormal!!
     }
 
-private var _repairModeSurfaceNormal: ImageVector? = null
+private var _repairModeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RepairMode: ImageVector
     get() {
-        if (_repairModeSurfaceRegular != null) return _repairModeSurfaceRegular!!
-        _repairModeSurfaceRegular = buildHyperOSIcon(
+        if (_repairModeRegular != null) return _repairModeRegular!!
+        _repairModeRegular = buildHyperOSIcon(
             name = "RepairMode.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(577f, -13f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.RepairMode: ImageVector
             translationY = 1038.9167f,
             autoMirror = false,
         )
-        return _repairModeSurfaceRegular!!
+        return _repairModeRegular!!
     }
 
-private var _repairModeSurfaceRegular: ImageVector? = null
+private var _repairModeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RepairMode: ImageVector
     get() {
-        if (_repairModeSurfaceMedium != null) return _repairModeSurfaceMedium!!
-        _repairModeSurfaceMedium = buildHyperOSIcon(
+        if (_repairModeMedium != null) return _repairModeMedium!!
+        _repairModeMedium = buildHyperOSIcon(
             name = "RepairMode.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(579.7f, -13f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.RepairMode: ImageVector
             translationY = 1040.5217f,
             autoMirror = false,
         )
-        return _repairModeSurfaceMedium!!
+        return _repairModeMedium!!
     }
 
-private var _repairModeSurfaceMedium: ImageVector? = null
+private var _repairModeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RepairMode: ImageVector
     get() {
-        if (_repairModeSurfaceDemibold != null) return _repairModeSurfaceDemibold!!
-        _repairModeSurfaceDemibold = buildHyperOSIcon(
+        if (_repairModeDemibold != null) return _repairModeDemibold!!
+        _repairModeDemibold = buildHyperOSIcon(
             name = "RepairMode.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(581.6f, -13f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.RepairMode: ImageVector
             translationY = 1041.6456f,
             autoMirror = false,
         )
-        return _repairModeSurfaceDemibold!!
+        return _repairModeDemibold!!
     }
 
-private var _repairModeSurfaceDemibold: ImageVector? = null
+private var _repairModeDemibold: ImageVector? = null
 

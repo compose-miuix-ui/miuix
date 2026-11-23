@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +33,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -58,17 +57,22 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
@@ -149,14 +153,16 @@ internal fun BottomSheetContentLayout(
     surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
-    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.0001f) }
+    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.001f) }
     val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    val blockTouches = remember { mutableStateOf(false) }
     val internalVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
         if (show) {
             internalVisible.value = true
+            blockTouches.value = true
             dragOffsetY.snapTo(0f)
             animationProgress.animateTo(
                 targetValue = 1f,
@@ -164,6 +170,10 @@ internal fun BottomSheetContentLayout(
             )
         } else {
             if (!internalVisible.value) return@LaunchedEffect
+            val touchReleaseJob = launch {
+                snapshotFlow { animationProgress.value <= 0.02f }.first { it }
+                blockTouches.value = false
+            }
             if (dragOffsetY.value > 0f) {
                 // Sheet already dragged off-screen — snap immediately
                 animationProgress.snapTo(0f)
@@ -175,6 +185,8 @@ internal fun BottomSheetContentLayout(
                 )
             }
             internalVisible.value = false
+            touchReleaseJob.cancel()
+            blockTouches.value = false
             currentOnDismissFinished?.invoke()
         }
     }
@@ -205,10 +217,12 @@ internal fun BottomSheetContentLayout(
         { currentOnDismissRequest?.invoke() }
     }
 
-    val resetGesture: suspend () -> Unit = {
-        dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
-        animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
-            dimAlpha.floatValue = value
+    val resetGesture: suspend () -> Unit = remember {
+        {
+            dragOffsetY.animateTo(0f, animationSpec = tween(durationMillis = 150))
+            animate(dimAlpha.floatValue, 1f, animationSpec = tween(durationMillis = 150)) { value, _ ->
+                dimAlpha.floatValue = value
+            }
         }
     }
 
@@ -272,39 +286,51 @@ internal fun BottomSheetContentLayout(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
-                // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
-                .pointerInput(allowDismiss) {
-                    detectTapGestures(
-                        onTap = {
-                            if (allowDismiss) {
-                                requestDismiss()
+                .then(
+                    if (blockTouches.value) {
+                        Modifier
+                            // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
+                            // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
+                            .pointerInput(allowDismiss) {
+                                detectTapGestures(
+                                    onTap = {
+                                        if (allowDismiss) {
+                                            requestDismiss()
+                                        }
+                                    },
+                                )
                             }
-                        },
-                    )
-                }
-                .semantics {
-                    if (allowDismiss) {
-                        onClick(label = "Dismiss") {
-                            requestDismiss()
-                            true
-                        }
-                    }
-                },
+                            .semantics {
+                                if (allowDismiss) {
+                                    onClick(label = "Dismiss") {
+                                        requestDismiss()
+                                        true
+                                    }
+                                }
+                            }
+                    } else {
+                        Modifier
+                    },
+                ),
             contentAlignment = Alignment.BottomCenter,
         ) {
             // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
             val sheetModifier = Modifier
-                .graphicsLayer {
-                    val progress = animationProgress.value
-                    val currentHeight = sheetHeightPx.intValue.toFloat()
-                    val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
-                    val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
-                    translationY = baseOffset * (1f - progress) + dragOffsetY.value
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        val progress = animationProgress.value
+                        val currentHeight = sheetHeightPx.intValue.toFloat()
+                        val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
+                        val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
+                        val offsetY = (baseOffset * (1f - progress) + dragOffsetY.value).fastRoundToInt()
+                        placeable.placeRelative(0, offsetY)
+                    }
                 }
                 .then(modifier)
 
             BottomSheetContent(
+                show = blockTouches.value,
                 title = title,
                 backgroundColor = backgroundColor,
                 cornerRadius = cornerRadius,
@@ -352,6 +378,7 @@ internal fun BottomSheetContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun BottomSheetContent(
+    show: Boolean,
     title: String?,
     backgroundColor: Color,
     cornerRadius: Dp,
@@ -384,13 +411,12 @@ internal fun BottomSheetContent(
 
     val settlingJob = remember { mutableStateOf<Job?>(null) }
     val isSettling = remember { mutableStateOf(false) }
-    val calculatedTopInset = if (topInset != null) {
-        topInset
-    } else {
-        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-        maxOf(statusBars, captionBar, displayCutout)
+    val calculatedTopInset = topInset ?: with(density) {
+        maxOf(
+            WindowInsets.statusBars.getTop(this),
+            WindowInsets.captionBar.getTop(this),
+            WindowInsets.displayCutout.getTop(this),
+        ).toDp()
     }
 
     val calculateNewOffset = remember(allowDismiss) {
@@ -574,6 +600,7 @@ internal fun BottomSheetContent(
     }
 
     BottomSheetColumn(
+        show = show,
         title = title,
         startAction = startAction,
         endAction = endAction,
@@ -609,6 +636,7 @@ internal fun BottomSheetContent(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 private fun BottomSheetColumn(
+    show: Boolean,
     title: String?,
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
@@ -652,18 +680,24 @@ private fun BottomSheetColumn(
 
         Column(
             modifier = modifier
-                .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
+                .then(
+                    if (show) {
+                        Modifier.pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
+                    } else {
+                        Modifier
+                    },
+                )
                 .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .heightIn(max = windowHeight - topInset)
-                .onGloballyPositioned { coordinates ->
+                .onSizeChanged { size ->
                     // Only capture the natural sheet height while the IME is closed; otherwise the
                     // bottom inset added by imePadding would inflate sheetHeightPx, shifting the
                     // dim threshold and causing translationY jumps mid-animation.
                     if (imeInsets.getBottom(density) == 0) {
-                        sheetHeightPx.intValue = coordinates.size.height
+                        sheetHeightPx.intValue = size.height
                     }
                 }
                 .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
@@ -716,15 +750,24 @@ private fun BoxScope.OverscrollBackground(
     backgroundColor: Color,
     surface: (@Composable () -> Modifier)? = null,
 ) {
-    val density = LocalDensity.current
-    val overscrollOffsetPx by remember { computedStateOf { (-dragOffsetY.value).coerceAtLeast(0f) } }
-    if (overscrollOffsetPx > 0f) {
+    val isOverscrolling by remember(dragOffsetY) { computedStateOf { dragOffsetY.value < 0f } }
+    if (isOverscrolling) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
-                .height(with(density) { overscrollOffsetPx.toDp() } + 1.dp)
+                .layout { measurable, constraints ->
+                    val heightPx = constraints.constrainHeight(
+                        ((-dragOffsetY.value).coerceAtLeast(0f) + 1.dp.toPx()).fastRoundToInt(),
+                    )
+                    val placeable = measurable.measure(
+                        constraints.copy(minHeight = heightPx, maxHeight = heightPx),
+                    )
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .padding(horizontal = outsideMargin.width)
                 .then(surface?.invoke() ?: Modifier.background(backgroundColor)),
         )
@@ -821,8 +864,14 @@ private fun DragHandleArea(
     ) {
         Box(
             modifier = Modifier
-                .width(pressWidth.value.dp)
-                .height(4.dp)
+                .layout { measurable, constraints ->
+                    val widthPx = constraints.constrainWidth(pressWidth.value.dp.roundToPx())
+                    val heightPx = constraints.constrainHeight(4.dp.roundToPx())
+                    val placeable = measurable.measure(Constraints.fixed(widthPx, heightPx))
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .graphicsLayer {
                     scaleY = pressScale.value
                 }
@@ -841,6 +890,8 @@ private fun TitleAndActionsRow(
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
 ) {
+    if (title == null && startAction == null && endAction == null) return
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -905,12 +956,14 @@ object BottomSheetDefaults {
      * The default background color of the bottom sheet.
      */
     @Composable
+    @ReadOnlyComposable
     fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**
      * The default color of the drag handle.
      */
     @Composable
+    @ReadOnlyComposable
     fun dragHandleColor() = MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f)
 
     /**

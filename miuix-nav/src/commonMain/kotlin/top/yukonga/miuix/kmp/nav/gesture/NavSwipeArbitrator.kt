@@ -46,10 +46,19 @@ internal enum class NavSwipeArbitrationOutcome {
  * @param touchSlop Navigation's activation dead zone in pixels. It never gates child ownership.
  */
 internal class NavSwipeArbitrator(
-    private val touchSlop: Float,
+    private var touchSlop: Float,
 ) {
     init {
         require(touchSlop >= 0f && touchSlop.isFinite()) { "touchSlop must be finite and non-negative" }
+    }
+
+    fun reset(touchSlop: Float) {
+        require(touchSlop >= 0f && touchSlop.isFinite()) { "touchSlop must be finite and non-negative" }
+        this.touchSlop = touchSlop
+        phase = NavSwipeArbitrationPhase.Possible
+        initialDismissTravelPx = 0f
+        towardTravelPx = 0f
+        crossTravelPx = 0f
     }
 
     var phase: NavSwipeArbitrationPhase = NavSwipeArbitrationPhase.Possible

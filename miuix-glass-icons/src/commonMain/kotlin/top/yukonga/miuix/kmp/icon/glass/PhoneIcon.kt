@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PhoneIcon: ImageVector
 
 val MiuixIcons.Glass.Light.PhoneIcon: ImageVector
     get() {
-        if (_phoneIconLineLight != null) return _phoneIconLineLight!!
-        _phoneIconLineLight = buildHyperOSIcon(
+        if (_phoneIconLight != null) return _phoneIconLight!!
+        _phoneIconLight = buildHyperOSIcon(
             name = "PhoneIcon.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(391.2f, 913.4f),
@@ -144,15 +144,15 @@ val MiuixIcons.Glass.Light.PhoneIcon: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneIconLineLight!!
+        return _phoneIconLight!!
     }
 
-private var _phoneIconLineLight: ImageVector? = null
+private var _phoneIconLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PhoneIcon: ImageVector
     get() {
-        if (_phoneIconLineNormal != null) return _phoneIconLineNormal!!
-        _phoneIconLineNormal = buildHyperOSIcon(
+        if (_phoneIconNormal != null) return _phoneIconNormal!!
+        _phoneIconNormal = buildHyperOSIcon(
             name = "PhoneIcon.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(386.9f, 921.4f),
@@ -283,15 +283,15 @@ val MiuixIcons.Glass.Normal.PhoneIcon: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneIconLineNormal!!
+        return _phoneIconNormal!!
     }
 
-private var _phoneIconLineNormal: ImageVector? = null
+private var _phoneIconNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PhoneIcon: ImageVector
     get() {
-        if (_phoneIconLineRegular != null) return _phoneIconLineRegular!!
-        _phoneIconLineRegular = buildHyperOSIcon(
+        if (_phoneIconRegular != null) return _phoneIconRegular!!
+        _phoneIconRegular = buildHyperOSIcon(
             name = "PhoneIcon.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(385f, 925f),
@@ -422,15 +422,15 @@ val MiuixIcons.Glass.Regular.PhoneIcon: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneIconLineRegular!!
+        return _phoneIconRegular!!
     }
 
-private var _phoneIconLineRegular: ImageVector? = null
+private var _phoneIconRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PhoneIcon: ImageVector
     get() {
-        if (_phoneIconLineMedium != null) return _phoneIconLineMedium!!
-        _phoneIconLineMedium = buildHyperOSIcon(
+        if (_phoneIconMedium != null) return _phoneIconMedium!!
+        _phoneIconMedium = buildHyperOSIcon(
             name = "PhoneIcon.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(381.5f, 932.3f),
@@ -561,15 +561,15 @@ val MiuixIcons.Glass.Medium.PhoneIcon: ImageVector
             translationY = 1041.8018f,
             autoMirror = false,
         )
-        return _phoneIconLineMedium!!
+        return _phoneIconMedium!!
     }
 
-private var _phoneIconLineMedium: ImageVector? = null
+private var _phoneIconMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PhoneIcon: ImageVector
     get() {
-        if (_phoneIconLineDemibold != null) return _phoneIconLineDemibold!!
-        _phoneIconLineDemibold = buildHyperOSIcon(
+        if (_phoneIconDemibold != null) return _phoneIconDemibold!!
+        _phoneIconDemibold = buildHyperOSIcon(
             name = "PhoneIcon.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(379f, 937.4f),
@@ -700,8 +700,8 @@ val MiuixIcons.Glass.Demibold.PhoneIcon: ImageVector
             translationY = 1041.8964f,
             autoMirror = false,
         )
-        return _phoneIconLineDemibold!!
+        return _phoneIconDemibold!!
     }
 
-private var _phoneIconLineDemibold: ImageVector? = null
+private var _phoneIconDemibold: ImageVector? = null
 

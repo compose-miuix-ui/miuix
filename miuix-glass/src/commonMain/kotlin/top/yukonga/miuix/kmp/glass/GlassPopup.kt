@@ -3,11 +3,8 @@
 
 package top.yukonga.miuix.kmp.glass
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -18,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.computedStateOf
@@ -25,8 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
@@ -57,6 +54,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.MiuixIndication
 
 /** Default values for [GlassPopup]. */
 object GlassPopupDefaults {
@@ -351,12 +349,13 @@ fun GlassPopupItem(
     pressedColor: Color = GlassPopupDefaults.itemPressedColor(),
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
-    val pressFill = animateColorAsState(
-        targetValue = if (pressed) pressedColor else Color.Transparent,
-        animationSpec = if (pressed) snap() else GlassMotion.popupPressExit(),
-        label = "glassPopupItemPress",
-    )
+    val itemShape = remember { RoundedCornerShape(GlassPopupDefaults.ItemPressRadius) }
+    val itemIndication = remember(pressedColor) {
+        MiuixIndication(
+            color = pressedColor.copy(alpha = 1f),
+            pressAlpha = pressedColor.alpha,
+        )
+    }
     val color = when {
         !enabled -> contentColor.copy(alpha = 0.4f)
         selected -> selectedContentColor
@@ -367,20 +366,12 @@ fun GlassPopupItem(
             .fillMaxWidth()
             .heightIn(min = GlassPopupDefaults.ItemMinHeight)
             .padding(horizontal = GlassPopupDefaults.ItemPressInset)
-            .drawBehind {
-                val fill = pressFill.value
-                if (fill.alpha > 0f) {
-                    drawRoundRect(
-                        color = fill,
-                        cornerRadius = CornerRadius(GlassPopupDefaults.ItemPressRadius.toPx()),
-                    )
-                }
-            }
+            .clip(itemShape)
             .selectable(
                 selected = selected,
                 enabled = enabled,
                 interactionSource = interactionSource,
-                indication = null,
+                indication = itemIndication,
             ) { onClick() }
             .padding(
                 horizontal = GlassPopupDefaults.ItemPaddingHorizontal - GlassPopupDefaults.ItemPressInset,

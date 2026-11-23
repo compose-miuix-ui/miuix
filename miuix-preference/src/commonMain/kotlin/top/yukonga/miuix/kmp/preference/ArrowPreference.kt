@@ -51,7 +51,7 @@ fun ArrowPreference(
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
     startAction: @Composable (() -> Unit)? = null,
-    endActions: @Composable RowScope.() -> Unit = {},
+    endActions: @Composable RowScope.() -> Unit = EmptyEndActions,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: (() -> Unit)? = null,
@@ -67,13 +67,15 @@ fun ArrowPreference(
         summaryColor = summaryColor,
         startAction = startAction,
         endActions = {
-            Row(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .align(Alignment.CenterVertically)
-                    .weight(1f, fill = false),
-            ) {
-                endActions()
+            if (endActions !== EmptyEndActions) {
+                Row(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .weight(1f, fill = false),
+                ) {
+                    endActions()
+                }
             }
             ArrowPreferenceEndAction(
                 enabled = enabled,
@@ -95,18 +97,20 @@ private fun RowScope.ArrowPreferenceEndAction(
         ColorFilter.tint(actionColors.color(enabled = enabled))
     }
     val layoutDirection = LocalLayoutDirection.current
+    val flipModifier = if (layoutDirection == LayoutDirection.Rtl) RtlFlipModifier else Modifier
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp)
-            .graphicsLayer {
-                scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            }
+            .then(flipModifier)
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = tintFilter,
     )
 }
+
+private val EmptyEndActions: @Composable RowScope.() -> Unit = {}
+private val RtlFlipModifier = Modifier.graphicsLayer { scaleX = -1f }
 
 object ArrowPreferenceDefaults {
     /**

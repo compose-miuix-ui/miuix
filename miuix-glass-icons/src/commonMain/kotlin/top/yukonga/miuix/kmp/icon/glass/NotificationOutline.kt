@@ -17,8 +17,8 @@ val MiuixIcons.Glass.NotificationOutline: ImageVector
 
 val MiuixIcons.Glass.Light.NotificationOutline: ImageVector
     get() {
-        if (_notificationsLight != null) return _notificationsLight!!
-        _notificationsLight = ImageVector.Builder(
+        if (_notificationOutlineLight != null) return _notificationOutlineLight!!
+        _notificationOutlineLight = ImageVector.Builder(
             name = "NotificationOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -95,15 +95,15 @@ val MiuixIcons.Glass.Light.NotificationOutline: ImageVector
                 )
             }
         }.build()
-        return _notificationsLight!!
+        return _notificationOutlineLight!!
     }
 
-private var _notificationsLight: ImageVector? = null
+private var _notificationOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotificationOutline: ImageVector
     get() {
-        if (_notificationsNormal != null) return _notificationsNormal!!
-        _notificationsNormal = ImageVector.Builder(
+        if (_notificationOutlineNormal != null) return _notificationOutlineNormal!!
+        _notificationOutlineNormal = ImageVector.Builder(
             name = "NotificationOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -180,15 +180,15 @@ val MiuixIcons.Glass.Normal.NotificationOutline: ImageVector
                 )
             }
         }.build()
-        return _notificationsNormal!!
+        return _notificationOutlineNormal!!
     }
 
-private var _notificationsNormal: ImageVector? = null
+private var _notificationOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotificationOutline: ImageVector
     get() {
-        if (_notificationsRegular != null) return _notificationsRegular!!
-        _notificationsRegular = ImageVector.Builder(
+        if (_notificationOutlineRegular != null) return _notificationOutlineRegular!!
+        _notificationOutlineRegular = ImageVector.Builder(
             name = "NotificationOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Regular.NotificationOutline: ImageVector
                 )
             }
         }.build()
-        return _notificationsRegular!!
+        return _notificationOutlineRegular!!
     }
 
-private var _notificationsRegular: ImageVector? = null
+private var _notificationOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotificationOutline: ImageVector
     get() {
-        if (_notificationsMedium != null) return _notificationsMedium!!
-        _notificationsMedium = ImageVector.Builder(
+        if (_notificationOutlineMedium != null) return _notificationOutlineMedium!!
+        _notificationOutlineMedium = ImageVector.Builder(
             name = "NotificationOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -350,15 +350,15 @@ val MiuixIcons.Glass.Medium.NotificationOutline: ImageVector
                 )
             }
         }.build()
-        return _notificationsMedium!!
+        return _notificationOutlineMedium!!
     }
 
-private var _notificationsMedium: ImageVector? = null
+private var _notificationOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotificationOutline: ImageVector
     get() {
-        if (_notificationsDemibold != null) return _notificationsDemibold!!
-        _notificationsDemibold = ImageVector.Builder(
+        if (_notificationOutlineDemibold != null) return _notificationOutlineDemibold!!
+        _notificationOutlineDemibold = ImageVector.Builder(
             name = "NotificationOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -435,7 +435,7 @@ val MiuixIcons.Glass.Demibold.NotificationOutline: ImageVector
                 )
             }
         }.build()
-        return _notificationsDemibold!!
+        return _notificationOutlineDemibold!!
     }
 
-private var _notificationsDemibold: ImageVector? = null
+private var _notificationOutlineDemibold: ImageVector? = null

@@ -19,9 +19,7 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -129,7 +127,6 @@ class GlassPopupMeasurementTest {
         onNodeWithText("Row 23").assertIsDisplayed().assertIsSelected()
         assertEquals(23, selected.intValue)
         assertEquals(first.width, onNodeWithText("Row 23").fetchSemanticsNode().boundsInRoot.width, 1f)
-        saveImage("popup-sampled-last-row", onRoot().captureToImage())
         onNodeWithText("Row 0").performScrollTo()
         onNodeWithText("Row 0").assertIsDisplayed()
     }

@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.glass.internal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.GraphicsLayerScope
@@ -63,7 +64,12 @@ internal class ScrimBackdrop(
             // Exact padding: the recording offsets by `padding / level`, so rounding leaves a strip.
             val scaledPadding = padding / downscaleFactor
             // Cover recording padding; SrcAtop preserves transparent scene pixels to prevent halos.
-            drawRect(color, topLeft = Offset(-scaledPadding, -scaledPadding), size = size, blendMode = BlendMode.SrcAtop)
+            drawRect(
+                color = color,
+                topLeft = Offset(-scaledPadding, -scaledPadding),
+                size = Size(size.width + scaledPadding * 2f, size.height + scaledPadding * 2f),
+                blendMode = BlendMode.SrcAtop,
+            )
         }
     }
 }

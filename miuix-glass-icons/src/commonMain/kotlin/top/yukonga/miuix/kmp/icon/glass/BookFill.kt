@@ -17,8 +17,8 @@ val MiuixIcons.Glass.BookFill: ImageVector
 
 val MiuixIcons.Glass.Light.BookFill: ImageVector
     get() {
-        if (_bookLight != null) return _bookLight!!
-        _bookLight = ImageVector.Builder(
+        if (_bookFillLight != null) return _bookFillLight!!
+        _bookFillLight = ImageVector.Builder(
             name = "BookFill.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -81,15 +81,15 @@ val MiuixIcons.Glass.Light.BookFill: ImageVector
                 )
             }
         }.build()
-        return _bookLight!!
+        return _bookFillLight!!
     }
 
-private var _bookLight: ImageVector? = null
+private var _bookFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BookFill: ImageVector
     get() {
-        if (_bookNormal != null) return _bookNormal!!
-        _bookNormal = ImageVector.Builder(
+        if (_bookFillNormal != null) return _bookFillNormal!!
+        _bookFillNormal = ImageVector.Builder(
             name = "BookFill.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -152,15 +152,15 @@ val MiuixIcons.Glass.Normal.BookFill: ImageVector
                 )
             }
         }.build()
-        return _bookNormal!!
+        return _bookFillNormal!!
     }
 
-private var _bookNormal: ImageVector? = null
+private var _bookFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BookFill: ImageVector
     get() {
-        if (_bookRegular != null) return _bookRegular!!
-        _bookRegular = ImageVector.Builder(
+        if (_bookFillRegular != null) return _bookFillRegular!!
+        _bookFillRegular = ImageVector.Builder(
             name = "BookFill.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -223,15 +223,15 @@ val MiuixIcons.Glass.Regular.BookFill: ImageVector
                 )
             }
         }.build()
-        return _bookRegular!!
+        return _bookFillRegular!!
     }
 
-private var _bookRegular: ImageVector? = null
+private var _bookFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BookFill: ImageVector
     get() {
-        if (_bookMedium != null) return _bookMedium!!
-        _bookMedium = ImageVector.Builder(
+        if (_bookFillMedium != null) return _bookFillMedium!!
+        _bookFillMedium = ImageVector.Builder(
             name = "BookFill.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -294,15 +294,15 @@ val MiuixIcons.Glass.Medium.BookFill: ImageVector
                 )
             }
         }.build()
-        return _bookMedium!!
+        return _bookFillMedium!!
     }
 
-private var _bookMedium: ImageVector? = null
+private var _bookFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BookFill: ImageVector
     get() {
-        if (_bookDemibold != null) return _bookDemibold!!
-        _bookDemibold = ImageVector.Builder(
+        if (_bookFillDemibold != null) return _bookFillDemibold!!
+        _bookFillDemibold = ImageVector.Builder(
             name = "BookFill.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -365,7 +365,7 @@ val MiuixIcons.Glass.Demibold.BookFill: ImageVector
                 )
             }
         }.build()
-        return _bookDemibold!!
+        return _bookFillDemibold!!
     }
 
-private var _bookDemibold: ImageVector? = null
+private var _bookFillDemibold: ImageVector? = null

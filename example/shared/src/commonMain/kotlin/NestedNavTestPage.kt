@@ -106,6 +106,7 @@ fun NestedNavTestPage(padding: PaddingValues) {
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 item(key = "nested_hint") {

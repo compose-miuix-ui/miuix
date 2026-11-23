@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.window.WindowDecoration
 import com.sun.jna.Memory
 import com.sun.jna.Native
@@ -39,7 +40,6 @@ import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val MAX_WAIT_FOR_SHOWING_MS = 10_000L
@@ -206,8 +206,8 @@ internal object LinuxClientShadow {
             val transform = window.graphicsConfiguration?.defaultTransform
             val scaleX = transform?.scaleX ?: 1.0
             val scaleY = transform?.scaleY ?: 1.0
-            val widthPx = (window.width * scaleX).roundToInt()
-            val heightPx = (window.height * scaleY).roundToInt()
+            val widthPx = (window.width * scaleX).fastRoundToInt()
+            val heightPx = (window.height * scaleY).fastRoundToInt()
 
             val margin = marginPx.coerceIn(0, minOf(widthPx, heightPx) / 2)
             val contentX = margin

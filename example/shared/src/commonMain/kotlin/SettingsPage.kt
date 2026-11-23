@@ -103,6 +103,7 @@ private fun SettingsContent(
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
             ),
+            overscrollEffect = null,
             contentPadding = contentPadding,
         ) {
             groupedCardItems(

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ToggleControlShortcut: ImageVector
 
 val MiuixIcons.Glass.Light.ToggleControlShortcut: ImageVector
     get() {
-        if (_toggleControlShortcutSurfaceLight != null) return _toggleControlShortcutSurfaceLight!!
-        _toggleControlShortcutSurfaceLight = buildHyperOSIcon(
+        if (_toggleControlShortcutLight != null) return _toggleControlShortcutLight!!
+        _toggleControlShortcutLight = buildHyperOSIcon(
             name = "ToggleControlShortcut.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(256.1f, 772.7f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.ToggleControlShortcut: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _toggleControlShortcutSurfaceLight!!
+        return _toggleControlShortcutLight!!
     }
 
-private var _toggleControlShortcutSurfaceLight: ImageVector? = null
+private var _toggleControlShortcutLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ToggleControlShortcut: ImageVector
     get() {
-        if (_toggleControlShortcutSurfaceNormal != null) return _toggleControlShortcutSurfaceNormal!!
-        _toggleControlShortcutSurfaceNormal = buildHyperOSIcon(
+        if (_toggleControlShortcutNormal != null) return _toggleControlShortcutNormal!!
+        _toggleControlShortcutNormal = buildHyperOSIcon(
             name = "ToggleControlShortcut.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(256.7f, 776.3f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.ToggleControlShortcut: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _toggleControlShortcutSurfaceNormal!!
+        return _toggleControlShortcutNormal!!
     }
 
-private var _toggleControlShortcutSurfaceNormal: ImageVector? = null
+private var _toggleControlShortcutNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ToggleControlShortcut: ImageVector
     get() {
-        if (_toggleControlShortcutSurfaceRegular != null) return _toggleControlShortcutSurfaceRegular!!
-        _toggleControlShortcutSurfaceRegular = buildHyperOSIcon(
+        if (_toggleControlShortcutRegular != null) return _toggleControlShortcutRegular!!
+        _toggleControlShortcutRegular = buildHyperOSIcon(
             name = "ToggleControlShortcut.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(257f, 778f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.ToggleControlShortcut: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _toggleControlShortcutSurfaceRegular!!
+        return _toggleControlShortcutRegular!!
     }
 
-private var _toggleControlShortcutSurfaceRegular: ImageVector? = null
+private var _toggleControlShortcutRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ToggleControlShortcut: ImageVector
     get() {
-        if (_toggleControlShortcutSurfaceMedium != null) return _toggleControlShortcutSurfaceMedium!!
-        _toggleControlShortcutSurfaceMedium = buildHyperOSIcon(
+        if (_toggleControlShortcutMedium != null) return _toggleControlShortcutMedium!!
+        _toggleControlShortcutMedium = buildHyperOSIcon(
             name = "ToggleControlShortcut.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(257.5f, 780.7f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.ToggleControlShortcut: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _toggleControlShortcutSurfaceMedium!!
+        return _toggleControlShortcutMedium!!
     }
 
-private var _toggleControlShortcutSurfaceMedium: ImageVector? = null
+private var _toggleControlShortcutMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ToggleControlShortcut: ImageVector
     get() {
-        if (_toggleControlShortcutSurfaceDemibold != null) return _toggleControlShortcutSurfaceDemibold!!
-        _toggleControlShortcutSurfaceDemibold = buildHyperOSIcon(
+        if (_toggleControlShortcutDemibold != null) return _toggleControlShortcutDemibold!!
+        _toggleControlShortcutDemibold = buildHyperOSIcon(
             name = "ToggleControlShortcut.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(257.9f, 782.6f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.ToggleControlShortcut: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _toggleControlShortcutSurfaceDemibold!!
+        return _toggleControlShortcutDemibold!!
     }
 
-private var _toggleControlShortcutSurfaceDemibold: ImageVector? = null
+private var _toggleControlShortcutDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MediaMuted: ImageVector
 
 val MiuixIcons.Glass.Light.MediaMuted: ImageVector
     get() {
-        if (_mediaMutedSurfaceLight != null) return _mediaMutedSurfaceLight!!
-        _mediaMutedSurfaceLight = buildHyperOSIcon(
+        if (_mediaMutedLight != null) return _mediaMutedLight!!
+        _mediaMutedLight = buildHyperOSIcon(
             name = "MediaMuted.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(274.6f, 464f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.MediaMuted: ImageVector
             translationY = 1040.1777f,
             autoMirror = false,
         )
-        return _mediaMutedSurfaceLight!!
+        return _mediaMutedLight!!
     }
 
-private var _mediaMutedSurfaceLight: ImageVector? = null
+private var _mediaMutedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MediaMuted: ImageVector
     get() {
-        if (_mediaMutedSurfaceNormal != null) return _mediaMutedSurfaceNormal!!
-        _mediaMutedSurfaceNormal = buildHyperOSIcon(
+        if (_mediaMutedNormal != null) return _mediaMutedNormal!!
+        _mediaMutedNormal = buildHyperOSIcon(
             name = "MediaMuted.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(266.6f, 464f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.MediaMuted: ImageVector
             translationY = 1039.4314f,
             autoMirror = false,
         )
-        return _mediaMutedSurfaceNormal!!
+        return _mediaMutedNormal!!
     }
 
-private var _mediaMutedSurfaceNormal: ImageVector? = null
+private var _mediaMutedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MediaMuted: ImageVector
     get() {
-        if (_mediaMutedSurfaceRegular != null) return _mediaMutedSurfaceRegular!!
-        _mediaMutedSurfaceRegular = buildHyperOSIcon(
+        if (_mediaMutedRegular != null) return _mediaMutedRegular!!
+        _mediaMutedRegular = buildHyperOSIcon(
             name = "MediaMuted.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(263f, 464f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.MediaMuted: ImageVector
             translationY = 1039.1667f,
             autoMirror = false,
         )
-        return _mediaMutedSurfaceRegular!!
+        return _mediaMutedRegular!!
     }
 
-private var _mediaMutedSurfaceRegular: ImageVector? = null
+private var _mediaMutedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MediaMuted: ImageVector
     get() {
-        if (_mediaMutedSurfaceMedium != null) return _mediaMutedSurfaceMedium!!
-        _mediaMutedSurfaceMedium = buildHyperOSIcon(
+        if (_mediaMutedMedium != null) return _mediaMutedMedium!!
+        _mediaMutedMedium = buildHyperOSIcon(
             name = "MediaMuted.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(254.4f, 461.6f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.MediaMuted: ImageVector
             translationY = 1038.7655f,
             autoMirror = false,
         )
-        return _mediaMutedSurfaceMedium!!
+        return _mediaMutedMedium!!
     }
 
-private var _mediaMutedSurfaceMedium: ImageVector? = null
+private var _mediaMutedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MediaMuted: ImageVector
     get() {
-        if (_mediaMutedSurfaceDemibold != null) return _mediaMutedSurfaceDemibold!!
-        _mediaMutedSurfaceDemibold = buildHyperOSIcon(
+        if (_mediaMutedDemibold != null) return _mediaMutedDemibold!!
+        _mediaMutedDemibold = buildHyperOSIcon(
             name = "MediaMuted.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(248.3f, 459.9f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.MediaMuted: ImageVector
             translationY = 1038.4811f,
             autoMirror = false,
         )
-        return _mediaMutedSurfaceDemibold!!
+        return _mediaMutedDemibold!!
     }
 
-private var _mediaMutedSurfaceDemibold: ImageVector? = null
+private var _mediaMutedDemibold: ImageVector? = null
 

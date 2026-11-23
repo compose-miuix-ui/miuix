@@ -22,8 +22,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toPixelMap
@@ -41,8 +39,6 @@ import androidx.navigationevent.DirectNavigationEventInput
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
-import org.jetbrains.skia.EncodedImageFormat
-import org.jetbrains.skia.Image
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -57,7 +53,6 @@ import top.yukonga.miuix.kmp.material.GlassMaterials
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -196,7 +191,6 @@ class GlassDialogSurfaceTest {
         assertColorNear(expectedTonal, cancel[8, cancel.height / 2], tolerance = 4f / 255f)
         val confirm = onNodeWithText("Confirm").captureToImage().toPixelMap()
         assertColorNear(Color(0xFF3482FF), confirm[8, confirm.height / 2])
-        saveImage("dialog-with-actions", onRoot().captureToImage())
     }
 
     private fun assertMaterial(isDark: Boolean, expectedChannel: Int) = runComposeUiTest {
@@ -239,7 +233,6 @@ class GlassDialogSurfaceTest {
         assertColorNear(Color(expected, expected, expected), center, tolerance = 4f / 255f)
         // The pre-blur scrim must also cover the kernel's padding, all the way to the side.
         assertColorNear(center, pixels[8, pixels.height / 2], tolerance = 4f / 255f)
-        saveImage(if (isDark) "dialog-dark" else "dialog-light", onRoot().captureToImage())
 
         runOnIdle { dimEnabled.value = false }
         waitForIdle()
@@ -299,7 +292,6 @@ class GlassDialogSurfaceTest {
         val right = pixels[pixels.width / 2 + 6, pixels.height / 2]
         assertTrue(left.red > left.blue, "The scene's red half must remain left of the screen center")
         assertTrue(right.blue > right.red, "The scene's blue half must remain right of the screen center")
-        saveImage("dialog-opening", image)
     }
 }
 
@@ -325,12 +317,4 @@ internal fun assertColorNear(expected: Color, actual: Color, tolerance: Float = 
     assertEquals(expected.green, actual.green, tolerance, "green")
     assertEquals(expected.blue, actual.blue, tolerance, "blue")
     assertEquals(expected.alpha, actual.alpha, tolerance, "alpha")
-}
-
-internal fun saveImage(name: String, bitmap: ImageBitmap) {
-    val output = File("build/reports/dialog-material/$name.png")
-    output.parentFile.mkdirs()
-    Image.makeFromBitmap(bitmap.asSkiaBitmap()).use { image ->
-        checkNotNull(image.encodeToData(EncodedImageFormat.PNG)).use { output.writeBytes(it.bytes) }
-    }
 }

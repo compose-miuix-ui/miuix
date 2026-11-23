@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IcSplitScreenHorizontal: ImageVector
 
 val MiuixIcons.Glass.Light.IcSplitScreenHorizontal: ImageVector
     get() {
-        if (_icSplitScreenHorizontalLineLight != null) return _icSplitScreenHorizontalLineLight!!
-        _icSplitScreenHorizontalLineLight = buildHyperOSIcon(
+        if (_icSplitScreenHorizontalLight != null) return _icSplitScreenHorizontalLight!!
+        _icSplitScreenHorizontalLight = buildHyperOSIcon(
             name = "IcSplitScreenHorizontal.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(684.6f, 14.8f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.IcSplitScreenHorizontal: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSplitScreenHorizontalLineLight!!
+        return _icSplitScreenHorizontalLight!!
     }
 
-private var _icSplitScreenHorizontalLineLight: ImageVector? = null
+private var _icSplitScreenHorizontalLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IcSplitScreenHorizontal: ImageVector
     get() {
-        if (_icSplitScreenHorizontalLineNormal != null) return _icSplitScreenHorizontalLineNormal!!
-        _icSplitScreenHorizontalLineNormal = buildHyperOSIcon(
+        if (_icSplitScreenHorizontalNormal != null) return _icSplitScreenHorizontalNormal!!
+        _icSplitScreenHorizontalNormal = buildHyperOSIcon(
             name = "IcSplitScreenHorizontal.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(687.6f, 13.6f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.IcSplitScreenHorizontal: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSplitScreenHorizontalLineNormal!!
+        return _icSplitScreenHorizontalNormal!!
     }
 
-private var _icSplitScreenHorizontalLineNormal: ImageVector? = null
+private var _icSplitScreenHorizontalNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IcSplitScreenHorizontal: ImageVector
     get() {
-        if (_icSplitScreenHorizontalLineRegular != null) return _icSplitScreenHorizontalLineRegular!!
-        _icSplitScreenHorizontalLineRegular = buildHyperOSIcon(
+        if (_icSplitScreenHorizontalRegular != null) return _icSplitScreenHorizontalRegular!!
+        _icSplitScreenHorizontalRegular = buildHyperOSIcon(
             name = "IcSplitScreenHorizontal.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(689f, 13f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.IcSplitScreenHorizontal: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSplitScreenHorizontalLineRegular!!
+        return _icSplitScreenHorizontalRegular!!
     }
 
-private var _icSplitScreenHorizontalLineRegular: ImageVector? = null
+private var _icSplitScreenHorizontalRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IcSplitScreenHorizontal: ImageVector
     get() {
-        if (_icSplitScreenHorizontalLineMedium != null) return _icSplitScreenHorizontalLineMedium!!
-        _icSplitScreenHorizontalLineMedium = buildHyperOSIcon(
+        if (_icSplitScreenHorizontalMedium != null) return _icSplitScreenHorizontalMedium!!
+        _icSplitScreenHorizontalMedium = buildHyperOSIcon(
             name = "IcSplitScreenHorizontal.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(694.1f, 13f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.IcSplitScreenHorizontal: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSplitScreenHorizontalLineMedium!!
+        return _icSplitScreenHorizontalMedium!!
     }
 
-private var _icSplitScreenHorizontalLineMedium: ImageVector? = null
+private var _icSplitScreenHorizontalMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IcSplitScreenHorizontal: ImageVector
     get() {
-        if (_icSplitScreenHorizontalLineDemibold != null) return _icSplitScreenHorizontalLineDemibold!!
-        _icSplitScreenHorizontalLineDemibold = buildHyperOSIcon(
+        if (_icSplitScreenHorizontalDemibold != null) return _icSplitScreenHorizontalDemibold!!
+        _icSplitScreenHorizontalDemibold = buildHyperOSIcon(
             name = "IcSplitScreenHorizontal.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(697.7f, 13f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.IcSplitScreenHorizontal: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _icSplitScreenHorizontalLineDemibold!!
+        return _icSplitScreenHorizontalDemibold!!
     }
 
-private var _icSplitScreenHorizontalLineDemibold: ImageVector? = null
+private var _icSplitScreenHorizontalDemibold: ImageVector? = null
 
