@@ -195,22 +195,7 @@ internal fun navExpandFrame(
         startRadius
     }
     val movingRadius = max(max(sourceRadius, cornerRadius), targetCornerRadius)
-    val clearance = max(max(bounds.left, width - bounds.right), max(bounds.top, height - bounds.bottom))
-    // Settle the radius against the actual silhouette, not a fixed late time interval. Until
-    // all four edges are within 2dp of the host, the moving page keeps its rounded outline.
-    // The remaining-progress term also preserves both endpoints for a full-host source.
-    val cornerApproach = 1f - max(remaining, clearance / with(density) { 2.dp.toPx() }).coerceIn(0f, 1f)
-    val sourceClearance = max(
-        max(abs(bounds.left - start.left), abs(bounds.right - start.right)),
-        max(abs(bounds.top - start.top), abs(bounds.bottom - start.bottom)),
-    )
-    // Restore the source outline only near its real bounds, not while a still-large page
-    // has the last third of its shrink left to travel. Full-host/fallback sources keep timing.
-    val sourceCornerFraction = if (source != null && start != viewport) {
-        navExpandFraction(sourceClearance, 0f, with(density) { 24.dp.toPx() })
-    } else {
-        navExpandFraction(p, 0f, 0.35f)
-    }
+    val sourceCornerFraction = navExpandFraction(p, 0f, 0.5f)
     return NavExpandFrame(
         progress = p,
         bounds = bounds,
@@ -220,7 +205,7 @@ internal fun navExpandFrame(
         cornerRadius = lerp(
             lerp(startRadius, movingRadius, sourceCornerFraction),
             targetCornerRadius,
-            navExpandFraction(cornerApproach, 0f, 1f),
+            navExpandFraction(p, 0.5f, 1f),
         ),
         hasSource = source != null,
         origin = start,

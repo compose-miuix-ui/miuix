@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
@@ -38,7 +39,7 @@ internal data class NavExpansionPreset(
             delegate = NavExpandTransition(
                 containerColor = color,
                 cornerRadius = cornerRadius,
-                targetCornerRadius = { context.effects.cornerClipRadius },
+                targetCornerRadius = { if (context.effects.enableCornerClip) context.effects.cornerClipRadius else 0.dp },
                 initialScale = 0.85f,
                 motion = motion,
                 anchor = { anchor?.value },

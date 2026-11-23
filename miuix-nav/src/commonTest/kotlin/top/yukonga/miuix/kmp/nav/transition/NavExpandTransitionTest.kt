@@ -143,15 +143,13 @@ class NavExpandTransitionTest {
     @Test
     fun cornerHandoffWaitsForEveryEdgeAndPreservesTheDeviceRadius() {
         val source = NavTransitionAnchor(Rect(20f, 100f, 380f, 220f), 8.dp)
-        // Assert before the eased geometry reaches the 4px (2dp) edge clearance.
-        val beforeHandoff = frame(source, 0.94f)
-        assertTrue(host.height - beforeHandoff.bounds.bottom >= 4f)
-        assertEquals(28f, beforeHandoff.cornerRadius)
-        assertTrue(frame(source, 0.99f).cornerRadius in 0f..28f)
-        for (step in 35..100) {
-            assertEquals(48f, frame(source, step / 100f, targetCornerRadius = 48f).cornerRadius)
+        assertEquals(16f, frame(source, 0f).cornerRadius)
+        assertEquals(28f, frame(source, 0.5f).cornerRadius, 0.01f)
+        assertTrue(frame(source, 0.75f).cornerRadius in 0f..28f)
+        assertEquals(0f, frame(source, 1f).cornerRadius)
+        for (step in 50..100) {
+            assertEquals(48f, frame(source, step / 100f, targetCornerRadius = 48f).cornerRadius, 0.01f)
         }
-        assertEquals(16f, frame(source, 0f, targetCornerRadius = 48f).cornerRadius)
         val fullHostSource = NavTransitionAnchor(Rect(0f, 0f, 400f, 800f), 8.dp)
         assertEquals(16f, frame(fullHostSource, 0f).cornerRadius)
         assertEquals(0f, frame(fullHostSource, 1f).cornerRadius)
