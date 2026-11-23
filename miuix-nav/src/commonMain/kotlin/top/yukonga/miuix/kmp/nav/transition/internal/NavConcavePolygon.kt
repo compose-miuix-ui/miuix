@@ -23,7 +23,7 @@ internal class NavConcavePolygon private constructor(private val center: Offset,
     private var pointsB = FloatArray(0)
 
     companion object {
-        fun create(curves: List<PathSegment>): NavConcavePolygon? {
+        fun create(curves: List<NavPathSegment>): NavConcavePolygon? {
             if (curves.any { it.type != PathSegment.Type.Move && it.type != PathSegment.Type.Line }) return null
             val vertices = curves.map { Offset(it.points[it.points.size - 2], it.points[it.points.size - 1]) }.toMutableList()
             if (vertices.size > 1 && vertices.first() == vertices.last()) vertices.removeAt(vertices.lastIndex)

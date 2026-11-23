@@ -133,6 +133,7 @@ fun NavTestPage(
                         }
                     }
                 }
+                navigationExpansionSection(origin = route.toString())
                 item(key = "nav_gesture") {
                     Column {
                         SmallTitle(text = "Gesture back")
@@ -146,7 +147,6 @@ fun NavTestPage(
                         }
                     }
                 }
-                navigationExpansionSection(origin = route.toString())
                 item(key = "nav_layout") {
                     SmallTitle(text = "Layout test")
                     Card(

@@ -92,6 +92,10 @@ NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
 
 将 `NavTransitions.Expansion` 设为全局默认或指定 entry 的转场。来源组件绑定目标 route 后，沿用原来的导航调用。
 
+<div style="position: relative; height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=navExpand" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
 ```kotlin
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.nav.transition.navTransitionSource

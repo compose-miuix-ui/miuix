@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
@@ -21,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import navigation.Route
-import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -52,15 +52,11 @@ fun LazyListScope.navigationExpansionSection(origin: String) {
         Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             ExpansionPreference(
                 destination = Route.ExpansionDetail(origin, 1),
-                corners = NavTransitionCorners(CardDefaults.CornerRadius, CardDefaults.CornerRadius, 0.dp, 0.dp),
-            )
-            ExpansionPreference(
-                destination = Route.ExpansionDetail(origin, 2),
-                corners = NavTransitionCorners(0.dp, 0.dp, CardDefaults.CornerRadius, CardDefaults.CornerRadius),
+                corners = NavTransitionCorners(CardDefaults.CornerRadius),
             )
         }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp),
+            modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -92,10 +88,12 @@ private fun ExpansionCard(destination: Route.ExpansionDetail, modifier: Modifier
     val navigator = LocalNavigator.current
     val sourceColor = MiuixTheme.colorScheme.surfaceContainer
     Card(
-        modifier = modifier.navTransitionSource(destination, CardDefaults.CornerRadius, sourceColor, sourceKey = "expansion-${destination.id}"),
+        modifier = modifier.aspectRatio(1f).navTransitionSource(destination, CardDefaults.CornerRadius, sourceColor, sourceKey = "expansion-${destination.id}"),
         onClick = { navigator.push(destination) },
     ) {
-        BasicComponent(title = "Title", summary = "Summary")
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "Title")
+        }
     }
 }
 

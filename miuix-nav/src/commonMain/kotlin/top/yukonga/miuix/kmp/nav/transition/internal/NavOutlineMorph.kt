@@ -11,7 +11,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathIterator
 import androidx.compose.ui.graphics.PathSegment
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
@@ -268,20 +267,9 @@ internal class NavOutlineMorph {
         return result
     }
 
-    private fun curves(path: Path): List<PathSegment> {
-        val result = mutableListOf<PathSegment>()
-        val iterator = PathIterator(path, PathIterator.ConicEvaluation.AsConic)
-        var contours = 0
-        while (iterator.hasNext()) {
-            val segment = iterator.next()
-            if (segment.type == PathSegment.Type.Move) contours++
-            if (segment.points.isNotEmpty()) result.add(segment)
-        }
-        require(contours <= 1) { "Expansion Shape must have one contour without holes" }
-        return result
-    }
+    private fun curves(path: Path): List<NavPathSegment> = readPathSegments(path, requireSingleContour = false).orEmpty()
 
-    private fun support(curves: List<PathSegment>, x: Float, y: Float): Float {
+    private fun support(curves: List<NavPathSegment>, x: Float, y: Float): Float {
         var result = Double.NEGATIVE_INFINITY
         for (index in curves.indices) {
             val curve = curves[index]
