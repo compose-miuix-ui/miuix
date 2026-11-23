@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
+import top.yukonga.miuix.kmp.layout.SheetMotion
 
 /**
  * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
@@ -35,6 +36,7 @@ import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
+ * @param motion The enter, exit and settle motion. See [SheetMotion].
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
 @Composable
@@ -56,6 +58,7 @@ fun WindowBottomSheet(
     dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
+    motion: SheetMotion = SheetMotion.Default,
     content: @Composable () -> Unit,
 ) {
     val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
@@ -90,6 +93,7 @@ fun WindowBottomSheet(
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
+        motion = motion,
         content = content,
     )
 }

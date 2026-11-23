@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.layout
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -83,7 +84,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.squircle.squircleSurface
@@ -124,6 +124,7 @@ internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<B
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
  * @param topInset Optional top inset override. If null, calculated from window insets.
  * @param dimColor The unanimated dimming color.
+ * @param motion The enter, exit and settle motion.
  * @param surface Optional replacement for the default surface, including the overscroll fill.
  * @param content The content of the bottom sheet.
  */
@@ -150,23 +151,29 @@ internal fun BottomSheetContentLayout(
     enableNestedScroll: Boolean = true,
     topInset: Dp? = null,
     dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    motion: SheetMotion = SheetMotion.Default,
     surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
-    val animationProgress = remember { Animatable(0f, visibilityThreshold = 0.001f) }
+    val animationProgress = remember { Animatable(0f, visibilityThreshold = SHEET_PROGRESS_THRESHOLD) }
+    // The scrim fades on its own timing, independent of the slide spring.
+    val dimProgress = remember { Animatable(0f) }
     val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    val currentMotion by rememberUpdatedState(motion)
     val blockTouches = remember { mutableStateOf(false) }
     val internalVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {
+        val motionAtStart = currentMotion
         if (show) {
             internalVisible.value = true
             blockTouches.value = true
             dragOffsetY.snapTo(0f)
+            launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = folmeSpring(damping = 0.9f, response = 0.38f),
+                animationSpec = motionAtStart.slideSpec(),
             )
         } else {
             if (!internalVisible.value) return@LaunchedEffect
@@ -174,6 +181,7 @@ internal fun BottomSheetContentLayout(
                 snapshotFlow { animationProgress.value <= 0.02f }.first { it }
                 blockTouches.value = false
             }
+            val dimJob = launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec()) }
             if (dragOffsetY.value > 0f) {
                 // Sheet already dragged off-screen — snap immediately
                 animationProgress.snapTo(0f)
@@ -181,9 +189,11 @@ internal fun BottomSheetContentLayout(
                 // Button/back dismiss — animate normally
                 animationProgress.animateTo(
                     targetValue = 0f,
-                    animationSpec = folmeSpring(damping = 0.9f, response = 0.38f),
+                    animationSpec = motionAtStart.slideSpec(),
                 )
             }
+            dimJob.cancel()
+            dimProgress.snapTo(0f)
             internalVisible.value = false
             touchReleaseJob.cancel()
             blockTouches.value = false
@@ -197,11 +207,21 @@ internal fun BottomSheetContentLayout(
     val windowInfo = LocalWindowInfo.current
     val coroutineScope = rememberCoroutineScope()
     val sheetHeightPx = remember { mutableIntStateOf(0) }
+    // Read during layout and drawing only, so the per-frame slide never recomposes the sheet.
+    val slideOffsetPx: () -> Float = remember(density, windowInfo) {
+        {
+            currentMotion.slideOffset(
+                progress = animationProgress.value,
+                sheetHeightPx = sheetHeightPx.intValue.toFloat(),
+                containerHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() },
+            )
+        }
+    }
     val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, animationProgress) {
+    val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
         computedStateOf {
             if (enableWindowDim) {
-                dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * animationProgress.value).coerceIn(0f, 1f))
+                dimColor.copy(alpha = (dimColor.alpha * dimAlpha.floatValue * dimProgress.value).coerceIn(0f, 1f))
             } else {
                 Color.Transparent
             }
@@ -245,6 +265,7 @@ internal fun BottomSheetContentLayout(
                             sheetHeightPx = sheetHeightPx.intValue,
                             windowHeightPx = windowHeightPx,
                             dimAlpha = dimAlpha,
+                            animationSpec = currentMotion.dragDismissSpec(),
                         ) {
                             requestDismiss()
                         }
@@ -319,11 +340,7 @@ internal fun BottomSheetContentLayout(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) {
-                        val progress = animationProgress.value
-                        val currentHeight = sheetHeightPx.intValue.toFloat()
-                        val windowHeightPx = with(density) { windowInfo.containerDpSize.height.toPx() }
-                        val baseOffset = if (currentHeight > 0) currentHeight else windowHeightPx
-                        val offsetY = (baseOffset * (1f - progress) + dragOffsetY.value).fastRoundToInt()
+                        val offsetY = (slideOffsetPx() + dragOffsetY.value).fastRoundToInt()
                         placeable.placeRelative(0, offsetY)
                     }
                 }
@@ -344,6 +361,8 @@ internal fun BottomSheetContentLayout(
                 dragOffsetY = dragOffsetY,
                 dimAlpha = dimAlpha,
                 dragSnapChannel = dragSnapChannel,
+                motion = motion,
+                slideOffsetPx = slideOffsetPx,
                 onDismissRequest = {
                     if (allowDismiss) {
                         requestDismiss()
@@ -394,6 +413,8 @@ internal fun BottomSheetContent(
     dragSnapChannel: Channel<Float>,
     onDismissRequest: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    motion: SheetMotion = SheetMotion.Default,
+    slideOffsetPx: () -> Float = { 0f },
     topInset: Dp? = null,
     enableNestedScroll: Boolean = true,
     startAction: @Composable (() -> Unit)? = null,
@@ -408,6 +429,7 @@ internal fun BottomSheetContent(
     // Do NOT use windowHeight as a remember key — IME resize would recreate handlers and trigger dismiss.
     val currentWindowHeight by rememberUpdatedState(windowHeight)
     val coroutineScope = rememberCoroutineScope()
+    val currentMotion by rememberUpdatedState(motion)
 
     val settlingJob = remember { mutableStateOf<Job?>(null) }
     val isSettling = remember { mutableStateOf(false) }
@@ -474,6 +496,7 @@ internal fun BottomSheetContent(
                                 sheetHeightPx = sheetHeightPx.intValue,
                                 windowHeightPx = windowHeightPx,
                                 dimAlpha = dimAlpha,
+                                animationSpec = currentMotion.dragDismissSpec(),
                                 velocity = velocity,
                             ) {
                                 onDismissRequest?.invoke()
@@ -483,7 +506,7 @@ internal fun BottomSheetContent(
                         val effectiveVelocity = if (!allowDismiss && velocity > 0) 0f else velocity
                         dragOffsetY.animateTo(
                             targetValue = 0f,
-                            animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
+                            animationSpec = currentMotion.settleSpec(),
                             initialVelocity = effectiveVelocity,
                         ) {
                             updateDimAlpha(value)
@@ -616,6 +639,7 @@ internal fun BottomSheetContent(
         topInset = calculatedTopInset,
         enableNestedScroll = enableNestedScroll,
         sheetHeightPx = sheetHeightPx,
+        slideOffsetPx = slideOffsetPx,
         dragOffsetY = dragOffsetY,
         nestedScrollConnection = nestedScrollConnection,
         coroutineScope = coroutineScope,
@@ -652,6 +676,7 @@ private fun BottomSheetColumn(
     topInset: Dp,
     enableNestedScroll: Boolean,
     sheetHeightPx: MutableIntState,
+    slideOffsetPx: () -> Float,
     dragOffsetY: Animatable<Float, *>,
     nestedScrollConnection: NestedScrollConnection,
     coroutineScope: CoroutineScope,
@@ -672,6 +697,7 @@ private fun BottomSheetColumn(
     ) {
         OverscrollBackground(
             dragOffsetY = dragOffsetY,
+            slideOffsetPx = slideOffsetPx,
             sheetMaxWidth = sheetMaxWidth,
             outsideMargin = outsideMargin,
             backgroundColor = backgroundColor,
@@ -737,20 +763,24 @@ private fun BottomSheetColumn(
 
 /**
  * Renders the elastic background fill that follows the sheet upward when the user
- * drags past the top of its contents (negative `dragOffsetY`). Lives in its own
- * composable so the only state it reads — `dragOffsetY.value` — invalidates this
+ * drags past the top of its contents (negative `dragOffsetY`), or when the opening
+ * spring carries it past its resting place (negative slide offset). Lives in its own
+ * composable so the only state it reads — the drag and slide offsets — invalidates this
  * subtree alone, leaving the surrounding [BottomSheetColumn] free of per-frame
- * recomposition during a drag.
+ * recomposition during a drag or slide.
  */
 @Composable
 private fun BoxScope.OverscrollBackground(
     dragOffsetY: Animatable<Float, *>,
+    slideOffsetPx: () -> Float,
     sheetMaxWidth: Dp,
     outsideMargin: DpSize,
     backgroundColor: Color,
     surface: (@Composable () -> Modifier)? = null,
 ) {
-    val isOverscrolling by remember(dragOffsetY) { computedStateOf { dragOffsetY.value < 0f } }
+    val isOverscrolling by remember(dragOffsetY, slideOffsetPx) {
+        computedStateOf { dragOffsetY.value + slideOffsetPx() < 0f }
+    }
     if (isOverscrolling) {
         Box(
             modifier = Modifier
@@ -759,7 +789,7 @@ private fun BoxScope.OverscrollBackground(
                 .fillMaxWidth()
                 .layout { measurable, constraints ->
                     val heightPx = constraints.constrainHeight(
-                        ((-dragOffsetY.value).coerceAtLeast(0f) + 1.dp.toPx()).fastRoundToInt(),
+                        ((-(dragOffsetY.value + slideOffsetPx())).coerceAtLeast(0f) + 1.dp.toPx()).fastRoundToInt(),
                     )
                     val placeable = measurable.measure(
                         constraints.copy(minHeight = heightPx, maxHeight = heightPx),
@@ -930,6 +960,7 @@ private suspend fun CoroutineScope.animateDismissOffScreen(
     sheetHeightPx: Int,
     windowHeightPx: Float,
     dimAlpha: MutableFloatState,
+    animationSpec: AnimationSpec<Float>,
     velocity: Float = 0f,
     onDismiss: () -> Unit,
 ) {
@@ -938,7 +969,7 @@ private suspend fun CoroutineScope.animateDismissOffScreen(
     val settleJob = launch {
         dragOffsetY.animateTo(
             targetValue = windowHeightPx,
-            animationSpec = folmeSpring(damping = 0.85f, response = 0.4f),
+            animationSpec = animationSpec,
             initialVelocity = velocity,
         ) {
             dimAlpha.floatValue = (1f - (value / thresholdPx).coerceIn(0f, 1f))

@@ -77,6 +77,7 @@ WindowBottomSheet(
 | dragHandleColor            | Color                     | 拖拽指示器的颜色                             | BottomSheetDefaults.dragHandleColor() | 否       |
 | allowDismiss               | Boolean                   | 是否允许通过拖拽或返回手势关闭抽屉           | true                                        | 否       |
 | enableNestedScroll         | Boolean                   | 是否允许内容嵌套滚动                         | true                                        | 否       |
+| motion                     | SheetMotion              | 进入、退出及拖动回弹动效，见 SheetMotion    | SheetMotion.Default                       | 否       |
 | content                    | @Composable () -> Unit    | 底部抽屉的内容                               | -                                           | 是       |
 
 ### BottomSheetDefaults
@@ -96,6 +97,15 @@ WindowBottomSheet(
 | ----------------- | -------- | ---------------------- |
 | backgroundColor() | Color    | 获取默认背景颜色       |
 | dragHandleColor() | Color    | 获取默认拖拽指示器颜色 |
+
+### SheetMotion
+
+底部抽屉显隐及拖动回弹的动效预设。
+
+| 预设    | 说明 |
+| ------- | ---- |
+| Default | HyperOS 系统底部抽屉动效（miuix `BottomSheetModal`）。以 0.9 / 0.38 s 弹簧滑过整个容器高度进出，停稳前有轻微过冲；拖动松手后以 0.85 / 0.4 s 弹簧回弹。遮罩 300 ms 淡入、250 ms 淡出 |
+| Glass   | HyperOS 桌面底部抽屉动效，`GlassBottomSheet` 使用此预设。以 0.9 / 0.38 s 弹簧滑过自身高度进出，停稳前有轻微过冲；拖动松手后以更紧的 0.85 / 0.35 s 弹簧回弹。遮罩 300 ms 淡入、250 ms 淡出 |
 
 ## 进阶用法
 

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
+import top.yukonga.miuix.kmp.layout.SheetMotion
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassMaterial
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
@@ -21,6 +22,8 @@ import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
  * A `null` backdrop or unavailable runtime shaders use [containerColor]. The glass extends to the
  * screen edge and fills upward overscroll. Apply navigation-bar padding inside scrollable content
  * when that spacing should scroll with the content.
+ *
+ * It opens, closes and settles with [SheetMotion.Glass], the HyperOS launcher's sheet motion.
  *
  * @param onDismissRequest Called on an allowed outside tap, drag dismissal or back gesture.
  * @param show Whether the sheet is shown.
@@ -93,6 +96,7 @@ fun GlassBottomSheet(
         enableNestedScroll = enableNestedScroll,
         renderInRootScaffold = renderInRootScaffold,
         dimColor = dimColor,
+        motion = SheetMotion.Glass,
         surface = glassBottomSheetSurface(backdrop, material, stroke, containerColor),
         content = content,
     )

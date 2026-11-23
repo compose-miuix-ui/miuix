@@ -81,3 +81,48 @@ internal fun GlassBottomSheetDemo(
         }
     }
 }
+
+/** A half-height sheet, sized like the launcher's settings sheet, to compare the opening motion. */
+@Composable
+internal fun GlassHalfBottomSheetDemo(
+    onDismissRequest: () -> Unit,
+    show: Boolean,
+    backdrop: Backdrop?,
+    modifier: Modifier = Modifier,
+    material: GlassMaterial = GlassBottomSheetDefaults.material(),
+    stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
+    onDismissFinished: (() -> Unit)? = null,
+) {
+    GlassBottomSheet(
+        show = show,
+        modifier = modifier,
+        title = "Half BottomSheet",
+        backdrop = backdrop,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        material = material,
+        stroke = stroke,
+    ) {
+        Column(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                repeat(5) { index ->
+                    BasicComponent(
+                        title = "Setting ${index + 1}",
+                        onClick = {},
+                    )
+                }
+            }
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                BasicComponent(
+                    title = "More settings",
+                    onClick = onDismissRequest,
+                )
+            }
+        }
+    }
+}
