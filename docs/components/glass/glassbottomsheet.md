@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassBottomSheet
 
-`GlassBottomSheet` is a glass sheet that slides up from the screen edge. It supports a header, dismissal gestures, predictive Back, and nested scrolling.
+`GlassBottomSheet` is a glass sheet that slides up from the screen edge. It supports a header, dismissal gestures, predictive Back, and nested scrolling. It opens, closes and settles with `SheetMotion.Glass`, the HyperOS launcher's sheet motion.
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -139,7 +139,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 
 ### Applying Glass to an Existing Sheet
 
-Use the surface factory when an existing `OverlayBottomSheet` already manages the layout and visibility. With `showSheet` and the clean `backdrop` from the basic example:
+Use the surface factory when an existing `OverlayBottomSheet` already manages the layout and visibility. With `showSheet` and the clean `backdrop` from the basic example (pass `SheetMotion.Glass` to keep the glass sheet's motion):
 
 ```kotlin
 OverlayBottomSheet(
@@ -147,6 +147,7 @@ OverlayBottomSheet(
     onDismissRequest = { showSheet = false },
     title = "Details",
     dimColor = GlassBottomSheetDefaults.ScrimColor,
+    motion = SheetMotion.Glass,
     surface = glassBottomSheetSurface(backdrop = backdrop),
 ) {
     Column(

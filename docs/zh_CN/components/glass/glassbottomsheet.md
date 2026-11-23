@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassBottomSheet
 
-`GlassBottomSheet` 是从屏幕边缘滑入的玻璃底部抽屉。它支持标题栏、关闭手势、预测性返回和嵌套滚动。
+`GlassBottomSheet` 是从屏幕边缘滑入的玻璃底部抽屉。它支持标题栏、关闭手势、预测性返回和嵌套滚动。显隐与拖动回弹使用 HyperOS 桌面底部抽屉动效 `SheetMotion.Glass`。
 
 <div style="position: relative; height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassBottomSheet" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -139,7 +139,7 @@ Scaffold { padding ->
 
 ### 为现有抽屉应用玻璃材质
 
-已有 `OverlayBottomSheet` 管理布局与显示状态时，可以使用表面工厂。沿用基本示例的 `showSheet` 和不含弹窗的 `backdrop`：
+已有 `OverlayBottomSheet` 管理布局与显示状态时，可以使用表面工厂。沿用基本示例的 `showSheet` 和不含弹窗的 `backdrop`（传入 `SheetMotion.Glass` 以保持玻璃底部抽屉的动效）：
 
 ```kotlin
 OverlayBottomSheet(
@@ -147,6 +147,7 @@ OverlayBottomSheet(
     onDismissRequest = { showSheet = false },
     title = "详细信息",
     dimColor = GlassBottomSheetDefaults.ScrimColor,
+    motion = SheetMotion.Glass,
     surface = glassBottomSheetSurface(backdrop = backdrop),
 ) {
     Column(
