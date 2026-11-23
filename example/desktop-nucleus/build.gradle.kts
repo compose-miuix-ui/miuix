@@ -41,8 +41,9 @@ aboutLibraries {
 nucleus.application {
     mainClass = "Main_desktopKt"
     buildTypes.release.proguard {
+        version = "7.10.0"
         isEnabled = true
-        optimize = true
+        optimize = false
         obfuscate = false
         joinOutputJars = true
         configurationFiles.from(project.file("proguard-rules.pro"))
