@@ -380,7 +380,8 @@ fun IconsPage(
                             overscrollEffect = null,
                             contentPadding = contentPadding,
                         ) {
-                            sectionRows.forEachIndexed { _, (title, rows) ->
+                            sectionRows.forEachIndexed { sectionIndex, (title, rows) ->
+                                val isLastSection = sectionIndex == sectionRows.lastIndex
                                 item(key = "section_title_$title", contentType = "section_title") {
                                     SmallTitle(
                                         text = title,
@@ -398,7 +399,11 @@ fun IconsPage(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 12.dp)
+                                            .padding(
+                                                start = 12.dp,
+                                                end = 12.dp,
+                                                bottom = if (isLast && !isLastSection) 12.dp else 0.dp,
+                                            )
                                             .let { mod ->
                                                 if (isFirst || isLast) {
                                                     mod.squircleClip(
