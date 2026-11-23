@@ -16,8 +16,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,13 +44,13 @@ import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
+import kotlin.concurrent.Volatile
 
 private val CamelCaseRegex = Regex("([A-Z])")
 private val ColorBlockCornerRadius = 12.dp
 
 @Immutable
 private data class ColorBlockData(
-    val name: String,
     val displayName: String,
     val surfaceColor: Color,
     val textColor: Color,
@@ -71,16 +69,12 @@ fun ColorPage(
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
 
     val currentColors = MiuixTheme.colorScheme
-    val lightColors = remember { lightColorScheme() }
-    val darkColors = remember { darkColorScheme() }
     val dynLight = platformDynamicColors(dark = false)
     val dynDark = platformDynamicColors(dark = true)
 
-    val currentRows by remember(currentColors) { derivedStateOf { buildColorBlockRows(currentColors) } }
-    val lightRows = remember(lightColors) { buildColorBlockRows(lightColors) }
-    val dynLightRows = remember(dynLight) { buildColorBlockRows(dynLight) }
-    val darkRows = remember(darkColors) { buildColorBlockRows(darkColors) }
-    val dynDarkRows = remember(dynDark) { buildColorBlockRows(dynDark) }
+    val currentRows = remember(currentColors) { buildColorBlockRows(currentColors) }
+    val dynLightRows = rememberDynamicColorRows(dynLight, isDark = false)
+    val dynDarkRows = rememberDynamicColorRows(dynDark, isDark = true)
     Scaffold(
         topBar = {
             BlurredBar(backdrop, blurActive) {
@@ -116,8 +110,8 @@ fun ColorPage(
                 colorPaletteSection(
                     keyPrefix = "light",
                     title = "Light Theme Colors",
-                    containerColor = lightColors.surfaceContainer,
-                    rows = lightRows,
+                    containerColor = LightColorScheme.surfaceContainer,
+                    rows = LightColorRows,
                 )
                 colorPaletteSection(
                     keyPrefix = "dynamic_light",
@@ -128,8 +122,8 @@ fun ColorPage(
                 colorPaletteSection(
                     keyPrefix = "dark",
                     title = "Dark Theme Colors",
-                    containerColor = darkColors.surfaceContainer,
-                    rows = darkRows,
+                    containerColor = DarkColorScheme.surfaceContainer,
+                    rows = DarkColorRows,
                 )
                 colorPaletteSection(
                     keyPrefix = "dynamic_dark",
@@ -199,77 +193,128 @@ private fun LazyListScope.colorPaletteSection(
     }
 }
 
-private fun buildColorBlockRows(colors: Colors): List<List<ColorBlockData>> {
-    val colorList = listOf(
-        "primary" to colors.primary,
-        "onPrimary" to colors.onPrimary,
-        "primaryVariant" to colors.primaryVariant,
-        "onPrimaryVariant" to colors.onPrimaryVariant,
-        "error" to colors.error,
-        "onError" to colors.onError,
-        "errorContainer" to colors.errorContainer,
-        "onErrorContainer" to colors.onErrorContainer,
-        "disabledPrimary" to colors.disabledPrimary,
-        "disabledOnPrimary" to colors.disabledOnPrimary,
-        "disabledPrimaryButton" to colors.disabledPrimaryButton,
-        "disabledOnPrimaryButton" to colors.disabledOnPrimaryButton,
-        "disabledPrimarySlider" to colors.disabledPrimarySlider,
-        "primaryContainer" to colors.primaryContainer,
-        "onPrimaryContainer" to colors.onPrimaryContainer,
-        "secondary" to colors.secondary,
-        "onSecondary" to colors.onSecondary,
-        "secondaryVariant" to colors.secondaryVariant,
-        "onSecondaryVariant" to colors.onSecondaryVariant,
-        "disabledSecondary" to colors.disabledSecondary,
-        "disabledOnSecondary" to colors.disabledOnSecondary,
-        "disabledSecondaryVariant" to colors.disabledSecondaryVariant,
-        "disabledOnSecondaryVariant" to colors.disabledOnSecondaryVariant,
-        "secondaryContainer" to colors.secondaryContainer,
-        "onSecondaryContainer" to colors.onSecondaryContainer,
-        "secondaryContainerVariant" to colors.secondaryContainerVariant,
-        "onSecondaryContainerVariant" to colors.onSecondaryContainerVariant,
-        "tertiaryContainer" to colors.tertiaryContainer,
-        "onTertiaryContainer" to colors.onTertiaryContainer,
-        "tertiaryContainerVariant" to colors.tertiaryContainerVariant,
-        "background" to colors.background,
-        "onBackground" to colors.onBackground,
-        "onBackgroundVariant" to colors.onBackgroundVariant,
-        "surface" to colors.surface,
-        "onSurface" to colors.onSurface,
-        "surfaceVariant" to colors.surfaceVariant,
-        "onSurfaceSecondary" to colors.onSurfaceSecondary,
-        "onSurfaceVariantSummary" to colors.onSurfaceVariantSummary,
-        "onSurfaceVariantActions" to colors.onSurfaceVariantActions,
-        "disabledOnSurface" to colors.disabledOnSurface,
-        "surfaceContainer" to colors.surfaceContainer,
-        "onSurfaceContainer" to colors.onSurfaceContainer,
-        "onSurfaceContainerVariant" to colors.onSurfaceContainerVariant,
-        "surfaceContainerHigh" to colors.surfaceContainerHigh,
-        "onSurfaceContainerHigh" to colors.onSurfaceContainerHigh,
-        "surfaceContainerHighest" to colors.surfaceContainerHighest,
-        "onSurfaceContainerHighest" to colors.onSurfaceContainerHighest,
-        "outline" to colors.outline,
-        "dividerLine" to colors.dividerLine,
-        "windowDimming" to colors.windowDimming,
-        "sliderKeyPoint" to colors.sliderKeyPoint,
-        "sliderKeyPointForeground" to colors.sliderKeyPointForeground,
+private class ColorSlotSpec(
+    val displayName: String,
+    val partnerIndex: Int,
+    val extract: (Colors) -> Color,
+)
+
+private val ColorSlotSpecs: List<ColorSlotSpec> by lazy {
+    val rawSlots: List<Pair<String, (Colors) -> Color>> = listOf(
+        "primary" to { it.primary },
+        "onPrimary" to { it.onPrimary },
+        "primaryVariant" to { it.primaryVariant },
+        "onPrimaryVariant" to { it.onPrimaryVariant },
+        "error" to { it.error },
+        "onError" to { it.onError },
+        "errorContainer" to { it.errorContainer },
+        "onErrorContainer" to { it.onErrorContainer },
+        "disabledPrimary" to { it.disabledPrimary },
+        "disabledOnPrimary" to { it.disabledOnPrimary },
+        "disabledPrimaryButton" to { it.disabledPrimaryButton },
+        "disabledOnPrimaryButton" to { it.disabledOnPrimaryButton },
+        "disabledPrimarySlider" to { it.disabledPrimarySlider },
+        "primaryContainer" to { it.primaryContainer },
+        "onPrimaryContainer" to { it.onPrimaryContainer },
+        "secondary" to { it.secondary },
+        "onSecondary" to { it.onSecondary },
+        "secondaryVariant" to { it.secondaryVariant },
+        "onSecondaryVariant" to { it.onSecondaryVariant },
+        "disabledSecondary" to { it.disabledSecondary },
+        "disabledOnSecondary" to { it.disabledOnSecondary },
+        "disabledSecondaryVariant" to { it.disabledSecondaryVariant },
+        "disabledOnSecondaryVariant" to { it.disabledOnSecondaryVariant },
+        "secondaryContainer" to { it.secondaryContainer },
+        "onSecondaryContainer" to { it.onSecondaryContainer },
+        "secondaryContainerVariant" to { it.secondaryContainerVariant },
+        "onSecondaryContainerVariant" to { it.onSecondaryContainerVariant },
+        "tertiaryContainer" to { it.tertiaryContainer },
+        "onTertiaryContainer" to { it.onTertiaryContainer },
+        "tertiaryContainerVariant" to { it.tertiaryContainerVariant },
+        "background" to { it.background },
+        "onBackground" to { it.onBackground },
+        "onBackgroundVariant" to { it.onBackgroundVariant },
+        "surface" to { it.surface },
+        "onSurface" to { it.onSurface },
+        "surfaceVariant" to { it.surfaceVariant },
+        "onSurfaceSecondary" to { it.onSurfaceSecondary },
+        "onSurfaceVariantSummary" to { it.onSurfaceVariantSummary },
+        "onSurfaceVariantActions" to { it.onSurfaceVariantActions },
+        "disabledOnSurface" to { it.disabledOnSurface },
+        "surfaceContainer" to { it.surfaceContainer },
+        "onSurfaceContainer" to { it.onSurfaceContainer },
+        "onSurfaceContainerVariant" to { it.onSurfaceContainerVariant },
+        "surfaceContainerHigh" to { it.surfaceContainerHigh },
+        "onSurfaceContainerHigh" to { it.onSurfaceContainerHigh },
+        "surfaceContainerHighest" to { it.surfaceContainerHighest },
+        "onSurfaceContainerHighest" to { it.onSurfaceContainerHighest },
+        "outline" to { it.outline },
+        "dividerLine" to { it.dividerLine },
+        "windowDimming" to { it.windowDimming },
+        "sliderKeyPoint" to { it.sliderKeyPoint },
+        "sliderKeyPointForeground" to { it.sliderKeyPointForeground },
     )
-    val colorMap = colorList.toMap()
-    return colorList.map { (name, color) ->
-        val (surfaceColor, textColor) = when {
-            name.startsWith("on") && colorMap.containsKey(name.removePrefix("on").replaceFirstChar { it.lowercase() }) -> {
-                color to colorMap[name.removePrefix("on").replaceFirstChar { it.lowercase() }]!!
-            }
-
-            !name.startsWith("on") && colorMap.containsKey("on" + name.replaceFirstChar { it.uppercase() }) -> {
-                color to colorMap["on" + name.replaceFirstChar { it.uppercase() }]!!
-            }
-
-            else -> color to (if (color.luminance() > 0.5) Color.Black else Color.White)
+    val nameToIndex = rawSlots.mapIndexed { idx, (name, _) -> name to idx }.toMap()
+    rawSlots.map { (name, extractor) ->
+        val partnerName = when {
+            name.startsWith("on") -> name.removePrefix("on").replaceFirstChar { it.lowercase() }
+            else -> "on" + name.replaceFirstChar { it.uppercase() }
         }
+        val partnerIndex = nameToIndex[partnerName] ?: -1
         val displayName = name.replace(CamelCaseRegex, " $1").trim().replaceFirstChar { it.uppercase() }
-        ColorBlockData(name, displayName, surfaceColor, textColor)
-    }.chunked(2)
+        ColorSlotSpec(displayName = displayName, partnerIndex = partnerIndex, extract = extractor)
+    }
+}
+
+private val LightColorScheme by lazy { lightColorScheme() }
+private val DarkColorScheme by lazy { darkColorScheme() }
+private val LightColorRows by lazy { buildColorBlockRows(LightColorScheme) }
+private val DarkColorRows by lazy { buildColorBlockRows(DarkColorScheme) }
+
+@Volatile
+private var cachedDynamicLight: Pair<Colors, List<List<ColorBlockData>>>? = null
+
+@Volatile
+private var cachedDynamicDark: Pair<Colors, List<List<ColorBlockData>>>? = null
+
+private fun rememberDynamicColorRows(colors: Colors, isDark: Boolean): List<List<ColorBlockData>> {
+    val cached = if (isDark) cachedDynamicDark else cachedDynamicLight
+    if (cached != null && cached.first == colors) return cached.second
+    val built = buildColorBlockRows(colors)
+    val entry = colors to built
+    if (isDark) {
+        cachedDynamicDark = entry
+    } else {
+        cachedDynamicLight = entry
+    }
+    return built
+}
+
+private fun buildColorBlockRows(colors: Colors): List<List<ColorBlockData>> {
+    val specs = ColorSlotSpecs
+    val resolved = Array(specs.size) { i -> specs[i].extract(colors) }
+    val rowCount = (specs.size + 1) / 2
+    return List(rowCount) { row ->
+        val start = row * 2
+        val end = minOf(start + 2, specs.size)
+        List(end - start) { offset ->
+            val idx = start + offset
+            val spec = specs[idx]
+            val surfaceColor = resolved[idx]
+            val textColor = if (spec.partnerIndex >= 0) {
+                resolved[spec.partnerIndex]
+            } else if (surfaceColor.luminance() > 0.5f) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            ColorBlockData(
+                displayName = spec.displayName,
+                surfaceColor = surfaceColor,
+                textColor = textColor,
+            )
+        }
+    }
 }
 
 @Composable

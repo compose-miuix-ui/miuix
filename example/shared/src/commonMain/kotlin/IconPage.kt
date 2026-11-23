@@ -6,6 +6,7 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.computedStateOf
@@ -38,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -49,7 +52,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -91,15 +93,17 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import utils.AdaptiveTopAppBar
-import utils.All
 import utils.BlurredBar
 import utils.LocalAppPageInsets
 import utils.SearchStatus
 import utils.appPageHorizontalInsets
 import utils.appPageSearchInsets
+import utils.glassIconsForWeight
+import utils.originalIconsForWeight
 import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration.Companion.milliseconds
 
 private val SearchResultVerticalPadding = 4.dp
@@ -109,12 +113,64 @@ private data class IconSection(
     val indices: List<Int>,
 )
 
-private data class IconFamilyCatalog(
+private val IconFamilies = listOf("Glass", "Original")
+private val IconWeightNames = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+private val IconCellShape = RoundedCornerShape(12.dp)
+
+private class IconFamilyCatalog(
     val regularIcons: List<ImageVector>,
-    val weightVariants: List<Pair<String, List<ImageVector>>>,
     val iconNames: List<String>,
     val sections: List<IconSection>,
-)
+    private val weightLoader: (String) -> List<ImageVector>,
+) {
+    val weightVariants: List<Pair<String, List<ImageVector>>> by lazy {
+        IconWeightNames.map { name -> name to weightLoader(name) }
+    }
+
+    @Volatile
+    private var rowsCache: Pair<Int, List<Pair<String, List<List<Int>>>>>? = null
+
+    fun sectionRowsFor(columns: Int): List<Pair<String, List<List<Int>>>> {
+        val cached = rowsCache
+        if (cached != null && cached.first == columns) return cached.second
+        val built = sections.map { it.title to it.indices.chunked(columns) }
+        rowsCache = columns to built
+        return built
+    }
+}
+
+private fun buildIconCatalog(
+    regular: List<ImageVector>,
+    weightLoader: (String) -> List<ImageVector>,
+): IconFamilyCatalog {
+    val names = regular.map { it.name.substringBefore(".") }
+    val sections = names.indices
+        .groupBy { names[it].firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
+        .entries
+        .sortedBy { it.key }
+        .map { (title, indices) ->
+            IconSection(
+                title = title,
+                indices = indices.sortedBy { names[it] },
+            )
+        }
+    return IconFamilyCatalog(
+        regularIcons = regular,
+        iconNames = names,
+        sections = sections,
+        weightLoader = weightLoader,
+    )
+}
+
+private val GlassIconCatalog by lazy {
+    buildIconCatalog(glassIconsForWeight("Regular"), ::glassIconsForWeight)
+}
+
+private val OriginalIconCatalog by lazy {
+    buildIconCatalog(originalIconsForWeight("Regular"), ::originalIconsForWeight)
+}
+
+private fun iconCatalogForPage(page: Int): IconFamilyCatalog = if (page == 0) GlassIconCatalog else OriginalIconCatalog
 
 @Composable
 fun IconsPage(
@@ -138,36 +194,10 @@ fun IconsPage(
     val searchModifier = Modifier.appPageSearchInsets()
     val searchResultPadding = pageBottomPadding(padding)
 
-    val iconFamilies = remember { listOf("Glass", "Original") }
-    val iconCatalogs = remember {
-        listOf(MiuixIcons.Glass.All, MiuixIcons.All).map { allIcons ->
-            val regular = allIcons["Regular"] ?: emptyList()
-            val weights = listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
-                name to (allIcons[name] ?: emptyList())
-            }
-            val names = regular.map { it.name.substringBefore(".") }
-            val sections = names.indices
-                .groupBy { names[it].firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
-                .entries
-                .sortedBy { it.key }
-                .map { (title, indices) ->
-                    IconSection(
-                        title = title,
-                        indices = indices.sortedBy { names[it] },
-                    )
-                }
-            IconFamilyCatalog(
-                regularIcons = regular,
-                weightVariants = weights,
-                iconNames = names,
-                sections = sections,
-            )
-        }
-    }
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { iconFamilies.size })
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { IconFamilies.size })
     val currentPage by remember { computedStateOf { pagerState.currentPage } }
     val searchIsGlass = currentPage == 0
-    val searchCatalog = iconCatalogs[currentPage]
+    val searchCatalog = iconCatalogForPage(currentPage)
     val searchRegularIcons = searchCatalog.regularIcons
     val searchIconNames = searchCatalog.iconNames
     val surfaceColor = colorScheme.surface
@@ -259,7 +289,7 @@ fun IconsPage(
                         bottomContent = {
                             if (glassTopBar) {
                                 GlassSegmentedTabRow(
-                                    tabs = iconFamilies,
+                                    tabs = IconFamilies,
                                     selectedIndex = pagerState.targetPage,
                                     onSelect = { index ->
                                         coroutineScope.launch { pagerState.springAnimateToPage(index) }
@@ -291,7 +321,7 @@ fun IconsPage(
                                         )
                                     }
                                     TabRow(
-                                        tabs = iconFamilies,
+                                        tabs = IconFamilies,
                                         selectedTabIndex = pagerState.targetPage,
                                         onTabSelected = { index ->
                                             coroutineScope.launch { pagerState.springAnimateToPage(index) }
@@ -314,128 +344,125 @@ fun IconsPage(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     userScrollEnabled = false,
-                    beyondViewportPageCount = 1,
+                    beyondViewportPageCount = 0,
                     key = { it },
                 ) { page ->
                     val isPageGlass = page == 0
                     val pageListState = listStates[page]
                     val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
-                    val catalog = iconCatalogs[page]
+                    val catalog = iconCatalogForPage(page)
                     val regularIcons = catalog.regularIcons
-                    val weightVariants = catalog.weightVariants
                     val iconNames = catalog.iconNames
                     // Dialog state for comparing weight variants of the tapped icon.
                     var showWeightDialog by remember { mutableStateOf(false) }
                     var selectedIconIndex by remember { mutableIntStateOf(0) }
 
-                    var containerWidthPx by remember { mutableIntStateOf(0) }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .onSizeChanged { containerWidthPx = it.width },
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        if (containerWidthPx > 0) {
-                            val columns = remember(containerWidthPx, density) {
-                                with(density) {
-                                    val widthDp = containerWidthPx.toDp()
-                                    ((widthDp - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
+                        val columns = remember(maxWidth) {
+                            ((maxWidth - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
+                        }
+                        pageColumns[page] = columns
+                        val sectionRows = remember(catalog, columns) {
+                            catalog.sectionRowsFor(columns)
+                        }
+                        LazyColumn(
+                            state = pageListState,
+                            cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pageScrollModifiers(
+                                    appState.enableScrollEndHaptic,
+                                    appState.showTopAppBar,
+                                    topAppBarScrollBehavior,
+                                ),
+                            overscrollEffect = null,
+                            contentPadding = contentPadding,
+                        ) {
+                            sectionRows.forEachIndexed { _, (title, rows) ->
+                                item(key = "section_title_$title", contentType = "section_title") {
+                                    SmallTitle(
+                                        text = title,
+                                        modifier = Modifier,
+                                    )
                                 }
-                            }
-                            pageColumns[page] = columns
-                            val sectionRows = remember(catalog.sections, columns) {
-                                catalog.sections.map { it.title to it.indices.chunked(columns) }
-                            }
-                            LazyColumn(
-                                state = pageListState,
-                                cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .pageScrollModifiers(
-                                        appState.enableScrollEndHaptic,
-                                        appState.showTopAppBar,
-                                        topAppBarScrollBehavior,
-                                    ),
-                                overscrollEffect = null,
-                                contentPadding = contentPadding,
-                            ) {
-                                sectionRows.forEachIndexed { _, (title, rows) ->
-                                    item(key = "section_title_$title", contentType = "section_title") {
-                                        SmallTitle(
-                                            text = title,
-                                            modifier = Modifier,
-                                        )
-                                    }
-                                    items(
-                                        count = rows.size,
-                                        key = { "section_${title}_row_$it" },
-                                        contentType = { "icon_row" },
-                                    ) { rowIndex ->
-                                        val isFirst = rowIndex == 0
-                                        val isLast = rowIndex == rows.lastIndex
-                                        val rowIndices = rows[rowIndex]
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 12.dp)
-                                                .squircleClip(
-                                                    topStart = if (isFirst) 16.dp else 0.dp,
-                                                    topEnd = if (isFirst) 16.dp else 0.dp,
-                                                    bottomEnd = if (isLast) 16.dp else 0.dp,
-                                                    bottomStart = if (isLast) 16.dp else 0.dp,
-                                                )
-                                                .background(colorScheme.surfaceContainer)
-                                                .padding(horizontal = 6.dp)
-                                                .padding(
-                                                    top = if (isFirst) 8.dp else 2.dp,
-                                                    bottom = if (isLast) 8.dp else 2.dp,
-                                                ),
-                                        ) {
-                                            for (col in 0 until columns) {
-                                                if (col < rowIndices.size) {
-                                                    val iconIndex = rowIndices[col]
-                                                    Column(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                            .squircleClip(12.dp)
-                                                            .clickable {
-                                                                selectedIconIndex = iconIndex
-                                                                showWeightDialog = true
-                                                            }
-                                                            .padding(horizontal = 4.dp, vertical = 10.dp),
-                                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = regularIcons[iconIndex],
-                                                            contentDescription = iconNames[iconIndex],
-                                                            tint = colorScheme.onBackground,
-                                                            modifier = Modifier.size(if (isPageGlass) 28.dp else 24.dp),
-                                                        )
-                                                        Spacer(modifier = Modifier.height(6.dp))
-                                                        Text(
-                                                            text = iconNames[iconIndex],
-                                                            style = MiuixTheme.textStyles.footnote2,
-                                                            color = colorScheme.onSurfaceVariantActions,
-                                                            textAlign = TextAlign.Center,
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis,
-                                                        )
-                                                    }
+                                items(
+                                    count = rows.size,
+                                    key = { "section_${title}_row_$it" },
+                                    contentType = { "icon_row" },
+                                ) { rowIndex ->
+                                    val isFirst = rowIndex == 0
+                                    val isLast = rowIndex == rows.lastIndex
+                                    val rowIndices = rows[rowIndex]
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp)
+                                            .let { mod ->
+                                                if (isFirst || isLast) {
+                                                    mod.squircleClip(
+                                                        topStart = if (isFirst) 16.dp else 0.dp,
+                                                        topEnd = if (isFirst) 16.dp else 0.dp,
+                                                        bottomEnd = if (isLast) 16.dp else 0.dp,
+                                                        bottomStart = if (isLast) 16.dp else 0.dp,
+                                                    )
                                                 } else {
-                                                    Spacer(modifier = Modifier.weight(1f))
+                                                    mod
                                                 }
+                                            }
+                                            .background(colorScheme.surfaceContainer)
+                                            .padding(horizontal = 6.dp)
+                                            .padding(
+                                                top = if (isFirst) 8.dp else 2.dp,
+                                                bottom = if (isLast) 8.dp else 2.dp,
+                                            ),
+                                    ) {
+                                        for (col in 0 until columns) {
+                                            if (col < rowIndices.size) {
+                                                val iconIndex = rowIndices[col]
+                                                Column(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .clip(IconCellShape)
+                                                        .clickable {
+                                                            selectedIconIndex = iconIndex
+                                                            showWeightDialog = true
+                                                        }
+                                                        .padding(horizontal = 4.dp, vertical = 10.dp),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                ) {
+                                                    Icon(
+                                                        imageVector = regularIcons[iconIndex],
+                                                        contentDescription = iconNames[iconIndex],
+                                                        tint = colorScheme.onBackground,
+                                                        modifier = Modifier.size(if (isPageGlass) 28.dp else 24.dp),
+                                                    )
+                                                    Spacer(modifier = Modifier.height(6.dp))
+                                                    Text(
+                                                        text = iconNames[iconIndex],
+                                                        style = MiuixTheme.textStyles.footnote2,
+                                                        color = colorScheme.onSurfaceVariantActions,
+                                                        textAlign = TextAlign.Center,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                }
+                                            } else {
+                                                Spacer(modifier = Modifier.weight(1f))
                                             }
                                         }
                                     }
                                 }
-                                item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
                             }
-                            VerticalScrollBar(
-                                adapter = scrollBarAdapter,
-                                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                                trackPadding = contentPadding,
-                                topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
-                            )
+                            item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
                         }
+                        VerticalScrollBar(
+                            adapter = scrollBarAdapter,
+                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                            trackPadding = contentPadding,
+                            topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
+                        )
                     }
 
                     val safeIconIndex = selectedIconIndex.coerceIn(0, regularIcons.lastIndex.coerceAtLeast(0))
@@ -453,7 +480,7 @@ fun IconsPage(
                                     .padding(top = 8.dp, bottom = 16.dp),
                                 verticalAlignment = Alignment.Top,
                             ) {
-                                weightVariants.forEach { (label, icons) ->
+                                catalog.weightVariants.forEach { (label, icons) ->
                                     icons.getOrNull(safeIconIndex)?.let { icon ->
                                         Column(
                                             modifier = Modifier.weight(1f),

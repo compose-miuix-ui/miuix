@@ -28,6 +28,7 @@ import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.asBrush
@@ -75,6 +76,9 @@ fun Modifier.squircleBackground(
     bottomStart: Dp,
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
+    if (topStart <= 0.dp && topEnd <= 0.dp && bottomEnd <= 0.dp && bottomStart <= 0.dp) {
+        return if (color.isSpecified && color.alpha > 0f) this.background(color) else this
+    }
     val tiles = rememberSquircleTiles(topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this.background(
             color = color,
@@ -121,6 +125,9 @@ fun Modifier.squircleClip(
     bottomStart: Dp,
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
+    if (topStart <= 0.dp && topEnd <= 0.dp && bottomEnd <= 0.dp && bottomStart <= 0.dp) {
+        return this
+    }
     val tiles = rememberSquircleTiles(topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this.clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
     return this.squircleShaderMask(tiles, fillColor = null, shaderCache = LocalRuntimeShaderCache.current)
@@ -163,6 +170,9 @@ fun Modifier.squircleSurface(
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
     val effectiveFillColor = color.takeIf { it.isSpecified && it.alpha > 0f }
+    if (topStart <= 0.dp && topEnd <= 0.dp && bottomEnd <= 0.dp && bottomStart <= 0.dp) {
+        return if (effectiveFillColor != null) this.background(effectiveFillColor) else this
+    }
     val tiles = rememberSquircleTiles(topStart, topEnd, bottomEnd, bottomStart, extension)
         ?: return this
             .clip(RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart))
@@ -193,6 +203,9 @@ fun Modifier.absoluteSquircleBackground(
     bottomLeft: Dp,
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
+    if (topLeft <= 0.dp && topRight <= 0.dp && bottomRight <= 0.dp && bottomLeft <= 0.dp) {
+        return if (color.isSpecified && color.alpha > 0f) this.background(color) else this
+    }
     val tiles = rememberSquircleTiles(topLeft, topRight, bottomRight, bottomLeft, extension)
         ?: return this.background(
             color = color,
@@ -223,6 +236,9 @@ fun Modifier.absoluteSquircleClip(
     bottomLeft: Dp,
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
+    if (topLeft <= 0.dp && topRight <= 0.dp && bottomRight <= 0.dp && bottomLeft <= 0.dp) {
+        return this
+    }
     val tiles = rememberSquircleTiles(topLeft, topRight, bottomRight, bottomLeft, extension)
         ?: return this.clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))
     return this.squircleShaderMask(tiles, fillColor = null, shaderCache = LocalRuntimeShaderCache.current)
@@ -249,6 +265,9 @@ fun Modifier.absoluteSquircleSurface(
     extension: Float = SquircleDefaults.Extension,
 ): Modifier {
     val effectiveFillColor = color.takeIf { it.isSpecified && it.alpha > 0f }
+    if (topLeft <= 0.dp && topRight <= 0.dp && bottomRight <= 0.dp && bottomLeft <= 0.dp) {
+        return if (effectiveFillColor != null) this.background(effectiveFillColor) else this
+    }
     val tiles = rememberSquircleTiles(topLeft, topRight, bottomRight, bottomLeft, extension)
         ?: return this
             .clip(AbsoluteRoundedCornerShape(topLeft, topRight, bottomRight, bottomLeft))

@@ -59,8 +59,16 @@ fun BoxScope.GlassIconDropdownMenu(
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     collapseOnSelection: Boolean = entries.size <= 1,
 ) {
+    var hasOpened by remember { mutableStateOf(show) }
+    if (show) hasOpened = true
+    if (!hasOpened) return
+    var popupShow by remember { mutableStateOf(false) }
     val density = LocalDensity.current
     var submenu by remember { mutableStateOf(false) }
+    LaunchedEffect(show) {
+        popupShow = show
+        if (!show) submenu = false
+    }
     var submenuPresent by remember { mutableStateOf(false) }
     val submenuPathState = remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val submenuPath = submenuPathState.value
@@ -70,20 +78,17 @@ fun BoxScope.GlassIconDropdownMenu(
     val groups = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val submenuEntry = submenuPath?.let { groups.getOrNull(it.first) }
     val submenuItem = submenuPath?.let { submenuEntry?.items?.getOrNull(it.second) }
-    val submenuShown = show && submenu && !submenuItem?.children.isNullOrEmpty()
+    val submenuShown = popupShow && submenu && !submenuItem?.children.isNullOrEmpty()
     val arrowTurn = CascadingPopupDefaults.arrowRotation(LocalLayoutDirection.current)
     val submenuArrow = animateFloatAsState(
         targetValue = if (submenuShown) arrowTurn else 0f,
         animationSpec = CascadingPopupDefaults.arrowSpring(submenuShown),
     )
     val menuVisibility = animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformBounds(show),
+        targetValue = if (popupShow) 1f else 0f,
+        animationSpec = GlassMotion.transformBounds(popupShow),
         label = "glassCascadeVisibility",
     )
-    LaunchedEffect(show) {
-        if (!show) submenu = false
-    }
 
     val primaryBackdrop = rememberLayerBackdrop()
     val layeredBackdrop = remember(secondaryBackdrop, primaryBackdrop) {
@@ -115,7 +120,7 @@ fun BoxScope.GlassIconDropdownMenu(
         },
     ) {
         GlassTransformPopup(
-            show = show,
+            show = popupShow,
             onDismissRequest = {
                 submenu = false
                 onDismissRequest()

@@ -86,6 +86,8 @@ import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
 
+private val DemoGroups by lazy { ComponentDemo.entries.groupBy { it.group } }
+
 @Composable
 fun MainPage(
     padding: PaddingValues,
@@ -95,7 +97,6 @@ fun MainPage(
     val isWideScreen = LocalIsWideScreen.current
     val navigator = LocalNavigator.current
     val runtimeShaderSupported = isRuntimeShaderSupported()
-    val demoGroups = remember { ComponentDemo.entries.groupBy { it.group } }
     val menuState = rememberMainPageMenuState()
     val backdrop = rememberBlurBackdrop()
     val pageBackdrop = rememberBlurBackdrop()
@@ -141,7 +142,7 @@ fun MainPage(
                     overscrollEffect = null,
                     contentPadding = contentPadding,
                 ) {
-                    demoGroups.forEach { (group, demos) ->
+                    DemoGroups.forEach { (group, demos) ->
                         if (!group.requiresRuntimeShader || runtimeShaderSupported) {
                             if (group != ComponentDemoGroup.Ui) {
                                 item(key = group.title, contentType = "section_title") {
