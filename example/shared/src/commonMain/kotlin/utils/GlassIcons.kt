@@ -84,7 +84,6 @@ import top.yukonga.miuix.kmp.icon.glass.Card1DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Card2Dash2
 import top.yukonga.miuix.kmp.icon.glass.Card2DashselectedPlus
 import top.yukonga.miuix.kmp.icon.glass.Carrier
-import top.yukonga.miuix.kmp.icon.glass.CeditSelection
 import top.yukonga.miuix.kmp.icon.glass.ChargingCase
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
 import top.yukonga.miuix.kmp.icon.glass.ChevronForward
@@ -599,7 +598,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Light.Card2DashselectedPlus,
             MiuixIcons.Glass.Light.CameraOutline,
             MiuixIcons.Glass.Light.Carrier,
-            MiuixIcons.Glass.Light.CeditSelection,
+            MiuixIcons.Glass.Light.CheckSelection,
             MiuixIcons.Glass.Light.ChargingCase,
             MiuixIcons.Glass.Light.ChevronBackward,
             MiuixIcons.Glass.Light.ChevronForward,
@@ -1112,7 +1111,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Normal.Card2DashselectedPlus,
             MiuixIcons.Glass.Normal.CameraOutline,
             MiuixIcons.Glass.Normal.Carrier,
-            MiuixIcons.Glass.Normal.CeditSelection,
+            MiuixIcons.Glass.Normal.CheckSelection,
             MiuixIcons.Glass.Normal.ChargingCase,
             MiuixIcons.Glass.Normal.ChevronBackward,
             MiuixIcons.Glass.Normal.ChevronForward,
@@ -1625,7 +1624,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Regular.Card2DashselectedPlus,
             MiuixIcons.Glass.Regular.CameraOutline,
             MiuixIcons.Glass.Regular.Carrier,
-            MiuixIcons.Glass.Regular.CeditSelection,
+            MiuixIcons.Glass.Regular.CheckSelection,
             MiuixIcons.Glass.Regular.ChargingCase,
             MiuixIcons.Glass.Regular.ChevronBackward,
             MiuixIcons.Glass.Regular.ChevronForward,
@@ -2138,7 +2137,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Medium.Card2DashselectedPlus,
             MiuixIcons.Glass.Medium.CameraOutline,
             MiuixIcons.Glass.Medium.Carrier,
-            MiuixIcons.Glass.Medium.CeditSelection,
+            MiuixIcons.Glass.Medium.CheckSelection,
             MiuixIcons.Glass.Medium.ChargingCase,
             MiuixIcons.Glass.Medium.ChevronBackward,
             MiuixIcons.Glass.Medium.ChevronForward,
@@ -2651,7 +2650,7 @@ internal val HyperOSGlassIcons: Map<String, List<ImageVector>> by lazy {
             MiuixIcons.Glass.Demibold.Card2DashselectedPlus,
             MiuixIcons.Glass.Demibold.CameraOutline,
             MiuixIcons.Glass.Demibold.Carrier,
-            MiuixIcons.Glass.Demibold.CeditSelection,
+            MiuixIcons.Glass.Demibold.CheckSelection,
             MiuixIcons.Glass.Demibold.ChargingCase,
             MiuixIcons.Glass.Demibold.ChevronBackward,
             MiuixIcons.Glass.Demibold.ChevronForward,
