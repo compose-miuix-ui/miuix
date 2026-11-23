@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.api.toOkLab
 import top.yukonga.miuix.kmp.color.api.toOkLch
@@ -1551,14 +1554,14 @@ private class CheckerboardNode(
     }
 
     override fun ContentDrawScope.draw() {
-        val cell = cellSizeDp.toPx().coerceAtLeast(1f)
+        val cell = cellSizeDp.toPx().fastCoerceAtLeast(1f)
         if (cachedWidth != size.width || cachedHeight != size.height || cachedDensity != density || cachedCellPx != cell) {
             cachedWidth = size.width
             cachedHeight = size.height
             cachedDensity = density
             cachedCellPx = cell
             darkPath.reset()
-            val rows = ceil(size.height / cell).toInt().coerceAtLeast(1)
+            val rows = ceil(size.height / cell).toInt().fastCoerceAtLeast(1)
             var y = 0f
             for (row in 0 until rows) {
                 var x = if ((row and 1) == 0) cell else 0f
@@ -1637,16 +1640,16 @@ private fun ColorSlider(
                         dragOffset,
                         sliderWidthPxState,
                         sliderHeightPx,
-                    ).coerceIn(0f, 1f)
+                    ).fastCoerceIn(0f, 1f)
                     onValueChangedState.value(newValue)
-                    hapticState.handleHapticFeedback(newValue, 0f..1f, hapticEffect, hapticFeedback)
+                    hapticState.handleHapticFeedback(newValue, UnitRange, hapticEffect, hapticFeedback)
                 },
                 onDragStarted = { offset ->
                     val x = if (isRtl) sliderWidthPxState - offset.x else offset.x
                     dragOffset = x
                     val newValue = handleSliderInteraction(x, sliderWidthPxState, sliderHeightPx)
                     onValueChangedState.value(newValue)
-                    hapticState.reset(newValue, 0f..1f, currentValueProvider())
+                    hapticState.reset(newValue, UnitRange, currentValueProvider())
                 },
             ),
     ) {
@@ -1675,10 +1678,9 @@ private fun SliderIndicator(
             }
             .offset {
                 val sliderWidthPx = sliderWidthPxProvider()
-                val effectiveWidthPx = (sliderWidthPx - sliderSizePx).coerceAtLeast(0f)
-                val indicatorPositionPx = (valueProvider() * effectiveWidthPx) + (sliderSizePx / 2)
-                val indicatorOffsetXDp = indicatorPositionPx.toDp() - (indicatorSize / 2)
-                IntOffset(indicatorOffsetXDp.roundToPx(), 0)
+                val effectiveWidthPx = (sliderWidthPx - sliderSizePx).fastCoerceAtLeast(0f)
+                val indicatorPositionPx = (valueProvider().fastCoerceIn(0f, 1f) * effectiveWidthPx) + (sliderSizePx / 2)
+                IntOffset((indicatorPositionPx - indicatorSize.toPx() / 2f).fastRoundToInt(), 0)
             }
             .size(indicatorSize)
             .drawWithCache {
@@ -1693,7 +1695,7 @@ private fun SliderIndicator(
 
                 val glowBrush = Brush.radialGradient(
                     colorStops = arrayOf(
-                        ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
+                        ((ringCenterRadius - halfStroke - glowSpread).fastCoerceAtLeast(0f) / gradientRadius) to Color.Transparent,
                         ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
                         ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
                         ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
@@ -1727,10 +1729,13 @@ private fun handleSliderInteraction(
 ): Float {
     val sliderHalfSizePx = sliderSizePx / 2
     val effectiveWidth = totalWidth - sliderSizePx
-    val constrainedX = positionX.coerceIn(sliderHalfSizePx, totalWidth - sliderHalfSizePx)
+    if (effectiveWidth <= 0f) return 0f
+    val constrainedX = positionX.fastCoerceIn(sliderHalfSizePx, totalWidth - sliderHalfSizePx)
     val newPosition = (constrainedX - sliderHalfSizePx) / effectiveWidth
-    return newPosition.coerceIn(0f, 1f)
+    return newPosition.fastCoerceIn(0f, 1f)
 }
+
+private val UnitRange = 0f..1f
 
 enum class ColorSpace {
     HSV,
