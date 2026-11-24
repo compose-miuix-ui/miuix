@@ -104,28 +104,38 @@ fun LazyListScope.dialogSection() {
 
         OverlayDialogDemo(
             show = showOverlayDialog,
-            onDismissRequest = { showOverlayDialog = false },
-            onDismissFinished = { overlayDialogHoldDown = false },
+            onDismissRequest = {
+                showOverlayDialog = false
+                overlayDialogHoldDown = false
+            },
         )
         WindowDialogDemo(
             show = showWindowDialog,
-            onDismissRequest = { showWindowDialog = false },
-            onDismissFinished = { windowDialogHoldDown = false },
+            onDismissRequest = {
+                showWindowDialog = false
+                windowDialogHoldDown = false
+            },
         )
         WideSuperDialogDemo(
             show = showWideSuperDialog,
-            onDismissRequest = { showWideSuperDialog = false },
-            onDismissFinished = { wideSuperDialogHoldDown = false },
+            onDismissRequest = {
+                showWideSuperDialog = false
+                wideSuperDialogHoldDown = false
+            },
         )
         WideWindowDialogDemo(
             show = showWideWindowDialog,
-            onDismissRequest = { showWideWindowDialog = false },
-            onDismissFinished = { wideWindowDialogHoldDown = false },
+            onDismissRequest = {
+                showWideWindowDialog = false
+                wideWindowDialogHoldDown = false
+            },
         )
         CenteredOverlayDialogDemo(
             show = showCenteredDialog,
-            onDismissRequest = { showCenteredDialog = false },
-            onDismissFinished = { centeredDialogHoldDown = false },
+            onDismissRequest = {
+                showCenteredDialog = false
+                centeredDialogHoldDown = false
+            },
         )
     }
 }
@@ -134,14 +144,12 @@ fun LazyListScope.dialogSection() {
 private fun OverlayDialogDemo(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     OverlayDialog(
         show = show,
         title = "Dialog (O)",
         summary = "A dialog component inside MiuixPopupHost.",
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         content = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -167,14 +175,12 @@ private fun OverlayDialogDemo(
 private fun WindowDialogDemo(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     WindowDialog(
         show = show,
         title = "Dialog (W)",
         summary = "A window-level dialog, no MiuixPopupHost required.",
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         content = {
             val dismissState = LocalDismissState.current
             Row(
@@ -201,7 +207,6 @@ private fun WindowDialogDemo(
 private fun CenteredOverlayDialogDemo(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     OverlayDialog(
         show = show,
@@ -209,7 +214,6 @@ private fun CenteredOverlayDialogDemo(
         summary = "largeScreen = true forces the centered presentation on any window size.",
         largeScreen = true,
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         content = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -235,7 +239,6 @@ private fun CenteredOverlayDialogDemo(
 private fun WideSuperDialogDemo(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     val windowSize = LocalWindowInfo.current.containerDpSize
     val isLandscape = windowSize.width > windowSize.height
@@ -246,7 +249,6 @@ private fun WideSuperDialogDemo(
         summary = if (isLandscape) null else "Rotate to landscape to see the effect.",
         maxWidth = if (isLandscape) 560.dp else DialogDefaults.MaxWidth,
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         content = {
             WideDialogContent(isLandscape = isLandscape)
         },
@@ -257,7 +259,6 @@ private fun WideSuperDialogDemo(
 private fun WideWindowDialogDemo(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     val windowSize = LocalWindowInfo.current.containerDpSize
     val isLandscape = windowSize.width > windowSize.height
@@ -268,7 +269,6 @@ private fun WideWindowDialogDemo(
         summary = if (isLandscape) null else "Rotate to landscape to see the effect.",
         maxWidth = if (isLandscape) 560.dp else DialogDefaults.MaxWidth,
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         content = {
             WideDialogContent(isLandscape = isLandscape)
         },

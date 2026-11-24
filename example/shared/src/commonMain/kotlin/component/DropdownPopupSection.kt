@@ -81,8 +81,10 @@ fun LazyListScope.dropdownPopupSection() {
                     OverlayDropdownPopup(
                         entry = overlayEntry,
                         show = showOverlay,
-                        onDismiss = { showOverlay = false },
-                        onDismissFinished = { holdOverlay = false },
+                        onDismiss = {
+                            showOverlay = false
+                            holdOverlay = false
+                        },
                         maxHeight = 300.dp,
                         dropdownColors = dropdownColors,
                         renderInRootScaffold = true,
@@ -105,8 +107,10 @@ fun LazyListScope.dropdownPopupSection() {
                     WindowDropdownPopup(
                         entry = windowEntry,
                         show = showWindow,
-                        onDismiss = { showWindow = false },
-                        onDismissFinished = { holdWindow = false },
+                        onDismiss = {
+                            showWindow = false
+                            holdWindow = false
+                        },
                         maxHeight = 300.dp,
                         dropdownColors = dropdownColors,
                         collapseOnSelection = true,
@@ -184,8 +188,10 @@ fun LazyListScope.dropdownPopupSection() {
                         title = "Sort by",
                         dialogButtonString = "Done",
                         show = showOverlay,
-                        onDismiss = { showOverlay = false },
-                        onDismissFinished = { holdOverlay = false },
+                        onDismiss = {
+                            showOverlay = false
+                            holdOverlay = false
+                        },
                         dropdownColors = dropdownColors,
                         renderInRootScaffold = true,
                         collapseOnSelection = false,
@@ -209,8 +215,10 @@ fun LazyListScope.dropdownPopupSection() {
                         title = "Sort and order",
                         dialogButtonString = "Done",
                         show = showWindow,
-                        onDismiss = { showWindow = false },
-                        onDismissFinished = { holdWindow = false },
+                        onDismiss = {
+                            showWindow = false
+                            holdWindow = false
+                        },
                         dropdownColors = dropdownColors,
                         collapseOnSelection = false,
                     )

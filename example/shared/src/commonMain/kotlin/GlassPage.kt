@@ -570,13 +570,10 @@ fun GlassPage(padding: PaddingValues) {
                                         onClick = { alignedPopupIndex = index },
                                         style = style,
                                         material = material,
-                                        stroke = stroke,
-                                        shadow = null,
                                         surfaceAlpha = alpha,
                                         modifier = Modifier.glassPopupAnchor(
                                             anchor = alignedAnchors[index],
                                             cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
-                                            floating = true,
                                         ),
                                     ) {
                                         Icon(
