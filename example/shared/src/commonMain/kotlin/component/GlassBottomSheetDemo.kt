@@ -51,7 +51,7 @@ internal fun GlassBottomSheetDemo(
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 BasicComponent(
@@ -107,7 +107,7 @@ internal fun GlassHalfBottomSheetDemo(
             modifier = Modifier
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 repeat(5) { index ->
