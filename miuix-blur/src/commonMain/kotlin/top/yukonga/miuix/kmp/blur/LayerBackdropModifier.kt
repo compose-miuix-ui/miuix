@@ -12,7 +12,10 @@ import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
+import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
 import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
@@ -57,6 +60,7 @@ private class LayerBackdropNode(
     CompositionLocalConsumerModifierNode {
 
     private var stopObservingResets: (() -> Unit)? = null
+    private var resumeJob: Job? = null
     private var coordinates: LayoutCoordinates? = null
 
     fun updateBackdrop(backdrop: LayerBackdrop) {
@@ -72,8 +76,12 @@ private class LayerBackdropNode(
 
     override fun onAttach() {
         val ownerLifecycle = graphicsResourceLifecycle() ?: return
-        stopObservingResets = observeGraphicsResourceResets(ownerLifecycle) {
+        stopObservingResets = observeGraphicsResourceResets(ownerLifecycle) { generation ->
+            resumeJob?.cancel()
             invalidateDraw()
+            resumeJob = coroutineScope.launch {
+                if (awaitGraphicsResourceRefresh(ownerLifecycle, generation) != null) invalidateDraw()
+            }
         }
     }
 
@@ -90,6 +98,8 @@ private class LayerBackdropNode(
     }
 
     override fun onDetach() {
+        resumeJob?.cancel()
+        resumeJob = null
         stopObservingResets?.invoke()
         stopObservingResets = null
         coordinates = null

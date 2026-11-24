@@ -17,6 +17,7 @@ import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.obtainBackdropRuntimeShader
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
 /** Scope for chaining effects onto a backdrop layer via [renderEffect]. */
@@ -234,7 +235,7 @@ internal abstract class BackdropEffectScopeImpl :
     internal var cachedNoiseChainCoeff: Float = Float.NaN
     internal var cachedNoiseChainResult: RenderEffect? = null
 
-    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainRuntimeShader(key, string)
+    override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = runtimeShaderCache.obtainBackdropRuntimeShader(key, string)
 
     fun update(scope: DrawScope): Boolean {
         val newDensity = scope.density

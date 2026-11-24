@@ -43,7 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -256,15 +255,6 @@ fun GlassNavigationBar(
     if (items.isEmpty()) return
     val index = selectedIndex.coerceIn(0, items.lastIndex)
     val iconGeneration = rememberGraphicsResourceGeneration()
-    var refreshIcons by remember(iconGeneration) { mutableStateOf(false) }
-    if (iconGeneration != null) {
-        LaunchedEffect(iconGeneration) {
-            // HWUI may discard freshly recorded resources during the first resume frames.
-            withFrameNanos { }
-            withFrameNanos { }
-            refreshIcons = true
-        }
-    }
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val labelSize = with(density) {
@@ -619,7 +609,7 @@ fun GlassNavigationBar(
                                 BadgedBox(badge = { item.badge?.invoke() }) {
                                     val painter = rememberVectorPainter(item.icon)
                                     // Recreate the icon's draw cache and its tint layer after resume.
-                                    key(iconGeneration, refreshIcons) {
+                                    key(iconGeneration) {
                                         Icon(
                                             painter = painter,
                                             tint = tintProducer,

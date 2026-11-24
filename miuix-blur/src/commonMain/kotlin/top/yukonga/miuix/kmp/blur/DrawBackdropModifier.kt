@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -20,6 +19,7 @@ import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
@@ -65,10 +65,10 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveSharpThreshold
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
+import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
 import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
-import top.yukonga.miuix.kmp.material.internal.refreshGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -78,6 +78,9 @@ import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositin
 private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { it() }
 private val EmptyEffects: BackdropEffectScope.() -> Unit = {}
 private val DefaultShapeBlock: () -> Shape = { androidx.compose.ui.graphics.RectangleShape }
+
+// Match the squircle mask's offscreen dimension limit.
+private const val MAX_OFFSCREEN_PX = 2048f
 
 /** Float tolerance for "a box step lands exactly on the level". */
 private const val LEVEL_EPS = 1e-3f
@@ -663,7 +666,9 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || requiresOffscreenCompositing) {
+        val needsFullLayer = contentBlendMode != BlendMode.SrcOver ||
+            (requiresOffscreenCompositing && maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX)
+        compositingStrategy = if (needsFullLayer) {
             CompositingStrategy.Offscreen
         } else {
             CompositingStrategy.Auto
@@ -826,6 +831,8 @@ private class DrawBackdropNode(
     }
 
     private val contentPaint = Paint()
+    private val tilePaint = Paint()
+    private var tiledSurfaceLayer: GraphicsLayer? = null
 
     // Reused saveLayer bounds for the non-SrcOver content path (DstIn / foreground blur): Rect is a
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
@@ -901,13 +908,15 @@ private class DrawBackdropNode(
             // Attach skipped construction for lack of a size; re-observe with real geometry.
             if (effectsSized) updateEffects() else observeEffects()
         }
-        onDrawBehind?.invoke(this)
+        if (requiresOffscreenCompositing && contentBlendMode == BlendMode.SrcOver &&
+            maxOf(size.width, size.height) > MAX_OFFSCREEN_PX
+        ) {
+            drawTiledSurface()
+            return
+        }
+        releaseTiledSurfaceLayer()
 
-        drawBlurredBackdrop()
-        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f) primary.cascadeLayers.firstOrNull() else null
-        with(midSharpOverlay) { draw(shared2x, primary.padLeft, primary.padTop) }
-        with(sharpOverlay) { draw() }
-        onDrawSurface?.invoke(this)
+        drawSurface()
         if (contentBlendMode == BlendMode.SrcOver) {
             drawContent()
         } else {
@@ -921,6 +930,51 @@ private class DrawBackdropNode(
         }
 
         onDrawFront?.invoke(this)
+    }
+
+    private fun DrawScope.drawSurface() {
+        onDrawBehind?.invoke(this)
+        drawBlurredBackdrop()
+        val shared2x = if (midSharpOverlay.active && primary.downscaleFactor > 2.001f) primary.cascadeLayers.firstOrNull() else null
+        with(midSharpOverlay) { draw(shared2x, primary.padLeft, primary.padTop) }
+        with(sharpOverlay) { draw() }
+        onDrawSurface?.invoke(this)
+    }
+
+    private fun ContentDrawScope.drawTiledSurface() {
+        // Record the surface and children once. Only the tiles containing the destination blend
+        // need offscreen storage, and each tile uses the full surface's shader coordinates.
+        val surfaceLayer = tiledSurfaceLayer ?: graphicsContext.createGraphicsLayer().also { tiledSurfaceLayer = it }
+        surfaceLayer.record {
+            drawSurface()
+            this@drawTiledSurface.drawContent()
+        }
+
+        val canvas = drawContext.canvas
+        var top = 0f
+        while (top < size.height) {
+            val bottom = minOf(top + MAX_OFFSCREEN_PX, size.height)
+            var left = 0f
+            while (left < size.width) {
+                val right = minOf(left + MAX_OFFSCREEN_PX, size.width)
+                clipRect(left, top, right, bottom) {
+                    canvas.saveLayer(Rect(left, top, right, bottom), tilePaint)
+                    try {
+                        drawLayer(surfaceLayer)
+                        onDrawFront?.invoke(this)
+                    } finally {
+                        canvas.restore()
+                    }
+                }
+                left = right
+            }
+            top = bottom
+        }
+    }
+
+    private fun releaseTiledSurfaceLayer() {
+        tiledSurfaceLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        tiledSurfaceLayer = null
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
@@ -981,13 +1035,7 @@ private class DrawBackdropNode(
             resumeJob?.cancel()
             recreateGraphicsResources()
             resumeJob = coroutineScope.launch {
-                // HWUI can discard resources after ON_RESUME; refresh shaders and layers again.
-                withFrameNanos { }
-                withFrameNanos { }
-                if (ownerLifecycle.currentState == Lifecycle.State.RESUMED) {
-                    refreshGraphicsResourceGeneration(generation)
-                    recreateGraphicsResources()
-                }
+                if (awaitGraphicsResourceRefresh(ownerLifecycle, generation) != null) recreateGraphicsResources()
             }
         }
     }
@@ -1402,6 +1450,7 @@ private class DrawBackdropNode(
     }
 
     fun releaseGraphicsLayers() {
+        releaseTiledSurfaceLayer()
         primary.release()
         midSharpOverlay.release()
         sharpOverlay.release()

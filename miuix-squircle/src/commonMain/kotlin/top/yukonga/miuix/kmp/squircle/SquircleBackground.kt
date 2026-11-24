@@ -7,10 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -265,22 +262,10 @@ private fun Modifier.squircleShaderMask(
 ): Modifier {
     if (!graphicsResourcesResetOnResume) return cachedSquircleShaderMask(brush, fillColor)
 
-    val resourceGeneration = brush.resourceGeneration
-    val rebuildLayer = remember(resourceGeneration) { mutableStateOf(false) }
-    LaunchedEffect(resourceGeneration) {
-        if (resourceGeneration != null) {
-            // Match blur's delayed rebuild: HWUI can discard resources after the first resume draw.
-            withFrameNanos { }
-            withFrameNanos { }
-            rebuildLayer.value = true
-        }
-    }
-
     return this
         .graphicsLayer()
         .drawWithCache {
-            // Invalidating this cache releases its managed layers, including the offscreen target.
-            rebuildLayer.value
+            // A new brush on either resume pass invalidates the cache and releases its layers.
             val fastPath = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
             val layerPaint = if (fastPath) null else Paint()
             val contentLayer = obtainGraphicsLayer().apply {
@@ -424,14 +409,13 @@ private fun rememberSquircleBrush(
         }
     }
     return remember(color, tiles, resourceGeneration) {
-        SquircleShaderBrush(color, tiles, resourceGeneration)
+        SquircleShaderBrush(color, tiles)
     }
 }
 
 private class SquircleShaderBrush(
     private val color: Color,
     private val cornerTilesPx: FloatArray,
-    val resourceGeneration: Any?,
 ) : ShaderBrush() {
     private val runtimeShader = RuntimeShader(SQUIRCLE_SHADER)
     private val cornerSdfShader = if (graphicsResourcesResetOnResume) makeLinearShader(bakedSdfImage) else bakedSdfShader

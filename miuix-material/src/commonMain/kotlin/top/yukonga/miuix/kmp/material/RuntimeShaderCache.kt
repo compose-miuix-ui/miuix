@@ -29,17 +29,27 @@ interface RuntimeShaderCache {
  * All backdrop effect scopes within the same composition share this cache,
  * avoiding redundant shader compilation while allowing the cache to be
  * garbage-collected when the composition is disposed.
+ * After a graphics resource reset, backdrop effects use a Miuix-managed replacement
+ * for each custom cache previously used by those effects.
  */
 val LocalRuntimeShaderCache = staticCompositionLocalOf<RuntimeShaderCache> {
     DefaultRuntimeShaderCache()
 }
+
+/** Internal implementation shared by Miuix backdrop effects. */
+fun RuntimeShaderCache.obtainBackdropRuntimeShader(key: String, source: String): RuntimeShader {
+    val cache = if (this is DefaultRuntimeShaderCache) this else backdropCacheFor(this)
+    return cache.obtainRuntimeShader(key, source)
+}
+
+internal expect fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache
 
 @OptIn(InternalCoroutinesApi::class)
 class DefaultRuntimeShaderCache : RuntimeShaderCache {
 
     private val lock = SynchronizedObject()
     private val runtimeShaders = mutableMapOf<String, RuntimeShader>()
-    private var resetGeneration: Any? = null
+    private var resetGeneration = 0L
 
     override fun obtainRuntimeShader(key: String, string: String): RuntimeShader = synchronized(lock) {
         // The registry keeps advancing while the host lives, including gaps with no nodes.
@@ -47,8 +57,8 @@ class DefaultRuntimeShaderCache : RuntimeShaderCache {
         runtimeShaders.getOrPut(key) { RuntimeShader(string) }
     }
 
-    private fun invalidate(generation: Any?) {
-        if (resetGeneration !== generation) {
+    private fun invalidate(generation: Long) {
+        if (resetGeneration != generation) {
             runtimeShaders.clear()
             resetGeneration = generation
         }

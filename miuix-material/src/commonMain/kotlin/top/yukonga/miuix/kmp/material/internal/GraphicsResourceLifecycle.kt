@@ -5,15 +5,17 @@ package top.yukonga.miuix.kmp.material.internal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 
 internal val graphicsResourceResetRegistry = GraphicsResourceResetRegistry()
 
-internal val graphicsResourceGeneration: Any?
+internal val graphicsResourceGeneration: Long
     get() = graphicsResourceResetRegistry.generation
 
 /** Internal device check shared by Miuix graphics components. */
@@ -23,8 +25,18 @@ expect val graphicsResourcesResetOnResume: Boolean
  * Internal implementation shared by Miuix graphics nodes; not a supported public API.
  * Advances the shared cache once for the delayed HWUI refresh of the current resume.
  */
-fun refreshGraphicsResourceGeneration(generation: Any) {
-    if (graphicsResourcesResetOnResume) graphicsResourceResetRegistry.refresh(generation)
+fun refreshGraphicsResourceGeneration(generation: Any): Any? = if (graphicsResourcesResetOnResume) {
+    graphicsResourceResetRegistry.refresh(generation)
+} else {
+    null
+}
+
+/** Waits for the delayed HWUI refresh while the host is still resumed. */
+suspend fun awaitGraphicsResourceRefresh(lifecycle: Lifecycle, generation: Any): Any? {
+    // HWUI can discard resources after the first resumed frame.
+    withFrameNanos { }
+    withFrameNanos { }
+    return if (lifecycle.currentState == Lifecycle.State.RESUMED) refreshGraphicsResourceGeneration(generation) else null
 }
 
 /** Host lifecycle used for graphics resources; Android always resolves the Activity lifecycle. */
@@ -38,7 +50,8 @@ expect fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lif
  * Internal implementation shared by Miuix graphics components; not a supported public API.
  *
  * Observes Android graphics resource resets with one observer per [lifecycle]. After an observed
- * pause, the next resume synchronously supplies the same identity token to every subscriber.
+ * pause, the next resume synchronously supplies the same identity token to every subscriber,
+ * including subscribers that join before the delayed refresh completes.
  * Initial lifecycle catch-up does not reset resources. Other platforms do not subscribe.
  *
  * Call this function and its returned, idempotent cleanup function on the UI thread.
@@ -65,16 +78,28 @@ fun rememberGraphicsResourceGeneration(): Any? {
         val stopObserving = observeGraphicsResourceResets(lifecycle) { generation.value = it }
         onDispose { stopObserving() }
     }
-    return generation.value
+    val resume = generation.value
+    val delayed = remember(lifecycle, resume) { mutableStateOf<Any?>(null) }
+    LaunchedEffect(lifecycle, resume) {
+        if (resume != null) {
+            delayed.value = awaitGraphicsResourceRefresh(lifecycle, resume)
+        }
+    }
+    return delayed.value ?: resume
 }
 
 internal class GraphicsResourceResetRegistry {
     private val entries = mutableMapOf<Lifecycle, Entry>()
-    var generation: Any? = null
+    var generation: Long = 0
         private set
 
-    fun refresh(resumeGeneration: Any) {
-        if (generation === resumeGeneration) generation = Any()
+    fun refresh(resumeGeneration: Any): Any? {
+        val resume = resumeGeneration as? Resume ?: return null
+        if (!resume.active) return null
+        return resume.delayedGeneration ?: Any().also {
+            resume.delayedGeneration = it
+            generation++
+        }
     }
 
     fun observe(lifecycle: Lifecycle, onReset: (Any) -> Unit): () -> Unit {
@@ -87,6 +112,8 @@ internal class GraphicsResourceResetRegistry {
             // Register the entry before addObserver, which synchronously catches up its state.
             entry.observing = true
             lifecycle.addObserver(entry.observer)
+        } else {
+            entry.pendingResume?.let(onReset)
         }
 
         return {
@@ -111,24 +138,32 @@ internal class GraphicsResourceResetRegistry {
         val listeners = mutableListOf<Listener>()
         var observing = false
         private var paused = false
+        private var resume: Resume? = null
+        val pendingResume: Any?
+            get() = resume?.takeIf { it.active && it.delayedGeneration == null }
 
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> paused = true
+                Lifecycle.Event.ON_PAUSE -> {
+                    paused = true
+                    resume?.active = false
+                }
 
                 Lifecycle.Event.ON_RESUME -> {
                     if (paused) {
                         paused = false
-                        val generation = Any()
-                        this@GraphicsResourceResetRegistry.generation = generation
+                        val token = Resume()
+                        resume = token
+                        generation++
                         // A callback can add or remove subscriptions during dispatch.
                         listeners.toList().forEach { listener ->
-                            if (listener.active) listener.onReset(generation)
+                            if (listener.active) listener.onReset(token)
                         }
                     }
                 }
 
                 Lifecycle.Event.ON_DESTROY -> {
+                    resume?.active = false
                     listeners.forEach { it.active = false }
                     listeners.clear()
                     removeEntry(this)
@@ -137,6 +172,11 @@ internal class GraphicsResourceResetRegistry {
                 else -> Unit
             }
         }
+    }
+
+    private class Resume {
+        var active = true
+        var delayedGeneration: Any? = null
     }
 
     private class Listener(val onReset: (Any) -> Unit) {
