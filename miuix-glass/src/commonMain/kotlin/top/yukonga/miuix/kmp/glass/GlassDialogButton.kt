@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -109,7 +110,15 @@ object GlassDialogButtonDefaults {
     fun buttonColors(role: GlassDialogButtonRole = GlassDialogButtonRole.Normal): ButtonColors {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f
-        val tonal = scheme.onBackground.copy(alpha = if (isDark) 36f / 255f else 15f / 255f)
+        val tonal = if (MiuixTheme.isDynamicColor) {
+            if (isDark) {
+                scheme.secondaryContainer.copy(alpha = 0.50f)
+            } else {
+                lerp(scheme.secondaryContainer, scheme.onSecondaryContainer, 0.14f).copy(alpha = 0.72f)
+            }
+        } else {
+            scheme.onBackground.copy(alpha = if (isDark) 36f / 255f else 15f / 255f)
+        }
         val color = if (role == GlassDialogButtonRole.Primary) scheme.primary else tonal
         val disabledColor = if (role == GlassDialogButtonRole.Primary) scheme.primary.copy(alpha = 0.3f) else tonal
         val contentColor = when (role) {

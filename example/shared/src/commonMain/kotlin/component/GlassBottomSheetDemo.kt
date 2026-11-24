@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +37,7 @@ import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
+import top.yukonga.miuix.kmp.glass.GlassTextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Close
 import top.yukonga.miuix.kmp.icon.glass.Ok
@@ -194,6 +196,7 @@ internal fun GlassHalfBottomSheetDemo(
     stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
     onDismissFinished: (() -> Unit)? = null,
 ) {
+    val textFieldState = rememberTextFieldState()
     GlassBottomSheet(
         show = show,
         modifier = modifier,
@@ -229,6 +232,12 @@ internal fun GlassHalfBottomSheetDemo(
                 .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            GlassTextField(
+                state = textFieldState,
+                modifier = Modifier.fillMaxWidth(),
+                label = "Text field",
+                useLabelAsPlaceholder = true,
+            )
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 repeat(5) { index ->
                     BasicComponent(

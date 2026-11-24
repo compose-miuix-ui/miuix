@@ -258,7 +258,12 @@ object GlassTextFieldDefaults {
     private fun defaultBackgroundColor(): Color {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f
-        return scheme.onBackground.copy(alpha = if (isDark) 36f / 255f else 15f / 255f)
+        val alpha = when {
+            isDark -> 26f / 255f
+            MiuixTheme.isDynamicColor -> 66f / 255f
+            else -> 24f / 255f
+        }
+        return scheme.onBackground.copy(alpha = alpha)
     }
 
     @Composable
