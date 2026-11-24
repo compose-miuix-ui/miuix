@@ -120,7 +120,7 @@ Scaffold(
 | TitleBlurRadius | Dp | 标题过渡模糊半径 | 8.dp |
 | ButtonSize | Dp | 按钮直径 | 44.dp |
 | PressedContentAlpha | Float | 按下时的内容透明度 | 0.6f |
-| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 36.dp |
+| BandOverhang | Dp | 背景带向顶栏下方延伸的距离 | 32.dp |
 
 #### 方法
 
