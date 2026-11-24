@@ -55,11 +55,11 @@ SPLtop/yukonga/miuix/kmp/glass/GlassSegmentedTabRowDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassShadowElement;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassShadowNode;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTabRowKt**->**(**)**
-SPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarContext;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarMeasurements;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTransformPopupKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/NavigationDragTargetKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/TopAppBarBandBrush;->**(**)**
+SPLtop/yukonga/miuix/kmp/glass/internal/GlassHeaderContext;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassShaderKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassUniformsKt**->**(**)**

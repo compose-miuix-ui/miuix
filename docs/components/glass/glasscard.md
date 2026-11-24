@@ -31,8 +31,11 @@ GlassBottomSheet(
     onDismissRequest = { showSheet = false },
     backdrop = backdrop,
     title = "Wallpaper",
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+) { innerPadding ->
+    Column(
+        modifier = Modifier.padding(innerPadding),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
             insideMargin = PaddingValues(horizontal = 16.dp, vertical = 18.dp),

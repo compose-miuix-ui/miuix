@@ -446,8 +446,8 @@ private fun AboutContent(
             showTextureSet = false
         },
         insideMargin = DpSize(0.dp, 0.dp),
-    ) {
-        LazyColumn {
+    ) { innerPadding ->
+        LazyColumn(contentPadding = innerPadding) {
             item {
                 val effectVariantOptions = listOf("OS2", "OS3")
                 GlassDropdownPreference(

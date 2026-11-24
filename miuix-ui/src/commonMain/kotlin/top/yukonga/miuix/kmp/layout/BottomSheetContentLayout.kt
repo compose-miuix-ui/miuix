@@ -3,25 +3,25 @@
 
 package top.yukonga.miuix.kmp.layout
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -43,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -58,6 +60,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -69,6 +72,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -89,6 +93,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.squircle.squircleSurface
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
@@ -98,6 +103,89 @@ internal interface BottomSheetNestedScrollConnection : NestedScrollConnection {
 }
 
 internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<BottomSheetNestedScrollConnection?> { null }
+
+/**
+ * Shared overlay-hosted bottom sheet layout supporting an overlaid header over scrollable content.
+ */
+@Suppress("ktlint:compose:modifier-not-used-at-root")
+@Composable
+fun BottomSheetOverlayLayout(
+    show: Boolean,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    startAction: @Composable (() -> Unit)? = null,
+    endAction: @Composable (() -> Unit)? = null,
+    headerBottomContent: @Composable () -> Unit = {},
+    backgroundColor: Color = BottomSheetDefaults.backgroundColor(),
+    enableWindowDim: Boolean = true,
+    cornerRadius: Dp = BottomSheetDefaults.cornerRadius,
+    sheetMaxWidth: Dp = BottomSheetDefaults.maxWidth,
+    onDismissRequest: (() -> Unit)? = null,
+    onDismissFinished: (() -> Unit)? = null,
+    outsideMargin: DpSize = BottomSheetDefaults.outsideMargin,
+    insideMargin: DpSize = BottomSheetDefaults.insideMargin,
+    defaultWindowInsetsPadding: Boolean = true,
+    dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
+    allowDismiss: Boolean = true,
+    enableNestedScroll: Boolean = true,
+    renderInRootScaffold: Boolean = true,
+    dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    motion: SheetMotion = SheetMotion.Default,
+    overlayHeader: Boolean = false,
+    surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
+    foregroundSurface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
+    headerBackground: (@Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit)? = null,
+    bodyModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    backgroundModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    scrollOffset: (() -> Float)? = null,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    BottomSheetContentLayout(
+        show = show,
+        backgroundColor = backgroundColor,
+        cornerRadius = cornerRadius,
+        sheetMaxWidth = sheetMaxWidth,
+        outsideMargin = outsideMargin,
+        insideMargin = insideMargin,
+        dragHandleColor = dragHandleColor,
+        popupHost = { visible, hostContent ->
+            val visibleState = remember { mutableStateOf(false) }
+            SideEffect { visibleState.value = visible }
+            DialogLayout(
+                visible = visibleState,
+                enableWindowDim = false,
+                enterTransition = EnterTransition.None,
+                exitTransition = ExitTransition.None,
+                enableAutoLargeScreen = false,
+                renderInRootScaffold = renderInRootScaffold,
+            ) {
+                hostContent()
+            }
+        },
+        modifier = modifier,
+        title = title,
+        startAction = startAction,
+        endAction = endAction,
+        headerBottomContent = headerBottomContent,
+        enableWindowDim = enableWindowDim,
+        onDismissRequest = onDismissRequest,
+        onDismissFinished = onDismissFinished,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        allowDismiss = allowDismiss,
+        enableNestedScroll = enableNestedScroll,
+        dimColor = dimColor,
+        motion = motion,
+        surface = surface,
+        overlayHeader = overlayHeader,
+        foregroundSurface = foregroundSurface,
+        headerBackground = headerBackground,
+        backgroundModifier = backgroundModifier,
+        bodyModifier = bodyModifier,
+        scrollOffset = scrollOffset,
+        paddedContent = content,
+        content = {},
+    )
+}
 
 /**
  * Internal shared layout logic for [OverlayBottomSheet] and [WindowBottomSheet].
@@ -115,6 +203,7 @@ internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<B
  * @param title Optional title to display at the top of the bottom sheet.
  * @param startAction Optional [Composable] to display on the start side of the title.
  * @param endAction Optional [Composable] to display on the end side of the title.
+ * @param headerBottomContent Optional content pinned below the title inside the header.
  * @param enableWindowDim Whether to dim the window behind the bottom sheet.
  * @param onDismissRequest The callback when the user tries to dismiss the bottom sheet.
  * @param onDismissFinished Invoked when the hide animation completes; not invoked if the hide
@@ -126,6 +215,13 @@ internal val LocalBottomSheetNestedScrollConnection = staticCompositionLocalOf<B
  * @param dimColor The unanimated dimming color.
  * @param motion The enter, exit and settle motion.
  * @param surface Optional replacement for the default surface, including the overscroll fill.
+ * @param overlayHeader Whether the header overlays [paddedContent] instead of stacking above it.
+ * @param foregroundSurface Optional foreground modifier drawn above the header and body (e.g. edge stroke).
+ * @param headerBackground Optional background drawn behind the overlaid header.
+ * @param backgroundModifier Optional modifier applied to the sheet background surface.
+ * @param scrollOffset Optional external scroll offset in pixels; `null` tracks nested scroll automatically.
+ * @param bodyModifier Optional modifier applied to the scrollable body container.
+ * @param paddedContent Optional content receiving the measured top header padding as [PaddingValues].
  * @param content The content of the bottom sheet.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -143,6 +239,7 @@ internal fun BottomSheetContentLayout(
     title: String? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
+    headerBottomContent: @Composable () -> Unit = {},
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
@@ -153,6 +250,13 @@ internal fun BottomSheetContentLayout(
     dimColor: Color = MiuixTheme.colorScheme.windowDimming,
     motion: SheetMotion = SheetMotion.Default,
     surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
+    overlayHeader: Boolean = false,
+    foregroundSurface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
+    headerBackground: (@Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit)? = null,
+    backgroundModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    scrollOffset: (() -> Float)? = null,
+    bodyModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    paddedContent: (@Composable (PaddingValues) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember { Animatable(0f, visibilityThreshold = SHEET_PROGRESS_THRESHOLD) }
@@ -390,6 +494,19 @@ internal fun BottomSheetContentLayout(
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
                 surface = surface?.let { sheetSurface -> { sheetSurface(surfaceScope) } },
+                overlayHeader = overlayHeader,
+                foregroundSurface = foregroundSurface?.let { sheetForeground -> { sheetForeground(surfaceScope) } },
+                headerBackground = headerBackground,
+                backgroundModifier = backgroundModifier,
+                bodyModifier = bodyModifier,
+                paddedContent = paddedContent?.let { body ->
+                    { innerPadding ->
+                        CompositionLocalProvider(LocalDismissState provides requestDismiss) {
+                            body(innerPadding)
+                        }
+                    }
+                },
+                headerBottomContent = headerBottomContent,
                 startAction = startAction?.let { action ->
                     { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
                 },
@@ -401,6 +518,7 @@ internal fun BottomSheetContentLayout(
                         content()
                     }
                 },
+                scrollOffset = scrollOffset,
             )
         }
     }
@@ -426,11 +544,19 @@ internal fun BottomSheetContent(
     modifier: Modifier = Modifier,
     motion: SheetMotion = SheetMotion.Default,
     slideOffsetPx: () -> Float = { 0f },
+    headerBottomContent: @Composable () -> Unit = {},
     topInset: Dp? = null,
     enableNestedScroll: Boolean = true,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
     surface: (@Composable () -> Modifier)? = null,
+    scrollOffset: (() -> Float)? = null,
+    overlayHeader: Boolean = false,
+    foregroundSurface: (@Composable () -> Modifier)? = null,
+    headerBackground: (@Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit)? = null,
+    backgroundModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    bodyModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    paddedContent: (@Composable (PaddingValues) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -535,6 +661,8 @@ internal fun BottomSheetContent(
 
     val isNestedScrollGestureStarted = remember { mutableStateOf(false) }
     val canDragSheetFromNestedScroll = remember { mutableStateOf(false) }
+    val contentScrollOffset = remember { mutableFloatStateOf(0f) }
+    val scrollOffsetProvider: () -> Float = remember { { contentScrollOffset.floatValue } }
 
     fun resetNestedScrollGesture() {
         isNestedScrollGestureStarted.value = false
@@ -542,7 +670,7 @@ internal fun BottomSheetContent(
     }
 
     // Nested scroll logic
-    val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density) {
+    val nestedScrollConnection = remember(enableNestedScroll, allowDismiss, density, overlayHeader) {
         object : BottomSheetNestedScrollConnection {
             override fun canConsumePostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Boolean = enableNestedScroll && allowDismiss && source == NestedScrollSource.UserInput && available.y > 0f &&
                 if (isNestedScrollGestureStarted.value) canDragSheetFromNestedScroll.value else abs(consumed.y) < 0.5f
@@ -571,6 +699,9 @@ internal fun BottomSheetContent(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (overlayHeader && scrollOffset == null && consumed.y != 0f && (source == NestedScrollSource.UserInput || source == NestedScrollSource.SideEffect)) {
+                    contentScrollOffset.floatValue = (contentScrollOffset.floatValue - consumed.y).coerceAtLeast(0f)
+                }
                 if (!enableNestedScroll || source != NestedScrollSource.UserInput) return Offset.Zero
 
                 val delta = available.y
@@ -653,16 +784,34 @@ internal fun BottomSheetContent(
         nestedScrollConnection = nestedScrollConnection,
         coroutineScope = coroutineScope,
         dragSnapChannel = dragSnapChannel,
+        headerBottomContent = headerBottomContent,
         onSettle = performSettle,
         onUpdateAlpha = updateDimAlpha,
         modifier = modifier,
         surface = surface,
-        content = {
+        overlayHeader = overlayHeader,
+        foregroundSurface = foregroundSurface,
+        headerBackground = headerBackground,
+        backgroundModifier = backgroundModifier,
+        bodyModifier = bodyModifier,
+        scrollOffset = scrollOffset ?: scrollOffsetProvider,
+        content = { innerPadding ->
             CompositionLocalProvider(LocalBottomSheetNestedScrollConnection provides nestedScrollConnection) {
-                content()
+                if (paddedContent != null) {
+                    paddedContent(innerPadding)
+                } else {
+                    content()
+                }
             }
         },
     )
+}
+
+private enum class BottomSheetOverlaySlot {
+    Background,
+    Body,
+    HeaderBackground,
+    Header,
 }
 
 @Suppress("ktlint:compose:modifier-not-used-at-root")
@@ -691,8 +840,15 @@ private fun BottomSheetColumn(
     onSettle: (velocity: Float) -> Unit,
     onUpdateAlpha: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    headerBottomContent: @Composable () -> Unit = {},
     surface: (@Composable () -> Modifier)? = null,
-    content: @Composable () -> Unit,
+    overlayHeader: Boolean = false,
+    foregroundSurface: (@Composable () -> Modifier)? = null,
+    headerBackground: (@Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit)? = null,
+    backgroundModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    bodyModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    scrollOffset: () -> Float = { 0f },
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
@@ -701,63 +857,305 @@ private fun BottomSheetColumn(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        Column(
-            modifier = modifier
-                .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
-                .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
-                .widthIn(max = sheetMaxWidth)
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .onSizeChanged { size ->
-                    // Only capture the natural sheet height while the IME is closed and not overscrolling;
-                    // otherwise imePadding or overscroll extension would inflate sheetHeightPx.
-                    if (imeInsets.getBottom(density) == 0 && dragOffsetY.value >= 0f && slideOffsetPx() >= 0f) {
-                        sheetHeightPx.intValue = size.height
-                    }
+        val sheetBaseModifier = modifier
+            .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
+            .then(if (enableNestedScroll || overlayHeader) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
+            .widthIn(max = sheetMaxWidth)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .onSizeChanged { size ->
+                // Only capture the natural sheet height while the IME is closed and not overscrolling;
+                // otherwise imePadding or overscroll extension would inflate sheetHeightPx.
+                if (imeInsets.getBottom(density) == 0 && dragOffsetY.value >= 0f && slideOffsetPx() >= 0f) {
+                    sheetHeightPx.intValue = size.height
                 }
-                .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
-                .padding(horizontal = outsideMargin.width)
-                .then(
-                    surface?.invoke() ?: Modifier.squircleSurface(
-                        color = backgroundColor,
-                        topStart = cornerRadius,
-                        topEnd = cornerRadius,
-                        bottomEnd = 0.dp,
-                        bottomStart = 0.dp,
-                    ),
-                )
-                .layout { measurable, constraints ->
-                    val contentMaxH = (windowHeight - topInset).roundToPx().coerceAtLeast(0)
-                    val contentConstraints = constraints.copy(
-                        maxHeight = minOf(constraints.maxHeight, contentMaxH),
-                    )
-                    val placeable = measurable.measure(contentConstraints)
-                    val extraBottom = (-(slideOffsetPx() + dragOffsetY.value)).fastRoundToInt().coerceAtLeast(0)
-                    layout(placeable.width, (placeable.height + extraBottom).coerceAtMost(constraints.maxHeight)) {
-                        placeable.placeRelative(0, 0)
-                    }
-                }
-                .padding(horizontal = insideMargin.width)
-                .padding(bottom = insideMargin.height),
-        ) {
-            DragHandleArea(
+            }
+            .then(if (defaultWindowInsetsPadding) Modifier.imePadding() else Modifier)
+            .padding(horizontal = outsideMargin.width)
+
+        if (overlayHeader) {
+            BottomSheetOverlayColumn(
+                title = title,
+                startAction = startAction,
+                endAction = endAction,
+                headerBottomContent = headerBottomContent,
+                backgroundColor = backgroundColor,
+                cornerRadius = cornerRadius,
+                insideMargin = insideMargin,
                 dragHandleColor = dragHandleColor,
                 allowDismiss = allowDismiss,
+                windowHeight = windowHeight,
+                topInset = topInset,
+                slideOffsetPx = slideOffsetPx,
                 dragOffsetY = dragOffsetY,
                 coroutineScope = coroutineScope,
                 dragSnapChannel = dragSnapChannel,
                 onSettle = onSettle,
                 onUpdateAlpha = onUpdateAlpha,
+                modifier = sheetBaseModifier,
+                surface = surface,
+                foregroundSurface = foregroundSurface,
+                headerBackground = headerBackground,
+                backgroundModifier = backgroundModifier,
+                bodyModifier = bodyModifier,
+                scrollOffset = scrollOffset,
+                content = content,
             )
-
-            TitleAndActionsRow(
+        } else {
+            BottomSheetStandardColumn(
                 title = title,
                 startAction = startAction,
                 endAction = endAction,
+                backgroundColor = backgroundColor,
+                headerBottomContent = headerBottomContent,
+                cornerRadius = cornerRadius,
+                insideMargin = insideMargin,
+                dragHandleColor = dragHandleColor,
+                allowDismiss = allowDismiss,
+                windowHeight = windowHeight,
+                topInset = topInset,
+                slideOffsetPx = slideOffsetPx,
+                dragOffsetY = dragOffsetY,
+                coroutineScope = coroutineScope,
+                dragSnapChannel = dragSnapChannel,
+                onSettle = onSettle,
+                onUpdateAlpha = onUpdateAlpha,
+                modifier = sheetBaseModifier,
+                surface = surface,
+                content = { content(PaddingValues(0.dp)) },
             )
-
-            content()
         }
+    }
+}
+
+@Composable
+private fun BottomSheetOverlayColumn(
+    title: String?,
+    startAction: (@Composable () -> Unit)?,
+    endAction: (@Composable () -> Unit)?,
+    backgroundColor: Color,
+    cornerRadius: Dp,
+    insideMargin: DpSize,
+    dragHandleColor: Color,
+    allowDismiss: Boolean,
+    windowHeight: Dp,
+    topInset: Dp,
+    slideOffsetPx: () -> Float,
+    dragOffsetY: Animatable<Float, *>,
+    coroutineScope: CoroutineScope,
+    dragSnapChannel: Channel<Float>,
+    onSettle: (velocity: Float) -> Unit,
+    onUpdateAlpha: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    headerBottomContent: @Composable () -> Unit = {},
+    surface: (@Composable () -> Modifier)? = null,
+    foregroundSurface: (@Composable () -> Modifier)? = null,
+    headerBackground: (@Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit)? = null,
+    backgroundModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    bodyModifier: (@Composable (scrollOffset: () -> Float) -> Modifier)? = null,
+    scrollOffset: () -> Float = { 0f },
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    val headerHeightPx = remember { mutableIntStateOf(0) }
+    val headerHeightProvider: () -> Int = remember { { headerHeightPx.intValue } }
+    val contentPadding = remember {
+        object : PaddingValues {
+            var paddingHolder by mutableStateOf(PaddingValues(0.dp))
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = paddingHolder.calculateLeftPadding(layoutDirection)
+            override fun calculateTopPadding(): Dp = paddingHolder.calculateTopPadding()
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = paddingHolder.calculateRightPadding(layoutDirection)
+            override fun calculateBottomPadding(): Dp = paddingHolder.calculateBottomPadding()
+        }
+    }
+    val headerContent: @Composable () -> Unit = remember(
+        title,
+        startAction,
+        endAction,
+        insideMargin.width,
+        dragHandleColor,
+        allowDismiss,
+        dragOffsetY,
+        coroutineScope,
+        dragSnapChannel,
+        onSettle,
+        onUpdateAlpha,
+        headerBottomContent,
+    ) {
+        {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = insideMargin.width),
+            ) {
+                DragHandleArea(
+                    dragHandleColor = dragHandleColor,
+                    allowDismiss = allowDismiss,
+                    dragOffsetY = dragOffsetY,
+                    coroutineScope = coroutineScope,
+                    dragSnapChannel = dragSnapChannel,
+                    onSettle = onSettle,
+                    onUpdateAlpha = onUpdateAlpha,
+                )
+                TitleAndActionsRow(
+                    title = title,
+                    startAction = startAction,
+                    endAction = endAction,
+                )
+                headerBottomContent()
+            }
+        }
+    }
+    val bodyContent: @Composable () -> Unit = remember(
+        content,
+        contentPadding,
+        bodyModifier,
+        scrollOffset,
+        insideMargin,
+    ) {
+        {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(bodyModifier?.invoke(scrollOffset) ?: Modifier)
+                    .padding(horizontal = insideMargin.width)
+                    .padding(bottom = insideMargin.height),
+            ) {
+                content(contentPadding)
+            }
+        }
+    }
+    val backgroundContent: @Composable () -> Unit = remember(surface, backgroundModifier, scrollOffset, backgroundColor, cornerRadius) {
+        {
+            Box(
+                modifier = Modifier
+                    .then(backgroundModifier?.invoke(scrollOffset) ?: Modifier)
+                    .then(
+                        surface?.invoke() ?: Modifier.squircleSurface(
+                            color = backgroundColor,
+                            topStart = cornerRadius,
+                            topEnd = cornerRadius,
+                            bottomEnd = 0.dp,
+                            bottomStart = 0.dp,
+                        ),
+                    ),
+            )
+        }
+    }
+    val headerBackgroundContent: @Composable () -> Unit = remember(headerBackground, scrollOffset, headerHeightProvider) {
+        {
+            headerBackground?.invoke(scrollOffset, headerHeightProvider)
+        }
+    }
+    SubcomposeLayout(
+        modifier = modifier.then(foregroundSurface?.invoke() ?: Modifier),
+    ) { constraints ->
+        val contentMaxH = (windowHeight - topInset).roundToPx().coerceAtLeast(0)
+        val maxSheetHeight = minOf(constraints.maxHeight, contentMaxH)
+        val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0, maxHeight = maxSheetHeight)
+
+        val headerPlaceable = subcompose(BottomSheetOverlaySlot.Header, headerContent)
+            .first()
+            .measure(looseConstraints)
+        val measuredHeaderHeight = headerPlaceable.height
+        if (headerHeightPx.intValue != measuredHeaderHeight) {
+            headerHeightPx.intValue = measuredHeaderHeight
+        }
+        val topPaddingDp = measuredHeaderHeight.toDp()
+        if (contentPadding.paddingHolder.calculateTopPadding() != topPaddingDp) {
+            contentPadding.paddingHolder = PaddingValues(top = topPaddingDp)
+        }
+
+        val bodyPlaceable = subcompose(BottomSheetOverlaySlot.Body, bodyContent)
+            .first()
+            .measure(looseConstraints)
+
+        val sheetWidth = constraints.constrainWidth(maxOf(headerPlaceable.width, bodyPlaceable.width))
+        val bodyHeight = maxOf(measuredHeaderHeight, bodyPlaceable.height).coerceAtMost(maxSheetHeight)
+        val extraBottom = (-(slideOffsetPx() + dragOffsetY.value)).fastRoundToInt().coerceAtLeast(0)
+        val totalHeight = (bodyHeight + extraBottom).coerceAtMost(constraints.maxHeight)
+
+        val bgPlaceables = subcompose(BottomSheetOverlaySlot.Background, backgroundContent).map {
+            it.measure(Constraints.fixed(sheetWidth, totalHeight))
+        }
+        val headerBgPlaceables = subcompose(BottomSheetOverlaySlot.HeaderBackground, headerBackgroundContent).map {
+            it.measure(Constraints(minWidth = sheetWidth, maxWidth = sheetWidth, minHeight = 0, maxHeight = bodyHeight))
+        }
+
+        layout(sheetWidth, totalHeight) {
+            bgPlaceables.forEach { it.placeRelative(0, 0) }
+            bodyPlaceable.placeRelative(0, 0)
+            headerBgPlaceables.forEach { it.placeRelative(0, 0) }
+            headerPlaceable.placeRelative(0, 0)
+        }
+    }
+}
+
+@Composable
+private fun BottomSheetStandardColumn(
+    title: String?,
+    startAction: (@Composable () -> Unit)?,
+    endAction: (@Composable () -> Unit)?,
+    backgroundColor: Color,
+    cornerRadius: Dp,
+    insideMargin: DpSize,
+    dragHandleColor: Color,
+    allowDismiss: Boolean,
+    windowHeight: Dp,
+    topInset: Dp,
+    slideOffsetPx: () -> Float,
+    dragOffsetY: Animatable<Float, *>,
+    coroutineScope: CoroutineScope,
+    dragSnapChannel: Channel<Float>,
+    onSettle: (velocity: Float) -> Unit,
+    onUpdateAlpha: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    headerBottomContent: @Composable () -> Unit = {},
+    surface: (@Composable () -> Modifier)? = null,
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .then(
+                surface?.invoke() ?: Modifier.squircleSurface(
+                    color = backgroundColor,
+                    topStart = cornerRadius,
+                    topEnd = cornerRadius,
+                    bottomEnd = 0.dp,
+                    bottomStart = 0.dp,
+                ),
+            )
+            .layout { measurable, constraints ->
+                val contentMaxH = (windowHeight - topInset).roundToPx().coerceAtLeast(0)
+                val contentConstraints = constraints.copy(
+                    maxHeight = minOf(constraints.maxHeight, contentMaxH),
+                )
+                val placeable = measurable.measure(contentConstraints)
+                val extraBottom = (-(slideOffsetPx() + dragOffsetY.value)).fastRoundToInt().coerceAtLeast(0)
+                layout(placeable.width, (placeable.height + extraBottom).coerceAtMost(constraints.maxHeight)) {
+                    placeable.placeRelative(0, 0)
+                }
+            }
+            .padding(horizontal = insideMargin.width)
+            .padding(bottom = insideMargin.height),
+    ) {
+        DragHandleArea(
+            dragHandleColor = dragHandleColor,
+            allowDismiss = allowDismiss,
+            dragOffsetY = dragOffsetY,
+            coroutineScope = coroutineScope,
+            dragSnapChannel = dragSnapChannel,
+            onSettle = onSettle,
+            onUpdateAlpha = onUpdateAlpha,
+        )
+
+        TitleAndActionsRow(
+            title = title,
+            startAction = startAction,
+            endAction = endAction,
+        )
+        headerBottomContent()
+
+        content()
     }
 }
 

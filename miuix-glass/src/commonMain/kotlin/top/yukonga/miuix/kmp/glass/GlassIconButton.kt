@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.LocalGlassHeaderContext
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -41,19 +42,20 @@ import top.yukonga.miuix.kmp.material.withUnderlayBlur
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 
 /**
- * A round glass icon button that inherits material and motion inside [GlassTopAppBar].
+ * A round glass icon button that inherits material and motion inside [GlassTopAppBar] or
+ * [GlassBottomSheet].
  *
  * @param onClick Called when the button is tapped.
- * @param backdrop Optional backdrop. Inside [GlassTopAppBar], the button inherits the bar backdrop;
- *   elsewhere `null` uses [fill].
+ * @param backdrop Optional backdrop. Inside a glass header, the button inherits the header
+ *   backdrop; elsewhere `null` uses [fill].
  * @param modifier Modifier applied to the button.
- * @param inheritTopBarMaterial Whether to inherit the bar's backdrop and underlay material. When
- *   false, use the button's own material over [backdrop], falling back to the bar's backdrop.
+ * @param inheritTopBarMaterial Whether to inherit the header's backdrop and underlay material. When
+ *   false, use the button's own material over [backdrop], falling back to the header's backdrop.
  * @param surfaceAlpha Opacity multiplier for the pill colour layers and stroke.
  * @param style Glass style forwarded to the renderer.
- * @param material Explicit button material. `null` inherits the bar material when
+ * @param material Explicit button material. `null` inherits the header material when
  *   [inheritTopBarMaterial] is true, otherwise uses [GlassTopAppBarDefaults.buttonMaterial].
- *   An inherited bar underlay contributes its blur to an explicit material.
+ *   An inherited header underlay contributes its blur to an explicit material.
  * @param size Button diameter.
  * @param shape Button silhouette.
  * @param shadow Shadow beneath the button; `null` disables it.
@@ -67,33 +69,33 @@ fun GlassIconButton(
     inheritTopBarMaterial: Boolean = true,
     backdrop: Backdrop? = null,
     surfaceAlpha: Float = 1f,
-    style: GlassStyle = LocalGlassTopAppBarContext.current?.style ?: GlassDefaults.Style,
+    style: GlassStyle = LocalGlassHeaderContext.current?.style ?: GlassDefaults.Style,
     material: GlassMaterial? = null,
-    size: Dp = LocalGlassTopAppBarContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
-    shape: GlassShape = LocalGlassTopAppBarContext.current?.shape ?: remember(size) { GlassShape(size / 2) },
-    fill: Color = LocalGlassTopAppBarContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
-    stroke: EdgeStroke? = LocalGlassTopAppBarContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
-    shadow: GlassShadow? = LocalGlassTopAppBarContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
+    size: Dp = LocalGlassHeaderContext.current?.size ?: GlassTopAppBarDefaults.ButtonSize,
+    shape: GlassShape = LocalGlassHeaderContext.current?.shape ?: remember(size) { GlassShape(size / 2) },
+    fill: Color = LocalGlassHeaderContext.current?.fill ?: GlassTopAppBarDefaults.buttonFill(),
+    stroke: EdgeStroke? = LocalGlassHeaderContext.current.let { if (it != null) it.stroke else GlassTopAppBarDefaults.buttonStroke() },
+    shadow: GlassShadow? = LocalGlassHeaderContext.current.let { if (it != null) it.shadow else GlassShadows.Regular },
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val topBarContext = LocalGlassTopAppBarContext.current
-    val usesTopBarButtonBackdrop = topBarContext?.onButtonBackdropConsumerChange != null &&
+    val headerContext = LocalGlassHeaderContext.current
+    val usesHeaderButtonBackdrop = headerContext?.onButtonBackdropConsumerChange != null &&
         (inheritTopBarMaterial || backdrop == null)
-    DisposableEffect(topBarContext, usesTopBarButtonBackdrop) {
-        val callback = if (usesTopBarButtonBackdrop) topBarContext.onButtonBackdropConsumerChange else null
+    DisposableEffect(headerContext, usesHeaderButtonBackdrop) {
+        val callback = if (usesHeaderButtonBackdrop) headerContext.onButtonBackdropConsumerChange else null
         callback?.invoke(1)
         onDispose { callback?.invoke(-1) }
     }
-    val materialContext = topBarContext.takeIf { inheritTopBarMaterial }
-    val resolvedSurfaceAlpha = surfaceAlpha * (topBarContext?.alpha ?: 1f)
-    val topBarProgress = topBarContext?.materialProgress
-    val shadowAlpha = remember(resolvedSurfaceAlpha, topBarProgress) {
-        { resolvedSurfaceAlpha * (topBarProgress?.value ?: 1f) }
+    val materialContext = headerContext.takeIf { inheritTopBarMaterial }
+    val resolvedSurfaceAlpha = surfaceAlpha * (headerContext?.alpha ?: 1f)
+    val headerProgress = headerContext?.materialProgress
+    val shadowAlpha = remember(resolvedSurfaceAlpha, headerProgress) {
+        { resolvedSurfaceAlpha * (headerProgress?.value ?: 1f) }
     }
     GlassButtonSurface(
-        backdrop = materialContext?.buttonBackdrop ?: backdrop ?: topBarContext?.buttonBackdrop,
-        floating = topBarContext?.floating ?: true,
+        backdrop = materialContext?.buttonBackdrop ?: backdrop ?: headerContext?.buttonBackdrop,
+        floating = headerContext?.floating ?: true,
         surfaceAlpha = resolvedSurfaceAlpha,
         shadowAlpha = shadowAlpha,
         style = style,
@@ -106,9 +108,8 @@ fun GlassIconButton(
         fill = fill,
         stroke = stroke,
         shadow = shadow,
-        sharedProgress = topBarContext?.materialProgress,
-        sharedKeepMaterial = topBarContext?.keepMaterial,
-        interactionSource = interactionSource,
+        sharedProgress = headerContext?.materialProgress,
+        sharedKeepMaterial = headerContext?.keepMaterial,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,

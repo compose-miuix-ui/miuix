@@ -85,12 +85,13 @@ fun GlassBottomSheetDemo() {
                         )
                     }
                 },
-            ) {
+            ) { innerPadding ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 260.dp)
                         .verticalScroll(rememberScrollState())
+                        .padding(innerPadding)
                         .padding(bottom = 24.dp),
                 ) {
                     GlassCard(modifier = Modifier.fillMaxWidth()) {

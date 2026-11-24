@@ -74,6 +74,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.glass.internal.LocalGlassHeaderContext
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
@@ -312,9 +313,9 @@ fun GlassTabRow(
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val shape = GlassTabRowDefaults.shape(height)
-    val topBarContext = LocalGlassTopAppBarContext.current
-    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop)?.takeIf { isRuntimeShaderSupported() }
-    val underlayMaterial = topBarContext?.underlayMaterial
+    val headerContext = LocalGlassHeaderContext.current
+    val resolvedBackdrop = (headerContext?.backdrop ?: backdrop)?.takeIf { isRuntimeShaderSupported() }
+    val underlayMaterial = headerContext?.underlayMaterial
     val resolvedMaterial = remember(material, underlayMaterial) { material?.withUnderlayBlur(underlayMaterial) }
     val targetRamp = if (resolvedBackdrop != null) surfaceAlpha.coerceIn(0f, 1f) else 0f
     val rampState = animateFloatAsState(
@@ -605,9 +606,9 @@ fun GlassSegmentedTabRow(
     if (tabs.isEmpty()) return
     val index = selectedIndex.coerceIn(0, tabs.lastIndex)
     val runtimeShaderSupported = isRuntimeShaderSupported()
-    val topBarContext = LocalGlassTopAppBarContext.current
-    val resolvedBackdrop = (topBarContext?.backdrop ?: backdrop).takeIf { runtimeShaderSupported }
-    val underlayMaterial = topBarContext?.underlayMaterial
+    val headerContext = LocalGlassHeaderContext.current
+    val resolvedBackdrop = (headerContext?.backdrop ?: backdrop).takeIf { runtimeShaderSupported }
+    val underlayMaterial = headerContext?.underlayMaterial
     val resolvedMaterial = remember(material, underlayMaterial) { material?.withUnderlayBlur(underlayMaterial) }
     val targetRamp = if (resolvedBackdrop != null) surfaceAlpha.coerceIn(0f, 1f) else 0f
     val rampState = animateFloatAsState(

@@ -19,7 +19,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -63,6 +62,8 @@ import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.internal.GlassHeaderContext
+import top.yukonga.miuix.kmp.glass.internal.LocalGlassHeaderContext
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
@@ -213,28 +214,6 @@ private class TopAppBarFixedFadeBrush(
 
     override fun createShader(size: Size): Shader = shader
 }
-
-@Stable
-internal data class GlassTopAppBarContext(
-    val backdrop: Backdrop?,
-    val buttonBackdrop: Backdrop?,
-    val material: GlassMaterial,
-    val underlayMaterial: GlassMaterial?,
-    val buttonUnderlayMaterial: GlassMaterial?,
-    val floating: Boolean,
-    val alpha: Float,
-    val materialProgress: State<Float>,
-    val keepMaterial: Boolean,
-    val style: GlassStyle,
-    val size: Dp,
-    val shape: GlassShape,
-    val fill: Color,
-    val stroke: EdgeStroke?,
-    val shadow: GlassShadow?,
-    val onButtonBackdropConsumerChange: ((Int) -> Unit)? = null,
-)
-
-internal val LocalGlassTopAppBarContext = compositionLocalOf<GlassTopAppBarContext?> { null }
 
 /**
  * Top app bar whose material visibility follows actual content scrolling in [ScrollBehavior].
@@ -511,7 +490,7 @@ fun GlassTopAppBar(
             buttonShadow,
             consumerChangeCallback,
         ) {
-            GlassTopAppBarContext(
+            GlassHeaderContext(
                 backdrop = rawBackdrop,
                 buttonBackdrop = progressiveBackdrop ?: rawBackdrop,
                 material = resolvedMaterial,
@@ -531,7 +510,7 @@ fun GlassTopAppBar(
             )
         }
         CompositionLocalProvider(
-            LocalGlassTopAppBarContext provides topBarContext,
+            LocalGlassHeaderContext provides topBarContext,
         ) {
             BlurTopAppBar(
                 title = title,

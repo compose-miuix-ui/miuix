@@ -4,6 +4,7 @@
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +26,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -105,8 +109,8 @@ class GlassOverlayComponentsTest {
                         title = "Glass sheet",
                         allowDismiss = allowDismiss.value,
                         onDismissFinished = { finished++ },
-                    ) {
-                        Column(Modifier.navigationBarsPadding().padding(bottom = 16.dp)) {
+                    ) { innerPadding ->
+                        Column(Modifier.padding(innerPadding).navigationBarsPadding().padding(bottom = 16.dp)) {
                             Box(Modifier.height(100.dp))
                             GlassDialogButton(
                                 onClick = { show.value = false },
@@ -150,11 +154,12 @@ class GlassOverlayComponentsTest {
                     backdrop = null,
                     modifier = Modifier.testTag("sheet"),
                     containerColor = Color(0xFF326498),
-                ) {
+                ) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .testTag("scroll-content")
                             .verticalScroll(scroll)
+                            .padding(innerPadding)
                             .navigationBarsPadding()
                             .padding(bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -184,5 +189,90 @@ class GlassOverlayComponentsTest {
         onNodeWithTag("done").performClick()
         waitForIdle()
         onNodeWithTag("sheet").assertDoesNotExist()
+    }
+
+    @Test
+    fun sheetTitleAppliesProgressiveBlurWhenContentScrollsUnderHeader() = runComposeUiTest {
+        val scroll = ScrollState(0)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    Box(Modifier.fillMaxSize().layerBackdrop(backdrop).drawBehind { drawRect(Color(0xFF808080)) })
+                    GlassBottomSheet(
+                        onDismissRequest = {},
+                        show = true,
+                        backdrop = backdrop,
+                        modifier = Modifier.testTag("sheet"),
+                        title = "Glass BottomSheet",
+                        allowDismiss = false,
+                        stroke = null,
+                    ) { innerPadding ->
+                        Column(
+                            modifier = Modifier
+                                .testTag("scroll-content")
+                                .verticalScroll(scroll)
+                                .padding(innerPadding)
+                                .padding(bottom = 16.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .testTag("first-item")
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                                    .background(Color.White),
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .background(Color.Red),
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(600.dp)
+                                    .background(Color.Blue),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        waitForIdle()
+
+        val titleBounds = onNodeWithText("Glass BottomSheet").fetchSemanticsNode().boundsInRoot
+        val firstItemBounds = onNodeWithTag("first-item").fetchSemanticsNode().boundsInRoot
+        assertTrue(firstItemBounds.top >= titleBounds.bottom, "Initial content must start below the title: item=${firstItemBounds.top}, title=${titleBounds.bottom}")
+
+        val sheetBounds = onNodeWithTag("sheet").fetchSemanticsNode().boundsInRoot
+        val sampleX = (sheetBounds.left + 16f).roundToInt()
+        val headerY = (sheetBounds.top + with(density) { 12.dp.toPx() }).roundToInt()
+        val atTop = onRoot().captureToImage().toPixelMap()
+        val headerAtRest = atTop[sampleX, headerY]
+        assertTrue(headerAtRest.red - headerAtRest.blue < 0.05f, "Unscrolled header must stay uniform: $headerAtRest")
+
+        // Scroll until the red/blue boundary sits near the top of the sheet behind the header.
+        onNodeWithTag("scroll-content").performTouchInput {
+            swipeUp(startY = bottom * 0.8f, endY = bottom * 0.35f, durationMillis = 300)
+        }
+        waitForIdle()
+        runOnIdle { assertTrue(scroll.value > 0) }
+
+        val scrolled = onRoot().captureToImage().toPixelMap()
+        val headerScrolled = scrolled[sampleX, headerY]
+        assertTrue(
+            headerScrolled.red > headerAtRest.red + 0.05f || headerScrolled.blue > headerAtRest.blue + 0.05f,
+            "Scrolled content must be visible and blurred in the header: atRest=$headerAtRest scrolled=$headerScrolled",
+        )
+
+        onNodeWithTag("scroll-content").performTouchInput {
+            swipeDown(startY = bottom * 0.35f, endY = bottom * 0.9f, durationMillis = 300)
+        }
+        waitForIdle()
+        runOnIdle { assertEquals(0, scroll.value) }
+
+        val returned = onRoot().captureToImage().toPixelMap()
+        assertColorNear(headerAtRest, returned[sampleX, headerY], tolerance = 4f / 255f)
     }
 }
