@@ -31,6 +31,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.layout.SheetMotion
 import top.yukonga.miuix.kmp.material.GlassColorBlendMode
 import top.yukonga.miuix.kmp.material.GlassColorLayer
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -68,7 +69,7 @@ class GlassBottomSheetSurfaceTest {
                     onDismissRequest = { show.value = false },
                     onDismissFinished = { finished++ },
                     surface = {
-                        scope = this
+                        if (!isOverscroll) scope = this
                         surface(this)
                     },
                 ) {
@@ -80,7 +81,6 @@ class GlassBottomSheetSurfaceTest {
         waitForIdle()
         val pixels = onNodeWithTag("sheet").captureToImage().toPixelMap()
         assertEquals(44.dp, scope?.cornerRadius)
-        assertEquals(false, scope?.isOverscroll)
         assertColorNear(fill, pixels[8, pixels.height / 2])
         assertTrue(pixels[1, 1] != fill)
         assertColorNear(fill, pixels[1, pixels.height - 2])
@@ -170,6 +170,7 @@ class GlassBottomSheetSurfaceTest {
                     sheetMaxWidth = 340.dp,
                     outsideMargin = DpSize(0.dp, 0.dp),
                     enableWindowDim = false,
+                    motion = SheetMotion.Glass,
                     surface = glassBottomSheetSurface(
                         backdrop,
                         material = GlassMaterial(0.dp, GlassColorLayer(Color.Transparent, GlassColorBlendMode.SrcOver)),

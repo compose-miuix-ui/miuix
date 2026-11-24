@@ -566,7 +566,13 @@ fun BoxScope.GlassTransformPopup(
         animationSpec = GlassMotion.secondaryPopupMask(stacked),
         label = "glassTransformMask",
     )
-    val active = show || transition.currentState || transition.isRunning
+    val active by remember(show, bounds, center) {
+        computedStateOf {
+            show ||
+                bounds.value > GlassMotion.TRANSFORM_VISIBILITY_THRESHOLD ||
+                center.value > GlassMotion.TRANSFORM_VISIBILITY_THRESHOLD
+        }
+    }
     val backProgress = rememberGlassPopupBackProgress(
         show = show,
         active = active,

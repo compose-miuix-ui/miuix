@@ -85,10 +85,17 @@ internal fun SheetMotion.dimEnterSpec(): AnimationSpec<Float> = tween(durationMi
  * Spec of the scrim fade out. The launcher runs its decelerate curve backwards along the barrier
  * controller, so the fade starts slowly; the platform sheet decelerates.
  */
-internal fun SheetMotion.dimExitSpec(): AnimationSpec<Float> = if (isGlass) {
-    tween(durationMillis = 250, easing = SheetAccelerate)
-} else {
-    tween(durationMillis = 250, easing = SheetDecelerate)
+internal fun SheetMotion.dimExitSpec(durationMillis: Int? = null): AnimationSpec<Float> {
+    val resolvedDuration = when {
+        durationMillis == null -> 250
+        isGlass -> minOf(250, durationMillis)
+        else -> durationMillis
+    }
+    return if (isGlass) {
+        tween(durationMillis = resolvedDuration, easing = SheetAccelerate)
+    } else {
+        tween(durationMillis = resolvedDuration, easing = SheetDecelerate)
+    }
 }
 
 /**

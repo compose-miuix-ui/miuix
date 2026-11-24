@@ -139,9 +139,13 @@ internal fun DialogContentLayout(
     val internalVisible = remember { mutableStateOf(false) }
     // Whether the last opening animation ran to rest; a close before that is an interruption.
     val enterSettled = remember { mutableStateOf(false) }
-    val blockTouches = remember { mutableStateOf(false) }
 
     val density = LocalDensity.current
+    val navBarInsets = WindowInsets.navigationBars
+    val captionBarInsets = WindowInsets.captionBar
+    val dialogHeightPx = remember { mutableIntStateOf(0) }
+    val dialogWidthPx = remember { mutableIntStateOf(0) }
+    val backProgress = remember { Animatable(0f) }
     val imeInsets = WindowInsets.ime
     val keyboardController = LocalSoftwareKeyboardController.current
     val isLargeScreen = largeScreen ?: DialogDefaults.isLargeScreen()
@@ -153,7 +157,6 @@ internal fun DialogContentLayout(
         val motionAtStart = currentMotion
         if (show) {
             internalVisible.value = true
-            blockTouches.value = true
             enterSettled.value = false
             if (enableWindowDim) {
                 launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
@@ -172,23 +175,36 @@ internal fun DialogContentLayout(
             if (imeInsets.getBottom(density) > 0) {
                 keyboardController?.hide()
             }
-            // The scrim may outlast the panel (the default motion fades it over 350 ms against a
-            // 200 ms panel); like the platform dialog, it is cut when the panel finishes.
-            val dimJob = if (enableWindowDim) {
-                launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec()) }
+            val exitSpec = motionAtStart.exitSpec(interrupted = !enterSettled.value)
+            val offScreenTarget = if (!largeAtStart && dialogHeightPx.intValue > 0) {
+                val insetBottom = if (defaultWindowInsetsPadding) {
+                    maxOf(
+                        imeInsets.getBottom(density),
+                        navBarInsets.getBottom(density) + captionBarInsets.getBottom(density),
+                    )
+                } else {
+                    0
+                }
+                val offScreen = dialogHeightPx.intValue + with(density) { outsideMargin.height.toPx() } + insetBottom
+                val oneDpPx = with(density) { 1.dp.toPx() }
+                if (offScreen > 0f) (backProgress.value + oneDpPx / offScreen).coerceIn(0f, 1f) else null
             } else {
                 null
             }
-            val exitSpec = motionAtStart.exitSpec(interrupted = !enterSettled.value)
-            val touchReleaseJob = launch {
-                snapshotFlow {
-                    if (largeAtStart && motionAtStart.isGlass) {
-                        alphaProgress.value <= 0.33f
-                    } else {
-                        animationProgress.value <= 0.02f
-                    }
-                }.first { it }
-                blockTouches.value = false
+            val exitMs = if (offScreenTarget != null) {
+                findExitThresholdMillis(
+                    animationSpec = exitSpec,
+                    initialValue = animationProgress.value,
+                    targetThreshold = offScreenTarget,
+                    initialVelocity = animationProgress.velocity,
+                )
+            } else {
+                null
+            }
+            val dimJob = if (enableWindowDim) {
+                launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec(exitMs)) }
+            } else {
+                null
             }
             coroutineScope {
                 when {
@@ -200,11 +216,15 @@ internal fun DialogContentLayout(
                         animationProgress.animateTo(0f, exitSpec)
                     }
 
+                    offScreenTarget != null -> {
+                        val slideJob = launch { animationProgress.animateTo(0f, exitSpec) }
+                        snapshotFlow { animationProgress.value <= offScreenTarget }.first { it }
+                        slideJob.cancel()
+                    }
+
                     else -> animationProgress.animateTo(0f, exitSpec)
                 }
             }
-            touchReleaseJob.cancel()
-            blockTouches.value = false
             dimJob?.cancel()
             dimProgress.snapTo(0f)
             animationProgress.snapTo(0f)
@@ -218,9 +238,6 @@ internal fun DialogContentLayout(
 
     val coroutineScope = rememberCoroutineScope()
     val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val dialogHeightPx = remember { mutableIntStateOf(0) }
-    val dialogWidthPx = remember { mutableIntStateOf(0) }
-    val backProgress = remember { Animatable(0f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
         computedStateOf {
             if (enableWindowDim) {
@@ -299,7 +316,6 @@ internal fun DialogContentLayout(
         }
 
         DialogContent(
-            show = blockTouches.value,
             title = title,
             titleColor = titleColor,
             summary = summary,
@@ -336,7 +352,6 @@ internal fun DialogContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root", "ktlint:compose:state-param-check")
 @Composable
 internal fun DialogContent(
-    show: Boolean,
     title: String?,
     titleColor: Color,
     summary: String?,
@@ -445,15 +460,9 @@ internal fun DialogContent(
             dialogHeightPx.intValue = size.height
             dialogWidthPx.intValue = size.width
         }
-        .then(
-            if (show) {
-                Modifier.pointerInput(Unit) {
-                    detectTapGestures { /* Consume click */ }
-                }
-            } else {
-                Modifier
-            },
-        )
+        .pointerInput(Unit) {
+            detectTapGestures { /* Consume click */ }
+        }
         .then(surfaceModifier)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
@@ -470,24 +479,17 @@ internal fun DialogContent(
                 },
             )
             .fillMaxSize()
-            .then(
-                if (show) {
-                    Modifier
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = { currentOnDismiss?.invoke() },
-                            )
-                        }
-                        .semantics {
-                            onClick(label = "Dismiss") {
-                                currentOnDismiss?.invoke()
-                                true
-                            }
-                        }
-                } else {
-                    Modifier
-                },
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { currentOnDismiss?.invoke() },
+                )
+            }
+            .semantics {
+                onClick(label = "Dismiss") {
+                    currentOnDismiss?.invoke()
+                    true
+                }
+            }
             .padding(horizontal = outsideMargin.width)
             .padding(top = calculatedTopInset, bottom = outsideMargin.height),
     ) {

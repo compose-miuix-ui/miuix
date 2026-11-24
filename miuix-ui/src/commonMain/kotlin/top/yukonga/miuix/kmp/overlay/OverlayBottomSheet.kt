@@ -18,7 +18,7 @@ import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
 import top.yukonga.miuix.kmp.layout.SheetMotion
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
@@ -88,14 +88,13 @@ fun OverlayBottomSheet(
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
             SideEffect { visibleState.value = visible }
-            DialogLayoutImpl(
+            DialogLayout(
                 visible = visibleState,
                 enableWindowDim = false,
                 enterTransition = EnterTransition.None,
                 exitTransition = ExitTransition.None,
                 enableAutoLargeScreen = false,
                 renderInRootScaffold = renderInRootScaffold,
-                consumeBackgroundTouches = false,
             ) {
                 hostContent()
             }

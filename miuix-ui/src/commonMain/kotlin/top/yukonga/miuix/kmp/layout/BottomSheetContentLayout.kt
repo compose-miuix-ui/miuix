@@ -161,14 +161,15 @@ internal fun BottomSheetContentLayout(
     val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val currentMotion by rememberUpdatedState(motion)
-    val blockTouches = remember { mutableStateOf(false) }
     val internalVisible = remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val sheetHeightPx = remember { mutableIntStateOf(0) }
 
     LaunchedEffect(show) {
         val motionAtStart = currentMotion
         if (show) {
             internalVisible.value = true
-            blockTouches.value = true
             dragOffsetY.snapTo(0f)
             launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
             animationProgress.animateTo(
@@ -177,36 +178,59 @@ internal fun BottomSheetContentLayout(
             )
         } else {
             if (!internalVisible.value) return@LaunchedEffect
-            val touchReleaseJob = launch {
-                snapshotFlow { animationProgress.value <= 0.02f }.first { it }
-                blockTouches.value = false
+            val sheetHeight = sheetHeightPx.intValue.toFloat()
+            val containerHeight = with(density) { windowInfo.containerDpSize.height.toPx() }
+            val oneDpPx = with(density) { 1.dp.toPx() }
+            val slideSpec = motionAtStart.slideSpec()
+            val offScreenTarget = if (sheetHeight > 0f && containerHeight > 0f) {
+                val distance = if (motionAtStart.isGlass) sheetHeight else containerHeight
+                ((distance - (sheetHeight - oneDpPx).coerceAtLeast(0f)) / distance).coerceIn(0f, 1f)
+            } else {
+                null
             }
-            val dimJob = launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec()) }
+            val exitMs = if (dragOffsetY.value > 0f) {
+                0
+            } else if (offScreenTarget != null) {
+                findExitThresholdMillis(
+                    animationSpec = slideSpec,
+                    initialValue = animationProgress.value,
+                    targetThreshold = offScreenTarget,
+                    initialVelocity = animationProgress.velocity,
+                )
+            } else {
+                null
+            }
+            val dimJob = launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec(exitMs)) }
             if (dragOffsetY.value > 0f) {
                 // Sheet already dragged off-screen — snap immediately
                 animationProgress.snapTo(0f)
+            } else if (offScreenTarget != null) {
+                val slideJob = launch {
+                    animationProgress.animateTo(
+                        targetValue = 0f,
+                        animationSpec = slideSpec,
+                    )
+                }
+                snapshotFlow { animationProgress.value <= offScreenTarget }.first { it }
+                slideJob.cancel()
+                animationProgress.snapTo(0f)
             } else {
-                // Button/back dismiss — animate normally
+                // Sheet was never measured — animate normally
                 animationProgress.animateTo(
                     targetValue = 0f,
-                    animationSpec = motionAtStart.slideSpec(),
+                    animationSpec = slideSpec,
                 )
             }
             dimJob.cancel()
             dimProgress.snapTo(0f)
             internalVisible.value = false
-            touchReleaseJob.cancel()
-            blockTouches.value = false
             currentOnDismissFinished?.invoke()
         }
     }
 
     if (!show && !internalVisible.value) return
 
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
     val coroutineScope = rememberCoroutineScope()
-    val sheetHeightPx = remember { mutableIntStateOf(0) }
     // Read during layout and drawing only, so the per-frame slide never recomposes the sheet.
     val slideOffsetPx: () -> Float = remember(density, windowInfo) {
         {
@@ -307,32 +331,25 @@ internal fun BottomSheetContentLayout(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(
-                    if (blockTouches.value) {
-                        Modifier
-                            // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
-                            // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
-                            .pointerInput(allowDismiss) {
-                                detectTapGestures(
-                                    onTap = {
-                                        if (allowDismiss) {
-                                            requestDismiss()
-                                        }
-                                    },
-                                )
+                // Key on `allowDismiss` so the gesture coroutine restarts with the latest closure
+                // when the consumer toggles it; otherwise the in-flight detector keeps the stale value.
+                .pointerInput(allowDismiss) {
+                    detectTapGestures(
+                        onTap = {
+                            if (allowDismiss) {
+                                requestDismiss()
                             }
-                            .semantics {
-                                if (allowDismiss) {
-                                    onClick(label = "Dismiss") {
-                                        requestDismiss()
-                                        true
-                                    }
-                                }
-                            }
-                    } else {
-                        Modifier
-                    },
-                ),
+                        },
+                    )
+                }
+                .semantics {
+                    if (allowDismiss) {
+                        onClick(label = "Dismiss") {
+                            requestDismiss()
+                            true
+                        }
+                    }
+                },
             contentAlignment = Alignment.BottomCenter,
         ) {
             // Must precede the user modifier: draw modifiers before a graphicsLayer don't follow its transform (issue #373).
@@ -347,7 +364,6 @@ internal fun BottomSheetContentLayout(
                 .then(modifier)
 
             BottomSheetContent(
-                show = blockTouches.value,
                 title = title,
                 backgroundColor = backgroundColor,
                 cornerRadius = cornerRadius,
@@ -397,7 +413,6 @@ internal fun BottomSheetContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 internal fun BottomSheetContent(
-    show: Boolean,
     title: String?,
     backgroundColor: Color,
     cornerRadius: Dp,
@@ -623,7 +638,6 @@ internal fun BottomSheetContent(
     }
 
     BottomSheetColumn(
-        show = show,
         title = title,
         startAction = startAction,
         endAction = endAction,
@@ -660,7 +674,6 @@ internal fun BottomSheetContent(
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
 private fun BottomSheetColumn(
-    show: Boolean,
     title: String?,
     startAction: (@Composable () -> Unit)?,
     endAction: (@Composable () -> Unit)?,
@@ -706,13 +719,7 @@ private fun BottomSheetColumn(
 
         Column(
             modifier = modifier
-                .then(
-                    if (show) {
-                        Modifier.pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
-                    } else {
-                        Modifier
-                    },
-                )
+                .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
                 .then(if (enableNestedScroll) Modifier.nestedScroll(nestedScrollConnection) else Modifier)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()

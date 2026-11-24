@@ -71,7 +71,6 @@ class BottomSheetOverscrollTest {
                     }
                     Box(Modifier.size(360.dp, 600.dp)) {
                         BottomSheetContent(
-                            show = true,
                             title = null,
                             backgroundColor = Color.White,
                             cornerRadius = 16.dp,

@@ -7,6 +7,8 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Immutable
 import top.yukonga.miuix.kmp.anim.DecelerateEasing
@@ -69,10 +71,17 @@ internal fun DialogMotion.dimEnterSpec(): AnimationSpec<Float> = if (isGlass) {
     tween(durationMillis = 300, easing = ClassicDecelerate)
 }
 
-internal fun DialogMotion.dimExitSpec(): AnimationSpec<Float> = if (isGlass) {
-    tween(durationMillis = 100, easing = LinearEasing)
-} else {
-    tween(durationMillis = 350, easing = ClassicDecelerate)
+internal fun DialogMotion.dimExitSpec(durationMillis: Int? = null): AnimationSpec<Float> {
+    val resolvedDuration = when {
+        durationMillis == null -> if (isGlass) 100 else 350
+        isGlass -> minOf(100, durationMillis)
+        else -> durationMillis
+    }
+    return if (isGlass) {
+        tween(durationMillis = resolvedDuration, easing = LinearEasing)
+    } else {
+        tween(durationMillis = resolvedDuration, easing = ClassicDecelerate)
+    }
 }
 
 /** Spring that carries the panel's slide (bottom-attached) or scale (centered) in. */
@@ -117,4 +126,40 @@ internal fun DialogMotion.startScale(panelWidthPx: Int, panelHeightPx: Int): Flo
     val longerSide = max(panelWidthPx, panelHeightPx)
     if (longerSide <= 0) return 0.8f
     return max(0.8f, 1f - 60f / longerSide)
+}
+
+/**
+ * Computes the earliest duration in milliseconds at which [animationSpec] moving from [initialValue]
+ * (with [initialVelocity]) to 0f reaches `<= targetThreshold`.
+ */
+internal fun findExitThresholdMillis(
+    animationSpec: AnimationSpec<Float>,
+    initialValue: Float,
+    targetThreshold: Float,
+    initialVelocity: Float = 0f,
+): Int {
+    if (initialValue <= targetThreshold) return 0
+    val anim = TargetBasedAnimation(
+        animationSpec = animationSpec,
+        typeConverter = Float.VectorConverter,
+        initialValue = initialValue,
+        targetValue = 0f,
+        initialVelocity = initialVelocity,
+    )
+    val totalNanos = anim.durationNanos
+    if (totalNanos <= 0L) return 0
+    var hi = totalNanos
+    if (anim.getValueFromNanos(hi) > targetThreshold) {
+        return (totalNanos / 1_000_000L).toInt().coerceAtLeast(1)
+    }
+    var lo = 0L
+    repeat(16) {
+        val mid = (lo + hi) ushr 1
+        if (anim.getValueFromNanos(mid) <= targetThreshold) {
+            hi = mid
+        } else {
+            lo = mid
+        }
+    }
+    return ((hi + 999_999L) / 1_000_000L).toInt().coerceAtLeast(1)
 }

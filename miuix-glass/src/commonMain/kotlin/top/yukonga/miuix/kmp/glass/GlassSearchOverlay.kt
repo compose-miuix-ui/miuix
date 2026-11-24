@@ -232,7 +232,9 @@ fun GlassSearchOverlay(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
-    val active = expanded || transition.currentState || transition.isRunning
+    val active by remember(expanded, progress) {
+        computedStateOf { expanded || progress.value > 1f / 255f }
+    }
     LaunchedEffect(expanded) {
         queryState.clearText()
         if (expanded) {
