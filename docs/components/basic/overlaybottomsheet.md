@@ -106,8 +106,8 @@ Presets for how the sheet opens, closes and settles after a drag.
 
 | Preset  | Description |
 | ------- | ----------- |
-| Default | HyperOS system sheet motion (miuix `BottomSheetModal`). Slides in and out over the full container height on a 0.9 / 0.38 s spring, overshooting slightly before it rests, and settles after a drag on a 0.85 / 0.4 s spring. The scrim fades in over 300 ms and out over 250 ms |
-| Glass   | HyperOS launcher sheet motion, used by `GlassBottomSheet`. Slides in and out over its own height on a 0.9 / 0.38 s spring, overshooting slightly before it rests, and settles after a drag on a firmer 0.85 / 0.35 s spring. The scrim fades in over 300 ms and out over 250 ms |
+| Default | Standard system sheet motion |
+| Glass   | Glass sheet motion, used by `GlassBottomSheet` |
 
 ## Advanced Usage
 

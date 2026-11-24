@@ -4,8 +4,6 @@
 easy-to-use search interface with support for expanded/collapsed state switching and search
 suggestions display.
 
-When the input contains text, the default trailing action is a translucent clear button. Its cutout reveals the input background. Custom `trailingIcon` content can use `SearchClearButton` from `top.yukonga.miuix.kmp.basic` for the same appearance and press feedback.
-
 <div style="position: relative; height: 250px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=searchBar" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>

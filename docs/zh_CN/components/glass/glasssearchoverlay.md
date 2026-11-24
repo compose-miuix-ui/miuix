@@ -2,8 +2,6 @@
 
 `GlassSearchOverlay` 是一个全屏液态玻璃搜索浮层组件，包含顶部渐进模糊过渡带、玻璃态搜索输入框胶囊、动画取消按钮以及可滚动的搜索结果容器。
 
-输入文本后，输入框内会显示半透明的圆形清除按钮，镂空的 × 会透出输入框背景。
-
 <div style="position: relative; height: 440px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassSearchOverlay" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
