@@ -146,6 +146,7 @@ internal fun DialogContentLayout(
     val dialogHeightPx = remember { mutableIntStateOf(0) }
     val dialogWidthPx = remember { mutableIntStateOf(0) }
     val backProgress = remember { Animatable(0f) }
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
     val imeInsets = WindowInsets.ime
     val keyboardController = LocalSoftwareKeyboardController.current
     val isLargeScreen = largeScreen ?: DialogDefaults.isLargeScreen()
@@ -158,6 +159,8 @@ internal fun DialogContentLayout(
         if (show) {
             internalVisible.value = true
             enterSettled.value = false
+            backProgress.snapTo(0f)
+            dimAlpha.floatValue = 1f
             if (enableWindowDim) {
                 launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
             }
@@ -229,6 +232,8 @@ internal fun DialogContentLayout(
             dimProgress.snapTo(0f)
             animationProgress.snapTo(0f)
             alphaProgress.snapTo(0f)
+            backProgress.snapTo(0f)
+            dimAlpha.floatValue = 1f
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -237,7 +242,6 @@ internal fun DialogContentLayout(
     if (!show && !internalVisible.value) return
 
     val coroutineScope = rememberCoroutineScope()
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
         computedStateOf {
             if (enableWindowDim) {

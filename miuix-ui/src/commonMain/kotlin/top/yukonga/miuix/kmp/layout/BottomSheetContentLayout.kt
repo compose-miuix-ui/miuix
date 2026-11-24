@@ -159,6 +159,7 @@ internal fun BottomSheetContentLayout(
     // The scrim fades on its own timing, independent of the slide spring.
     val dimProgress = remember { Animatable(0f) }
     val dragOffsetY = remember { Animatable(0f) }
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
     val currentMotion by rememberUpdatedState(motion)
     val internalVisible = remember { mutableStateOf(false) }
@@ -171,6 +172,7 @@ internal fun BottomSheetContentLayout(
         if (show) {
             internalVisible.value = true
             dragOffsetY.snapTo(0f)
+            dimAlpha.floatValue = 1f
             launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
             animationProgress.animateTo(
                 targetValue = 1f,
@@ -223,6 +225,7 @@ internal fun BottomSheetContentLayout(
             }
             dimJob.cancel()
             dimProgress.snapTo(0f)
+            dimAlpha.floatValue = 1f
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -241,7 +244,6 @@ internal fun BottomSheetContentLayout(
             )
         }
     }
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
         computedStateOf {
             if (enableWindowDim) {
