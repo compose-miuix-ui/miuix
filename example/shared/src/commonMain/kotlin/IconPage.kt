@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.computedStateOf
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -50,10 +52,12 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.SearchBarFake
 import component.SearchPager
@@ -89,15 +93,17 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import utils.AdaptiveTopAppBar
-import utils.All
 import utils.BlurredBar
 import utils.LocalAppPageInsets
 import utils.SearchStatus
 import utils.appPageHorizontalInsets
 import utils.appPageSearchInsets
+import utils.glassIconsForWeight
+import utils.originalIconsForWeight
 import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration.Companion.milliseconds
 
 private val SearchResultVerticalPadding = 4.dp
@@ -107,12 +113,64 @@ private data class IconSection(
     val indices: List<Int>,
 )
 
-private data class IconFamilyCatalog(
+private val IconFamilies = listOf("Glass", "Original")
+private val IconWeightNames = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+private val IconCellShape = RoundedCornerShape(12.dp)
+
+private class IconFamilyCatalog(
     val regularIcons: List<ImageVector>,
-    val weightVariants: List<Pair<String, List<ImageVector>>>,
     val iconNames: List<String>,
     val sections: List<IconSection>,
-)
+    private val weightLoader: (String) -> List<ImageVector>,
+) {
+    val weightVariants: List<Pair<String, List<ImageVector>>> by lazy {
+        IconWeightNames.map { name -> name to weightLoader(name) }
+    }
+
+    @Volatile
+    private var rowsCache: Pair<Int, List<Pair<String, List<List<Int>>>>>? = null
+
+    fun sectionRowsFor(columns: Int): List<Pair<String, List<List<Int>>>> {
+        val cached = rowsCache
+        if (cached != null && cached.first == columns) return cached.second
+        val built = sections.map { it.title to it.indices.chunked(columns) }
+        rowsCache = columns to built
+        return built
+    }
+}
+
+private fun buildIconCatalog(
+    regular: List<ImageVector>,
+    weightLoader: (String) -> List<ImageVector>,
+): IconFamilyCatalog {
+    val names = regular.map { it.name.substringBefore(".") }
+    val sections = names.indices
+        .groupBy { names[it].firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
+        .entries
+        .sortedBy { it.key }
+        .map { (title, indices) ->
+            IconSection(
+                title = title,
+                indices = indices.sortedBy { names[it] },
+            )
+        }
+    return IconFamilyCatalog(
+        regularIcons = regular,
+        iconNames = names,
+        sections = sections,
+        weightLoader = weightLoader,
+    )
+}
+
+private val GlassIconCatalog by lazy {
+    buildIconCatalog(glassIconsForWeight("Regular"), ::glassIconsForWeight)
+}
+
+private val OriginalIconCatalog by lazy {
+    buildIconCatalog(originalIconsForWeight("Regular"), ::originalIconsForWeight)
+}
+
+private fun iconCatalogForPage(page: Int): IconFamilyCatalog = if (page == 0) GlassIconCatalog else OriginalIconCatalog
 
 @Composable
 fun IconsPage(
@@ -129,43 +187,17 @@ fun IconsPage(
     val searchBarAlpha = rememberGlassSearchBarAlpha(searchExpanded && glassTopBar)
     var legacySearchStatus by remember { mutableStateOf<SearchStatus?>(null) }
     var legacySearchOffset by remember { mutableStateOf(0.dp) }
-    val pageCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val searchCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val pageCoordinates = remember { Ref<LayoutCoordinates>() }
+    val searchCoordinates = remember { Ref<LayoutCoordinates>() }
     val density = LocalDensity.current
     val searchTopInset = LocalAppPageInsets.current.searchTop
     val searchModifier = Modifier.appPageSearchInsets()
     val searchResultPadding = pageBottomPadding(padding)
 
-    val iconFamilies = remember { listOf("Glass", "Original") }
-    val iconCatalogs = remember {
-        listOf(MiuixIcons.Glass.All, MiuixIcons.All).map { allIcons ->
-            val regular = allIcons["Regular"] ?: emptyList()
-            val weights = listOf("Light", "Normal", "Regular", "Medium", "Demibold").map { name ->
-                name to (allIcons[name] ?: emptyList())
-            }
-            val names = regular.map { it.name.substringBefore(".") }
-            val sections = names.indices
-                .groupBy { names[it].firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
-                .entries
-                .sortedBy { it.key }
-                .map { (title, indices) ->
-                    IconSection(
-                        title = title,
-                        indices = indices.sortedBy { names[it] },
-                    )
-                }
-            IconFamilyCatalog(
-                regularIcons = regular,
-                weightVariants = weights,
-                iconNames = names,
-                sections = sections,
-            )
-        }
-    }
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { iconFamilies.size })
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { IconFamilies.size })
     val currentPage by remember { computedStateOf { pagerState.currentPage } }
     val searchIsGlass = currentPage == 0
-    val searchCatalog = iconCatalogs[currentPage]
+    val searchCatalog = iconCatalogForPage(currentPage)
     val searchRegularIcons = searchCatalog.regularIcons
     val searchIconNames = searchCatalog.iconNames
     val surfaceColor = colorScheme.surface
@@ -188,6 +220,7 @@ fun IconsPage(
         items(
             count = filteredIndices.size,
             key = { filteredIndices[it] },
+            contentType = { "search_result" },
         ) { i ->
             val index = filteredIndices[i]
             Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = SearchResultVerticalPadding)) {
@@ -256,7 +289,7 @@ fun IconsPage(
                         bottomContent = {
                             if (glassTopBar) {
                                 GlassSegmentedTabRow(
-                                    tabs = iconFamilies,
+                                    tabs = IconFamilies,
                                     selectedIndex = pagerState.targetPage,
                                     onSelect = { index ->
                                         coroutineScope.launch { pagerState.springAnimateToPage(index) }
@@ -288,7 +321,7 @@ fun IconsPage(
                                         )
                                     }
                                     TabRow(
-                                        tabs = iconFamilies,
+                                        tabs = IconFamilies,
                                         selectedTabIndex = pagerState.targetPage,
                                         onTabSelected = { index ->
                                             coroutineScope.launch { pagerState.springAnimateToPage(index) }
@@ -311,27 +344,28 @@ fun IconsPage(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     userScrollEnabled = false,
-                    beyondViewportPageCount = 1,
+                    beyondViewportPageCount = 0,
                     key = { it },
                 ) { page ->
                     val isPageGlass = page == 0
                     val pageListState = listStates[page]
                     val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
-                    val catalog = iconCatalogs[page]
+                    val catalog = iconCatalogForPage(page)
                     val regularIcons = catalog.regularIcons
-                    val weightVariants = catalog.weightVariants
                     val iconNames = catalog.iconNames
                     // Dialog state for comparing weight variants of the tapped icon.
                     var showWeightDialog by remember { mutableStateOf(false) }
                     var selectedIconIndex by remember { mutableIntStateOf(0) }
 
-                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
                         val columns = remember(maxWidth) {
                             ((maxWidth - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
                         }
                         pageColumns[page] = columns
-                        val sectionRows = remember(catalog.sections, columns) {
-                            catalog.sections.map { it.title to it.indices.chunked(columns) }
+                        val sectionRows = remember(catalog, columns) {
+                            catalog.sectionRowsFor(columns)
                         }
                         LazyColumn(
                             state = pageListState,
@@ -343,10 +377,12 @@ fun IconsPage(
                                     appState.showTopAppBar,
                                     topAppBarScrollBehavior,
                                 ),
+                            overscrollEffect = null,
                             contentPadding = contentPadding,
                         ) {
-                            sectionRows.forEachIndexed { _, (title, rows) ->
-                                item(key = "section_title_$title") {
+                            sectionRows.forEachIndexed { sectionIndex, (title, rows) ->
+                                val isLastSection = sectionIndex == sectionRows.lastIndex
+                                item(key = "section_title_$title", contentType = "section_title") {
                                     SmallTitle(
                                         text = title,
                                         modifier = Modifier,
@@ -355,6 +391,7 @@ fun IconsPage(
                                 items(
                                     count = rows.size,
                                     key = { "section_${title}_row_$it" },
+                                    contentType = { "icon_row" },
                                 ) { rowIndex ->
                                     val isFirst = rowIndex == 0
                                     val isLast = rowIndex == rows.lastIndex
@@ -362,13 +399,23 @@ fun IconsPage(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 12.dp)
-                                            .squircleClip(
-                                                topStart = if (isFirst) 16.dp else 0.dp,
-                                                topEnd = if (isFirst) 16.dp else 0.dp,
-                                                bottomEnd = if (isLast) 16.dp else 0.dp,
-                                                bottomStart = if (isLast) 16.dp else 0.dp,
+                                            .padding(
+                                                start = 12.dp,
+                                                end = 12.dp,
+                                                bottom = if (isLast && !isLastSection) 12.dp else 0.dp,
                                             )
+                                            .let { mod ->
+                                                if (isFirst || isLast) {
+                                                    mod.squircleClip(
+                                                        topStart = if (isFirst) 16.dp else 0.dp,
+                                                        topEnd = if (isFirst) 16.dp else 0.dp,
+                                                        bottomEnd = if (isLast) 16.dp else 0.dp,
+                                                        bottomStart = if (isLast) 16.dp else 0.dp,
+                                                    )
+                                                } else {
+                                                    mod
+                                                }
+                                            }
                                             .background(colorScheme.surfaceContainer)
                                             .padding(horizontal = 6.dp)
                                             .padding(
@@ -382,7 +429,7 @@ fun IconsPage(
                                                 Column(
                                                     modifier = Modifier
                                                         .weight(1f)
-                                                        .squircleClip(12.dp)
+                                                        .clip(IconCellShape)
                                                         .clickable {
                                                             selectedIconIndex = iconIndex
                                                             showWeightDialog = true
@@ -413,7 +460,7 @@ fun IconsPage(
                                     }
                                 }
                             }
-                            item { Spacer(modifier = Modifier.height(12.dp)) }
+                            item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
                         }
                         VerticalScrollBar(
                             adapter = scrollBarAdapter,
@@ -438,7 +485,7 @@ fun IconsPage(
                                     .padding(top = 8.dp, bottom = 16.dp),
                                 verticalAlignment = Alignment.Top,
                             ) {
-                                weightVariants.forEach { (label, icons) ->
+                                catalog.weightVariants.forEach { (label, icons) ->
                                     icons.getOrNull(safeIconIndex)?.let { icon ->
                                         Column(
                                             modifier = Modifier.weight(1f),
@@ -511,14 +558,20 @@ fun IconsPage(
                         }
                     }
                 }
+                val safeInsetsPadding = pageInsets.safeInsets.asPaddingValues()
+                val searchContentPadding = remember(safeInsetsPadding, pageInsets, searchBarSpace, searchResultPadding) {
+                    object : PaddingValues {
+                        override fun calculateLeftPadding(layoutDirection: LayoutDirection) = 0.dp
+                        override fun calculateRightPadding(layoutDirection: LayoutDirection) = 0.dp
+                        override fun calculateTopPadding() = safeInsetsPadding.calculateTopPadding() + pageInsets.searchTop() + searchBarSpace
+                        override fun calculateBottomPadding() = searchResultPadding.calculateBottomPadding()
+                    }
+                }
                 LazyColumn(
                     state = searchListState,
                     cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
                     modifier = Modifier.fillMaxSize().appPageHorizontalInsets(),
-                    contentPadding = PaddingValues(
-                        top = pageInsets.safeInsets.asPaddingValues().calculateTopPadding() + pageInsets.searchTop() + searchBarSpace,
-                        bottom = searchResultPadding.calculateBottomPadding(),
-                    ),
+                    contentPadding = searchContentPadding,
                 ) {
                     searchResultItems(filteredIndices)
                 }

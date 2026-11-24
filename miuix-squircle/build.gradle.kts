@@ -26,17 +26,23 @@ miuixPublication {
  * under the JVM 65535-byte constant-pool entry limit). Re-runs when any input changes.
  */
 abstract class BakeSquircleSdfTask : DefaultTask() {
-    @get:Input abstract val control: Property<Float>
+    @get:Input
+    abstract val control: Property<Float>
 
-    @get:Input abstract val size: Property<Int>
+    @get:Input
+    abstract val size: Property<Int>
 
-    @get:Input abstract val halfRange: Property<Float>
+    @get:Input
+    abstract val halfRange: Property<Float>
 
-    @get:Input abstract val bezierSamples: Property<Int>
+    @get:Input
+    abstract val bezierSamples: Property<Int>
 
-    @get:Input abstract val packageName: Property<String>
+    @get:Input
+    abstract val packageName: Property<String>
 
-    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun bake() {
@@ -78,8 +84,13 @@ abstract class BakeSquircleSdfTask : DefaultTask() {
                 }
                 appendLine("    )")
                 appendLine()
-                appendLine("    val bytes: ByteArray by lazy(LazyThreadSafetyMode.PUBLICATION) {")
-                appendLine("        Base64.decode(CHUNKS.joinToString(\"\"))")
+                appendLine("    fun decodeBytes(): ByteArray {")
+                appendLine("        val out = ByteArray(SIZE * SIZE)")
+                appendLine("        var offset = 0")
+                appendLine("        for (chunk in CHUNKS) {")
+                appendLine("            offset += Base64.decodeIntoByteArray(chunk, out, offset)")
+                appendLine("        }")
+                appendLine("        return out")
                 appendLine("    }")
                 appendLine("}")
             }
@@ -172,6 +183,7 @@ kotlin {
         }
         minSdk = BuildConfig.MIN_SDK
         namespace = "${BuildConfig.LIBRARY_ID}.squircle"
+        withHostTest {}
     }
 
     jvm("desktop")
@@ -192,6 +204,16 @@ kotlin {
     applyMiuixSourceSetHierarchy()
 
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
+        named("desktopTest") {
+            dependencies {
+                implementation(libs.jetbrains.compose.ui.test)
+            }
+        }
+
         commonMain {
             kotlin.srcDir(bakeSquircleSdf)
             dependencies {

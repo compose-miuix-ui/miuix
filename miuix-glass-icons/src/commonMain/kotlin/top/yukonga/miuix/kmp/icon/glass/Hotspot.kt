@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Hotspot: ImageVector
 
 val MiuixIcons.Glass.Light.Hotspot: ImageVector
     get() {
-        if (_hotspotSurfaceLight != null) return _hotspotSurfaceLight!!
-        _hotspotSurfaceLight = buildHyperOSIcon(
+        if (_hotspotLight != null) return _hotspotLight!!
+        _hotspotLight = buildHyperOSIcon(
             name = "Hotspot.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(129.3f, 267f),
@@ -97,15 +97,15 @@ val MiuixIcons.Glass.Light.Hotspot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hotspotSurfaceLight!!
+        return _hotspotLight!!
     }
 
-private var _hotspotSurfaceLight: ImageVector? = null
+private var _hotspotLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Hotspot: ImageVector
     get() {
-        if (_hotspotSurfaceNormal != null) return _hotspotSurfaceNormal!!
-        _hotspotSurfaceNormal = buildHyperOSIcon(
+        if (_hotspotNormal != null) return _hotspotNormal!!
+        _hotspotNormal = buildHyperOSIcon(
             name = "Hotspot.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(120.2f, 267f),
@@ -189,15 +189,15 @@ val MiuixIcons.Glass.Normal.Hotspot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hotspotSurfaceNormal!!
+        return _hotspotNormal!!
     }
 
-private var _hotspotSurfaceNormal: ImageVector? = null
+private var _hotspotNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Hotspot: ImageVector
     get() {
-        if (_hotspotSurfaceRegular != null) return _hotspotSurfaceRegular!!
-        _hotspotSurfaceRegular = buildHyperOSIcon(
+        if (_hotspotRegular != null) return _hotspotRegular!!
+        _hotspotRegular = buildHyperOSIcon(
             name = "Hotspot.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(116f, 267f),
@@ -281,15 +281,15 @@ val MiuixIcons.Glass.Regular.Hotspot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hotspotSurfaceRegular!!
+        return _hotspotRegular!!
     }
 
-private var _hotspotSurfaceRegular: ImageVector? = null
+private var _hotspotRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Hotspot: ImageVector
     get() {
-        if (_hotspotSurfaceMedium != null) return _hotspotSurfaceMedium!!
-        _hotspotSurfaceMedium = buildHyperOSIcon(
+        if (_hotspotMedium != null) return _hotspotMedium!!
+        _hotspotMedium = buildHyperOSIcon(
             name = "Hotspot.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(107.9f, 265.6f),
@@ -373,15 +373,15 @@ val MiuixIcons.Glass.Medium.Hotspot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hotspotSurfaceMedium!!
+        return _hotspotMedium!!
     }
 
-private var _hotspotSurfaceMedium: ImageVector? = null
+private var _hotspotMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Hotspot: ImageVector
     get() {
-        if (_hotspotSurfaceDemibold != null) return _hotspotSurfaceDemibold!!
-        _hotspotSurfaceDemibold = buildHyperOSIcon(
+        if (_hotspotDemibold != null) return _hotspotDemibold!!
+        _hotspotDemibold = buildHyperOSIcon(
             name = "Hotspot.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(102.2f, 264.7f),
@@ -465,8 +465,8 @@ val MiuixIcons.Glass.Demibold.Hotspot: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hotspotSurfaceDemibold!!
+        return _hotspotDemibold!!
     }
 
-private var _hotspotSurfaceDemibold: ImageVector? = null
+private var _hotspotDemibold: ImageVector? = null
 

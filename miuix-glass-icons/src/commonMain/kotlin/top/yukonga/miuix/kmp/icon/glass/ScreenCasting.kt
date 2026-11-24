@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ScreenCasting: ImageVector
 
 val MiuixIcons.Glass.Light.ScreenCasting: ImageVector
     get() {
-        if (_screenCastingSurfaceLight != null) return _screenCastingSurfaceLight!!
-        _screenCastingSurfaceLight = buildHyperOSIcon(
+        if (_screenCastingLight != null) return _screenCastingLight!!
+        _screenCastingLight = buildHyperOSIcon(
             name = "ScreenCasting.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(206f, 194.1f),
@@ -66,15 +66,15 @@ val MiuixIcons.Glass.Light.ScreenCasting: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _screenCastingSurfaceLight!!
+        return _screenCastingLight!!
     }
 
-private var _screenCastingSurfaceLight: ImageVector? = null
+private var _screenCastingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ScreenCasting: ImageVector
     get() {
-        if (_screenCastingSurfaceNormal != null) return _screenCastingSurfaceNormal!!
-        _screenCastingSurfaceNormal = buildHyperOSIcon(
+        if (_screenCastingNormal != null) return _screenCastingNormal!!
+        _screenCastingNormal = buildHyperOSIcon(
             name = "ScreenCasting.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(203.3f, 192f),
@@ -127,15 +127,15 @@ val MiuixIcons.Glass.Normal.ScreenCasting: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _screenCastingSurfaceNormal!!
+        return _screenCastingNormal!!
     }
 
-private var _screenCastingSurfaceNormal: ImageVector? = null
+private var _screenCastingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ScreenCasting: ImageVector
     get() {
-        if (_screenCastingSurfaceRegular != null) return _screenCastingSurfaceRegular!!
-        _screenCastingSurfaceRegular = buildHyperOSIcon(
+        if (_screenCastingRegular != null) return _screenCastingRegular!!
+        _screenCastingRegular = buildHyperOSIcon(
             name = "ScreenCasting.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(202f, 191f),
@@ -188,15 +188,15 @@ val MiuixIcons.Glass.Regular.ScreenCasting: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _screenCastingSurfaceRegular!!
+        return _screenCastingRegular!!
     }
 
-private var _screenCastingSurfaceRegular: ImageVector? = null
+private var _screenCastingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ScreenCasting: ImageVector
     get() {
-        if (_screenCastingSurfaceMedium != null) return _screenCastingSurfaceMedium!!
-        _screenCastingSurfaceMedium = buildHyperOSIcon(
+        if (_screenCastingMedium != null) return _screenCastingMedium!!
+        _screenCastingMedium = buildHyperOSIcon(
             name = "ScreenCasting.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(199.8f, 189.4f),
@@ -249,15 +249,15 @@ val MiuixIcons.Glass.Medium.ScreenCasting: ImageVector
             translationY = 1038.018f,
             autoMirror = false,
         )
-        return _screenCastingSurfaceMedium!!
+        return _screenCastingMedium!!
     }
 
-private var _screenCastingSurfaceMedium: ImageVector? = null
+private var _screenCastingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ScreenCasting: ImageVector
     get() {
-        if (_screenCastingSurfaceDemibold != null) return _screenCastingSurfaceDemibold!!
-        _screenCastingSurfaceDemibold = buildHyperOSIcon(
+        if (_screenCastingDemibold != null) return _screenCastingDemibold!!
+        _screenCastingDemibold = buildHyperOSIcon(
             name = "ScreenCasting.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(198.3f, 188.2f),
@@ -310,8 +310,8 @@ val MiuixIcons.Glass.Demibold.ScreenCasting: ImageVector
             translationY = 1038.964f,
             autoMirror = false,
         )
-        return _screenCastingSurfaceDemibold!!
+        return _screenCastingDemibold!!
     }
 
-private var _screenCastingSurfaceDemibold: ImageVector? = null
+private var _screenCastingDemibold: ImageVector? = null
 

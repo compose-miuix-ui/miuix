@@ -12,8 +12,8 @@ val MiuixIcons.Glass.DislikeSelected: ImageVector
 
 val MiuixIcons.Glass.Light.DislikeSelected: ImageVector
     get() {
-        if (_dislikeSelectedSurfaceLight != null) return _dislikeSelectedSurfaceLight!!
-        _dislikeSelectedSurfaceLight = buildHyperOSIcon(
+        if (_dislikeSelectedLight != null) return _dislikeSelectedLight!!
+        _dislikeSelectedLight = buildHyperOSIcon(
             name = "DislikeSelected.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(712.1f, 7f),
@@ -60,15 +60,15 @@ val MiuixIcons.Glass.Light.DislikeSelected: ImageVector
             translationY = 1004.6667f,
             autoMirror = false,
         )
-        return _dislikeSelectedSurfaceLight!!
+        return _dislikeSelectedLight!!
     }
 
-private var _dislikeSelectedSurfaceLight: ImageVector? = null
+private var _dislikeSelectedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.DislikeSelected: ImageVector
     get() {
-        if (_dislikeSelectedSurfaceNormal != null) return _dislikeSelectedSurfaceNormal!!
-        _dislikeSelectedSurfaceNormal = buildHyperOSIcon(
+        if (_dislikeSelectedNormal != null) return _dislikeSelectedNormal!!
+        _dislikeSelectedNormal = buildHyperOSIcon(
             name = "DislikeSelected.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(732f, 7f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Normal.DislikeSelected: ImageVector
             translationY = 1004.6667f,
             autoMirror = false,
         )
-        return _dislikeSelectedSurfaceNormal!!
+        return _dislikeSelectedNormal!!
     }
 
-private var _dislikeSelectedSurfaceNormal: ImageVector? = null
+private var _dislikeSelectedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.DislikeSelected: ImageVector
     get() {
-        if (_dislikeSelectedSurfaceRegular != null) return _dislikeSelectedSurfaceRegular!!
-        _dislikeSelectedSurfaceRegular = buildHyperOSIcon(
+        if (_dislikeSelectedRegular != null) return _dislikeSelectedRegular!!
+        _dislikeSelectedRegular = buildHyperOSIcon(
             name = "DislikeSelected.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(741f, 7f),
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Regular.DislikeSelected: ImageVector
             translationY = 1004.6667f,
             autoMirror = false,
         )
-        return _dislikeSelectedSurfaceRegular!!
+        return _dislikeSelectedRegular!!
     }
 
-private var _dislikeSelectedSurfaceRegular: ImageVector? = null
+private var _dislikeSelectedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.DislikeSelected: ImageVector
     get() {
-        if (_dislikeSelectedSurfaceMedium != null) return _dislikeSelectedSurfaceMedium!!
-        _dislikeSelectedSurfaceMedium = buildHyperOSIcon(
+        if (_dislikeSelectedMedium != null) return _dislikeSelectedMedium!!
+        _dislikeSelectedMedium = buildHyperOSIcon(
             name = "DislikeSelected.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(759.9f, 8.1f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Medium.DislikeSelected: ImageVector
             translationY = 1004.5315f,
             autoMirror = false,
         )
-        return _dislikeSelectedSurfaceMedium!!
+        return _dislikeSelectedMedium!!
     }
 
-private var _dislikeSelectedSurfaceMedium: ImageVector? = null
+private var _dislikeSelectedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.DislikeSelected: ImageVector
     get() {
-        if (_dislikeSelectedSurfaceDemibold != null) return _dislikeSelectedSurfaceDemibold!!
-        _dislikeSelectedSurfaceDemibold = buildHyperOSIcon(
+        if (_dislikeSelectedDemibold != null) return _dislikeSelectedDemibold!!
+        _dislikeSelectedDemibold = buildHyperOSIcon(
             name = "DislikeSelected.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(773.2f, 8.8f),
@@ -280,8 +280,8 @@ val MiuixIcons.Glass.Demibold.DislikeSelected: ImageVector
             translationY = 1004.4369f,
             autoMirror = false,
         )
-        return _dislikeSelectedSurfaceDemibold!!
+        return _dislikeSelectedDemibold!!
     }
 
-private var _dislikeSelectedSurfaceDemibold: ImageVector? = null
+private var _dislikeSelectedDemibold: ImageVector? = null
 

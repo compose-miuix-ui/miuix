@@ -107,7 +107,6 @@ fun SliderPreference(
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val stableOnValueChange = remember { { v: Float -> currentOnValueChange(v) } }
-    val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
 
@@ -144,8 +143,27 @@ fun SliderPreference(
             null
         },
         bottomAction = {
-            Column {
-                bottomAction?.invoke()
+            if (bottomAction != null) {
+                Column {
+                    bottomAction.invoke()
+                    Slider(
+                        value = value,
+                        onValueChange = stableOnValueChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = enabled,
+                        valueRange = valueRange,
+                        steps = steps,
+                        onValueChangeFinished = onValueChangeFinished,
+                        reverseDirection = reverseDirection,
+                        height = sliderHeight,
+                        colors = sliderColors,
+                        hapticEffect = hapticEffect,
+                        showKeyPoints = showKeyPoints,
+                        keyPoints = keyPoints,
+                        magnetThreshold = magnetThreshold,
+                    )
+                }
+            } else {
                 Slider(
                     value = value,
                     onValueChange = stableOnValueChange,
@@ -153,7 +171,7 @@ fun SliderPreference(
                     enabled = enabled,
                     valueRange = valueRange,
                     steps = steps,
-                    onValueChangeFinished = currentOnValueChangeFinished,
+                    onValueChangeFinished = onValueChangeFinished,
                     reverseDirection = reverseDirection,
                     height = sliderHeight,
                     colors = sliderColors,
@@ -235,7 +253,6 @@ fun RangeSliderPreference(
 ) {
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val stableOnValueChange = remember { { r: ClosedFloatingPointRange<Float> -> currentOnValueChange(r) } }
-    val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val showArrow = onClick != null
     val showEndArea = valueText != null || endActions != null || showArrow
 
@@ -272,8 +289,26 @@ fun RangeSliderPreference(
             null
         },
         bottomAction = {
-            Column {
-                bottomAction?.invoke()
+            if (bottomAction != null) {
+                Column {
+                    bottomAction.invoke()
+                    RangeSlider(
+                        value = value,
+                        onValueChange = stableOnValueChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = enabled,
+                        valueRange = valueRange,
+                        steps = steps,
+                        onValueChangeFinished = onValueChangeFinished,
+                        height = sliderHeight,
+                        colors = sliderColors,
+                        hapticEffect = hapticEffect,
+                        showKeyPoints = showKeyPoints,
+                        keyPoints = keyPoints,
+                        magnetThreshold = magnetThreshold,
+                    )
+                }
+            } else {
                 RangeSlider(
                     value = value,
                     onValueChange = stableOnValueChange,
@@ -281,7 +316,7 @@ fun RangeSliderPreference(
                     enabled = enabled,
                     valueRange = valueRange,
                     steps = steps,
-                    onValueChangeFinished = currentOnValueChangeFinished,
+                    onValueChangeFinished = onValueChangeFinished,
                     height = sliderHeight,
                     colors = sliderColors,
                     hapticEffect = hapticEffect,
@@ -306,15 +341,16 @@ private fun RowScope.SliderPreferenceArrowIcon(
         ColorFilter.tint(actionColors.color(enabled = enabled))
     }
     val layoutDirection = LocalLayoutDirection.current
+    val flipModifier = if (layoutDirection == LayoutDirection.Rtl) RtlFlipModifier else Modifier
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp)
-            .graphicsLayer {
-                scaleX = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
-            }
+            .then(flipModifier)
             .align(Alignment.CenterVertically),
         imageVector = MiuixIcons.Basic.ArrowRight,
         contentDescription = null,
         colorFilter = tintFilter,
     )
 }
+
+private val RtlFlipModifier = Modifier.graphicsLayer { scaleX = -1f }

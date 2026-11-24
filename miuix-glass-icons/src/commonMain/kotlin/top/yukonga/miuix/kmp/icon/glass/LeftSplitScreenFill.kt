@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LeftSplitScreenFill: ImageVector
 
 val MiuixIcons.Glass.Light.LeftSplitScreenFill: ImageVector
     get() {
-        if (_leftSplitScreenSurfaceLight != null) return _leftSplitScreenSurfaceLight!!
-        _leftSplitScreenSurfaceLight = buildHyperOSIcon(
+        if (_leftSplitScreenFillLight != null) return _leftSplitScreenFillLight!!
+        _leftSplitScreenFillLight = buildHyperOSIcon(
             name = "LeftSplitScreenFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1041.2f, -71.3f),
@@ -100,15 +100,15 @@ val MiuixIcons.Glass.Light.LeftSplitScreenFill: ImageVector
             translationY = 1065.8889f,
             autoMirror = false,
         )
-        return _leftSplitScreenSurfaceLight!!
+        return _leftSplitScreenFillLight!!
     }
 
-private var _leftSplitScreenSurfaceLight: ImageVector? = null
+private var _leftSplitScreenFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LeftSplitScreenFill: ImageVector
     get() {
-        if (_leftSplitScreenSurfaceNormal != null) return _leftSplitScreenSurfaceNormal!!
-        _leftSplitScreenSurfaceNormal = buildHyperOSIcon(
+        if (_leftSplitScreenFillNormal != null) return _leftSplitScreenFillNormal!!
+        _leftSplitScreenFillNormal = buildHyperOSIcon(
             name = "LeftSplitScreenFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1061.7f, -75.9f),
@@ -195,15 +195,15 @@ val MiuixIcons.Glass.Normal.LeftSplitScreenFill: ImageVector
             translationY = 1065.7361f,
             autoMirror = false,
         )
-        return _leftSplitScreenSurfaceNormal!!
+        return _leftSplitScreenFillNormal!!
     }
 
-private var _leftSplitScreenSurfaceNormal: ImageVector? = null
+private var _leftSplitScreenFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LeftSplitScreenFill: ImageVector
     get() {
-        if (_leftSplitScreenSurfaceRegular != null) return _leftSplitScreenSurfaceRegular!!
-        _leftSplitScreenSurfaceRegular = buildHyperOSIcon(
+        if (_leftSplitScreenFillRegular != null) return _leftSplitScreenFillRegular!!
+        _leftSplitScreenFillRegular = buildHyperOSIcon(
             name = "LeftSplitScreenFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1071f, -78f),
@@ -290,15 +290,15 @@ val MiuixIcons.Glass.Regular.LeftSplitScreenFill: ImageVector
             translationY = 1065.6667f,
             autoMirror = false,
         )
-        return _leftSplitScreenSurfaceRegular!!
+        return _leftSplitScreenFillRegular!!
     }
 
-private var _leftSplitScreenSurfaceRegular: ImageVector? = null
+private var _leftSplitScreenFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LeftSplitScreenFill: ImageVector
     get() {
-        if (_leftSplitScreenSurfaceMedium != null) return _leftSplitScreenSurfaceMedium!!
-        _leftSplitScreenSurfaceMedium = buildHyperOSIcon(
+        if (_leftSplitScreenFillMedium != null) return _leftSplitScreenFillMedium!!
+        _leftSplitScreenFillMedium = buildHyperOSIcon(
             name = "LeftSplitScreenFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1074.5f, -85.3f),
@@ -385,15 +385,15 @@ val MiuixIcons.Glass.Medium.LeftSplitScreenFill: ImageVector
             translationY = 1065.6667f,
             autoMirror = false,
         )
-        return _leftSplitScreenSurfaceMedium!!
+        return _leftSplitScreenFillMedium!!
     }
 
-private var _leftSplitScreenSurfaceMedium: ImageVector? = null
+private var _leftSplitScreenFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LeftSplitScreenFill: ImageVector
     get() {
-        if (_leftSplitScreenSurfaceDemibold != null) return _leftSplitScreenSurfaceDemibold!!
-        _leftSplitScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_leftSplitScreenFillDemibold != null) return _leftSplitScreenFillDemibold!!
+        _leftSplitScreenFillDemibold = buildHyperOSIcon(
             name = "LeftSplitScreenFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1077f, -90.4f),
@@ -480,8 +480,8 @@ val MiuixIcons.Glass.Demibold.LeftSplitScreenFill: ImageVector
             translationY = 1065.6667f,
             autoMirror = false,
         )
-        return _leftSplitScreenSurfaceDemibold!!
+        return _leftSplitScreenFillDemibold!!
     }
 
-private var _leftSplitScreenSurfaceDemibold: ImageVector? = null
+private var _leftSplitScreenFillDemibold: ImageVector? = null
 

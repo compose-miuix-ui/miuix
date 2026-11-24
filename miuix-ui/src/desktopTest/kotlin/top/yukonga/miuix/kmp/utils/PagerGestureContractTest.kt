@@ -292,7 +292,7 @@ class PagerGestureContractTest {
         )
         assertEquals(1, claims, "A down on the incoming page must not start a pager drag (palette=$paletteChanges)")
         onNodeWithTag("pager").performTouchInput {
-            repeat(4) { moveBy(Offset(-width * 0.08f, 0f), delayMillis = 16) }
+            repeat(4) { moveBy(Offset(-width * 0.08f, 12f), delayMillis = 16) }
         }
         mainClock.advanceTimeByFrame()
         waitForIdle()

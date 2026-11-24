@@ -36,11 +36,11 @@ fun OverlayDropdownPopup(
     entry: DropdownEntry,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     renderInRootScaffold: Boolean,
     collapseOnSelection: Boolean = true,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val entries = remember(entry) { listOf(entry) }
     OverlayDropdownPopup(
@@ -65,11 +65,11 @@ fun OverlayDropdownPopup(
     entries: List<DropdownEntry>,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     renderInRootScaffold: Boolean,
     collapseOnSelection: Boolean = entries.size <= 1,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)
@@ -118,11 +118,11 @@ fun OverlayDropdownDialog(
     dialogButtonString: String,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = true,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val entries = remember(entry) { listOf(entry) }
     OverlayDropdownDialog(
@@ -152,11 +152,11 @@ fun OverlayDropdownDialog(
     dialogButtonString: String,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
     renderInRootScaffold: Boolean = true,
     collapseOnSelection: Boolean = entries.size <= 1,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)

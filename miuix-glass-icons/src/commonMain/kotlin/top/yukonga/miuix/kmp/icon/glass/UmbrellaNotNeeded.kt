@@ -12,8 +12,8 @@ val MiuixIcons.Glass.UmbrellaNotNeeded: ImageVector
 
 val MiuixIcons.Glass.Light.UmbrellaNotNeeded: ImageVector
     get() {
-        if (_umbrellaNotNeededLineLight != null) return _umbrellaNotNeededLineLight!!
-        _umbrellaNotNeededLineLight = buildHyperOSIcon(
+        if (_umbrellaNotNeededLight != null) return _umbrellaNotNeededLight!!
+        _umbrellaNotNeededLight = buildHyperOSIcon(
             name = "UmbrellaNotNeeded.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(234.6f, 452.6f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.UmbrellaNotNeeded: ImageVector
             translationY = 1036.6733f,
             autoMirror = false,
         )
-        return _umbrellaNotNeededLineLight!!
+        return _umbrellaNotNeededLight!!
     }
 
-private var _umbrellaNotNeededLineLight: ImageVector? = null
+private var _umbrellaNotNeededLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.UmbrellaNotNeeded: ImageVector
     get() {
-        if (_umbrellaNotNeededLineNormal != null) return _umbrellaNotNeededLineNormal!!
-        _umbrellaNotNeededLineNormal = buildHyperOSIcon(
+        if (_umbrellaNotNeededNormal != null) return _umbrellaNotNeededNormal!!
+        _umbrellaNotNeededNormal = buildHyperOSIcon(
             name = "UmbrellaNotNeeded.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(245.9f, 461.1f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.UmbrellaNotNeeded: ImageVector
             translationY = 1036.6673f,
             autoMirror = false,
         )
-        return _umbrellaNotNeededLineNormal!!
+        return _umbrellaNotNeededNormal!!
     }
 
-private var _umbrellaNotNeededLineNormal: ImageVector? = null
+private var _umbrellaNotNeededNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.UmbrellaNotNeeded: ImageVector
     get() {
-        if (_umbrellaNotNeededLineRegular != null) return _umbrellaNotNeededLineRegular!!
-        _umbrellaNotNeededLineRegular = buildHyperOSIcon(
+        if (_umbrellaNotNeededRegular != null) return _umbrellaNotNeededRegular!!
+        _umbrellaNotNeededRegular = buildHyperOSIcon(
             name = "UmbrellaNotNeeded.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(251f, 465f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.UmbrellaNotNeeded: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _umbrellaNotNeededLineRegular!!
+        return _umbrellaNotNeededRegular!!
     }
 
-private var _umbrellaNotNeededLineRegular: ImageVector? = null
+private var _umbrellaNotNeededRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.UmbrellaNotNeeded: ImageVector
     get() {
-        if (_umbrellaNotNeededLineMedium != null) return _umbrellaNotNeededLineMedium!!
-        _umbrellaNotNeededLineMedium = buildHyperOSIcon(
+        if (_umbrellaNotNeededMedium != null) return _umbrellaNotNeededMedium!!
+        _umbrellaNotNeededMedium = buildHyperOSIcon(
             name = "UmbrellaNotNeeded.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(261.8f, 473.9f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.UmbrellaNotNeeded: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _umbrellaNotNeededLineMedium!!
+        return _umbrellaNotNeededMedium!!
     }
 
-private var _umbrellaNotNeededLineMedium: ImageVector? = null
+private var _umbrellaNotNeededMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.UmbrellaNotNeeded: ImageVector
     get() {
-        if (_umbrellaNotNeededLineDemibold != null) return _umbrellaNotNeededLineDemibold!!
-        _umbrellaNotNeededLineDemibold = buildHyperOSIcon(
+        if (_umbrellaNotNeededDemibold != null) return _umbrellaNotNeededDemibold!!
+        _umbrellaNotNeededDemibold = buildHyperOSIcon(
             name = "UmbrellaNotNeeded.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(269.4f, 480.2f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.UmbrellaNotNeeded: ImageVector
             translationY = 1036.6667f,
             autoMirror = false,
         )
-        return _umbrellaNotNeededLineDemibold!!
+        return _umbrellaNotNeededDemibold!!
     }
 
-private var _umbrellaNotNeededLineDemibold: ImageVector? = null
+private var _umbrellaNotNeededDemibold: ImageVector? = null
 

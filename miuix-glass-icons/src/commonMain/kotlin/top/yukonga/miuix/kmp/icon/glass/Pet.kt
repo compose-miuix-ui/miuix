@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Pet: ImageVector
 
 val MiuixIcons.Glass.Light.Pet: ImageVector
     get() {
-        if (_petSurfaceLight != null) return _petSurfaceLight!!
-        _petSurfaceLight = buildHyperOSIcon(
+        if (_petLight != null) return _petLight!!
+        _petLight = buildHyperOSIcon(
             name = "Pet.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(569.7f, -73.4f),
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.Pet: ImageVector
             translationY = 1027.4917f,
             autoMirror = false,
         )
-        return _petSurfaceLight!!
+        return _petLight!!
     }
 
-private var _petSurfaceLight: ImageVector? = null
+private var _petLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Pet: ImageVector
     get() {
-        if (_petSurfaceNormal != null) return _petSurfaceNormal!!
-        _petSurfaceNormal = buildHyperOSIcon(
+        if (_petNormal != null) return _petNormal!!
+        _petNormal = buildHyperOSIcon(
             name = "Pet.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(573.3f, -81.4f),
@@ -183,15 +183,15 @@ val MiuixIcons.Glass.Normal.Pet: ImageVector
             translationY = 1027.4838f,
             autoMirror = false,
         )
-        return _petSurfaceNormal!!
+        return _petNormal!!
     }
 
-private var _petSurfaceNormal: ImageVector? = null
+private var _petNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Pet: ImageVector
     get() {
-        if (_petSurfaceRegular != null) return _petSurfaceRegular!!
-        _petSurfaceRegular = buildHyperOSIcon(
+        if (_petRegular != null) return _petRegular!!
+        _petRegular = buildHyperOSIcon(
             name = "Pet.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(575f, -85f),
@@ -272,15 +272,15 @@ val MiuixIcons.Glass.Regular.Pet: ImageVector
             translationY = 1027.4804f,
             autoMirror = false,
         )
-        return _petSurfaceRegular!!
+        return _petRegular!!
     }
 
-private var _petSurfaceRegular: ImageVector? = null
+private var _petRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Pet: ImageVector
     get() {
-        if (_petSurfaceMedium != null) return _petSurfaceMedium!!
-        _petSurfaceMedium = buildHyperOSIcon(
+        if (_petMedium != null) return _petMedium!!
+        _petMedium = buildHyperOSIcon(
             name = "Pet.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(578.2f, -92f),
@@ -361,15 +361,15 @@ val MiuixIcons.Glass.Medium.Pet: ImageVector
             translationY = 1027.5114f,
             autoMirror = false,
         )
-        return _petSurfaceMedium!!
+        return _petMedium!!
     }
 
-private var _petSurfaceMedium: ImageVector? = null
+private var _petMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Pet: ImageVector
     get() {
-        if (_petSurfaceDemibold != null) return _petSurfaceDemibold!!
-        _petSurfaceDemibold = buildHyperOSIcon(
+        if (_petDemibold != null) return _petDemibold!!
+        _petDemibold = buildHyperOSIcon(
             name = "Pet.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(580.5f, -96.9f),
@@ -450,8 +450,8 @@ val MiuixIcons.Glass.Demibold.Pet: ImageVector
             translationY = 1027.5335f,
             autoMirror = false,
         )
-        return _petSurfaceDemibold!!
+        return _petDemibold!!
     }
 
-private var _petSurfaceDemibold: ImageVector? = null
+private var _petDemibold: ImageVector? = null
 

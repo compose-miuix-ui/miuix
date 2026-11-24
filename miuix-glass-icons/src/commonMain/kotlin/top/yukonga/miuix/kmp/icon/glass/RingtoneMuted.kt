@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RingtoneMuted: ImageVector
 
 val MiuixIcons.Glass.Light.RingtoneMuted: ImageVector
     get() {
-        if (_ringtoneMutedSurfaceLight != null) return _ringtoneMutedSurfaceLight!!
-        _ringtoneMutedSurfaceLight = buildHyperOSIcon(
+        if (_ringtoneMutedLight != null) return _ringtoneMutedLight!!
+        _ringtoneMutedLight = buildHyperOSIcon(
             name = "RingtoneMuted.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(217.2f, 901.1f),
@@ -71,15 +71,15 @@ val MiuixIcons.Glass.Light.RingtoneMuted: ImageVector
             translationY = 1068.4224f,
             autoMirror = false,
         )
-        return _ringtoneMutedSurfaceLight!!
+        return _ringtoneMutedLight!!
     }
 
-private var _ringtoneMutedSurfaceLight: ImageVector? = null
+private var _ringtoneMutedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RingtoneMuted: ImageVector
     get() {
-        if (_ringtoneMutedSurfaceNormal != null) return _ringtoneMutedSurfaceNormal!!
-        _ringtoneMutedSurfaceNormal = buildHyperOSIcon(
+        if (_ringtoneMutedNormal != null) return _ringtoneMutedNormal!!
+        _ringtoneMutedNormal = buildHyperOSIcon(
             name = "RingtoneMuted.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(212.9f, 910f),
@@ -137,15 +137,15 @@ val MiuixIcons.Glass.Normal.RingtoneMuted: ImageVector
             translationY = 1070.4897f,
             autoMirror = false,
         )
-        return _ringtoneMutedSurfaceNormal!!
+        return _ringtoneMutedNormal!!
     }
 
-private var _ringtoneMutedSurfaceNormal: ImageVector? = null
+private var _ringtoneMutedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RingtoneMuted: ImageVector
     get() {
-        if (_ringtoneMutedSurfaceRegular != null) return _ringtoneMutedSurfaceRegular!!
-        _ringtoneMutedSurfaceRegular = buildHyperOSIcon(
+        if (_ringtoneMutedRegular != null) return _ringtoneMutedRegular!!
+        _ringtoneMutedRegular = buildHyperOSIcon(
             name = "RingtoneMuted.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(211f, 914f),
@@ -203,15 +203,15 @@ val MiuixIcons.Glass.Regular.RingtoneMuted: ImageVector
             translationY = 1071.4298f,
             autoMirror = false,
         )
-        return _ringtoneMutedSurfaceRegular!!
+        return _ringtoneMutedRegular!!
     }
 
-private var _ringtoneMutedSurfaceRegular: ImageVector? = null
+private var _ringtoneMutedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RingtoneMuted: ImageVector
     get() {
-        if (_ringtoneMutedSurfaceMedium != null) return _ringtoneMutedSurfaceMedium!!
-        _ringtoneMutedSurfaceMedium = buildHyperOSIcon(
+        if (_ringtoneMutedMedium != null) return _ringtoneMutedMedium!!
+        _ringtoneMutedMedium = buildHyperOSIcon(
             name = "RingtoneMuted.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(206.4f, 915.6f),
@@ -269,15 +269,15 @@ val MiuixIcons.Glass.Medium.RingtoneMuted: ImageVector
             translationY = 1070.003f,
             autoMirror = false,
         )
-        return _ringtoneMutedSurfaceMedium!!
+        return _ringtoneMutedMedium!!
     }
 
-private var _ringtoneMutedSurfaceMedium: ImageVector? = null
+private var _ringtoneMutedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RingtoneMuted: ImageVector
     get() {
-        if (_ringtoneMutedSurfaceDemibold != null) return _ringtoneMutedSurfaceDemibold!!
-        _ringtoneMutedSurfaceDemibold = buildHyperOSIcon(
+        if (_ringtoneMutedDemibold != null) return _ringtoneMutedDemibold!!
+        _ringtoneMutedDemibold = buildHyperOSIcon(
             name = "RingtoneMuted.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(203.2f, 916.8f),
@@ -335,8 +335,8 @@ val MiuixIcons.Glass.Demibold.RingtoneMuted: ImageVector
             translationY = 1069.0069f,
             autoMirror = false,
         )
-        return _ringtoneMutedSurfaceDemibold!!
+        return _ringtoneMutedDemibold!!
     }
 
-private var _ringtoneMutedSurfaceDemibold: ImageVector? = null
+private var _ringtoneMutedDemibold: ImageVector? = null
 

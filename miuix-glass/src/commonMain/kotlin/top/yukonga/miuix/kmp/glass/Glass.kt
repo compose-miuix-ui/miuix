@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -23,9 +24,10 @@ import top.yukonga.miuix.kmp.blur.BackdropPipeline
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.effect
 import top.yukonga.miuix.kmp.blur.noiseDither
 import top.yukonga.miuix.kmp.glass.internal.GLASS_COLOR_BLEND_SHADER_KEY
-import top.yukonga.miuix.kmp.glass.internal.colorBlendEffect
+import top.yukonga.miuix.kmp.glass.internal.buildColorBlendEffect
 import top.yukonga.miuix.kmp.glass.internal.glassEffect
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassColorBlendMode
@@ -38,6 +40,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.GlassStyles
+import top.yukonga.miuix.kmp.material.ShaderBrushCache
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.drawGlassEdge
 import top.yukonga.miuix.kmp.material.drawGlassMask
@@ -92,6 +95,38 @@ fun Modifier.glass(
     shading = shading,
 )
 
+/**
+ * Applies a glass surface over [backdrop], reading [stroke] during the draw phase so animated or
+ * sensor-driven strokes do not trigger recomposition or rebuild backdrop blur effects.
+ */
+fun Modifier.glass(
+    backdrop: Backdrop,
+    shape: GlassShape,
+    style: GlassStyle = GlassDefaults.Style,
+    alpha: Float = 1f,
+    tint: Color = Color.Unspecified,
+    material: GlassMaterial? = null,
+    noiseCoefficient: Float = GlassDefaults.NoiseCoefficient,
+    stroke: () -> EdgeStroke?,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
+    enabled: Boolean = true,
+    shading: Boolean = true,
+): Modifier = glassImpl(
+    backdrop = backdrop,
+    shape = shape,
+    style = style,
+    alpha = alpha,
+    tint = tint,
+    material = material,
+    underlayMaterial = null,
+    noiseCoefficient = noiseCoefficient,
+    stroke = null,
+    strokeProvider = stroke,
+    contentBlendMode = contentBlendMode,
+    enabled = enabled,
+    shading = shading,
+)
+
 /** Applies a child material over an action bar's blurred and colour-treated surface. */
 internal fun Modifier.glassOnActionBar(
     backdrop: Backdrop,
@@ -127,6 +162,7 @@ private fun Modifier.glassImpl(
     underlayMaterial: GlassMaterial?,
     noiseCoefficient: Float,
     stroke: EdgeStroke?,
+    strokeProvider: (() -> EdgeStroke?)? = null,
     contentBlendMode: BlendMode,
     enabled: Boolean,
     shading: Boolean,
@@ -141,6 +177,7 @@ private fun Modifier.glassImpl(
         underlayMaterial = underlayMaterial,
         noiseCoefficient = noiseCoefficient,
         stroke = stroke,
+        strokeProvider = strokeProvider,
         shading = shading,
     ),
     contentBlendMode = contentBlendMode,
@@ -160,8 +197,15 @@ private class GlassPipeline(
     private val underlayMaterial: GlassMaterial?,
     private val noiseCoefficient: Float,
     private val stroke: EdgeStroke?,
+    private val strokeProvider: (() -> EdgeStroke?)?,
     private val shading: Boolean,
 ) : BackdropPipeline {
+
+    private var cachedUnderlayBlendEffect: RenderEffect? = null
+    private var cachedMaterialBlendEffect: RenderEffect? = null
+    private val edgeBrushCache = ShaderBrushCache()
+    private val rimBrushCache = ShaderBrushCache()
+    private val maskBrushCache = ShaderBrushCache()
 
     override val shape: Shape get() = glassShape
     override val requiresOffscreenCompositing: Boolean get() = true
@@ -172,16 +216,27 @@ private class GlassPipeline(
             val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
             blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
             if (underlayMaterial != null) {
-                colorBlendEffect(underlayMaterial, 1f, "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar")
+                val underlay = cachedUnderlayBlendEffect ?: buildColorBlendEffect(
+                    underlayMaterial,
+                    1f,
+                    "${GLASS_COLOR_BLEND_SHADER_KEY}ActionBar",
+                )?.also { cachedUnderlayBlendEffect = it }
+                if (underlay != null) effect(underlay)
             }
-            if (material != null) colorBlendEffect(material, alpha)
+            if (material != null) {
+                val blend = cachedMaterialBlendEffect ?: buildColorBlendEffect(
+                    material,
+                    alpha,
+                )?.also { cachedMaterialBlendEffect = it }
+                if (blend != null) effect(blend)
+            }
             if (shading) glassEffect(style, glassShape, alpha, tint)
         }
     }
     override fun drawFront(scope: DrawScope) {
         with(scope) {
             // Stroke and rim share one silhouette pass; the mask trims it afterwards.
-            val current = stroke
+            val current = strokeProvider?.invoke() ?: stroke
             val fuse = current != null && shading &&
                 current.width.value > 0f &&
                 current.blendMode == BlendMode.Plus
@@ -192,17 +247,28 @@ private class GlassPipeline(
                     style = style,
                     surface = if (tint.isSpecified) tint else style.inner.tint,
                     alpha = alpha,
+                    brushCache = edgeBrushCache,
                 )
-                drawGlassMask(glassShape)
+                drawGlassMask(glassShape, brushCache = maskBrushCache)
             } else {
-                if (current != null) drawEdgeStroke(glassShape, current, alpha)
-                drawGlassMask(glassShape)
+                if (current != null) drawEdgeStroke(glassShape, current, alpha, brushCache = edgeBrushCache)
+                drawGlassMask(glassShape, brushCache = maskBrushCache)
                 if (shading) {
-                    drawGlassRim(glassShape, style, if (tint.isSpecified) tint else style.inner.tint, alpha)
+                    drawGlassRim(glassShape, style, if (tint.isSpecified) tint else style.inner.tint, alpha, brushCache = rimBrushCache)
                 }
             }
         }
     }
+
+    override fun hasSameBackdropEffects(other: BackdropPipeline): Boolean = other is GlassPipeline &&
+        other.glassShape == glassShape &&
+        other.style == style &&
+        other.alpha == alpha &&
+        other.tint == tint &&
+        other.material == material &&
+        other.underlayMaterial == underlayMaterial &&
+        other.noiseCoefficient == noiseCoefficient &&
+        other.shading == shading
 
     override fun equals(other: Any?): Boolean = other is GlassPipeline &&
         other.glassShape == glassShape &&
@@ -213,6 +279,7 @@ private class GlassPipeline(
         other.underlayMaterial == underlayMaterial &&
         other.noiseCoefficient == noiseCoefficient &&
         other.stroke == stroke &&
+        other.strokeProvider === strokeProvider &&
         other.shading == shading
 
     override fun hashCode(): Int {
@@ -224,6 +291,7 @@ private class GlassPipeline(
         result = 31 * result + underlayMaterial.hashCode()
         result = 31 * result + noiseCoefficient.hashCode()
         result = 31 * result + stroke.hashCode()
+        result = 31 * result + (strokeProvider?.hashCode() ?: 0)
         result = 31 * result + shading.hashCode()
         return result
     }
@@ -300,8 +368,10 @@ private class GlassShadowNode(
     var alpha: Float,
 ) : Modifier.Node(),
     DrawModifierNode {
+    private val brushCache = ShaderBrushCache()
+
     override fun ContentDrawScope.draw() {
-        drawGlassShadow(shape, shadow, alpha)
+        drawGlassShadow(shape, shadow, alpha, brushCache = brushCache)
         drawContent()
     }
 }
@@ -345,8 +415,10 @@ private class DeferredGlassShadowNode(
     var alpha: () -> Float,
 ) : Modifier.Node(),
     DrawModifierNode {
+    private val brushCache = ShaderBrushCache()
+
     override fun ContentDrawScope.draw() {
-        drawGlassShadow(shape, shadow, alpha())
+        drawGlassShadow(shape, shadow, alpha(), brushCache = brushCache)
         drawContent()
     }
 }

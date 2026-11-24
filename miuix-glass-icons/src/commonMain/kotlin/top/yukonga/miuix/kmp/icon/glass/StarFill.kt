@@ -17,8 +17,8 @@ val MiuixIcons.Glass.StarFill: ImageVector
 
 val MiuixIcons.Glass.Light.StarFill: ImageVector
     get() {
-        if (_unstarLight != null) return _unstarLight!!
-        _unstarLight = ImageVector.Builder(
+        if (_starFillLight != null) return _starFillLight!!
+        _starFillLight = ImageVector.Builder(
             name = "StarFill.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.StarFill: ImageVector
                 )
             }
         }.build()
-        return _unstarLight!!
+        return _starFillLight!!
     }
 
-private var _unstarLight: ImageVector? = null
+private var _starFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.StarFill: ImageVector
     get() {
-        if (_unstarNormal != null) return _unstarNormal!!
-        _unstarNormal = ImageVector.Builder(
+        if (_starFillNormal != null) return _starFillNormal!!
+        _starFillNormal = ImageVector.Builder(
             name = "StarFill.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Normal.StarFill: ImageVector
                 )
             }
         }.build()
-        return _unstarNormal!!
+        return _starFillNormal!!
     }
 
-private var _unstarNormal: ImageVector? = null
+private var _starFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.StarFill: ImageVector
     get() {
-        if (_unstarRegular != null) return _unstarRegular!!
-        _unstarRegular = ImageVector.Builder(
+        if (_starFillRegular != null) return _starFillRegular!!
+        _starFillRegular = ImageVector.Builder(
             name = "StarFill.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -250,15 +250,15 @@ val MiuixIcons.Glass.Regular.StarFill: ImageVector
                 )
             }
         }.build()
-        return _unstarRegular!!
+        return _starFillRegular!!
     }
 
-private var _unstarRegular: ImageVector? = null
+private var _starFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.StarFill: ImageVector
     get() {
-        if (_unstarMedium != null) return _unstarMedium!!
-        _unstarMedium = ImageVector.Builder(
+        if (_starFillMedium != null) return _starFillMedium!!
+        _starFillMedium = ImageVector.Builder(
             name = "StarFill.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -330,15 +330,15 @@ val MiuixIcons.Glass.Medium.StarFill: ImageVector
                 )
             }
         }.build()
-        return _unstarMedium!!
+        return _starFillMedium!!
     }
 
-private var _unstarMedium: ImageVector? = null
+private var _starFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.StarFill: ImageVector
     get() {
-        if (_unstarDemibold != null) return _unstarDemibold!!
-        _unstarDemibold = ImageVector.Builder(
+        if (_starFillDemibold != null) return _starFillDemibold!!
+        _starFillDemibold = ImageVector.Builder(
             name = "StarFill.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -410,7 +410,7 @@ val MiuixIcons.Glass.Demibold.StarFill: ImageVector
                 )
             }
         }.build()
-        return _unstarDemibold!!
+        return _starFillDemibold!!
     }
 
-private var _unstarDemibold: ImageVector? = null
+private var _starFillDemibold: ImageVector? = null

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Privacy: ImageVector
 
 val MiuixIcons.Glass.Light.Privacy: ImageVector
     get() {
-        if (_privacySurfaceLight != null) return _privacySurfaceLight!!
-        _privacySurfaceLight = buildHyperOSIcon(
+        if (_privacyLight != null) return _privacyLight!!
+        _privacyLight = buildHyperOSIcon(
             name = "Privacy.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(98f, 435.8f),
@@ -68,15 +68,15 @@ val MiuixIcons.Glass.Light.Privacy: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _privacySurfaceLight!!
+        return _privacyLight!!
     }
 
-private var _privacySurfaceLight: ImageVector? = null
+private var _privacyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Privacy: ImageVector
     get() {
-        if (_privacySurfaceNormal != null) return _privacySurfaceNormal!!
-        _privacySurfaceNormal = buildHyperOSIcon(
+        if (_privacyNormal != null) return _privacyNormal!!
+        _privacyNormal = buildHyperOSIcon(
             name = "Privacy.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(95.3f, 440.1f),
@@ -131,15 +131,15 @@ val MiuixIcons.Glass.Normal.Privacy: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _privacySurfaceNormal!!
+        return _privacyNormal!!
     }
 
-private var _privacySurfaceNormal: ImageVector? = null
+private var _privacyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Privacy: ImageVector
     get() {
-        if (_privacySurfaceRegular != null) return _privacySurfaceRegular!!
-        _privacySurfaceRegular = buildHyperOSIcon(
+        if (_privacyRegular != null) return _privacyRegular!!
+        _privacyRegular = buildHyperOSIcon(
             name = "Privacy.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(94f, 442f),
@@ -194,15 +194,15 @@ val MiuixIcons.Glass.Regular.Privacy: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _privacySurfaceRegular!!
+        return _privacyRegular!!
     }
 
-private var _privacySurfaceRegular: ImageVector? = null
+private var _privacyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Privacy: ImageVector
     get() {
-        if (_privacySurfaceMedium != null) return _privacySurfaceMedium!!
-        _privacySurfaceMedium = buildHyperOSIcon(
+        if (_privacyMedium != null) return _privacyMedium!!
+        _privacyMedium = buildHyperOSIcon(
             name = "Privacy.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(87f, 446.3f),
@@ -257,15 +257,15 @@ val MiuixIcons.Glass.Medium.Privacy: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _privacySurfaceMedium!!
+        return _privacyMedium!!
     }
 
-private var _privacySurfaceMedium: ImageVector? = null
+private var _privacyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Privacy: ImageVector
     get() {
-        if (_privacySurfaceDemibold != null) return _privacySurfaceDemibold!!
-        _privacySurfaceDemibold = buildHyperOSIcon(
+        if (_privacyDemibold != null) return _privacyDemibold!!
+        _privacyDemibold = buildHyperOSIcon(
             name = "Privacy.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(82.1f, 449.4f),
@@ -320,8 +320,8 @@ val MiuixIcons.Glass.Demibold.Privacy: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _privacySurfaceDemibold!!
+        return _privacyDemibold!!
     }
 
-private var _privacySurfaceDemibold: ImageVector? = null
+private var _privacyDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BmiCalculator: ImageVector
 
 val MiuixIcons.Glass.Light.BmiCalculator: ImageVector
     get() {
-        if (_bmiCalculatorSurfaceLight != null) return _bmiCalculatorSurfaceLight!!
-        _bmiCalculatorSurfaceLight = buildHyperOSIcon(
+        if (_bmiCalculatorLight != null) return _bmiCalculatorLight!!
+        _bmiCalculatorLight = buildHyperOSIcon(
             name = "BmiCalculator.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1050.8f, -50f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Light.BmiCalculator: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _bmiCalculatorSurfaceLight!!
+        return _bmiCalculatorLight!!
     }
 
-private var _bmiCalculatorSurfaceLight: ImageVector? = null
+private var _bmiCalculatorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BmiCalculator: ImageVector
     get() {
-        if (_bmiCalculatorSurfaceNormal != null) return _bmiCalculatorSurfaceNormal!!
-        _bmiCalculatorSurfaceNormal = buildHyperOSIcon(
+        if (_bmiCalculatorNormal != null) return _bmiCalculatorNormal!!
+        _bmiCalculatorNormal = buildHyperOSIcon(
             name = "BmiCalculator.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1055.1f, -58.2f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Normal.BmiCalculator: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _bmiCalculatorSurfaceNormal!!
+        return _bmiCalculatorNormal!!
     }
 
-private var _bmiCalculatorSurfaceNormal: ImageVector? = null
+private var _bmiCalculatorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BmiCalculator: ImageVector
     get() {
-        if (_bmiCalculatorSurfaceRegular != null) return _bmiCalculatorSurfaceRegular!!
-        _bmiCalculatorSurfaceRegular = buildHyperOSIcon(
+        if (_bmiCalculatorRegular != null) return _bmiCalculatorRegular!!
+        _bmiCalculatorRegular = buildHyperOSIcon(
             name = "BmiCalculator.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1057f, -62f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Regular.BmiCalculator: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _bmiCalculatorSurfaceRegular!!
+        return _bmiCalculatorRegular!!
     }
 
-private var _bmiCalculatorSurfaceRegular: ImageVector? = null
+private var _bmiCalculatorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BmiCalculator: ImageVector
     get() {
-        if (_bmiCalculatorSurfaceMedium != null) return _bmiCalculatorSurfaceMedium!!
-        _bmiCalculatorSurfaceMedium = buildHyperOSIcon(
+        if (_bmiCalculatorMedium != null) return _bmiCalculatorMedium!!
+        _bmiCalculatorMedium = buildHyperOSIcon(
             name = "BmiCalculator.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1060.8f, -69.3f),
@@ -325,15 +325,15 @@ val MiuixIcons.Glass.Medium.BmiCalculator: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _bmiCalculatorSurfaceMedium!!
+        return _bmiCalculatorMedium!!
     }
 
-private var _bmiCalculatorSurfaceMedium: ImageVector? = null
+private var _bmiCalculatorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BmiCalculator: ImageVector
     get() {
-        if (_bmiCalculatorSurfaceDemibold != null) return _bmiCalculatorSurfaceDemibold!!
-        _bmiCalculatorSurfaceDemibold = buildHyperOSIcon(
+        if (_bmiCalculatorDemibold != null) return _bmiCalculatorDemibold!!
+        _bmiCalculatorDemibold = buildHyperOSIcon(
             name = "BmiCalculator.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1063.4f, -74.4f),
@@ -405,8 +405,8 @@ val MiuixIcons.Glass.Demibold.BmiCalculator: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _bmiCalculatorSurfaceDemibold!!
+        return _bmiCalculatorDemibold!!
     }
 
-private var _bmiCalculatorSurfaceDemibold: ImageVector? = null
+private var _bmiCalculatorDemibold: ImageVector? = null
 

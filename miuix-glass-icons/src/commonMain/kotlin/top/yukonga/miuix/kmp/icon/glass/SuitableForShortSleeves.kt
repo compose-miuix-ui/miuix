@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SuitableForShortSleeves: ImageVector
 
 val MiuixIcons.Glass.Light.SuitableForShortSleeves: ImageVector
     get() {
-        if (_suitableForShortSleevesLineLight != null) return _suitableForShortSleevesLineLight!!
-        _suitableForShortSleevesLineLight = buildHyperOSIcon(
+        if (_suitableForShortSleevesLight != null) return _suitableForShortSleevesLight!!
+        _suitableForShortSleevesLight = buildHyperOSIcon(
             name = "SuitableForShortSleeves.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(548.8f, 779.1f),
@@ -96,15 +96,15 @@ val MiuixIcons.Glass.Light.SuitableForShortSleeves: ImageVector
             translationY = 1027.7037f,
             autoMirror = false,
         )
-        return _suitableForShortSleevesLineLight!!
+        return _suitableForShortSleevesLight!!
     }
 
-private var _suitableForShortSleevesLineLight: ImageVector? = null
+private var _suitableForShortSleevesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SuitableForShortSleeves: ImageVector
     get() {
-        if (_suitableForShortSleevesLineNormal != null) return _suitableForShortSleevesLineNormal!!
-        _suitableForShortSleevesLineNormal = buildHyperOSIcon(
+        if (_suitableForShortSleevesNormal != null) return _suitableForShortSleevesNormal!!
+        _suitableForShortSleevesNormal = buildHyperOSIcon(
             name = "SuitableForShortSleeves.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(555.8f, 785.2f),
@@ -187,15 +187,15 @@ val MiuixIcons.Glass.Normal.SuitableForShortSleeves: ImageVector
             translationY = 1027.8654f,
             autoMirror = false,
         )
-        return _suitableForShortSleevesLineNormal!!
+        return _suitableForShortSleevesNormal!!
     }
 
-private var _suitableForShortSleevesLineNormal: ImageVector? = null
+private var _suitableForShortSleevesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SuitableForShortSleeves: ImageVector
     get() {
-        if (_suitableForShortSleevesLineRegular != null) return _suitableForShortSleevesLineRegular!!
-        _suitableForShortSleevesLineRegular = buildHyperOSIcon(
+        if (_suitableForShortSleevesRegular != null) return _suitableForShortSleevesRegular!!
+        _suitableForShortSleevesRegular = buildHyperOSIcon(
             name = "SuitableForShortSleeves.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(559f, 788f),
@@ -278,15 +278,15 @@ val MiuixIcons.Glass.Regular.SuitableForShortSleeves: ImageVector
             translationY = 1027.9394f,
             autoMirror = false,
         )
-        return _suitableForShortSleevesLineRegular!!
+        return _suitableForShortSleevesRegular!!
     }
 
-private var _suitableForShortSleevesLineRegular: ImageVector? = null
+private var _suitableForShortSleevesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SuitableForShortSleeves: ImageVector
     get() {
-        if (_suitableForShortSleevesLineMedium != null) return _suitableForShortSleevesLineMedium!!
-        _suitableForShortSleevesLineMedium = buildHyperOSIcon(
+        if (_suitableForShortSleevesMedium != null) return _suitableForShortSleevesMedium!!
+        _suitableForShortSleevesMedium = buildHyperOSIcon(
             name = "SuitableForShortSleeves.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(565.2f, 793.4f),
@@ -369,15 +369,15 @@ val MiuixIcons.Glass.Medium.SuitableForShortSleeves: ImageVector
             translationY = 1027.95f,
             autoMirror = false,
         )
-        return _suitableForShortSleevesLineMedium!!
+        return _suitableForShortSleevesMedium!!
     }
 
-private var _suitableForShortSleevesLineMedium: ImageVector? = null
+private var _suitableForShortSleevesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SuitableForShortSleeves: ImageVector
     get() {
-        if (_suitableForShortSleevesLineDemibold != null) return _suitableForShortSleevesLineDemibold!!
-        _suitableForShortSleevesLineDemibold = buildHyperOSIcon(
+        if (_suitableForShortSleevesDemibold != null) return _suitableForShortSleevesDemibold!!
+        _suitableForShortSleevesDemibold = buildHyperOSIcon(
             name = "SuitableForShortSleeves.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(569.6f, 797.2f),
@@ -460,8 +460,8 @@ val MiuixIcons.Glass.Demibold.SuitableForShortSleeves: ImageVector
             translationY = 1027.9581f,
             autoMirror = false,
         )
-        return _suitableForShortSleevesLineDemibold!!
+        return _suitableForShortSleevesDemibold!!
     }
 
-private var _suitableForShortSleevesLineDemibold: ImageVector? = null
+private var _suitableForShortSleevesDemibold: ImageVector? = null
 

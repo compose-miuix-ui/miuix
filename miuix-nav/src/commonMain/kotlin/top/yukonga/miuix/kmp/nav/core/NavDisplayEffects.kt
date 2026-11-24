@@ -39,7 +39,9 @@ enum class NavCornerClipMode {
  * are pure functions of the switches and the depth.
  *
  * @property enableCornerClip whether to clip the transitioning top entry with smooth rounded
- *   corners (per [cornerClipMode]) while it animates over the layer below.
+ *   corners (per [cornerClipMode]) while it animates over the layer below. Skipped when the
+ *   governing transition owns its clip via
+ *   [top.yukonga.miuix.kmp.nav.transition.NavTransition.handlesCornerClip].
  * @property cornerClipRadius the corner radius used when [enableCornerClip] is on. Defaults to
  *   0.dp (no rounding); pass [rememberNavSystemCornerRadius] to follow the device screen corner
  *   (matching the platform), which still yields no rounding where the platform reports 0.

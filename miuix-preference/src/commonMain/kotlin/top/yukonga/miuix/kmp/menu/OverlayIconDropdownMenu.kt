@@ -91,7 +91,7 @@ fun OverlayIconDropdownMenu(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val actualEnabled = enabled && nonEmptyEntries.isNotEmpty()
     val handleClick = remember(actualEnabled) {
         {
@@ -104,6 +104,8 @@ fun OverlayIconDropdownMenu(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     Box(modifier = modifier) {
         IconButton(
@@ -120,8 +122,8 @@ fun OverlayIconDropdownMenu(
             OverlayDropdownPopup(
                 entries = nonEmptyEntries,
                 show = isDropdownExpanded.value,
-                onDismiss = { setExpanded(false) },
-                onDismissFinished = { isHoldDown.value = false },
+                onDismiss = onDismissPopup,
+                onDismissFinished = onDismissFinishedPopup,
                 maxHeight = maxHeight,
                 dropdownColors = dropdownColors,
                 renderInRootScaffold = renderInRootScaffold,

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PhoneBackupRestore: ImageVector
 
 val MiuixIcons.Glass.Light.PhoneBackupRestore: ImageVector
     get() {
-        if (_phoneBackupRestoreLineLight != null) return _phoneBackupRestoreLineLight!!
-        _phoneBackupRestoreLineLight = buildHyperOSIcon(
+        if (_phoneBackupRestoreLight != null) return _phoneBackupRestoreLight!!
+        _phoneBackupRestoreLight = buildHyperOSIcon(
             name = "PhoneBackupRestore.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(302f, -43.8f),
@@ -88,15 +88,15 @@ val MiuixIcons.Glass.Light.PhoneBackupRestore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneBackupRestoreLineLight!!
+        return _phoneBackupRestoreLight!!
     }
 
-private var _phoneBackupRestoreLineLight: ImageVector? = null
+private var _phoneBackupRestoreLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PhoneBackupRestore: ImageVector
     get() {
-        if (_phoneBackupRestoreLineNormal != null) return _phoneBackupRestoreLineNormal!!
-        _phoneBackupRestoreLineNormal = buildHyperOSIcon(
+        if (_phoneBackupRestoreNormal != null) return _phoneBackupRestoreNormal!!
+        _phoneBackupRestoreNormal = buildHyperOSIcon(
             name = "PhoneBackupRestore.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(293.8f, -48.1f),
@@ -171,15 +171,15 @@ val MiuixIcons.Glass.Normal.PhoneBackupRestore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneBackupRestoreLineNormal!!
+        return _phoneBackupRestoreNormal!!
     }
 
-private var _phoneBackupRestoreLineNormal: ImageVector? = null
+private var _phoneBackupRestoreNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PhoneBackupRestore: ImageVector
     get() {
-        if (_phoneBackupRestoreLineRegular != null) return _phoneBackupRestoreLineRegular!!
-        _phoneBackupRestoreLineRegular = buildHyperOSIcon(
+        if (_phoneBackupRestoreRegular != null) return _phoneBackupRestoreRegular!!
+        _phoneBackupRestoreRegular = buildHyperOSIcon(
             name = "PhoneBackupRestore.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(290f, -50f),
@@ -254,15 +254,15 @@ val MiuixIcons.Glass.Regular.PhoneBackupRestore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneBackupRestoreLineRegular!!
+        return _phoneBackupRestoreRegular!!
     }
 
-private var _phoneBackupRestoreLineRegular: ImageVector? = null
+private var _phoneBackupRestoreRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PhoneBackupRestore: ImageVector
     get() {
-        if (_phoneBackupRestoreLineMedium != null) return _phoneBackupRestoreLineMedium!!
-        _phoneBackupRestoreLineMedium = buildHyperOSIcon(
+        if (_phoneBackupRestoreMedium != null) return _phoneBackupRestoreMedium!!
+        _phoneBackupRestoreMedium = buildHyperOSIcon(
             name = "PhoneBackupRestore.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(282.7f, -53.8f),
@@ -337,15 +337,15 @@ val MiuixIcons.Glass.Medium.PhoneBackupRestore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneBackupRestoreLineMedium!!
+        return _phoneBackupRestoreMedium!!
     }
 
-private var _phoneBackupRestoreLineMedium: ImageVector? = null
+private var _phoneBackupRestoreMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PhoneBackupRestore: ImageVector
     get() {
-        if (_phoneBackupRestoreLineDemibold != null) return _phoneBackupRestoreLineDemibold!!
-        _phoneBackupRestoreLineDemibold = buildHyperOSIcon(
+        if (_phoneBackupRestoreDemibold != null) return _phoneBackupRestoreDemibold!!
+        _phoneBackupRestoreDemibold = buildHyperOSIcon(
             name = "PhoneBackupRestore.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(277.6f, -56.4f),
@@ -420,8 +420,8 @@ val MiuixIcons.Glass.Demibold.PhoneBackupRestore: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _phoneBackupRestoreLineDemibold!!
+        return _phoneBackupRestoreDemibold!!
     }
 
-private var _phoneBackupRestoreLineDemibold: ImageVector? = null
+private var _phoneBackupRestoreDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Card2DashselectedPlus: ImageVector
 
 val MiuixIcons.Glass.Light.Card2DashselectedPlus: ImageVector
     get() {
-        if (_card2DashselectedPlusSurfaceLight != null) return _card2DashselectedPlusSurfaceLight!!
-        _card2DashselectedPlusSurfaceLight = buildHyperOSIcon(
+        if (_card2DashselectedPlusLight != null) return _card2DashselectedPlusLight!!
+        _card2DashselectedPlusLight = buildHyperOSIcon(
             name = "Card2DashselectedPlus.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1016.8f, -108f),
@@ -117,15 +117,15 @@ val MiuixIcons.Glass.Light.Card2DashselectedPlus: ImageVector
             translationY = 1097.2778f,
             autoMirror = false,
         )
-        return _card2DashselectedPlusSurfaceLight!!
+        return _card2DashselectedPlusLight!!
     }
 
-private var _card2DashselectedPlusSurfaceLight: ImageVector? = null
+private var _card2DashselectedPlusLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Card2DashselectedPlus: ImageVector
     get() {
-        if (_card2DashselectedPlusSurfaceNormal != null) return _card2DashselectedPlusSurfaceNormal!!
-        _card2DashselectedPlusSurfaceNormal = buildHyperOSIcon(
+        if (_card2DashselectedPlusNormal != null) return _card2DashselectedPlusNormal!!
+        _card2DashselectedPlusNormal = buildHyperOSIcon(
             name = "Card2DashselectedPlus.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1021.1f, -116.2f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Normal.Card2DashselectedPlus: ImageVector
             translationY = 1096.5139f,
             autoMirror = false,
         )
-        return _card2DashselectedPlusSurfaceNormal!!
+        return _card2DashselectedPlusNormal!!
     }
 
-private var _card2DashselectedPlusSurfaceNormal: ImageVector? = null
+private var _card2DashselectedPlusNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Card2DashselectedPlus: ImageVector
     get() {
-        if (_card2DashselectedPlusSurfaceRegular != null) return _card2DashselectedPlusSurfaceRegular!!
-        _card2DashselectedPlusSurfaceRegular = buildHyperOSIcon(
+        if (_card2DashselectedPlusRegular != null) return _card2DashselectedPlusRegular!!
+        _card2DashselectedPlusRegular = buildHyperOSIcon(
             name = "Card2DashselectedPlus.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1023f, -120f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Regular.Card2DashselectedPlus: ImageVector
             translationY = 1096.1667f,
             autoMirror = false,
         )
-        return _card2DashselectedPlusSurfaceRegular!!
+        return _card2DashselectedPlusRegular!!
     }
 
-private var _card2DashselectedPlusSurfaceRegular: ImageVector? = null
+private var _card2DashselectedPlusRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Card2DashselectedPlus: ImageVector
     get() {
-        if (_card2DashselectedPlusSurfaceMedium != null) return _card2DashselectedPlusSurfaceMedium!!
-        _card2DashselectedPlusSurfaceMedium = buildHyperOSIcon(
+        if (_card2DashselectedPlusMedium != null) return _card2DashselectedPlusMedium!!
+        _card2DashselectedPlusMedium = buildHyperOSIcon(
             name = "Card2DashselectedPlus.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1016f, -127.3f),
@@ -453,15 +453,15 @@ val MiuixIcons.Glass.Medium.Card2DashselectedPlus: ImageVector
             translationY = 1093.464f,
             autoMirror = false,
         )
-        return _card2DashselectedPlusSurfaceMedium!!
+        return _card2DashselectedPlusMedium!!
     }
 
-private var _card2DashselectedPlusSurfaceMedium: ImageVector? = null
+private var _card2DashselectedPlusMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Card2DashselectedPlus: ImageVector
     get() {
-        if (_card2DashselectedPlusSurfaceDemibold != null) return _card2DashselectedPlusSurfaceDemibold!!
-        _card2DashselectedPlusSurfaceDemibold = buildHyperOSIcon(
+        if (_card2DashselectedPlusDemibold != null) return _card2DashselectedPlusDemibold!!
+        _card2DashselectedPlusDemibold = buildHyperOSIcon(
             name = "Card2DashselectedPlus.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1011.1f, -132.4f),
@@ -565,8 +565,8 @@ val MiuixIcons.Glass.Demibold.Card2DashselectedPlus: ImageVector
             translationY = 1091.5719f,
             autoMirror = false,
         )
-        return _card2DashselectedPlusSurfaceDemibold!!
+        return _card2DashselectedPlusDemibold!!
     }
 
-private var _card2DashselectedPlusSurfaceDemibold: ImageVector? = null
+private var _card2DashselectedPlusDemibold: ImageVector? = null
 

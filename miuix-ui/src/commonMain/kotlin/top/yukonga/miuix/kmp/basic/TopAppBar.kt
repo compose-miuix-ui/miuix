@@ -323,7 +323,11 @@ class TopAppBarState(
      *
      * Use this limit to coerce the [heightOffset] value when it's updated.
      */
-    var heightOffsetLimit = initialHeightOffsetLimit
+    var heightOffsetLimit: Float
+        get() = _heightOffsetLimit.floatValue
+        set(newLimit) {
+            _heightOffsetLimit.floatValue = newLimit
+        }
 
     /**
      * The top app bar's current height offset in pixels. This height offset is applied to the fixed
@@ -422,6 +426,7 @@ class TopAppBarState(
             )
     }
 
+    private var _heightOffsetLimit = mutableFloatStateOf(initialHeightOffsetLimit)
     private var _heightOffset = mutableFloatStateOf(initialHeightOffset)
 }
 

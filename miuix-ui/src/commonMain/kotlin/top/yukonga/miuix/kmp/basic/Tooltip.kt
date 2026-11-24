@@ -31,15 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -55,6 +53,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -281,9 +280,9 @@ fun TooltipBox(
     enableUserInput: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    var anchorBounds by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val anchorBoundsRef = remember { Ref<LayoutCoordinates>() }
     val positioning = (positionProvider as? TooltipPopupPositionProvider)?.positioning ?: TooltipAnchorPosition.Below
-    val scope = remember(positioning) { TooltipScopeImpl(positioning) { anchorBounds } }
+    val scope = remember(positioning) { TooltipScopeImpl(positioning) { anchorBoundsRef.value } }
 
     TooltipBoxImpl(
         positionProvider = positionProvider,
@@ -299,7 +298,7 @@ fun TooltipBox(
             }
         },
         state = state,
-        modifier = modifier.onGloballyPositioned { anchorBounds = it },
+        modifier = modifier.onGloballyPositioned { anchorBoundsRef.value = it },
         focusable = focusable,
         enableUserInput = enableUserInput,
         content = content,
@@ -581,39 +580,43 @@ private fun TooltipScope.TooltipSurface(
         (positioning == TooltipAnchorPosition.Above || positioning == TooltipAnchorPosition.Below)
     val caretOnTop = positioning == TooltipAnchorPosition.Below
     val caretSize = TooltipDefaults.caretSize
-    var selfBounds by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val selfBoundsRef = remember(drawCaret) { if (drawCaret) Ref<LayoutCoordinates>() else null }
 
     Box(
         modifier = modifier
             .widthIn(max = maxWidth)
-            .onGloballyPositioned { selfBounds = it }
             .then(
                 if (drawCaret) {
-                    Modifier.drawBehind {
-                        val anchor = obtainAnchorBounds() ?: return@drawBehind
-                        val self = selfBounds ?: return@drawBehind
-                        if (!anchor.isAttached || !self.isAttached) return@drawBehind
-                        val anchorCenterX = anchor.positionInWindow().x + anchor.size.width / 2f
-                        val selfX = self.positionInWindow().x
-                        val caretHalf = caretSize.width.toPx() / 2f
-                        val cr = cornerRadius.toPx()
-                        val minCenter = cr + caretHalf
-                        if (size.width < 2 * minCenter) return@drawBehind
-                        val centerX = (anchorCenterX - selfX).coerceIn(minCenter, size.width - minCenter)
-                        val caretHeight = caretSize.height.toPx()
-                        val path = Path()
-                        if (caretOnTop) {
-                            path.moveTo(centerX, 0f)
-                            path.lineTo(centerX - caretHalf, caretHeight)
-                            path.lineTo(centerX + caretHalf, caretHeight)
-                        } else {
-                            path.moveTo(centerX, size.height)
-                            path.lineTo(centerX - caretHalf, size.height - caretHeight)
-                            path.lineTo(centerX + caretHalf, size.height - caretHeight)
+                    Modifier
+                        .onGloballyPositioned { selfBoundsRef?.value = it }
+                        .drawWithCache {
+                            val path = Path()
+                            onDrawBehind {
+                                val anchor = obtainAnchorBounds() ?: return@onDrawBehind
+                                val self = selfBoundsRef?.value ?: return@onDrawBehind
+                                if (!anchor.isAttached || !self.isAttached) return@onDrawBehind
+                                val anchorCenterX = anchor.positionInWindow().x + anchor.size.width / 2f
+                                val selfX = self.positionInWindow().x
+                                val caretHalf = caretSize.width.toPx() / 2f
+                                val cr = cornerRadius.toPx()
+                                val minCenter = cr + caretHalf
+                                if (size.width < 2 * minCenter) return@onDrawBehind
+                                val centerX = (anchorCenterX - selfX).coerceIn(minCenter, size.width - minCenter)
+                                val caretHeight = caretSize.height.toPx()
+                                path.rewind()
+                                if (caretOnTop) {
+                                    path.moveTo(centerX, 0f)
+                                    path.lineTo(centerX - caretHalf, caretHeight)
+                                    path.lineTo(centerX + caretHalf, caretHeight)
+                                } else {
+                                    path.moveTo(centerX, size.height)
+                                    path.lineTo(centerX - caretHalf, size.height - caretHeight)
+                                    path.lineTo(centerX + caretHalf, size.height - caretHeight)
+                                }
+                                path.close()
+                                drawPath(path, color = containerColor)
+                            }
                         }
-                        path.close()
-                        drawPath(path, color = containerColor)
-                    }
                 } else {
                     Modifier
                 },
@@ -866,11 +869,13 @@ object TooltipDefaults {
 
     /** The default container color of a plain tooltip (inverse surface). */
     val plainTooltipContainerColor: Color
-        @Composable get() = MiuixTheme.colorScheme.onSecondaryVariant
+        @Composable @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.onSecondaryVariant
 
     /** The default content color of a plain tooltip. */
     val plainTooltipContentColor: Color
-        @Composable get() = MiuixTheme.colorScheme.secondaryVariant
+        @Composable @ReadOnlyComposable
+        get() = MiuixTheme.colorScheme.secondaryVariant
 
     /** The default maximum width of a rich tooltip. */
     val RichTooltipMaxWidth = 320.dp

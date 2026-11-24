@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NotificationFill: ImageVector
 
 val MiuixIcons.Glass.Light.NotificationFill: ImageVector
     get() {
-        if (_notificationRemindersSurfaceLight != null) return _notificationRemindersSurfaceLight!!
-        _notificationRemindersSurfaceLight = buildHyperOSIcon(
+        if (_notificationFillLight != null) return _notificationFillLight!!
+        _notificationFillLight = buildHyperOSIcon(
             name = "NotificationFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(395f, 590.4f),
@@ -60,15 +60,15 @@ val MiuixIcons.Glass.Light.NotificationFill: ImageVector
             translationY = 1037.2221f,
             autoMirror = false,
         )
-        return _notificationRemindersSurfaceLight!!
+        return _notificationFillLight!!
     }
 
-private var _notificationRemindersSurfaceLight: ImageVector? = null
+private var _notificationFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotificationFill: ImageVector
     get() {
-        if (_notificationRemindersSurfaceNormal != null) return _notificationRemindersSurfaceNormal!!
-        _notificationRemindersSurfaceNormal = buildHyperOSIcon(
+        if (_notificationFillNormal != null) return _notificationFillNormal!!
+        _notificationFillNormal = buildHyperOSIcon(
             name = "NotificationFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(386.8f, 595.6f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Normal.NotificationFill: ImageVector
             translationY = 1040.2775f,
             autoMirror = false,
         )
-        return _notificationRemindersSurfaceNormal!!
+        return _notificationFillNormal!!
     }
 
-private var _notificationRemindersSurfaceNormal: ImageVector? = null
+private var _notificationFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotificationFill: ImageVector
     get() {
-        if (_notificationRemindersSurfaceRegular != null) return _notificationRemindersSurfaceRegular!!
-        _notificationRemindersSurfaceRegular = buildHyperOSIcon(
+        if (_notificationFillRegular != null) return _notificationFillRegular!!
+        _notificationFillRegular = buildHyperOSIcon(
             name = "NotificationFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(383f, 598f),
@@ -170,15 +170,15 @@ val MiuixIcons.Glass.Regular.NotificationFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _notificationRemindersSurfaceRegular!!
+        return _notificationFillRegular!!
     }
 
-private var _notificationRemindersSurfaceRegular: ImageVector? = null
+private var _notificationFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotificationFill: ImageVector
     get() {
-        if (_notificationRemindersSurfaceMedium != null) return _notificationRemindersSurfaceMedium!!
-        _notificationRemindersSurfaceMedium = buildHyperOSIcon(
+        if (_notificationFillMedium != null) return _notificationFillMedium!!
+        _notificationFillMedium = buildHyperOSIcon(
             name = "NotificationFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(376.8f, 600.4f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Medium.NotificationFill: ImageVector
             translationY = 1041.9369f,
             autoMirror = false,
         )
-        return _notificationRemindersSurfaceMedium!!
+        return _notificationFillMedium!!
     }
 
-private var _notificationRemindersSurfaceMedium: ImageVector? = null
+private var _notificationFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotificationFill: ImageVector
     get() {
-        if (_notificationRemindersSurfaceDemibold != null) return _notificationRemindersSurfaceDemibold!!
-        _notificationRemindersSurfaceDemibold = buildHyperOSIcon(
+        if (_notificationFillDemibold != null) return _notificationFillDemibold!!
+        _notificationFillDemibold = buildHyperOSIcon(
             name = "NotificationFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(372.4f, 602.1f),
@@ -280,8 +280,8 @@ val MiuixIcons.Glass.Demibold.NotificationFill: ImageVector
             translationY = 1042.1261f,
             autoMirror = false,
         )
-        return _notificationRemindersSurfaceDemibold!!
+        return _notificationFillDemibold!!
     }
 
-private var _notificationRemindersSurfaceDemibold: ImageVector? = null
+private var _notificationFillDemibold: ImageVector? = null
 

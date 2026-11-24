@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Close2: ImageVector
 
 val MiuixIcons.Glass.Light.Close2: ImageVector
     get() {
-        if (_closeSurfaceLight != null) return _closeSurfaceLight!!
-        _closeSurfaceLight = buildHyperOSIcon(
+        if (_close2Light != null) return _close2Light!!
+        _close2Light = buildHyperOSIcon(
             name = "Close2.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(817.1f, 570f),
@@ -80,15 +80,15 @@ val MiuixIcons.Glass.Light.Close2: ImageVector
             translationY = 1041.7222f,
             autoMirror = false,
         )
-        return _closeSurfaceLight!!
+        return _close2Light!!
     }
 
-private var _closeSurfaceLight: ImageVector? = null
+private var _close2Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Close2: ImageVector
     get() {
-        if (_closeSurfaceNormal != null) return _closeSurfaceNormal!!
-        _closeSurfaceNormal = buildHyperOSIcon(
+        if (_close2Normal != null) return _close2Normal!!
+        _close2Normal = buildHyperOSIcon(
             name = "Close2.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(806.7f, 572.7f),
@@ -155,15 +155,15 @@ val MiuixIcons.Glass.Normal.Close2: ImageVector
             translationY = 1042.0277f,
             autoMirror = false,
         )
-        return _closeSurfaceNormal!!
+        return _close2Normal!!
     }
 
-private var _closeSurfaceNormal: ImageVector? = null
+private var _close2Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Close2: ImageVector
     get() {
-        if (_closeSurfaceRegular != null) return _closeSurfaceRegular!!
-        _closeSurfaceRegular = buildHyperOSIcon(
+        if (_close2Regular != null) return _close2Regular!!
+        _close2Regular = buildHyperOSIcon(
             name = "Close2.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(802f, 574f),
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Regular.Close2: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _closeSurfaceRegular!!
+        return _close2Regular!!
     }
 
-private var _closeSurfaceRegular: ImageVector? = null
+private var _close2Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Close2: ImageVector
     get() {
-        if (_closeSurfaceMedium != null) return _closeSurfaceMedium!!
-        _closeSurfaceMedium = buildHyperOSIcon(
+        if (_close2Medium != null) return _close2Medium!!
+        _close2Medium = buildHyperOSIcon(
             name = "Close2.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(796.6f, 579.7f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Medium.Close2: ImageVector
             translationY = 1041.8964f,
             autoMirror = false,
         )
-        return _closeSurfaceMedium!!
+        return _close2Medium!!
     }
 
-private var _closeSurfaceMedium: ImageVector? = null
+private var _close2Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Close2: ImageVector
     get() {
-        if (_closeSurfaceDemibold != null) return _closeSurfaceDemibold!!
-        _closeSurfaceDemibold = buildHyperOSIcon(
+        if (_close2Demibold != null) return _close2Demibold!!
+        _close2Demibold = buildHyperOSIcon(
             name = "Close2.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(792.8f, 583.6f),
@@ -380,8 +380,8 @@ val MiuixIcons.Glass.Demibold.Close2: ImageVector
             translationY = 1041.7072f,
             autoMirror = false,
         )
-        return _closeSurfaceDemibold!!
+        return _close2Demibold!!
     }
 
-private var _closeSurfaceDemibold: ImageVector? = null
+private var _close2Demibold: ImageVector? = null
 

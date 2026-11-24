@@ -120,7 +120,7 @@ The explicit-overlap overload adds one required parameter:
 | TitleBlurRadius | Dp | Title transition blur radius | 8.dp |
 | ButtonSize | Dp | Button diameter | 44.dp |
 | PressedContentAlpha | Float | Content opacity while pressed | 0.6f |
-| BandOverhang | Dp | Band extension below the bar | 36.dp |
+| BandOverhang | Dp | Band extension below the bar | 32.dp |
 
 #### Methods
 

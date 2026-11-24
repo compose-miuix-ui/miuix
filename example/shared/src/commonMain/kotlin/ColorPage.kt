@@ -4,7 +4,6 @@
 @file:OptIn(ExperimentalScrollBarApi::class)
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -23,8 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
+import component.CardSegment
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -45,13 +44,13 @@ import utils.BlurredBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
+import kotlin.concurrent.Volatile
 
 private val CamelCaseRegex = Regex("([A-Z])")
 private val ColorBlockCornerRadius = 12.dp
 
 @Immutable
 private data class ColorBlockData(
-    val name: String,
     val displayName: String,
     val surfaceColor: Color,
     val textColor: Color,
@@ -69,11 +68,13 @@ fun ColorPage(
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
 
-    val lightColors = remember { lightColorScheme() }
-    val darkColors = remember { darkColorScheme() }
+    val currentColors = MiuixTheme.colorScheme
     val dynLight = platformDynamicColors(dark = false)
     val dynDark = platformDynamicColors(dark = true)
 
+    val currentRows = remember(currentColors) { buildColorBlockRows(currentColors) }
+    val dynLightRows = rememberDynamicColorRows(dynLight, isDark = false)
+    val dynDarkRows = rememberDynamicColorRows(dynDark, isDark = true)
     Scaffold(
         topBar = {
             BlurredBar(backdrop, blurActive) {
@@ -97,64 +98,41 @@ fun ColorPage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
-                item(key = "current") {
-                    SmallTitle("Current Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(MiuixTheme.colorScheme)
-                    }
-                }
-                item(key = "light") {
-                    SmallTitle("Light Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(lightColors)
-                    }
-                }
-                item(key = "dynamic_light") {
-                    SmallTitle("Dynamic Light Colors")
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(dynLight)
-                    }
-                }
-                item(key = "dark") {
-                    SmallTitle("Dark Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(darkColors)
-                    }
-                }
-                item(key = "dynamic_dark") {
-                    SmallTitle("Dynamic Dark Colors")
-                    Card(
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(dynDark)
-                    }
-                }
-                item { Spacer(modifier = Modifier.height(12.dp)) }
+                colorPaletteSection(
+                    keyPrefix = "current",
+                    title = "Current Theme Colors",
+                    containerColor = currentColors.surfaceContainer,
+                    rows = currentRows,
+                )
+                colorPaletteSection(
+                    keyPrefix = "light",
+                    title = "Light Theme Colors",
+                    containerColor = LightColorScheme.surfaceContainer,
+                    rows = LightColorRows,
+                )
+                colorPaletteSection(
+                    keyPrefix = "dynamic_light",
+                    title = "Dynamic Light Colors",
+                    containerColor = dynLight.surfaceContainer,
+                    rows = dynLightRows,
+                )
+                colorPaletteSection(
+                    keyPrefix = "dark",
+                    title = "Dark Theme Colors",
+                    containerColor = DarkColorScheme.surfaceContainer,
+                    rows = DarkColorRows,
+                )
+                colorPaletteSection(
+                    keyPrefix = "dynamic_dark",
+                    title = "Dynamic Dark Colors",
+                    containerColor = dynDark.surfaceContainer,
+                    rows = dynDarkRows,
+                    bottomPadding = false,
+                )
+                item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
             }
             VerticalScrollBar(
                 adapter = rememberScrollBarAdapter(lazyListState),
@@ -166,87 +144,39 @@ fun ColorPage(
     }
 }
 
-@Composable
-fun ColorsPreview(colors: Colors) {
-    val colorList = listOf(
-        "primary" to colors.primary,
-        "onPrimary" to colors.onPrimary,
-        "primaryVariant" to colors.primaryVariant,
-        "onPrimaryVariant" to colors.onPrimaryVariant,
-        "error" to colors.error,
-        "onError" to colors.onError,
-        "errorContainer" to colors.errorContainer,
-        "onErrorContainer" to colors.onErrorContainer,
-        "disabledPrimary" to colors.disabledPrimary,
-        "disabledOnPrimary" to colors.disabledOnPrimary,
-        "disabledPrimaryButton" to colors.disabledPrimaryButton,
-        "disabledOnPrimaryButton" to colors.disabledOnPrimaryButton,
-        "disabledPrimarySlider" to colors.disabledPrimarySlider,
-        "primaryContainer" to colors.primaryContainer,
-        "onPrimaryContainer" to colors.onPrimaryContainer,
-        "secondary" to colors.secondary,
-        "onSecondary" to colors.onSecondary,
-        "secondaryVariant" to colors.secondaryVariant,
-        "onSecondaryVariant" to colors.onSecondaryVariant,
-        "disabledSecondary" to colors.disabledSecondary,
-        "disabledOnSecondary" to colors.disabledOnSecondary,
-        "disabledSecondaryVariant" to colors.disabledSecondaryVariant,
-        "disabledOnSecondaryVariant" to colors.disabledOnSecondaryVariant,
-        "secondaryContainer" to colors.secondaryContainer,
-        "onSecondaryContainer" to colors.onSecondaryContainer,
-        "secondaryContainerVariant" to colors.secondaryContainerVariant,
-        "onSecondaryContainerVariant" to colors.onSecondaryContainerVariant,
-        "tertiaryContainer" to colors.tertiaryContainer,
-        "onTertiaryContainer" to colors.onTertiaryContainer,
-        "tertiaryContainerVariant" to colors.tertiaryContainerVariant,
-        "background" to colors.background,
-        "onBackground" to colors.onBackground,
-        "onBackgroundVariant" to colors.onBackgroundVariant,
-        "surface" to colors.surface,
-        "onSurface" to colors.onSurface,
-        "surfaceVariant" to colors.surfaceVariant,
-        "onSurfaceSecondary" to colors.onSurfaceSecondary,
-        "onSurfaceVariantSummary" to colors.onSurfaceVariantSummary,
-        "onSurfaceVariantActions" to colors.onSurfaceVariantActions,
-        "disabledOnSurface" to colors.disabledOnSurface,
-        "surfaceContainer" to colors.surfaceContainer,
-        "onSurfaceContainer" to colors.onSurfaceContainer,
-        "onSurfaceContainerVariant" to colors.onSurfaceContainerVariant,
-        "surfaceContainerHigh" to colors.surfaceContainerHigh,
-        "onSurfaceContainerHigh" to colors.onSurfaceContainerHigh,
-        "surfaceContainerHighest" to colors.surfaceContainerHighest,
-        "onSurfaceContainerHighest" to colors.onSurfaceContainerHighest,
-        "outline" to colors.outline,
-        "dividerLine" to colors.dividerLine,
-        "windowDimming" to colors.windowDimming,
-        "sliderKeyPoint" to colors.sliderKeyPoint,
-        "sliderKeyPointForeground" to colors.sliderKeyPointForeground,
-    )
-    val colorBlocks = remember(colorList) {
-        val colorMap = colorList.toMap()
-        colorList.map { (name, color) ->
-            val (surfaceColor, textColor) = when {
-                name.startsWith("on") && colorMap.containsKey(name.removePrefix("on").replaceFirstChar { it.lowercase() }) -> {
-                    color to colorMap[name.removePrefix("on").replaceFirstChar { it.lowercase() }]!!
-                }
+private val PaletteHorizontalPadding = PaddingValues(horizontal = 16.dp)
 
-                !name.startsWith("on") && colorMap.containsKey("on" + name.replaceFirstChar { it.uppercase() }) -> {
-                    color to colorMap["on" + name.replaceFirstChar { it.uppercase() }]!!
-                }
-
-                else -> color to (if (color.luminance() > 0.5) Color.Black else Color.White)
-            }
-            val displayName = name.replace(CamelCaseRegex, " $1").trim().replaceFirstChar { it.uppercase() }
-            ColorBlockData(name, displayName, surfaceColor, textColor)
-        }
+private fun LazyListScope.colorPaletteSection(
+    keyPrefix: String,
+    title: String,
+    containerColor: Color,
+    rows: List<List<ColorBlockData>>,
+    bottomPadding: Boolean = true,
+) {
+    item(key = "${keyPrefix}_title", contentType = "palette_title") {
+        SmallTitle(title)
     }
-
-    Column(
-        modifier = Modifier.padding(top = 16.dp),
-    ) {
-        colorBlocks.chunked(2).forEach { rowColors ->
+    val lastRowIdx = rows.lastIndex
+    items(
+        count = rows.size,
+        key = { "${keyPrefix}_$it" },
+        contentType = { "color_row" },
+    ) { rowIdx ->
+        val rowColors = rows[rowIdx]
+        val isFirst = rowIdx == 0
+        val isLast = rowIdx == lastRowIdx
+        CardSegment(
+            isFirst = isFirst,
+            isLast = isLast,
+            color = containerColor,
+            outerBottomPadding = if (isLast && bottomPadding) 12.dp else 0.dp,
+            insidePadding = PaletteHorizontalPadding,
+        ) {
             Row(
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(
+                    top = if (isFirst) 16.dp else 0.dp,
+                    bottom = 16.dp,
+                ),
             ) {
                 rowColors.forEachIndexed { idx, block ->
                     ColorBlock(
@@ -259,6 +189,130 @@ fun ColorsPreview(colors: Colors) {
                     )
                 }
             }
+        }
+    }
+}
+
+private class ColorSlotSpec(
+    val displayName: String,
+    val partnerIndex: Int,
+    val extract: (Colors) -> Color,
+)
+
+private val ColorSlotSpecs: List<ColorSlotSpec> by lazy {
+    val rawSlots: List<Pair<String, (Colors) -> Color>> = listOf(
+        "primary" to { it.primary },
+        "onPrimary" to { it.onPrimary },
+        "primaryVariant" to { it.primaryVariant },
+        "onPrimaryVariant" to { it.onPrimaryVariant },
+        "error" to { it.error },
+        "onError" to { it.onError },
+        "errorContainer" to { it.errorContainer },
+        "onErrorContainer" to { it.onErrorContainer },
+        "disabledPrimary" to { it.disabledPrimary },
+        "disabledOnPrimary" to { it.disabledOnPrimary },
+        "disabledPrimaryButton" to { it.disabledPrimaryButton },
+        "disabledOnPrimaryButton" to { it.disabledOnPrimaryButton },
+        "disabledPrimarySlider" to { it.disabledPrimarySlider },
+        "primaryContainer" to { it.primaryContainer },
+        "onPrimaryContainer" to { it.onPrimaryContainer },
+        "secondary" to { it.secondary },
+        "onSecondary" to { it.onSecondary },
+        "secondaryVariant" to { it.secondaryVariant },
+        "onSecondaryVariant" to { it.onSecondaryVariant },
+        "disabledSecondary" to { it.disabledSecondary },
+        "disabledOnSecondary" to { it.disabledOnSecondary },
+        "disabledSecondaryVariant" to { it.disabledSecondaryVariant },
+        "disabledOnSecondaryVariant" to { it.disabledOnSecondaryVariant },
+        "secondaryContainer" to { it.secondaryContainer },
+        "onSecondaryContainer" to { it.onSecondaryContainer },
+        "secondaryContainerVariant" to { it.secondaryContainerVariant },
+        "onSecondaryContainerVariant" to { it.onSecondaryContainerVariant },
+        "tertiaryContainer" to { it.tertiaryContainer },
+        "onTertiaryContainer" to { it.onTertiaryContainer },
+        "tertiaryContainerVariant" to { it.tertiaryContainerVariant },
+        "background" to { it.background },
+        "onBackground" to { it.onBackground },
+        "onBackgroundVariant" to { it.onBackgroundVariant },
+        "surface" to { it.surface },
+        "onSurface" to { it.onSurface },
+        "surfaceVariant" to { it.surfaceVariant },
+        "onSurfaceSecondary" to { it.onSurfaceSecondary },
+        "onSurfaceVariantSummary" to { it.onSurfaceVariantSummary },
+        "onSurfaceVariantActions" to { it.onSurfaceVariantActions },
+        "disabledOnSurface" to { it.disabledOnSurface },
+        "surfaceContainer" to { it.surfaceContainer },
+        "onSurfaceContainer" to { it.onSurfaceContainer },
+        "onSurfaceContainerVariant" to { it.onSurfaceContainerVariant },
+        "surfaceContainerHigh" to { it.surfaceContainerHigh },
+        "onSurfaceContainerHigh" to { it.onSurfaceContainerHigh },
+        "surfaceContainerHighest" to { it.surfaceContainerHighest },
+        "onSurfaceContainerHighest" to { it.onSurfaceContainerHighest },
+        "outline" to { it.outline },
+        "dividerLine" to { it.dividerLine },
+        "windowDimming" to { it.windowDimming },
+        "sliderKeyPoint" to { it.sliderKeyPoint },
+        "sliderKeyPointForeground" to { it.sliderKeyPointForeground },
+    )
+    val nameToIndex = rawSlots.mapIndexed { idx, (name, _) -> name to idx }.toMap()
+    rawSlots.map { (name, extractor) ->
+        val partnerName = when {
+            name.startsWith("on") -> name.removePrefix("on").replaceFirstChar { it.lowercase() }
+            else -> "on" + name.replaceFirstChar { it.uppercase() }
+        }
+        val partnerIndex = nameToIndex[partnerName] ?: -1
+        val displayName = name.replace(CamelCaseRegex, " $1").trim().replaceFirstChar { it.uppercase() }
+        ColorSlotSpec(displayName = displayName, partnerIndex = partnerIndex, extract = extractor)
+    }
+}
+
+private val LightColorScheme by lazy { lightColorScheme() }
+private val DarkColorScheme by lazy { darkColorScheme() }
+private val LightColorRows by lazy { buildColorBlockRows(LightColorScheme) }
+private val DarkColorRows by lazy { buildColorBlockRows(DarkColorScheme) }
+
+@Volatile
+private var cachedDynamicLight: Pair<Colors, List<List<ColorBlockData>>>? = null
+
+@Volatile
+private var cachedDynamicDark: Pair<Colors, List<List<ColorBlockData>>>? = null
+
+private fun rememberDynamicColorRows(colors: Colors, isDark: Boolean): List<List<ColorBlockData>> {
+    val cached = if (isDark) cachedDynamicDark else cachedDynamicLight
+    if (cached != null && cached.first == colors) return cached.second
+    val built = buildColorBlockRows(colors)
+    val entry = colors to built
+    if (isDark) {
+        cachedDynamicDark = entry
+    } else {
+        cachedDynamicLight = entry
+    }
+    return built
+}
+
+private fun buildColorBlockRows(colors: Colors): List<List<ColorBlockData>> {
+    val specs = ColorSlotSpecs
+    val resolved = Array(specs.size) { i -> specs[i].extract(colors) }
+    val rowCount = (specs.size + 1) / 2
+    return List(rowCount) { row ->
+        val start = row * 2
+        val end = minOf(start + 2, specs.size)
+        List(end - start) { offset ->
+            val idx = start + offset
+            val spec = specs[idx]
+            val surfaceColor = resolved[idx]
+            val textColor = if (spec.partnerIndex >= 0) {
+                resolved[spec.partnerIndex]
+            } else if (surfaceColor.luminance() > 0.5f) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            ColorBlockData(
+                displayName = spec.displayName,
+                surfaceColor = surfaceColor,
+                textColor = textColor,
+            )
         }
     }
 }

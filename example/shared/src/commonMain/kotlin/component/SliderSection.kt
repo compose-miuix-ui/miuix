@@ -30,6 +30,10 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalSlider
 import top.yukonga.miuix.kmp.preference.RangeSliderPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
+import kotlin.math.roundToInt
+
+private val CustomKeyPoints = listOf(0f, 25f, 50f, 75f, 100f)
+private val CustomRangeKeyPoints = listOf(0f, 20f, 40f, 60f, 80f, 100f)
 
 /** Keeps standalone sliders' label and row spacing consistent with the preference demos. */
 fun LazyListScope.basicSliderSection() {
@@ -40,7 +44,7 @@ fun LazyListScope.basicSliderSection() {
             insideMargin = PaddingValues(16.dp),
         ) {
             var value by remember { mutableFloatStateOf(0.3f) }
-            Text(text = "Value: ${(value * 100).toInt()}%")
+            Text(text = "Value: ${(value * 100).roundToInt()}%")
             Slider(
                 value = value,
                 onValueChange = { value = it },
@@ -112,7 +116,7 @@ fun LazyListScope.sliderSection() {
                 value = sliderValue,
                 onValueChange = { sliderValue = it },
                 title = "Normal",
-                valueText = "${(sliderValue * 100).toInt()}%",
+                valueText = "${(sliderValue * 100).roundToInt()}%",
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var stepsValue by remember { mutableFloatStateOf(100f) }
@@ -120,7 +124,7 @@ fun LazyListScope.sliderSection() {
                 value = stepsValue,
                 onValueChange = { stepsValue = it },
                 title = "Steps",
-                valueText = "${stepsValue.toInt()}/200",
+                valueText = "${stepsValue.roundToInt()}/200",
                 valueRange = 0f..200f,
                 steps = 199,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
@@ -131,7 +135,7 @@ fun LazyListScope.sliderSection() {
                 value = stepsWithKeyPointsValue,
                 onValueChange = { stepsWithKeyPointsValue = it },
                 title = "Steps with Key Points",
-                valueText = "${stepsWithKeyPointsValue.toInt()}/8",
+                valueText = "${stepsWithKeyPointsValue.roundToInt()}/8",
                 valueRange = 0f..8f,
                 steps = 7,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
@@ -143,11 +147,11 @@ fun LazyListScope.sliderSection() {
                 value = customKeyPointsValue,
                 onValueChange = { customKeyPointsValue = it },
                 title = "Custom Key Points",
-                valueText = "${customKeyPointsValue.toInt()}%",
+                valueText = "${customKeyPointsValue.roundToInt()}%",
                 valueRange = 0f..100f,
                 showKeyPoints = true,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
+                keyPoints = CustomKeyPoints,
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             val disabledValue = 0.7f
@@ -155,7 +159,7 @@ fun LazyListScope.sliderSection() {
                 value = disabledValue,
                 onValueChange = {},
                 title = "Disabled",
-                valueText = "${(disabledValue * 100).toInt()}%",
+                valueText = "${(disabledValue * 100).roundToInt()}%",
                 enabled = false,
             )
         }
@@ -175,7 +179,7 @@ fun LazyListScope.rangeSliderSection() {
                 value = rangeValue,
                 onValueChange = { rangeValue = it },
                 title = "Range",
-                valueText = "${(rangeValue.start * 100).toInt()}% - ${(rangeValue.endInclusive * 100).toInt()}%",
+                valueText = "${(rangeValue.start * 100).roundToInt()}% - ${(rangeValue.endInclusive * 100).roundToInt()}%",
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var rangeStepsValue by remember { mutableStateOf(2f..8f) }
@@ -183,7 +187,7 @@ fun LazyListScope.rangeSliderSection() {
                 value = rangeStepsValue,
                 onValueChange = { rangeStepsValue = it },
                 title = "Range with Key Points",
-                valueText = "${rangeStepsValue.start.toInt()} - ${rangeStepsValue.endInclusive.toInt()}",
+                valueText = "${rangeStepsValue.start.roundToInt()} - ${rangeStepsValue.endInclusive.roundToInt()}",
                 valueRange = 0f..8f,
                 steps = 7,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
@@ -195,11 +199,11 @@ fun LazyListScope.rangeSliderSection() {
                 value = customRangeValue,
                 onValueChange = { customRangeValue = it },
                 title = "Custom Range Points",
-                valueText = "${customRangeValue.start.toInt()}% - ${customRangeValue.endInclusive.toInt()}%",
+                valueText = "${customRangeValue.start.roundToInt()}% - ${customRangeValue.endInclusive.roundToInt()}%",
                 valueRange = 0f..100f,
                 showKeyPoints = true,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                keyPoints = listOf(0f, 20f, 40f, 60f, 80f, 100f),
+                keyPoints = CustomRangeKeyPoints,
                 insideMargin = PaddingValues(16.dp, 16.dp, 16.dp, 0.dp),
             )
             var disabledRangeValue by remember { mutableStateOf(0.3f..0.7f) }
@@ -207,7 +211,7 @@ fun LazyListScope.rangeSliderSection() {
                 value = disabledRangeValue,
                 onValueChange = {},
                 title = "Disabled",
-                valueText = "${(disabledRangeValue.start * 100).toInt()}% - ${(disabledRangeValue.endInclusive * 100).toInt()}%",
+                valueText = "${(disabledRangeValue.start * 100).roundToInt()}% - ${(disabledRangeValue.endInclusive * 100).roundToInt()}%",
                 enabled = false,
             )
         }
@@ -241,7 +245,7 @@ fun LazyListScope.verticalSliderSection() {
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
-                        text = "Normal\n${(verticalValue1 * 100).toInt()}%",
+                        text = "Normal\n${(verticalValue1 * 100).roundToInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -261,7 +265,7 @@ fun LazyListScope.verticalSliderSection() {
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
-                        text = "Steps\n${verticalValue2.toInt()}/6",
+                        text = "Steps\n${verticalValue2.roundToInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -282,7 +286,7 @@ fun LazyListScope.verticalSliderSection() {
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
-                        text = "Points\n${verticalValue3.toInt()}/6",
+                        text = "Points\n${verticalValue3.roundToInt()}/6",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -299,11 +303,11 @@ fun LazyListScope.verticalSliderSection() {
                         valueRange = 0f..100f,
                         showKeyPoints = true,
                         hapticEffect = SliderDefaults.SliderHapticEffect.Step,
-                        keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
+                        keyPoints = CustomKeyPoints,
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
-                        text = "Custom\n${verticalValue4.toInt()}%",
+                        text = "Custom\n${verticalValue4.roundToInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -321,7 +325,7 @@ fun LazyListScope.verticalSliderSection() {
                         modifier = Modifier.size(25.dp, 160.dp),
                     )
                     Text(
-                        text = "Disabled\n${(disabledVerticalValue * 100).toInt()}%",
+                        text = "Disabled\n${(disabledVerticalValue * 100).roundToInt()}%",
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),

@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
+import component.navigationExpansionSection
 import navigation.Route
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -32,6 +35,8 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
@@ -44,6 +49,7 @@ import kotlin.random.Random
 fun NavTestPage(
     index: Int,
     padding: PaddingValues,
+    route: Route,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
@@ -61,6 +67,8 @@ fun NavTestPage(
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val navigator = LocalNavigator.current
+    val nextRouteId = rememberSaveable(route) { Random.nextLong().toString() }
+    val nextRoute = remember(nextRouteId) { Route.Navigation(nextRouteId) }
 
     Scaffold(
         topBar = {
@@ -73,7 +81,7 @@ fun NavTestPage(
                     color = barColor,
                     navigationIcon = {
                         BackNavigationIcon(
-                            onClick = { navigator.pop() },
+                            onClick = { if (navigator.current() == route) navigator.pop() },
                         )
                     },
                 )
@@ -94,6 +102,7 @@ fun NavTestPage(
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
                 ),
+                overscrollEffect = null,
                 contentPadding = contentPadding,
             ) {
                 item(key = "nav_continuous") {
@@ -104,7 +113,8 @@ fun NavTestPage(
                             ArrowPreference(
                                 title = "Push another Navigation page",
                                 summary = "Single push (animatedTop N -> N+1)",
-                                onClick = { navigator.push(Route.Navigation(Random.nextLong().toString())) },
+                                modifier = Modifier.navTransitionSource(nextRoute, containerColor = MiuixTheme.colorScheme.surfaceContainer, corners = NavTransitionCorners(16.dp, 16.dp, 0.dp, 0.dp), sourceKey = "pushNavigation"),
+                                onClick = { navigator.push(nextRoute) },
                             )
                             ArrowPreference(
                                 title = "Push three pages at once",
@@ -118,11 +128,12 @@ fun NavTestPage(
                             ArrowPreference(
                                 title = "Pop all Navigation pages",
                                 summary = "Continuous multi-pop back to the entry",
-                                onClick = { navigator.popUntil { it !is Route.Navigation } },
+                                onClick = { navigator.popUntil { it !is Route.Navigation && it !is Route.ExpansionDetail } },
                             )
                         }
                     }
                 }
+                navigationExpansionSection(origin = route.toString())
                 item(key = "nav_gesture") {
                     Column {
                         SmallTitle(text = "Gesture back")

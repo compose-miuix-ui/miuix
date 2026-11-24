@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AccessControl: ImageVector
 
 val MiuixIcons.Glass.Light.AccessControl: ImageVector
     get() {
-        if (_accessControlSurfaceLight != null) return _accessControlSurfaceLight!!
-        _accessControlSurfaceLight = buildHyperOSIcon(
+        if (_accessControlLight != null) return _accessControlLight!!
+        _accessControlLight = buildHyperOSIcon(
             name = "AccessControl.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(442.7f, 318.7f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.AccessControl: ImageVector
             translationY = 1061.4378f,
             autoMirror = false,
         )
-        return _accessControlSurfaceLight!!
+        return _accessControlLight!!
     }
 
-private var _accessControlSurfaceLight: ImageVector? = null
+private var _accessControlLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AccessControl: ImageVector
     get() {
-        if (_accessControlSurfaceNormal != null) return _accessControlSurfaceNormal!!
-        _accessControlSurfaceNormal = buildHyperOSIcon(
+        if (_accessControlNormal != null) return _accessControlNormal!!
+        _accessControlNormal = buildHyperOSIcon(
             name = "AccessControl.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(451.8f, 319.6f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.AccessControl: ImageVector
             translationY = 1061.5951f,
             autoMirror = false,
         )
-        return _accessControlSurfaceNormal!!
+        return _accessControlNormal!!
     }
 
-private var _accessControlSurfaceNormal: ImageVector? = null
+private var _accessControlNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AccessControl: ImageVector
     get() {
-        if (_accessControlSurfaceRegular != null) return _accessControlSurfaceRegular!!
-        _accessControlSurfaceRegular = buildHyperOSIcon(
+        if (_accessControlRegular != null) return _accessControlRegular!!
+        _accessControlRegular = buildHyperOSIcon(
             name = "AccessControl.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(456f, 320f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.AccessControl: ImageVector
             translationY = 1061.6667f,
             autoMirror = false,
         )
-        return _accessControlSurfaceRegular!!
+        return _accessControlRegular!!
     }
 
-private var _accessControlSurfaceRegular: ImageVector? = null
+private var _accessControlRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AccessControl: ImageVector
     get() {
-        if (_accessControlSurfaceMedium != null) return _accessControlSurfaceMedium!!
-        _accessControlSurfaceMedium = buildHyperOSIcon(
+        if (_accessControlMedium != null) return _accessControlMedium!!
+        _accessControlMedium = buildHyperOSIcon(
             name = "AccessControl.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(463.3f, 320.9f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.AccessControl: ImageVector
             translationY = 1061.7004f,
             autoMirror = false,
         )
-        return _accessControlSurfaceMedium!!
+        return _accessControlMedium!!
     }
 
-private var _accessControlSurfaceMedium: ImageVector? = null
+private var _accessControlMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AccessControl: ImageVector
     get() {
-        if (_accessControlSurfaceDemibold != null) return _accessControlSurfaceDemibold!!
-        _accessControlSurfaceDemibold = buildHyperOSIcon(
+        if (_accessControlDemibold != null) return _accessControlDemibold!!
+        _accessControlDemibold = buildHyperOSIcon(
             name = "AccessControl.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(468.4f, 321.6f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.AccessControl: ImageVector
             translationY = 1061.7241f,
             autoMirror = false,
         )
-        return _accessControlSurfaceDemibold!!
+        return _accessControlDemibold!!
     }
 
-private var _accessControlSurfaceDemibold: ImageVector? = null
+private var _accessControlDemibold: ImageVector? = null
 

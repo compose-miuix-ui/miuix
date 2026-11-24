@@ -5,7 +5,7 @@ package top.yukonga.miuix.kmp.material
 
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.LayoutDirection
  *   between them interpolate. The glass renderer uses this value; [Modifier.clip] and
  *   [createOutline] use a plain rounded rectangle.
  */
-@Immutable
+@Stable
 class GlassShape(
     topStart: CornerSize,
     topEnd: CornerSize,

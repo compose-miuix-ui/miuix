@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.captionBarPadding
 import androidx.compose.foundation.layout.displayCutout
@@ -28,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -137,9 +139,14 @@ internal fun DialogContentLayout(
     val internalVisible = remember { mutableStateOf(false) }
     // Whether the last opening animation ran to rest; a close before that is an interruption.
     val enterSettled = remember { mutableStateOf(false) }
-    val blockTouches = remember { mutableStateOf(false) }
 
     val density = LocalDensity.current
+    val navBarInsets = WindowInsets.navigationBars
+    val captionBarInsets = WindowInsets.captionBar
+    val dialogHeightPx = remember { mutableIntStateOf(0) }
+    val dialogWidthPx = remember { mutableIntStateOf(0) }
+    val backProgress = remember { Animatable(0f) }
+    val dimAlpha = remember { mutableFloatStateOf(1f) }
     val imeInsets = WindowInsets.ime
     val keyboardController = LocalSoftwareKeyboardController.current
     val isLargeScreen = largeScreen ?: DialogDefaults.isLargeScreen()
@@ -151,8 +158,9 @@ internal fun DialogContentLayout(
         val motionAtStart = currentMotion
         if (show) {
             internalVisible.value = true
-            blockTouches.value = true
             enterSettled.value = false
+            backProgress.snapTo(0f)
+            dimAlpha.floatValue = 1f
             if (enableWindowDim) {
                 launch { dimProgress.animateTo(1f, motionAtStart.dimEnterSpec()) }
             }
@@ -170,23 +178,36 @@ internal fun DialogContentLayout(
             if (imeInsets.getBottom(density) > 0) {
                 keyboardController?.hide()
             }
-            // The scrim may outlast the panel (the default motion fades it over 350 ms against a
-            // 200 ms panel); like the platform dialog, it is cut when the panel finishes.
-            val dimJob = if (enableWindowDim) {
-                launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec()) }
+            val exitSpec = motionAtStart.exitSpec(interrupted = !enterSettled.value)
+            val offScreenTarget = if (!largeAtStart && dialogHeightPx.intValue > 0) {
+                val insetBottom = if (defaultWindowInsetsPadding) {
+                    maxOf(
+                        imeInsets.getBottom(density),
+                        navBarInsets.getBottom(density) + captionBarInsets.getBottom(density),
+                    )
+                } else {
+                    0
+                }
+                val offScreen = dialogHeightPx.intValue + with(density) { outsideMargin.height.toPx() } + insetBottom
+                val oneDpPx = with(density) { 1.dp.toPx() }
+                if (offScreen > 0f) (backProgress.value + oneDpPx / offScreen).coerceIn(0f, 1f) else null
             } else {
                 null
             }
-            val exitSpec = motionAtStart.exitSpec(interrupted = !enterSettled.value)
-            val touchReleaseJob = launch {
-                snapshotFlow {
-                    if (largeAtStart && motionAtStart.isGlass) {
-                        alphaProgress.value <= 0.33f
-                    } else {
-                        animationProgress.value <= 0.02f
-                    }
-                }.first { it }
-                blockTouches.value = false
+            val exitMs = if (offScreenTarget != null) {
+                findExitThresholdMillis(
+                    animationSpec = exitSpec,
+                    initialValue = animationProgress.value,
+                    targetThreshold = offScreenTarget,
+                    initialVelocity = animationProgress.velocity,
+                )
+            } else {
+                null
+            }
+            val dimJob = if (enableWindowDim) {
+                launch { dimProgress.animateTo(0f, motionAtStart.dimExitSpec(exitMs)) }
+            } else {
+                null
             }
             coroutineScope {
                 when {
@@ -198,15 +219,21 @@ internal fun DialogContentLayout(
                         animationProgress.animateTo(0f, exitSpec)
                     }
 
+                    offScreenTarget != null -> {
+                        val slideJob = launch { animationProgress.animateTo(0f, exitSpec) }
+                        snapshotFlow { animationProgress.value <= offScreenTarget }.first { it }
+                        slideJob.cancel()
+                    }
+
                     else -> animationProgress.animateTo(0f, exitSpec)
                 }
             }
-            touchReleaseJob.cancel()
-            blockTouches.value = false
             dimJob?.cancel()
             dimProgress.snapTo(0f)
             animationProgress.snapTo(0f)
             alphaProgress.snapTo(0f)
+            backProgress.snapTo(0f)
+            dimAlpha.floatValue = 1f
             internalVisible.value = false
             currentOnDismissFinished?.invoke()
         }
@@ -215,10 +242,6 @@ internal fun DialogContentLayout(
     if (!show && !internalVisible.value) return
 
     val coroutineScope = rememberCoroutineScope()
-    val dimAlpha = remember { mutableFloatStateOf(1f) }
-    val dialogHeightPx = remember { mutableIntStateOf(0) }
-    val dialogWidthPx = remember { mutableIntStateOf(0) }
-    val backProgress = remember { Animatable(0f) }
     val scrimColor = remember(dimColor, enableWindowDim, dimAlpha, dimProgress) {
         computedStateOf {
             if (enableWindowDim) {
@@ -297,7 +320,6 @@ internal fun DialogContentLayout(
         }
 
         DialogContent(
-            show = blockTouches.value,
             title = title,
             titleColor = titleColor,
             summary = summary,
@@ -334,7 +356,6 @@ internal fun DialogContentLayout(
 @Suppress("ktlint:compose:modifier-not-used-at-root", "ktlint:compose:state-param-check")
 @Composable
 internal fun DialogContent(
-    show: Boolean,
     title: String?,
     titleColor: Color,
     summary: String?,
@@ -383,13 +404,12 @@ internal fun DialogContent(
     val surfaceModifier = surface?.invoke(surfaceScope)
         ?: Modifier.squircleSurface(color = backgroundColor, cornerRadius = resolvedCornerRadius)
 
-    val calculatedTopInset = if (topInset != null) {
-        topInset
-    } else {
-        val statusBars = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        val captionBar = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-        val displayCutout = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-        maxOf(statusBars, captionBar, displayCutout)
+    val calculatedTopInset = topInset ?: with(density) {
+        maxOf(
+            WindowInsets.statusBars.getTop(this),
+            WindowInsets.captionBar.getTop(this),
+            WindowInsets.displayCutout.getTop(this),
+        ).toDp()
     }
 
     // Slide distance and predictive-back translation pad (small-screen only). Pre-converted to px
@@ -402,38 +422,41 @@ internal fun DialogContent(
     val navBarInsets = WindowInsets.navigationBars
     val captionBarInsets = WindowInsets.captionBar
     val contentModifier = Modifier
-        .graphicsLayer {
-            // Apply the open/close and predictive back animations; branch inside the block so the
-            // modifier chain produces a single graphicsLayer node instead of swapping nodes per
-            // recomposition. Must precede the user modifier so its draw modifiers follow the
-            // transform (issue #373).
+        .then(
             if (isLargeScreen) {
-                val scale = enterScale.value * (1f - backProgress.value * 0.2f)
-                scaleX = scale
-                scaleY = scale
-                alpha = alphaProgress.value.coerceIn(0f, 1f)
-            } else {
-                // Rest the panel just below the screen edge when hidden, as the platform dialog
-                // does: its own height plus the margin and insets beneath it, keyboard included.
-                val anim = animationProgress.value
-                val back = backProgress.value
-                if (anim >= 1f && back <= 0f) {
-                    translationY = 0f
-                } else {
-                    val insetBottom = if (defaultWindowInsetsPadding) {
-                        maxOf(
-                            imeInsets.getBottom(this),
-                            navBarInsets.getBottom(this) + captionBarInsets.getBottom(this),
-                        )
-                    } else {
-                        0
-                    }
-                    val offScreen = size.height + outsideMarginBottomPx + insetBottom
-                    translationY = (1f - anim) * offScreen + back * offScreen
+                Modifier.graphicsLayer {
+                    val scale = enterScale.value * (1f - backProgress.value * 0.2f)
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = alphaProgress.value.coerceIn(0f, 1f)
                 }
-                alpha = 1f
-            }
-        }
+            } else {
+                Modifier.layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        // Rest the panel just below the screen edge when hidden, as the platform dialog
+                        // does: its own height plus the margin and insets beneath it, keyboard included.
+                        val anim = animationProgress.value
+                        val back = backProgress.value
+                        val offsetY = if (anim == 1f && back <= 0f) {
+                            0
+                        } else {
+                            val insetBottom = if (defaultWindowInsetsPadding) {
+                                maxOf(
+                                    imeInsets.getBottom(density),
+                                    navBarInsets.getBottom(density) + captionBarInsets.getBottom(density),
+                                )
+                            } else {
+                                0
+                            }
+                            val offScreen = placeable.height + outsideMarginBottomPx + insetBottom
+                            ((1f - anim) * offScreen + back * offScreen).fastRoundToInt()
+                        }
+                        placeable.placeRelative(0, offsetY)
+                    }
+                }
+            },
+        )
         .then(modifier)
         .widthIn(max = maxWidth)
         .heightIn(max = if (isLargeScreen) windowHeight * (2f / 3f) else Dp.Unspecified)
@@ -441,15 +464,9 @@ internal fun DialogContent(
             dialogHeightPx.intValue = size.height
             dialogWidthPx.intValue = size.width
         }
-        .then(
-            if (show) {
-                Modifier.pointerInput(Unit) {
-                    detectTapGestures { /* Consume click */ }
-                }
-            } else {
-                Modifier
-            },
-        )
+        .pointerInput(Unit) {
+            detectTapGestures { /* Consume click */ }
+        }
         .then(surfaceModifier)
         .padding(horizontal = insideMargin.width, vertical = insideMargin.height)
 
@@ -466,24 +483,17 @@ internal fun DialogContent(
                 },
             )
             .fillMaxSize()
-            .then(
-                if (show) {
-                    Modifier
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = { currentOnDismiss?.invoke() },
-                            )
-                        }
-                        .semantics {
-                            onClick(label = "Dismiss") {
-                                currentOnDismiss?.invoke()
-                                true
-                            }
-                        }
-                } else {
-                    Modifier
-                },
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { currentOnDismiss?.invoke() },
+                )
+            }
+            .semantics {
+                onClick(label = "Dismiss") {
+                    currentOnDismiss?.invoke()
+                    true
+                }
+            }
             .padding(horizontal = outsideMargin.width)
             .padding(top = calculatedTopInset, bottom = outsideMargin.height),
     ) {
@@ -521,6 +531,7 @@ object DialogDefaults {
      * compact -> expanded boundary (840 dp width / 480 dp height).
      */
     @Composable
+    @ReadOnlyComposable
     internal fun isLargeScreen(): Boolean {
         val windowInfo = LocalWindowInfo.current
         val windowWidth = windowInfo.containerDpSize.width
@@ -532,18 +543,21 @@ object DialogDefaults {
      * The default color of the title.
      */
     @Composable
+    @ReadOnlyComposable
     fun titleColor() = MiuixTheme.colorScheme.onBackground
 
     /**
      * The default color of the summary.
      */
     @Composable
+    @ReadOnlyComposable
     fun summaryColor() = MiuixTheme.colorScheme.onSurfaceSecondary
 
     /**
      * The default background color of the dialog.
      */
     @Composable
+    @ReadOnlyComposable
     fun backgroundColor() = MiuixTheme.colorScheme.background
 
     /**

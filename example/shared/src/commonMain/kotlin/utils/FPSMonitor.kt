@@ -152,13 +152,20 @@ internal data class FpsStats(val avg: Int, val low1: Int) {
 
 internal data class AvgTick(val timeNs: Long, val avg: Int)
 
-internal fun computeFpsStats(samples: ArrayDeque<Long>, sumNs: Long): FpsStats {
+internal fun computeFpsStats(
+    samples: ArrayDeque<Long>,
+    sumNs: Long,
+    scratchBuffer: LongArray = LongArray(samples.size),
+): FpsStats {
     val size = samples.size
     val avgNs = sumNs.toDouble() / size
-    val sorted = samples.toLongArray().also { it.sort() }
+    for (i in 0 until size) {
+        scratchBuffer[i] = samples[i]
+    }
+    scratchBuffer.sort(0, size)
     val low1Count = (size / 100).coerceAtLeast(1)
     var low1SumNs = 0L
-    for (i in size - low1Count until size) low1SumNs += sorted[i]
+    for (i in size - low1Count until size) low1SumNs += scratchBuffer[i]
     val low1AvgNs = low1SumNs.toDouble() / low1Count
     return FpsStats(
         avg = (NS_PER_SECOND / avgNs).toInt(),
@@ -171,7 +178,7 @@ internal class FpsSampleCollector {
     private val avgHistory = ArrayDeque<AvgTick>(REF_HISTORY_CAP)
     private var sumNs = 0L
     private var nextRefreshNs = 0L
-
+    private val sortBuffer = LongArray(WINDOW_FRAME_CAP)
     fun record(
         durationNs: Long,
         timestampNs: Long,
@@ -186,7 +193,7 @@ internal class FpsSampleCollector {
             sumNs -= samples.removeFirst()
         }
         if (timestampNs >= nextRefreshNs && samples.size >= MIN_SAMPLES) {
-            val newStats = computeFpsStats(samples, sumNs)
+            val newStats = computeFpsStats(samples, sumNs, sortBuffer)
             avgHistory.addLast(AvgTick(timestampNs, newStats.avg))
             while (avgHistory.size > 1 && timestampNs - avgHistory.first().timeNs > REF_HISTORY_NS) {
                 avgHistory.removeFirst()

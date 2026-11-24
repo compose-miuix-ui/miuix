@@ -11,7 +11,7 @@ popupHost: MiuixPopupHost
 
 # GlassDialog
 
-`GlassDialog` 是用于确认操作和输入内容的玻璃对话框。它提供布局、动画、关闭行为和 `GlassDialogButton` 操作按钮。显隐使用 HyperOS 桌面对话框动效 `DialogMotion.Glass`。
+`GlassDialog` 是用于确认操作和输入内容的玻璃对话框。它提供布局、动画、关闭行为和 `GlassDialogButton` 操作按钮。
 
 <div style="position: relative; height: 280px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassDialog" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -188,7 +188,7 @@ Scaffold { padding ->
 
 ### 为现有对话框应用玻璃材质
 
-已有 `OverlayDialog` 管理布局与显示状态时，可以使用表面工厂。沿用基本示例的 `showDialog` 和不含弹窗的 `backdrop`（传入 `DialogMotion.Glass` 以保持玻璃对话框的动效）：
+已有 `OverlayDialog` 管理布局与显示状态时，可以使用表面工厂。沿用基本示例的 `showDialog` 和不含弹窗的 `backdrop`：
 
 ```kotlin
 OverlayDialog(

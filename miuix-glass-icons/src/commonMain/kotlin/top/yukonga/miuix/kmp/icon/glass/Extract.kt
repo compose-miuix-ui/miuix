@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Extract: ImageVector
 
 val MiuixIcons.Glass.Light.Extract: ImageVector
     get() {
-        if (_extractLineLight != null) return _extractLineLight!!
-        _extractLineLight = buildHyperOSIcon(
+        if (_extractLight != null) return _extractLight!!
+        _extractLight = buildHyperOSIcon(
             name = "Extract.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(422.2f, 538.9f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Light.Extract: ImageVector
             translationY = 1042.1433f,
             autoMirror = false,
         )
-        return _extractLineLight!!
+        return _extractLight!!
     }
 
-private var _extractLineLight: ImageVector? = null
+private var _extractLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Extract: ImageVector
     get() {
-        if (_extractLineNormal != null) return _extractLineNormal!!
-        _extractLineNormal = buildHyperOSIcon(
+        if (_extractNormal != null) return _extractNormal!!
+        _extractNormal = buildHyperOSIcon(
             name = "Extract.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(420.7f, 541f),
@@ -285,15 +285,15 @@ val MiuixIcons.Glass.Normal.Extract: ImageVector
             translationY = 1042.1643f,
             autoMirror = false,
         )
-        return _extractLineNormal!!
+        return _extractNormal!!
     }
 
-private var _extractLineNormal: ImageVector? = null
+private var _extractNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Extract: ImageVector
     get() {
-        if (_extractLineRegular != null) return _extractLineRegular!!
-        _extractLineRegular = buildHyperOSIcon(
+        if (_extractRegular != null) return _extractRegular!!
+        _extractRegular = buildHyperOSIcon(
             name = "Extract.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(420f, 542f),
@@ -425,15 +425,15 @@ val MiuixIcons.Glass.Regular.Extract: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _extractLineRegular!!
+        return _extractRegular!!
     }
 
-private var _extractLineRegular: ImageVector? = null
+private var _extractRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Extract: ImageVector
     get() {
-        if (_extractLineMedium != null) return _extractLineMedium!!
-        _extractLineMedium = buildHyperOSIcon(
+        if (_extractMedium != null) return _extractMedium!!
+        _extractMedium = buildHyperOSIcon(
             name = "Extract.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(415.9f, 543.1f),
@@ -565,15 +565,15 @@ val MiuixIcons.Glass.Medium.Extract: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _extractLineMedium!!
+        return _extractMedium!!
     }
 
-private var _extractLineMedium: ImageVector? = null
+private var _extractMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Extract: ImageVector
     get() {
-        if (_extractLineDemibold != null) return _extractLineDemibold!!
-        _extractLineDemibold = buildHyperOSIcon(
+        if (_extractDemibold != null) return _extractDemibold!!
+        _extractDemibold = buildHyperOSIcon(
             name = "Extract.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(413.1f, 543.8f),
@@ -705,8 +705,8 @@ val MiuixIcons.Glass.Demibold.Extract: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _extractLineDemibold!!
+        return _extractDemibold!!
     }
 
-private var _extractLineDemibold: ImageVector? = null
+private var _extractDemibold: ImageVector? = null
 

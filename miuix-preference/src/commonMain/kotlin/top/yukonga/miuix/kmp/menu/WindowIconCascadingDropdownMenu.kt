@@ -182,7 +182,7 @@ fun WindowIconCascadingDropdownMenu(
         }
     }
 
-    val nonEmptyEntries = entries.filter { it.items.isNotEmpty() }
+    val nonEmptyEntries = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val actualEnabled = enabled && nonEmptyEntries.isNotEmpty()
     val handleClick = remember(actualEnabled) {
         {
@@ -195,6 +195,8 @@ fun WindowIconCascadingDropdownMenu(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     Box(modifier = modifier) {
         IconButton(
@@ -211,8 +213,8 @@ fun WindowIconCascadingDropdownMenu(
             WindowCascadingListPopup(
                 show = isDropdownExpanded.value,
                 entries = nonEmptyEntries,
-                onDismissRequest = { setExpanded(false) },
-                onDismissFinished = { isHoldDown.value = false },
+                onDismissRequest = onDismissPopup,
+                onDismissFinished = onDismissFinishedPopup,
                 maxHeight = maxHeight,
                 dropdownColors = dropdownColors,
                 collapseOnSelection = collapseOnSelection,

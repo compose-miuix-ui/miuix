@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CurrencyConversion: ImageVector
 
 val MiuixIcons.Glass.Light.CurrencyConversion: ImageVector
     get() {
-        if (_currencyConversionSurfaceLight != null) return _currencyConversionSurfaceLight!!
-        _currencyConversionSurfaceLight = buildHyperOSIcon(
+        if (_currencyConversionLight != null) return _currencyConversionLight!!
+        _currencyConversionLight = buildHyperOSIcon(
             name = "CurrencyConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(141.6f, 298.8f),
@@ -99,15 +99,15 @@ val MiuixIcons.Glass.Light.CurrencyConversion: ImageVector
             translationY = 1045.2776f,
             autoMirror = false,
         )
-        return _currencyConversionSurfaceLight!!
+        return _currencyConversionLight!!
     }
 
-private var _currencyConversionSurfaceLight: ImageVector? = null
+private var _currencyConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CurrencyConversion: ImageVector
     get() {
-        if (_currencyConversionSurfaceNormal != null) return _currencyConversionSurfaceNormal!!
-        _currencyConversionSurfaceNormal = buildHyperOSIcon(
+        if (_currencyConversionNormal != null) return _currencyConversionNormal!!
+        _currencyConversionNormal = buildHyperOSIcon(
             name = "CurrencyConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(130.9f, 296.2f),
@@ -193,15 +193,15 @@ val MiuixIcons.Glass.Normal.CurrencyConversion: ImageVector
             translationY = 1050.0135f,
             autoMirror = false,
         )
-        return _currencyConversionSurfaceNormal!!
+        return _currencyConversionNormal!!
     }
 
-private var _currencyConversionSurfaceNormal: ImageVector? = null
+private var _currencyConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CurrencyConversion: ImageVector
     get() {
-        if (_currencyConversionSurfaceRegular != null) return _currencyConversionSurfaceRegular!!
-        _currencyConversionSurfaceRegular = buildHyperOSIcon(
+        if (_currencyConversionRegular != null) return _currencyConversionRegular!!
+        _currencyConversionRegular = buildHyperOSIcon(
             name = "CurrencyConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(126f, 295f),
@@ -287,15 +287,15 @@ val MiuixIcons.Glass.Regular.CurrencyConversion: ImageVector
             translationY = 1052.1667f,
             autoMirror = false,
         )
-        return _currencyConversionSurfaceRegular!!
+        return _currencyConversionRegular!!
     }
 
-private var _currencyConversionSurfaceRegular: ImageVector? = null
+private var _currencyConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CurrencyConversion: ImageVector
     get() {
-        if (_currencyConversionSurfaceMedium != null) return _currencyConversionSurfaceMedium!!
-        _currencyConversionSurfaceMedium = buildHyperOSIcon(
+        if (_currencyConversionMedium != null) return _currencyConversionMedium!!
+        _currencyConversionMedium = buildHyperOSIcon(
             name = "CurrencyConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(117.4f, 290.1f),
@@ -381,15 +381,15 @@ val MiuixIcons.Glass.Medium.CurrencyConversion: ImageVector
             translationY = 1050.0045f,
             autoMirror = false,
         )
-        return _currencyConversionSurfaceMedium!!
+        return _currencyConversionMedium!!
     }
 
-private var _currencyConversionSurfaceMedium: ImageVector? = null
+private var _currencyConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CurrencyConversion: ImageVector
     get() {
-        if (_currencyConversionSurfaceDemibold != null) return _currencyConversionSurfaceDemibold!!
-        _currencyConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_currencyConversionDemibold != null) return _currencyConversionDemibold!!
+        _currencyConversionDemibold = buildHyperOSIcon(
             name = "CurrencyConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(111.3f, 286.7f),
@@ -475,8 +475,8 @@ val MiuixIcons.Glass.Demibold.CurrencyConversion: ImageVector
             translationY = 1048.4909f,
             autoMirror = false,
         )
-        return _currencyConversionSurfaceDemibold!!
+        return _currencyConversionDemibold!!
     }
 
-private var _currencyConversionSurfaceDemibold: ImageVector? = null
+private var _currencyConversionDemibold: ImageVector? = null
 

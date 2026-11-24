@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AfterSalesPolicy: ImageVector
 
 val MiuixIcons.Glass.Light.AfterSalesPolicy: ImageVector
     get() {
-        if (_afterSalesPolicySurfaceLight != null) return _afterSalesPolicySurfaceLight!!
-        _afterSalesPolicySurfaceLight = buildHyperOSIcon(
+        if (_afterSalesPolicyLight != null) return _afterSalesPolicyLight!!
+        _afterSalesPolicyLight = buildHyperOSIcon(
             name = "AfterSalesPolicy.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1055f, 779.1f),
@@ -92,15 +92,15 @@ val MiuixIcons.Glass.Light.AfterSalesPolicy: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _afterSalesPolicySurfaceLight!!
+        return _afterSalesPolicyLight!!
     }
 
-private var _afterSalesPolicySurfaceLight: ImageVector? = null
+private var _afterSalesPolicyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AfterSalesPolicy: ImageVector
     get() {
-        if (_afterSalesPolicySurfaceNormal != null) return _afterSalesPolicySurfaceNormal!!
-        _afterSalesPolicySurfaceNormal = buildHyperOSIcon(
+        if (_afterSalesPolicyNormal != null) return _afterSalesPolicyNormal!!
+        _afterSalesPolicyNormal = buildHyperOSIcon(
             name = "AfterSalesPolicy.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1060.5f, 781.8f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Normal.AfterSalesPolicy: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _afterSalesPolicySurfaceNormal!!
+        return _afterSalesPolicyNormal!!
     }
 
-private var _afterSalesPolicySurfaceNormal: ImageVector? = null
+private var _afterSalesPolicyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AfterSalesPolicy: ImageVector
     get() {
-        if (_afterSalesPolicySurfaceRegular != null) return _afterSalesPolicySurfaceRegular!!
-        _afterSalesPolicySurfaceRegular = buildHyperOSIcon(
+        if (_afterSalesPolicyRegular != null) return _afterSalesPolicyRegular!!
+        _afterSalesPolicyRegular = buildHyperOSIcon(
             name = "AfterSalesPolicy.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1063f, 783f),
@@ -266,15 +266,15 @@ val MiuixIcons.Glass.Regular.AfterSalesPolicy: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _afterSalesPolicySurfaceRegular!!
+        return _afterSalesPolicyRegular!!
     }
 
-private var _afterSalesPolicySurfaceRegular: ImageVector? = null
+private var _afterSalesPolicyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AfterSalesPolicy: ImageVector
     get() {
-        if (_afterSalesPolicySurfaceMedium != null) return _afterSalesPolicySurfaceMedium!!
-        _afterSalesPolicySurfaceMedium = buildHyperOSIcon(
+        if (_afterSalesPolicyMedium != null) return _afterSalesPolicyMedium!!
+        _afterSalesPolicyMedium = buildHyperOSIcon(
             name = "AfterSalesPolicy.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1067.9f, 785.4f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Medium.AfterSalesPolicy: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _afterSalesPolicySurfaceMedium!!
+        return _afterSalesPolicyMedium!!
     }
 
-private var _afterSalesPolicySurfaceMedium: ImageVector? = null
+private var _afterSalesPolicyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AfterSalesPolicy: ImageVector
     get() {
-        if (_afterSalesPolicySurfaceDemibold != null) return _afterSalesPolicySurfaceDemibold!!
-        _afterSalesPolicySurfaceDemibold = buildHyperOSIcon(
+        if (_afterSalesPolicyDemibold != null) return _afterSalesPolicyDemibold!!
+        _afterSalesPolicyDemibold = buildHyperOSIcon(
             name = "AfterSalesPolicy.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1071.3f, 787.1f),
@@ -440,8 +440,8 @@ val MiuixIcons.Glass.Demibold.AfterSalesPolicy: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _afterSalesPolicySurfaceDemibold!!
+        return _afterSalesPolicyDemibold!!
     }
 
-private var _afterSalesPolicySurfaceDemibold: ImageVector? = null
+private var _afterSalesPolicyDemibold: ImageVector? = null
 

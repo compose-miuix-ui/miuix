@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Talkback: ImageVector
 
 val MiuixIcons.Glass.Light.Talkback: ImageVector
     get() {
-        if (_talkbackSurfaceLight != null) return _talkbackSurfaceLight!!
-        _talkbackSurfaceLight = buildHyperOSIcon(
+        if (_talkbackLight != null) return _talkbackLight!!
+        _talkbackLight = buildHyperOSIcon(
             name = "Talkback.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(297.6f, 799.6f),
@@ -92,15 +92,15 @@ val MiuixIcons.Glass.Light.Talkback: ImageVector
             translationY = 1029.1655f,
             autoMirror = false,
         )
-        return _talkbackSurfaceLight!!
+        return _talkbackLight!!
     }
 
-private var _talkbackSurfaceLight: ImageVector? = null
+private var _talkbackLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Talkback: ImageVector
     get() {
-        if (_talkbackSurfaceNormal != null) return _talkbackSurfaceNormal!!
-        _talkbackSurfaceNormal = buildHyperOSIcon(
+        if (_talkbackNormal != null) return _talkbackNormal!!
+        _talkbackNormal = buildHyperOSIcon(
             name = "Talkback.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(297.9f, 802.6f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Normal.Talkback: ImageVector
             translationY = 1026.3332f,
             autoMirror = false,
         )
-        return _talkbackSurfaceNormal!!
+        return _talkbackNormal!!
     }
 
-private var _talkbackSurfaceNormal: ImageVector? = null
+private var _talkbackNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Talkback: ImageVector
     get() {
-        if (_talkbackSurfaceRegular != null) return _talkbackSurfaceRegular!!
-        _talkbackSurfaceRegular = buildHyperOSIcon(
+        if (_talkbackRegular != null) return _talkbackRegular!!
+        _talkbackRegular = buildHyperOSIcon(
             name = "Talkback.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(298f, 804f),
@@ -266,15 +266,15 @@ val MiuixIcons.Glass.Regular.Talkback: ImageVector
             translationY = 1025.0454f,
             autoMirror = false,
         )
-        return _talkbackSurfaceRegular!!
+        return _talkbackRegular!!
     }
 
-private var _talkbackSurfaceRegular: ImageVector? = null
+private var _talkbackRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Talkback: ImageVector
     get() {
-        if (_talkbackSurfaceMedium != null) return _talkbackSurfaceMedium!!
-        _talkbackSurfaceMedium = buildHyperOSIcon(
+        if (_talkbackMedium != null) return _talkbackMedium!!
+        _talkbackMedium = buildHyperOSIcon(
             name = "Talkback.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(298.3f, 806.2f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Medium.Talkback: ImageVector
             translationY = 1020.1807f,
             autoMirror = false,
         )
-        return _talkbackSurfaceMedium!!
+        return _talkbackMedium!!
     }
 
-private var _talkbackSurfaceMedium: ImageVector? = null
+private var _talkbackMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Talkback: ImageVector
     get() {
-        if (_talkbackSurfaceDemibold != null) return _talkbackSurfaceDemibold!!
-        _talkbackSurfaceDemibold = buildHyperOSIcon(
+        if (_talkbackDemibold != null) return _talkbackDemibold!!
+        _talkbackDemibold = buildHyperOSIcon(
             name = "Talkback.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(298.5f, 807.7f),
@@ -440,8 +440,8 @@ val MiuixIcons.Glass.Demibold.Talkback: ImageVector
             translationY = 1016.7749f,
             autoMirror = false,
         )
-        return _talkbackSurfaceDemibold!!
+        return _talkbackDemibold!!
     }
 
-private var _talkbackSurfaceDemibold: ImageVector? = null
+private var _talkbackDemibold: ImageVector? = null
 

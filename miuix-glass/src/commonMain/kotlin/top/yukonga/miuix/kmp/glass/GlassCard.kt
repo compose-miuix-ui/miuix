@@ -10,6 +10,7 @@ import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -109,6 +110,8 @@ object GlassCardDefaults {
 
     private const val LIGHT_ALPHA: Float = 0x8C / 255f
     private const val DARK_ALPHA: Float = 0x14 / 255f
+    private const val DYNAMIC_LIGHT_ALPHA: Float = 0.62f
+    private const val DYNAMIC_DARK_ALPHA: Float = 0.12f
 
     /** Translucent fill for the current theme. */
     @Composable
@@ -117,8 +120,14 @@ object GlassCardDefaults {
         val scheme = MiuixTheme.colorScheme
         val isDark = scheme.background.luminance() < 0.5f
         return when {
+            MiuixTheme.isDynamicColor -> if (isDark) {
+                lerp(scheme.onSurfaceContainer, scheme.secondaryContainer, 0.30f).copy(alpha = DYNAMIC_DARK_ALPHA)
+            } else {
+                lerp(scheme.background, scheme.secondaryContainer, 0.32f).copy(alpha = DYNAMIC_LIGHT_ALPHA)
+            }
+
             isDark -> scheme.onSurfaceContainer.copy(alpha = DARK_ALPHA)
-            MiuixTheme.isDynamicColor -> scheme.background.copy(alpha = LIGHT_ALPHA)
+
             else -> scheme.surfaceContainer.copy(alpha = LIGHT_ALPHA)
         }
     }

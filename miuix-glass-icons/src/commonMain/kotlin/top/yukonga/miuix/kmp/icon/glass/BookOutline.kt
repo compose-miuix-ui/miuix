@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BookOutline: ImageVector
 
 val MiuixIcons.Glass.Light.BookOutline: ImageVector
     get() {
-        if (_bookCourseScheduleLineLight != null) return _bookCourseScheduleLineLight!!
-        _bookCourseScheduleLineLight = buildHyperOSIcon(
+        if (_bookOutlineLight != null) return _bookOutlineLight!!
+        _bookOutlineLight = buildHyperOSIcon(
             name = "BookOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(160.3f, 679f),
@@ -82,15 +82,15 @@ val MiuixIcons.Glass.Light.BookOutline: ImageVector
             translationY = 1020.7778f,
             autoMirror = false,
         )
-        return _bookCourseScheduleLineLight!!
+        return _bookOutlineLight!!
     }
 
-private var _bookCourseScheduleLineLight: ImageVector? = null
+private var _bookOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BookOutline: ImageVector
     get() {
-        if (_bookCourseScheduleLineNormal != null) return _bookCourseScheduleLineNormal!!
-        _bookCourseScheduleLineNormal = buildHyperOSIcon(
+        if (_bookOutlineNormal != null) return _bookOutlineNormal!!
+        _bookOutlineNormal = buildHyperOSIcon(
             name = "BookOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(151.2f, 679f),
@@ -159,15 +159,15 @@ val MiuixIcons.Glass.Normal.BookOutline: ImageVector
             translationY = 1020.0139f,
             autoMirror = false,
         )
-        return _bookCourseScheduleLineNormal!!
+        return _bookOutlineNormal!!
     }
 
-private var _bookCourseScheduleLineNormal: ImageVector? = null
+private var _bookOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BookOutline: ImageVector
     get() {
-        if (_bookCourseScheduleLineRegular != null) return _bookCourseScheduleLineRegular!!
-        _bookCourseScheduleLineRegular = buildHyperOSIcon(
+        if (_bookOutlineRegular != null) return _bookOutlineRegular!!
+        _bookOutlineRegular = buildHyperOSIcon(
             name = "BookOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(147f, 679f),
@@ -236,15 +236,15 @@ val MiuixIcons.Glass.Regular.BookOutline: ImageVector
             translationY = 1019.6667f,
             autoMirror = false,
         )
-        return _bookCourseScheduleLineRegular!!
+        return _bookOutlineRegular!!
     }
 
-private var _bookCourseScheduleLineRegular: ImageVector? = null
+private var _bookOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BookOutline: ImageVector
     get() {
-        if (_bookCourseScheduleLineMedium != null) return _bookCourseScheduleLineMedium!!
-        _bookCourseScheduleLineMedium = buildHyperOSIcon(
+        if (_bookOutlineMedium != null) return _bookOutlineMedium!!
+        _bookOutlineMedium = buildHyperOSIcon(
             name = "BookOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(138.9f, 679f),
@@ -313,15 +313,15 @@ val MiuixIcons.Glass.Medium.BookOutline: ImageVector
             translationY = 1019.5315f,
             autoMirror = false,
         )
-        return _bookCourseScheduleLineMedium!!
+        return _bookOutlineMedium!!
     }
 
-private var _bookCourseScheduleLineMedium: ImageVector? = null
+private var _bookOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BookOutline: ImageVector
     get() {
-        if (_bookCourseScheduleLineDemibold != null) return _bookCourseScheduleLineDemibold!!
-        _bookCourseScheduleLineDemibold = buildHyperOSIcon(
+        if (_bookOutlineDemibold != null) return _bookOutlineDemibold!!
+        _bookOutlineDemibold = buildHyperOSIcon(
             name = "BookOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(133.2f, 679f),
@@ -390,8 +390,8 @@ val MiuixIcons.Glass.Demibold.BookOutline: ImageVector
             translationY = 1019.4369f,
             autoMirror = false,
         )
-        return _bookCourseScheduleLineDemibold!!
+        return _bookOutlineDemibold!!
     }
 
-private var _bookCourseScheduleLineDemibold: ImageVector? = null
+private var _bookOutlineDemibold: ImageVector? = null
 

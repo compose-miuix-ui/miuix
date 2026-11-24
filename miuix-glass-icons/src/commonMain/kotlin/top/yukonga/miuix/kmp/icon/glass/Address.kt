@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Address: ImageVector
 
 val MiuixIcons.Glass.Light.Address: ImageVector
     get() {
-        if (_addressSurfaceLight != null) return _addressSurfaceLight!!
-        _addressSurfaceLight = buildHyperOSIcon(
+        if (_addressLight != null) return _addressLight!!
+        _addressLight = buildHyperOSIcon(
             name = "Address.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(866.1f, -95.3f),
@@ -45,15 +45,15 @@ val MiuixIcons.Glass.Light.Address: ImageVector
             translationY = 1022.4671f,
             autoMirror = false,
         )
-        return _addressSurfaceLight!!
+        return _addressLight!!
     }
 
-private var _addressSurfaceLight: ImageVector? = null
+private var _addressLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Address: ImageVector
     get() {
-        if (_addressSurfaceNormal != null) return _addressSurfaceNormal!!
-        _addressSurfaceNormal = buildHyperOSIcon(
+        if (_addressNormal != null) return _addressNormal!!
+        _addressNormal = buildHyperOSIcon(
             name = "Address.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(875f, -99.9f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Normal.Address: ImageVector
             translationY = 1020.9512f,
             autoMirror = false,
         )
-        return _addressSurfaceNormal!!
+        return _addressNormal!!
     }
 
-private var _addressSurfaceNormal: ImageVector? = null
+private var _addressNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Address: ImageVector
     get() {
-        if (_addressSurfaceRegular != null) return _addressSurfaceRegular!!
-        _addressSurfaceRegular = buildHyperOSIcon(
+        if (_addressRegular != null) return _addressRegular!!
+        _addressRegular = buildHyperOSIcon(
             name = "Address.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(879f, -102f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Regular.Address: ImageVector
             translationY = 1020.2619f,
             autoMirror = false,
         )
-        return _addressSurfaceRegular!!
+        return _addressRegular!!
     }
 
-private var _addressSurfaceRegular: ImageVector? = null
+private var _addressRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Address: ImageVector
     get() {
-        if (_addressSurfaceMedium != null) return _addressSurfaceMedium!!
-        _addressSurfaceMedium = buildHyperOSIcon(
+        if (_addressMedium != null) return _addressMedium!!
+        _addressMedium = buildHyperOSIcon(
             name = "Address.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(886.3f, -103.9f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Medium.Address: ImageVector
             translationY = 1020.1303f,
             autoMirror = false,
         )
-        return _addressSurfaceMedium!!
+        return _addressMedium!!
     }
 
-private var _addressSurfaceMedium: ImageVector? = null
+private var _addressMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Address: ImageVector
     get() {
-        if (_addressSurfaceDemibold != null) return _addressSurfaceDemibold!!
-        _addressSurfaceDemibold = buildHyperOSIcon(
+        if (_addressDemibold != null) return _addressDemibold!!
+        _addressDemibold = buildHyperOSIcon(
             name = "Address.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(891.4f, -105.2f),
@@ -205,8 +205,8 @@ val MiuixIcons.Glass.Demibold.Address: ImageVector
             translationY = 1020.0377f,
             autoMirror = false,
         )
-        return _addressSurfaceDemibold!!
+        return _addressDemibold!!
     }
 
-private var _addressSurfaceDemibold: ImageVector? = null
+private var _addressDemibold: ImageVector? = null
 

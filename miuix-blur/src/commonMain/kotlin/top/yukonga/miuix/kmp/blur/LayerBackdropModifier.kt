@@ -5,6 +5,7 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
@@ -14,7 +15,6 @@ import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
 import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
@@ -85,9 +85,15 @@ private class LayerBackdropNode(
         }
     }
 
+    private val recordBlock: DrawScope.() -> Unit = {
+        (this as? ContentDrawScope)?.let(backdrop.onDraw)
+    }
+
     override fun ContentDrawScope.draw() {
         drawContent()
-        recordLayer(backdrop.graphicsLayer) { backdrop.onDraw(this@draw) }
+        with(backdrop.graphicsLayer) {
+            record(block = recordBlock)
+        }
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {

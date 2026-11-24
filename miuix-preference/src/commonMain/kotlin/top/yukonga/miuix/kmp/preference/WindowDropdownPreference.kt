@@ -71,17 +71,14 @@ fun WindowDropdownPreference(
     onExpandedChange: ((Boolean) -> Unit)? = null,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
 ) {
-    val entry = remember(
-        items,
-        selectedIndex,
-        onSelectedIndexChange,
-    ) {
+    val currentOnSelectedIndexChange by rememberUpdatedState(onSelectedIndexChange)
+    val entry = remember(items, selectedIndex) {
         DropdownEntry(
             items.mapIndexed { index, item ->
                 DropdownItem(
                     text = item,
                     selected = index == selectedIndex,
-                    onClick = { onSelectedIndexChange?.invoke(index) },
+                    onClick = { currentOnSelectedIndexChange?.invoke(index) },
                 )
             },
         )
@@ -158,6 +155,8 @@ fun WindowDropdownPreference(
             }
         }
     }
+    val onDismissPopup = remember { { setExpanded(false) } }
+    val onDismissFinishedPopup = remember { { isHoldDown.value = false } }
 
     BasicComponent(
         modifier = modifier,
@@ -170,7 +169,7 @@ fun WindowDropdownPreference(
         startAction = startAction,
         endActions = {
             if (showValue && itemsNotEmpty) {
-                val text = entry.items.firstOrNull { it.selected }?.text
+                val text = remember(entry) { entry.items.firstOrNull { it.selected }?.text }
                 if (!text.isNullOrEmpty()) {
                     Text(
                         text = text,
@@ -191,8 +190,8 @@ fun WindowDropdownPreference(
                 WindowDropdownPopup(
                     entry = entry,
                     show = isDropdownExpanded.value,
-                    onDismiss = { setExpanded(false) },
-                    onDismissFinished = { isHoldDown.value = false },
+                    onDismiss = onDismissPopup,
+                    onDismissFinished = onDismissFinishedPopup,
                     maxHeight = maxHeight,
                     dropdownColors = dropdownColors,
                     collapseOnSelection = collapseOnSelection,

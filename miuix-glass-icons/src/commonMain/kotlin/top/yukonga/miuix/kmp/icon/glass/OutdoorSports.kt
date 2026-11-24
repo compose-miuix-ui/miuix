@@ -12,8 +12,8 @@ val MiuixIcons.Glass.OutdoorSports: ImageVector
 
 val MiuixIcons.Glass.Light.OutdoorSports: ImageVector
     get() {
-        if (_outdoorSportsLineLight != null) return _outdoorSportsLineLight!!
-        _outdoorSportsLineLight = buildHyperOSIcon(
+        if (_outdoorSportsLight != null) return _outdoorSportsLight!!
+        _outdoorSportsLight = buildHyperOSIcon(
             name = "OutdoorSports.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(414.1f, 559.9f),
@@ -126,15 +126,15 @@ val MiuixIcons.Glass.Light.OutdoorSports: ImageVector
             translationY = 1037.3541f,
             autoMirror = false,
         )
-        return _outdoorSportsLineLight!!
+        return _outdoorSportsLight!!
     }
 
-private var _outdoorSportsLineLight: ImageVector? = null
+private var _outdoorSportsLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.OutdoorSports: ImageVector
     get() {
-        if (_outdoorSportsLineNormal != null) return _outdoorSportsLineNormal!!
-        _outdoorSportsLineNormal = buildHyperOSIcon(
+        if (_outdoorSportsNormal != null) return _outdoorSportsNormal!!
+        _outdoorSportsNormal = buildHyperOSIcon(
             name = "OutdoorSports.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(409.2f, 567.5f),
@@ -247,15 +247,15 @@ val MiuixIcons.Glass.Normal.OutdoorSports: ImageVector
             translationY = 1040.2985f,
             autoMirror = false,
         )
-        return _outdoorSportsLineNormal!!
+        return _outdoorSportsNormal!!
     }
 
-private var _outdoorSportsLineNormal: ImageVector? = null
+private var _outdoorSportsNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.OutdoorSports: ImageVector
     get() {
-        if (_outdoorSportsLineRegular != null) return _outdoorSportsLineRegular!!
-        _outdoorSportsLineRegular = buildHyperOSIcon(
+        if (_outdoorSportsRegular != null) return _outdoorSportsRegular!!
+        _outdoorSportsRegular = buildHyperOSIcon(
             name = "OutdoorSports.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(407f, 571f),
@@ -368,15 +368,15 @@ val MiuixIcons.Glass.Regular.OutdoorSports: ImageVector
             translationY = 1041.6372f,
             autoMirror = false,
         )
-        return _outdoorSportsLineRegular!!
+        return _outdoorSportsRegular!!
     }
 
-private var _outdoorSportsLineRegular: ImageVector? = null
+private var _outdoorSportsRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.OutdoorSports: ImageVector
     get() {
-        if (_outdoorSportsLineMedium != null) return _outdoorSportsLineMedium!!
-        _outdoorSportsLineMedium = buildHyperOSIcon(
+        if (_outdoorSportsMedium != null) return _outdoorSportsMedium!!
+        _outdoorSportsMedium = buildHyperOSIcon(
             name = "OutdoorSports.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(403.5f, 576.7f),
@@ -489,15 +489,15 @@ val MiuixIcons.Glass.Medium.OutdoorSports: ImageVector
             translationY = 1045.7824f,
             autoMirror = false,
         )
-        return _outdoorSportsLineMedium!!
+        return _outdoorSportsMedium!!
     }
 
-private var _outdoorSportsLineMedium: ImageVector? = null
+private var _outdoorSportsMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.OutdoorSports: ImageVector
     get() {
-        if (_outdoorSportsLineDemibold != null) return _outdoorSportsLineDemibold!!
-        _outdoorSportsLineDemibold = buildHyperOSIcon(
+        if (_outdoorSportsDemibold != null) return _outdoorSportsDemibold!!
+        _outdoorSportsDemibold = buildHyperOSIcon(
             name = "OutdoorSports.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(401f, 580.6f),
@@ -610,8 +610,8 @@ val MiuixIcons.Glass.Demibold.OutdoorSports: ImageVector
             translationY = 1048.6807f,
             autoMirror = false,
         )
-        return _outdoorSportsLineDemibold!!
+        return _outdoorSportsDemibold!!
     }
 
-private var _outdoorSportsLineDemibold: ImageVector? = null
+private var _outdoorSportsDemibold: ImageVector? = null
 

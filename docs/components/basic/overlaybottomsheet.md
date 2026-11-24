@@ -77,6 +77,7 @@ Scaffold {
 | renderInRootScaffold       | Boolean                   | Whether to render the bottom sheet in the root (outermost) Scaffold. When true, it covers the full screen. When false, it renders within the current Scaffold's bounds | true | No |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                          | Yes      |
 | dimColor                   | Color                     | Dimming color before opening, closing and drag progress are applied | MiuixTheme.colorScheme.windowDimming | No |
+| motion                     | SheetMotion              | Enter, exit and drag-settle motion; see SheetMotion           | SheetMotion.Default                       | No       |
 | surface                    | (@Composable BottomSheetSurfaceScope.() -> Modifier)? | Replaces the background and clipping, including the elastic bottom extension | null | No |
 
 ### BottomSheetDefaults Object
@@ -98,6 +99,15 @@ The BottomSheetDefaults object provides default settings for the OverlayBottomSh
 | ----------------- | ----------- | -------------------------------- |
 | backgroundColor() | Color       | Get default background color     |
 | dragHandleColor() | Color       | Get default drag indicator color |
+
+### SheetMotion
+
+Presets for how the sheet opens, closes and settles after a drag.
+
+| Preset  | Description |
+| ------- | ----------- |
+| Default | Standard system sheet motion |
+| Glass   | Glass sheet motion, used by `GlassBottomSheet` |
 
 ## Advanced Usage
 

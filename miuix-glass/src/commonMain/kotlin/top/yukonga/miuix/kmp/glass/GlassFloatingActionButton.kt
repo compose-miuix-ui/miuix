@@ -111,7 +111,7 @@ fun GlassFloatingActionButton(
         fill = fill,
         stroke = stroke,
         shadow = shadow,
-        pressed = pressed,
+        interactionSource = interactionSource,
         modifier = modifier
             .semantics { role = Role.Button }
             .clickable(

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FeedbackFill: ImageVector
 
 val MiuixIcons.Glass.Light.FeedbackFill: ImageVector
     get() {
-        if (_feedbackSurfaceLight != null) return _feedbackSurfaceLight!!
-        _feedbackSurfaceLight = buildHyperOSIcon(
+        if (_feedbackFillLight != null) return _feedbackFillLight!!
+        _feedbackFillLight = buildHyperOSIcon(
             name = "FeedbackFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(196f, 148.2f),
@@ -101,15 +101,15 @@ val MiuixIcons.Glass.Light.FeedbackFill: ImageVector
             translationY = 1027.7778f,
             autoMirror = false,
         )
-        return _feedbackSurfaceLight!!
+        return _feedbackFillLight!!
     }
 
-private var _feedbackSurfaceLight: ImageVector? = null
+private var _feedbackFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FeedbackFill: ImageVector
     get() {
-        if (_feedbackSurfaceNormal != null) return _feedbackSurfaceNormal!!
-        _feedbackSurfaceNormal = buildHyperOSIcon(
+        if (_feedbackFillNormal != null) return _feedbackFillNormal!!
+        _feedbackFillNormal = buildHyperOSIcon(
             name = "FeedbackFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(187.8f, 143.9f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Normal.FeedbackFill: ImageVector
             translationY = 1027.7014f,
             autoMirror = false,
         )
-        return _feedbackSurfaceNormal!!
+        return _feedbackFillNormal!!
     }
 
-private var _feedbackSurfaceNormal: ImageVector? = null
+private var _feedbackFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FeedbackFill: ImageVector
     get() {
-        if (_feedbackSurfaceRegular != null) return _feedbackSurfaceRegular!!
-        _feedbackSurfaceRegular = buildHyperOSIcon(
+        if (_feedbackFillRegular != null) return _feedbackFillRegular!!
+        _feedbackFillRegular = buildHyperOSIcon(
             name = "FeedbackFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(184f, 142f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Regular.FeedbackFill: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _feedbackSurfaceRegular!!
+        return _feedbackFillRegular!!
     }
 
-private var _feedbackSurfaceRegular: ImageVector? = null
+private var _feedbackFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FeedbackFill: ImageVector
     get() {
-        if (_feedbackSurfaceMedium != null) return _feedbackSurfaceMedium!!
-        _feedbackSurfaceMedium = buildHyperOSIcon(
+        if (_feedbackFillMedium != null) return _feedbackFillMedium!!
+        _feedbackFillMedium = buildHyperOSIcon(
             name = "FeedbackFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(182.1f, 140.6f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Medium.FeedbackFill: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _feedbackSurfaceMedium!!
+        return _feedbackFillMedium!!
     }
 
-private var _feedbackSurfaceMedium: ImageVector? = null
+private var _feedbackFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FeedbackFill: ImageVector
     get() {
-        if (_feedbackSurfaceDemibold != null) return _feedbackSurfaceDemibold!!
-        _feedbackSurfaceDemibold = buildHyperOSIcon(
+        if (_feedbackFillDemibold != null) return _feedbackFillDemibold!!
+        _feedbackFillDemibold = buildHyperOSIcon(
             name = "FeedbackFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(180.8f, 139.7f),
@@ -485,8 +485,8 @@ val MiuixIcons.Glass.Demibold.FeedbackFill: ImageVector
             translationY = 1027.6667f,
             autoMirror = false,
         )
-        return _feedbackSurfaceDemibold!!
+        return _feedbackFillDemibold!!
     }
 
-private var _feedbackSurfaceDemibold: ImageVector? = null
+private var _feedbackFillDemibold: ImageVector? = null
 

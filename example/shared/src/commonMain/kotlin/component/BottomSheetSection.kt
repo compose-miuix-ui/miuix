@@ -39,7 +39,6 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
@@ -81,21 +80,25 @@ fun LazyListScope.bottomSheetSection() {
 
         SuperBottomSheetDemo(
             show = showSuperBottomSheet,
-            onDismissRequest = { showSuperBottomSheet = false },
+            onDismissRequest = {
+                showSuperBottomSheet = false
+                superBottomSheetHoldDown = false
+            },
             dropdownSelectedIndex = bottomSheetDropdownSelectedOption,
             onDropdownSelectedIndexChange = { bottomSheetDropdownSelectedOption = it },
             switchChecked = bottomSheetSuperSwitchState,
             onSwitchCheckedChange = { bottomSheetSuperSwitchState = it },
-            onDismissFinished = { superBottomSheetHoldDown = false },
         )
         WindowBottomSheetDemo(
             show = showWindowBottomSheet,
-            onDismissRequest = { showWindowBottomSheet = false },
+            onDismissRequest = {
+                showWindowBottomSheet = false
+                windowBottomSheetHoldDown = false
+            },
             dropdownSelectedIndex = bottomSheetDropdownSelectedOption,
             onDropdownSelectedIndexChange = { bottomSheetDropdownSelectedOption = it },
             switchChecked = bottomSheetSuperSwitchState,
             onSwitchCheckedChange = { bottomSheetSuperSwitchState = it },
-            onDismissFinished = { windowBottomSheetHoldDown = false },
         )
     }
 }
@@ -108,7 +111,6 @@ private fun SuperBottomSheetDemo(
     onDropdownSelectedIndexChange: (Int) -> Unit,
     switchChecked: Boolean,
     onSwitchCheckedChange: (Boolean) -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     var allowDismiss by remember { mutableStateOf(true) }
     var enableNestedScroll by remember { mutableStateOf(true) }
@@ -120,7 +122,6 @@ private fun SuperBottomSheetDemo(
         enableNestedScroll = enableNestedScroll,
         dimColor = MiuixTheme.colorScheme.windowDimming.copy(alpha = 0.2f),
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         startAction = {
             BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = onDismissRequest)
         },
@@ -154,7 +155,6 @@ private fun WindowBottomSheetDemo(
     onDropdownSelectedIndexChange: (Int) -> Unit,
     switchChecked: Boolean,
     onSwitchCheckedChange: (Boolean) -> Unit,
-    onDismissFinished: () -> Unit,
 ) {
     var allowDismiss by remember { mutableStateOf(true) }
     var enableNestedScroll by remember { mutableStateOf(true) }
@@ -165,7 +165,6 @@ private fun WindowBottomSheetDemo(
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
         onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
         startAction = {
             val dismissState = LocalDismissState.current
             BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = { dismissState?.invoke() })
@@ -209,8 +208,7 @@ private fun BottomSheetContent(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
-            .scrollEndHaptic()
-            .overScrollVertical(),
+            .scrollEndHaptic(),
     ) {
         item {
             SmallTitle(

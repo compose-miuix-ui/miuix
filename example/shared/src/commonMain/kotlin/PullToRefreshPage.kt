@@ -5,6 +5,7 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -166,9 +168,10 @@ fun PullToRefreshPage(
                             appState.showTopAppBar,
                             topAppBarScrollBehavior,
                         ),
+                        overscrollEffect = null,
                         contentPadding = contentPadding,
                     ) {
-                        item(key = "progress_card") {
+                        item(key = "progress_card", contentType = "progress_card") {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -192,7 +195,8 @@ fun PullToRefreshPage(
                         }
                         items(
                             count = dropdownCount,
-                            key = { "dropdown_$it" },
+                            key = { it },
+                            contentType = { if (it % 2 == 0) "overlay_dropdown" else "window_dropdown" },
                         ) { i ->
                             val isFirst = i == 0
                             val isLast = i == dropdownCount - 1
@@ -245,37 +249,39 @@ fun PullToRefreshPage(
             show = showSettings,
             backdrop = pageBackdrop,
             onDismissRequest = { showSettings = false },
-        ) {
-            Card(
-                insideMargin = PaddingValues(),
-                colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.secondaryContainer,
-                ),
-            ) {
-                SliderPreference(
-                    title = "Refresh Threshold",
-                    summary = if (thresholdValue == 0f) {
-                        "Any pull triggers refresh."
-                    } else {
-                        "Pull ${(thresholdValue * 100).toInt()}% of the drag range to refresh."
-                    },
-                    value = thresholdValue,
-                    onValueChange = { thresholdValue = it },
-                    valueRange = 0f..1f,
-                    steps = 99,
-                    showKeyPoints = true,
-                    keyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f),
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                Card(
+                    insideMargin = PaddingValues(),
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.secondaryContainer,
+                    ),
+                ) {
+                    SliderPreference(
+                        title = "Refresh Threshold",
+                        summary = if (thresholdValue == 0f) {
+                            "Any pull triggers refresh."
+                        } else {
+                            "Pull ${(thresholdValue * 100).toInt()}% of the drag range to refresh."
+                        },
+                        value = thresholdValue,
+                        onValueChange = { thresholdValue = it },
+                        valueRange = 0f..1f,
+                        steps = 99,
+                        showKeyPoints = true,
+                        keyPoints = ThresholdKeyPoints,
+                    )
+                }
+                // The window-owned sheet excludes page/sidebar padding; overlapping safe areas use max.
+                Spacer(
+                    Modifier.padding(
+                        bottom = 12.dp + maxOf(
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
+                        ),
+                    ),
                 )
             }
-            // The window-owned sheet excludes page/sidebar padding; overlapping safe areas use max.
-            Spacer(
-                Modifier.padding(
-                    bottom = 12.dp + maxOf(
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-                        WindowInsets.captionBar.asPaddingValues().calculateBottomPadding(),
-                    ),
-                ),
-            )
         }
     }
 }
@@ -284,9 +290,14 @@ fun PullToRefreshPage(
 private fun PullProgressText(
     progressProvider: () -> Float,
 ) {
+    val percent by remember(progressProvider) {
+        computedStateOf { (progressProvider() * 100).toInt() }
+    }
     Text(
-        text = "Pull Progress: ${(progressProvider() * 100).toInt()}%",
+        text = "Pull Progress: $percent%",
         style = MiuixTheme.textStyles.body1,
         color = MiuixTheme.colorScheme.onSurface,
     )
 }
+
+private val ThresholdKeyPoints = listOf(0f, 0.25f, 0.5f, 0.75f, 1f)

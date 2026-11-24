@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ViewInDocumentViewer: ImageVector
 
 val MiuixIcons.Glass.Light.ViewInDocumentViewer: ImageVector
     get() {
-        if (_viewInDocumentViewerLineLight != null) return _viewInDocumentViewerLineLight!!
-        _viewInDocumentViewerLineLight = buildHyperOSIcon(
+        if (_viewInDocumentViewerLight != null) return _viewInDocumentViewerLight!!
+        _viewInDocumentViewerLight = buildHyperOSIcon(
             name = "ViewInDocumentViewer.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(626.2f, 869.7f),
@@ -96,15 +96,15 @@ val MiuixIcons.Glass.Light.ViewInDocumentViewer: ImageVector
             translationY = 1080.6667f,
             autoMirror = false,
         )
-        return _viewInDocumentViewerLineLight!!
+        return _viewInDocumentViewerLight!!
     }
 
-private var _viewInDocumentViewerLineLight: ImageVector? = null
+private var _viewInDocumentViewerLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ViewInDocumentViewer: ImageVector
     get() {
-        if (_viewInDocumentViewerLineNormal != null) return _viewInDocumentViewerLineNormal!!
-        _viewInDocumentViewerLineNormal = buildHyperOSIcon(
+        if (_viewInDocumentViewerNormal != null) return _viewInDocumentViewerNormal!!
+        _viewInDocumentViewerNormal = buildHyperOSIcon(
             name = "ViewInDocumentViewer.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(619.2f, 878.8f),
@@ -187,15 +187,15 @@ val MiuixIcons.Glass.Normal.ViewInDocumentViewer: ImageVector
             translationY = 1080.6667f,
             autoMirror = false,
         )
-        return _viewInDocumentViewerLineNormal!!
+        return _viewInDocumentViewerNormal!!
     }
 
-private var _viewInDocumentViewerLineNormal: ImageVector? = null
+private var _viewInDocumentViewerNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ViewInDocumentViewer: ImageVector
     get() {
-        if (_viewInDocumentViewerLineRegular != null) return _viewInDocumentViewerLineRegular!!
-        _viewInDocumentViewerLineRegular = buildHyperOSIcon(
+        if (_viewInDocumentViewerRegular != null) return _viewInDocumentViewerRegular!!
+        _viewInDocumentViewerRegular = buildHyperOSIcon(
             name = "ViewInDocumentViewer.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(616f, 883f),
@@ -278,15 +278,15 @@ val MiuixIcons.Glass.Regular.ViewInDocumentViewer: ImageVector
             translationY = 1080.6667f,
             autoMirror = false,
         )
-        return _viewInDocumentViewerLineRegular!!
+        return _viewInDocumentViewerRegular!!
     }
 
-private var _viewInDocumentViewerLineRegular: ImageVector? = null
+private var _viewInDocumentViewerRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ViewInDocumentViewer: ImageVector
     get() {
-        if (_viewInDocumentViewerLineMedium != null) return _viewInDocumentViewerLineMedium!!
-        _viewInDocumentViewerLineMedium = buildHyperOSIcon(
+        if (_viewInDocumentViewerMedium != null) return _viewInDocumentViewerMedium!!
+        _viewInDocumentViewerMedium = buildHyperOSIcon(
             name = "ViewInDocumentViewer.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(613.3f, 891.1f),
@@ -369,15 +369,15 @@ val MiuixIcons.Glass.Medium.ViewInDocumentViewer: ImageVector
             translationY = 1080.6667f,
             autoMirror = false,
         )
-        return _viewInDocumentViewerLineMedium!!
+        return _viewInDocumentViewerMedium!!
     }
 
-private var _viewInDocumentViewerLineMedium: ImageVector? = null
+private var _viewInDocumentViewerMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ViewInDocumentViewer: ImageVector
     get() {
-        if (_viewInDocumentViewerLineDemibold != null) return _viewInDocumentViewerLineDemibold!!
-        _viewInDocumentViewerLineDemibold = buildHyperOSIcon(
+        if (_viewInDocumentViewerDemibold != null) return _viewInDocumentViewerDemibold!!
+        _viewInDocumentViewerDemibold = buildHyperOSIcon(
             name = "ViewInDocumentViewer.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(611.4f, 896.8f),
@@ -460,8 +460,8 @@ val MiuixIcons.Glass.Demibold.ViewInDocumentViewer: ImageVector
             translationY = 1080.6667f,
             autoMirror = false,
         )
-        return _viewInDocumentViewerLineDemibold!!
+        return _viewInDocumentViewerDemibold!!
     }
 
-private var _viewInDocumentViewerLineDemibold: ImageVector? = null
+private var _viewInDocumentViewerDemibold: ImageVector? = null
 

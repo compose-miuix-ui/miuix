@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Videography: ImageVector
 
 val MiuixIcons.Glass.Light.Videography: ImageVector
     get() {
-        if (_videographySurfaceLight != null) return _videographySurfaceLight!!
-        _videographySurfaceLight = buildHyperOSIcon(
+        if (_videographyLight != null) return _videographyLight!!
+        _videographyLight = buildHyperOSIcon(
             name = "Videography.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(195.1f, 683f),
@@ -66,15 +66,15 @@ val MiuixIcons.Glass.Light.Videography: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _videographySurfaceLight!!
+        return _videographyLight!!
     }
 
-private var _videographySurfaceLight: ImageVector? = null
+private var _videographyLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Videography: ImageVector
     get() {
-        if (_videographySurfaceNormal != null) return _videographySurfaceNormal!!
-        _videographySurfaceNormal = buildHyperOSIcon(
+        if (_videographyNormal != null) return _videographyNormal!!
+        _videographyNormal = buildHyperOSIcon(
             name = "Videography.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(193f, 691.2f),
@@ -127,15 +127,15 @@ val MiuixIcons.Glass.Normal.Videography: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _videographySurfaceNormal!!
+        return _videographyNormal!!
     }
 
-private var _videographySurfaceNormal: ImageVector? = null
+private var _videographyNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Videography: ImageVector
     get() {
-        if (_videographySurfaceRegular != null) return _videographySurfaceRegular!!
-        _videographySurfaceRegular = buildHyperOSIcon(
+        if (_videographyRegular != null) return _videographyRegular!!
+        _videographyRegular = buildHyperOSIcon(
             name = "Videography.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(192f, 695f),
@@ -188,15 +188,15 @@ val MiuixIcons.Glass.Regular.Videography: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _videographySurfaceRegular!!
+        return _videographyRegular!!
     }
 
-private var _videographySurfaceRegular: ImageVector? = null
+private var _videographyRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Videography: ImageVector
     get() {
-        if (_videographySurfaceMedium != null) return _videographySurfaceMedium!!
-        _videographySurfaceMedium = buildHyperOSIcon(
+        if (_videographyMedium != null) return _videographyMedium!!
+        _videographyMedium = buildHyperOSIcon(
             name = "Videography.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(186.3f, 702.3f),
@@ -249,15 +249,15 @@ val MiuixIcons.Glass.Medium.Videography: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _videographySurfaceMedium!!
+        return _videographyMedium!!
     }
 
-private var _videographySurfaceMedium: ImageVector? = null
+private var _videographyMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Videography: ImageVector
     get() {
-        if (_videographySurfaceDemibold != null) return _videographySurfaceDemibold!!
-        _videographySurfaceDemibold = buildHyperOSIcon(
+        if (_videographyDemibold != null) return _videographyDemibold!!
+        _videographyDemibold = buildHyperOSIcon(
             name = "Videography.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(182.4f, 707.4f),
@@ -310,8 +310,8 @@ val MiuixIcons.Glass.Demibold.Videography: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _videographySurfaceDemibold!!
+        return _videographyDemibold!!
     }
 
-private var _videographySurfaceDemibold: ImageVector? = null
+private var _videographyDemibold: ImageVector? = null
 

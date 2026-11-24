@@ -3,14 +3,7 @@
 
 package top.yukonga.miuix.kmp.window
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
-import top.yukonga.miuix.kmp.theme.LocalDismissState
+import top.yukonga.miuix.kmp.layout.SheetMotion
 
 /**
  * A bottom sheet that slides up from the bottom of the screen, rendered at window level without `Scaffold`.
@@ -43,6 +36,7 @@ import top.yukonga.miuix.kmp.theme.LocalDismissState
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
+ * @param motion The enter, exit and settle motion. See [SheetMotion].
  * @param content The [Composable] content of the [WindowBottomSheet].
  */
 @Composable
@@ -64,15 +58,9 @@ fun WindowBottomSheet(
     dragHandleColor: Color = BottomSheetDefaults.dragHandleColor(),
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
+    motion: SheetMotion = SheetMotion.Default,
     content: @Composable () -> Unit,
 ) {
-    val statusBarsPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val captionBarPadding = WindowInsets.captionBar.asPaddingValues().calculateTopPadding()
-    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val safeTopInset = remember(statusBarsPadding, captionBarPadding, displayCutoutPadding) {
-        maxOf(statusBarsPadding, captionBarPadding, displayCutoutPadding)
-    }
-
     val currentOnDismissRequest = rememberUpdatedState(onDismissRequest)
 
     BottomSheetContentLayout(
@@ -105,15 +93,7 @@ fun WindowBottomSheet(
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
-        topInset = safeTopInset,
-        content = {
-            CompositionLocalProvider(
-                LocalDismissState provides {
-                    currentOnDismissRequest.value?.invoke()
-                },
-            ) {
-                content()
-            }
-        },
+        motion = motion,
+        content = content,
     )
 }

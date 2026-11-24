@@ -52,8 +52,9 @@ compose.desktop {
                 )
         }
         buildTypes.release.proguard {
+            version = "7.10.0"
             isEnabled = true
-            optimize = true
+            optimize = false
             configurationFiles.from(project.file("proguard-rules.pro"))
         }
         nativeDistributions {

@@ -50,7 +50,9 @@ fun BackdropEffectScope.lens(
     val scaledPadding = padding / sf
     val scaledRefractionHeight = refractionHeight / sf
     val scaledRefractionAmount = refractionAmount / sf
-    val scaledRadii = FloatArray(radii.size) { radii[it] / sf }
+    for (i in radii.indices) {
+        radii[i] /= sf
+    }
 
     runtimeShaderEffect(
         key = key,
@@ -59,8 +61,7 @@ fun BackdropEffectScope.lens(
     ) {
         setFloatUniform("size", scaledSizeW, scaledSizeH)
         setFloatUniform("offset", -scaledPadding, -scaledPadding)
-        setFloatUniform("cornerRadii", scaledRadii)
-        setFloatUniform("refractionHeight", scaledRefractionHeight)
+        setFloatUniform("cornerRadii", radii)
         setFloatUniform("refractionAmount", -scaledRefractionAmount)
         setFloatUniform("depthEffect", if (depthEffect) 1f else 0f)
         if (dispersionEnabled) {

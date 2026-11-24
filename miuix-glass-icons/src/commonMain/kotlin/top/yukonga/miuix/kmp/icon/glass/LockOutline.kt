@@ -17,8 +17,8 @@ val MiuixIcons.Glass.LockOutline: ImageVector
 
 val MiuixIcons.Glass.Light.LockOutline: ImageVector
     get() {
-        if (_lockLight != null) return _lockLight!!
-        _lockLight = ImageVector.Builder(
+        if (_lockOutlineLight != null) return _lockOutlineLight!!
+        _lockOutlineLight = ImageVector.Builder(
             name = "LockOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -109,15 +109,15 @@ val MiuixIcons.Glass.Light.LockOutline: ImageVector
                 )
             }
         }.build()
-        return _lockLight!!
+        return _lockOutlineLight!!
     }
 
-private var _lockLight: ImageVector? = null
+private var _lockOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LockOutline: ImageVector
     get() {
-        if (_lockNormal != null) return _lockNormal!!
-        _lockNormal = ImageVector.Builder(
+        if (_lockOutlineNormal != null) return _lockOutlineNormal!!
+        _lockOutlineNormal = ImageVector.Builder(
             name = "LockOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -208,15 +208,15 @@ val MiuixIcons.Glass.Normal.LockOutline: ImageVector
                 )
             }
         }.build()
-        return _lockNormal!!
+        return _lockOutlineNormal!!
     }
 
-private var _lockNormal: ImageVector? = null
+private var _lockOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LockOutline: ImageVector
     get() {
-        if (_lockRegular != null) return _lockRegular!!
-        _lockRegular = ImageVector.Builder(
+        if (_lockOutlineRegular != null) return _lockOutlineRegular!!
+        _lockOutlineRegular = ImageVector.Builder(
             name = "LockOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -307,15 +307,15 @@ val MiuixIcons.Glass.Regular.LockOutline: ImageVector
                 )
             }
         }.build()
-        return _lockRegular!!
+        return _lockOutlineRegular!!
     }
 
-private var _lockRegular: ImageVector? = null
+private var _lockOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LockOutline: ImageVector
     get() {
-        if (_lockMedium != null) return _lockMedium!!
-        _lockMedium = ImageVector.Builder(
+        if (_lockOutlineMedium != null) return _lockOutlineMedium!!
+        _lockOutlineMedium = ImageVector.Builder(
             name = "LockOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -406,15 +406,15 @@ val MiuixIcons.Glass.Medium.LockOutline: ImageVector
                 )
             }
         }.build()
-        return _lockMedium!!
+        return _lockOutlineMedium!!
     }
 
-private var _lockMedium: ImageVector? = null
+private var _lockOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LockOutline: ImageVector
     get() {
-        if (_lockDemibold != null) return _lockDemibold!!
-        _lockDemibold = ImageVector.Builder(
+        if (_lockOutlineDemibold != null) return _lockOutlineDemibold!!
+        _lockOutlineDemibold = ImageVector.Builder(
             name = "LockOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -505,7 +505,7 @@ val MiuixIcons.Glass.Demibold.LockOutline: ImageVector
                 )
             }
         }.build()
-        return _lockDemibold!!
+        return _lockOutlineDemibold!!
     }
 
-private var _lockDemibold: ImageVector? = null
+private var _lockOutlineDemibold: ImageVector? = null

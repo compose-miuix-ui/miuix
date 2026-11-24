@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Microphone: ImageVector
 
 val MiuixIcons.Glass.Light.Microphone: ImageVector
     get() {
-        if (_microphoneSurfaceLight != null) return _microphoneSurfaceLight!!
-        _microphoneSurfaceLight = buildHyperOSIcon(
+        if (_microphoneLight != null) return _microphoneLight!!
+        _microphoneLight = buildHyperOSIcon(
             name = "Microphone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(664.9f, 187.3f),
@@ -69,15 +69,15 @@ val MiuixIcons.Glass.Light.Microphone: ImageVector
             translationY = 1037.9442f,
             autoMirror = false,
         )
-        return _microphoneSurfaceLight!!
+        return _microphoneLight!!
     }
 
-private var _microphoneSurfaceLight: ImageVector? = null
+private var _microphoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Microphone: ImageVector
     get() {
-        if (_microphoneSurfaceNormal != null) return _microphoneSurfaceNormal!!
-        _microphoneSurfaceNormal = buildHyperOSIcon(
+        if (_microphoneNormal != null) return _microphoneNormal!!
+        _microphoneNormal = buildHyperOSIcon(
             name = "Microphone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(665f, 178.2f),
@@ -133,15 +133,15 @@ val MiuixIcons.Glass.Normal.Microphone: ImageVector
             translationY = 1042.2218f,
             autoMirror = false,
         )
-        return _microphoneSurfaceNormal!!
+        return _microphoneNormal!!
     }
 
-private var _microphoneSurfaceNormal: ImageVector? = null
+private var _microphoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Microphone: ImageVector
     get() {
-        if (_microphoneSurfaceRegular != null) return _microphoneSurfaceRegular!!
-        _microphoneSurfaceRegular = buildHyperOSIcon(
+        if (_microphoneRegular != null) return _microphoneRegular!!
+        _microphoneRegular = buildHyperOSIcon(
             name = "Microphone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(665f, 174f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Regular.Microphone: ImageVector
             translationY = 1044.1667f,
             autoMirror = false,
         )
-        return _microphoneSurfaceRegular!!
+        return _microphoneRegular!!
     }
 
-private var _microphoneSurfaceRegular: ImageVector? = null
+private var _microphoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Microphone: ImageVector
     get() {
-        if (_microphoneSurfaceMedium != null) return _microphoneSurfaceMedium!!
-        _microphoneSurfaceMedium = buildHyperOSIcon(
+        if (_microphoneMedium != null) return _microphoneMedium!!
+        _microphoneMedium = buildHyperOSIcon(
             name = "Microphone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(664.7f, 174f),
@@ -261,15 +261,15 @@ val MiuixIcons.Glass.Medium.Microphone: ImageVector
             translationY = 1042.8153f,
             autoMirror = false,
         )
-        return _microphoneSurfaceMedium!!
+        return _microphoneMedium!!
     }
 
-private var _microphoneSurfaceMedium: ImageVector? = null
+private var _microphoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Microphone: ImageVector
     get() {
-        if (_microphoneSurfaceDemibold != null) return _microphoneSurfaceDemibold!!
-        _microphoneSurfaceDemibold = buildHyperOSIcon(
+        if (_microphoneDemibold != null) return _microphoneDemibold!!
+        _microphoneDemibold = buildHyperOSIcon(
             name = "Microphone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(664.5f, 174f),
@@ -325,8 +325,8 @@ val MiuixIcons.Glass.Demibold.Microphone: ImageVector
             translationY = 1041.8693f,
             autoMirror = false,
         )
-        return _microphoneSurfaceDemibold!!
+        return _microphoneDemibold!!
     }
 
-private var _microphoneSurfaceDemibold: ImageVector? = null
+private var _microphoneDemibold: ImageVector? = null
 

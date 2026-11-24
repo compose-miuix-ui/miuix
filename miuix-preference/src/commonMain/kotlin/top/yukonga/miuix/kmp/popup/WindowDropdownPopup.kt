@@ -37,10 +37,10 @@ fun WindowDropdownPopup(
     entry: DropdownEntry,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     collapseOnSelection: Boolean = true,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val entries = remember(entry) { listOf(entry) }
     WindowDropdownPopup(
@@ -64,10 +64,10 @@ fun WindowDropdownPopup(
     entries: List<DropdownEntry>,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     maxHeight: Dp?,
     dropdownColors: DropdownColors,
     collapseOnSelection: Boolean = entries.size <= 1,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)
@@ -116,10 +116,10 @@ fun WindowDropdownDialog(
     dialogButtonString: String,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
     collapseOnSelection: Boolean = true,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val entries = remember(entry) { listOf(entry) }
     WindowDropdownDialog(
@@ -148,10 +148,10 @@ fun WindowDropdownDialog(
     dialogButtonString: String,
     show: Boolean,
     onDismiss: () -> Unit,
-    onDismissFinished: () -> Unit,
     dropdownColors: DropdownColors,
     popupModifier: Modifier = Modifier,
     collapseOnSelection: Boolean = entries.size <= 1,
+    onDismissFinished: (() -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentEntries by rememberUpdatedState(entries)

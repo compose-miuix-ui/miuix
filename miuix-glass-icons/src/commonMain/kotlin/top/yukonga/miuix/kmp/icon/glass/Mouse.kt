@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Mouse: ImageVector
 
 val MiuixIcons.Glass.Light.Mouse: ImageVector
     get() {
-        if (_mouseSurfaceLight != null) return _mouseSurfaceLight!!
-        _mouseSurfaceLight = buildHyperOSIcon(
+        if (_mouseLight != null) return _mouseLight!!
+        _mouseLight = buildHyperOSIcon(
             name = "Mouse.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(274.2f, 550.3f),
@@ -52,15 +52,15 @@ val MiuixIcons.Glass.Light.Mouse: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _mouseSurfaceLight!!
+        return _mouseLight!!
     }
 
-private var _mouseSurfaceLight: ImageVector? = null
+private var _mouseLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Mouse: ImageVector
     get() {
-        if (_mouseSurfaceNormal != null) return _mouseSurfaceNormal!!
-        _mouseSurfaceNormal = buildHyperOSIcon(
+        if (_mouseNormal != null) return _mouseNormal!!
+        _mouseNormal = buildHyperOSIcon(
             name = "Mouse.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(267.2f, 549.4f),
@@ -99,15 +99,15 @@ val MiuixIcons.Glass.Normal.Mouse: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _mouseSurfaceNormal!!
+        return _mouseNormal!!
     }
 
-private var _mouseSurfaceNormal: ImageVector? = null
+private var _mouseNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Mouse: ImageVector
     get() {
-        if (_mouseSurfaceRegular != null) return _mouseSurfaceRegular!!
-        _mouseSurfaceRegular = buildHyperOSIcon(
+        if (_mouseRegular != null) return _mouseRegular!!
+        _mouseRegular = buildHyperOSIcon(
             name = "Mouse.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(264f, 549f),
@@ -146,15 +146,15 @@ val MiuixIcons.Glass.Regular.Mouse: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _mouseSurfaceRegular!!
+        return _mouseRegular!!
     }
 
-private var _mouseSurfaceRegular: ImageVector? = null
+private var _mouseRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Mouse: ImageVector
     get() {
-        if (_mouseSurfaceMedium != null) return _mouseSurfaceMedium!!
-        _mouseSurfaceMedium = buildHyperOSIcon(
+        if (_mouseMedium != null) return _mouseMedium!!
+        _mouseMedium = buildHyperOSIcon(
             name = "Mouse.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(258.1f, 548.2f),
@@ -193,15 +193,15 @@ val MiuixIcons.Glass.Medium.Mouse: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _mouseSurfaceMedium!!
+        return _mouseMedium!!
     }
 
-private var _mouseSurfaceMedium: ImageVector? = null
+private var _mouseMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Mouse: ImageVector
     get() {
-        if (_mouseSurfaceDemibold != null) return _mouseSurfaceDemibold!!
-        _mouseSurfaceDemibold = buildHyperOSIcon(
+        if (_mouseDemibold != null) return _mouseDemibold!!
+        _mouseDemibold = buildHyperOSIcon(
             name = "Mouse.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(253.9f, 547.6f),
@@ -240,8 +240,8 @@ val MiuixIcons.Glass.Demibold.Mouse: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _mouseSurfaceDemibold!!
+        return _mouseDemibold!!
     }
 
-private var _mouseSurfaceDemibold: ImageVector? = null
+private var _mouseDemibold: ImageVector? = null
 

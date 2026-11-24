@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MobileNetwork: ImageVector
 
 val MiuixIcons.Glass.Light.MobileNetwork: ImageVector
     get() {
-        if (_mobileNetworkSurfaceLight != null) return _mobileNetworkSurfaceLight!!
-        _mobileNetworkSurfaceLight = buildHyperOSIcon(
+        if (_mobileNetworkLight != null) return _mobileNetworkLight!!
+        _mobileNetworkLight = buildHyperOSIcon(
             name = "MobileNetwork.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(497.6f, 854.7f),
@@ -56,15 +56,15 @@ val MiuixIcons.Glass.Light.MobileNetwork: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _mobileNetworkSurfaceLight!!
+        return _mobileNetworkLight!!
     }
 
-private var _mobileNetworkSurfaceLight: ImageVector? = null
+private var _mobileNetworkLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MobileNetwork: ImageVector
     get() {
-        if (_mobileNetworkSurfaceNormal != null) return _mobileNetworkSurfaceNormal!!
-        _mobileNetworkSurfaceNormal = buildHyperOSIcon(
+        if (_mobileNetworkNormal != null) return _mobileNetworkNormal!!
+        _mobileNetworkNormal = buildHyperOSIcon(
             name = "MobileNetwork.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(500.6f, 863.8f),
@@ -107,15 +107,15 @@ val MiuixIcons.Glass.Normal.MobileNetwork: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _mobileNetworkSurfaceNormal!!
+        return _mobileNetworkNormal!!
     }
 
-private var _mobileNetworkSurfaceNormal: ImageVector? = null
+private var _mobileNetworkNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MobileNetwork: ImageVector
     get() {
-        if (_mobileNetworkSurfaceRegular != null) return _mobileNetworkSurfaceRegular!!
-        _mobileNetworkSurfaceRegular = buildHyperOSIcon(
+        if (_mobileNetworkRegular != null) return _mobileNetworkRegular!!
+        _mobileNetworkRegular = buildHyperOSIcon(
             name = "MobileNetwork.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(502f, 868f),
@@ -158,15 +158,15 @@ val MiuixIcons.Glass.Regular.MobileNetwork: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _mobileNetworkSurfaceRegular!!
+        return _mobileNetworkRegular!!
     }
 
-private var _mobileNetworkSurfaceRegular: ImageVector? = null
+private var _mobileNetworkRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MobileNetwork: ImageVector
     get() {
-        if (_mobileNetworkSurfaceMedium != null) return _mobileNetworkSurfaceMedium!!
-        _mobileNetworkSurfaceMedium = buildHyperOSIcon(
+        if (_mobileNetworkMedium != null) return _mobileNetworkMedium!!
+        _mobileNetworkMedium = buildHyperOSIcon(
             name = "MobileNetwork.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(507.4f, 876.1f),
@@ -209,15 +209,15 @@ val MiuixIcons.Glass.Medium.MobileNetwork: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _mobileNetworkSurfaceMedium!!
+        return _mobileNetworkMedium!!
     }
 
-private var _mobileNetworkSurfaceMedium: ImageVector? = null
+private var _mobileNetworkMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MobileNetwork: ImageVector
     get() {
-        if (_mobileNetworkSurfaceDemibold != null) return _mobileNetworkSurfaceDemibold!!
-        _mobileNetworkSurfaceDemibold = buildHyperOSIcon(
+        if (_mobileNetworkDemibold != null) return _mobileNetworkDemibold!!
+        _mobileNetworkDemibold = buildHyperOSIcon(
             name = "MobileNetwork.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(511.2f, 881.8f),
@@ -260,8 +260,8 @@ val MiuixIcons.Glass.Demibold.MobileNetwork: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _mobileNetworkSurfaceDemibold!!
+        return _mobileNetworkDemibold!!
     }
 
-private var _mobileNetworkSurfaceDemibold: ImageVector? = null
+private var _mobileNetworkDemibold: ImageVector? = null
 

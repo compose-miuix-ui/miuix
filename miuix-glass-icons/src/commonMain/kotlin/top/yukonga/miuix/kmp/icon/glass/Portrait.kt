@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Portrait: ImageVector
 
 val MiuixIcons.Glass.Light.Portrait: ImageVector
     get() {
-        if (_portraitLineLight != null) return _portraitLineLight!!
-        _portraitLineLight = buildHyperOSIcon(
+        if (_portraitLight != null) return _portraitLight!!
+        _portraitLight = buildHyperOSIcon(
             name = "Portrait.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1161.7f, 375f),
@@ -92,15 +92,15 @@ val MiuixIcons.Glass.Light.Portrait: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _portraitLineLight!!
+        return _portraitLight!!
     }
 
-private var _portraitLineLight: ImageVector? = null
+private var _portraitLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Portrait: ImageVector
     get() {
-        if (_portraitLineNormal != null) return _portraitLineNormal!!
-        _portraitLineNormal = buildHyperOSIcon(
+        if (_portraitNormal != null) return _portraitNormal!!
+        _portraitNormal = buildHyperOSIcon(
             name = "Portrait.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1170.8f, 375f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Normal.Portrait: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _portraitLineNormal!!
+        return _portraitNormal!!
     }
 
-private var _portraitLineNormal: ImageVector? = null
+private var _portraitNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Portrait: ImageVector
     get() {
-        if (_portraitLineRegular != null) return _portraitLineRegular!!
-        _portraitLineRegular = buildHyperOSIcon(
+        if (_portraitRegular != null) return _portraitRegular!!
+        _portraitRegular = buildHyperOSIcon(
             name = "Portrait.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1175f, 375f),
@@ -266,15 +266,15 @@ val MiuixIcons.Glass.Regular.Portrait: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _portraitLineRegular!!
+        return _portraitRegular!!
     }
 
-private var _portraitLineRegular: ImageVector? = null
+private var _portraitRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Portrait: ImageVector
     get() {
-        if (_portraitLineMedium != null) return _portraitLineMedium!!
-        _portraitLineMedium = buildHyperOSIcon(
+        if (_portraitMedium != null) return _portraitMedium!!
+        _portraitMedium = buildHyperOSIcon(
             name = "Portrait.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1183.1f, 375f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Medium.Portrait: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _portraitLineMedium!!
+        return _portraitMedium!!
     }
 
-private var _portraitLineMedium: ImageVector? = null
+private var _portraitMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Portrait: ImageVector
     get() {
-        if (_portraitLineDemibold != null) return _portraitLineDemibold!!
-        _portraitLineDemibold = buildHyperOSIcon(
+        if (_portraitDemibold != null) return _portraitDemibold!!
+        _portraitDemibold = buildHyperOSIcon(
             name = "Portrait.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1188.8f, 374.9f),
@@ -440,8 +440,8 @@ val MiuixIcons.Glass.Demibold.Portrait: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _portraitLineDemibold!!
+        return _portraitDemibold!!
     }
 
-private var _portraitLineDemibold: ImageVector? = null
+private var _portraitDemibold: ImageVector? = null
 

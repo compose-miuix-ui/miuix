@@ -12,8 +12,8 @@ val MiuixIcons.Glass.CameraPhone: ImageVector
 
 val MiuixIcons.Glass.Light.CameraPhone: ImageVector
     get() {
-        if (_cameraPhoneSurfaceLight != null) return _cameraPhoneSurfaceLight!!
-        _cameraPhoneSurfaceLight = buildHyperOSIcon(
+        if (_cameraPhoneLight != null) return _cameraPhoneLight!!
+        _cameraPhoneLight = buildHyperOSIcon(
             name = "CameraPhone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1018.4f, 375f),
@@ -103,15 +103,15 @@ val MiuixIcons.Glass.Light.CameraPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraPhoneSurfaceLight!!
+        return _cameraPhoneLight!!
     }
 
-private var _cameraPhoneSurfaceLight: ImageVector? = null
+private var _cameraPhoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.CameraPhone: ImageVector
     get() {
-        if (_cameraPhoneSurfaceNormal != null) return _cameraPhoneSurfaceNormal!!
-        _cameraPhoneSurfaceNormal = buildHyperOSIcon(
+        if (_cameraPhoneNormal != null) return _cameraPhoneNormal!!
+        _cameraPhoneNormal = buildHyperOSIcon(
             name = "CameraPhone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1023.6f, 375f),
@@ -201,15 +201,15 @@ val MiuixIcons.Glass.Normal.CameraPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraPhoneSurfaceNormal!!
+        return _cameraPhoneNormal!!
     }
 
-private var _cameraPhoneSurfaceNormal: ImageVector? = null
+private var _cameraPhoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.CameraPhone: ImageVector
     get() {
-        if (_cameraPhoneSurfaceRegular != null) return _cameraPhoneSurfaceRegular!!
-        _cameraPhoneSurfaceRegular = buildHyperOSIcon(
+        if (_cameraPhoneRegular != null) return _cameraPhoneRegular!!
+        _cameraPhoneRegular = buildHyperOSIcon(
             name = "CameraPhone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1026f, 375f),
@@ -299,15 +299,15 @@ val MiuixIcons.Glass.Regular.CameraPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraPhoneSurfaceRegular!!
+        return _cameraPhoneRegular!!
     }
 
-private var _cameraPhoneSurfaceRegular: ImageVector? = null
+private var _cameraPhoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.CameraPhone: ImageVector
     get() {
-        if (_cameraPhoneSurfaceMedium != null) return _cameraPhoneSurfaceMedium!!
-        _cameraPhoneSurfaceMedium = buildHyperOSIcon(
+        if (_cameraPhoneMedium != null) return _cameraPhoneMedium!!
+        _cameraPhoneMedium = buildHyperOSIcon(
             name = "CameraPhone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1026f, 375f),
@@ -397,15 +397,15 @@ val MiuixIcons.Glass.Medium.CameraPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraPhoneSurfaceMedium!!
+        return _cameraPhoneMedium!!
     }
 
-private var _cameraPhoneSurfaceMedium: ImageVector? = null
+private var _cameraPhoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.CameraPhone: ImageVector
     get() {
-        if (_cameraPhoneSurfaceDemibold != null) return _cameraPhoneSurfaceDemibold!!
-        _cameraPhoneSurfaceDemibold = buildHyperOSIcon(
+        if (_cameraPhoneDemibold != null) return _cameraPhoneDemibold!!
+        _cameraPhoneDemibold = buildHyperOSIcon(
             name = "CameraPhone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1026f, 375f),
@@ -495,8 +495,8 @@ val MiuixIcons.Glass.Demibold.CameraPhone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cameraPhoneSurfaceDemibold!!
+        return _cameraPhoneDemibold!!
     }
 
-private var _cameraPhoneSurfaceDemibold: ImageVector? = null
+private var _cameraPhoneDemibold: ImageVector? = null
 

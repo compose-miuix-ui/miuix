@@ -17,8 +17,8 @@ val MiuixIcons.Glass.FavoriteFill: ImageVector
 
 val MiuixIcons.Glass.Light.FavoriteFill: ImageVector
     get() {
-        if (_favoritesFillLight != null) return _favoritesFillLight!!
-        _favoritesFillLight = ImageVector.Builder(
+        if (_favoriteFillLight != null) return _favoriteFillLight!!
+        _favoriteFillLight = ImageVector.Builder(
             name = "FavoriteFill.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -65,15 +65,15 @@ val MiuixIcons.Glass.Light.FavoriteFill: ImageVector
                 )
             }
         }.build()
-        return _favoritesFillLight!!
+        return _favoriteFillLight!!
     }
 
-private var _favoritesFillLight: ImageVector? = null
+private var _favoriteFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FavoriteFill: ImageVector
     get() {
-        if (_favoritesFillNormal != null) return _favoritesFillNormal!!
-        _favoritesFillNormal = ImageVector.Builder(
+        if (_favoriteFillNormal != null) return _favoriteFillNormal!!
+        _favoriteFillNormal = ImageVector.Builder(
             name = "FavoriteFill.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -120,15 +120,15 @@ val MiuixIcons.Glass.Normal.FavoriteFill: ImageVector
                 )
             }
         }.build()
-        return _favoritesFillNormal!!
+        return _favoriteFillNormal!!
     }
 
-private var _favoritesFillNormal: ImageVector? = null
+private var _favoriteFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FavoriteFill: ImageVector
     get() {
-        if (_favoritesFillRegular != null) return _favoritesFillRegular!!
-        _favoritesFillRegular = ImageVector.Builder(
+        if (_favoriteFillRegular != null) return _favoriteFillRegular!!
+        _favoriteFillRegular = ImageVector.Builder(
             name = "FavoriteFill.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Regular.FavoriteFill: ImageVector
                 )
             }
         }.build()
-        return _favoritesFillRegular!!
+        return _favoriteFillRegular!!
     }
 
-private var _favoritesFillRegular: ImageVector? = null
+private var _favoriteFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FavoriteFill: ImageVector
     get() {
-        if (_favoritesFillMedium != null) return _favoritesFillMedium!!
-        _favoritesFillMedium = ImageVector.Builder(
+        if (_favoriteFillMedium != null) return _favoriteFillMedium!!
+        _favoriteFillMedium = ImageVector.Builder(
             name = "FavoriteFill.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -230,15 +230,15 @@ val MiuixIcons.Glass.Medium.FavoriteFill: ImageVector
                 )
             }
         }.build()
-        return _favoritesFillMedium!!
+        return _favoriteFillMedium!!
     }
 
-private var _favoritesFillMedium: ImageVector? = null
+private var _favoriteFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FavoriteFill: ImageVector
     get() {
-        if (_favoritesFillDemibold != null) return _favoritesFillDemibold!!
-        _favoritesFillDemibold = ImageVector.Builder(
+        if (_favoriteFillDemibold != null) return _favoriteFillDemibold!!
+        _favoriteFillDemibold = ImageVector.Builder(
             name = "FavoriteFill.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -285,7 +285,7 @@ val MiuixIcons.Glass.Demibold.FavoriteFill: ImageVector
                 )
             }
         }.build()
-        return _favoritesFillDemibold!!
+        return _favoriteFillDemibold!!
     }
 
-private var _favoritesFillDemibold: ImageVector? = null
+private var _favoriteFillDemibold: ImageVector? = null

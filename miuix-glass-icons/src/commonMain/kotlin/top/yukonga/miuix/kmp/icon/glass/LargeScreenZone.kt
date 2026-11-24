@@ -12,8 +12,8 @@ val MiuixIcons.Glass.LargeScreenZone: ImageVector
 
 val MiuixIcons.Glass.Light.LargeScreenZone: ImageVector
     get() {
-        if (_largeScreenZoneSurfaceLight != null) return _largeScreenZoneSurfaceLight!!
-        _largeScreenZoneSurfaceLight = buildHyperOSIcon(
+        if (_largeScreenZoneLight != null) return _largeScreenZoneLight!!
+        _largeScreenZoneLight = buildHyperOSIcon(
             name = "LargeScreenZone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(242.8f, 614.5f),
@@ -78,15 +78,15 @@ val MiuixIcons.Glass.Light.LargeScreenZone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _largeScreenZoneSurfaceLight!!
+        return _largeScreenZoneLight!!
     }
 
-private var _largeScreenZoneSurfaceLight: ImageVector? = null
+private var _largeScreenZoneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.LargeScreenZone: ImageVector
     get() {
-        if (_largeScreenZoneSurfaceNormal != null) return _largeScreenZoneSurfaceNormal!!
-        _largeScreenZoneSurfaceNormal = buildHyperOSIcon(
+        if (_largeScreenZoneNormal != null) return _largeScreenZoneNormal!!
+        _largeScreenZoneNormal = buildHyperOSIcon(
             name = "LargeScreenZone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(230.6f, 617.6f),
@@ -151,15 +151,15 @@ val MiuixIcons.Glass.Normal.LargeScreenZone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _largeScreenZoneSurfaceNormal!!
+        return _largeScreenZoneNormal!!
     }
 
-private var _largeScreenZoneSurfaceNormal: ImageVector? = null
+private var _largeScreenZoneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.LargeScreenZone: ImageVector
     get() {
-        if (_largeScreenZoneSurfaceRegular != null) return _largeScreenZoneSurfaceRegular!!
-        _largeScreenZoneSurfaceRegular = buildHyperOSIcon(
+        if (_largeScreenZoneRegular != null) return _largeScreenZoneRegular!!
+        _largeScreenZoneRegular = buildHyperOSIcon(
             name = "LargeScreenZone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(225f, 619f),
@@ -224,15 +224,15 @@ val MiuixIcons.Glass.Regular.LargeScreenZone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _largeScreenZoneSurfaceRegular!!
+        return _largeScreenZoneRegular!!
     }
 
-private var _largeScreenZoneSurfaceRegular: ImageVector? = null
+private var _largeScreenZoneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.LargeScreenZone: ImageVector
     get() {
-        if (_largeScreenZoneSurfaceMedium != null) return _largeScreenZoneSurfaceMedium!!
-        _largeScreenZoneSurfaceMedium = buildHyperOSIcon(
+        if (_largeScreenZoneMedium != null) return _largeScreenZoneMedium!!
+        _largeScreenZoneMedium = buildHyperOSIcon(
             name = "LargeScreenZone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(216.9f, 621.7f),
@@ -297,15 +297,15 @@ val MiuixIcons.Glass.Medium.LargeScreenZone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _largeScreenZoneSurfaceMedium!!
+        return _largeScreenZoneMedium!!
     }
 
-private var _largeScreenZoneSurfaceMedium: ImageVector? = null
+private var _largeScreenZoneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.LargeScreenZone: ImageVector
     get() {
-        if (_largeScreenZoneSurfaceDemibold != null) return _largeScreenZoneSurfaceDemibold!!
-        _largeScreenZoneSurfaceDemibold = buildHyperOSIcon(
+        if (_largeScreenZoneDemibold != null) return _largeScreenZoneDemibold!!
+        _largeScreenZoneDemibold = buildHyperOSIcon(
             name = "LargeScreenZone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(211.2f, 623.6f),
@@ -370,8 +370,8 @@ val MiuixIcons.Glass.Demibold.LargeScreenZone: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _largeScreenZoneSurfaceDemibold!!
+        return _largeScreenZoneDemibold!!
     }
 
-private var _largeScreenZoneSurfaceDemibold: ImageVector? = null
+private var _largeScreenZoneDemibold: ImageVector? = null
 

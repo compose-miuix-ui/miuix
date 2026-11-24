@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EducationTraining: ImageVector
 
 val MiuixIcons.Glass.Light.EducationTraining: ImageVector
     get() {
-        if (_educationTrainingSurfaceLight != null) return _educationTrainingSurfaceLight!!
-        _educationTrainingSurfaceLight = buildHyperOSIcon(
+        if (_educationTrainingLight != null) return _educationTrainingLight!!
+        _educationTrainingLight = buildHyperOSIcon(
             name = "EducationTraining.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(991f, 42.7f),
@@ -65,15 +65,15 @@ val MiuixIcons.Glass.Light.EducationTraining: ImageVector
             translationY = 1047.9584f,
             autoMirror = false,
         )
-        return _educationTrainingSurfaceLight!!
+        return _educationTrainingLight!!
     }
 
-private var _educationTrainingSurfaceLight: ImageVector? = null
+private var _educationTrainingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EducationTraining: ImageVector
     get() {
-        if (_educationTrainingSurfaceNormal != null) return _educationTrainingSurfaceNormal!!
-        _educationTrainingSurfaceNormal = buildHyperOSIcon(
+        if (_educationTrainingNormal != null) return _educationTrainingNormal!!
+        _educationTrainingNormal = buildHyperOSIcon(
             name = "EducationTraining.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(993.7f, 32.6f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Normal.EducationTraining: ImageVector
             translationY = 1046.4689f,
             autoMirror = false,
         )
-        return _educationTrainingSurfaceNormal!!
+        return _educationTrainingNormal!!
     }
 
-private var _educationTrainingSurfaceNormal: ImageVector? = null
+private var _educationTrainingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EducationTraining: ImageVector
     get() {
-        if (_educationTrainingSurfaceRegular != null) return _educationTrainingSurfaceRegular!!
-        _educationTrainingSurfaceRegular = buildHyperOSIcon(
+        if (_educationTrainingRegular != null) return _educationTrainingRegular!!
+        _educationTrainingRegular = buildHyperOSIcon(
             name = "EducationTraining.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(995f, 28f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Regular.EducationTraining: ImageVector
             translationY = 1045.7917f,
             autoMirror = false,
         )
-        return _educationTrainingSurfaceRegular!!
+        return _educationTrainingRegular!!
     }
 
-private var _educationTrainingSurfaceRegular: ImageVector? = null
+private var _educationTrainingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EducationTraining: ImageVector
     get() {
-        if (_educationTrainingSurfaceMedium != null) return _educationTrainingSurfaceMedium!!
-        _educationTrainingSurfaceMedium = buildHyperOSIcon(
+        if (_educationTrainingMedium != null) return _educationTrainingMedium!!
+        _educationTrainingMedium = buildHyperOSIcon(
             name = "EducationTraining.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(991.8f, 23.9f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Medium.EducationTraining: ImageVector
             translationY = 1051.0762f,
             autoMirror = false,
         )
-        return _educationTrainingSurfaceMedium!!
+        return _educationTrainingMedium!!
     }
 
-private var _educationTrainingSurfaceMedium: ImageVector? = null
+private var _educationTrainingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EducationTraining: ImageVector
     get() {
-        if (_educationTrainingSurfaceDemibold != null) return _educationTrainingSurfaceDemibold!!
-        _educationTrainingSurfaceDemibold = buildHyperOSIcon(
+        if (_educationTrainingDemibold != null) return _educationTrainingDemibold!!
+        _educationTrainingDemibold = buildHyperOSIcon(
             name = "EducationTraining.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(989.5f, 21.1f),
@@ -305,8 +305,8 @@ val MiuixIcons.Glass.Demibold.EducationTraining: ImageVector
             translationY = 1054.7729f,
             autoMirror = false,
         )
-        return _educationTrainingSurfaceDemibold!!
+        return _educationTrainingDemibold!!
     }
 
-private var _educationTrainingSurfaceDemibold: ImageVector? = null
+private var _educationTrainingDemibold: ImageVector? = null
 

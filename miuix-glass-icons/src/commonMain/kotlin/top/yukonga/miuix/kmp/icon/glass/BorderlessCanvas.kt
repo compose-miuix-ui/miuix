@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BorderlessCanvas: ImageVector
 
 val MiuixIcons.Glass.Light.BorderlessCanvas: ImageVector
     get() {
-        if (_borderlessCanvasLineLight != null) return _borderlessCanvasLineLight!!
-        _borderlessCanvasLineLight = buildHyperOSIcon(
+        if (_borderlessCanvasLight != null) return _borderlessCanvasLight!!
+        _borderlessCanvasLight = buildHyperOSIcon(
             name = "BorderlessCanvas.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(345.7f, 785.6f),
@@ -216,15 +216,15 @@ val MiuixIcons.Glass.Light.BorderlessCanvas: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _borderlessCanvasLineLight!!
+        return _borderlessCanvasLight!!
     }
 
-private var _borderlessCanvasLineLight: ImageVector? = null
+private var _borderlessCanvasLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BorderlessCanvas: ImageVector
     get() {
-        if (_borderlessCanvasLineNormal != null) return _borderlessCanvasLineNormal!!
-        _borderlessCanvasLineNormal = buildHyperOSIcon(
+        if (_borderlessCanvasNormal != null) return _borderlessCanvasNormal!!
+        _borderlessCanvasNormal = buildHyperOSIcon(
             name = "BorderlessCanvas.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(338.3f, 794.1f),
@@ -427,15 +427,15 @@ val MiuixIcons.Glass.Normal.BorderlessCanvas: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _borderlessCanvasLineNormal!!
+        return _borderlessCanvasNormal!!
     }
 
-private var _borderlessCanvasLineNormal: ImageVector? = null
+private var _borderlessCanvasNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BorderlessCanvas: ImageVector
     get() {
-        if (_borderlessCanvasLineRegular != null) return _borderlessCanvasLineRegular!!
-        _borderlessCanvasLineRegular = buildHyperOSIcon(
+        if (_borderlessCanvasRegular != null) return _borderlessCanvasRegular!!
+        _borderlessCanvasRegular = buildHyperOSIcon(
             name = "BorderlessCanvas.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(335f, 798f),
@@ -638,15 +638,15 @@ val MiuixIcons.Glass.Regular.BorderlessCanvas: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _borderlessCanvasLineRegular!!
+        return _borderlessCanvasRegular!!
     }
 
-private var _borderlessCanvasLineRegular: ImageVector? = null
+private var _borderlessCanvasRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BorderlessCanvas: ImageVector
     get() {
-        if (_borderlessCanvasLineMedium != null) return _borderlessCanvasLineMedium!!
-        _borderlessCanvasLineMedium = buildHyperOSIcon(
+        if (_borderlessCanvasMedium != null) return _borderlessCanvasMedium!!
+        _borderlessCanvasMedium = buildHyperOSIcon(
             name = "BorderlessCanvas.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(335f, 806.1f),
@@ -849,15 +849,15 @@ val MiuixIcons.Glass.Medium.BorderlessCanvas: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _borderlessCanvasLineMedium!!
+        return _borderlessCanvasMedium!!
     }
 
-private var _borderlessCanvasLineMedium: ImageVector? = null
+private var _borderlessCanvasMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BorderlessCanvas: ImageVector
     get() {
-        if (_borderlessCanvasLineDemibold != null) return _borderlessCanvasLineDemibold!!
-        _borderlessCanvasLineDemibold = buildHyperOSIcon(
+        if (_borderlessCanvasDemibold != null) return _borderlessCanvasDemibold!!
+        _borderlessCanvasDemibold = buildHyperOSIcon(
             name = "BorderlessCanvas.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(335f, 811.8f),
@@ -1060,8 +1060,8 @@ val MiuixIcons.Glass.Demibold.BorderlessCanvas: ImageVector
             translationY = 1041.1667f,
             autoMirror = false,
         )
-        return _borderlessCanvasLineDemibold!!
+        return _borderlessCanvasDemibold!!
     }
 
-private var _borderlessCanvasLineDemibold: ImageVector? = null
+private var _borderlessCanvasDemibold: ImageVector? = null
 

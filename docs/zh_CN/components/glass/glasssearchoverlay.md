@@ -85,7 +85,7 @@ Box(Modifier.fillMaxSize()) {
 | stroke | EdgeStroke? | GlassSearchOverlayDefaults.stroke() | 玻璃胶囊边缘描边 |
 | shadow | GlassShadow? | GlassSearchOverlayDefaults.shadow() | 玻璃胶囊外阴影 |
 | searchIcon | ImageVector | MiuixIcons.Basic.Search | 搜索框前置图标 |
-| closeIcon | ImageVector | MiuixIcons.Basic.Close | 清空与取消图标 |
+| closeIcon | ImageVector | MiuixIcons.Basic.Close | 输入框旁的取消图标 |
 | content | @Composable ColumnScope.(String) -> Unit | `{}` | 搜索结果内容，接收当前输入文本 |
 
 ### GlassSearchOverlayDefaults

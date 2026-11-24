@@ -12,8 +12,8 @@ val MiuixIcons.Glass.JumpNext: ImageVector
 
 val MiuixIcons.Glass.Light.JumpNext: ImageVector
     get() {
-        if (_jumpNextLineLight != null) return _jumpNextLineLight!!
-        _jumpNextLineLight = buildHyperOSIcon(
+        if (_jumpNextLight != null) return _jumpNextLight!!
+        _jumpNextLight = buildHyperOSIcon(
             name = "JumpNext.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(254f, 366.2f),
@@ -58,15 +58,15 @@ val MiuixIcons.Glass.Light.JumpNext: ImageVector
             translationY = 1042.1662f,
             autoMirror = true,
         )
-        return _jumpNextLineLight!!
+        return _jumpNextLight!!
     }
 
-private var _jumpNextLineLight: ImageVector? = null
+private var _jumpNextLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.JumpNext: ImageVector
     get() {
-        if (_jumpNextLineNormal != null) return _jumpNextLineNormal!!
-        _jumpNextLineNormal = buildHyperOSIcon(
+        if (_jumpNextNormal != null) return _jumpNextNormal!!
+        _jumpNextNormal = buildHyperOSIcon(
             name = "JumpNext.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(245.8f, 361.9f),
@@ -111,15 +111,15 @@ val MiuixIcons.Glass.Normal.JumpNext: ImageVector
             translationY = 1042.1666f,
             autoMirror = true,
         )
-        return _jumpNextLineNormal!!
+        return _jumpNextNormal!!
     }
 
-private var _jumpNextLineNormal: ImageVector? = null
+private var _jumpNextNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.JumpNext: ImageVector
     get() {
-        if (_jumpNextLineRegular != null) return _jumpNextLineRegular!!
-        _jumpNextLineRegular = buildHyperOSIcon(
+        if (_jumpNextRegular != null) return _jumpNextRegular!!
+        _jumpNextRegular = buildHyperOSIcon(
             name = "JumpNext.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(242f, 360f),
@@ -164,15 +164,15 @@ val MiuixIcons.Glass.Regular.JumpNext: ImageVector
             translationY = 1042.1667f,
             autoMirror = true,
         )
-        return _jumpNextLineRegular!!
+        return _jumpNextRegular!!
     }
 
-private var _jumpNextLineRegular: ImageVector? = null
+private var _jumpNextRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.JumpNext: ImageVector
     get() {
-        if (_jumpNextLineMedium != null) return _jumpNextLineMedium!!
-        _jumpNextLineMedium = buildHyperOSIcon(
+        if (_jumpNextMedium != null) return _jumpNextMedium!!
+        _jumpNextMedium = buildHyperOSIcon(
             name = "JumpNext.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(232.5f, 358.1f),
@@ -217,15 +217,15 @@ val MiuixIcons.Glass.Medium.JumpNext: ImageVector
             translationY = 1042.3018f,
             autoMirror = true,
         )
-        return _jumpNextLineMedium!!
+        return _jumpNextMedium!!
     }
 
-private var _jumpNextLineMedium: ImageVector? = null
+private var _jumpNextMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.JumpNext: ImageVector
     get() {
-        if (_jumpNextLineDemibold != null) return _jumpNextLineDemibold!!
-        _jumpNextLineDemibold = buildHyperOSIcon(
+        if (_jumpNextDemibold != null) return _jumpNextDemibold!!
+        _jumpNextDemibold = buildHyperOSIcon(
             name = "JumpNext.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(225.9f, 356.8f),
@@ -270,8 +270,8 @@ val MiuixIcons.Glass.Demibold.JumpNext: ImageVector
             translationY = 1042.3963f,
             autoMirror = true,
         )
-        return _jumpNextLineDemibold!!
+        return _jumpNextDemibold!!
     }
 
-private var _jumpNextLineDemibold: ImageVector? = null
+private var _jumpNextDemibold: ImageVector? = null
 

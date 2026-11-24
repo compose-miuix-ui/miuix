@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ViewWatchOnWrist: ImageVector
 
 val MiuixIcons.Glass.Light.ViewWatchOnWrist: ImageVector
     get() {
-        if (_viewWatchOnWristLineLight != null) return _viewWatchOnWristLineLight!!
-        _viewWatchOnWristLineLight = buildHyperOSIcon(
+        if (_viewWatchOnWristLight != null) return _viewWatchOnWristLight!!
+        _viewWatchOnWristLight = buildHyperOSIcon(
             name = "ViewWatchOnWrist.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(856f, 613.3f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Light.ViewWatchOnWrist: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _viewWatchOnWristLineLight!!
+        return _viewWatchOnWristLight!!
     }
 
-private var _viewWatchOnWristLineLight: ImageVector? = null
+private var _viewWatchOnWristLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ViewWatchOnWrist: ImageVector
     get() {
-        if (_viewWatchOnWristLineNormal != null) return _viewWatchOnWristLineNormal!!
-        _viewWatchOnWristLineNormal = buildHyperOSIcon(
+        if (_viewWatchOnWristNormal != null) return _viewWatchOnWristNormal!!
+        _viewWatchOnWristNormal = buildHyperOSIcon(
             name = "ViewWatchOnWrist.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(856f, 609.7f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Normal.ViewWatchOnWrist: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _viewWatchOnWristLineNormal!!
+        return _viewWatchOnWristNormal!!
     }
 
-private var _viewWatchOnWristLineNormal: ImageVector? = null
+private var _viewWatchOnWristNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ViewWatchOnWrist: ImageVector
     get() {
-        if (_viewWatchOnWristLineRegular != null) return _viewWatchOnWristLineRegular!!
-        _viewWatchOnWristLineRegular = buildHyperOSIcon(
+        if (_viewWatchOnWristRegular != null) return _viewWatchOnWristRegular!!
+        _viewWatchOnWristRegular = buildHyperOSIcon(
             name = "ViewWatchOnWrist.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(856f, 608f),
@@ -521,15 +521,15 @@ val MiuixIcons.Glass.Regular.ViewWatchOnWrist: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _viewWatchOnWristLineRegular!!
+        return _viewWatchOnWristRegular!!
     }
 
-private var _viewWatchOnWristLineRegular: ImageVector? = null
+private var _viewWatchOnWristRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ViewWatchOnWrist: ImageVector
     get() {
-        if (_viewWatchOnWristLineMedium != null) return _viewWatchOnWristLineMedium!!
-        _viewWatchOnWristLineMedium = buildHyperOSIcon(
+        if (_viewWatchOnWristMedium != null) return _viewWatchOnWristMedium!!
+        _viewWatchOnWristMedium = buildHyperOSIcon(
             name = "ViewWatchOnWrist.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(847.4f, 608.3f),
@@ -693,15 +693,15 @@ val MiuixIcons.Glass.Medium.ViewWatchOnWrist: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _viewWatchOnWristLineMedium!!
+        return _viewWatchOnWristMedium!!
     }
 
-private var _viewWatchOnWristLineMedium: ImageVector? = null
+private var _viewWatchOnWristMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ViewWatchOnWrist: ImageVector
     get() {
-        if (_viewWatchOnWristLineDemibold != null) return _viewWatchOnWristLineDemibold!!
-        _viewWatchOnWristLineDemibold = buildHyperOSIcon(
+        if (_viewWatchOnWristDemibold != null) return _viewWatchOnWristDemibold!!
+        _viewWatchOnWristDemibold = buildHyperOSIcon(
             name = "ViewWatchOnWrist.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(841.3f, 608.5f),
@@ -865,8 +865,8 @@ val MiuixIcons.Glass.Demibold.ViewWatchOnWrist: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _viewWatchOnWristLineDemibold!!
+        return _viewWatchOnWristDemibold!!
     }
 
-private var _viewWatchOnWristLineDemibold: ImageVector? = null
+private var _viewWatchOnWristDemibold: ImageVector? = null
 

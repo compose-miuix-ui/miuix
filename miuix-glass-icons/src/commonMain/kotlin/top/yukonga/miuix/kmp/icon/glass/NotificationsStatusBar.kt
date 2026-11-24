@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NotificationsStatusBar: ImageVector
 
 val MiuixIcons.Glass.Light.NotificationsStatusBar: ImageVector
     get() {
-        if (_notificationsStatusBarSurfaceLight != null) return _notificationsStatusBarSurfaceLight!!
-        _notificationsStatusBarSurfaceLight = buildHyperOSIcon(
+        if (_notificationsStatusBarLight != null) return _notificationsStatusBarLight!!
+        _notificationsStatusBarLight = buildHyperOSIcon(
             name = "NotificationsStatusBar.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(877.3f, 707f),
@@ -63,15 +63,15 @@ val MiuixIcons.Glass.Light.NotificationsStatusBar: ImageVector
             translationY = 1051.6667f,
             autoMirror = false,
         )
-        return _notificationsStatusBarSurfaceLight!!
+        return _notificationsStatusBarLight!!
     }
 
-private var _notificationsStatusBarSurfaceLight: ImageVector? = null
+private var _notificationsStatusBarLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotificationsStatusBar: ImageVector
     get() {
-        if (_notificationsStatusBarSurfaceNormal != null) return _notificationsStatusBarSurfaceNormal!!
-        _notificationsStatusBarSurfaceNormal = buildHyperOSIcon(
+        if (_notificationsStatusBarNormal != null) return _notificationsStatusBarNormal!!
+        _notificationsStatusBarNormal = buildHyperOSIcon(
             name = "NotificationsStatusBar.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(868.2f, 707f),
@@ -121,15 +121,15 @@ val MiuixIcons.Glass.Normal.NotificationsStatusBar: ImageVector
             translationY = 1051.6667f,
             autoMirror = false,
         )
-        return _notificationsStatusBarSurfaceNormal!!
+        return _notificationsStatusBarNormal!!
     }
 
-private var _notificationsStatusBarSurfaceNormal: ImageVector? = null
+private var _notificationsStatusBarNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotificationsStatusBar: ImageVector
     get() {
-        if (_notificationsStatusBarSurfaceRegular != null) return _notificationsStatusBarSurfaceRegular!!
-        _notificationsStatusBarSurfaceRegular = buildHyperOSIcon(
+        if (_notificationsStatusBarRegular != null) return _notificationsStatusBarRegular!!
+        _notificationsStatusBarRegular = buildHyperOSIcon(
             name = "NotificationsStatusBar.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(864f, 707f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Regular.NotificationsStatusBar: ImageVector
             translationY = 1051.6667f,
             autoMirror = false,
         )
-        return _notificationsStatusBarSurfaceRegular!!
+        return _notificationsStatusBarRegular!!
     }
 
-private var _notificationsStatusBarSurfaceRegular: ImageVector? = null
+private var _notificationsStatusBarRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotificationsStatusBar: ImageVector
     get() {
-        if (_notificationsStatusBarSurfaceMedium != null) return _notificationsStatusBarSurfaceMedium!!
-        _notificationsStatusBarSurfaceMedium = buildHyperOSIcon(
+        if (_notificationsStatusBarMedium != null) return _notificationsStatusBarMedium!!
+        _notificationsStatusBarMedium = buildHyperOSIcon(
             name = "NotificationsStatusBar.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(855.9f, 707f),
@@ -237,15 +237,15 @@ val MiuixIcons.Glass.Medium.NotificationsStatusBar: ImageVector
             translationY = 1051.6667f,
             autoMirror = false,
         )
-        return _notificationsStatusBarSurfaceMedium!!
+        return _notificationsStatusBarMedium!!
     }
 
-private var _notificationsStatusBarSurfaceMedium: ImageVector? = null
+private var _notificationsStatusBarMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotificationsStatusBar: ImageVector
     get() {
-        if (_notificationsStatusBarSurfaceDemibold != null) return _notificationsStatusBarSurfaceDemibold!!
-        _notificationsStatusBarSurfaceDemibold = buildHyperOSIcon(
+        if (_notificationsStatusBarDemibold != null) return _notificationsStatusBarDemibold!!
+        _notificationsStatusBarDemibold = buildHyperOSIcon(
             name = "NotificationsStatusBar.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(850.2f, 707f),
@@ -295,8 +295,8 @@ val MiuixIcons.Glass.Demibold.NotificationsStatusBar: ImageVector
             translationY = 1051.6667f,
             autoMirror = false,
         )
-        return _notificationsStatusBarSurfaceDemibold!!
+        return _notificationsStatusBarDemibold!!
     }
 
-private var _notificationsStatusBarSurfaceDemibold: ImageVector? = null
+private var _notificationsStatusBarDemibold: ImageVector? = null
 

@@ -4,9 +4,11 @@
 package top.yukonga.miuix.kmp.nav.transition
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import top.yukonga.miuix.kmp.nav.core.NavKey
 import top.yukonga.miuix.kmp.nav.runtime.NavChange
 
 /**
@@ -41,7 +43,24 @@ class NavGesture(
     val swipeEdge: NavSwipeEdge,
     val touchY: Float,
     val initialTouchY: Float = touchY,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NavGesture) return false
+        return progress == other.progress &&
+            swipeEdge == other.swipeEdge &&
+            touchY == other.touchY &&
+            initialTouchY == other.initialTouchY
+    }
+
+    override fun hashCode(): Int {
+        var result = progress.hashCode()
+        result = 31 * result + swipeEdge.hashCode()
+        result = 31 * result + touchY.hashCode()
+        result = 31 * result + initialTouchY.hashCode()
+        return result
+    }
+}
 
 /** Which release path started the current settle. */
 enum class NavSettlePhase {
@@ -94,6 +113,15 @@ interface NavSettle {
  */
 @Stable
 interface NavTransitionScope {
+    /** Route rendered by this layer, including while it is leaving the stack. */
+    val entryKey: NavKey? get() = null
+
+    /** Window-space origin of the navigation host, before this entry's transform. */
+    val layoutPositionInWindow: Offset get() = Offset.Zero
+
+    /** Converts a window-space anchor into host coordinates, including ancestor scale/translation. */
+    fun windowToLocal(position: Offset): Offset = position - layoutPositionInWindow
+
     /**
      * The entry's continuous relative depth: `animatedTop - entryIndex`.
      *

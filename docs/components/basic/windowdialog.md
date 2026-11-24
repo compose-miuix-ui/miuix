@@ -102,8 +102,8 @@ Presets for how the dialog opens and closes. Both cover the bottom-attached and 
 
 | Preset  | Description |
 | ------- | ----------- |
-| Default | HyperOS system dialog motion. Bottom-attached: slides up on a 0.82 / 0.3 s spring and leaves in 200 ms. Centered: scales up from slightly smaller and fades in on a 0.8 / 0.3 s spring, then reverses in 200 ms. The scrim fades in over 300 ms and out over 350 ms |
-| Glass   | HyperOS launcher glass dialog motion, used by `GlassDialog`. Bottom-attached: slides up on a 0.84 / 0.3 s spring and drops back on a 0.97 / 0.33 s spring. Centered: scales up from 0.75 on a 0.7 / 0.45 s spring while fading in, then fades out at full size. The scrim fades linearly over 100 ms |
+| Default | Standard system dialog motion |
+| Glass   | Glass dialog motion, used by `GlassDialog` |
 
 ### LocalDismissState
 

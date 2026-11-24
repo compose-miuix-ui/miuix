@@ -77,6 +77,7 @@ WindowBottomSheet(
 | dragHandleColor            | Color                     | Drag indicator color                                           | BottomSheetDefaults.dragHandleColor()  | No       |
 | allowDismiss               | Boolean                   | Whether to allow dismissing the sheet via drag or back gesture | true                                         | No       |
 | enableNestedScroll         | Boolean                   | Whether to enable nested scrolling for the content             | true                                         | No       |
+| motion                     | SheetMotion              | Enter, exit and drag-settle motion; see SheetMotion           | SheetMotion.Default                       | No       |
 | content                    | @Composable () -> Unit    | Bottom sheet content                                           | -                                            | Yes      |
 
 ### BottomSheetDefaults Object
@@ -98,6 +99,15 @@ The BottomSheetDefaults object provides default settings for the bottom sheet co
 | ----------------- | ----------- | -------------------------------- |
 | backgroundColor() | Color       | Get default background color     |
 | dragHandleColor() | Color       | Get default drag indicator color |
+
+### SheetMotion
+
+Presets for how the sheet opens, closes and settles after a drag.
+
+| Preset  | Description |
+| ------- | ----------- |
+| Default | Standard system sheet motion |
+| Glass   | Glass sheet motion, used by `GlassBottomSheet` |
 
 ## Advanced Usage
 

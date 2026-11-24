@@ -85,7 +85,7 @@ Box(Modifier.fillMaxSize()) {
 | stroke | EdgeStroke? | GlassSearchOverlayDefaults.stroke() | Edge stroke along the glass capsules |
 | shadow | GlassShadow? | GlassSearchOverlayDefaults.shadow() | Drop shadow behind the glass capsules |
 | searchIcon | ImageVector | MiuixIcons.Basic.Search | Leading search icon |
-| closeIcon | ImageVector | MiuixIcons.Basic.Close | Clear and cancel icon |
+| closeIcon | ImageVector | MiuixIcons.Basic.Close | Cancel icon beside the input |
 | content | @Composable ColumnScope.(String) -> Unit | `{}` | Search result content receiving the current query string |
 
 ### GlassSearchOverlayDefaults

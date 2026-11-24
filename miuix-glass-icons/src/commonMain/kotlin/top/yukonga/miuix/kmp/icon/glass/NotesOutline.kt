@@ -17,8 +17,8 @@ val MiuixIcons.Glass.NotesOutline: ImageVector
 
 val MiuixIcons.Glass.Light.NotesOutline: ImageVector
     get() {
-        if (_notesLight != null) return _notesLight!!
-        _notesLight = ImageVector.Builder(
+        if (_notesOutlineLight != null) return _notesOutlineLight!!
+        _notesOutlineLight = ImageVector.Builder(
             name = "NotesOutline.Glass.Light",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -124,15 +124,15 @@ val MiuixIcons.Glass.Light.NotesOutline: ImageVector
                 )
             }
         }.build()
-        return _notesLight!!
+        return _notesOutlineLight!!
     }
 
-private var _notesLight: ImageVector? = null
+private var _notesOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NotesOutline: ImageVector
     get() {
-        if (_notesNormal != null) return _notesNormal!!
-        _notesNormal = ImageVector.Builder(
+        if (_notesOutlineNormal != null) return _notesOutlineNormal!!
+        _notesOutlineNormal = ImageVector.Builder(
             name = "NotesOutline.Glass.Normal",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -238,15 +238,15 @@ val MiuixIcons.Glass.Normal.NotesOutline: ImageVector
                 )
             }
         }.build()
-        return _notesNormal!!
+        return _notesOutlineNormal!!
     }
 
-private var _notesNormal: ImageVector? = null
+private var _notesOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NotesOutline: ImageVector
     get() {
-        if (_notesRegular != null) return _notesRegular!!
-        _notesRegular = ImageVector.Builder(
+        if (_notesOutlineRegular != null) return _notesOutlineRegular!!
+        _notesOutlineRegular = ImageVector.Builder(
             name = "NotesOutline.Glass.Regular",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -352,15 +352,15 @@ val MiuixIcons.Glass.Regular.NotesOutline: ImageVector
                 )
             }
         }.build()
-        return _notesRegular!!
+        return _notesOutlineRegular!!
     }
 
-private var _notesRegular: ImageVector? = null
+private var _notesOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NotesOutline: ImageVector
     get() {
-        if (_notesMedium != null) return _notesMedium!!
-        _notesMedium = ImageVector.Builder(
+        if (_notesOutlineMedium != null) return _notesOutlineMedium!!
+        _notesOutlineMedium = ImageVector.Builder(
             name = "NotesOutline.Glass.Medium",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -466,15 +466,15 @@ val MiuixIcons.Glass.Medium.NotesOutline: ImageVector
                 )
             }
         }.build()
-        return _notesMedium!!
+        return _notesOutlineMedium!!
     }
 
-private var _notesMedium: ImageVector? = null
+private var _notesOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NotesOutline: ImageVector
     get() {
-        if (_notesDemibold != null) return _notesDemibold!!
-        _notesDemibold = ImageVector.Builder(
+        if (_notesOutlineDemibold != null) return _notesOutlineDemibold!!
+        _notesOutlineDemibold = ImageVector.Builder(
             name = "NotesOutline.Glass.Demibold",
             defaultWidth = 28.0f.dp,
             defaultHeight = 28.0f.dp,
@@ -580,7 +580,7 @@ val MiuixIcons.Glass.Demibold.NotesOutline: ImageVector
                 )
             }
         }.build()
-        return _notesDemibold!!
+        return _notesOutlineDemibold!!
     }
 
-private var _notesDemibold: ImageVector? = null
+private var _notesOutlineDemibold: ImageVector? = null

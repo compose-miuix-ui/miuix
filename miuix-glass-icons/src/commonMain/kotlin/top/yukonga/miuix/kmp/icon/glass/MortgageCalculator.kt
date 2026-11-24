@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MortgageCalculator: ImageVector
 
 val MiuixIcons.Glass.Light.MortgageCalculator: ImageVector
     get() {
-        if (_mortgageCalculatorSurfaceLight != null) return _mortgageCalculatorSurfaceLight!!
-        _mortgageCalculatorSurfaceLight = buildHyperOSIcon(
+        if (_mortgageCalculatorLight != null) return _mortgageCalculatorLight!!
+        _mortgageCalculatorLight = buildHyperOSIcon(
             name = "MortgageCalculator.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(175f, 389.2f),
@@ -102,15 +102,15 @@ val MiuixIcons.Glass.Light.MortgageCalculator: ImageVector
             translationY = 1010.4211f,
             autoMirror = false,
         )
-        return _mortgageCalculatorSurfaceLight!!
+        return _mortgageCalculatorLight!!
     }
 
-private var _mortgageCalculatorSurfaceLight: ImageVector? = null
+private var _mortgageCalculatorLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MortgageCalculator: ImageVector
     get() {
-        if (_mortgageCalculatorSurfaceNormal != null) return _mortgageCalculatorSurfaceNormal!!
-        _mortgageCalculatorSurfaceNormal = buildHyperOSIcon(
+        if (_mortgageCalculatorNormal != null) return _mortgageCalculatorNormal!!
+        _mortgageCalculatorNormal = buildHyperOSIcon(
             name = "MortgageCalculator.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(169.5f, 379.4f),
@@ -199,15 +199,15 @@ val MiuixIcons.Glass.Normal.MortgageCalculator: ImageVector
             translationY = 1010.4209f,
             autoMirror = false,
         )
-        return _mortgageCalculatorSurfaceNormal!!
+        return _mortgageCalculatorNormal!!
     }
 
-private var _mortgageCalculatorSurfaceNormal: ImageVector? = null
+private var _mortgageCalculatorNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MortgageCalculator: ImageVector
     get() {
-        if (_mortgageCalculatorSurfaceRegular != null) return _mortgageCalculatorSurfaceRegular!!
-        _mortgageCalculatorSurfaceRegular = buildHyperOSIcon(
+        if (_mortgageCalculatorRegular != null) return _mortgageCalculatorRegular!!
+        _mortgageCalculatorRegular = buildHyperOSIcon(
             name = "MortgageCalculator.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(167f, 375f),
@@ -296,15 +296,15 @@ val MiuixIcons.Glass.Regular.MortgageCalculator: ImageVector
             translationY = 1010.4207f,
             autoMirror = false,
         )
-        return _mortgageCalculatorSurfaceRegular!!
+        return _mortgageCalculatorRegular!!
     }
 
-private var _mortgageCalculatorSurfaceRegular: ImageVector? = null
+private var _mortgageCalculatorRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MortgageCalculator: ImageVector
     get() {
-        if (_mortgageCalculatorSurfaceMedium != null) return _mortgageCalculatorSurfaceMedium!!
-        _mortgageCalculatorSurfaceMedium = buildHyperOSIcon(
+        if (_mortgageCalculatorMedium != null) return _mortgageCalculatorMedium!!
+        _mortgageCalculatorMedium = buildHyperOSIcon(
             name = "MortgageCalculator.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(151.6f, 366.9f),
@@ -393,15 +393,15 @@ val MiuixIcons.Glass.Medium.MortgageCalculator: ImageVector
             translationY = 1010.4206f,
             autoMirror = false,
         )
-        return _mortgageCalculatorSurfaceMedium!!
+        return _mortgageCalculatorMedium!!
     }
 
-private var _mortgageCalculatorSurfaceMedium: ImageVector? = null
+private var _mortgageCalculatorMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MortgageCalculator: ImageVector
     get() {
-        if (_mortgageCalculatorSurfaceDemibold != null) return _mortgageCalculatorSurfaceDemibold!!
-        _mortgageCalculatorSurfaceDemibold = buildHyperOSIcon(
+        if (_mortgageCalculatorDemibold != null) return _mortgageCalculatorDemibold!!
+        _mortgageCalculatorDemibold = buildHyperOSIcon(
             name = "MortgageCalculator.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(140.8f, 361.2f),
@@ -490,8 +490,8 @@ val MiuixIcons.Glass.Demibold.MortgageCalculator: ImageVector
             translationY = 1010.4205f,
             autoMirror = false,
         )
-        return _mortgageCalculatorSurfaceDemibold!!
+        return _mortgageCalculatorDemibold!!
     }
 
-private var _mortgageCalculatorSurfaceDemibold: ImageVector? = null
+private var _mortgageCalculatorDemibold: ImageVector? = null
 

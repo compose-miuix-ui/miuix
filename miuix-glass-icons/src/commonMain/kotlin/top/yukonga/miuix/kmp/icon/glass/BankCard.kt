@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BankCard: ImageVector
 
 val MiuixIcons.Glass.Light.BankCard: ImageVector
     get() {
-        if (_bankCardLineLight != null) return _bankCardLineLight!!
-        _bankCardLineLight = buildHyperOSIcon(
+        if (_bankCardLight != null) return _bankCardLight!!
+        _bankCardLight = buildHyperOSIcon(
             name = "BankCard.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(739f, 171.4f),
@@ -87,15 +87,15 @@ val MiuixIcons.Glass.Light.BankCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _bankCardLineLight!!
+        return _bankCardLight!!
     }
 
-private var _bankCardLineLight: ImageVector? = null
+private var _bankCardLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BankCard: ImageVector
     get() {
-        if (_bankCardLineNormal != null) return _bankCardLineNormal!!
-        _bankCardLineNormal = buildHyperOSIcon(
+        if (_bankCardNormal != null) return _bankCardNormal!!
+        _bankCardNormal = buildHyperOSIcon(
             name = "BankCard.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(739f, 173.9f),
@@ -169,15 +169,15 @@ val MiuixIcons.Glass.Normal.BankCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _bankCardLineNormal!!
+        return _bankCardNormal!!
     }
 
-private var _bankCardLineNormal: ImageVector? = null
+private var _bankCardNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BankCard: ImageVector
     get() {
-        if (_bankCardLineRegular != null) return _bankCardLineRegular!!
-        _bankCardLineRegular = buildHyperOSIcon(
+        if (_bankCardRegular != null) return _bankCardRegular!!
+        _bankCardRegular = buildHyperOSIcon(
             name = "BankCard.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(739f, 175f),
@@ -251,15 +251,15 @@ val MiuixIcons.Glass.Regular.BankCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _bankCardLineRegular!!
+        return _bankCardRegular!!
     }
 
-private var _bankCardLineRegular: ImageVector? = null
+private var _bankCardRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BankCard: ImageVector
     get() {
-        if (_bankCardLineMedium != null) return _bankCardLineMedium!!
-        _bankCardLineMedium = buildHyperOSIcon(
+        if (_bankCardMedium != null) return _bankCardMedium!!
+        _bankCardMedium = buildHyperOSIcon(
             name = "BankCard.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(726.8f, 188.2f),
@@ -333,15 +333,15 @@ val MiuixIcons.Glass.Medium.BankCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _bankCardLineMedium!!
+        return _bankCardMedium!!
     }
 
-private var _bankCardLineMedium: ImageVector? = null
+private var _bankCardMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BankCard: ImageVector
     get() {
-        if (_bankCardLineDemibold != null) return _bankCardLineDemibold!!
-        _bankCardLineDemibold = buildHyperOSIcon(
+        if (_bankCardDemibold != null) return _bankCardDemibold!!
+        _bankCardDemibold = buildHyperOSIcon(
             name = "BankCard.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(718.3f, 197.5f),
@@ -415,8 +415,8 @@ val MiuixIcons.Glass.Demibold.BankCard: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _bankCardLineDemibold!!
+        return _bankCardDemibold!!
     }
 
-private var _bankCardLineDemibold: ImageVector? = null
+private var _bankCardDemibold: ImageVector? = null
 

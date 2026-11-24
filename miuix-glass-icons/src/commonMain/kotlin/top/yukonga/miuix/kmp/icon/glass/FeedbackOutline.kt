@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FeedbackOutline: ImageVector
 
 val MiuixIcons.Glass.Light.FeedbackOutline: ImageVector
     get() {
-        if (_feedbackLineLight != null) return _feedbackLineLight!!
-        _feedbackLineLight = buildHyperOSIcon(
+        if (_feedbackOutlineLight != null) return _feedbackOutlineLight!!
+        _feedbackOutlineLight = buildHyperOSIcon(
             name = "FeedbackOutline.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1091.3f, 675f),
@@ -126,15 +126,15 @@ val MiuixIcons.Glass.Light.FeedbackOutline: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _feedbackLineLight!!
+        return _feedbackOutlineLight!!
     }
 
-private var _feedbackLineLight: ImageVector? = null
+private var _feedbackOutlineLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FeedbackOutline: ImageVector
     get() {
-        if (_feedbackLineNormal != null) return _feedbackLineNormal!!
-        _feedbackLineNormal = buildHyperOSIcon(
+        if (_feedbackOutlineNormal != null) return _feedbackOutlineNormal!!
+        _feedbackOutlineNormal = buildHyperOSIcon(
             name = "FeedbackOutline.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1082.2f, 675f),
@@ -247,15 +247,15 @@ val MiuixIcons.Glass.Normal.FeedbackOutline: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _feedbackLineNormal!!
+        return _feedbackOutlineNormal!!
     }
 
-private var _feedbackLineNormal: ImageVector? = null
+private var _feedbackOutlineNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FeedbackOutline: ImageVector
     get() {
-        if (_feedbackLineRegular != null) return _feedbackLineRegular!!
-        _feedbackLineRegular = buildHyperOSIcon(
+        if (_feedbackOutlineRegular != null) return _feedbackOutlineRegular!!
+        _feedbackOutlineRegular = buildHyperOSIcon(
             name = "FeedbackOutline.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1078f, 675f),
@@ -368,15 +368,15 @@ val MiuixIcons.Glass.Regular.FeedbackOutline: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _feedbackLineRegular!!
+        return _feedbackOutlineRegular!!
     }
 
-private var _feedbackLineRegular: ImageVector? = null
+private var _feedbackOutlineRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FeedbackOutline: ImageVector
     get() {
-        if (_feedbackLineMedium != null) return _feedbackLineMedium!!
-        _feedbackLineMedium = buildHyperOSIcon(
+        if (_feedbackOutlineMedium != null) return _feedbackOutlineMedium!!
+        _feedbackOutlineMedium = buildHyperOSIcon(
             name = "FeedbackOutline.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1069.9f, 675.3f),
@@ -489,15 +489,15 @@ val MiuixIcons.Glass.Medium.FeedbackOutline: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _feedbackLineMedium!!
+        return _feedbackOutlineMedium!!
     }
 
-private var _feedbackLineMedium: ImageVector? = null
+private var _feedbackOutlineMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FeedbackOutline: ImageVector
     get() {
-        if (_feedbackLineDemibold != null) return _feedbackLineDemibold!!
-        _feedbackLineDemibold = buildHyperOSIcon(
+        if (_feedbackOutlineDemibold != null) return _feedbackOutlineDemibold!!
+        _feedbackOutlineDemibold = buildHyperOSIcon(
             name = "FeedbackOutline.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1064.2f, 675.5f),
@@ -610,8 +610,8 @@ val MiuixIcons.Glass.Demibold.FeedbackOutline: ImageVector
             translationY = 1051.1667f,
             autoMirror = false,
         )
-        return _feedbackLineDemibold!!
+        return _feedbackOutlineDemibold!!
     }
 
-private var _feedbackLineDemibold: ImageVector? = null
+private var _feedbackOutlineDemibold: ImageVector? = null
 

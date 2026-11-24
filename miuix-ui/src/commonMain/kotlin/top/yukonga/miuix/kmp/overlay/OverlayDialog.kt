@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,7 +18,7 @@ import top.yukonga.miuix.kmp.layout.DialogDefaults
 import top.yukonga.miuix.kmp.layout.DialogMotion
 import top.yukonga.miuix.kmp.layout.DialogSurfaceScope
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 
 /**
  * A dialog with a title, a summary, and other contents.
@@ -83,15 +84,14 @@ fun OverlayDialog(
         insideMargin = insideMargin,
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
-            visibleState.value = visible
-            DialogLayoutImpl(
+            SideEffect { visibleState.value = visible }
+            DialogLayout(
                 visible = visibleState,
                 enableWindowDim = false,
                 enterTransition = EnterTransition.None,
                 exitTransition = ExitTransition.None,
                 enableAutoLargeScreen = false,
                 renderInRootScaffold = renderInRootScaffold,
-                consumeBackgroundTouches = false,
             ) {
                 hostContent()
             }

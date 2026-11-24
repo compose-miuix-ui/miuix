@@ -576,14 +576,47 @@ private fun NavigationRailItemLabel(
     fontWeight: FontWeight,
     modifier: Modifier = Modifier,
 ) {
-    val fraction = info.progress.value.coerceIn(0f, 1f)
     val collapsedSp = NavigationRailDefaults.LabelFontSize.value
     val expandedSp = NavigationRailDefaults.ExpandedLabelFontSize.value
+    val minScale = collapsedSp / expandedSp
+    val progress = info.progress
     Text(
         text = label,
-        modifier = modifier,
+        modifier = modifier.layout { measurable, constraints ->
+            val fraction = progress.value.coerceIn(0f, 1f)
+            val scale = lerp(minScale, 1f, fraction)
+            val childMaxWidth = if (constraints.hasBoundedWidth) {
+                (constraints.maxWidth / scale).fastRoundToInt().coerceAtLeast(0)
+            } else {
+                Constraints.Infinity
+            }
+            val childMaxHeight = if (constraints.hasBoundedHeight) {
+                (constraints.maxHeight / scale).fastRoundToInt().coerceAtLeast(0)
+            } else {
+                Constraints.Infinity
+            }
+            val placeable = measurable.measure(
+                Constraints(
+                    minWidth = 0,
+                    maxWidth = childMaxWidth,
+                    minHeight = 0,
+                    maxHeight = childMaxHeight,
+                ),
+            )
+            val scaledW = (placeable.width * scale).fastRoundToInt().coerceAtMost(constraints.maxWidth)
+            val scaledH = (placeable.height * scale).fastRoundToInt().coerceAtMost(constraints.maxHeight)
+            layout(scaledW, scaledH) {
+                placeable.placeWithLayer(
+                    x = ((scaledW - placeable.width) * 0.5f).fastRoundToInt(),
+                    y = ((scaledH - placeable.height) * 0.5f).fastRoundToInt(),
+                ) {
+                    scaleX = scale
+                    scaleY = scale
+                }
+            }
+        },
         color = tint,
-        fontSize = lerp(collapsedSp, expandedSp, fraction).sp,
+        fontSize = NavigationRailDefaults.ExpandedLabelFontSize,
         fontWeight = fontWeight,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,

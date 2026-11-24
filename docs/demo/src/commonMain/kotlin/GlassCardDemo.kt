@@ -74,12 +74,13 @@ fun GlassCardDemo() {
                 backdrop = backdrop,
                 title = "Wallpaper",
                 onDismissRequest = { showSheet = false },
-            ) {
+            ) { innerPadding ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 320.dp)
                         .verticalScroll(rememberScrollState())
+                        .padding(innerPadding)
                         .padding(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {

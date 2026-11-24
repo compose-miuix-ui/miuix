@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Battery50: ImageVector
 
 val MiuixIcons.Glass.Light.Battery50: ImageVector
     get() {
-        if (_batteryNew50NormalOnSurfaceLight != null) return _batteryNew50NormalOnSurfaceLight!!
-        _batteryNew50NormalOnSurfaceLight = buildHyperOSIcon(
+        if (_battery50Light != null) return _battery50Light!!
+        _battery50Light = buildHyperOSIcon(
             name = "Battery50.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(298.8f, 795f),
@@ -115,15 +115,15 @@ val MiuixIcons.Glass.Light.Battery50: ImageVector
             translationY = 951.9164f,
             autoMirror = false,
         )
-        return _batteryNew50NormalOnSurfaceLight!!
+        return _battery50Light!!
     }
 
-private var _batteryNew50NormalOnSurfaceLight: ImageVector? = null
+private var _battery50Light: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Battery50: ImageVector
     get() {
-        if (_batteryNew50NormalOnSurfaceNormal != null) return _batteryNew50NormalOnSurfaceNormal!!
-        _batteryNew50NormalOnSurfaceNormal = buildHyperOSIcon(
+        if (_battery50Normal != null) return _battery50Normal!!
+        _battery50Normal = buildHyperOSIcon(
             name = "Battery50.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(294.8f, 803.2f),
@@ -225,15 +225,15 @@ val MiuixIcons.Glass.Normal.Battery50: ImageVector
             translationY = 948.9463f,
             autoMirror = false,
         )
-        return _batteryNew50NormalOnSurfaceNormal!!
+        return _battery50Normal!!
     }
 
-private var _batteryNew50NormalOnSurfaceNormal: ImageVector? = null
+private var _battery50Normal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Battery50: ImageVector
     get() {
-        if (_batteryNew50NormalOnSurfaceRegular != null) return _batteryNew50NormalOnSurfaceRegular!!
-        _batteryNew50NormalOnSurfaceRegular = buildHyperOSIcon(
+        if (_battery50Regular != null) return _battery50Regular!!
+        _battery50Regular = buildHyperOSIcon(
             name = "Battery50.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(293f, 807f),
@@ -335,15 +335,15 @@ val MiuixIcons.Glass.Regular.Battery50: ImageVector
             translationY = 947.6163f,
             autoMirror = false,
         )
-        return _batteryNew50NormalOnSurfaceRegular!!
+        return _battery50Regular!!
     }
 
-private var _batteryNew50NormalOnSurfaceRegular: ImageVector? = null
+private var _battery50Regular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Battery50: ImageVector
     get() {
-        if (_batteryNew50NormalOnSurfaceMedium != null) return _batteryNew50NormalOnSurfaceMedium!!
-        _batteryNew50NormalOnSurfaceMedium = buildHyperOSIcon(
+        if (_battery50Medium != null) return _battery50Medium!!
+        _battery50Medium = buildHyperOSIcon(
             name = "Battery50.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(289.5f, 814.3f),
@@ -445,15 +445,15 @@ val MiuixIcons.Glass.Medium.Battery50: ImageVector
             translationY = 945.0644f,
             autoMirror = false,
         )
-        return _batteryNew50NormalOnSurfaceMedium!!
+        return _battery50Medium!!
     }
 
-private var _batteryNew50NormalOnSurfaceMedium: ImageVector? = null
+private var _battery50Medium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Battery50: ImageVector
     get() {
-        if (_batteryNew50NormalOnSurfaceDemibold != null) return _batteryNew50NormalOnSurfaceDemibold!!
-        _batteryNew50NormalOnSurfaceDemibold = buildHyperOSIcon(
+        if (_battery50Demibold != null) return _battery50Demibold!!
+        _battery50Demibold = buildHyperOSIcon(
             name = "Battery50.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(287f, 819.4f),
@@ -555,8 +555,8 @@ val MiuixIcons.Glass.Demibold.Battery50: ImageVector
             translationY = 943.3052f,
             autoMirror = false,
         )
-        return _batteryNew50NormalOnSurfaceDemibold!!
+        return _battery50Demibold!!
     }
 
-private var _batteryNew50NormalOnSurfaceDemibold: ImageVector? = null
+private var _battery50Demibold: ImageVector? = null
 

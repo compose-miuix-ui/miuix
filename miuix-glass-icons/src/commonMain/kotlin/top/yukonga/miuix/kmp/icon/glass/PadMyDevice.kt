@@ -12,8 +12,8 @@ val MiuixIcons.Glass.PadMyDevice: ImageVector
 
 val MiuixIcons.Glass.Light.PadMyDevice: ImageVector
     get() {
-        if (_padMyDeviceSurfaceLight != null) return _padMyDeviceSurfaceLight!!
-        _padMyDeviceSurfaceLight = buildHyperOSIcon(
+        if (_padMyDeviceLight != null) return _padMyDeviceLight!!
+        _padMyDeviceLight = buildHyperOSIcon(
             name = "PadMyDevice.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(194.8f, 767f),
@@ -92,15 +92,15 @@ val MiuixIcons.Glass.Light.PadMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padMyDeviceSurfaceLight!!
+        return _padMyDeviceLight!!
     }
 
-private var _padMyDeviceSurfaceLight: ImageVector? = null
+private var _padMyDeviceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.PadMyDevice: ImageVector
     get() {
-        if (_padMyDeviceSurfaceNormal != null) return _padMyDeviceSurfaceNormal!!
-        _padMyDeviceSurfaceNormal = buildHyperOSIcon(
+        if (_padMyDeviceNormal != null) return _padMyDeviceNormal!!
+        _padMyDeviceNormal = buildHyperOSIcon(
             name = "PadMyDevice.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(190.8f, 775.2f),
@@ -179,15 +179,15 @@ val MiuixIcons.Glass.Normal.PadMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padMyDeviceSurfaceNormal!!
+        return _padMyDeviceNormal!!
     }
 
-private var _padMyDeviceSurfaceNormal: ImageVector? = null
+private var _padMyDeviceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.PadMyDevice: ImageVector
     get() {
-        if (_padMyDeviceSurfaceRegular != null) return _padMyDeviceSurfaceRegular!!
-        _padMyDeviceSurfaceRegular = buildHyperOSIcon(
+        if (_padMyDeviceRegular != null) return _padMyDeviceRegular!!
+        _padMyDeviceRegular = buildHyperOSIcon(
             name = "PadMyDevice.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(189f, 779f),
@@ -266,15 +266,15 @@ val MiuixIcons.Glass.Regular.PadMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padMyDeviceSurfaceRegular!!
+        return _padMyDeviceRegular!!
     }
 
-private var _padMyDeviceSurfaceRegular: ImageVector? = null
+private var _padMyDeviceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.PadMyDevice: ImageVector
     get() {
-        if (_padMyDeviceSurfaceMedium != null) return _padMyDeviceSurfaceMedium!!
-        _padMyDeviceSurfaceMedium = buildHyperOSIcon(
+        if (_padMyDeviceMedium != null) return _padMyDeviceMedium!!
+        _padMyDeviceMedium = buildHyperOSIcon(
             name = "PadMyDevice.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(185.2f, 786.6f),
@@ -353,15 +353,15 @@ val MiuixIcons.Glass.Medium.PadMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padMyDeviceSurfaceMedium!!
+        return _padMyDeviceMedium!!
     }
 
-private var _padMyDeviceSurfaceMedium: ImageVector? = null
+private var _padMyDeviceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.PadMyDevice: ImageVector
     get() {
-        if (_padMyDeviceSurfaceDemibold != null) return _padMyDeviceSurfaceDemibold!!
-        _padMyDeviceSurfaceDemibold = buildHyperOSIcon(
+        if (_padMyDeviceDemibold != null) return _padMyDeviceDemibold!!
+        _padMyDeviceDemibold = buildHyperOSIcon(
             name = "PadMyDevice.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(182.6f, 791.9f),
@@ -440,8 +440,8 @@ val MiuixIcons.Glass.Demibold.PadMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _padMyDeviceSurfaceDemibold!!
+        return _padMyDeviceDemibold!!
     }
 
-private var _padMyDeviceSurfaceDemibold: ImageVector? = null
+private var _padMyDeviceDemibold: ImageVector? = null
 

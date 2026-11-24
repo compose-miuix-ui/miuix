@@ -12,8 +12,8 @@ val MiuixIcons.Glass.KeyboardMouseKeyboardMouseSharing: ImageVector
 
 val MiuixIcons.Glass.Light.KeyboardMouseKeyboardMouseSharing: ImageVector
     get() {
-        if (_keyboardMouseKeyboardMouseSharingSurfaceLight != null) return _keyboardMouseKeyboardMouseSharingSurfaceLight!!
-        _keyboardMouseKeyboardMouseSharingSurfaceLight = buildHyperOSIcon(
+        if (_keyboardMouseKeyboardMouseSharingLight != null) return _keyboardMouseKeyboardMouseSharingLight!!
+        _keyboardMouseKeyboardMouseSharingLight = buildHyperOSIcon(
             name = "KeyboardMouseKeyboardMouseSharing.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(879.3f, 232.3f),
@@ -119,15 +119,15 @@ val MiuixIcons.Glass.Light.KeyboardMouseKeyboardMouseSharing: ImageVector
             translationY = 1040.1667f,
             autoMirror = false,
         )
-        return _keyboardMouseKeyboardMouseSharingSurfaceLight!!
+        return _keyboardMouseKeyboardMouseSharingLight!!
     }
 
-private var _keyboardMouseKeyboardMouseSharingSurfaceLight: ImageVector? = null
+private var _keyboardMouseKeyboardMouseSharingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.KeyboardMouseKeyboardMouseSharing: ImageVector
     get() {
-        if (_keyboardMouseKeyboardMouseSharingSurfaceNormal != null) return _keyboardMouseKeyboardMouseSharingSurfaceNormal!!
-        _keyboardMouseKeyboardMouseSharingSurfaceNormal = buildHyperOSIcon(
+        if (_keyboardMouseKeyboardMouseSharingNormal != null) return _keyboardMouseKeyboardMouseSharingNormal!!
+        _keyboardMouseKeyboardMouseSharingNormal = buildHyperOSIcon(
             name = "KeyboardMouseKeyboardMouseSharing.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(867.4f, 234.2f),
@@ -233,15 +233,15 @@ val MiuixIcons.Glass.Normal.KeyboardMouseKeyboardMouseSharing: ImageVector
             translationY = 1040.1667f,
             autoMirror = false,
         )
-        return _keyboardMouseKeyboardMouseSharingSurfaceNormal!!
+        return _keyboardMouseKeyboardMouseSharingNormal!!
     }
 
-private var _keyboardMouseKeyboardMouseSharingSurfaceNormal: ImageVector? = null
+private var _keyboardMouseKeyboardMouseSharingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.KeyboardMouseKeyboardMouseSharing: ImageVector
     get() {
-        if (_keyboardMouseKeyboardMouseSharingSurfaceRegular != null) return _keyboardMouseKeyboardMouseSharingSurfaceRegular!!
-        _keyboardMouseKeyboardMouseSharingSurfaceRegular = buildHyperOSIcon(
+        if (_keyboardMouseKeyboardMouseSharingRegular != null) return _keyboardMouseKeyboardMouseSharingRegular!!
+        _keyboardMouseKeyboardMouseSharingRegular = buildHyperOSIcon(
             name = "KeyboardMouseKeyboardMouseSharing.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(862f, 235f),
@@ -347,15 +347,15 @@ val MiuixIcons.Glass.Regular.KeyboardMouseKeyboardMouseSharing: ImageVector
             translationY = 1040.1667f,
             autoMirror = false,
         )
-        return _keyboardMouseKeyboardMouseSharingSurfaceRegular!!
+        return _keyboardMouseKeyboardMouseSharingRegular!!
     }
 
-private var _keyboardMouseKeyboardMouseSharingSurfaceRegular: ImageVector? = null
+private var _keyboardMouseKeyboardMouseSharingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.KeyboardMouseKeyboardMouseSharing: ImageVector
     get() {
-        if (_keyboardMouseKeyboardMouseSharingSurfaceMedium != null) return _keyboardMouseKeyboardMouseSharingSurfaceMedium!!
-        _keyboardMouseKeyboardMouseSharingSurfaceMedium = buildHyperOSIcon(
+        if (_keyboardMouseKeyboardMouseSharingMedium != null) return _keyboardMouseKeyboardMouseSharingMedium!!
+        _keyboardMouseKeyboardMouseSharingMedium = buildHyperOSIcon(
             name = "KeyboardMouseKeyboardMouseSharing.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(852.3f, 236.4f),
@@ -461,15 +461,15 @@ val MiuixIcons.Glass.Medium.KeyboardMouseKeyboardMouseSharing: ImageVector
             translationY = 1040.1667f,
             autoMirror = false,
         )
-        return _keyboardMouseKeyboardMouseSharingSurfaceMedium!!
+        return _keyboardMouseKeyboardMouseSharingMedium!!
     }
 
-private var _keyboardMouseKeyboardMouseSharingSurfaceMedium: ImageVector? = null
+private var _keyboardMouseKeyboardMouseSharingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.KeyboardMouseKeyboardMouseSharing: ImageVector
     get() {
-        if (_keyboardMouseKeyboardMouseSharingSurfaceDemibold != null) return _keyboardMouseKeyboardMouseSharingSurfaceDemibold!!
-        _keyboardMouseKeyboardMouseSharingSurfaceDemibold = buildHyperOSIcon(
+        if (_keyboardMouseKeyboardMouseSharingDemibold != null) return _keyboardMouseKeyboardMouseSharingDemibold!!
+        _keyboardMouseKeyboardMouseSharingDemibold = buildHyperOSIcon(
             name = "KeyboardMouseKeyboardMouseSharing.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(845.5f, 237.3f),
@@ -575,8 +575,8 @@ val MiuixIcons.Glass.Demibold.KeyboardMouseKeyboardMouseSharing: ImageVector
             translationY = 1040.1667f,
             autoMirror = false,
         )
-        return _keyboardMouseKeyboardMouseSharingSurfaceDemibold!!
+        return _keyboardMouseKeyboardMouseSharingDemibold!!
     }
 
-private var _keyboardMouseKeyboardMouseSharingSurfaceDemibold: ImageVector? = null
+private var _keyboardMouseKeyboardMouseSharingDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Document: ImageVector
 
 val MiuixIcons.Glass.Light.Document: ImageVector
     get() {
-        if (_documentLineLight != null) return _documentLineLight!!
-        _documentLineLight = buildHyperOSIcon(
+        if (_documentLight != null) return _documentLight!!
+        _documentLight = buildHyperOSIcon(
             name = "Document.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(250.3f, 708f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.Document: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _documentLineLight!!
+        return _documentLight!!
     }
 
-private var _documentLineLight: ImageVector? = null
+private var _documentLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Document: ImageVector
     get() {
-        if (_documentLineNormal != null) return _documentLineNormal!!
-        _documentLineNormal = buildHyperOSIcon(
+        if (_documentNormal != null) return _documentNormal!!
+        _documentNormal = buildHyperOSIcon(
             name = "Document.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(241.2f, 708f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.Document: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _documentLineNormal!!
+        return _documentNormal!!
     }
 
-private var _documentLineNormal: ImageVector? = null
+private var _documentNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Document: ImageVector
     get() {
-        if (_documentLineRegular != null) return _documentLineRegular!!
-        _documentLineRegular = buildHyperOSIcon(
+        if (_documentRegular != null) return _documentRegular!!
+        _documentRegular = buildHyperOSIcon(
             name = "Document.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(237f, 708f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.Document: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _documentLineRegular!!
+        return _documentRegular!!
     }
 
-private var _documentLineRegular: ImageVector? = null
+private var _documentRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Document: ImageVector
     get() {
-        if (_documentLineMedium != null) return _documentLineMedium!!
-        _documentLineMedium = buildHyperOSIcon(
+        if (_documentMedium != null) return _documentMedium!!
+        _documentMedium = buildHyperOSIcon(
             name = "Document.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(228.9f, 708f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.Document: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _documentLineMedium!!
+        return _documentMedium!!
     }
 
-private var _documentLineMedium: ImageVector? = null
+private var _documentMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Document: ImageVector
     get() {
-        if (_documentLineDemibold != null) return _documentLineDemibold!!
-        _documentLineDemibold = buildHyperOSIcon(
+        if (_documentDemibold != null) return _documentDemibold!!
+        _documentDemibold = buildHyperOSIcon(
             name = "Document.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(223.2f, 708f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.Document: ImageVector
             translationY = 1053.6667f,
             autoMirror = false,
         )
-        return _documentLineDemibold!!
+        return _documentDemibold!!
     }
 
-private var _documentLineDemibold: ImageVector? = null
+private var _documentDemibold: ImageVector? = null
 

@@ -31,6 +31,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.layout.SheetMotion
 import top.yukonga.miuix.kmp.material.GlassColorBlendMode
 import top.yukonga.miuix.kmp.material.GlassColorLayer
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -68,7 +69,7 @@ class GlassBottomSheetSurfaceTest {
                     onDismissRequest = { show.value = false },
                     onDismissFinished = { finished++ },
                     surface = {
-                        scope = this
+                        if (!isOverscroll) scope = this
                         surface(this)
                     },
                 ) {
@@ -80,7 +81,6 @@ class GlassBottomSheetSurfaceTest {
         waitForIdle()
         val pixels = onNodeWithTag("sheet").captureToImage().toPixelMap()
         assertEquals(44.dp, scope?.cornerRadius)
-        assertEquals(false, scope?.isOverscroll)
         assertColorNear(fill, pixels[8, pixels.height / 2])
         assertTrue(pixels[1, 1] != fill)
         assertColorNear(fill, pixels[1, pixels.height - 2])
@@ -170,6 +170,7 @@ class GlassBottomSheetSurfaceTest {
                     sheetMaxWidth = 340.dp,
                     outsideMargin = DpSize(0.dp, 0.dp),
                     enableWindowDim = false,
+                    motion = SheetMotion.Glass,
                     surface = glassBottomSheetSurface(
                         backdrop,
                         material = GlassMaterial(0.dp, GlassColorLayer(Color.Transparent, GlassColorBlendMode.SrcOver)),
@@ -202,7 +203,6 @@ class GlassBottomSheetSurfaceTest {
     fun upwardOverscrollUsesTheMaterialAndDownwardDragStillDismisses() = runComposeUiTest {
         val show = mutableStateOf(true)
         var finished = 0
-        var overscroll: BottomSheetSurfaceScope? = null
         setContent {
             DialogTestHost {
                 val backdrop = rememberLayerBackdrop()
@@ -217,10 +217,7 @@ class GlassBottomSheetSurfaceTest {
                     dimColor = GlassBottomSheetDefaults.ScrimColor,
                     onDismissRequest = { show.value = false },
                     onDismissFinished = { finished++ },
-                    surface = {
-                        if (isOverscroll) overscroll = this
-                        surface(this)
-                    },
+                    surface = surface,
                 ) {
                     Box(Modifier.height(240.dp))
                 }
@@ -234,8 +231,6 @@ class GlassBottomSheetSurfaceTest {
             moveBy(Offset(0f, -180f), delayMillis = 120)
         }
         waitForIdle()
-        assertEquals(true, overscroll?.isOverscroll)
-        assertEquals(0.dp, overscroll?.cornerRadius)
         val pixels = onRoot().captureToImage().toPixelMap()
         val expected = 206f / 255f
         assertColorNear(Color(expected, expected, expected), pixels[pixels.width / 2, pixels.height - 2], tolerance = 4f / 255f)
@@ -248,5 +243,46 @@ class GlassBottomSheetSurfaceTest {
         waitForIdle()
         sheet.assertDoesNotExist()
         assertEquals(1, finished)
+    }
+
+    @Test
+    fun upwardOverscrollBlursNonUniformBackdropSeamlessly() = runComposeUiTest {
+        setContent {
+            DialogTestHost {
+                val backdrop = rememberLayerBackdrop()
+                Box(
+                    Modifier.fillMaxSize().layerBackdrop(backdrop).drawBehind {
+                        drawRect(Color(0xFF808080))
+                        drawRect(Color.Red, topLeft = Offset(0f, size.height - 20f), size = androidx.compose.ui.geometry.Size(size.width, 20f))
+                    },
+                )
+                OverlayBottomSheet(
+                    show = true,
+                    modifier = Modifier.testTag("sheet"),
+                    sheetMaxWidth = 340.dp,
+                    outsideMargin = DpSize(0.dp, 0.dp),
+                    dimColor = GlassBottomSheetDefaults.ScrimColor,
+                    surface = glassBottomSheetSurface(backdrop, stroke = GlassBottomSheetDefaults.stroke()),
+                ) {
+                    Box(Modifier.height(240.dp))
+                }
+            }
+        }
+        waitForIdle()
+        val sheet = onNodeWithTag("sheet")
+        sheet.performTouchInput {
+            down(Offset(centerX, 12f))
+            moveBy(Offset(0f, -200f), delayMillis = 120)
+        }
+        waitForIdle()
+        val pixels = onRoot().captureToImage().toPixelMap()
+        val x = pixels.width / 2
+        val overscrollPixel = pixels[x, pixels.height - 2]
+        // Unblurred red under DialogGlassLight + ScrimColor sits around g=0.61;
+        // blurring with the gray backdrop above raises green/blue toward ~0.70.
+        assertTrue(
+            overscrollPixel.green > 0.67f,
+            "Expected overscroll strip to blur with backdrop above, got $overscrollPixel",
+        )
     }
 }

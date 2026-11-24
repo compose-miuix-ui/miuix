@@ -50,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -155,6 +156,7 @@ import utils.LocalTopAppBarTitleAlpha
 import utils.LocalTopLayer
 import utils.TopLayerHost
 import utils.TopLayerState
+import utils.isInMultiWindowMode
 import utils.rememberAppPageInsets
 import utils.rememberBlurBackdrop
 import utils.shouldExpandNavigationRail
@@ -188,6 +190,7 @@ val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator f
 val LocalIsWideScreen = compositionLocalOf { false }
 val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> { error("LocalMainPagerState not provided") }
 private val DefaultTopAppBarTitleAlpha: () -> Float = { 1f }
+private val DefaultTopAppBarCenterObstructionStart: () -> Dp = { Dp.Unspecified }
 
 @Composable
 fun AppContent(
@@ -197,8 +200,9 @@ fun AppContent(
 
     val pagerState = rememberPagerState(pageCount = { UIConstants.PAGE_COUNT })
     val mainPagerState = rememberMainPagerState(pagerState)
-    LaunchedEffect(mainPagerState.pagerState.currentPage) {
-        mainPagerState.syncPage()
+    LaunchedEffect(mainPagerState) {
+        snapshotFlow { mainPagerState.pagerState.currentPage }
+            .collect { mainPagerState.syncPage() }
     }
 
     // Explicit Route type preserves the sealed hierarchy for save/restore.
@@ -231,12 +235,18 @@ fun AppContent(
             { 1f }
         }
     }
-    val topAppBarCenterObstructionStart = if (
-        useGlassSidebar && !sidebarState.expanded && sidebarState.collapsedWidth > 0.dp
-    ) {
-        sidebarState.collapsedStart
-    } else {
-        Dp.Unspecified
+    val topAppBarCenterObstructionStart: () -> Dp = remember(useGlassSidebar, sidebarState) {
+        if (useGlassSidebar) {
+            {
+                if (!sidebarState.expanded && sidebarState.collapsedWidth > 0.dp) {
+                    sidebarState.collapsedStart
+                } else {
+                    Dp.Unspecified
+                }
+            }
+        } else {
+            DefaultTopAppBarCenterObstructionStart
+        }
     }
     LaunchedEffect(useGlassSidebar, sidebarState.expanded) {
         mainPagerState.snapTransitions = useGlassSidebar && sidebarState.expanded
@@ -271,8 +281,8 @@ fun AppContent(
         LocalTopAppBarCenterObstructionStart provides topAppBarCenterObstructionStart,
         LocalAppPageInsets provides pageInsets,
     ) {
-        // Match platform screen corners; split panes have no outer corner.
-        val navCornerRadius = if (isWideScreen) 0.dp else rememberNavSystemCornerRadius()
+        // Match platform screen corners; multi-window has no outer screen corner.
+        val navCornerRadius = if (isInMultiWindowMode()) 0.dp else rememberNavSystemCornerRadius()
         val isCrossActivityStyle = appState.navTransitionStyle == 1
         val backdropColor = MiuixTheme.colorScheme.surface
         val isDarkTheme = isInDarkTheme()
@@ -318,6 +328,7 @@ fun AppContent(
         }
         val navTransition = when {
             suppressNavTransition -> InstantNavTransition
+            appState.navTransitionStyle == 2 -> NavTransitions.Expansion
             isCrossActivityStyle -> CrossActivityTransition
             else -> NavTransitions.MiuixDefault
         }
@@ -437,7 +448,7 @@ private fun AppNavHost(
         entry<Route.Main>(swipeDismiss = swipeBackDirection) {
             CompositionLocalProvider(
                 LocalTopAppBarTitleAlpha provides primaryTitleAlpha,
-                LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
+                LocalTopAppBarCenterObstructionStart provides DefaultTopAppBarCenterObstructionStart,
             ) {
                 Home(
                     navigationItems = navigationItems,
@@ -461,10 +472,13 @@ private fun AppNavHost(
             LicensePage(padding = padding)
         }
         entry<Route.Navigation>(swipeDismiss = swipeBackDirection) { route ->
-            val index = backStack.filterIsInstance<Route.Navigation>().indexOf(route) + 1
+            val index = remember(route) {
+                backStack.filter { it is Route.Navigation || it is Route.ExpansionDetail }.indexOf(route) + 1
+            }
             NavTestPage(
                 index = index,
                 padding = padding,
+                route = route,
             )
         }
         entry<Route.MultiScaffold>(swipeDismiss = swipeBackDirection) {
@@ -472,6 +486,12 @@ private fun AppNavHost(
         }
         entry<Route.NestedNav>(swipeDismiss = swipeBackDirection) {
             NestedNavTestPage(padding = padding)
+        }
+        entry<Route.ExpansionDetail>(transition = NavTransitions.Expansion, swipeDismiss = swipeBackDirection) { route ->
+            val index = remember(route) {
+                backStack.filter { it is Route.Navigation || it is Route.ExpansionDetail }.indexOf(route) + 1
+            }
+            NavTestPage(index = index, padding = padding, route = route)
         }
         entry<Route.OverscrollLoadMore>(swipeDismiss = swipeBackDirection) {
             OverscrollLoadMorePage(padding = padding)
@@ -1027,7 +1047,7 @@ fun AppPager(
         },
         verticalAlignment = Alignment.Top,
         flingBehavior = flingBehavior,
-        beyondViewportPageCount = 4,
+        beyondViewportPageCount = 1,
         pageContent = { page ->
             // Pages out of view don't follow a sidebar's morph.
             val hidden = remember(pagerState, page) {

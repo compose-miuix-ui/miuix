@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Cutout: ImageVector
 
 val MiuixIcons.Glass.Light.Cutout: ImageVector
     get() {
-        if (_cutoutSurfaceLight != null) return _cutoutSurfaceLight!!
-        _cutoutSurfaceLight = buildHyperOSIcon(
+        if (_cutoutLight != null) return _cutoutLight!!
+        _cutoutLight = buildHyperOSIcon(
             name = "Cutout.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(796.8f, 428.7f),
@@ -171,15 +171,15 @@ val MiuixIcons.Glass.Light.Cutout: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cutoutSurfaceLight!!
+        return _cutoutLight!!
     }
 
-private var _cutoutSurfaceLight: ImageVector? = null
+private var _cutoutLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Cutout: ImageVector
     get() {
-        if (_cutoutSurfaceNormal != null) return _cutoutSurfaceNormal!!
-        _cutoutSurfaceNormal = buildHyperOSIcon(
+        if (_cutoutNormal != null) return _cutoutNormal!!
+        _cutoutNormal = buildHyperOSIcon(
             name = "Cutout.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(790.1f, 435.1f),
@@ -337,15 +337,15 @@ val MiuixIcons.Glass.Normal.Cutout: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cutoutSurfaceNormal!!
+        return _cutoutNormal!!
     }
 
-private var _cutoutSurfaceNormal: ImageVector? = null
+private var _cutoutNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Cutout: ImageVector
     get() {
-        if (_cutoutSurfaceRegular != null) return _cutoutSurfaceRegular!!
-        _cutoutSurfaceRegular = buildHyperOSIcon(
+        if (_cutoutRegular != null) return _cutoutRegular!!
+        _cutoutRegular = buildHyperOSIcon(
             name = "Cutout.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(787f, 438f),
@@ -503,15 +503,15 @@ val MiuixIcons.Glass.Regular.Cutout: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cutoutSurfaceRegular!!
+        return _cutoutRegular!!
     }
 
-private var _cutoutSurfaceRegular: ImageVector? = null
+private var _cutoutRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Cutout: ImageVector
     get() {
-        if (_cutoutSurfaceMedium != null) return _cutoutSurfaceMedium!!
-        _cutoutSurfaceMedium = buildHyperOSIcon(
+        if (_cutoutMedium != null) return _cutoutMedium!!
+        _cutoutMedium = buildHyperOSIcon(
             name = "Cutout.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(782.9f, 441.8f),
@@ -669,15 +669,15 @@ val MiuixIcons.Glass.Medium.Cutout: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cutoutSurfaceMedium!!
+        return _cutoutMedium!!
     }
 
-private var _cutoutSurfaceMedium: ImageVector? = null
+private var _cutoutMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Cutout: ImageVector
     get() {
-        if (_cutoutSurfaceDemibold != null) return _cutoutSurfaceDemibold!!
-        _cutoutSurfaceDemibold = buildHyperOSIcon(
+        if (_cutoutDemibold != null) return _cutoutDemibold!!
+        _cutoutDemibold = buildHyperOSIcon(
             name = "Cutout.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(780.1f, 444.4f),
@@ -835,8 +835,8 @@ val MiuixIcons.Glass.Demibold.Cutout: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _cutoutSurfaceDemibold!!
+        return _cutoutDemibold!!
     }
 
-private var _cutoutSurfaceDemibold: ImageVector? = null
+private var _cutoutDemibold: ImageVector? = null
 

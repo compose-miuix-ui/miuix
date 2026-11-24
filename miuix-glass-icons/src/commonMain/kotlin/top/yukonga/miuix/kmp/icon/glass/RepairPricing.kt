@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RepairPricing: ImageVector
 
 val MiuixIcons.Glass.Light.RepairPricing: ImageVector
     get() {
-        if (_repairPricingSurfaceLight != null) return _repairPricingSurfaceLight!!
-        _repairPricingSurfaceLight = buildHyperOSIcon(
+        if (_repairPricingLight != null) return _repairPricingLight!!
+        _repairPricingLight = buildHyperOSIcon(
             name = "RepairPricing.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1152.9f, 375f),
@@ -87,15 +87,15 @@ val MiuixIcons.Glass.Light.RepairPricing: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairPricingSurfaceLight!!
+        return _repairPricingLight!!
     }
 
-private var _repairPricingSurfaceLight: ImageVector? = null
+private var _repairPricingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RepairPricing: ImageVector
     get() {
-        if (_repairPricingSurfaceNormal != null) return _repairPricingSurfaceNormal!!
-        _repairPricingSurfaceNormal = buildHyperOSIcon(
+        if (_repairPricingNormal != null) return _repairPricingNormal!!
+        _repairPricingNormal = buildHyperOSIcon(
             name = "RepairPricing.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1160.5f, 375f),
@@ -169,15 +169,15 @@ val MiuixIcons.Glass.Normal.RepairPricing: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairPricingSurfaceNormal!!
+        return _repairPricingNormal!!
     }
 
-private var _repairPricingSurfaceNormal: ImageVector? = null
+private var _repairPricingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RepairPricing: ImageVector
     get() {
-        if (_repairPricingSurfaceRegular != null) return _repairPricingSurfaceRegular!!
-        _repairPricingSurfaceRegular = buildHyperOSIcon(
+        if (_repairPricingRegular != null) return _repairPricingRegular!!
+        _repairPricingRegular = buildHyperOSIcon(
             name = "RepairPricing.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1164f, 375f),
@@ -251,15 +251,15 @@ val MiuixIcons.Glass.Regular.RepairPricing: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairPricingSurfaceRegular!!
+        return _repairPricingRegular!!
     }
 
-private var _repairPricingSurfaceRegular: ImageVector? = null
+private var _repairPricingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RepairPricing: ImageVector
     get() {
-        if (_repairPricingSurfaceMedium != null) return _repairPricingSurfaceMedium!!
-        _repairPricingSurfaceMedium = buildHyperOSIcon(
+        if (_repairPricingMedium != null) return _repairPricingMedium!!
+        _repairPricingMedium = buildHyperOSIcon(
             name = "RepairPricing.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1173.5f, 375.3f),
@@ -333,15 +333,15 @@ val MiuixIcons.Glass.Medium.RepairPricing: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairPricingSurfaceMedium!!
+        return _repairPricingMedium!!
     }
 
-private var _repairPricingSurfaceMedium: ImageVector? = null
+private var _repairPricingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RepairPricing: ImageVector
     get() {
-        if (_repairPricingSurfaceDemibold != null) return _repairPricingSurfaceDemibold!!
-        _repairPricingSurfaceDemibold = buildHyperOSIcon(
+        if (_repairPricingDemibold != null) return _repairPricingDemibold!!
+        _repairPricingDemibold = buildHyperOSIcon(
             name = "RepairPricing.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1180.1f, 375.5f),
@@ -415,8 +415,8 @@ val MiuixIcons.Glass.Demibold.RepairPricing: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _repairPricingSurfaceDemibold!!
+        return _repairPricingDemibold!!
     }
 
-private var _repairPricingSurfaceDemibold: ImageVector? = null
+private var _repairPricingDemibold: ImageVector? = null
 

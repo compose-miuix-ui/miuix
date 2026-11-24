@@ -88,9 +88,11 @@ private class EdgeStrokeNode(
 ) : Modifier.Node(),
     DrawModifierNode {
 
+    private val brushCache = ShaderBrushCache()
+
     override fun ContentDrawScope.draw() {
         drawContent()
-        drawEdgeStroke(shape = shape, stroke = stroke, alpha = alpha)
+        drawEdgeStroke(shape = shape, stroke = stroke, alpha = alpha, brushCache = brushCache)
     }
 }
 
@@ -140,9 +142,11 @@ private class DeferredEdgeStrokeNode(
 ) : Modifier.Node(),
     DrawModifierNode {
 
+    private val brushCache = ShaderBrushCache()
+
     override fun ContentDrawScope.draw() {
         drawContent()
         val resolvedStroke = stroke() ?: return
-        drawEdgeStroke(shape = shape, stroke = resolvedStroke, alpha = alpha())
+        drawEdgeStroke(shape = shape, stroke = resolvedStroke, alpha = alpha(), brushCache = brushCache)
     }
 }

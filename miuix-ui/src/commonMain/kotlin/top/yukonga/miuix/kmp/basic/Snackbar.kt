@@ -125,6 +125,7 @@ data class SnackbarVisuals(
 /**
  * Interface representing the data of a [Snackbar].
  */
+@Stable
 interface SnackbarData {
     /** Visuals of the Snackbar. */
     val visuals: SnackbarVisuals
@@ -144,6 +145,12 @@ private enum class SnackbarSwipeToDismissValue {
 
 /** Gap kept between the newest snackbar and the bottom edge of the [SnackbarHost]. */
 private val HostBottomPadding = 12.dp
+
+private val SnackbarShadow = Shadow(
+    radius = 10.dp,
+    color = Color.Black,
+    alpha = 0.1f,
+)
 
 /**
  * State of the [SnackbarHost].
@@ -404,11 +411,7 @@ fun Snackbar(
                 .padding(SnackbarDefaults.OuterPadding)
                 .dropShadow(
                     shape = RoundedCornerShape(cornerRadius),
-                    shadow = Shadow(
-                        radius = 10.dp,
-                        color = Color.Black,
-                        alpha = 0.1f,
-                    ),
+                    shadow = SnackbarShadow,
                 )
                 .squircleBackground(color = colors.containerColor, cornerRadius = cornerRadius)
                 .pointerInput(Unit) {

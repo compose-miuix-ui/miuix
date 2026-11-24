@@ -12,8 +12,8 @@ val MiuixIcons.Glass.AlarmMuted: ImageVector
 
 val MiuixIcons.Glass.Light.AlarmMuted: ImageVector
     get() {
-        if (_alarmMutedSurfaceLight != null) return _alarmMutedSurfaceLight!!
-        _alarmMutedSurfaceLight = buildHyperOSIcon(
+        if (_alarmMutedLight != null) return _alarmMutedLight!!
+        _alarmMutedLight = buildHyperOSIcon(
             name = "AlarmMuted.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1156.8f, -37.2f),
@@ -112,15 +112,15 @@ val MiuixIcons.Glass.Light.AlarmMuted: ImageVector
             translationY = 1038.3293f,
             autoMirror = false,
         )
-        return _alarmMutedSurfaceLight!!
+        return _alarmMutedLight!!
     }
 
-private var _alarmMutedSurfaceLight: ImageVector? = null
+private var _alarmMutedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.AlarmMuted: ImageVector
     get() {
-        if (_alarmMutedSurfaceNormal != null) return _alarmMutedSurfaceNormal!!
-        _alarmMutedSurfaceNormal = buildHyperOSIcon(
+        if (_alarmMutedNormal != null) return _alarmMutedNormal!!
+        _alarmMutedNormal = buildHyperOSIcon(
             name = "AlarmMuted.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1161.1f, -32.9f),
@@ -219,15 +219,15 @@ val MiuixIcons.Glass.Normal.AlarmMuted: ImageVector
             translationY = 1040.6013f,
             autoMirror = false,
         )
-        return _alarmMutedSurfaceNormal!!
+        return _alarmMutedNormal!!
     }
 
-private var _alarmMutedSurfaceNormal: ImageVector? = null
+private var _alarmMutedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.AlarmMuted: ImageVector
     get() {
-        if (_alarmMutedSurfaceRegular != null) return _alarmMutedSurfaceRegular!!
-        _alarmMutedSurfaceRegular = buildHyperOSIcon(
+        if (_alarmMutedRegular != null) return _alarmMutedRegular!!
+        _alarmMutedRegular = buildHyperOSIcon(
             name = "AlarmMuted.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1163f, -31f),
@@ -326,15 +326,15 @@ val MiuixIcons.Glass.Regular.AlarmMuted: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _alarmMutedSurfaceRegular!!
+        return _alarmMutedRegular!!
     }
 
-private var _alarmMutedSurfaceRegular: ImageVector? = null
+private var _alarmMutedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.AlarmMuted: ImageVector
     get() {
-        if (_alarmMutedSurfaceMedium != null) return _alarmMutedSurfaceMedium!!
-        _alarmMutedSurfaceMedium = buildHyperOSIcon(
+        if (_alarmMutedMedium != null) return _alarmMutedMedium!!
+        _alarmMutedMedium = buildHyperOSIcon(
             name = "AlarmMuted.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1173.5f, -35.6f),
@@ -433,15 +433,15 @@ val MiuixIcons.Glass.Medium.AlarmMuted: ImageVector
             translationY = 1042.9465f,
             autoMirror = false,
         )
-        return _alarmMutedSurfaceMedium!!
+        return _alarmMutedMedium!!
     }
 
-private var _alarmMutedSurfaceMedium: ImageVector? = null
+private var _alarmMutedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.AlarmMuted: ImageVector
     get() {
-        if (_alarmMutedSurfaceDemibold != null) return _alarmMutedSurfaceDemibold!!
-        _alarmMutedSurfaceDemibold = buildHyperOSIcon(
+        if (_alarmMutedDemibold != null) return _alarmMutedDemibold!!
+        _alarmMutedDemibold = buildHyperOSIcon(
             name = "AlarmMuted.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1180.9f, -38.8f),
@@ -540,8 +540,8 @@ val MiuixIcons.Glass.Demibold.AlarmMuted: ImageVector
             translationY = 1043.8458f,
             autoMirror = false,
         )
-        return _alarmMutedSurfaceDemibold!!
+        return _alarmMutedDemibold!!
     }
 
-private var _alarmMutedSurfaceDemibold: ImageVector? = null
+private var _alarmMutedDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EditSubtitle: ImageVector
 
 val MiuixIcons.Glass.Light.EditSubtitle: ImageVector
     get() {
-        if (_editSubtitleLineLight != null) return _editSubtitleLineLight!!
-        _editSubtitleLineLight = buildHyperOSIcon(
+        if (_editSubtitleLight != null) return _editSubtitleLight!!
+        _editSubtitleLight = buildHyperOSIcon(
             name = "EditSubtitle.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(426.3f, 537.6f),
@@ -84,15 +84,15 @@ val MiuixIcons.Glass.Light.EditSubtitle: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _editSubtitleLineLight!!
+        return _editSubtitleLight!!
     }
 
-private var _editSubtitleLineLight: ImageVector? = null
+private var _editSubtitleLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EditSubtitle: ImageVector
     get() {
-        if (_editSubtitleLineNormal != null) return _editSubtitleLineNormal!!
-        _editSubtitleLineNormal = buildHyperOSIcon(
+        if (_editSubtitleNormal != null) return _editSubtitleNormal!!
+        _editSubtitleNormal = buildHyperOSIcon(
             name = "EditSubtitle.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(417.2f, 540.6f),
@@ -163,15 +163,15 @@ val MiuixIcons.Glass.Normal.EditSubtitle: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _editSubtitleLineNormal!!
+        return _editSubtitleNormal!!
     }
 
-private var _editSubtitleLineNormal: ImageVector? = null
+private var _editSubtitleNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EditSubtitle: ImageVector
     get() {
-        if (_editSubtitleLineRegular != null) return _editSubtitleLineRegular!!
-        _editSubtitleLineRegular = buildHyperOSIcon(
+        if (_editSubtitleRegular != null) return _editSubtitleRegular!!
+        _editSubtitleRegular = buildHyperOSIcon(
             name = "EditSubtitle.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(413f, 542f),
@@ -242,15 +242,15 @@ val MiuixIcons.Glass.Regular.EditSubtitle: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _editSubtitleLineRegular!!
+        return _editSubtitleRegular!!
     }
 
-private var _editSubtitleLineRegular: ImageVector? = null
+private var _editSubtitleRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EditSubtitle: ImageVector
     get() {
-        if (_editSubtitleLineMedium != null) return _editSubtitleLineMedium!!
-        _editSubtitleLineMedium = buildHyperOSIcon(
+        if (_editSubtitleMedium != null) return _editSubtitleMedium!!
+        _editSubtitleMedium = buildHyperOSIcon(
             name = "EditSubtitle.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(404.9f, 546.6f),
@@ -321,15 +321,15 @@ val MiuixIcons.Glass.Medium.EditSubtitle: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _editSubtitleLineMedium!!
+        return _editSubtitleMedium!!
     }
 
-private var _editSubtitleLineMedium: ImageVector? = null
+private var _editSubtitleMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EditSubtitle: ImageVector
     get() {
-        if (_editSubtitleLineDemibold != null) return _editSubtitleLineDemibold!!
-        _editSubtitleLineDemibold = buildHyperOSIcon(
+        if (_editSubtitleDemibold != null) return _editSubtitleDemibold!!
+        _editSubtitleDemibold = buildHyperOSIcon(
             name = "EditSubtitle.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(399.2f, 549.8f),
@@ -400,8 +400,8 @@ val MiuixIcons.Glass.Demibold.EditSubtitle: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _editSubtitleLineDemibold!!
+        return _editSubtitleDemibold!!
     }
 
-private var _editSubtitleLineDemibold: ImageVector? = null
+private var _editSubtitleDemibold: ImageVector? = null
 

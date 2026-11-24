@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MagicClone: ImageVector
 
 val MiuixIcons.Glass.Light.MagicClone: ImageVector
     get() {
-        if (_magicCloneSurfaceLight != null) return _magicCloneSurfaceLight!!
-        _magicCloneSurfaceLight = buildHyperOSIcon(
+        if (_magicCloneLight != null) return _magicCloneLight!!
+        _magicCloneLight = buildHyperOSIcon(
             name = "MagicClone.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(70f, 352f),
@@ -65,15 +65,15 @@ val MiuixIcons.Glass.Light.MagicClone: ImageVector
             translationY = 1019.1667f,
             autoMirror = false,
         )
-        return _magicCloneSurfaceLight!!
+        return _magicCloneLight!!
     }
 
-private var _magicCloneSurfaceLight: ImageVector? = null
+private var _magicCloneLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MagicClone: ImageVector
     get() {
-        if (_magicCloneSurfaceNormal != null) return _magicCloneSurfaceNormal!!
-        _magicCloneSurfaceNormal = buildHyperOSIcon(
+        if (_magicCloneNormal != null) return _magicCloneNormal!!
+        _magicCloneNormal = buildHyperOSIcon(
             name = "MagicClone.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(53.5f, 352f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Normal.MagicClone: ImageVector
             translationY = 1019.1667f,
             autoMirror = false,
         )
-        return _magicCloneSurfaceNormal!!
+        return _magicCloneNormal!!
     }
 
-private var _magicCloneSurfaceNormal: ImageVector? = null
+private var _magicCloneNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MagicClone: ImageVector
     get() {
-        if (_magicCloneSurfaceRegular != null) return _magicCloneSurfaceRegular!!
-        _magicCloneSurfaceRegular = buildHyperOSIcon(
+        if (_magicCloneRegular != null) return _magicCloneRegular!!
+        _magicCloneRegular = buildHyperOSIcon(
             name = "MagicClone.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(46f, 352f),
@@ -185,15 +185,15 @@ val MiuixIcons.Glass.Regular.MagicClone: ImageVector
             translationY = 1019.1667f,
             autoMirror = false,
         )
-        return _magicCloneSurfaceRegular!!
+        return _magicCloneRegular!!
     }
 
-private var _magicCloneSurfaceRegular: ImageVector? = null
+private var _magicCloneRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MagicClone: ImageVector
     get() {
-        if (_magicCloneSurfaceMedium != null) return _magicCloneSurfaceMedium!!
-        _magicCloneSurfaceMedium = buildHyperOSIcon(
+        if (_magicCloneMedium != null) return _magicCloneMedium!!
+        _magicCloneMedium = buildHyperOSIcon(
             name = "MagicClone.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(40.6f, 352f),
@@ -245,15 +245,15 @@ val MiuixIcons.Glass.Medium.MagicClone: ImageVector
             translationY = 1019.1667f,
             autoMirror = false,
         )
-        return _magicCloneSurfaceMedium!!
+        return _magicCloneMedium!!
     }
 
-private var _magicCloneSurfaceMedium: ImageVector? = null
+private var _magicCloneMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MagicClone: ImageVector
     get() {
-        if (_magicCloneSurfaceDemibold != null) return _magicCloneSurfaceDemibold!!
-        _magicCloneSurfaceDemibold = buildHyperOSIcon(
+        if (_magicCloneDemibold != null) return _magicCloneDemibold!!
+        _magicCloneDemibold = buildHyperOSIcon(
             name = "MagicClone.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(36.8f, 352f),
@@ -305,8 +305,8 @@ val MiuixIcons.Glass.Demibold.MagicClone: ImageVector
             translationY = 1019.1667f,
             autoMirror = false,
         )
-        return _magicCloneSurfaceDemibold!!
+        return _magicCloneDemibold!!
     }
 
-private var _magicCloneSurfaceDemibold: ImageVector? = null
+private var _magicCloneDemibold: ImageVector? = null
 

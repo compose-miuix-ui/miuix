@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Annotation: ImageVector
 
 val MiuixIcons.Glass.Light.Annotation: ImageVector
     get() {
-        if (_annotationLineLight != null) return _annotationLineLight!!
-        _annotationLineLight = buildHyperOSIcon(
+        if (_annotationLight != null) return _annotationLight!!
+        _annotationLight = buildHyperOSIcon(
             name = "Annotation.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(902.6f, 313.6f),
@@ -133,15 +133,15 @@ val MiuixIcons.Glass.Light.Annotation: ImageVector
             translationY = 1041.6177f,
             autoMirror = false,
         )
-        return _annotationLineLight!!
+        return _annotationLight!!
     }
 
-private var _annotationLineLight: ImageVector? = null
+private var _annotationLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Annotation: ImageVector
     get() {
-        if (_annotationLineNormal != null) return _annotationLineNormal!!
-        _annotationLineNormal = buildHyperOSIcon(
+        if (_annotationNormal != null) return _annotationNormal!!
+        _annotationNormal = buildHyperOSIcon(
             name = "Annotation.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(902.9f, 311.1f),
@@ -261,15 +261,15 @@ val MiuixIcons.Glass.Normal.Annotation: ImageVector
             translationY = 1041.623f,
             autoMirror = false,
         )
-        return _annotationLineNormal!!
+        return _annotationNormal!!
     }
 
-private var _annotationLineNormal: ImageVector? = null
+private var _annotationNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Annotation: ImageVector
     get() {
-        if (_annotationLineRegular != null) return _annotationLineRegular!!
-        _annotationLineRegular = buildHyperOSIcon(
+        if (_annotationRegular != null) return _annotationRegular!!
+        _annotationRegular = buildHyperOSIcon(
             name = "Annotation.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(903f, 310f),
@@ -389,15 +389,15 @@ val MiuixIcons.Glass.Regular.Annotation: ImageVector
             translationY = 1041.625f,
             autoMirror = false,
         )
-        return _annotationLineRegular!!
+        return _annotationRegular!!
     }
 
-private var _annotationLineRegular: ImageVector? = null
+private var _annotationRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Annotation: ImageVector
     get() {
-        if (_annotationLineMedium != null) return _annotationLineMedium!!
-        _annotationLineMedium = buildHyperOSIcon(
+        if (_annotationMedium != null) return _annotationMedium!!
+        _annotationMedium = buildHyperOSIcon(
             name = "Annotation.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(902.7f, 309.7f),
@@ -517,15 +517,15 @@ val MiuixIcons.Glass.Medium.Annotation: ImageVector
             translationY = 1041.6284f,
             autoMirror = false,
         )
-        return _annotationLineMedium!!
+        return _annotationMedium!!
     }
 
-private var _annotationLineMedium: ImageVector? = null
+private var _annotationMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Annotation: ImageVector
     get() {
-        if (_annotationLineDemibold != null) return _annotationLineDemibold!!
-        _annotationLineDemibold = buildHyperOSIcon(
+        if (_annotationDemibold != null) return _annotationDemibold!!
+        _annotationDemibold = buildHyperOSIcon(
             name = "Annotation.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(902.5f, 309.5f),
@@ -645,8 +645,8 @@ val MiuixIcons.Glass.Demibold.Annotation: ImageVector
             translationY = 1041.6305f,
             autoMirror = false,
         )
-        return _annotationLineDemibold!!
+        return _annotationDemibold!!
     }
 
-private var _annotationLineDemibold: ImageVector? = null
+private var _annotationDemibold: ImageVector? = null
 

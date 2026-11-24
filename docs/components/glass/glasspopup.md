@@ -83,6 +83,7 @@ GlassPopupItem(
 | visuals | GlassPopupVisuals | Panel appearance | GlassPopupDefaults.visuals() | No |
 | cornerRadius | Dp | Settled panel corner radius | GlassPopupDefaults.CornerRadius (24.dp) | No |
 | secondary | Boolean | Uses secondary geometry; use GlassSecondaryPopup to inherit a primary popup's material | false | No |
+| horizontalAlignment | Alignment.Horizontal | Horizontal alignment of the panel relative to anchorBounds | Alignment.End | No |
 | contentPadding | PaddingValues | Padding around the rows | PaddingValues(vertical = GlassPopupDefaults.ContentPaddingVertical) | No |
 | content | @Composable ColumnScope.() -> Unit | Menu rows | - | Yes |
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoCardSelected: ImageVector
 
 val MiuixIcons.Glass.Light.NoCardSelected: ImageVector
     get() {
-        if (_noCardSelectedSurfaceLight != null) return _noCardSelectedSurfaceLight!!
-        _noCardSelectedSurfaceLight = buildHyperOSIcon(
+        if (_noCardSelectedLight != null) return _noCardSelectedLight!!
+        _noCardSelectedLight = buildHyperOSIcon(
             name = "NoCardSelected.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(625.3f, 106f),
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.NoCardSelected: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _noCardSelectedSurfaceLight!!
+        return _noCardSelectedLight!!
     }
 
-private var _noCardSelectedSurfaceLight: ImageVector? = null
+private var _noCardSelectedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoCardSelected: ImageVector
     get() {
-        if (_noCardSelectedSurfaceNormal != null) return _noCardSelectedSurfaceNormal!!
-        _noCardSelectedSurfaceNormal = buildHyperOSIcon(
+        if (_noCardSelectedNormal != null) return _noCardSelectedNormal!!
+        _noCardSelectedNormal = buildHyperOSIcon(
             name = "NoCardSelected.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(616.2f, 106f),
@@ -183,15 +183,15 @@ val MiuixIcons.Glass.Normal.NoCardSelected: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _noCardSelectedSurfaceNormal!!
+        return _noCardSelectedNormal!!
     }
 
-private var _noCardSelectedSurfaceNormal: ImageVector? = null
+private var _noCardSelectedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoCardSelected: ImageVector
     get() {
-        if (_noCardSelectedSurfaceRegular != null) return _noCardSelectedSurfaceRegular!!
-        _noCardSelectedSurfaceRegular = buildHyperOSIcon(
+        if (_noCardSelectedRegular != null) return _noCardSelectedRegular!!
+        _noCardSelectedRegular = buildHyperOSIcon(
             name = "NoCardSelected.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(612f, 106f),
@@ -272,15 +272,15 @@ val MiuixIcons.Glass.Regular.NoCardSelected: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _noCardSelectedSurfaceRegular!!
+        return _noCardSelectedRegular!!
     }
 
-private var _noCardSelectedSurfaceRegular: ImageVector? = null
+private var _noCardSelectedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoCardSelected: ImageVector
     get() {
-        if (_noCardSelectedSurfaceMedium != null) return _noCardSelectedSurfaceMedium!!
-        _noCardSelectedSurfaceMedium = buildHyperOSIcon(
+        if (_noCardSelectedMedium != null) return _noCardSelectedMedium!!
+        _noCardSelectedMedium = buildHyperOSIcon(
             name = "NoCardSelected.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(606.6f, 106f),
@@ -361,15 +361,15 @@ val MiuixIcons.Glass.Medium.NoCardSelected: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _noCardSelectedSurfaceMedium!!
+        return _noCardSelectedMedium!!
     }
 
-private var _noCardSelectedSurfaceMedium: ImageVector? = null
+private var _noCardSelectedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoCardSelected: ImageVector
     get() {
-        if (_noCardSelectedSurfaceDemibold != null) return _noCardSelectedSurfaceDemibold!!
-        _noCardSelectedSurfaceDemibold = buildHyperOSIcon(
+        if (_noCardSelectedDemibold != null) return _noCardSelectedDemibold!!
+        _noCardSelectedDemibold = buildHyperOSIcon(
             name = "NoCardSelected.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(602.8f, 106f),
@@ -450,8 +450,8 @@ val MiuixIcons.Glass.Demibold.NoCardSelected: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _noCardSelectedSurfaceDemibold!!
+        return _noCardSelectedDemibold!!
     }
 
-private var _noCardSelectedSurfaceDemibold: ImageVector? = null
+private var _noCardSelectedDemibold: ImageVector? = null
 

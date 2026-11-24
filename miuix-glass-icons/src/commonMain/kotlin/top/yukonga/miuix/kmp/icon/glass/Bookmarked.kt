@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Bookmarked: ImageVector
 
 val MiuixIcons.Glass.Light.Bookmarked: ImageVector
     get() {
-        if (_bookmarkedSurfaceLight != null) return _bookmarkedSurfaceLight!!
-        _bookmarkedSurfaceLight = buildHyperOSIcon(
+        if (_bookmarkedLight != null) return _bookmarkedLight!!
+        _bookmarkedLight = buildHyperOSIcon(
             name = "Bookmarked.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(407.4f, 869.1f),
@@ -71,15 +71,15 @@ val MiuixIcons.Glass.Light.Bookmarked: ImageVector
             translationY = 1035.9928f,
             autoMirror = false,
         )
-        return _bookmarkedSurfaceLight!!
+        return _bookmarkedLight!!
     }
 
-private var _bookmarkedSurfaceLight: ImageVector? = null
+private var _bookmarkedLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Bookmarked: ImageVector
     get() {
-        if (_bookmarkedSurfaceNormal != null) return _bookmarkedSurfaceNormal!!
-        _bookmarkedSurfaceNormal = buildHyperOSIcon(
+        if (_bookmarkedNormal != null) return _bookmarkedNormal!!
+        _bookmarkedNormal = buildHyperOSIcon(
             name = "Bookmarked.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(409.9f, 872.5f),
@@ -137,15 +137,15 @@ val MiuixIcons.Glass.Normal.Bookmarked: ImageVector
             translationY = 1035.9651f,
             autoMirror = false,
         )
-        return _bookmarkedSurfaceNormal!!
+        return _bookmarkedNormal!!
     }
 
-private var _bookmarkedSurfaceNormal: ImageVector? = null
+private var _bookmarkedNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Bookmarked: ImageVector
     get() {
-        if (_bookmarkedSurfaceRegular != null) return _bookmarkedSurfaceRegular!!
-        _bookmarkedSurfaceRegular = buildHyperOSIcon(
+        if (_bookmarkedRegular != null) return _bookmarkedRegular!!
+        _bookmarkedRegular = buildHyperOSIcon(
             name = "Bookmarked.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(411f, 874f),
@@ -203,15 +203,15 @@ val MiuixIcons.Glass.Regular.Bookmarked: ImageVector
             translationY = 1035.9524f,
             autoMirror = false,
         )
-        return _bookmarkedSurfaceRegular!!
+        return _bookmarkedRegular!!
     }
 
-private var _bookmarkedSurfaceRegular: ImageVector? = null
+private var _bookmarkedRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Bookmarked: ImageVector
     get() {
-        if (_bookmarkedSurfaceMedium != null) return _bookmarkedSurfaceMedium!!
-        _bookmarkedSurfaceMedium = buildHyperOSIcon(
+        if (_bookmarkedMedium != null) return _bookmarkedMedium!!
+        _bookmarkedMedium = buildHyperOSIcon(
             name = "Bookmarked.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(413.2f, 876.4f),
@@ -269,15 +269,15 @@ val MiuixIcons.Glass.Medium.Bookmarked: ImageVector
             translationY = 1035.9245f,
             autoMirror = false,
         )
-        return _bookmarkedSurfaceMedium!!
+        return _bookmarkedMedium!!
     }
 
-private var _bookmarkedSurfaceMedium: ImageVector? = null
+private var _bookmarkedMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Bookmarked: ImageVector
     get() {
-        if (_bookmarkedSurfaceDemibold != null) return _bookmarkedSurfaceDemibold!!
-        _bookmarkedSurfaceDemibold = buildHyperOSIcon(
+        if (_bookmarkedDemibold != null) return _bookmarkedDemibold!!
+        _bookmarkedDemibold = buildHyperOSIcon(
             name = "Bookmarked.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(414.7f, 878.1f),
@@ -335,8 +335,8 @@ val MiuixIcons.Glass.Demibold.Bookmarked: ImageVector
             translationY = 1035.9046f,
             autoMirror = false,
         )
-        return _bookmarkedSurfaceDemibold!!
+        return _bookmarkedDemibold!!
     }
 
-private var _bookmarkedSurfaceDemibold: ImageVector? = null
+private var _bookmarkedDemibold: ImageVector? = null
 

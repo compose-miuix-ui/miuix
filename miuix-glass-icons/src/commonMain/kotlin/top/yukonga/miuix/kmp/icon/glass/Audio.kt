@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Audio: ImageVector
 
 val MiuixIcons.Glass.Light.Audio: ImageVector
     get() {
-        if (_audioLineLight != null) return _audioLineLight!!
-        _audioLineLight = buildHyperOSIcon(
+        if (_audioLight != null) return _audioLight!!
+        _audioLight = buildHyperOSIcon(
             name = "Audio.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(674.9f, 884.7f),
@@ -120,15 +120,15 @@ val MiuixIcons.Glass.Light.Audio: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _audioLineLight!!
+        return _audioLight!!
     }
 
-private var _audioLineLight: ImageVector? = null
+private var _audioLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Audio: ImageVector
     get() {
-        if (_audioLineNormal != null) return _audioLineNormal!!
-        _audioLineNormal = buildHyperOSIcon(
+        if (_audioNormal != null) return _audioNormal!!
+        _audioNormal = buildHyperOSIcon(
             name = "Audio.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(677f, 893.8f),
@@ -235,15 +235,15 @@ val MiuixIcons.Glass.Normal.Audio: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _audioLineNormal!!
+        return _audioNormal!!
     }
 
-private var _audioLineNormal: ImageVector? = null
+private var _audioNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Audio: ImageVector
     get() {
-        if (_audioLineRegular != null) return _audioLineRegular!!
-        _audioLineRegular = buildHyperOSIcon(
+        if (_audioRegular != null) return _audioRegular!!
+        _audioRegular = buildHyperOSIcon(
             name = "Audio.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(678f, 898f),
@@ -350,15 +350,15 @@ val MiuixIcons.Glass.Regular.Audio: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _audioLineRegular!!
+        return _audioRegular!!
     }
 
-private var _audioLineRegular: ImageVector? = null
+private var _audioRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Audio: ImageVector
     get() {
-        if (_audioLineMedium != null) return _audioLineMedium!!
-        _audioLineMedium = buildHyperOSIcon(
+        if (_audioMedium != null) return _audioMedium!!
+        _audioMedium = buildHyperOSIcon(
             name = "Audio.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(680.7f, 903.4f),
@@ -465,15 +465,15 @@ val MiuixIcons.Glass.Medium.Audio: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _audioLineMedium!!
+        return _audioMedium!!
     }
 
-private var _audioLineMedium: ImageVector? = null
+private var _audioMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Audio: ImageVector
     get() {
-        if (_audioLineDemibold != null) return _audioLineDemibold!!
-        _audioLineDemibold = buildHyperOSIcon(
+        if (_audioDemibold != null) return _audioDemibold!!
+        _audioDemibold = buildHyperOSIcon(
             name = "Audio.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(682.6f, 907.2f),
@@ -580,8 +580,8 @@ val MiuixIcons.Glass.Demibold.Audio: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _audioLineDemibold!!
+        return _audioDemibold!!
     }
 
-private var _audioLineDemibold: ImageVector? = null
+private var _audioDemibold: ImageVector? = null
 

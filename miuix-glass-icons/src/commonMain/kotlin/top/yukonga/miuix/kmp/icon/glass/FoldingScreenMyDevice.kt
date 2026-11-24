@@ -12,8 +12,8 @@ val MiuixIcons.Glass.FoldingScreenMyDevice: ImageVector
 
 val MiuixIcons.Glass.Light.FoldingScreenMyDevice: ImageVector
     get() {
-        if (_foldingScreenMyDeviceSurfaceLight != null) return _foldingScreenMyDeviceSurfaceLight!!
-        _foldingScreenMyDeviceSurfaceLight = buildHyperOSIcon(
+        if (_foldingScreenMyDeviceLight != null) return _foldingScreenMyDeviceLight!!
+        _foldingScreenMyDeviceLight = buildHyperOSIcon(
             name = "FoldingScreenMyDevice.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(325.3f, 836.9f),
@@ -91,15 +91,15 @@ val MiuixIcons.Glass.Light.FoldingScreenMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _foldingScreenMyDeviceSurfaceLight!!
+        return _foldingScreenMyDeviceLight!!
     }
 
-private var _foldingScreenMyDeviceSurfaceLight: ImageVector? = null
+private var _foldingScreenMyDeviceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.FoldingScreenMyDevice: ImageVector
     get() {
-        if (_foldingScreenMyDeviceSurfaceNormal != null) return _foldingScreenMyDeviceSurfaceNormal!!
-        _foldingScreenMyDeviceSurfaceNormal = buildHyperOSIcon(
+        if (_foldingScreenMyDeviceNormal != null) return _foldingScreenMyDeviceNormal!!
+        _foldingScreenMyDeviceNormal = buildHyperOSIcon(
             name = "FoldingScreenMyDevice.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(321.7f, 844.5f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Normal.FoldingScreenMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _foldingScreenMyDeviceSurfaceNormal!!
+        return _foldingScreenMyDeviceNormal!!
     }
 
-private var _foldingScreenMyDeviceSurfaceNormal: ImageVector? = null
+private var _foldingScreenMyDeviceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.FoldingScreenMyDevice: ImageVector
     get() {
-        if (_foldingScreenMyDeviceSurfaceRegular != null) return _foldingScreenMyDeviceSurfaceRegular!!
-        _foldingScreenMyDeviceSurfaceRegular = buildHyperOSIcon(
+        if (_foldingScreenMyDeviceRegular != null) return _foldingScreenMyDeviceRegular!!
+        _foldingScreenMyDeviceRegular = buildHyperOSIcon(
             name = "FoldingScreenMyDevice.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(320f, 848f),
@@ -263,15 +263,15 @@ val MiuixIcons.Glass.Regular.FoldingScreenMyDevice: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _foldingScreenMyDeviceSurfaceRegular!!
+        return _foldingScreenMyDeviceRegular!!
     }
 
-private var _foldingScreenMyDeviceSurfaceRegular: ImageVector? = null
+private var _foldingScreenMyDeviceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.FoldingScreenMyDevice: ImageVector
     get() {
-        if (_foldingScreenMyDeviceSurfaceMedium != null) return _foldingScreenMyDeviceSurfaceMedium!!
-        _foldingScreenMyDeviceSurfaceMedium = buildHyperOSIcon(
+        if (_foldingScreenMyDeviceMedium != null) return _foldingScreenMyDeviceMedium!!
+        _foldingScreenMyDeviceMedium = buildHyperOSIcon(
             name = "FoldingScreenMyDevice.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(316.2f, 855.6f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Medium.FoldingScreenMyDevice: ImageVector
             translationY = 1041.5315f,
             autoMirror = false,
         )
-        return _foldingScreenMyDeviceSurfaceMedium!!
+        return _foldingScreenMyDeviceMedium!!
     }
 
-private var _foldingScreenMyDeviceSurfaceMedium: ImageVector? = null
+private var _foldingScreenMyDeviceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.FoldingScreenMyDevice: ImageVector
     get() {
-        if (_foldingScreenMyDeviceSurfaceDemibold != null) return _foldingScreenMyDeviceSurfaceDemibold!!
-        _foldingScreenMyDeviceSurfaceDemibold = buildHyperOSIcon(
+        if (_foldingScreenMyDeviceDemibold != null) return _foldingScreenMyDeviceDemibold!!
+        _foldingScreenMyDeviceDemibold = buildHyperOSIcon(
             name = "FoldingScreenMyDevice.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(313.6f, 860.9f),
@@ -435,8 +435,8 @@ val MiuixIcons.Glass.Demibold.FoldingScreenMyDevice: ImageVector
             translationY = 1041.4369f,
             autoMirror = false,
         )
-        return _foldingScreenMyDeviceSurfaceDemibold!!
+        return _foldingScreenMyDeviceDemibold!!
     }
 
-private var _foldingScreenMyDeviceSurfaceDemibold: ImageVector? = null
+private var _foldingScreenMyDeviceDemibold: ImageVector? = null
 

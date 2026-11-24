@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HybridPasswordWithFrame: ImageVector
 
 val MiuixIcons.Glass.Light.HybridPasswordWithFrame: ImageVector
     get() {
-        if (_hybridPasswordWithFrameLineLight != null) return _hybridPasswordWithFrameLineLight!!
-        _hybridPasswordWithFrameLineLight = buildHyperOSIcon(
+        if (_hybridPasswordWithFrameLight != null) return _hybridPasswordWithFrameLight!!
+        _hybridPasswordWithFrameLight = buildHyperOSIcon(
             name = "HybridPasswordWithFrame.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(203.3f, 641f),
@@ -153,15 +153,15 @@ val MiuixIcons.Glass.Light.HybridPasswordWithFrame: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hybridPasswordWithFrameLineLight!!
+        return _hybridPasswordWithFrameLight!!
     }
 
-private var _hybridPasswordWithFrameLineLight: ImageVector? = null
+private var _hybridPasswordWithFrameLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HybridPasswordWithFrame: ImageVector
     get() {
-        if (_hybridPasswordWithFrameLineNormal != null) return _hybridPasswordWithFrameLineNormal!!
-        _hybridPasswordWithFrameLineNormal = buildHyperOSIcon(
+        if (_hybridPasswordWithFrameNormal != null) return _hybridPasswordWithFrameNormal!!
+        _hybridPasswordWithFrameNormal = buildHyperOSIcon(
             name = "HybridPasswordWithFrame.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(194.2f, 641f),
@@ -301,15 +301,15 @@ val MiuixIcons.Glass.Normal.HybridPasswordWithFrame: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hybridPasswordWithFrameLineNormal!!
+        return _hybridPasswordWithFrameNormal!!
     }
 
-private var _hybridPasswordWithFrameLineNormal: ImageVector? = null
+private var _hybridPasswordWithFrameNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HybridPasswordWithFrame: ImageVector
     get() {
-        if (_hybridPasswordWithFrameLineRegular != null) return _hybridPasswordWithFrameLineRegular!!
-        _hybridPasswordWithFrameLineRegular = buildHyperOSIcon(
+        if (_hybridPasswordWithFrameRegular != null) return _hybridPasswordWithFrameRegular!!
+        _hybridPasswordWithFrameRegular = buildHyperOSIcon(
             name = "HybridPasswordWithFrame.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(190f, 641f),
@@ -449,15 +449,15 @@ val MiuixIcons.Glass.Regular.HybridPasswordWithFrame: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hybridPasswordWithFrameLineRegular!!
+        return _hybridPasswordWithFrameRegular!!
     }
 
-private var _hybridPasswordWithFrameLineRegular: ImageVector? = null
+private var _hybridPasswordWithFrameRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HybridPasswordWithFrame: ImageVector
     get() {
-        if (_hybridPasswordWithFrameLineMedium != null) return _hybridPasswordWithFrameLineMedium!!
-        _hybridPasswordWithFrameLineMedium = buildHyperOSIcon(
+        if (_hybridPasswordWithFrameMedium != null) return _hybridPasswordWithFrameMedium!!
+        _hybridPasswordWithFrameMedium = buildHyperOSIcon(
             name = "HybridPasswordWithFrame.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(181.9f, 641f),
@@ -597,15 +597,15 @@ val MiuixIcons.Glass.Medium.HybridPasswordWithFrame: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hybridPasswordWithFrameLineMedium!!
+        return _hybridPasswordWithFrameMedium!!
     }
 
-private var _hybridPasswordWithFrameLineMedium: ImageVector? = null
+private var _hybridPasswordWithFrameMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HybridPasswordWithFrame: ImageVector
     get() {
-        if (_hybridPasswordWithFrameLineDemibold != null) return _hybridPasswordWithFrameLineDemibold!!
-        _hybridPasswordWithFrameLineDemibold = buildHyperOSIcon(
+        if (_hybridPasswordWithFrameDemibold != null) return _hybridPasswordWithFrameDemibold!!
+        _hybridPasswordWithFrameDemibold = buildHyperOSIcon(
             name = "HybridPasswordWithFrame.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(176.2f, 641f),
@@ -745,8 +745,8 @@ val MiuixIcons.Glass.Demibold.HybridPasswordWithFrame: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _hybridPasswordWithFrameLineDemibold!!
+        return _hybridPasswordWithFrameDemibold!!
     }
 
-private var _hybridPasswordWithFrameLineDemibold: ImageVector? = null
+private var _hybridPasswordWithFrameDemibold: ImageVector? = null
 

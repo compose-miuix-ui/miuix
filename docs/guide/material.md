@@ -191,15 +191,22 @@ Names read `{Big,Middle,Small}{Light,Dark}`: the size picks the halo depth, the 
 
 ### Tilt-driven lights
 
-`rememberTiltLight(base, sensitivity)` returns an `EdgeLightSource` whose UV position follows the device rotation sensor, producing a parallax-like edge. On platforms without a sensor the light stays anchored at `base`.
+`rememberTiltLightState(base, sensitivity)` returns a `State<EdgeLightSource>` whose UV position follows the device rotation sensor, producing a parallax-like edge while deferring reads to the draw phase (avoiding 50Hz recompositions). On platforms without a sensor the light stays anchored at `base`. (`rememberTiltLight` is also available when a plain value is needed during composition.)
 
 ```kotlin
 import top.yukonga.miuix.kmp.material.EdgeLightSource
-import top.yukonga.miuix.kmp.material.rememberTiltLight
+import top.yukonga.miuix.kmp.material.EdgeStrokes
+import top.yukonga.miuix.kmp.material.edgeStroke
+import top.yukonga.miuix.kmp.material.rememberTiltLightState
 
-val primary = rememberTiltLight(
+val primaryLight by rememberTiltLightState(
     base = EdgeLightSource(0.5f, 0.5f, -0.5f, intensity = 0.4f),
     sensitivity = 0.1f, // UV shift per radian of tilt
+)
+
+Modifier.edgeStroke(
+    shape = shape,
+    stroke = { EdgeStrokes.MiddleLight.copy(primary = primaryLight) },
 )
 ```
 

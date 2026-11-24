@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -94,6 +95,8 @@ fun NumberPicker(
     val currentIndex = coercedValue - range.first
     val halfVisibleCount = visibleItemCount / 2
     val hapticFeedback = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    val initialItemHeightPx = with(density) { itemHeight.roundToPx() }
 
     // Drag offset (updated synchronously, no coroutine needed)
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -101,8 +104,7 @@ fun NumberPicker(
     val flingAnimatable = remember { Animatable(0f) }
     var isDragging by remember { mutableStateOf(false) }
     var isUserScrolling by remember { mutableStateOf(false) }
-    var itemHeightPx by remember { mutableIntStateOf(0) }
-
+    var itemHeightPx by remember(itemHeight, density) { mutableIntStateOf(initialItemHeightPx) }
     // Total offset combines drag + fling
     val totalOffset by remember {
         computedStateOf { dragOffset + flingAnimatable.value }
@@ -167,7 +169,10 @@ fun NumberPicker(
                 contentDescription = "$displayValue, ${range.first} - ${range.last}"
             }
             .onSizeChanged { size ->
-                itemHeightPx = size.height / visibleItemCount
+                val measured = size.height / visibleItemCount
+                if (measured != itemHeightPx) {
+                    itemHeightPx = measured
+                }
             }
             .then(
                 if (enabled) {

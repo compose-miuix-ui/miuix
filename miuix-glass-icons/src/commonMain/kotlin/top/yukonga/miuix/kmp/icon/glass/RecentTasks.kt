@@ -12,8 +12,8 @@ val MiuixIcons.Glass.RecentTasks: ImageVector
 
 val MiuixIcons.Glass.Light.RecentTasks: ImageVector
     get() {
-        if (_recentTasksSurfaceLight != null) return _recentTasksSurfaceLight!!
-        _recentTasksSurfaceLight = buildHyperOSIcon(
+        if (_recentTasksLight != null) return _recentTasksLight!!
+        _recentTasksLight = buildHyperOSIcon(
             name = "RecentTasks.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(265.7f, 844f),
@@ -69,15 +69,15 @@ val MiuixIcons.Glass.Light.RecentTasks: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _recentTasksSurfaceLight!!
+        return _recentTasksLight!!
     }
 
-private var _recentTasksSurfaceLight: ImageVector? = null
+private var _recentTasksLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.RecentTasks: ImageVector
     get() {
-        if (_recentTasksSurfaceNormal != null) return _recentTasksSurfaceNormal!!
-        _recentTasksSurfaceNormal = buildHyperOSIcon(
+        if (_recentTasksNormal != null) return _recentTasksNormal!!
+        _recentTasksNormal = buildHyperOSIcon(
             name = "RecentTasks.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(266.6f, 849.5f),
@@ -133,15 +133,15 @@ val MiuixIcons.Glass.Normal.RecentTasks: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _recentTasksSurfaceNormal!!
+        return _recentTasksNormal!!
     }
 
-private var _recentTasksSurfaceNormal: ImageVector? = null
+private var _recentTasksNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.RecentTasks: ImageVector
     get() {
-        if (_recentTasksSurfaceRegular != null) return _recentTasksSurfaceRegular!!
-        _recentTasksSurfaceRegular = buildHyperOSIcon(
+        if (_recentTasksRegular != null) return _recentTasksRegular!!
+        _recentTasksRegular = buildHyperOSIcon(
             name = "RecentTasks.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(267f, 852f),
@@ -197,15 +197,15 @@ val MiuixIcons.Glass.Regular.RecentTasks: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _recentTasksSurfaceRegular!!
+        return _recentTasksRegular!!
     }
 
-private var _recentTasksSurfaceRegular: ImageVector? = null
+private var _recentTasksRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.RecentTasks: ImageVector
     get() {
-        if (_recentTasksSurfaceMedium != null) return _recentTasksSurfaceMedium!!
-        _recentTasksSurfaceMedium = buildHyperOSIcon(
+        if (_recentTasksMedium != null) return _recentTasksMedium!!
+        _recentTasksMedium = buildHyperOSIcon(
             name = "RecentTasks.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(261.9f, 856.6f),
@@ -261,15 +261,15 @@ val MiuixIcons.Glass.Medium.RecentTasks: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _recentTasksSurfaceMedium!!
+        return _recentTasksMedium!!
     }
 
-private var _recentTasksSurfaceMedium: ImageVector? = null
+private var _recentTasksMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.RecentTasks: ImageVector
     get() {
-        if (_recentTasksSurfaceDemibold != null) return _recentTasksSurfaceDemibold!!
-        _recentTasksSurfaceDemibold = buildHyperOSIcon(
+        if (_recentTasksDemibold != null) return _recentTasksDemibold!!
+        _recentTasksDemibold = buildHyperOSIcon(
             name = "RecentTasks.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(258.3f, 859.8f),
@@ -325,8 +325,8 @@ val MiuixIcons.Glass.Demibold.RecentTasks: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _recentTasksSurfaceDemibold!!
+        return _recentTasksDemibold!!
     }
 
-private var _recentTasksSurfaceDemibold: ImageVector? = null
+private var _recentTasksDemibold: ImageVector? = null
 

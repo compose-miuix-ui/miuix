@@ -58,10 +58,11 @@ Scaffold { padding ->
         onDismissRequest = { showSheet = false },
         backdrop = backdrop,
         title = "详细信息",
-    ) {
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
+                .padding(innerPadding)
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp),
         ) {
@@ -92,9 +93,11 @@ Scaffold { padding ->
 | allowDismiss | Boolean | 允许外部点击、拖动或返回关闭 | true | 否 |
 | enableNestedScroll | Boolean | 在子内容滚动与抽屉拖动之间传递位移 | true | 否 |
 | renderInRootScaffold | Boolean | 使用最外层 Scaffold；false 使用当前 Scaffold | true | 否 |
-| title | String? | 可选标题。`title`、`startAction`、`endAction` 任一非 `null`（包括 `title = ""`），标题栏就占位。拖拽手柄不受影响。 | null | 否 |
+| progressiveBlur | Boolean | 标题栏覆盖于内容之上并在滚动时绘制渐进模糊带 | true | 否 |
+| title | String? | 可选标题；与 `startAction` / `endAction` 任一非 `null` 时显示标题栏 | null | 否 |
 | startAction | (@Composable () -> Unit)? | 标题栏前侧操作 | null | 否 |
 | endAction | (@Composable () -> Unit)? | 标题栏后侧操作 | null | 否 |
+| headerBottomContent | @Composable () -> Unit | 固定在标题下方、标题栏内部的内容 | {} | 否 |
 | cornerRadius | Dp | 顶角半径；底角保持直角 | BottomSheetDefaults.cornerRadius | 否 |
 | sheetMaxWidth | Dp | 抽屉最大宽度 | BottomSheetDefaults.maxWidth | 否 |
 | outsideMargin | DpSize | `width` 用作水平外边距；不应用 `height` | BottomSheetDefaults.outsideMargin | 否 |
@@ -105,7 +108,8 @@ Scaffold { padding ->
 | containerColor | Color | 不透明回退填充色 | GlassBottomSheetDefaults.containerColor() | 否 |
 | dimColor | Color | 应用动画进度之前的遮罩颜色 | GlassBottomSheetDefaults.ScrimColor | 否 |
 | onDismissFinished | (() -> Unit)? | 隐藏动画完成后调用；隐藏被取消时不调用 | null | 否 |
-| content | @Composable () -> Unit | 抽屉主体内容 | - | 是 |
+| scrollOffset | (() -> Float)? | 外部滚动偏移（像素）；`null` 时自动跟踪嵌套滚动 | null | 否 |
+| content | @Composable (PaddingValues) -> Unit | 接收顶部标题栏内边距的抽屉主体内容 | - | 是 |
 
 ### glassBottomSheetSurface 属性 {#glassbottomsheetsurface}
 
@@ -126,6 +130,10 @@ Scaffold { padding ->
 | --- | --- | --- | --- |
 | ScrimColor | Color | 宿主应用动画之前的遮罩颜色 | GlassDialogDefaults.ScrimColor（`Color(0x33000000)`） |
 | InsideMargin | DpSize | 默认面板内容内边距 | `DpSize(12.dp, 0.dp)` |
+| ProgressiveBlurRadius | Dp | 渐进模糊标题带的最大模糊半径 | `32.dp` |
+| ProgressiveBlurOverhang | Dp | 渐进模糊标题带向标题栏下方延伸的距离 | `24.dp` |
+| ProgressiveBlurRampDistance | Dp | 渐进模糊标题带随滚动渐显的距离阈值 | `32.dp` |
+| ButtonSize | Dp | 标题栏操作按钮直径 | `44.dp` |
 
 #### 方法
 
@@ -134,6 +142,9 @@ Scaffold { padding ->
 | material() | GlassMaterial | 随主题变化的 `GlassMaterials.dialogGlass`，与 GlassDialog 共用 |
 | stroke() | EdgeStroke | 随主题选择 `GlassEdgeStrokes.MiddleLight` 或 `MiddleDark` 辉光描边 |
 | containerColor() | Color | 用于不透明回退的主题背景色 |
+| buttonFill() | Color | 标题栏按钮回退填充色 |
+| buttonMaterial() | GlassMaterial | 随主题变化的标题栏按钮 `GlassMaterials.puredThinGlass` 材质 |
+| buttonStroke() | EdgeStroke | 标题栏按钮的小尺寸辉光描边 |
 
 ## 进阶用法
 
@@ -147,6 +158,7 @@ OverlayBottomSheet(
     onDismissRequest = { showSheet = false },
     title = "详细信息",
     dimColor = GlassBottomSheetDefaults.ScrimColor,
+    motion = SheetMotion.Glass,
     surface = glassBottomSheetSurface(backdrop = backdrop),
 ) {
     Column(

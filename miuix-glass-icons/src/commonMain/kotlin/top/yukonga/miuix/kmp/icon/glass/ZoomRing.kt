@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ZoomRing: ImageVector
 
 val MiuixIcons.Glass.Light.ZoomRing: ImageVector
     get() {
-        if (_zoomRingSurfaceLight != null) return _zoomRingSurfaceLight!!
-        _zoomRingSurfaceLight = buildHyperOSIcon(
+        if (_zoomRingLight != null) return _zoomRingLight!!
+        _zoomRingLight = buildHyperOSIcon(
             name = "ZoomRing.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(692.3f, -102.2f),
@@ -202,15 +202,15 @@ val MiuixIcons.Glass.Light.ZoomRing: ImageVector
             translationY = 1040.6667f,
             autoMirror = false,
         )
-        return _zoomRingSurfaceLight!!
+        return _zoomRingLight!!
     }
 
-private var _zoomRingSurfaceLight: ImageVector? = null
+private var _zoomRingLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ZoomRing: ImageVector
     get() {
-        if (_zoomRingSurfaceNormal != null) return _zoomRingSurfaceNormal!!
-        _zoomRingSurfaceNormal = buildHyperOSIcon(
+        if (_zoomRingNormal != null) return _zoomRingNormal!!
+        _zoomRingNormal = buildHyperOSIcon(
             name = "ZoomRing.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(699.7f, -106.2f),
@@ -399,15 +399,15 @@ val MiuixIcons.Glass.Normal.ZoomRing: ImageVector
             translationY = 1040.6667f,
             autoMirror = false,
         )
-        return _zoomRingSurfaceNormal!!
+        return _zoomRingNormal!!
     }
 
-private var _zoomRingSurfaceNormal: ImageVector? = null
+private var _zoomRingNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ZoomRing: ImageVector
     get() {
-        if (_zoomRingSurfaceRegular != null) return _zoomRingSurfaceRegular!!
-        _zoomRingSurfaceRegular = buildHyperOSIcon(
+        if (_zoomRingRegular != null) return _zoomRingRegular!!
+        _zoomRingRegular = buildHyperOSIcon(
             name = "ZoomRing.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(703f, -108f),
@@ -596,15 +596,15 @@ val MiuixIcons.Glass.Regular.ZoomRing: ImageVector
             translationY = 1040.6667f,
             autoMirror = false,
         )
-        return _zoomRingSurfaceRegular!!
+        return _zoomRingRegular!!
     }
 
-private var _zoomRingSurfaceRegular: ImageVector? = null
+private var _zoomRingRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ZoomRing: ImageVector
     get() {
-        if (_zoomRingSurfaceMedium != null) return _zoomRingSurfaceMedium!!
-        _zoomRingSurfaceMedium = buildHyperOSIcon(
+        if (_zoomRingMedium != null) return _zoomRingMedium!!
+        _zoomRingMedium = buildHyperOSIcon(
             name = "ZoomRing.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(708.7f, -109.1f),
@@ -793,15 +793,15 @@ val MiuixIcons.Glass.Medium.ZoomRing: ImageVector
             translationY = 1040.6667f,
             autoMirror = false,
         )
-        return _zoomRingSurfaceMedium!!
+        return _zoomRingMedium!!
     }
 
-private var _zoomRingSurfaceMedium: ImageVector? = null
+private var _zoomRingMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ZoomRing: ImageVector
     get() {
-        if (_zoomRingSurfaceDemibold != null) return _zoomRingSurfaceDemibold!!
-        _zoomRingSurfaceDemibold = buildHyperOSIcon(
+        if (_zoomRingDemibold != null) return _zoomRingDemibold!!
+        _zoomRingDemibold = buildHyperOSIcon(
             name = "ZoomRing.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(712.6f, -109.8f),
@@ -990,8 +990,8 @@ val MiuixIcons.Glass.Demibold.ZoomRing: ImageVector
             translationY = 1040.6667f,
             autoMirror = false,
         )
-        return _zoomRingSurfaceDemibold!!
+        return _zoomRingDemibold!!
     }
 
-private var _zoomRingSurfaceDemibold: ImageVector? = null
+private var _zoomRingDemibold: ImageVector? = null
 

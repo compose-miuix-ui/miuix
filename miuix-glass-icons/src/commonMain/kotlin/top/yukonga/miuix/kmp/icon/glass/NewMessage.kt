@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NewMessage: ImageVector
 
 val MiuixIcons.Glass.Light.NewMessage: ImageVector
     get() {
-        if (_newMessageLineLight != null) return _newMessageLineLight!!
-        _newMessageLineLight = buildHyperOSIcon(
+        if (_newMessageLight != null) return _newMessageLight!!
+        _newMessageLight = buildHyperOSIcon(
             name = "NewMessage.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(649.3f, 613.9f),
@@ -83,15 +83,15 @@ val MiuixIcons.Glass.Light.NewMessage: ImageVector
             translationY = 1048.3361f,
             autoMirror = false,
         )
-        return _newMessageLineLight!!
+        return _newMessageLight!!
     }
 
-private var _newMessageLineLight: ImageVector? = null
+private var _newMessageLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NewMessage: ImageVector
     get() {
-        if (_newMessageLineNormal != null) return _newMessageLineNormal!!
-        _newMessageLineNormal = buildHyperOSIcon(
+        if (_newMessageNormal != null) return _newMessageNormal!!
+        _newMessageNormal = buildHyperOSIcon(
             name = "NewMessage.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(640.2f, 616f),
@@ -161,15 +161,15 @@ val MiuixIcons.Glass.Normal.NewMessage: ImageVector
             translationY = 1046.3639f,
             autoMirror = false,
         )
-        return _newMessageLineNormal!!
+        return _newMessageNormal!!
     }
 
-private var _newMessageLineNormal: ImageVector? = null
+private var _newMessageNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NewMessage: ImageVector
     get() {
-        if (_newMessageLineRegular != null) return _newMessageLineRegular!!
-        _newMessageLineRegular = buildHyperOSIcon(
+        if (_newMessageRegular != null) return _newMessageRegular!!
+        _newMessageRegular = buildHyperOSIcon(
             name = "NewMessage.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(636f, 617f),
@@ -239,15 +239,15 @@ val MiuixIcons.Glass.Regular.NewMessage: ImageVector
             translationY = 1045.4667f,
             autoMirror = false,
         )
-        return _newMessageLineRegular!!
+        return _newMessageRegular!!
     }
 
-private var _newMessageLineRegular: ImageVector? = null
+private var _newMessageRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NewMessage: ImageVector
     get() {
-        if (_newMessageLineMedium != null) return _newMessageLineMedium!!
-        _newMessageLineMedium = buildHyperOSIcon(
+        if (_newMessageMedium != null) return _newMessageMedium!!
+        _newMessageMedium = buildHyperOSIcon(
             name = "NewMessage.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(627.9f, 622.4f),
@@ -317,15 +317,15 @@ val MiuixIcons.Glass.Medium.NewMessage: ImageVector
             translationY = 1045.4396f,
             autoMirror = false,
         )
-        return _newMessageLineMedium!!
+        return _newMessageMedium!!
     }
 
-private var _newMessageLineMedium: ImageVector? = null
+private var _newMessageMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NewMessage: ImageVector
     get() {
-        if (_newMessageLineDemibold != null) return _newMessageLineDemibold!!
-        _newMessageLineDemibold = buildHyperOSIcon(
+        if (_newMessageDemibold != null) return _newMessageDemibold!!
+        _newMessageDemibold = buildHyperOSIcon(
             name = "NewMessage.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(622.2f, 626.2f),
@@ -395,8 +395,8 @@ val MiuixIcons.Glass.Demibold.NewMessage: ImageVector
             translationY = 1045.4207f,
             autoMirror = false,
         )
-        return _newMessageLineDemibold!!
+        return _newMessageDemibold!!
     }
 
-private var _newMessageLineDemibold: ImageVector? = null
+private var _newMessageDemibold: ImageVector? = null
 

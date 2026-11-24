@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
@@ -79,6 +80,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.SearchClearButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
@@ -97,7 +99,6 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
-import top.yukonga.miuix.kmp.material.drawGlassShadow
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
@@ -231,7 +232,9 @@ fun GlassSearchOverlay(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val direction = LocalLayoutDirection.current
-    val active = expanded || transition.currentState || transition.isRunning
+    val active by remember(expanded, progress) {
+        computedStateOf { expanded || progress.value > 1f / 255f }
+    }
     LaunchedEffect(expanded) {
         queryState.clearText()
         if (expanded) {
@@ -285,11 +288,13 @@ fun GlassSearchOverlay(
         }
         val baseBandHeight = GlassSearchOverlayDefaults.BarHeight +
             GlassSearchOverlayDefaults.VerticalPadding * 2 + GlassSearchOverlayDefaults.ProgressiveBlurOverhang
-        val bandLayoutModifier = Modifier.layout { measurable, constraints ->
-            val bandHeightPx = (topInsets.getTop(this) + (searchTopPadding() + baseBandHeight).roundToPx())
-                .coerceIn(0, constraints.maxHeight)
-            val placeable = measurable.measure(constraints.copy(minHeight = bandHeightPx, maxHeight = bandHeightPx))
-            layout(placeable.width, bandHeightPx) { placeable.placeRelative(0, 0) }
+        val bandLayoutModifier = remember(topInsets, searchTopPadding, baseBandHeight) {
+            Modifier.layout { measurable, constraints ->
+                val bandHeightPx = (topInsets.getTop(this) + (searchTopPadding() + baseBandHeight).roundToPx())
+                    .coerceIn(0, constraints.maxHeight)
+                val placeable = measurable.measure(constraints.copy(minHeight = bandHeightPx, maxHeight = bandHeightPx))
+                layout(placeable.width, bandHeightPx) { placeable.placeRelative(0, 0) }
+            }
         }
         Box(
             modifier = Modifier
@@ -303,7 +308,7 @@ fun GlassSearchOverlay(
                     .then(if (contentBackdrop != null) Modifier.layerBackdrop(contentBackdrop) else Modifier)
                     .background(colors.surface),
             ) {
-                content(queryState.text.toString())
+                SearchOverlayContent(queryState, content)
             }
             if (contentBackdrop != null) {
                 val blendColors = remember(colors.surface) {
@@ -440,20 +445,13 @@ fun GlassSearchOverlay(
                                     field()
                                 }
                                 if (queryState.text.isNotEmpty()) {
-                                    IconButton(
+                                    SearchClearButton(
                                         onClick = {
                                             queryState.clearText()
                                             focusRequester.requestFocus()
                                         },
                                         modifier = Modifier.size(24.dp),
-                                    ) {
-                                        Icon(
-                                            closeIcon,
-                                            contentDescription = "Clear",
-                                            modifier = Modifier.size(16.dp * (7f / 6f)),
-                                            tint = mutedColor,
-                                        )
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -542,6 +540,14 @@ private fun ScrollSearchPillBackground(
     }
 }
 
+@Composable
+private fun ColumnScope.SearchOverlayContent(
+    queryState: TextFieldState,
+    content: @Composable ColumnScope.(query: String) -> Unit,
+) {
+    content(queryState.text.toString())
+}
+
 /** Shared page opacity keeps content and its sampled top-bar background in sync. */
 @Composable
 fun rememberGlassSearchBarAlpha(expanded: Boolean): State<Float> {
@@ -575,33 +581,44 @@ fun Modifier.glassSearchBarTransition(expanded: Boolean, blurEnabled: Boolean = 
         label = "glassSearchTopBarBlur",
     ) { if (it && blurActive) SEARCH_TOP_BAR_BLUR_RADIUS else 0f }
     val currentBarAlpha by rememberUpdatedState(barAlpha)
-    val transitionModifier = remember(layerOutset, scale, blur, blurActive) {
-        Modifier.drawWithCache {
-            val layer = obtainGraphicsLayer()
-            val halo = ceil(layerOutset).toInt()
-            val layerSize = IntSize(size.width.toInt() + halo * 2, size.height.toInt() + halo * 2)
-            onDrawWithContent {
-                val opacity = currentBarAlpha().coerceIn(0f, 1f)
-                val currentScale = scale.value
-                val currentBlur = blur.value
-                if (opacity > 0f) {
-                    if (opacity == 1f && currentScale == 1f && currentBlur == 0f) {
-                        drawContent()
-                    } else {
-                        // Keep the halo in the recorded bounds: Skiko can replay nested layers with
-                        // LayerOutsets without applying their opacity or render effect.
-                        layer.record(density = this@drawWithCache, size = layerSize) {
-                            translate(halo.toFloat(), halo.toFloat()) { this@record.drawContent() }
+    val transitionActive by remember(transition) {
+        computedStateOf { transition.targetState || transition.currentState || transition.isRunning }
+    }
+    val modifierToApply = if (transitionActive) {
+        remember(layerOutset, scale, blur, blurActive) {
+            Modifier.drawWithCache {
+                val layer = obtainGraphicsLayer()
+                val halo = ceil(layerOutset).toInt()
+                val layerSize = IntSize(size.width.toInt() + halo * 2, size.height.toInt() + halo * 2)
+                onDrawWithContent {
+                    val opacity = currentBarAlpha().coerceIn(0f, 1f)
+                    val currentScale = scale.value
+                    val currentBlur = blur.value
+                    if (opacity > 0f) {
+                        if (opacity == 1f && currentScale == 1f && currentBlur == 0f) {
+                            drawContent()
+                        } else {
+                            // Keep the halo in the recorded bounds: Skiko can replay nested layers with
+                            // LayerOutsets without applying their opacity or render effect.
+                            layer.record(density = this@drawWithCache, size = layerSize) {
+                                translate(halo.toFloat(), halo.toFloat()) { this@record.drawContent() }
+                            }
+                            layer.alpha = opacity
+                            layer.scaleX = currentScale
+                            layer.scaleY = currentScale
+                            layer.renderEffect = if (blurActive && currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
+                            translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
                         }
-                        layer.alpha = opacity
-                        layer.scaleX = currentScale
-                        layer.scaleY = currentScale
-                        layer.renderEffect = if (blurActive && currentBlur > 0.5f) BlurEffect(currentBlur, currentBlur, TileMode.Decal) else null
-                        translate(-halo.toFloat(), -halo.toFloat()) { drawLayer(layer) }
                     }
                 }
             }
         }
+    } else {
+        remember {
+            Modifier.graphicsLayer {
+                alpha = currentBarAlpha().coerceIn(0f, 1f)
+            }
+        }
     }
-    return this.then(transitionModifier)
+    return this.then(modifierToApply)
 }

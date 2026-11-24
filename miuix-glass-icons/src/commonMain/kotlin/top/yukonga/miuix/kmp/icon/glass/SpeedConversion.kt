@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SpeedConversion: ImageVector
 
 val MiuixIcons.Glass.Light.SpeedConversion: ImageVector
     get() {
-        if (_speedConversionSurfaceLight != null) return _speedConversionSurfaceLight!!
-        _speedConversionSurfaceLight = buildHyperOSIcon(
+        if (_speedConversionLight != null) return _speedConversionLight!!
+        _speedConversionLight = buildHyperOSIcon(
             name = "SpeedConversion.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(140.4f, 320.1f),
@@ -75,15 +75,15 @@ val MiuixIcons.Glass.Light.SpeedConversion: ImageVector
             translationY = 1049.3889f,
             autoMirror = false,
         )
-        return _speedConversionSurfaceLight!!
+        return _speedConversionLight!!
     }
 
-private var _speedConversionSurfaceLight: ImageVector? = null
+private var _speedConversionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SpeedConversion: ImageVector
     get() {
-        if (_speedConversionSurfaceNormal != null) return _speedConversionSurfaceNormal!!
-        _speedConversionSurfaceNormal = buildHyperOSIcon(
+        if (_speedConversionNormal != null) return _speedConversionNormal!!
+        _speedConversionNormal = buildHyperOSIcon(
             name = "SpeedConversion.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(137.4f, 320.7f),
@@ -145,15 +145,15 @@ val MiuixIcons.Glass.Normal.SpeedConversion: ImageVector
             translationY = 1049.2361f,
             autoMirror = false,
         )
-        return _speedConversionSurfaceNormal!!
+        return _speedConversionNormal!!
     }
 
-private var _speedConversionSurfaceNormal: ImageVector? = null
+private var _speedConversionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SpeedConversion: ImageVector
     get() {
-        if (_speedConversionSurfaceRegular != null) return _speedConversionSurfaceRegular!!
-        _speedConversionSurfaceRegular = buildHyperOSIcon(
+        if (_speedConversionRegular != null) return _speedConversionRegular!!
+        _speedConversionRegular = buildHyperOSIcon(
             name = "SpeedConversion.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(136f, 321f),
@@ -215,15 +215,15 @@ val MiuixIcons.Glass.Regular.SpeedConversion: ImageVector
             translationY = 1049.1667f,
             autoMirror = false,
         )
-        return _speedConversionSurfaceRegular!!
+        return _speedConversionRegular!!
     }
 
-private var _speedConversionSurfaceRegular: ImageVector? = null
+private var _speedConversionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SpeedConversion: ImageVector
     get() {
-        if (_speedConversionSurfaceMedium != null) return _speedConversionSurfaceMedium!!
-        _speedConversionSurfaceMedium = buildHyperOSIcon(
+        if (_speedConversionMedium != null) return _speedConversionMedium!!
+        _speedConversionMedium = buildHyperOSIcon(
             name = "SpeedConversion.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(133.8f, 321.5f),
@@ -285,15 +285,15 @@ val MiuixIcons.Glass.Medium.SpeedConversion: ImageVector
             translationY = 1049.1667f,
             autoMirror = false,
         )
-        return _speedConversionSurfaceMedium!!
+        return _speedConversionMedium!!
     }
 
-private var _speedConversionSurfaceMedium: ImageVector? = null
+private var _speedConversionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SpeedConversion: ImageVector
     get() {
-        if (_speedConversionSurfaceDemibold != null) return _speedConversionSurfaceDemibold!!
-        _speedConversionSurfaceDemibold = buildHyperOSIcon(
+        if (_speedConversionDemibold != null) return _speedConversionDemibold!!
+        _speedConversionDemibold = buildHyperOSIcon(
             name = "SpeedConversion.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(132.3f, 321.9f),
@@ -355,8 +355,8 @@ val MiuixIcons.Glass.Demibold.SpeedConversion: ImageVector
             translationY = 1049.1667f,
             autoMirror = false,
         )
-        return _speedConversionSurfaceDemibold!!
+        return _speedConversionDemibold!!
     }
 
-private var _speedConversionSurfaceDemibold: ImageVector? = null
+private var _speedConversionDemibold: ImageVector? = null
 

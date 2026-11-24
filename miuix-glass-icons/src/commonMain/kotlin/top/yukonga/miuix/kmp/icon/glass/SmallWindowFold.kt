@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SmallWindowFold: ImageVector
 
 val MiuixIcons.Glass.Light.SmallWindowFold: ImageVector
     get() {
-        if (_smallWindowFoldSurfaceLight != null) return _smallWindowFoldSurfaceLight!!
-        _smallWindowFoldSurfaceLight = buildHyperOSIcon(
+        if (_smallWindowFoldLight != null) return _smallWindowFoldLight!!
+        _smallWindowFoldLight = buildHyperOSIcon(
             name = "SmallWindowFold.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(973.4f, 854.8f),
@@ -64,15 +64,15 @@ val MiuixIcons.Glass.Light.SmallWindowFold: ImageVector
             translationY = 1041f,
             autoMirror = false,
         )
-        return _smallWindowFoldSurfaceLight!!
+        return _smallWindowFoldLight!!
     }
 
-private var _smallWindowFoldSurfaceLight: ImageVector? = null
+private var _smallWindowFoldLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SmallWindowFold: ImageVector
     get() {
-        if (_smallWindowFoldSurfaceNormal != null) return _smallWindowFoldSurfaceNormal!!
-        _smallWindowFoldSurfaceNormal = buildHyperOSIcon(
+        if (_smallWindowFoldNormal != null) return _smallWindowFoldNormal!!
+        _smallWindowFoldNormal = buildHyperOSIcon(
             name = "SmallWindowFold.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(973.1f, 864.6f),
@@ -123,15 +123,15 @@ val MiuixIcons.Glass.Normal.SmallWindowFold: ImageVector
             translationY = 1041.4583f,
             autoMirror = false,
         )
-        return _smallWindowFoldSurfaceNormal!!
+        return _smallWindowFoldNormal!!
     }
 
-private var _smallWindowFoldSurfaceNormal: ImageVector? = null
+private var _smallWindowFoldNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SmallWindowFold: ImageVector
     get() {
-        if (_smallWindowFoldSurfaceRegular != null) return _smallWindowFoldSurfaceRegular!!
-        _smallWindowFoldSurfaceRegular = buildHyperOSIcon(
+        if (_smallWindowFoldRegular != null) return _smallWindowFoldRegular!!
+        _smallWindowFoldRegular = buildHyperOSIcon(
             name = "SmallWindowFold.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(973f, 869f),
@@ -182,15 +182,15 @@ val MiuixIcons.Glass.Regular.SmallWindowFold: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _smallWindowFoldSurfaceRegular!!
+        return _smallWindowFoldRegular!!
     }
 
-private var _smallWindowFoldSurfaceRegular: ImageVector? = null
+private var _smallWindowFoldRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SmallWindowFold: ImageVector
     get() {
-        if (_smallWindowFoldSurfaceMedium != null) return _smallWindowFoldSurfaceMedium!!
-        _smallWindowFoldSurfaceMedium = buildHyperOSIcon(
+        if (_smallWindowFoldMedium != null) return _smallWindowFoldMedium!!
+        _smallWindowFoldMedium = buildHyperOSIcon(
             name = "SmallWindowFold.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(973.3f, 876.8f),
@@ -241,15 +241,15 @@ val MiuixIcons.Glass.Medium.SmallWindowFold: ImageVector
             translationY = 1041.3964f,
             autoMirror = false,
         )
-        return _smallWindowFoldSurfaceMedium!!
+        return _smallWindowFoldMedium!!
     }
 
-private var _smallWindowFoldSurfaceMedium: ImageVector? = null
+private var _smallWindowFoldMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SmallWindowFold: ImageVector
     get() {
-        if (_smallWindowFoldSurfaceDemibold != null) return _smallWindowFoldSurfaceDemibold!!
-        _smallWindowFoldSurfaceDemibold = buildHyperOSIcon(
+        if (_smallWindowFoldDemibold != null) return _smallWindowFoldDemibold!!
+        _smallWindowFoldDemibold = buildHyperOSIcon(
             name = "SmallWindowFold.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(973.5f, 882.3f),
@@ -300,8 +300,8 @@ val MiuixIcons.Glass.Demibold.SmallWindowFold: ImageVector
             translationY = 1041.2072f,
             autoMirror = false,
         )
-        return _smallWindowFoldSurfaceDemibold!!
+        return _smallWindowFoldDemibold!!
     }
 
-private var _smallWindowFoldSurfaceDemibold: ImageVector? = null
+private var _smallWindowFoldDemibold: ImageVector? = null
 

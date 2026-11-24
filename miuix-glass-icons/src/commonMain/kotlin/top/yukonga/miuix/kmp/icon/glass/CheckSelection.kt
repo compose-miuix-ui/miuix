@@ -7,14 +7,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathNode
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 
-val MiuixIcons.Glass.CeditSelection: ImageVector
-    get() = MiuixIcons.Glass.Regular.CeditSelection
+val MiuixIcons.Glass.CheckSelection: ImageVector
+    get() = MiuixIcons.Glass.Regular.CheckSelection
 
-val MiuixIcons.Glass.Light.CeditSelection: ImageVector
+val MiuixIcons.Glass.Light.CheckSelection: ImageVector
     get() {
-        if (_ceditSelectionSurfaceLight != null) return _ceditSelectionSurfaceLight!!
-        _ceditSelectionSurfaceLight = buildHyperOSIcon(
-            name = "CeditSelection.Glass.Light",
+        if (_checkSelectionLight != null) return _checkSelectionLight!!
+        _checkSelectionLight = buildHyperOSIcon(
+            name = "CheckSelection.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(924.1f, 578.3f),
                 PathNode.LineTo(934.6f, 570.4f),
@@ -54,16 +54,16 @@ val MiuixIcons.Glass.Light.CeditSelection: ImageVector
             translationY = 1041.9444f,
             autoMirror = false,
         )
-        return _ceditSelectionSurfaceLight!!
+        return _checkSelectionLight!!
     }
 
-private var _ceditSelectionSurfaceLight: ImageVector? = null
+private var _checkSelectionLight: ImageVector? = null
 
-val MiuixIcons.Glass.Normal.CeditSelection: ImageVector
+val MiuixIcons.Glass.Normal.CheckSelection: ImageVector
     get() {
-        if (_ceditSelectionSurfaceNormal != null) return _ceditSelectionSurfaceNormal!!
-        _ceditSelectionSurfaceNormal = buildHyperOSIcon(
-            name = "CeditSelection.Glass.Normal",
+        if (_checkSelectionNormal != null) return _checkSelectionNormal!!
+        _checkSelectionNormal = buildHyperOSIcon(
+            name = "CheckSelection.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(919.2f, 577.4f),
                 PathNode.LineTo(932.1f, 567.4f),
@@ -103,16 +103,16 @@ val MiuixIcons.Glass.Normal.CeditSelection: ImageVector
             translationY = 1042.0972f,
             autoMirror = false,
         )
-        return _ceditSelectionSurfaceNormal!!
+        return _checkSelectionNormal!!
     }
 
-private var _ceditSelectionSurfaceNormal: ImageVector? = null
+private var _checkSelectionNormal: ImageVector? = null
 
-val MiuixIcons.Glass.Regular.CeditSelection: ImageVector
+val MiuixIcons.Glass.Regular.CheckSelection: ImageVector
     get() {
-        if (_ceditSelectionSurfaceRegular != null) return _ceditSelectionSurfaceRegular!!
-        _ceditSelectionSurfaceRegular = buildHyperOSIcon(
-            name = "CeditSelection.Glass.Regular",
+        if (_checkSelectionRegular != null) return _checkSelectionRegular!!
+        _checkSelectionRegular = buildHyperOSIcon(
+            name = "CheckSelection.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(917f, 577f),
                 PathNode.LineTo(931f, 566f),
@@ -152,16 +152,16 @@ val MiuixIcons.Glass.Regular.CeditSelection: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _ceditSelectionSurfaceRegular!!
+        return _checkSelectionRegular!!
     }
 
-private var _ceditSelectionSurfaceRegular: ImageVector? = null
+private var _checkSelectionRegular: ImageVector? = null
 
-val MiuixIcons.Glass.Medium.CeditSelection: ImageVector
+val MiuixIcons.Glass.Medium.CheckSelection: ImageVector
     get() {
-        if (_ceditSelectionSurfaceMedium != null) return _ceditSelectionSurfaceMedium!!
-        _ceditSelectionSurfaceMedium = buildHyperOSIcon(
-            name = "CeditSelection.Glass.Medium",
+        if (_checkSelectionMedium != null) return _checkSelectionMedium!!
+        _checkSelectionMedium = buildHyperOSIcon(
+            name = "CheckSelection.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(908.9f, 576.2f),
                 PathNode.LineTo(928.6f, 560.9f),
@@ -201,16 +201,16 @@ val MiuixIcons.Glass.Medium.CeditSelection: ImageVector
             translationY = 1042.0315f,
             autoMirror = false,
         )
-        return _ceditSelectionSurfaceMedium!!
+        return _checkSelectionMedium!!
     }
 
-private var _ceditSelectionSurfaceMedium: ImageVector? = null
+private var _checkSelectionMedium: ImageVector? = null
 
-val MiuixIcons.Glass.Demibold.CeditSelection: ImageVector
+val MiuixIcons.Glass.Demibold.CheckSelection: ImageVector
     get() {
-        if (_ceditSelectionSurfaceDemibold != null) return _ceditSelectionSurfaceDemibold!!
-        _ceditSelectionSurfaceDemibold = buildHyperOSIcon(
-            name = "CeditSelection.Glass.Demibold",
+        if (_checkSelectionDemibold != null) return _checkSelectionDemibold!!
+        _checkSelectionDemibold = buildHyperOSIcon(
+            name = "CheckSelection.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(903.2f, 575.6f),
                 PathNode.LineTo(926.9f, 557.3f),
@@ -250,8 +250,8 @@ val MiuixIcons.Glass.Demibold.CeditSelection: ImageVector
             translationY = 1041.9369f,
             autoMirror = false,
         )
-        return _ceditSelectionSurfaceDemibold!!
+        return _checkSelectionDemibold!!
     }
 
-private var _ceditSelectionSurfaceDemibold: ImageVector? = null
+private var _checkSelectionDemibold: ImageVector? = null
 

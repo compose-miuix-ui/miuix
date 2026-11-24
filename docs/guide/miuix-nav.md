@@ -55,7 +55,7 @@ fun App() {
 Because the stack is driven by one float, pushing or popping several entries at once animates as a single continuous sweep instead of collapsing into one top-level cross-fade:
 
 ```kotlin
-// Push three at once: animatedTop goes N -> N+3 over one shared spring.
+// Push three at once: animatedTop goes N -> N+3 over one shared animation.
 backStack.add(Route.Detail("1"))
 backStack.add(Route.Detail("2"))
 backStack.add(Route.Detail("3"))
@@ -74,9 +74,10 @@ A built-in preset library is available as `NavTransitions`:
 | :-- | :-- |
 | `MiuixDefault` (default) | Full-width slide + quarter-width parallax + light covered alpha falloff |
 | `Modal` | Bottom-up slide; lower layer stays visible |
+| `Expansion` | Expands the component bound to the destination route into a page |
 | `None` | Instant, no animation |
 
-The leading-edge corner clip and the dark dim scrim are not baked into any preset — they come from the orthogonal `NavDisplayEffects` layer (`enableCornerClip`, `dimAmount`; both on by default), while each transition only shapes the scrim's curve along the motion via `scrimFraction`.
+Sliding presets use the orthogonal `NavDisplayEffects` corner clip. `Expansion` owns its animated clip. The fullscreen dim scrim still comes from `NavDisplayEffects.dimAmount`; each transition shapes its curve via `scrimFraction`.
 
 Set a global default on `NavDisplay(transition = ...)` and override per route with `entry(transition = ...)`:
 
@@ -86,6 +87,42 @@ NavDisplay(backStack, transition = NavTransitions.MiuixDefault) {
     entry<Route.Detail>(transition = NavTransitions.Modal) { DetailScreen(it.id) }
 }
 ```
+
+## Component expansion
+
+Use `NavTransitions.Expansion` globally or per entry. Bind the source component to its destination route and navigate normally.
+
+<div style="position: relative; height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
+    <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../compose/index.html?id=navExpand" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+
+```kotlin
+import top.yukonga.miuix.kmp.nav.transition.NavTransitions
+import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
+
+NavDisplay(
+    backStack,
+    transition = NavTransitions.expansion(containerColor = MiuixTheme.colorScheme.surface),
+) {
+    entry<Route.Home> {
+        val destination = Route.Detail("1")
+        Card(
+            modifier = Modifier.navTransitionSource(destination, containerColor = MiuixTheme.colorScheme.surfaceContainer),
+            onClick = { if (destination !in backStack) backStack.add(destination) },
+        ) {
+            BasicComponent(title = "Open details")
+        }
+    }
+    entry<Route.Detail> { route ->
+        DetailScreen(route.id, onBack = { backStack.removeLastOrNull() })
+    }
+}
+```
+
+- Attach `navTransitionSource` after padding and before the background/clip. Match the source's `containerColor` and outline (`cornerRadius`, `corners`, or `shape`); custom shapes must have one contour without holes.
+- Use an opaque destination background matching the container color. `Expansion` uses the first opaque color from `expansion(containerColor = ...)`, `NavDisplayEffects.backdropColor`, or the source's `containerColor`. `cornerClipRadius` supplies the final moving-frame radius; settled pages are not clipped.
+- Source and destination must share a window. Opening a page without a capturable source or an opaque container color uses `MiuixDefault`. If multiple components bind the same route, the pressed source wins.
+- When an Expansion entry returns, the original source must have a visible area within the navigation container. If an entry can be recomposed after being covered, pass a stable `sourceKey` to reconnect the source. Use a distinct key for each source within the same origin and destination. A source that is still detached or fully clipped uses the centered shrink and fade.
 
 ## Swipe-to-dismiss direction
 
@@ -134,13 +171,13 @@ val myTransition = navGraphicsTransition { scope ->
 }
 ```
 
-`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `settle`, `layoutSize`, `layoutDirection` and `density`.
+`NavTransitionScope` exposes `relativeDepth`, `role`, `change`, `gesture`, `isRunning`, `settle`, `layoutSize`, `layoutDirection`, `density`, `entryKey` and `layoutPositionInWindow`. `entryKey` identifies the layer, including during exit. Use `windowToLocal(position)` to convert window coordinates, including ancestor transforms.
 
 Read `LocalNavTransitionScope.current` from entry content when it needs Miuix's live navigation
 state. Use `isRunning` for the coarse transition lifecycle, and read `relativeDepth`, `gesture` or
 `settle` in a deferred `graphicsLayer` block when implementing entry-local effects.
 
-Generic looks (fade, scale, shared-axis, …) are deliberately not shipped as presets — each is a few lines on this builder. A cross-fade, for instance:
+For other looks (fade, shared-axis, …), use this builder. A cross-fade, for instance:
 
 ```kotlin
 val fade = navGraphicsTransition { scope ->
@@ -254,7 +291,7 @@ One trade-off to know: a gesture may grab the stack mid-programmatic-settle, swi
 
 | Property | Default | Description |
 | :-- | :-- | :-- |
-| `enableCornerClip` | `true` | Clip the transitioning top entry with smooth rounded corners while it animates over the layer below |
+| `enableCornerClip` | `true` | Clip the transitioning top entry with smooth rounded corners; skipped when its transition owns an animated clip (`Expansion`) |
 | `cornerClipRadius` | `0.dp` | Radius of that clip; pass `rememberNavSystemCornerRadius()` to follow the device screen corner (still no rounding where the platform reports 0) |
 | `cornerClipMode` | `Leading` | Which corners to round: `Leading` — the corners meeting the screen edge, for slide-style transitions; `All` — every corner, for card-style transitions that scale the whole page |
 | `dimAmount` | `0.5f` | Maximum alpha of the fullscreen dim scrim beneath the top-most layer; the curve along the motion belongs to the transition (`scrimFraction`), this only caps darkness. `0f` disables |
@@ -371,7 +408,7 @@ Port that approach (or a `SavedStateHandle`-style holder) into your own app laye
 | Capability | v1 status |
 | :-- | :-- |
 | Dialog / bottom-sheet scene strategy (overlay destinations) | Not supported |
-| Shared-element transitions across destinations | Not supported |
+| Shared-element content matching across destinations | Not supported; `Expansion` supports page-container expansion only |
 | KSP / annotation-based route registration | Not supported (register entries via the `entry<T> { }` DSL) |
 | Built-in result channel on `NavController` | Not supported (see the section above) |
 

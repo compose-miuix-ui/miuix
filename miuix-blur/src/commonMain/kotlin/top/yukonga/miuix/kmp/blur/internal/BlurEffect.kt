@@ -214,6 +214,8 @@ internal fun createProgressiveBlurEffect(
     adjustedVarianceY: Float,
     padLeft: Float,
     padTop: Float,
+    padRight: Float,
+    padBottom: Float,
     compW: Float,
     compH: Float,
     angleDeg: Float,
@@ -242,6 +244,8 @@ internal fun createProgressiveBlurEffect(
     val gradVecY = scope.progGradVecY
     val gradOffset = scope.progGradOffset
     val clampedCurve = scope.progClampedCurve
+    val texW = ((compW + padLeft + padRight) / downScale).coerceAtLeast(1f)
+    val texH = ((compH + padTop + padBottom) / downScale).coerceAtLeast(1f)
     val curveKind = progressiveCurveKind(clampedCurve)
 
     // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
@@ -290,6 +294,7 @@ internal fun createProgressiveBlurEffect(
                 inlineNoise = hInlineNoise,
             ),
         ).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_maxRadius", maxRadiusX)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)
@@ -322,6 +327,7 @@ internal fun createProgressiveBlurEffect(
                 inlineNoise = vInlineNoise,
             ),
         ).apply {
+            setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
             setFloatUniform("in_maxRadius", maxRadiusY)
             setFloatUniform("in_gradVec", gradVecX, gradVecY)
             setFloatUniform("in_gradOffset", gradOffset)

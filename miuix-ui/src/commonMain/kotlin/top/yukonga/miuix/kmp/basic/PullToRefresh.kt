@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
@@ -66,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.constrain
 import androidx.compose.ui.unit.constrainHeight
@@ -232,6 +234,10 @@ fun PullToRefresh(
                 .then(pointerModifier)
         }
 
+        val headerModifier = remember(contentPadding) {
+            Modifier.offset { IntOffset(0, contentPadding.calculateTopPadding().roundToPx()) }
+        }
+
         Box(modifier = boxModifier) {
             Column {
                 RefreshHeader(
@@ -240,7 +246,7 @@ fun PullToRefresh(
                     color = color,
                     refreshTexts = refreshTexts,
                     refreshTextStyle = refreshTextStyle,
-                    modifier = Modifier.offset(y = contentPadding.calculateTopPadding()),
+                    modifier = headerModifier,
                 )
                 content()
             }
@@ -315,6 +321,7 @@ sealed interface RefreshState {
  *
  * @param coroutineScope A [CoroutineScope] used to launch animations and state updates.
  */
+@Stable
 class PullToRefreshState(
     internal var coroutineScope: CoroutineScope,
 ) {

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.BluetoothDiscovery: ImageVector
 
 val MiuixIcons.Glass.Light.BluetoothDiscovery: ImageVector
     get() {
-        if (_noNetworkLineLight != null) return _noNetworkLineLight!!
-        _noNetworkLineLight = buildHyperOSIcon(
+        if (_bluetoothDiscoveryLight != null) return _bluetoothDiscoveryLight!!
+        _bluetoothDiscoveryLight = buildHyperOSIcon(
             name = "BluetoothDiscovery.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(776f, 197.4f),
@@ -94,15 +94,15 @@ val MiuixIcons.Glass.Light.BluetoothDiscovery: ImageVector
             translationY = 1041.7713f,
             autoMirror = false,
         )
-        return _noNetworkLineLight!!
+        return _bluetoothDiscoveryLight!!
     }
 
-private var _noNetworkLineLight: ImageVector? = null
+private var _bluetoothDiscoveryLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.BluetoothDiscovery: ImageVector
     get() {
-        if (_noNetworkLineNormal != null) return _noNetworkLineNormal!!
-        _noNetworkLineNormal = buildHyperOSIcon(
+        if (_bluetoothDiscoveryNormal != null) return _bluetoothDiscoveryNormal!!
+        _bluetoothDiscoveryNormal = buildHyperOSIcon(
             name = "BluetoothDiscovery.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(778.7f, 208.1f),
@@ -183,15 +183,15 @@ val MiuixIcons.Glass.Normal.BluetoothDiscovery: ImageVector
             translationY = 1041.562f,
             autoMirror = false,
         )
-        return _noNetworkLineNormal!!
+        return _bluetoothDiscoveryNormal!!
     }
 
-private var _noNetworkLineNormal: ImageVector? = null
+private var _bluetoothDiscoveryNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.BluetoothDiscovery: ImageVector
     get() {
-        if (_noNetworkLineRegular != null) return _noNetworkLineRegular!!
-        _noNetworkLineRegular = buildHyperOSIcon(
+        if (_bluetoothDiscoveryRegular != null) return _bluetoothDiscoveryRegular!!
+        _bluetoothDiscoveryRegular = buildHyperOSIcon(
             name = "BluetoothDiscovery.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(780f, 213f),
@@ -272,15 +272,15 @@ val MiuixIcons.Glass.Regular.BluetoothDiscovery: ImageVector
             translationY = 1041.4667f,
             autoMirror = false,
         )
-        return _noNetworkLineRegular!!
+        return _bluetoothDiscoveryRegular!!
     }
 
-private var _noNetworkLineRegular: ImageVector? = null
+private var _bluetoothDiscoveryRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.BluetoothDiscovery: ImageVector
     get() {
-        if (_noNetworkLineMedium != null) return _noNetworkLineMedium!!
-        _noNetworkLineMedium = buildHyperOSIcon(
+        if (_bluetoothDiscoveryMedium != null) return _bluetoothDiscoveryMedium!!
+        _bluetoothDiscoveryMedium = buildHyperOSIcon(
             name = "BluetoothDiscovery.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(784.9f, 219.5f),
@@ -361,15 +361,15 @@ val MiuixIcons.Glass.Medium.BluetoothDiscovery: ImageVector
             translationY = 1041.4661f,
             autoMirror = false,
         )
-        return _noNetworkLineMedium!!
+        return _bluetoothDiscoveryMedium!!
     }
 
-private var _noNetworkLineMedium: ImageVector? = null
+private var _bluetoothDiscoveryMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.BluetoothDiscovery: ImageVector
     get() {
-        if (_noNetworkLineDemibold != null) return _noNetworkLineDemibold!!
-        _noNetworkLineDemibold = buildHyperOSIcon(
+        if (_bluetoothDiscoveryDemibold != null) return _bluetoothDiscoveryDemibold!!
+        _bluetoothDiscoveryDemibold = buildHyperOSIcon(
             name = "BluetoothDiscovery.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(788.3f, 224f),
@@ -450,8 +450,8 @@ val MiuixIcons.Glass.Demibold.BluetoothDiscovery: ImageVector
             translationY = 1041.4658f,
             autoMirror = false,
         )
-        return _noNetworkLineDemibold!!
+        return _bluetoothDiscoveryDemibold!!
     }
 
-private var _noNetworkLineDemibold: ImageVector? = null
+private var _bluetoothDiscoveryDemibold: ImageVector? = null
 

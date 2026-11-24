@@ -76,6 +76,7 @@ Scaffold {
 | renderInRootScaffold       | Boolean                   | 是否在根（最外层）Scaffold 中渲染底部抽屉。为 true 时，覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染 | true | 否 |
 | content                    | @Composable () -> Unit    | 底部抽屉的内容                               | -                                          | 是       |
 | dimColor                   | Color                     | 应用显隐与拖动进度前的遮罩颜色 | MiuixTheme.colorScheme.windowDimming | 否 |
+| motion                     | SheetMotion              | 进入、退出及拖动回弹动效，见 SheetMotion    | SheetMotion.Default                       | 否       |
 | surface                    | (@Composable BottomSheetSurfaceScope.() -> Modifier)? | 替换背景与裁剪，同时用于上拉回弹时的底部延伸区域 | null | 否 |
 
 ### BottomSheetDefaults
@@ -95,6 +96,15 @@ Scaffold {
 | ----------------- | -------- | ---------------------- |
 | backgroundColor() | Color    | 获取默认背景颜色       |
 | dragHandleColor() | Color    | 获取默认拖拽指示器颜色 |
+
+### SheetMotion
+
+底部抽屉显隐及拖动回弹的动效预设。
+
+| 预设    | 说明 |
+| ------- | ---- |
+| Default | 标准系统底部抽屉动效 |
+| Glass   | 玻璃底部抽屉动效，`GlassBottomSheet` 使用此预设 |
 
 ## 进阶用法
 

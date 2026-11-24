@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.overlay
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -15,8 +16,9 @@ import androidx.compose.ui.unit.DpSize
 import top.yukonga.miuix.kmp.layout.BottomSheetContentLayout
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.layout.BottomSheetSurfaceScope
+import top.yukonga.miuix.kmp.layout.SheetMotion
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayout
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
@@ -44,6 +46,7 @@ import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.DialogLayoutImpl
  *   When true (default), the bottom sheet covers the full screen. When false, it renders within the
  *   current Scaffold's bounds.
  * @param dimColor The unanimated dimming color.
+ * @param motion The enter, exit and settle motion. See [SheetMotion].
  * @param surface Optional replacement for the default background and clipping. Also used for
  *   the exposed bottom edge during upward overscroll, with [BottomSheetSurfaceScope.isOverscroll].
  *   [backgroundColor] applies only when this is null.
@@ -70,6 +73,7 @@ fun OverlayBottomSheet(
     enableNestedScroll: Boolean = true,
     renderInRootScaffold: Boolean = true,
     dimColor: Color = MiuixTheme.colorScheme.windowDimming,
+    motion: SheetMotion = SheetMotion.Default,
     surface: (@Composable BottomSheetSurfaceScope.() -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -83,15 +87,14 @@ fun OverlayBottomSheet(
         dragHandleColor = dragHandleColor,
         popupHost = { visible, hostContent ->
             val visibleState = remember { mutableStateOf(false) }
-            visibleState.value = visible
-            DialogLayoutImpl(
+            SideEffect { visibleState.value = visible }
+            DialogLayout(
                 visible = visibleState,
                 enableWindowDim = false,
                 enterTransition = EnterTransition.None,
                 exitTransition = ExitTransition.None,
                 enableAutoLargeScreen = false,
                 renderInRootScaffold = renderInRootScaffold,
-                consumeBackgroundTouches = false,
             ) {
                 hostContent()
             }
@@ -107,6 +110,7 @@ fun OverlayBottomSheet(
         allowDismiss = allowDismiss,
         enableNestedScroll = enableNestedScroll,
         dimColor = dimColor,
+        motion = motion,
         surface = surface,
         content = content,
     )

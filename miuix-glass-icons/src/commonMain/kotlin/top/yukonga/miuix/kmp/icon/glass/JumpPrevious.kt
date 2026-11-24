@@ -12,8 +12,8 @@ val MiuixIcons.Glass.JumpPrevious: ImageVector
 
 val MiuixIcons.Glass.Light.JumpPrevious: ImageVector
     get() {
-        if (_jumpPreviousLineLight != null) return _jumpPreviousLineLight!!
-        _jumpPreviousLineLight = buildHyperOSIcon(
+        if (_jumpPreviousLight != null) return _jumpPreviousLight!!
+        _jumpPreviousLight = buildHyperOSIcon(
             name = "JumpPrevious.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(638.6f, 804.4f),
@@ -58,15 +58,15 @@ val MiuixIcons.Glass.Light.JumpPrevious: ImageVector
             translationY = 1042.1662f,
             autoMirror = true,
         )
-        return _jumpPreviousLineLight!!
+        return _jumpPreviousLight!!
     }
 
-private var _jumpPreviousLineLight: ImageVector? = null
+private var _jumpPreviousLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.JumpPrevious: ImageVector
     get() {
-        if (_jumpPreviousLineNormal != null) return _jumpPreviousLineNormal!!
-        _jumpPreviousLineNormal = buildHyperOSIcon(
+        if (_jumpPreviousNormal != null) return _jumpPreviousNormal!!
+        _jumpPreviousNormal = buildHyperOSIcon(
             name = "JumpPrevious.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(633.4f, 812.4f),
@@ -111,15 +111,15 @@ val MiuixIcons.Glass.Normal.JumpPrevious: ImageVector
             translationY = 1042.1666f,
             autoMirror = true,
         )
-        return _jumpPreviousLineNormal!!
+        return _jumpPreviousNormal!!
     }
 
-private var _jumpPreviousLineNormal: ImageVector? = null
+private var _jumpPreviousNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.JumpPrevious: ImageVector
     get() {
-        if (_jumpPreviousLineRegular != null) return _jumpPreviousLineRegular!!
-        _jumpPreviousLineRegular = buildHyperOSIcon(
+        if (_jumpPreviousRegular != null) return _jumpPreviousRegular!!
+        _jumpPreviousRegular = buildHyperOSIcon(
             name = "JumpPrevious.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(631f, 816f),
@@ -164,15 +164,15 @@ val MiuixIcons.Glass.Regular.JumpPrevious: ImageVector
             translationY = 1042.1667f,
             autoMirror = true,
         )
-        return _jumpPreviousLineRegular!!
+        return _jumpPreviousRegular!!
     }
 
-private var _jumpPreviousLineRegular: ImageVector? = null
+private var _jumpPreviousRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.JumpPrevious: ImageVector
     get() {
-        if (_jumpPreviousLineMedium != null) return _jumpPreviousLineMedium!!
-        _jumpPreviousLineMedium = buildHyperOSIcon(
+        if (_jumpPreviousMedium != null) return _jumpPreviousMedium!!
+        _jumpPreviousMedium = buildHyperOSIcon(
             name = "JumpPrevious.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(628.8f, 825.5f),
@@ -217,15 +217,15 @@ val MiuixIcons.Glass.Medium.JumpPrevious: ImageVector
             translationY = 1042.3018f,
             autoMirror = true,
         )
-        return _jumpPreviousLineMedium!!
+        return _jumpPreviousMedium!!
     }
 
-private var _jumpPreviousLineMedium: ImageVector? = null
+private var _jumpPreviousMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.JumpPrevious: ImageVector
     get() {
-        if (_jumpPreviousLineDemibold != null) return _jumpPreviousLineDemibold!!
-        _jumpPreviousLineDemibold = buildHyperOSIcon(
+        if (_jumpPreviousDemibold != null) return _jumpPreviousDemibold!!
+        _jumpPreviousDemibold = buildHyperOSIcon(
             name = "JumpPrevious.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(627.3f, 832.1f),
@@ -270,8 +270,8 @@ val MiuixIcons.Glass.Demibold.JumpPrevious: ImageVector
             translationY = 1042.3963f,
             autoMirror = true,
         )
-        return _jumpPreviousLineDemibold!!
+        return _jumpPreviousDemibold!!
     }
 
-private var _jumpPreviousLineDemibold: ImageVector? = null
+private var _jumpPreviousDemibold: ImageVector? = null
 

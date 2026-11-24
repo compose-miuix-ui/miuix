@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ControlCenter: ImageVector
 
 val MiuixIcons.Glass.Light.ControlCenter: ImageVector
     get() {
-        if (_controlCenterSurfaceLight != null) return _controlCenterSurfaceLight!!
-        _controlCenterSurfaceLight = buildHyperOSIcon(
+        if (_controlCenterLight != null) return _controlCenterLight!!
+        _controlCenterLight = buildHyperOSIcon(
             name = "ControlCenter.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(175.3f, 148.2f),
@@ -82,15 +82,15 @@ val MiuixIcons.Glass.Light.ControlCenter: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _controlCenterSurfaceLight!!
+        return _controlCenterLight!!
     }
 
-private var _controlCenterSurfaceLight: ImageVector? = null
+private var _controlCenterLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ControlCenter: ImageVector
     get() {
-        if (_controlCenterSurfaceNormal != null) return _controlCenterSurfaceNormal!!
-        _controlCenterSurfaceNormal = buildHyperOSIcon(
+        if (_controlCenterNormal != null) return _controlCenterNormal!!
+        _controlCenterNormal = buildHyperOSIcon(
             name = "ControlCenter.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(168.9f, 149.4f),
@@ -159,15 +159,15 @@ val MiuixIcons.Glass.Normal.ControlCenter: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _controlCenterSurfaceNormal!!
+        return _controlCenterNormal!!
     }
 
-private var _controlCenterSurfaceNormal: ImageVector? = null
+private var _controlCenterNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ControlCenter: ImageVector
     get() {
-        if (_controlCenterSurfaceRegular != null) return _controlCenterSurfaceRegular!!
-        _controlCenterSurfaceRegular = buildHyperOSIcon(
+        if (_controlCenterRegular != null) return _controlCenterRegular!!
+        _controlCenterRegular = buildHyperOSIcon(
             name = "ControlCenter.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(166f, 150f),
@@ -236,15 +236,15 @@ val MiuixIcons.Glass.Regular.ControlCenter: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _controlCenterSurfaceRegular!!
+        return _controlCenterRegular!!
     }
 
-private var _controlCenterSurfaceRegular: ImageVector? = null
+private var _controlCenterRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ControlCenter: ImageVector
     get() {
-        if (_controlCenterSurfaceMedium != null) return _controlCenterSurfaceMedium!!
-        _controlCenterSurfaceMedium = buildHyperOSIcon(
+        if (_controlCenterMedium != null) return _controlCenterMedium!!
+        _controlCenterMedium = buildHyperOSIcon(
             name = "ControlCenter.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(160.6f, 151.1f),
@@ -313,15 +313,15 @@ val MiuixIcons.Glass.Medium.ControlCenter: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _controlCenterSurfaceMedium!!
+        return _controlCenterMedium!!
     }
 
-private var _controlCenterSurfaceMedium: ImageVector? = null
+private var _controlCenterMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ControlCenter: ImageVector
     get() {
-        if (_controlCenterSurfaceDemibold != null) return _controlCenterSurfaceDemibold!!
-        _controlCenterSurfaceDemibold = buildHyperOSIcon(
+        if (_controlCenterDemibold != null) return _controlCenterDemibold!!
+        _controlCenterDemibold = buildHyperOSIcon(
             name = "ControlCenter.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(156.8f, 151.9f),
@@ -390,8 +390,8 @@ val MiuixIcons.Glass.Demibold.ControlCenter: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _controlCenterSurfaceDemibold!!
+        return _controlCenterDemibold!!
     }
 
-private var _controlCenterSurfaceDemibold: ImageVector? = null
+private var _controlCenterDemibold: ImageVector? = null
 

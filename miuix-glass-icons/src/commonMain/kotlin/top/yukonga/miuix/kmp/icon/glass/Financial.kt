@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Financial: ImageVector
 
 val MiuixIcons.Glass.Light.Financial: ImageVector
     get() {
-        if (_financialSurfaceLight != null) return _financialSurfaceLight!!
-        _financialSurfaceLight = buildHyperOSIcon(
+        if (_financialLight != null) return _financialLight!!
+        _financialLight = buildHyperOSIcon(
             name = "Financial.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(775.7f, 124f),
@@ -117,15 +117,15 @@ val MiuixIcons.Glass.Light.Financial: ImageVector
             translationY = 1077.5557f,
             autoMirror = false,
         )
-        return _financialSurfaceLight!!
+        return _financialLight!!
     }
 
-private var _financialSurfaceLight: ImageVector? = null
+private var _financialLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Financial: ImageVector
     get() {
-        if (_financialSurfaceNormal != null) return _financialSurfaceNormal!!
-        _financialSurfaceNormal = buildHyperOSIcon(
+        if (_financialNormal != null) return _financialNormal!!
+        _financialNormal = buildHyperOSIcon(
             name = "Financial.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(768.3f, 110.3f),
@@ -229,15 +229,15 @@ val MiuixIcons.Glass.Normal.Financial: ImageVector
             translationY = 1072.8198f,
             autoMirror = false,
         )
-        return _financialSurfaceNormal!!
+        return _financialNormal!!
     }
 
-private var _financialSurfaceNormal: ImageVector? = null
+private var _financialNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Financial: ImageVector
     get() {
-        if (_financialSurfaceRegular != null) return _financialSurfaceRegular!!
-        _financialSurfaceRegular = buildHyperOSIcon(
+        if (_financialRegular != null) return _financialRegular!!
+        _financialRegular = buildHyperOSIcon(
             name = "Financial.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(765f, 104f),
@@ -341,15 +341,15 @@ val MiuixIcons.Glass.Regular.Financial: ImageVector
             translationY = 1070.6667f,
             autoMirror = false,
         )
-        return _financialSurfaceRegular!!
+        return _financialRegular!!
     }
 
-private var _financialSurfaceRegular: ImageVector? = null
+private var _financialRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Financial: ImageVector
     get() {
-        if (_financialSurfaceMedium != null) return _financialSurfaceMedium!!
-        _financialSurfaceMedium = buildHyperOSIcon(
+        if (_financialMedium != null) return _financialMedium!!
+        _financialMedium = buildHyperOSIcon(
             name = "Financial.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(763.1f, 105.4f),
@@ -453,15 +453,15 @@ val MiuixIcons.Glass.Medium.Financial: ImageVector
             translationY = 1071.4774f,
             autoMirror = false,
         )
-        return _financialSurfaceMedium!!
+        return _financialMedium!!
     }
 
-private var _financialSurfaceMedium: ImageVector? = null
+private var _financialMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Financial: ImageVector
     get() {
-        if (_financialSurfaceDemibold != null) return _financialSurfaceDemibold!!
-        _financialSurfaceDemibold = buildHyperOSIcon(
+        if (_financialDemibold != null) return _financialDemibold!!
+        _financialDemibold = buildHyperOSIcon(
             name = "Financial.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(761.8f, 106.3f),
@@ -565,8 +565,8 @@ val MiuixIcons.Glass.Demibold.Financial: ImageVector
             translationY = 1072.0451f,
             autoMirror = false,
         )
-        return _financialSurfaceDemibold!!
+        return _financialDemibold!!
     }
 
-private var _financialSurfaceDemibold: ImageVector? = null
+private var _financialDemibold: ImageVector? = null
 

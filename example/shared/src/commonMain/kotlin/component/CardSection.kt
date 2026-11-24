@@ -140,25 +140,29 @@ private fun LongPressHoldDownCardDemo(backdrop: Backdrop?) {
         },
     )
 
+    val dismissDialog = {
+        showDialog = false
+        holdDown = false
+    }
+
     GlassDialog(
         show = showDialog,
         backdrop = backdrop,
         title = "Long Press Action",
         summary = "Triggered by long pressing the card.",
-        onDismissRequest = { showDialog = false },
-        onDismissFinished = { holdDown = false },
+        onDismissRequest = dismissDialog,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             GlassDialogButton(
-                onClick = { showDialog = false },
+                onClick = dismissDialog,
                 modifier = Modifier.weight(1f),
             ) {
                 Text(text = "Cancel", style = MiuixTheme.textStyles.button)
             }
             GlassDialogButton(
-                onClick = { showDialog = false },
+                onClick = dismissDialog,
                 modifier = Modifier.weight(1f),
                 role = GlassDialogButtonRole.Primary,
             ) {

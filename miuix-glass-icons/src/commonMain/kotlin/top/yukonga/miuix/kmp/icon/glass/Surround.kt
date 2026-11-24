@@ -12,8 +12,8 @@ val MiuixIcons.Glass.Surround: ImageVector
 
 val MiuixIcons.Glass.Light.Surround: ImageVector
     get() {
-        if (_surroundLineLight != null) return _surroundLineLight!!
-        _surroundLineLight = buildHyperOSIcon(
+        if (_surroundLight != null) return _surroundLight!!
+        _surroundLight = buildHyperOSIcon(
             name = "Surround.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(273.4f, 641.6f),
@@ -136,15 +136,15 @@ val MiuixIcons.Glass.Light.Surround: ImageVector
             translationY = 1024.954f,
             autoMirror = false,
         )
-        return _surroundLineLight!!
+        return _surroundLight!!
     }
 
-private var _surroundLineLight: ImageVector? = null
+private var _surroundLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.Surround: ImageVector
     get() {
-        if (_surroundLineNormal != null) return _surroundLineNormal!!
-        _surroundLineNormal = buildHyperOSIcon(
+        if (_surroundNormal != null) return _surroundNormal!!
+        _surroundNormal = buildHyperOSIcon(
             name = "Surround.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(270.4f, 650.1f),
@@ -267,15 +267,15 @@ val MiuixIcons.Glass.Normal.Surround: ImageVector
             translationY = 1025.7679f,
             autoMirror = false,
         )
-        return _surroundLineNormal!!
+        return _surroundNormal!!
     }
 
-private var _surroundLineNormal: ImageVector? = null
+private var _surroundNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.Surround: ImageVector
     get() {
-        if (_surroundLineRegular != null) return _surroundLineRegular!!
-        _surroundLineRegular = buildHyperOSIcon(
+        if (_surroundRegular != null) return _surroundRegular!!
+        _surroundRegular = buildHyperOSIcon(
             name = "Surround.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(269f, 654f),
@@ -398,15 +398,15 @@ val MiuixIcons.Glass.Regular.Surround: ImageVector
             translationY = 1026.1387f,
             autoMirror = false,
         )
-        return _surroundLineRegular!!
+        return _surroundRegular!!
     }
 
-private var _surroundLineRegular: ImageVector? = null
+private var _surroundRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.Surround: ImageVector
     get() {
-        if (_surroundLineMedium != null) return _surroundLineMedium!!
-        _surroundLineMedium = buildHyperOSIcon(
+        if (_surroundMedium != null) return _surroundMedium!!
+        _surroundMedium = buildHyperOSIcon(
             name = "Surround.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(266.8f, 660.5f),
@@ -529,15 +529,15 @@ val MiuixIcons.Glass.Medium.Surround: ImageVector
             translationY = 1026.0486f,
             autoMirror = false,
         )
-        return _surroundLineMedium!!
+        return _surroundMedium!!
     }
 
-private var _surroundLineMedium: ImageVector? = null
+private var _surroundMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.Surround: ImageVector
     get() {
-        if (_surroundLineDemibold != null) return _surroundLineDemibold!!
-        _surroundLineDemibold = buildHyperOSIcon(
+        if (_surroundDemibold != null) return _surroundDemibold!!
+        _surroundDemibold = buildHyperOSIcon(
             name = "Surround.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(265.3f, 665f),
@@ -660,8 +660,8 @@ val MiuixIcons.Glass.Demibold.Surround: ImageVector
             translationY = 1025.9845f,
             autoMirror = false,
         )
-        return _surroundLineDemibold!!
+        return _surroundDemibold!!
     }
 
-private var _surroundLineDemibold: ImageVector? = null
+private var _surroundDemibold: ImageVector? = null
 

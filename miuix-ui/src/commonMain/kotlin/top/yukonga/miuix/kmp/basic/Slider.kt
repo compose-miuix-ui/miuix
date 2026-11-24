@@ -8,12 +8,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -42,12 +43,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
@@ -55,6 +60,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
+import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -118,18 +126,20 @@ fun Slider(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValue = value.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValueState by rememberUpdatedState(coercedValue)
 
-    val progressAnimationSpec = remember(isDragging) {
-        if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
-        } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
-        }
-    }
-
-    val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
-    val thumbScaleState = animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val coercedFraction = valueToFraction(coercedValue, valueRange)
+    val animatedFractionState = animateFloatAsState(
+        targetValue = coercedFraction,
+        animationSpec = if (isDragging) DraggingProgressAnimationSpec else SettlingProgressAnimationSpec,
+        visibilityThreshold = 0.0001f,
+    )
+    val thumbScaleState = animateFloatAsState(
+        targetValue = if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f,
+        animationSpec = ThumbScaleAnimationSpec,
+        visibilityThreshold = 0.001f,
+    )
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -141,17 +151,20 @@ fun Slider(
         computeAllKeyPointFractions(keyPoints, stepFractions, valueRange)
     }
 
-    val fractionToValue = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
+    val fractionToValue = remember(valueRange, steps, keyPoints, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
             resolveValueFromFraction(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
+                keyPoints = keyPoints,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
         }
     }
+    val fractionProvider = remember { { animatedFractionState.value } }
+    val thumbScaleProvider = remember { { thumbScaleState.value } }
 
     Box(
         modifier = modifier
@@ -177,13 +190,12 @@ fun Slider(
                                     }
 
                                     val thumbRadius = layoutHeight / 2f
-                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val fraction =
-                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val fraction = animatedFractionState.value.fastCoerceIn(0f, 1f)
                                     val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
                                     val thumbX = thumbRadius + effectiveFraction * availableWidth
 
@@ -198,52 +210,159 @@ fun Slider(
                             interactionSource = interactionSource,
                             enabled = enabled,
                         )
-                        .draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { dragAmount ->
-                                dragOffset += dragAmount
-                                val visualFraction = horizontalVisualFraction(dragOffset, layoutWidth, layoutHeight)
-                                val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
-                                val calculatedValue = fractionToValue(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.handleHapticFeedback(
-                                    calculatedValue,
-                                    valueRange,
-                                    hapticEffect,
-                                    hapticFeedback,
-                                    allKeyPointFractions,
-                                    hasCustomKeyPoints = keyPoints != null,
-                                )
-                            },
-                            onDragStarted = { offset ->
-                                isDragging = true
-                                dragOffset = offset.x
-                                val visualFraction = horizontalVisualFraction(offset.x, layoutWidth, layoutHeight)
-                                val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
-                                val calculatedValue = fractionToValue(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue, valueRange, coercedValue)
-                            },
-                            onDragStopped = {
-                                isDragging = false
-                                onValueChangeFinishedState?.invoke()
-                            },
-                        )
+                        .pointerInput(effectiveReverseDirection, valueRange, steps, keyPoints, magnetThreshold, hapticEffect) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                val thumbRadius = layoutHeight / 2f
+                                val availableWidth = (layoutWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
+                                val currentFraction = valueToFraction(coercedValueState, valueRange)
+                                val currentEffectiveFraction = if (effectiveReverseDirection) 1f - currentFraction else currentFraction
+                                val thumbX = thumbRadius + currentEffectiveFraction * availableWidth
+                                val hitRadius = thumbRadius * 0.72f + (thumbRadius * 0.5f)
+                                val isOnThumb = abs(down.position.x - thumbX) <= hitRadius
+                                val grabOffset = if (isOnThumb) down.position.x - thumbX else 0f
+                                var activePress = if (isOnThumb) {
+                                    PressInteraction.Press(down.position).also {
+                                        interactionSource.tryEmit(it)
+                                    }
+                                } else {
+                                    null
+                                }
+                                try {
+                                    var overSlop = Offset.Zero
+                                    val pointerSlop = viewConfiguration.touchSlop
+                                    var drag: PointerInputChange?
+                                    do {
+                                        drag = awaitPointerEvent().changes.firstOrNull { it.id == down.id }
+                                        if (drag != null && !drag.isConsumed) {
+                                            overSlop += drag.positionChange()
+                                        }
+                                    } while (
+                                        drag != null &&
+                                        drag.pressed &&
+                                        !drag.isConsumed &&
+                                        abs(overSlop.x) < pointerSlop &&
+                                        abs(overSlop.y) < pointerSlop
+                                    )
+
+                                    if (drag != null && !drag.isConsumed && abs(overSlop.x) >= pointerSlop && abs(overSlop.x) >= abs(
+                                            overSlop.y,
+                                        )
+                                    ) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                        activePress = null
+                                        val dragInteraction = DragInteraction.Start()
+                                        interactionSource.tryEmit(dragInteraction)
+                                        isDragging = true
+                                        dragOffset = down.position.x + overSlop.x - grabOffset
+                                        var lastDispatchedValue = coercedValueState
+                                        val initialVisualFraction = horizontalVisualFraction(dragOffset, layoutWidth, layoutHeight)
+                                        val initialFractionForValue =
+                                            if (effectiveReverseDirection) 1f - initialVisualFraction else initialVisualFraction
+                                        val initialValue = fractionToValue(initialFractionForValue)
+                                        if (initialValue != lastDispatchedValue) {
+                                            lastDispatchedValue = initialValue
+                                            onValueChangeState(initialValue)
+                                        }
+                                        hapticState.reset(initialValue, valueRange, coercedValueState)
+
+                                        var dragSucceeded = false
+                                        try {
+                                            while (true) {
+                                                val event = awaitPointerEvent()
+                                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                                if (change.changedToUpIgnoreConsumed()) {
+                                                    change.consume()
+                                                    dragSucceeded = true
+                                                    break
+                                                }
+                                                if (change.isConsumed) break
+                                                val delta = change.positionChange().x
+                                                change.consume()
+                                                if (delta != 0f) {
+                                                    dragOffset += delta
+                                                    val visualFraction = horizontalVisualFraction(dragOffset, layoutWidth, layoutHeight)
+                                                    val fractionForValue =
+                                                        if (effectiveReverseDirection) 1f - visualFraction else visualFraction
+                                                    val calculatedValue = fractionToValue(fractionForValue)
+                                                    if (calculatedValue != lastDispatchedValue) {
+                                                        lastDispatchedValue = calculatedValue
+                                                        onValueChangeState(calculatedValue)
+                                                    }
+                                                    hapticState.handleHapticFeedback(
+                                                        calculatedValue,
+                                                        valueRange,
+                                                        hapticEffect,
+                                                        hapticFeedback,
+                                                        allKeyPointFractions,
+                                                        hasCustomKeyPoints = keyPoints != null,
+                                                    )
+                                                }
+                                            }
+                                        } finally {
+                                            isDragging = false
+                                            interactionSource.tryEmit(
+                                                if (dragSucceeded) {
+                                                    DragInteraction.Stop(dragInteraction)
+                                                } else {
+                                                    DragInteraction.Cancel(
+                                                        dragInteraction,
+                                                    )
+                                                },
+                                            )
+                                            onValueChangeFinishedState?.invoke()
+                                        }
+                                    } else if (drag != null && !drag.pressed && !drag.isConsumed) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Release(it)) }
+                                        activePress = null
+                                        val tapX = down.position.x - grabOffset
+                                        val visualFraction = horizontalVisualFraction(tapX, layoutWidth, layoutHeight)
+                                        val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
+                                        val calculatedValue = fractionToValue(fractionForValue)
+                                        if (calculatedValue != coercedValueState) {
+                                            onValueChangeState(calculatedValue)
+                                        }
+                                        hapticState.reset(calculatedValue, valueRange, coercedValueState)
+                                        hapticState.handleHapticFeedback(
+                                            calculatedValue,
+                                            valueRange,
+                                            hapticEffect,
+                                            hapticFeedback,
+                                            allKeyPointFractions,
+                                            hasCustomKeyPoints = keyPoints != null,
+                                        )
+                                        onValueChangeFinishedState?.invoke()
+                                    }
+                                } finally {
+                                    activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                }
+                            }
+                        }
                         .indication(interactionSource, null)
                 } else {
                     Modifier
                 },
             )
             .semantics {
+                if (!enabled) disabled()
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
                     valueRange.start..valueRange.endInclusive,
                     if (steps > 0) steps else 0,
                 )
                 setProgress { target ->
-                    val clamped = target.coerceIn(valueRange.start, valueRange.endInclusive)
-                    onValueChangeState(clamped)
-                    true
+                    val clamped = target.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+                    val resolved = snapValueToStep(clamped, valueRange, steps)
+                    if (resolved == coercedValue) {
+                        false
+                    } else {
+                        onValueChangeState(resolved)
+                        onValueChangeFinishedState?.invoke()
+                        true
+                    }
                 }
             },
         contentAlignment = Alignment.CenterStart,
@@ -254,15 +373,20 @@ fun Slider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueProvider = { animatedValueState.value },
-            valueRange = valueRange,
+            fractionProvider = fractionProvider,
             isDragging = isDragging,
             isVertical = false,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            thumbScaleProvider = { thumbScaleState.value },
+            thumbScaleProvider = thumbScaleProvider,
             reverseDirection = effectiveReverseDirection,
-            modifier = Modifier.fillMaxWidth().height(height),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .onSizeChanged {
+                    layoutWidth = it.width
+                    layoutHeight = it.height
+                },
         )
     }
 }
@@ -322,18 +446,20 @@ fun VerticalSlider(
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValue = value.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedValueState by rememberUpdatedState(coercedValue)
 
-    val progressAnimationSpec = remember(isDragging) {
-        if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
-        } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
-        }
-    }
-
-    val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
-    val thumbScaleState = animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
+    val coercedFraction = valueToFraction(coercedValue, valueRange)
+    val animatedFractionState = animateFloatAsState(
+        targetValue = coercedFraction,
+        animationSpec = if (isDragging) DraggingProgressAnimationSpec else SettlingProgressAnimationSpec,
+        visibilityThreshold = 0.0001f,
+    )
+    val thumbScaleState = animateFloatAsState(
+        targetValue = if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f,
+        animationSpec = ThumbScaleAnimationSpec,
+        visibilityThreshold = 0.001f,
+    )
 
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
@@ -345,27 +471,25 @@ fun VerticalSlider(
         computeAllKeyPointFractions(keyPoints, stepFractions, valueRange)
     }
 
-    val fractionToValueVertical = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
+    val fractionToValueVertical = remember(valueRange, steps, keyPoints, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
             resolveValueFromFraction(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
+                keyPoints = keyPoints,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
         }
     }
-
+    val fractionProvider = remember { { animatedFractionState.value } }
+    val thumbScaleProvider = remember { { thumbScaleState.value } }
     Box(
         modifier = modifier
             .then(
                 if (enabled) {
                     Modifier
-                        .onSizeChanged {
-                            layoutWidth = it.width
-                            layoutHeight = it.height
-                        }
                         .pointerInput(reverseDirection, valueRange) {
                             awaitPointerEventScope {
                                 while (true) {
@@ -381,13 +505,12 @@ fun VerticalSlider(
                                     }
 
                                     val thumbRadius = layoutWidth / 2f
-                                    val availableHeight = (layoutHeight - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val availableHeight = (layoutHeight - 2f * thumbRadius).fastCoerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val fraction =
-                                        (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val fraction = animatedFractionState.value.fastCoerceIn(0f, 1f)
                                     val effectiveFraction = if (reverseDirection) fraction else 1f - fraction
                                     val thumbY = thumbRadius + effectiveFraction * availableHeight
 
@@ -398,52 +521,158 @@ fun VerticalSlider(
                                 }
                             }
                         }
-                        .draggable(
-                            orientation = Orientation.Vertical,
-                            state = rememberDraggableState { dragAmount ->
-                                dragOffset += dragAmount
-                                val visualFraction = verticalVisualFraction(dragOffset, layoutHeight, layoutWidth)
-                                val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
-                                val calculatedValue = fractionToValueVertical(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.handleHapticFeedback(
-                                    calculatedValue,
-                                    valueRange,
-                                    hapticEffect,
-                                    hapticFeedback,
-                                    allKeyPointFractions,
-                                    hasCustomKeyPoints = keyPoints != null,
-                                )
-                            },
-                            onDragStarted = { offset ->
-                                isDragging = true
-                                dragOffset = offset.y
-                                val visualFraction = verticalVisualFraction(offset.y, layoutHeight, layoutWidth)
-                                val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
-                                val calculatedValue = fractionToValueVertical(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue, valueRange, coercedValue)
-                            },
-                            onDragStopped = {
-                                isDragging = false
-                                onValueChangeFinishedState?.invoke()
-                            },
-                        )
+                        .pointerInput(reverseDirection, valueRange, steps, keyPoints, magnetThreshold, hapticEffect) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                val thumbRadius = layoutWidth / 2f
+                                val availableHeight = (layoutHeight - 2f * thumbRadius).fastCoerceAtLeast(0f)
+                                val currentFraction = valueToFraction(coercedValueState, valueRange)
+                                val currentEffectiveFraction = if (reverseDirection) currentFraction else 1f - currentFraction
+                                val thumbY = thumbRadius + currentEffectiveFraction * availableHeight
+                                val hitRadius = thumbRadius * 0.72f + (thumbRadius * 0.5f)
+                                val isOnThumb = abs(down.position.y - thumbY) <= hitRadius
+                                val grabOffset = if (isOnThumb) down.position.y - thumbY else 0f
+                                var activePress = if (isOnThumb) {
+                                    PressInteraction.Press(down.position).also {
+                                        interactionSource.tryEmit(it)
+                                    }
+                                } else {
+                                    null
+                                }
+                                try {
+                                    var overSlop = Offset.Zero
+                                    val pointerSlop = viewConfiguration.touchSlop
+                                    var drag: PointerInputChange?
+                                    do {
+                                        drag = awaitPointerEvent().changes.firstOrNull { it.id == down.id }
+                                        if (drag != null && !drag.isConsumed) {
+                                            overSlop += drag.positionChange()
+                                        }
+                                    } while (
+                                        drag != null &&
+                                        drag.pressed &&
+                                        !drag.isConsumed &&
+                                        abs(overSlop.y) < pointerSlop &&
+                                        abs(overSlop.x) < pointerSlop
+                                    )
+
+                                    if (drag != null && !drag.isConsumed && abs(overSlop.y) >= pointerSlop && abs(overSlop.y) >= abs(
+                                            overSlop.x,
+                                        )
+                                    ) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                        activePress = null
+                                        val dragInteraction = DragInteraction.Start()
+                                        interactionSource.tryEmit(dragInteraction)
+                                        isDragging = true
+                                        dragOffset = down.position.y + overSlop.y - grabOffset
+                                        var lastDispatchedValue = coercedValueState
+                                        val initialVisualFraction = verticalVisualFraction(dragOffset, layoutHeight, layoutWidth)
+                                        val initialFractionForValue =
+                                            if (reverseDirection) initialVisualFraction else 1f - initialVisualFraction
+                                        val initialValue = fractionToValueVertical(initialFractionForValue)
+                                        if (initialValue != lastDispatchedValue) {
+                                            lastDispatchedValue = initialValue
+                                            onValueChangeState(initialValue)
+                                        }
+                                        hapticState.reset(initialValue, valueRange, coercedValueState)
+
+                                        var dragSucceeded = false
+                                        try {
+                                            while (true) {
+                                                val event = awaitPointerEvent()
+                                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                                if (change.changedToUpIgnoreConsumed()) {
+                                                    change.consume()
+                                                    dragSucceeded = true
+                                                    break
+                                                }
+                                                if (change.isConsumed) break
+                                                val delta = change.positionChange().y
+                                                change.consume()
+                                                if (delta != 0f) {
+                                                    dragOffset += delta
+                                                    val visualFraction = verticalVisualFraction(dragOffset, layoutHeight, layoutWidth)
+                                                    val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
+                                                    val calculatedValue = fractionToValueVertical(fractionForValue)
+                                                    if (calculatedValue != lastDispatchedValue) {
+                                                        lastDispatchedValue = calculatedValue
+                                                        onValueChangeState(calculatedValue)
+                                                    }
+                                                    hapticState.handleHapticFeedback(
+                                                        calculatedValue,
+                                                        valueRange,
+                                                        hapticEffect,
+                                                        hapticFeedback,
+                                                        allKeyPointFractions,
+                                                        hasCustomKeyPoints = keyPoints != null,
+                                                    )
+                                                }
+                                            }
+                                        } finally {
+                                            isDragging = false
+                                            interactionSource.tryEmit(
+                                                if (dragSucceeded) {
+                                                    DragInteraction.Stop(dragInteraction)
+                                                } else {
+                                                    DragInteraction.Cancel(
+                                                        dragInteraction,
+                                                    )
+                                                },
+                                            )
+                                            onValueChangeFinishedState?.invoke()
+                                        }
+                                    } else if (drag != null && !drag.pressed && !drag.isConsumed) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Release(it)) }
+                                        activePress = null
+                                        val tapY = down.position.y - grabOffset
+                                        val visualFraction = verticalVisualFraction(tapY, layoutHeight, layoutWidth)
+                                        val fractionForValue = if (reverseDirection) visualFraction else 1f - visualFraction
+                                        val calculatedValue = fractionToValueVertical(fractionForValue)
+                                        if (calculatedValue != coercedValueState) {
+                                            onValueChangeState(calculatedValue)
+                                        }
+                                        hapticState.reset(calculatedValue, valueRange, coercedValueState)
+                                        hapticState.handleHapticFeedback(
+                                            calculatedValue,
+                                            valueRange,
+                                            hapticEffect,
+                                            hapticFeedback,
+                                            allKeyPointFractions,
+                                            hasCustomKeyPoints = keyPoints != null,
+                                        )
+                                        onValueChangeFinishedState?.invoke()
+                                    }
+                                } finally {
+                                    activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                }
+                            }
+                        }
                         .indication(interactionSource, null)
                 } else {
                     Modifier
                 },
             )
             .semantics {
+                if (!enabled) disabled()
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
                     valueRange.start..valueRange.endInclusive,
                     if (steps > 0) steps else 0,
                 )
                 setProgress { target ->
-                    val clamped = target.coerceIn(valueRange.start, valueRange.endInclusive)
-                    onValueChangeState(clamped)
-                    true
+                    val clamped = target.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+                    val resolved = snapValueToStep(clamped, valueRange, steps)
+                    if (resolved == coercedValue) {
+                        false
+                    } else {
+                        onValueChangeState(resolved)
+                        onValueChangeFinishedState?.invoke()
+                        true
+                    }
                 }
             },
         contentAlignment = Alignment.BottomCenter,
@@ -454,15 +683,20 @@ fun VerticalSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueProvider = { animatedValueState.value },
-            valueRange = valueRange,
+            fractionProvider = fractionProvider,
             isDragging = isDragging,
             isVertical = true,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
-            thumbScaleProvider = { thumbScaleState.value },
+            thumbScaleProvider = thumbScaleProvider,
             reverseDirection = reverseDirection,
-            modifier = Modifier.width(width).fillMaxHeight(),
+            modifier = Modifier
+                .width(width)
+                .fillMaxHeight()
+                .onSizeChanged {
+                    layoutWidth = it.width
+                    layoutHeight = it.height
+                },
         )
     }
 }
@@ -519,42 +753,42 @@ fun RangeSlider(
     var isDraggingEnd by remember { mutableStateOf(false) }
     var isHoveringStartThumb by remember { mutableStateOf(false) }
     var isHoveringEndThumb by remember { mutableStateOf(false) }
+    var isPressingStartThumb by remember { mutableStateOf(false) }
+    var isPressingEndThumb by remember { mutableStateOf(false) }
     val isDragging by remember { computedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
     var lastDraggedIsStart by remember { mutableStateOf(true) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
-    val isPressed by interactionSource.collectIsPressedAsState()
 
-    var currentStartValue by remember { mutableFloatStateOf(value.start) }
-    var currentEndValue by remember { mutableFloatStateOf(value.endInclusive) }
+    val coercedStart = value.start.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+    val coercedEnd = value.endInclusive.fastCoerceIn(coercedStart, valueRange.endInclusive)
+    val coercedStartState by rememberUpdatedState(coercedStart)
+    val coercedEndState by rememberUpdatedState(coercedEnd)
 
-    if (!isDragging) {
-        currentStartValue = value.start
-        currentEndValue = value.endInclusive
-    }
-
-    val coercedStart = currentStartValue.coerceIn(valueRange.start, valueRange.endInclusive)
-    val coercedEnd = currentEndValue.coerceIn(valueRange.start, valueRange.endInclusive)
-
-    val progressAnimationSpec = remember(isDragging) {
-        if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
-        } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
-        }
-    }
-
-    val animatedStartValueState = animateFloatAsState(coercedStart, progressAnimationSpec)
-    val animatedEndValueState = animateFloatAsState(coercedEnd, progressAnimationSpec)
-    val startThumbScaleState = animateFloatAsState(
-        if (isDraggingStart || isPressed || isHoveringStartThumb) 1.127f else 1f,
-        ThumbScaleAnimationSpec,
+    val coercedStartFraction = valueToFraction(coercedStart, valueRange)
+    val coercedEndFraction = valueToFraction(coercedEnd, valueRange)
+    val animatedStartFractionState = animateFloatAsState(
+        targetValue = coercedStartFraction,
+        animationSpec = if (isDragging) DraggingProgressAnimationSpec else SettlingProgressAnimationSpec,
+        visibilityThreshold = 0.0001f,
     )
-    val endThumbScaleState =
-        animateFloatAsState(if (isDraggingEnd || isPressed || isHoveringEndThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
-
+    val animatedEndFractionState = animateFloatAsState(
+        targetValue = coercedEndFraction,
+        animationSpec = if (isDragging) DraggingProgressAnimationSpec else SettlingProgressAnimationSpec,
+        visibilityThreshold = 0.0001f,
+    )
+    val startThumbScaleState = animateFloatAsState(
+        targetValue = if (isDraggingStart || isPressingStartThumb || isHoveringStartThumb) 1.127f else 1f,
+        animationSpec = ThumbScaleAnimationSpec,
+        visibilityThreshold = 0.001f,
+    )
+    val endThumbScaleState = animateFloatAsState(
+        targetValue = if (isDraggingEnd || isPressingEndThumb || isHoveringEndThumb) 1.127f else 1f,
+        animationSpec = ThumbScaleAnimationSpec,
+        visibilityThreshold = 0.001f,
+    )
     val stepFractions = remember(steps) { stepsToTickFractions(steps) }
 
     val keyPointFractions = remember(keyPoints, stepFractions, valueRange, showKeyPoints) {
@@ -565,27 +799,27 @@ fun RangeSlider(
         computeAllKeyPointFractions(keyPoints, stepFractions, valueRange)
     }
 
-    val fractionToValueRange = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
+    val fractionToValueRange = remember(valueRange, steps, keyPoints, allKeyPointFractions, magnetThreshold) {
         { fraction: Float ->
             resolveValueFromFraction(
                 fraction = fraction,
                 valueRange = valueRange,
                 steps = steps,
+                keyPoints = keyPoints,
                 allKeyPointFractions = allKeyPointFractions,
                 magnetThreshold = magnetThreshold,
             )
         }
     }
-
+    val startFractionProvider = remember { { animatedStartFractionState.value } }
+    val endFractionProvider = remember { { animatedEndFractionState.value } }
+    val startThumbScaleProvider = remember { { startThumbScaleState.value } }
+    val endThumbScaleProvider = remember { { endThumbScaleState.value } }
     Box(
         modifier = modifier
             .then(
                 if (enabled) {
                     Modifier
-                        .onSizeChanged {
-                            layoutWidth = it.width
-                            layoutHeight = it.height
-                        }
                         .pointerInput(isRtl, valueRange) {
                             awaitPointerEventScope {
                                 while (true) {
@@ -602,15 +836,13 @@ fun RangeSlider(
                                     }
 
                                     val thumbRadius = layoutHeight / 2f
-                                    val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
+                                    val availableWidth = (layoutWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
                                     val knobRadius = thumbRadius * 0.72f
                                     val hitRadius = knobRadius + (thumbRadius * 0.5f)
 
                                     val position = change.position
-                                    val startFraction =
-                                        (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val endFraction =
-                                        (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                    val startFraction = animatedStartFractionState.value.fastCoerceIn(0f, 1f)
+                                    val endFraction = animatedEndFractionState.value.fastCoerceIn(0f, 1f)
                                     val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
                                     val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
                                     val startThumbX = thumbRadius + effectiveStartFraction * availableWidth
@@ -629,157 +861,316 @@ fun RangeSlider(
                             }
                         }
                         .hoverable(interactionSource = interactionSource, enabled = enabled)
-                        .draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { dragAmount ->
-                                if (isDraggingStart) {
-                                    lastDraggedIsStart = true
-                                    val tentativeStartOffset = startDragOffset + dragAmount
-                                    val visualFractionStart = horizontalVisualFraction(tentativeStartOffset, layoutWidth, layoutHeight)
-                                    val fractionForValue = if (isRtl) 1f - visualFractionStart else visualFractionStart
-                                    val newStart = fractionToValueRange(fractionForValue).coerceAtMost(currentEndValue)
-                                    val crossCondition = if (isRtl) dragAmount < 0f else dragAmount > 0f
-
-                                    if (newStart >= currentEndValue && crossCondition && currentStartValue == currentEndValue) {
-                                        isDraggingStart = false
-                                        isDraggingEnd = true
-
-                                        endDragOffset = tentativeStartOffset
-                                        hapticState.resetEnd(currentEndValue, valueRange)
-                                        hapticState.inheritEndKeyPoint()
-
-                                        val visualFractionEnd = horizontalVisualFraction(endDragOffset, layoutWidth, layoutHeight)
-                                        val fractionForValueEnd = if (isRtl) 1f - visualFractionEnd else visualFractionEnd
-                                        val newEnd = fractionToValueRange(fractionForValueEnd).coerceAtLeast(currentStartValue)
-                                        currentEndValue = newEnd
-                                        onValueChangeState(currentStartValue..newEnd)
-                                        hapticState.handleEndHapticFeedback(
-                                            newEnd,
-                                            valueRange,
-                                            hapticEffect,
-                                            hapticFeedback,
-                                            allKeyPointFractions,
-                                            hasCustomKeyPoints = keyPoints != null,
-                                        )
-                                    } else {
-                                        startDragOffset = tentativeStartOffset
-                                        currentStartValue = newStart
-                                        onValueChangeState(newStart..currentEndValue)
-                                        hapticState.handleStartHapticFeedback(
-                                            newStart,
-                                            valueRange,
-                                            hapticEffect,
-                                            hapticFeedback,
-                                            allKeyPointFractions,
-                                            hasCustomKeyPoints = keyPoints != null,
-                                        )
-                                    }
-                                } else if (isDraggingEnd) {
-                                    lastDraggedIsStart = false
-                                    val tentativeEndOffset = endDragOffset + dragAmount
-                                    val visualFractionEnd = horizontalVisualFraction(tentativeEndOffset, layoutWidth, layoutHeight)
-                                    val fractionForValue = if (isRtl) 1f - visualFractionEnd else visualFractionEnd
-                                    val newEnd = fractionToValueRange(fractionForValue).coerceAtLeast(currentStartValue)
-                                    val crossCondition = if (isRtl) dragAmount > 0f else dragAmount < 0f
-
-                                    if (newEnd <= currentStartValue && crossCondition && currentStartValue == currentEndValue) {
-                                        isDraggingEnd = false
-                                        isDraggingStart = true
-                                        startDragOffset = tentativeEndOffset
-                                        hapticState.resetStart(currentStartValue, valueRange)
-                                        hapticState.inheritStartKeyPoint()
-
-                                        val visualFractionStart = horizontalVisualFraction(startDragOffset, layoutWidth, layoutHeight)
-                                        val fractionForValueStart = if (isRtl) 1f - visualFractionStart else visualFractionStart
-                                        val newStart = fractionToValueRange(fractionForValueStart).coerceAtMost(currentEndValue)
-                                        currentStartValue = newStart
-                                        onValueChangeState(newStart..currentEndValue)
-                                        hapticState.handleStartHapticFeedback(
-                                            newStart,
-                                            valueRange,
-                                            hapticEffect,
-                                            hapticFeedback,
-                                            allKeyPointFractions,
-                                            hasCustomKeyPoints = keyPoints != null,
-                                        )
-                                    } else {
-                                        endDragOffset = tentativeEndOffset
-                                        currentEndValue = newEnd
-                                        onValueChangeState(currentStartValue..newEnd)
-                                        hapticState.handleEndHapticFeedback(
-                                            newEnd,
-                                            valueRange,
-                                            hapticEffect,
-                                            hapticFeedback,
-                                            allKeyPointFractions,
-                                            hasCustomKeyPoints = keyPoints != null,
-                                        )
-                                    }
-                                }
-                            },
-                            onDragStarted = { offset ->
+                        .pointerInput(isRtl, valueRange, steps, keyPoints, magnetThreshold, hapticEffect) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
                                 val thumbRadius = layoutHeight / 2f
-                                val availableWidth = (layoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                                val startFraction =
-                                    (currentStartValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                val endFraction =
-                                    (currentEndValue - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                                val availableWidth = (layoutWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
+                                val startFraction = valueToFraction(coercedStartState, valueRange)
+                                val endFraction = valueToFraction(coercedEndState, valueRange)
                                 val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
                                 val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
                                 val startPos = thumbRadius + effectiveStartFraction * availableWidth
                                 val endPos = thumbRadius + effectiveEndFraction * availableWidth
 
-                                val knobRadius = thumbRadius * 0.72f
-                                val hitRadius = knobRadius + (thumbRadius * 0.5f)
-                                val isOnStartThumb = abs(offset.x - startPos) <= hitRadius
-                                val isOnEndThumb = abs(offset.x - endPos) <= hitRadius
+                                val hitRadius = thumbRadius * 0.72f + (thumbRadius * 0.5f)
+                                val isOnStartThumb = abs(down.position.x - startPos) <= hitRadius
+                                val isOnEndThumb = abs(down.position.x - endPos) <= hitRadius
+                                val targetStart = when {
+                                    isOnStartThumb && !isOnEndThumb -> true
 
-                                when {
-                                    isOnStartThumb && !isOnEndThumb -> {
-                                        isDraggingStart = true
-                                        startDragOffset = offset.x
-                                        hapticState.resetStart(coercedStart, valueRange)
-                                    }
+                                    !isOnStartThumb && isOnEndThumb -> false
 
-                                    !isOnStartThumb && isOnEndThumb -> {
-                                        isDraggingEnd = true
-                                        endDragOffset = offset.x
-                                        hapticState.resetEnd(coercedEnd, valueRange)
-                                    }
-
-                                    isOnStartThumb && isOnEndThumb -> {
-                                        if (lastDraggedIsStart) {
-                                            isDraggingStart = true
-                                            startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart, valueRange)
-                                        } else {
-                                            isDraggingEnd = true
-                                            endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd, valueRange)
-                                        }
-                                    }
+                                    isOnStartThumb && isOnEndThumb -> lastDraggedIsStart
 
                                     else -> {
-                                        val diffStart = abs(offset.x - startPos)
-                                        val diffEnd = abs(offset.x - endPos)
-                                        if (diffStart <= diffEnd) {
-                                            isDraggingStart = true
-                                            startDragOffset = offset.x
-                                            hapticState.resetStart(coercedStart, valueRange)
+                                        val diffStart = abs(down.position.x - startPos)
+                                        val diffEnd = abs(down.position.x - endPos)
+                                        if (diffStart != diffEnd) {
+                                            diffStart < diffEnd
+                                        } else if (isRtl) {
+                                            down.position.x > startPos
                                         } else {
-                                            isDraggingEnd = true
-                                            endDragOffset = offset.x
-                                            hapticState.resetEnd(coercedEnd, valueRange)
+                                            down.position.x < startPos
                                         }
                                     }
                                 }
-                            },
-                            onDragStopped = {
-                                isDraggingStart = false
-                                isDraggingEnd = false
-                                onValueChangeFinishedState?.invoke()
-                            },
-                        )
+                                val isOnTargetThumb = if (targetStart) isOnStartThumb else isOnEndThumb
+                                val grabOffset = if (isOnTargetThumb) {
+                                    down.position.x - (if (targetStart) startPos else endPos)
+                                } else {
+                                    0f
+                                }
+                                var activePress = if (isOnTargetThumb) {
+                                    if (targetStart) {
+                                        isPressingStartThumb = true
+                                    } else {
+                                        isPressingEndThumb = true
+                                    }
+                                    PressInteraction.Press(down.position).also {
+                                        interactionSource.tryEmit(it)
+                                    }
+                                } else {
+                                    null
+                                }
+                                try {
+                                    var overSlop = Offset.Zero
+                                    val pointerSlop = viewConfiguration.touchSlop
+                                    var drag: PointerInputChange?
+                                    do {
+                                        drag = awaitPointerEvent().changes.firstOrNull { it.id == down.id }
+                                        if (drag != null && !drag.isConsumed) {
+                                            overSlop += drag.positionChange()
+                                        }
+                                    } while (
+                                        drag != null &&
+                                        drag.pressed &&
+                                        !drag.isConsumed &&
+                                        abs(overSlop.x) < pointerSlop &&
+                                        abs(overSlop.y) < pointerSlop
+                                    )
+
+                                    if (drag != null && !drag.isConsumed && abs(overSlop.x) >= pointerSlop && abs(overSlop.x) >= abs(
+                                            overSlop.y,
+                                        )
+                                    ) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                        activePress = null
+                                        isPressingStartThumb = false
+                                        isPressingEndThumb = false
+                                        val dragInteraction = DragInteraction.Start()
+                                        interactionSource.tryEmit(dragInteraction)
+
+                                        val initialX = down.position.x + overSlop.x - grabOffset
+                                        var lastDispatchedRange = coercedStartState..coercedEndState
+                                        if (targetStart) {
+                                            isDraggingStart = true
+                                            lastDraggedIsStart = true
+                                            startDragOffset = initialX
+                                            hapticState.resetStart(coercedStartState, valueRange)
+                                            val vf = horizontalVisualFraction(startDragOffset, layoutWidth, layoutHeight)
+                                            val ffv = if (isRtl) 1f - vf else vf
+                                            val newStart = fractionToValueRange(ffv).fastCoerceAtMost(coercedEndState)
+                                            val nextRange = newStart..coercedEndState
+                                            if (nextRange != lastDispatchedRange) {
+                                                lastDispatchedRange = nextRange
+                                                onValueChangeState(nextRange)
+                                            }
+                                        } else {
+                                            isDraggingEnd = true
+                                            lastDraggedIsStart = false
+                                            endDragOffset = initialX
+                                            hapticState.resetEnd(coercedEndState, valueRange)
+                                            val vf = horizontalVisualFraction(endDragOffset, layoutWidth, layoutHeight)
+                                            val ffv = if (isRtl) 1f - vf else vf
+                                            val newEnd = fractionToValueRange(ffv).fastCoerceAtLeast(coercedStartState)
+                                            val nextRange = coercedStartState..newEnd
+                                            if (nextRange != lastDispatchedRange) {
+                                                lastDispatchedRange = nextRange
+                                                onValueChangeState(nextRange)
+                                            }
+                                        }
+
+                                        var dragSucceeded = false
+                                        try {
+                                            while (true) {
+                                                val event = awaitPointerEvent()
+                                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                                if (change.changedToUpIgnoreConsumed()) {
+                                                    change.consume()
+                                                    dragSucceeded = true
+                                                    break
+                                                }
+                                                if (change.isConsumed) break
+                                                val dragAmount = change.positionChange().x
+                                                change.consume()
+                                                if (dragAmount != 0f) {
+                                                    if (isDraggingStart) {
+                                                        lastDraggedIsStart = true
+                                                        val tentativeStartOffset = startDragOffset + dragAmount
+                                                        val visualFractionStart =
+                                                            horizontalVisualFraction(tentativeStartOffset, layoutWidth, layoutHeight)
+                                                        val fractionForValue =
+                                                            if (isRtl) 1f - visualFractionStart else visualFractionStart
+                                                        val newStart =
+                                                            fractionToValueRange(fractionForValue).fastCoerceAtMost(coercedEndState)
+                                                        val crossCondition = if (isRtl) dragAmount < 0f else dragAmount > 0f
+
+                                                        if (
+                                                            newStart >= coercedEndState &&
+                                                            crossCondition &&
+                                                            coercedStartState == coercedEndState
+                                                        ) {
+                                                            isDraggingStart = false
+                                                            isDraggingEnd = true
+                                                            endDragOffset = tentativeStartOffset
+                                                            hapticState.resetEnd(coercedEndState, valueRange)
+                                                            hapticState.inheritEndKeyPoint()
+
+                                                            val visualFractionEnd =
+                                                                horizontalVisualFraction(endDragOffset, layoutWidth, layoutHeight)
+                                                            val fractionForValueEnd =
+                                                                if (isRtl) 1f - visualFractionEnd else visualFractionEnd
+                                                            val newEnd =
+                                                                fractionToValueRange(fractionForValueEnd)
+                                                                    .fastCoerceAtLeast(coercedStartState)
+                                                            val nextRange = coercedStartState..newEnd
+                                                            if (nextRange != lastDispatchedRange) {
+                                                                lastDispatchedRange = nextRange
+                                                                onValueChangeState(nextRange)
+                                                            }
+                                                            hapticState.handleEndHapticFeedback(
+                                                                newEnd,
+                                                                valueRange,
+                                                                hapticEffect,
+                                                                hapticFeedback,
+                                                                allKeyPointFractions,
+                                                                hasCustomKeyPoints = keyPoints != null,
+                                                            )
+                                                        } else {
+                                                            startDragOffset = tentativeStartOffset
+                                                            val nextRange = newStart..coercedEndState
+                                                            if (nextRange != lastDispatchedRange) {
+                                                                lastDispatchedRange = nextRange
+                                                                onValueChangeState(nextRange)
+                                                            }
+                                                            hapticState.handleStartHapticFeedback(
+                                                                newStart,
+                                                                valueRange,
+                                                                hapticEffect,
+                                                                hapticFeedback,
+                                                                allKeyPointFractions,
+                                                                hasCustomKeyPoints = keyPoints != null,
+                                                            )
+                                                        }
+                                                    } else if (isDraggingEnd) {
+                                                        lastDraggedIsStart = false
+                                                        val tentativeEndOffset = endDragOffset + dragAmount
+                                                        val visualFractionEnd =
+                                                            horizontalVisualFraction(tentativeEndOffset, layoutWidth, layoutHeight)
+                                                        val fractionForValue =
+                                                            if (isRtl) 1f - visualFractionEnd else visualFractionEnd
+                                                        val newEnd =
+                                                            fractionToValueRange(fractionForValue).fastCoerceAtLeast(coercedStartState)
+                                                        val crossCondition = if (isRtl) dragAmount > 0f else dragAmount < 0f
+
+                                                        if (
+                                                            newEnd <= coercedStartState &&
+                                                            crossCondition &&
+                                                            coercedStartState == coercedEndState
+                                                        ) {
+                                                            isDraggingEnd = false
+                                                            isDraggingStart = true
+                                                            startDragOffset = tentativeEndOffset
+                                                            hapticState.resetStart(coercedStartState, valueRange)
+                                                            hapticState.inheritStartKeyPoint()
+
+                                                            val visualFractionStart =
+                                                                horizontalVisualFraction(startDragOffset, layoutWidth, layoutHeight)
+                                                            val fractionForValueStart =
+                                                                if (isRtl) 1f - visualFractionStart else visualFractionStart
+                                                            val newStart =
+                                                                fractionToValueRange(fractionForValueStart)
+                                                                    .fastCoerceAtMost(coercedEndState)
+                                                            val nextRange = newStart..coercedEndState
+                                                            if (nextRange != lastDispatchedRange) {
+                                                                lastDispatchedRange = nextRange
+                                                                onValueChangeState(nextRange)
+                                                            }
+                                                            hapticState.handleStartHapticFeedback(
+                                                                newStart,
+                                                                valueRange,
+                                                                hapticEffect,
+                                                                hapticFeedback,
+                                                                allKeyPointFractions,
+                                                                hasCustomKeyPoints = keyPoints != null,
+                                                            )
+                                                        } else {
+                                                            endDragOffset = tentativeEndOffset
+                                                            val nextRange = coercedStartState..newEnd
+                                                            if (nextRange != lastDispatchedRange) {
+                                                                lastDispatchedRange = nextRange
+                                                                onValueChangeState(nextRange)
+                                                            }
+                                                            hapticState.handleEndHapticFeedback(
+                                                                newEnd,
+                                                                valueRange,
+                                                                hapticEffect,
+                                                                hapticFeedback,
+                                                                allKeyPointFractions,
+                                                                hasCustomKeyPoints = keyPoints != null,
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } finally {
+                                            isDraggingStart = false
+                                            isDraggingEnd = false
+                                            interactionSource.tryEmit(
+                                                if (dragSucceeded) {
+                                                    DragInteraction.Stop(dragInteraction)
+                                                } else {
+                                                    DragInteraction.Cancel(
+                                                        dragInteraction,
+                                                    )
+                                                },
+                                            )
+                                            onValueChangeFinishedState?.invoke()
+                                        }
+                                    } else if (drag != null && !drag.pressed && !drag.isConsumed) {
+                                        drag.consume()
+                                        activePress?.let { interactionSource.tryEmit(PressInteraction.Release(it)) }
+                                        activePress = null
+                                        isPressingStartThumb = false
+                                        isPressingEndThumb = false
+                                        val tapX = down.position.x - grabOffset
+                                        val visualFraction = horizontalVisualFraction(tapX, layoutWidth, layoutHeight)
+                                        val fractionForValue = if (isRtl) 1f - visualFraction else visualFraction
+                                        if (targetStart) {
+                                            lastDraggedIsStart = true
+                                            val newStart = fractionToValueRange(fractionForValue).fastCoerceAtMost(coercedEndState)
+                                            val nextRange = newStart..coercedEndState
+                                            if (nextRange != coercedStartState..coercedEndState) {
+                                                onValueChangeState(nextRange)
+                                            }
+                                            hapticState.resetStart(newStart, valueRange)
+                                            hapticState.handleStartHapticFeedback(
+                                                newStart,
+                                                valueRange,
+                                                hapticEffect,
+                                                hapticFeedback,
+                                                allKeyPointFractions,
+                                                hasCustomKeyPoints = keyPoints != null,
+                                            )
+                                        } else {
+                                            lastDraggedIsStart = false
+                                            val newEnd = fractionToValueRange(fractionForValue).fastCoerceAtLeast(coercedStartState)
+                                            val nextRange = coercedStartState..newEnd
+                                            if (nextRange != coercedStartState..coercedEndState) {
+                                                onValueChangeState(nextRange)
+                                            }
+                                            hapticState.resetEnd(newEnd, valueRange)
+                                            hapticState.handleEndHapticFeedback(
+                                                newEnd,
+                                                valueRange,
+                                                hapticEffect,
+                                                hapticFeedback,
+                                                allKeyPointFractions,
+                                                hasCustomKeyPoints = keyPoints != null,
+                                            )
+                                        }
+                                        onValueChangeFinishedState?.invoke()
+                                    }
+                                } finally {
+                                    activePress?.let { interactionSource.tryEmit(PressInteraction.Cancel(it)) }
+                                    isPressingStartThumb = false
+                                    isPressingEndThumb = false
+                                }
+                            }
+                        }
                         .indication(interactionSource, null)
                 } else {
                     Modifier
@@ -796,16 +1187,21 @@ fun RangeSlider(
             thumbColor = colors.thumbColor(enabled),
             keyPointColor = colors.keyPointColor(),
             keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueStartProvider = { animatedStartValueState.value },
-            valueEndProvider = { animatedEndValueState.value },
-            startThumbScaleProvider = { startThumbScaleState.value },
-            endThumbScaleProvider = { endThumbScaleState.value },
-            valueRange = valueRange,
+            startFractionProvider = startFractionProvider,
+            endFractionProvider = endFractionProvider,
+            startThumbScaleProvider = startThumbScaleProvider,
+            endThumbScaleProvider = endThumbScaleProvider,
             isDragging = isDragging,
             showKeyPoints = showKeyPoints,
             stepFractions = keyPointFractions,
             isRtl = isRtl,
-            modifier = Modifier.fillMaxWidth().height(height),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .onSizeChanged {
+                    layoutWidth = it.width
+                    layoutHeight = it.height
+                },
         )
     }
 }
@@ -820,8 +1216,7 @@ private fun SliderTrack(
     thumbColor: Color,
     keyPointColor: Color,
     keyPointForegroundColor: Color,
-    valueProvider: () -> Float,
-    valueRange: ClosedFloatingPointRange<Float>,
+    fractionProvider: () -> Float,
     isDragging: Boolean,
     isVertical: Boolean,
     showKeyPoints: Boolean,
@@ -830,7 +1225,7 @@ private fun SliderTrack(
     reverseDirection: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundAlpha by animateFloatAsState(
+    val backgroundAlphaState = animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
         animationSpec = tween(150),
         label = "SliderTrackAlpha",
@@ -841,18 +1236,17 @@ private fun SliderTrack(
             .clip(CircleShape)
             .drawBehind {
                 drawRect(backgroundColor)
-                drawRect(Color.Black, alpha = backgroundAlpha)
+                drawRect(Color.Black, alpha = backgroundAlphaState.value)
             },
     ) {
         val barHeight = size.height
         val barWidth = size.width
-        val value = valueProvider()
+        val fraction = fractionProvider().fastCoerceIn(0f, 1f)
         val thumbScale = thumbScaleProvider()
-        val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
 
         if (isVertical) {
             val thumbRadius = barWidth / 2f
-            val availableHeight = (barHeight - 2f * thumbRadius).coerceAtLeast(0f)
+            val availableHeight = (barHeight - 2f * thumbRadius).fastCoerceAtLeast(0f)
             val effectiveFraction = if (reverseDirection) fraction else (1f - fraction)
             val centerY = thumbRadius + effectiveFraction * availableHeight
 
@@ -885,7 +1279,7 @@ private fun SliderTrack(
             )
         } else {
             val thumbRadius = barHeight / 2f
-            val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
+            val availableWidth = (barWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
             val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
             val centerX = thumbRadius + effectiveFraction * availableWidth
             val startX = if (reverseDirection) barWidth else 0f
@@ -932,18 +1326,17 @@ private fun RangeSliderTrack(
     thumbColor: Color,
     keyPointColor: Color,
     keyPointForegroundColor: Color,
-    valueStartProvider: () -> Float,
-    valueEndProvider: () -> Float,
+    startFractionProvider: () -> Float,
+    endFractionProvider: () -> Float,
     startThumbScaleProvider: () -> Float,
     endThumbScaleProvider: () -> Float,
-    valueRange: ClosedFloatingPointRange<Float>,
     isDragging: Boolean,
     showKeyPoints: Boolean,
     stepFractions: FloatArray,
     isRtl: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundAlpha by animateFloatAsState(
+    val backgroundAlphaState = animateFloatAsState(
         targetValue = if (isDragging) 0.044f else 0f,
         animationSpec = tween(150),
         label = "RangeSliderTrackAlpha",
@@ -954,19 +1347,17 @@ private fun RangeSliderTrack(
             .clip(CircleShape)
             .drawBehind {
                 drawRect(backgroundColor)
-                drawRect(Color.Black, alpha = backgroundAlpha)
+                drawRect(Color.Black, alpha = backgroundAlphaState.value)
             },
     ) {
         val barHeight = size.height
         val barWidth = size.width
-        val valueStart = valueStartProvider()
-        val valueEnd = valueEndProvider()
+        val startFraction = startFractionProvider().fastCoerceIn(0f, 1f)
+        val endFraction = endFractionProvider().fastCoerceIn(0f, 1f)
         val startThumbScale = startThumbScaleProvider()
         val endThumbScale = endThumbScaleProvider()
-        val startFraction = (valueStart - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-        val endFraction = (valueEnd - valueRange.start) / (valueRange.endInclusive - valueRange.start)
         val thumbRadius = barHeight / 2f
-        val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
+        val availableWidth = (barWidth - 2f * thumbRadius).fastCoerceAtLeast(0f)
         val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
         val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
         val startX = thumbRadius + effectiveStartFraction * availableWidth
@@ -1188,7 +1579,7 @@ internal class RangeSliderHapticState {
         )
     }
 
-    private fun handleHapticFeedbackInternal(
+    private inline fun handleHapticFeedbackInternal(
         currentValue: Float,
         valueRange: ClosedFloatingPointRange<Float>,
         hapticEffect: SliderDefaults.SliderHapticEffect,
@@ -1244,27 +1635,57 @@ internal class RangeSliderHapticState {
     }
 }
 
-private fun stepsToTickFractions(steps: Int): FloatArray = if (steps == 0) floatArrayOf() else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
+private val EmptyFloatArray = floatArrayOf()
+private val DraggingProgressAnimationSpec = spring<Float>(dampingRatio = 0.9f, stiffness = 1755f, visibilityThreshold = 0.0001f)
+private fun valueToFraction(
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+): Float {
+    val span = valueRange.endInclusive - valueRange.start
+    return if (span > 0f) ((value - valueRange.start) / span).fastCoerceIn(0f, 1f) else 0f
+}
+
+private val SettlingProgressAnimationSpec = spring<Float>(dampingRatio = 0.96f, stiffness = 322f, visibilityThreshold = 0.0001f)
+
+private fun stepsToTickFractions(steps: Int): FloatArray = if (steps == 0) EmptyFloatArray else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
+
+private fun snapValueToStep(
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+): Float {
+    if (steps <= 0) return value
+    val stepCount = steps + 1
+    val start = valueRange.start.toDouble()
+    val end = valueRange.endInclusive.toDouble()
+    val span = end - start
+    if (span <= 0.0) return value
+    val fraction = ((value.toDouble() - start) / span).coerceIn(0.0, 1.0)
+    val stepIndex = (fraction * stepCount).fastRoundToInt().fastCoerceIn(0, stepCount)
+    return (start + span * stepIndex / stepCount).toFloat()
+}
 
 private fun resolveValueFromFraction(
     fraction: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int,
+    keyPoints: List<Float>? = null,
     allKeyPointFractions: FloatArray,
     magnetThreshold: Float,
 ): Float {
-    val f = fraction.coerceIn(0f, 1f)
+    val f = fraction.fastCoerceIn(0f, 1f)
     val base = lerp(valueRange.start, valueRange.endInclusive, f)
     return when {
         steps > 0 -> {
             val stepCount = steps + 1
             val start = valueRange.start.toDouble()
             val end = valueRange.endInclusive.toDouble()
-            val stepIndex = (f * stepCount).fastRoundToInt().coerceIn(0, stepCount)
+            val stepIndex = (f * stepCount).fastRoundToInt().fastCoerceIn(0, stepCount)
             (start + (end - start) * stepIndex / stepCount).toFloat()
         }
 
         allKeyPointFractions.isNotEmpty() -> {
+            var bestIndex = 0
             var closest = allKeyPointFractions[0]
             var bestDist = abs(closest - f)
             for (i in 1 until allKeyPointFractions.size) {
@@ -1273,10 +1694,12 @@ private fun resolveValueFromFraction(
                 if (dist < bestDist) {
                     bestDist = dist
                     closest = cand
+                    bestIndex = i
                 }
             }
             if (bestDist < magnetThreshold) {
-                lerp(valueRange.start, valueRange.endInclusive, closest)
+                keyPoints?.getOrNull(bestIndex)?.fastCoerceIn(valueRange.start, valueRange.endInclusive)
+                    ?: lerp(valueRange.start, valueRange.endInclusive, closest)
             } else {
                 base
             }
@@ -1286,18 +1709,17 @@ private fun resolveValueFromFraction(
     }
 }
 
-private val ThumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
-
+private val ThumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f, visibilityThreshold = 0.001f)
 private fun horizontalVisualFraction(offsetX: Float, sizeWidth: Int, sizeHeight: Int): Float {
     val thumbRadius = sizeHeight / 2f
-    val availableWidth = (sizeWidth.toFloat() - 2f * thumbRadius).coerceAtLeast(0f)
-    return if (availableWidth == 0f) 0f else ((offsetX - thumbRadius) / availableWidth).coerceIn(0f, 1f)
+    val availableWidth = (sizeWidth.toFloat() - 2f * thumbRadius).fastCoerceAtLeast(0f)
+    return if (availableWidth == 0f) 0f else ((offsetX - thumbRadius) / availableWidth).fastCoerceIn(0f, 1f)
 }
 
 private fun verticalVisualFraction(offsetY: Float, sizeHeight: Int, sizeWidth: Int): Float {
     val thumbRadius = sizeWidth / 2f
-    val availableHeight = (sizeHeight.toFloat() - 2f * thumbRadius).coerceAtLeast(0f)
-    return if (availableHeight == 0f) 0f else ((offsetY - thumbRadius) / availableHeight).coerceIn(0f, 1f)
+    val availableHeight = (sizeHeight.toFloat() - 2f * thumbRadius).fastCoerceAtLeast(0f)
+    return if (availableHeight == 0f) 0f else ((offsetY - thumbRadius) / availableHeight).fastCoerceIn(0f, 1f)
 }
 
 /**
@@ -1306,10 +1728,12 @@ private fun verticalVisualFraction(offsetY: Float, sizeHeight: Int, sizeWidth: I
 private fun pointsToFractions(
     points: List<Float>,
     valueRange: ClosedFloatingPointRange<Float>,
-): FloatArray = points.map { point ->
-    ((point - valueRange.start) / (valueRange.endInclusive - valueRange.start))
-        .coerceIn(0f, 1f)
-}.toFloatArray()
+): FloatArray {
+    val span = valueRange.endInclusive - valueRange.start
+    return FloatArray(points.size) { index ->
+        ((points[index] - valueRange.start) / span).fastCoerceIn(0f, 1f)
+    }
+}
 
 /**
  * Computes key point fractions for slider display.

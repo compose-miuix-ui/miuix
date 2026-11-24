@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MyServices: ImageVector
 
 val MiuixIcons.Glass.Light.MyServices: ImageVector
     get() {
-        if (_myServicesSurfaceLight != null) return _myServicesSurfaceLight!!
-        _myServicesSurfaceLight = buildHyperOSIcon(
+        if (_myServicesLight != null) return _myServicesLight!!
+        _myServicesLight = buildHyperOSIcon(
             name = "MyServices.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(687.1f, 672.4f),
@@ -51,15 +51,15 @@ val MiuixIcons.Glass.Light.MyServices: ImageVector
             translationY = 992.2142f,
             autoMirror = false,
         )
-        return _myServicesSurfaceLight!!
+        return _myServicesLight!!
     }
 
-private var _myServicesSurfaceLight: ImageVector? = null
+private var _myServicesLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MyServices: ImageVector
     get() {
-        if (_myServicesSurfaceNormal != null) return _myServicesSurfaceNormal!!
-        _myServicesSurfaceNormal = buildHyperOSIcon(
+        if (_myServicesNormal != null) return _myServicesNormal!!
+        _myServicesNormal = buildHyperOSIcon(
             name = "MyServices.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(679.5f, 677.6f),
@@ -97,15 +97,15 @@ val MiuixIcons.Glass.Normal.MyServices: ImageVector
             translationY = 992.4581f,
             autoMirror = false,
         )
-        return _myServicesSurfaceNormal!!
+        return _myServicesNormal!!
     }
 
-private var _myServicesSurfaceNormal: ImageVector? = null
+private var _myServicesNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MyServices: ImageVector
     get() {
-        if (_myServicesSurfaceRegular != null) return _myServicesSurfaceRegular!!
-        _myServicesSurfaceRegular = buildHyperOSIcon(
+        if (_myServicesRegular != null) return _myServicesRegular!!
+        _myServicesRegular = buildHyperOSIcon(
             name = "MyServices.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(676f, 680f),
@@ -143,15 +143,15 @@ val MiuixIcons.Glass.Regular.MyServices: ImageVector
             translationY = 992.5691f,
             autoMirror = false,
         )
-        return _myServicesSurfaceRegular!!
+        return _myServicesRegular!!
     }
 
-private var _myServicesSurfaceRegular: ImageVector? = null
+private var _myServicesRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MyServices: ImageVector
     get() {
-        if (_myServicesSurfaceMedium != null) return _myServicesSurfaceMedium!!
-        _myServicesSurfaceMedium = buildHyperOSIcon(
+        if (_myServicesMedium != null) return _myServicesMedium!!
+        _myServicesMedium = buildHyperOSIcon(
             name = "MyServices.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(688.2f, 684.1f),
@@ -189,15 +189,15 @@ val MiuixIcons.Glass.Medium.MyServices: ImageVector
             translationY = 991.8602f,
             autoMirror = false,
         )
-        return _myServicesSurfaceMedium!!
+        return _myServicesMedium!!
     }
 
-private var _myServicesSurfaceMedium: ImageVector? = null
+private var _myServicesMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MyServices: ImageVector
     get() {
-        if (_myServicesSurfaceDemibold != null) return _myServicesSurfaceDemibold!!
-        _myServicesSurfaceDemibold = buildHyperOSIcon(
+        if (_myServicesDemibold != null) return _myServicesDemibold!!
+        _myServicesDemibold = buildHyperOSIcon(
             name = "MyServices.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(696.7f, 686.9f),
@@ -235,8 +235,8 @@ val MiuixIcons.Glass.Demibold.MyServices: ImageVector
             translationY = 992.0168f,
             autoMirror = false,
         )
-        return _myServicesSurfaceDemibold!!
+        return _myServicesDemibold!!
     }
 
-private var _myServicesSurfaceDemibold: ImageVector? = null
+private var _myServicesDemibold: ImageVector? = null
 

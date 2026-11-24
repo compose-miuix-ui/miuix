@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MultiSelect: ImageVector
 
 val MiuixIcons.Glass.Light.MultiSelect: ImageVector
     get() {
-        if (_multiSelectLineLight != null) return _multiSelectLineLight!!
-        _multiSelectLineLight = buildHyperOSIcon(
+        if (_multiSelectLight != null) return _multiSelectLight!!
+        _multiSelectLight = buildHyperOSIcon(
             name = "MultiSelect.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1116f, 701.6f),
@@ -82,15 +82,15 @@ val MiuixIcons.Glass.Light.MultiSelect: ImageVector
             translationY = 1018.7758f,
             autoMirror = false,
         )
-        return _multiSelectLineLight!!
+        return _multiSelectLight!!
     }
 
-private var _multiSelectLineLight: ImageVector? = null
+private var _multiSelectLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MultiSelect: ImageVector
     get() {
-        if (_multiSelectLineNormal != null) return _multiSelectLineNormal!!
-        _multiSelectLineNormal = buildHyperOSIcon(
+        if (_multiSelectNormal != null) return _multiSelectNormal!!
+        _multiSelectNormal = buildHyperOSIcon(
             name = "MultiSelect.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1116f, 699.1f),
@@ -159,15 +159,15 @@ val MiuixIcons.Glass.Normal.MultiSelect: ImageVector
             translationY = 1018.7012f,
             autoMirror = false,
         )
-        return _multiSelectLineNormal!!
+        return _multiSelectNormal!!
     }
 
-private var _multiSelectLineNormal: ImageVector? = null
+private var _multiSelectNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MultiSelect: ImageVector
     get() {
-        if (_multiSelectLineRegular != null) return _multiSelectLineRegular!!
-        _multiSelectLineRegular = buildHyperOSIcon(
+        if (_multiSelectRegular != null) return _multiSelectRegular!!
+        _multiSelectRegular = buildHyperOSIcon(
             name = "MultiSelect.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1116f, 698f),
@@ -236,15 +236,15 @@ val MiuixIcons.Glass.Regular.MultiSelect: ImageVector
             translationY = 1018.6667f,
             autoMirror = false,
         )
-        return _multiSelectLineRegular!!
+        return _multiSelectRegular!!
     }
 
-private var _multiSelectLineRegular: ImageVector? = null
+private var _multiSelectRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MultiSelect: ImageVector
     get() {
-        if (_multiSelectLineMedium != null) return _multiSelectLineMedium!!
-        _multiSelectLineMedium = buildHyperOSIcon(
+        if (_multiSelectMedium != null) return _multiSelectMedium!!
+        _multiSelectMedium = buildHyperOSIcon(
             name = "MultiSelect.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1122.2f, 695f),
@@ -313,15 +313,15 @@ val MiuixIcons.Glass.Medium.MultiSelect: ImageVector
             translationY = 1017.4505f,
             autoMirror = false,
         )
-        return _multiSelectLineMedium!!
+        return _multiSelectMedium!!
     }
 
-private var _multiSelectLineMedium: ImageVector? = null
+private var _multiSelectMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MultiSelect: ImageVector
     get() {
-        if (_multiSelectLineDemibold != null) return _multiSelectLineDemibold!!
-        _multiSelectLineDemibold = buildHyperOSIcon(
+        if (_multiSelectDemibold != null) return _multiSelectDemibold!!
+        _multiSelectDemibold = buildHyperOSIcon(
             name = "MultiSelect.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1126.6f, 692.9f),
@@ -390,8 +390,8 @@ val MiuixIcons.Glass.Demibold.MultiSelect: ImageVector
             translationY = 1016.599f,
             autoMirror = false,
         )
-        return _multiSelectLineDemibold!!
+        return _multiSelectDemibold!!
     }
 
-private var _multiSelectLineDemibold: ImageVector? = null
+private var _multiSelectDemibold: ImageVector? = null
 

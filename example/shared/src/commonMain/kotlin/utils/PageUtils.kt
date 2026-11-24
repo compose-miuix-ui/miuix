@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -57,7 +56,7 @@ val LocalTopAppBarBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 val LocalTopAppBarTitleAlpha = staticCompositionLocalOf<() -> Float> { { 1f } }
 
 /** Start offset of centered chrome (such as a collapsed glass sidebar) obstructing the top bar center. */
-val LocalTopAppBarCenterObstructionStart = compositionLocalOf { Dp.Unspecified }
+val LocalTopAppBarCenterObstructionStart = staticCompositionLocalOf<() -> Dp> { { Dp.Unspecified } }
 
 /**
  * Full-window safe areas and the remaining insets in the current page pane. A sibling rail has
@@ -266,7 +265,7 @@ fun AdaptiveTopAppBar(
     if (!showTopAppBar) return
     val appState = LocalAppState.current
     val chromeTitleAlpha = LocalTopAppBarTitleAlpha.current
-    val centerObstructionStart = LocalTopAppBarCenterObstructionStart.current
+    val centerObstructionStart = LocalTopAppBarCenterObstructionStart.current()
     if (appState.topAppBarStyle == 1) {
         val backdrop = LocalTopAppBarBackdrop.current
         val surfaceColor = MiuixTheme.colorScheme.surface

@@ -35,14 +35,18 @@ import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.ListPopupContent
+import top.yukonga.miuix.kmp.basic.ListPopupContentImpl
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
+import top.yukonga.miuix.kmp.basic.PopupPlacementHolder
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
+import top.yukonga.miuix.kmp.basic.resolveLocalTransformOrigin
+import top.yukonga.miuix.kmp.basic.resolvePopupLayoutPosition
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowListPopup
+import top.yukonga.miuix.kmp.window.windowComponentBounds
 
 /**
  * Internal shared layout logic for [OverlayListPopup] and [WindowListPopup].
@@ -78,13 +82,13 @@ internal fun ListPopupLayout(
     maxHeight: Dp? = null,
     minWidth: Dp = ListPopupDefaults.MinWidth,
     componentBounds: IntRect? = null,
+    useWindowComponentBounds: Boolean = false,
     constrainHeightToViewport: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val internalVisible = remember { mutableStateOf(false) }
-    var popupContentSize by remember { mutableStateOf(IntSize.Zero) }
-    var hostPositionInWindow by remember { mutableStateOf(Offset.Zero) }
     if (!show && !internalVisible.value) return
+    val resolvedComponentBounds = componentBounds ?: if (useWindowComponentBounds) windowComponentBounds() else null
 
     val fractionProgress = remember { Animatable(0f) }
     val alphaProgress = remember { Animatable(0f) }
@@ -143,10 +147,12 @@ internal fun ListPopupLayout(
         alignment = alignment,
         popupPositionProvider = popupPositionProvider,
         parentBounds = parentBounds,
-        popupContentSize = popupContentSize,
-        componentBounds = componentBounds,
+        popupContentSize = IntSize.Zero,
+        componentBounds = resolvedComponentBounds,
     )
-
+    val placement = remember {
+        PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)
+    }
     val requestDismiss: () -> Unit = remember {
         { currentOnDismiss?.invoke() }
     }
@@ -194,9 +200,6 @@ internal fun ListPopupLayout(
             Box(
                 modifier = popupModifier
                     .fillMaxSize()
-                    .onGloballyPositioned { coordinates ->
-                        hostPositionInWindow = coordinates.positionInWindow()
-                    }
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = { requestDismiss() },
@@ -231,23 +234,30 @@ internal fun ListPopupLayout(
                             alignment,
                         )
 
-                        val adjustedOffset = IntOffset(
-                            x = calculatedOffset.x - hostPositionInWindow.x.toInt(),
-                            y = calculatedOffset.y - hostPositionInWindow.y.toInt(),
-                        )
+                        val resolvedPos = resolvePopupLayoutPosition(parentBounds, measuredSize, calculatedOffset)
+                        val resolvedOrigin = resolveLocalTransformOrigin(resolvedPos)
+                        if (placement.popupLayoutPosition != resolvedPos) {
+                            placement.popupLayoutPosition = resolvedPos
+                        }
+                        if (placement.localTransformOrigin != resolvedOrigin) {
+                            placement.localTransformOrigin = resolvedOrigin
+                        }
 
                         layout(constraints.maxWidth, constraints.maxHeight) {
+                            val hostPos = coordinates?.positionInWindow() ?: Offset.Zero
+                            val adjustedOffset = IntOffset(
+                                x = calculatedOffset.x - hostPos.x.toInt(),
+                                y = calculatedOffset.y - hostPos.y.toInt(),
+                            )
                             placeable.place(adjustedOffset)
                         }
                     },
             ) {
-                ListPopupContent(
-                    popupContentSize = popupContentSize,
-                    onPopupContentSizeChange = { popupContentSize = it },
+                ListPopupContentImpl(
                     fractionProgress = { fractionProgress.value * (1f - backProgress.value) },
                     alphaProgress = { alphaProgress.value * (1f - backProgress.value) },
-                    popupLayoutPosition = layoutInfo.popupLayoutPosition,
-                    localTransformOrigin = layoutInfo.localTransformOrigin,
+                    popupLayoutPosition = { placement.popupLayoutPosition },
+                    localTransformOrigin = { placement.localTransformOrigin },
                     content = {
                         CompositionLocalProvider(LocalDismissState provides requestDismiss) {
                             content()

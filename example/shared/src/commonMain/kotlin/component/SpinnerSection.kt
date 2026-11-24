@@ -57,7 +57,7 @@ fun LazyListScope.spinnerSection() {
                 DropdownItem(
                     icon = {
                         Icon(
-                            RoundedRectanglePainter(),
+                            DefaultSpinnerIconPainter,
                             "Icon",
                             Modifier.padding(end = 12.dp),
                             Color(0xFFFF5B29),
@@ -69,7 +69,7 @@ fun LazyListScope.spinnerSection() {
                 DropdownItem(
                     icon = {
                         Icon(
-                            RoundedRectanglePainter(),
+                            DefaultSpinnerIconPainter,
                             "Icon",
                             Modifier.padding(end = 12.dp),
                             Color(0xFF36D167),
@@ -81,7 +81,7 @@ fun LazyListScope.spinnerSection() {
                 DropdownItem(
                     icon = {
                         Icon(
-                            RoundedRectanglePainter(),
+                            DefaultSpinnerIconPainter,
                             "Icon",
                             Modifier.padding(end = 12.dp),
                             Color(0xFF3482FF),
@@ -93,7 +93,7 @@ fun LazyListScope.spinnerSection() {
                 DropdownItem(
                     icon = {
                         Icon(
-                            RoundedRectanglePainter(),
+                            DefaultSpinnerIconPainter,
                             "Icon",
                             Modifier.padding(end = 12.dp),
                             Color(0xFFFFB21D),
@@ -302,6 +302,8 @@ private fun groupedSpinnerOptions(
         },
     ),
 )
+
+private val DefaultSpinnerIconPainter = RoundedRectanglePainter()
 
 private class RoundedRectanglePainter(
     private val cornerRadius: Dp = 6.dp,

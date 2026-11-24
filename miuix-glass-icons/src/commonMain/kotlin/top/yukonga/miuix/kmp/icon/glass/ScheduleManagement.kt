@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ScheduleManagement: ImageVector
 
 val MiuixIcons.Glass.Light.ScheduleManagement: ImageVector
     get() {
-        if (_scheduleManagementSurfaceLight != null) return _scheduleManagementSurfaceLight!!
-        _scheduleManagementSurfaceLight = buildHyperOSIcon(
+        if (_scheduleManagementLight != null) return _scheduleManagementLight!!
+        _scheduleManagementLight = buildHyperOSIcon(
             name = "ScheduleManagement.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(167.3f, 375f),
@@ -105,15 +105,15 @@ val MiuixIcons.Glass.Light.ScheduleManagement: ImageVector
             translationY = 1040.5772f,
             autoMirror = false,
         )
-        return _scheduleManagementSurfaceLight!!
+        return _scheduleManagementLight!!
     }
 
-private var _scheduleManagementSurfaceLight: ImageVector? = null
+private var _scheduleManagementLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ScheduleManagement: ImageVector
     get() {
-        if (_scheduleManagementSurfaceNormal != null) return _scheduleManagementSurfaceNormal!!
-        _scheduleManagementSurfaceNormal = buildHyperOSIcon(
+        if (_scheduleManagementNormal != null) return _scheduleManagementNormal!!
+        _scheduleManagementNormal = buildHyperOSIcon(
             name = "ScheduleManagement.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(158.2f, 375f),
@@ -205,15 +205,15 @@ val MiuixIcons.Glass.Normal.ScheduleManagement: ImageVector
             translationY = 1041.3213f,
             autoMirror = false,
         )
-        return _scheduleManagementSurfaceNormal!!
+        return _scheduleManagementNormal!!
     }
 
-private var _scheduleManagementSurfaceNormal: ImageVector? = null
+private var _scheduleManagementNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ScheduleManagement: ImageVector
     get() {
-        if (_scheduleManagementSurfaceRegular != null) return _scheduleManagementSurfaceRegular!!
-        _scheduleManagementSurfaceRegular = buildHyperOSIcon(
+        if (_scheduleManagementRegular != null) return _scheduleManagementRegular!!
+        _scheduleManagementRegular = buildHyperOSIcon(
             name = "ScheduleManagement.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(154f, 375f),
@@ -305,15 +305,15 @@ val MiuixIcons.Glass.Regular.ScheduleManagement: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _scheduleManagementSurfaceRegular!!
+        return _scheduleManagementRegular!!
     }
 
-private var _scheduleManagementSurfaceRegular: ImageVector? = null
+private var _scheduleManagementRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ScheduleManagement: ImageVector
     get() {
-        if (_scheduleManagementSurfaceMedium != null) return _scheduleManagementSurfaceMedium!!
-        _scheduleManagementSurfaceMedium = buildHyperOSIcon(
+        if (_scheduleManagementMedium != null) return _scheduleManagementMedium!!
+        _scheduleManagementMedium = buildHyperOSIcon(
             name = "ScheduleManagement.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(145.9f, 375f),
@@ -405,15 +405,15 @@ val MiuixIcons.Glass.Medium.ScheduleManagement: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _scheduleManagementSurfaceMedium!!
+        return _scheduleManagementMedium!!
     }
 
-private var _scheduleManagementSurfaceMedium: ImageVector? = null
+private var _scheduleManagementMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ScheduleManagement: ImageVector
     get() {
-        if (_scheduleManagementSurfaceDemibold != null) return _scheduleManagementSurfaceDemibold!!
-        _scheduleManagementSurfaceDemibold = buildHyperOSIcon(
+        if (_scheduleManagementDemibold != null) return _scheduleManagementDemibold!!
+        _scheduleManagementDemibold = buildHyperOSIcon(
             name = "ScheduleManagement.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(140.2f, 375f),
@@ -505,8 +505,8 @@ val MiuixIcons.Glass.Demibold.ScheduleManagement: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _scheduleManagementSurfaceDemibold!!
+        return _scheduleManagementDemibold!!
     }
 
-private var _scheduleManagementSurfaceDemibold: ImageVector? = null
+private var _scheduleManagementDemibold: ImageVector? = null
 

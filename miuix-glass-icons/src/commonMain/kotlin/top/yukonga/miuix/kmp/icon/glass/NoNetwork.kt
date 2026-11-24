@@ -12,8 +12,8 @@ val MiuixIcons.Glass.NoNetwork: ImageVector
 
 val MiuixIcons.Glass.Light.NoNetwork: ImageVector
     get() {
-        if (_noNetworkSurfaceLight != null) return _noNetworkSurfaceLight!!
-        _noNetworkSurfaceLight = buildHyperOSIcon(
+        if (_noNetworkLight != null) return _noNetworkLight!!
+        _noNetworkLight = buildHyperOSIcon(
             name = "NoNetwork.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(227.8f, 794.3f),
@@ -87,15 +87,15 @@ val MiuixIcons.Glass.Light.NoNetwork: ImageVector
             translationY = 1076.3384f,
             autoMirror = false,
         )
-        return _noNetworkSurfaceLight!!
+        return _noNetworkLight!!
     }
 
-private var _noNetworkSurfaceLight: ImageVector? = null
+private var _noNetworkLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.NoNetwork: ImageVector
     get() {
-        if (_noNetworkSurfaceNormal != null) return _noNetworkSurfaceNormal!!
-        _noNetworkSurfaceNormal = buildHyperOSIcon(
+        if (_noNetworkNormal != null) return _noNetworkNormal!!
+        _noNetworkNormal = buildHyperOSIcon(
             name = "NoNetwork.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(223.8f, 785.2f),
@@ -169,15 +169,15 @@ val MiuixIcons.Glass.Normal.NoNetwork: ImageVector
             translationY = 1075.8835f,
             autoMirror = false,
         )
-        return _noNetworkSurfaceNormal!!
+        return _noNetworkNormal!!
     }
 
-private var _noNetworkSurfaceNormal: ImageVector? = null
+private var _noNetworkNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.NoNetwork: ImageVector
     get() {
-        if (_noNetworkSurfaceRegular != null) return _noNetworkSurfaceRegular!!
-        _noNetworkSurfaceRegular = buildHyperOSIcon(
+        if (_noNetworkRegular != null) return _noNetworkRegular!!
+        _noNetworkRegular = buildHyperOSIcon(
             name = "NoNetwork.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(222f, 781f),
@@ -251,15 +251,15 @@ val MiuixIcons.Glass.Regular.NoNetwork: ImageVector
             translationY = 1075.6766f,
             autoMirror = false,
         )
-        return _noNetworkSurfaceRegular!!
+        return _noNetworkRegular!!
     }
 
-private var _noNetworkSurfaceRegular: ImageVector? = null
+private var _noNetworkRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.NoNetwork: ImageVector
     get() {
-        if (_noNetworkSurfaceMedium != null) return _noNetworkSurfaceMedium!!
-        _noNetworkSurfaceMedium = buildHyperOSIcon(
+        if (_noNetworkMedium != null) return _noNetworkMedium!!
+        _noNetworkMedium = buildHyperOSIcon(
             name = "NoNetwork.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(213.9f, 778.8f),
@@ -333,15 +333,15 @@ val MiuixIcons.Glass.Medium.NoNetwork: ImageVector
             translationY = 1077.3562f,
             autoMirror = false,
         )
-        return _noNetworkSurfaceMedium!!
+        return _noNetworkMedium!!
     }
 
-private var _noNetworkSurfaceMedium: ImageVector? = null
+private var _noNetworkMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.NoNetwork: ImageVector
     get() {
-        if (_noNetworkSurfaceDemibold != null) return _noNetworkSurfaceDemibold!!
-        _noNetworkSurfaceDemibold = buildHyperOSIcon(
+        if (_noNetworkDemibold != null) return _noNetworkDemibold!!
+        _noNetworkDemibold = buildHyperOSIcon(
             name = "NoNetwork.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(208.2f, 777.3f),
@@ -415,8 +415,8 @@ val MiuixIcons.Glass.Demibold.NoNetwork: ImageVector
             translationY = 1078.5351f,
             autoMirror = false,
         )
-        return _noNetworkSurfaceDemibold!!
+        return _noNetworkDemibold!!
     }
 
-private var _noNetworkSurfaceDemibold: ImageVector? = null
+private var _noNetworkDemibold: ImageVector? = null
 

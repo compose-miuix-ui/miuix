@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.maxLengthReject
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -97,29 +96,29 @@ fun LazyListScope.arrowSection() {
         }
 
         SliderDialog(
-            showVolumeDialog,
+            show = showVolumeDialog.value,
             volumeState = { volume },
             onVolumeChange = { volume = it },
-            onDismissFinished = { volumeDialogHoldDown.value = false },
+            onDismissRequest = {
+                showVolumeDialog.value = false
+                volumeDialogHoldDown.value = false
+            },
         )
     }
 }
 
 @Composable
 private fun SliderDialog(
-    showDialog: MutableState<Boolean>,
+    show: Boolean,
     volumeState: () -> Float,
     onVolumeChange: (Float) -> Unit,
-    onDismissFinished: () -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
     OverlayDialog(
-        show = showDialog.value,
+        show = show,
         title = "Adjust Volume",
         summary = "Enter 0-100",
-        onDismissRequest = {
-            showDialog.value = false
-        },
-        onDismissFinished = onDismissFinished,
+        onDismissRequest = onDismissRequest,
         content = {
             val textState = rememberTextFieldState(
                 initialText = ((volumeState() * 100).toInt()).toString(),
@@ -139,7 +138,7 @@ private fun SliderDialog(
             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(
                     text = "Cancel",
-                    onClick = { showDialog.value = false },
+                    onClick = onDismissRequest,
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(20.dp))
@@ -149,7 +148,7 @@ private fun SliderDialog(
                         val parsed = textState.text.toString().toIntOrNull()
                         val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
                         onVolumeChange(clamped / 100f)
-                        showDialog.value = false
+                        onDismissRequest()
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),

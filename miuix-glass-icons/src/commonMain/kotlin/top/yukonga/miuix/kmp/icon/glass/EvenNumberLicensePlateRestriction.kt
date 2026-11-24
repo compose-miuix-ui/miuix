@@ -12,8 +12,8 @@ val MiuixIcons.Glass.EvenNumberLicensePlateRestriction: ImageVector
 
 val MiuixIcons.Glass.Light.EvenNumberLicensePlateRestriction: ImageVector
     get() {
-        if (_evenNumberLicensePlateRestrictionLineLight != null) return _evenNumberLicensePlateRestrictionLineLight!!
-        _evenNumberLicensePlateRestrictionLineLight = buildHyperOSIcon(
+        if (_evenNumberLicensePlateRestrictionLight != null) return _evenNumberLicensePlateRestrictionLight!!
+        _evenNumberLicensePlateRestrictionLight = buildHyperOSIcon(
             name = "EvenNumberLicensePlateRestriction.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1161.7f, 375f),
@@ -90,15 +90,15 @@ val MiuixIcons.Glass.Light.EvenNumberLicensePlateRestriction: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _evenNumberLicensePlateRestrictionLineLight!!
+        return _evenNumberLicensePlateRestrictionLight!!
     }
 
-private var _evenNumberLicensePlateRestrictionLineLight: ImageVector? = null
+private var _evenNumberLicensePlateRestrictionLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.EvenNumberLicensePlateRestriction: ImageVector
     get() {
-        if (_evenNumberLicensePlateRestrictionLineNormal != null) return _evenNumberLicensePlateRestrictionLineNormal!!
-        _evenNumberLicensePlateRestrictionLineNormal = buildHyperOSIcon(
+        if (_evenNumberLicensePlateRestrictionNormal != null) return _evenNumberLicensePlateRestrictionNormal!!
+        _evenNumberLicensePlateRestrictionNormal = buildHyperOSIcon(
             name = "EvenNumberLicensePlateRestriction.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1170.8f, 375f),
@@ -175,15 +175,15 @@ val MiuixIcons.Glass.Normal.EvenNumberLicensePlateRestriction: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _evenNumberLicensePlateRestrictionLineNormal!!
+        return _evenNumberLicensePlateRestrictionNormal!!
     }
 
-private var _evenNumberLicensePlateRestrictionLineNormal: ImageVector? = null
+private var _evenNumberLicensePlateRestrictionNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.EvenNumberLicensePlateRestriction: ImageVector
     get() {
-        if (_evenNumberLicensePlateRestrictionLineRegular != null) return _evenNumberLicensePlateRestrictionLineRegular!!
-        _evenNumberLicensePlateRestrictionLineRegular = buildHyperOSIcon(
+        if (_evenNumberLicensePlateRestrictionRegular != null) return _evenNumberLicensePlateRestrictionRegular!!
+        _evenNumberLicensePlateRestrictionRegular = buildHyperOSIcon(
             name = "EvenNumberLicensePlateRestriction.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1175f, 375f),
@@ -260,15 +260,15 @@ val MiuixIcons.Glass.Regular.EvenNumberLicensePlateRestriction: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _evenNumberLicensePlateRestrictionLineRegular!!
+        return _evenNumberLicensePlateRestrictionRegular!!
     }
 
-private var _evenNumberLicensePlateRestrictionLineRegular: ImageVector? = null
+private var _evenNumberLicensePlateRestrictionRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.EvenNumberLicensePlateRestriction: ImageVector
     get() {
-        if (_evenNumberLicensePlateRestrictionLineMedium != null) return _evenNumberLicensePlateRestrictionLineMedium!!
-        _evenNumberLicensePlateRestrictionLineMedium = buildHyperOSIcon(
+        if (_evenNumberLicensePlateRestrictionMedium != null) return _evenNumberLicensePlateRestrictionMedium!!
+        _evenNumberLicensePlateRestrictionMedium = buildHyperOSIcon(
             name = "EvenNumberLicensePlateRestriction.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1183.1f, 375f),
@@ -345,15 +345,15 @@ val MiuixIcons.Glass.Medium.EvenNumberLicensePlateRestriction: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _evenNumberLicensePlateRestrictionLineMedium!!
+        return _evenNumberLicensePlateRestrictionMedium!!
     }
 
-private var _evenNumberLicensePlateRestrictionLineMedium: ImageVector? = null
+private var _evenNumberLicensePlateRestrictionMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.EvenNumberLicensePlateRestriction: ImageVector
     get() {
-        if (_evenNumberLicensePlateRestrictionLineDemibold != null) return _evenNumberLicensePlateRestrictionLineDemibold!!
-        _evenNumberLicensePlateRestrictionLineDemibold = buildHyperOSIcon(
+        if (_evenNumberLicensePlateRestrictionDemibold != null) return _evenNumberLicensePlateRestrictionDemibold!!
+        _evenNumberLicensePlateRestrictionDemibold = buildHyperOSIcon(
             name = "EvenNumberLicensePlateRestriction.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1188.8f, 375f),
@@ -430,8 +430,8 @@ val MiuixIcons.Glass.Demibold.EvenNumberLicensePlateRestriction: ImageVector
             translationY = 1042.1667f,
             autoMirror = false,
         )
-        return _evenNumberLicensePlateRestrictionLineDemibold!!
+        return _evenNumberLicensePlateRestrictionDemibold!!
     }
 
-private var _evenNumberLicensePlateRestrictionLineDemibold: ImageVector? = null
+private var _evenNumberLicensePlateRestrictionDemibold: ImageVector? = null
 

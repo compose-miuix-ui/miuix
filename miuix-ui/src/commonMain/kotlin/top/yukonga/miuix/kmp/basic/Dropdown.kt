@@ -316,10 +316,37 @@ data class DropdownColors(
  * when true, each item's [DropdownItem.enabled] value is still respected.
  */
 @Stable
-data class DropdownEntry(
-    val items: List<DropdownItem>,
+class DropdownEntry(
+    items: List<DropdownItem>,
     val enabled: Boolean = true,
-)
+) {
+    val items: List<DropdownItem> = if (items.isEmpty()) emptyList() else items.toList()
+
+    fun copy(
+        items: List<DropdownItem> = this.items,
+        enabled: Boolean = this.enabled,
+    ): DropdownEntry = DropdownEntry(
+        items = items,
+        enabled = enabled,
+    )
+
+    operator fun component1(): List<DropdownItem> = items
+    operator fun component2(): Boolean = enabled
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DropdownEntry) return false
+        return items == other.items && enabled == other.enabled
+    }
+
+    override fun hashCode(): Int {
+        var result = items.hashCode()
+        result = 31 * result + enabled.hashCode()
+        return result
+    }
+
+    override fun toString(): String = "DropdownEntry(items=$items, enabled=$enabled)"
+}
 
 /**
  * An item shown inside a dropdown, spinner, or dropdown menu.
@@ -336,15 +363,17 @@ data class DropdownEntry(
  *   recursively. Stabilize this list (e.g. via `remember`) to avoid unnecessary recomposition.
  */
 @Stable
-data class DropdownItem(
+class DropdownItem(
     val text: String,
     val enabled: Boolean = true,
     val selected: Boolean = false,
     val onClick: (() -> Unit)? = null,
     val icon: @Composable ((Modifier) -> Unit)? = null,
     val summary: String? = null,
-    val children: List<DropdownItem>? = null,
+    children: List<DropdownItem>? = null,
 ) {
+    val children: List<DropdownItem>? = children?.let { if (it.isEmpty()) emptyList() else it.toList() }
+
     /**
      * [SpinnerEntry] compatibility
      */
@@ -357,6 +386,57 @@ data class DropdownItem(
         icon = icon,
         summary = summary,
     )
+
+    fun copy(
+        text: String = this.text,
+        enabled: Boolean = this.enabled,
+        selected: Boolean = this.selected,
+        onClick: (() -> Unit)? = this.onClick,
+        icon: @Composable ((Modifier) -> Unit)? = this.icon,
+        summary: String? = this.summary,
+        children: List<DropdownItem>? = this.children,
+    ): DropdownItem = DropdownItem(
+        text = text,
+        enabled = enabled,
+        selected = selected,
+        onClick = onClick,
+        icon = icon,
+        summary = summary,
+        children = children,
+    )
+
+    operator fun component1(): String = text
+    operator fun component2(): Boolean = enabled
+    operator fun component3(): Boolean = selected
+    operator fun component4(): (() -> Unit)? = onClick
+    operator fun component5(): @Composable ((Modifier) -> Unit)? = icon
+    operator fun component6(): String? = summary
+    operator fun component7(): List<DropdownItem>? = children
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DropdownItem) return false
+        return text == other.text &&
+            enabled == other.enabled &&
+            selected == other.selected &&
+            onClick == other.onClick &&
+            icon == other.icon &&
+            summary == other.summary &&
+            children == other.children
+    }
+
+    override fun hashCode(): Int {
+        var result = text.hashCode()
+        result = 31 * result + enabled.hashCode()
+        result = 31 * result + selected.hashCode()
+        result = 31 * result + (onClick?.hashCode() ?: 0)
+        result = 31 * result + (icon?.hashCode() ?: 0)
+        result = 31 * result + (summary?.hashCode() ?: 0)
+        result = 31 * result + (children?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String = "DropdownItem(text=$text, enabled=$enabled, selected=$selected, onClick=$onClick, icon=$icon, summary=$summary, children=$children)"
 }
 
 object DropdownDefaults {

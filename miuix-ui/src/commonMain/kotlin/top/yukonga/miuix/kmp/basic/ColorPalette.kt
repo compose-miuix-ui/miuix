@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -43,7 +47,6 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.color.api.toHsv
 import top.yukonga.miuix.kmp.color.space.Hsv
-import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import kotlin.math.abs
 import kotlin.math.min
@@ -78,12 +81,31 @@ fun ColorPalette(
     val rowSV = remember(rows) { buildRowSV(rows) }
     val grayV = remember(rows) { buildGrayV(rows) }
 
+    val currentExternalColor by rememberUpdatedState(color)
     var selectedRow by remember { mutableIntStateOf(0) }
     var selectedCol by remember { mutableIntStateOf(0) }
     var alpha by remember { mutableStateOf(color.alpha.coerceIn(0f, 1f)) }
-    var lastEmittedColor by remember { mutableStateOf<Color?>(null) }
+    var lastEmittedColor by remember { mutableStateOf(Color.Unspecified) }
     var lastAcceptedHSV by remember { mutableStateOf<Triple<Float, Float, Float>?>(null) }
-    LaunchedEffect(color, rows, hueColumns, includeGrayColumn) {
+    var lastSyncedColor by remember { mutableStateOf(Color.Unspecified) }
+    var lastSyncedRows by remember { mutableIntStateOf(-1) }
+    var lastSyncedHueCols by remember { mutableIntStateOf(-1) }
+    var lastSyncedIncludeGray by remember { mutableStateOf(includeGrayColumn) }
+
+    SideEffect {
+        if (
+            lastSyncedColor == color &&
+            lastSyncedRows == rows &&
+            lastSyncedHueCols == hueColumns &&
+            lastSyncedIncludeGray == includeGrayColumn
+        ) {
+            return@SideEffect
+        }
+        lastSyncedColor = color
+        lastSyncedRows = rows
+        lastSyncedHueCols = hueColumns
+        lastSyncedIncludeGray = includeGrayColumn
+
         val hsvInit = color.toHsv()
         val h = hsvInit.h
         val s = hsvInit.s / 100f
@@ -92,7 +114,7 @@ fun ColorPalette(
         if (lastAcceptedHSV?.let { hsvEqualApprox(it, currentHSV) } == true) {
             alpha = color.alpha
             lastAcceptedHSV = currentHSV
-            return@LaunchedEffect
+            return@SideEffect
         }
 
         val isGray = includeGrayColumn && s < 0.05f
@@ -114,6 +136,45 @@ fun ColorPalette(
     }
 
     val onColorChangedState = rememberUpdatedState(onColorChanged)
+    val currentHueColumns by rememberUpdatedState(hueColumns)
+    val currentIncludeGray by rememberUpdatedState(includeGrayColumn)
+    val currentRowSV by rememberUpdatedState(rowSV)
+    val currentGrayV by rememberUpdatedState(grayV)
+
+    val baseColor = remember(selectedRow, selectedCol, rows, hueColumns, includeGrayColumn) {
+        cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn)
+    }
+    val currentBaseColor by rememberUpdatedState(baseColor)
+    val selectedRowProvider = remember { { selectedRow } }
+    val selectedColProvider = remember { { selectedCol } }
+    val onCellSelect = remember {
+        { r: Int, c: Int ->
+            selectedRow = r
+            selectedCol = c
+            val newColor = cellColor(
+                c,
+                r,
+                currentRowSV,
+                currentGrayV,
+                currentHueColumns,
+                currentIncludeGray,
+            ).copy(alpha = alpha)
+            lastAcceptedHSV = newColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
+            lastEmittedColor = newColor
+            onColorChangedState.value(newColor)
+        }
+    }
+    val alphaProvider = remember { { alpha } }
+    val onAlphaChanged = remember {
+        { newAlpha: Float ->
+            alpha = newAlpha
+            val base = currentBaseColor
+            val newColor = base.copy(alpha = newAlpha)
+            lastAcceptedHSV = base.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
+            lastEmittedColor = newColor
+            onColorChangedState.value(newColor)
+        }
+    }
 
     Column(
         modifier = modifier,
@@ -125,15 +186,12 @@ fun ColorPalette(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(26.dp)
-                    .squircleBackground(
-                        color = lastEmittedColor ?: color,
-                        cornerRadius = 13.dp,
-                    ),
+                    .clip(CircleShape)
+                    .drawBehind {
+                        val previewColor = if (lastEmittedColor.isSpecified) lastEmittedColor else currentExternalColor
+                        drawRect(previewColor)
+                    },
             )
-        }
-
-        val baseColor = remember(selectedRow, selectedCol, rows, hueColumns, includeGrayColumn) {
-            cellColor(selectedCol, selectedRow, rowSV, grayV, hueColumns, includeGrayColumn)
         }
 
         PaletteCanvas(
@@ -142,18 +200,11 @@ fun ColorPalette(
             includeGrayColumn = includeGrayColumn,
             cornerRadius = cornerRadius,
             indicatorRadius = indicatorRadius,
-            selectedRow = selectedRow,
-            selectedCol = selectedCol,
+            selectedRowProvider = selectedRowProvider,
+            selectedColProvider = selectedColProvider,
             rowSV = rowSV,
             grayV = grayV,
-            onSelect = { r, c ->
-                selectedRow = r
-                selectedCol = c
-                val newColor = cellColor(c, r, rowSV, grayV, hueColumns, includeGrayColumn).copy(alpha = alpha)
-                lastAcceptedHSV = newColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
-                lastEmittedColor = newColor
-                onColorChangedState.value(newColor)
-            },
+            onSelect = onCellSelect,
         )
 
         val hsvBase = remember(baseColor) { baseColor.toHsv() }
@@ -161,18 +212,13 @@ fun ColorPalette(
         val s = hsvBase.s / 100f
         val v = hsvBase.v / 100f
 
-        HsvAlphaSlider(
+        HsvAlphaSliderImpl(
             currentHue = h,
             currentSaturation = s,
             currentValue = v,
-            currentAlpha = alpha,
-            onAlphaChanged = {
-                alpha = it
-                val newColor = baseColor.copy(alpha = it)
-                lastAcceptedHSV = baseColor.toHsv().let { Triple(it.h, it.s / 100f, it.v / 100f) }
-                lastEmittedColor = newColor
-                onColorChangedState.value(newColor)
-            },
+            alphaProvider = alphaProvider,
+            onAlphaChanged = onAlphaChanged,
+            hapticEffect = SliderDefaults.DefaultHapticEffect,
         )
     }
 }
@@ -184,8 +230,8 @@ private fun PaletteCanvas(
     includeGrayColumn: Boolean,
     cornerRadius: Dp,
     indicatorRadius: Dp,
-    selectedRow: Int,
-    selectedCol: Int,
+    selectedRowProvider: () -> Int,
+    selectedColProvider: () -> Int,
     rowSV: List<Pair<Float, Float>>,
     grayV: List<Float>,
     onSelect: (row: Int, col: Int) -> Unit,
@@ -205,16 +251,22 @@ private fun PaletteCanvas(
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     if (sizePx.width == 0 || sizePx.height == 0) return@awaitEachGesture
-                    val (r0, c0) = pointToCell(down.position, sizePx, rows, totalColumns, isRtl)
-                    onSelectState.value(r0, c0)
+                    var lastRow = pointToRow(down.position.y, sizePx.height, rows)
+                    var lastCol = pointToCol(down.position.x, sizePx.width, totalColumns, isRtl)
+                    onSelectState.value(lastRow, lastCol)
 
                     val pointerId = down.id
                     while (true) {
                         val event = awaitPointerEvent()
                         val change = event.changes.find { it.id == pointerId } ?: event.changes.firstOrNull() ?: break
                         if (!change.pressed) break
-                        val (r, c) = pointToCell(change.position, sizePx, rows, totalColumns, isRtl)
-                        onSelectState.value(r, c)
+                        val r = pointToRow(change.position.y, sizePx.height, rows)
+                        val c = pointToCol(change.position.x, sizePx.width, totalColumns, isRtl)
+                        if (r != lastRow || c != lastCol) {
+                            lastRow = r
+                            lastCol = c
+                            onSelectState.value(r, c)
+                        }
                         change.consume()
                     }
                 }
@@ -245,10 +297,12 @@ private fun PaletteCanvas(
                     if (w <= 0 || h <= 0) {
                         IntOffset.Zero
                     } else {
-                        val start = (selectedCol * w) / totalColumns
-                        val end = ((selectedCol + 1) * w) / totalColumns
-                        val top = (selectedRow * h) / rows
-                        val bottom = ((selectedRow + 1) * h) / rows
+                        val col = selectedColProvider()
+                        val row = selectedRowProvider()
+                        val start = (col * w) / totalColumns
+                        val end = ((col + 1) * w) / totalColumns
+                        val top = (row * h) / rows
+                        val bottom = ((row + 1) * h) / rows
                         val cxPx = (start + end) / 2f
                         val cyPx = (top + bottom) / 2f
                         IntOffset(
@@ -267,13 +321,14 @@ private fun PaletteCanvas(
                     val ringCenterRadius = (size.minDimension / 2f) - halfStroke
                     val gradientRadius = ringCenterRadius + halfStroke + glowSpread
 
+                    val indicatorStroke = Stroke(width = strokeWidth)
                     val glowBrush = Brush.radialGradient(
-                        colorStops = listOf(
+                        colorStops = arrayOf(
                             ((ringCenterRadius - halfStroke - glowSpread).coerceAtLeast(0f) / gradientRadius) to Color.Transparent,
                             ((ringCenterRadius - halfStroke) / gradientRadius) to glowColor,
                             ((ringCenterRadius + halfStroke) / gradientRadius) to glowColor,
                             ((ringCenterRadius + halfStroke + glowSpread) / gradientRadius) to Color.Transparent,
-                        ).toTypedArray(),
+                        ),
                         radius = gradientRadius,
                     )
 
@@ -282,7 +337,7 @@ private fun PaletteCanvas(
                         drawCircle(
                             color = Color.White,
                             radius = ringCenterRadius,
-                            style = Stroke(width = strokeWidth),
+                            style = indicatorStroke,
                         )
                     }
                 },
@@ -387,13 +442,16 @@ private fun cellColor(
     }
 }
 
-private fun pointToCell(pos: Offset, size: IntSize, rows: Int, totalColumns: Int, isRtl: Boolean): Pair<Int, Int> {
-    val x = pos.x.coerceIn(0f, size.width.toFloat() - 1)
-    val y = pos.y.coerceIn(0f, size.height.toFloat() - 1)
-    var col = ((x / size.width) * totalColumns).toInt().coerceIn(0, totalColumns - 1)
+private fun pointToCol(posX: Float, width: Int, totalColumns: Int, isRtl: Boolean): Int {
+    val x = posX.coerceIn(0f, width.toFloat() - 1f)
+    var col = ((x / width) * totalColumns).toInt().coerceIn(0, totalColumns - 1)
     if (isRtl) col = totalColumns - 1 - col
-    val row = ((y / size.height) * rows).toInt().coerceIn(0, rows - 1)
-    return row to col
+    return col
+}
+
+private fun pointToRow(posY: Float, height: Int, rows: Int): Int {
+    val y = posY.coerceIn(0f, height.toFloat() - 1f)
+    return ((y / height) * rows).toInt().coerceIn(0, rows - 1)
 }
 
 private fun hsvEqualApprox(

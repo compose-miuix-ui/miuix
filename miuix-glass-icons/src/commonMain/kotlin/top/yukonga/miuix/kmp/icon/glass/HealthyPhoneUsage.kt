@@ -12,8 +12,8 @@ val MiuixIcons.Glass.HealthyPhoneUsage: ImageVector
 
 val MiuixIcons.Glass.Light.HealthyPhoneUsage: ImageVector
     get() {
-        if (_healthyPhoneUsageSurfaceLight != null) return _healthyPhoneUsageSurfaceLight!!
-        _healthyPhoneUsageSurfaceLight = buildHyperOSIcon(
+        if (_healthyPhoneUsageLight != null) return _healthyPhoneUsageLight!!
+        _healthyPhoneUsageLight = buildHyperOSIcon(
             name = "HealthyPhoneUsage.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(703.6f, 320.4f),
@@ -77,15 +77,15 @@ val MiuixIcons.Glass.Light.HealthyPhoneUsage: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _healthyPhoneUsageSurfaceLight!!
+        return _healthyPhoneUsageLight!!
     }
 
-private var _healthyPhoneUsageSurfaceLight: ImageVector? = null
+private var _healthyPhoneUsageLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.HealthyPhoneUsage: ImageVector
     get() {
-        if (_healthyPhoneUsageSurfaceNormal != null) return _healthyPhoneUsageSurfaceNormal!!
-        _healthyPhoneUsageSurfaceNormal = buildHyperOSIcon(
+        if (_healthyPhoneUsageNormal != null) return _healthyPhoneUsageNormal!!
+        _healthyPhoneUsageNormal = buildHyperOSIcon(
             name = "HealthyPhoneUsage.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(698.4f, 339.4f),
@@ -149,15 +149,15 @@ val MiuixIcons.Glass.Normal.HealthyPhoneUsage: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _healthyPhoneUsageSurfaceNormal!!
+        return _healthyPhoneUsageNormal!!
     }
 
-private var _healthyPhoneUsageSurfaceNormal: ImageVector? = null
+private var _healthyPhoneUsageNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.HealthyPhoneUsage: ImageVector
     get() {
-        if (_healthyPhoneUsageSurfaceRegular != null) return _healthyPhoneUsageSurfaceRegular!!
-        _healthyPhoneUsageSurfaceRegular = buildHyperOSIcon(
+        if (_healthyPhoneUsageRegular != null) return _healthyPhoneUsageRegular!!
+        _healthyPhoneUsageRegular = buildHyperOSIcon(
             name = "HealthyPhoneUsage.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(696f, 348f),
@@ -221,15 +221,15 @@ val MiuixIcons.Glass.Regular.HealthyPhoneUsage: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _healthyPhoneUsageSurfaceRegular!!
+        return _healthyPhoneUsageRegular!!
     }
 
-private var _healthyPhoneUsageSurfaceRegular: ImageVector? = null
+private var _healthyPhoneUsageRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.HealthyPhoneUsage: ImageVector
     get() {
-        if (_healthyPhoneUsageSurfaceMedium != null) return _healthyPhoneUsageSurfaceMedium!!
-        _healthyPhoneUsageSurfaceMedium = buildHyperOSIcon(
+        if (_healthyPhoneUsageMedium != null) return _healthyPhoneUsageMedium!!
+        _healthyPhoneUsageMedium = buildHyperOSIcon(
             name = "HealthyPhoneUsage.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(692.2f, 362.1f),
@@ -293,15 +293,15 @@ val MiuixIcons.Glass.Medium.HealthyPhoneUsage: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _healthyPhoneUsageSurfaceMedium!!
+        return _healthyPhoneUsageMedium!!
     }
 
-private var _healthyPhoneUsageSurfaceMedium: ImageVector? = null
+private var _healthyPhoneUsageMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.HealthyPhoneUsage: ImageVector
     get() {
-        if (_healthyPhoneUsageSurfaceDemibold != null) return _healthyPhoneUsageSurfaceDemibold!!
-        _healthyPhoneUsageSurfaceDemibold = buildHyperOSIcon(
+        if (_healthyPhoneUsageDemibold != null) return _healthyPhoneUsageDemibold!!
+        _healthyPhoneUsageDemibold = buildHyperOSIcon(
             name = "HealthyPhoneUsage.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(689.6f, 371.9f),
@@ -365,8 +365,8 @@ val MiuixIcons.Glass.Demibold.HealthyPhoneUsage: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _healthyPhoneUsageSurfaceDemibold!!
+        return _healthyPhoneUsageDemibold!!
     }
 
-private var _healthyPhoneUsageSurfaceDemibold: ImageVector? = null
+private var _healthyPhoneUsageDemibold: ImageVector? = null
 

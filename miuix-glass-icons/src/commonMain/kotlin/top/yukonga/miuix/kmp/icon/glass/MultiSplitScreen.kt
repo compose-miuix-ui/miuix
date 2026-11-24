@@ -12,8 +12,8 @@ val MiuixIcons.Glass.MultiSplitScreen: ImageVector
 
 val MiuixIcons.Glass.Light.MultiSplitScreen: ImageVector
     get() {
-        if (_multiSplitScreenSurfaceLight != null) return _multiSplitScreenSurfaceLight!!
-        _multiSplitScreenSurfaceLight = buildHyperOSIcon(
+        if (_multiSplitScreenLight != null) return _multiSplitScreenLight!!
+        _multiSplitScreenLight = buildHyperOSIcon(
             name = "MultiSplitScreen.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(985f, 851.7f),
@@ -76,15 +76,15 @@ val MiuixIcons.Glass.Light.MultiSplitScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _multiSplitScreenSurfaceLight!!
+        return _multiSplitScreenLight!!
     }
 
-private var _multiSplitScreenSurfaceLight: ImageVector? = null
+private var _multiSplitScreenLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.MultiSplitScreen: ImageVector
     get() {
-        if (_multiSplitScreenSurfaceNormal != null) return _multiSplitScreenSurfaceNormal!!
-        _multiSplitScreenSurfaceNormal = buildHyperOSIcon(
+        if (_multiSplitScreenNormal != null) return _multiSplitScreenNormal!!
+        _multiSplitScreenNormal = buildHyperOSIcon(
             name = "MultiSplitScreen.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(985f, 860.8f),
@@ -147,15 +147,15 @@ val MiuixIcons.Glass.Normal.MultiSplitScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _multiSplitScreenSurfaceNormal!!
+        return _multiSplitScreenNormal!!
     }
 
-private var _multiSplitScreenSurfaceNormal: ImageVector? = null
+private var _multiSplitScreenNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.MultiSplitScreen: ImageVector
     get() {
-        if (_multiSplitScreenSurfaceRegular != null) return _multiSplitScreenSurfaceRegular!!
-        _multiSplitScreenSurfaceRegular = buildHyperOSIcon(
+        if (_multiSplitScreenRegular != null) return _multiSplitScreenRegular!!
+        _multiSplitScreenRegular = buildHyperOSIcon(
             name = "MultiSplitScreen.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(985f, 865f),
@@ -218,15 +218,15 @@ val MiuixIcons.Glass.Regular.MultiSplitScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _multiSplitScreenSurfaceRegular!!
+        return _multiSplitScreenRegular!!
     }
 
-private var _multiSplitScreenSurfaceRegular: ImageVector? = null
+private var _multiSplitScreenRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.MultiSplitScreen: ImageVector
     get() {
-        if (_multiSplitScreenSurfaceMedium != null) return _multiSplitScreenSurfaceMedium!!
-        _multiSplitScreenSurfaceMedium = buildHyperOSIcon(
+        if (_multiSplitScreenMedium != null) return _multiSplitScreenMedium!!
+        _multiSplitScreenMedium = buildHyperOSIcon(
             name = "MultiSplitScreen.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(985f, 873.1f),
@@ -289,15 +289,15 @@ val MiuixIcons.Glass.Medium.MultiSplitScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _multiSplitScreenSurfaceMedium!!
+        return _multiSplitScreenMedium!!
     }
 
-private var _multiSplitScreenSurfaceMedium: ImageVector? = null
+private var _multiSplitScreenMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.MultiSplitScreen: ImageVector
     get() {
-        if (_multiSplitScreenSurfaceDemibold != null) return _multiSplitScreenSurfaceDemibold!!
-        _multiSplitScreenSurfaceDemibold = buildHyperOSIcon(
+        if (_multiSplitScreenDemibold != null) return _multiSplitScreenDemibold!!
+        _multiSplitScreenDemibold = buildHyperOSIcon(
             name = "MultiSplitScreen.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(985f, 878.8f),
@@ -360,8 +360,8 @@ val MiuixIcons.Glass.Demibold.MultiSplitScreen: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _multiSplitScreenSurfaceDemibold!!
+        return _multiSplitScreenDemibold!!
     }
 
-private var _multiSplitScreenSurfaceDemibold: ImageVector? = null
+private var _multiSplitScreenDemibold: ImageVector? = null
 

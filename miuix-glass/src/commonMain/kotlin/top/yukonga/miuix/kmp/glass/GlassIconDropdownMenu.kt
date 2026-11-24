@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -56,11 +57,20 @@ fun BoxScope.GlassIconDropdownMenu(
     modifier: Modifier = Modifier,
     secondaryBackdrop: Backdrop? = backdrop,
     sizing: GlassPopupSizing = GlassPopupSizing(),
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
     visuals: GlassPopupVisuals = GlassPopupDefaults.visuals(),
     collapseOnSelection: Boolean = entries.size <= 1,
 ) {
+    var hasOpened by remember { mutableStateOf(show) }
+    if (show) hasOpened = true
+    if (!hasOpened) return
+    var popupShow by remember { mutableStateOf(false) }
     val density = LocalDensity.current
     var submenu by remember { mutableStateOf(false) }
+    LaunchedEffect(show) {
+        popupShow = show
+        if (!show) submenu = false
+    }
     var submenuPresent by remember { mutableStateOf(false) }
     val submenuPathState = remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val submenuPath = submenuPathState.value
@@ -70,20 +80,17 @@ fun BoxScope.GlassIconDropdownMenu(
     val groups = remember(entries) { entries.filter { it.items.isNotEmpty() } }
     val submenuEntry = submenuPath?.let { groups.getOrNull(it.first) }
     val submenuItem = submenuPath?.let { submenuEntry?.items?.getOrNull(it.second) }
-    val submenuShown = show && submenu && !submenuItem?.children.isNullOrEmpty()
+    val submenuShown = popupShow && submenu && !submenuItem?.children.isNullOrEmpty()
     val arrowTurn = CascadingPopupDefaults.arrowRotation(LocalLayoutDirection.current)
     val submenuArrow = animateFloatAsState(
         targetValue = if (submenuShown) arrowTurn else 0f,
         animationSpec = CascadingPopupDefaults.arrowSpring(submenuShown),
     )
     val menuVisibility = animateFloatAsState(
-        targetValue = if (show) 1f else 0f,
-        animationSpec = GlassMotion.transformBounds(show),
+        targetValue = if (popupShow) 1f else 0f,
+        animationSpec = GlassMotion.transformBounds(popupShow),
         label = "glassCascadeVisibility",
     )
-    LaunchedEffect(show) {
-        if (!show) submenu = false
-    }
 
     val primaryBackdrop = rememberLayerBackdrop()
     val layeredBackdrop = remember(secondaryBackdrop, primaryBackdrop) {
@@ -105,10 +112,17 @@ fun BoxScope.GlassIconDropdownMenu(
             }
         }
     }
-    // Only record the primary. Recording the secondary here would make it sample itself.
-    Box(Modifier.matchParentSize().layerBackdrop(primaryBackdrop)) {
+    val secondaryActive = submenuShown || submenuPresent
+    // Only record the primary while a submenu is active; recording the secondary here would make it sample itself.
+    Box(
+        if (secondaryActive) {
+            Modifier.matchParentSize().layerBackdrop(primaryBackdrop)
+        } else {
+            Modifier.matchParentSize()
+        },
+    ) {
         GlassTransformPopup(
-            show = show,
+            show = popupShow,
             onDismissRequest = {
                 submenu = false
                 onDismissRequest()
@@ -119,6 +133,7 @@ fun BoxScope.GlassIconDropdownMenu(
             modifier = modifier,
             stacked = submenuShown,
             sizing = sizing,
+            horizontalAlignment = horizontalAlignment,
             visuals = visuals,
             onMeasured = { primaryWidth = with(density) { it.width.toDp() } },
         ) {
@@ -179,65 +194,70 @@ fun BoxScope.GlassIconDropdownMenu(
             }
         }
     }
-    // Submenu dismissal collapses to the row; full dismissal also moves toward the toolbar anchor.
-    Box(
-        Modifier.matchParentSize()
-            .onGloballyPositioned { hostOriginState.value = it.positionInWindow() }
-            .graphicsLayer {
-                val progress = menuVisibility.value.coerceIn(0f, 1f)
-                val trigger = anchor.containerBounds
-                val closedScale = (trigger.width / primaryWidth.toPx()).coerceIn(0f, 1f)
-                val scale = closedScale + (1f - closedScale) * progress
-                // The anchor is reported in window coordinates; this layer is host-local.
-                val origin = hostOriginState.value
-                val centerX = trigger.center.x - origin.x
-                val centerY = trigger.center.y - origin.y
-                transformOrigin = TransformOrigin(
-                    if (size.width > 0f) centerX / size.width else 0.5f,
-                    if (size.height > 0f) centerY / size.height else 0.5f,
-                )
-                scaleX = scale
-                scaleY = scale
-                alpha = progress
-            },
-    ) {
-        GlassSecondaryPopup(
-            show = submenuShown,
-            onDismissRequest = { submenu = false },
-            anchorBounds = submenuAnchor,
-            backdrop = layeredBackdrop,
-            materialAnchor = anchor,
-            sizing = sizing.copy(minWidth = primaryWidth),
-            visuals = visuals,
-            onDismissFinished = {
-                submenuPresent = false
-                submenuPathState.value = null
-            },
-        ) {
-            submenuItem?.let { parent ->
-                GlassPopupItem(
-                    text = parent.text,
-                    summary = parent.summary,
-                    selected = parent.selected,
-                    showArrow = true,
-                    arrowRotation = { submenuArrow.value * (1f - anchor.secondaryBackProgress) },
-                    onClick = { submenu = false },
-                )
-                GlassMenuDivider()
-                parent.children.orEmpty().forEach { item ->
-                    GlassPopupItem(
-                        text = item.text,
-                        summary = item.summary,
-                        enabled = submenuEntry?.enabled == true && parent.enabled && item.enabled,
-                        selected = item.selected,
-                        onClick = {
-                            item.onClick?.invoke()
-                            if (collapseOnSelection) {
-                                submenu = false
-                                onDismissRequest()
-                            }
-                        },
+    if (secondaryActive) {
+        // Submenu dismissal collapses to the row; full dismissal also moves toward the toolbar anchor.
+        Box(
+            Modifier.matchParentSize()
+                .onGloballyPositioned { hostOriginState.value = it.positionInWindow() }
+                .graphicsLayer {
+                    val progress = menuVisibility.value.coerceIn(0f, 1f)
+                    val trigger = anchor.containerBounds
+                    val closedScale = (trigger.width / primaryWidth.toPx()).coerceIn(0f, 1f)
+                    val scale = closedScale + (1f - closedScale) * progress
+                    // The anchor is reported in window coordinates; this layer is host-local.
+                    val origin = hostOriginState.value
+                    val centerX = trigger.center.x - origin.x
+                    val centerY = trigger.center.y - origin.y
+                    transformOrigin = TransformOrigin(
+                        if (size.width > 0f) centerX / size.width else 0.5f,
+                        if (size.height > 0f) centerY / size.height else 0.5f,
                     )
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                },
+        ) {
+            GlassSecondaryPopup(
+                show = submenuShown,
+                onDismissRequest = { submenu = false },
+                anchorBounds = submenuAnchor,
+                backdrop = layeredBackdrop,
+                materialAnchor = anchor,
+                sizing = sizing.copy(minWidth = primaryWidth),
+                visuals = visuals,
+                onDismissFinished = {
+                    submenuPresent = false
+                    submenuPathState.value = null
+                },
+            ) {
+                submenuItem?.let { parent ->
+                    val secondaryArrowRotation = remember(submenuArrow, anchor) {
+                        { submenuArrow.value * (1f - anchor.secondaryBackProgress) }
+                    }
+                    GlassPopupItem(
+                        text = parent.text,
+                        summary = parent.summary,
+                        selected = parent.selected,
+                        showArrow = true,
+                        arrowRotation = secondaryArrowRotation,
+                        onClick = { submenu = false },
+                    )
+                    GlassMenuDivider()
+                    parent.children.orEmpty().forEach { item ->
+                        GlassPopupItem(
+                            text = item.text,
+                            summary = item.summary,
+                            enabled = submenuEntry?.enabled == true && parent.enabled && item.enabled,
+                            selected = item.selected,
+                            onClick = {
+                                item.onClick?.invoke()
+                                if (collapseOnSelection) {
+                                    submenu = false
+                                    onDismissRequest()
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

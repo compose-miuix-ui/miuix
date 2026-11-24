@@ -173,6 +173,7 @@ fun RowScope.NavigationBarItem(
 
     val tint = colors.contentColor(selected, isPressed)
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+    val tintFilter = remember(tint) { ColorFilter.tint(tint) }
     val mode = LocalNavigationBarDisplayMode.current
 
     Column(
@@ -202,7 +203,7 @@ fun RowScope.NavigationBarItem(
                         imageVector = icon,
                         // Decorative: the adjacent label already names the item; avoids TalkBack double-read.
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(tint),
+                        colorFilter = tintFilter,
                     )
                 }
                 Text(
@@ -243,7 +244,7 @@ fun RowScope.NavigationBarItem(
                         imageVector = icon,
                         // Decorative: the label (always present in the tree) names the item; avoids double-read.
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(tint),
+                        colorFilter = tintFilter,
                     )
                 }
                 Text(
@@ -264,7 +265,7 @@ fun RowScope.NavigationBarItem(
                         modifier = iconModifier.size(NavigationBarDefaults.IconSize),
                         imageVector = icon,
                         contentDescription = label,
-                        colorFilter = ColorFilter.tint(tint),
+                        colorFilter = tintFilter,
                     )
                 }
             }
@@ -374,11 +375,7 @@ fun FloatingNavigationBar(
                     if (shadowElevation > 0.dp) {
                         Modifier.dropShadow(
                             shape = RoundedCornerShape(cornerRadius),
-                            shadow = Shadow(
-                                radius = 10.dp,
-                                color = Color.Black,
-                                alpha = 0.2f,
-                            ),
+                            shadow = FloatingNavigationBarShadow,
                         )
                     } else {
                         Modifier
@@ -426,6 +423,7 @@ fun FloatingNavigationBarItem(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val tint = colors.contentColor(selected, isPressed)
+    val tintFilter = remember(tint) { ColorFilter.tint(tint) }
 
     Column(
         modifier = modifier
@@ -451,7 +449,7 @@ fun FloatingNavigationBarItem(
                 modifier = iconModifier.size(FloatingNavigationBarDefaults.IconSize),
                 imageVector = icon,
                 contentDescription = label,
-                colorFilter = ColorFilter.tint(tint),
+                colorFilter = tintFilter,
             )
         }
     }
@@ -599,4 +597,10 @@ val LocalNavigationBarDisplayMode = compositionLocalOf { NavigationBarDisplayMod
 data class NavigationItem(
     val label: String,
     val icon: ImageVector,
+)
+
+private val FloatingNavigationBarShadow = Shadow(
+    radius = 10.dp,
+    color = Color.Black,
+    alpha = 0.2f,
 )

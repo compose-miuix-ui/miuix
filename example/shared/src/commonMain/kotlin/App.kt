@@ -1,9 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -13,10 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.drop
 import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
@@ -24,7 +20,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.TextStyles
 import ui.AppTheme
 import ui.keyColorFor
-import utils.LocalContainerSize
 
 @Composable
 fun App(
@@ -85,18 +80,14 @@ fun App(
             fontScale = currentDensity.fontScale,
         )
     }
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val containerSize = IntSize(constraints.maxWidth, constraints.maxHeight)
-        CompositionLocalProvider(
-            LocalAppState provides appState,
-            LocalUpdateAppState provides onUpdateAppState,
-            LocalSquircleEnabled provides appState.enableSquircle,
-            LocalPlatformDensity provides currentDensity,
-            LocalDensity provides appDensity,
-            LocalContainerSize provides containerSize,
-            LocalOnPredictiveBackChange provides onPredictiveBackChange,
-        ) {
-            AppContent(padding = padding)
-        }
+    CompositionLocalProvider(
+        LocalAppState provides appState,
+        LocalUpdateAppState provides onUpdateAppState,
+        LocalSquircleEnabled provides appState.enableSquircle,
+        LocalPlatformDensity provides currentDensity,
+        LocalDensity provides appDensity,
+        LocalOnPredictiveBackChange provides onPredictiveBackChange,
+    ) {
+        AppContent(padding = padding)
     }
 }

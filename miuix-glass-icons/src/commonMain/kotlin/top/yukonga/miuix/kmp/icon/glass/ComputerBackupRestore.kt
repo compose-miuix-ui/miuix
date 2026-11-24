@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ComputerBackupRestore: ImageVector
 
 val MiuixIcons.Glass.Light.ComputerBackupRestore: ImageVector
     get() {
-        if (_computerBackupRestoreLineLight != null) return _computerBackupRestoreLineLight!!
-        _computerBackupRestoreLineLight = buildHyperOSIcon(
+        if (_computerBackupRestoreLight != null) return _computerBackupRestoreLight!!
+        _computerBackupRestoreLight = buildHyperOSIcon(
             name = "ComputerBackupRestore.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(183f, 194.4f),
@@ -88,15 +88,15 @@ val MiuixIcons.Glass.Light.ComputerBackupRestore: ImageVector
             translationY = 1039.2778f,
             autoMirror = false,
         )
-        return _computerBackupRestoreLineLight!!
+        return _computerBackupRestoreLight!!
     }
 
-private var _computerBackupRestoreLineLight: ImageVector? = null
+private var _computerBackupRestoreLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ComputerBackupRestore: ImageVector
     get() {
-        if (_computerBackupRestoreLineNormal != null) return _computerBackupRestoreLineNormal!!
-        _computerBackupRestoreLineNormal = buildHyperOSIcon(
+        if (_computerBackupRestoreNormal != null) return _computerBackupRestoreNormal!!
+        _computerBackupRestoreNormal = buildHyperOSIcon(
             name = "ComputerBackupRestore.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(174.8f, 188.6f),
@@ -171,15 +171,15 @@ val MiuixIcons.Glass.Normal.ComputerBackupRestore: ImageVector
             translationY = 1038.5139f,
             autoMirror = false,
         )
-        return _computerBackupRestoreLineNormal!!
+        return _computerBackupRestoreNormal!!
     }
 
-private var _computerBackupRestoreLineNormal: ImageVector? = null
+private var _computerBackupRestoreNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ComputerBackupRestore: ImageVector
     get() {
-        if (_computerBackupRestoreLineRegular != null) return _computerBackupRestoreLineRegular!!
-        _computerBackupRestoreLineRegular = buildHyperOSIcon(
+        if (_computerBackupRestoreRegular != null) return _computerBackupRestoreRegular!!
+        _computerBackupRestoreRegular = buildHyperOSIcon(
             name = "ComputerBackupRestore.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(171f, 186f),
@@ -254,15 +254,15 @@ val MiuixIcons.Glass.Regular.ComputerBackupRestore: ImageVector
             translationY = 1038.1667f,
             autoMirror = false,
         )
-        return _computerBackupRestoreLineRegular!!
+        return _computerBackupRestoreRegular!!
     }
 
-private var _computerBackupRestoreLineRegular: ImageVector? = null
+private var _computerBackupRestoreRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ComputerBackupRestore: ImageVector
     get() {
-        if (_computerBackupRestoreLineMedium != null) return _computerBackupRestoreLineMedium!!
-        _computerBackupRestoreLineMedium = buildHyperOSIcon(
+        if (_computerBackupRestoreMedium != null) return _computerBackupRestoreMedium!!
+        _computerBackupRestoreMedium = buildHyperOSIcon(
             name = "ComputerBackupRestore.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(163.7f, 196.3f),
@@ -337,15 +337,15 @@ val MiuixIcons.Glass.Medium.ComputerBackupRestore: ImageVector
             translationY = 1038.3018f,
             autoMirror = false,
         )
-        return _computerBackupRestoreLineMedium!!
+        return _computerBackupRestoreMedium!!
     }
 
-private var _computerBackupRestoreLineMedium: ImageVector? = null
+private var _computerBackupRestoreMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ComputerBackupRestore: ImageVector
     get() {
-        if (_computerBackupRestoreLineDemibold != null) return _computerBackupRestoreLineDemibold!!
-        _computerBackupRestoreLineDemibold = buildHyperOSIcon(
+        if (_computerBackupRestoreDemibold != null) return _computerBackupRestoreDemibold!!
+        _computerBackupRestoreDemibold = buildHyperOSIcon(
             name = "ComputerBackupRestore.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(158.6f, 203.5f),
@@ -420,8 +420,8 @@ val MiuixIcons.Glass.Demibold.ComputerBackupRestore: ImageVector
             translationY = 1038.3964f,
             autoMirror = false,
         )
-        return _computerBackupRestoreLineDemibold!!
+        return _computerBackupRestoreDemibold!!
     }
 
-private var _computerBackupRestoreLineDemibold: ImageVector? = null
+private var _computerBackupRestoreDemibold: ImageVector? = null
 

@@ -12,8 +12,8 @@ val MiuixIcons.Glass.ExpandList: ImageVector
 
 val MiuixIcons.Glass.Light.ExpandList: ImageVector
     get() {
-        if (_expandListLineLight != null) return _expandListLineLight!!
-        _expandListLineLight = buildHyperOSIcon(
+        if (_expandListLight != null) return _expandListLight!!
+        _expandListLight = buildHyperOSIcon(
             name = "ExpandList.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(648.4f, 150.9f),
@@ -45,15 +45,15 @@ val MiuixIcons.Glass.Light.ExpandList: ImageVector
             translationY = 1009.8091f,
             autoMirror = false,
         )
-        return _expandListLineLight!!
+        return _expandListLight!!
     }
 
-private var _expandListLineLight: ImageVector? = null
+private var _expandListLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.ExpandList: ImageVector
     get() {
-        if (_expandListLineNormal != null) return _expandListLineNormal!!
-        _expandListLineNormal = buildHyperOSIcon(
+        if (_expandListNormal != null) return _expandListNormal!!
+        _expandListNormal = buildHyperOSIcon(
             name = "ExpandList.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(645.4f, 142f),
@@ -85,15 +85,15 @@ val MiuixIcons.Glass.Normal.ExpandList: ImageVector
             translationY = 1009.8885f,
             autoMirror = false,
         )
-        return _expandListLineNormal!!
+        return _expandListNormal!!
     }
 
-private var _expandListLineNormal: ImageVector? = null
+private var _expandListNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.ExpandList: ImageVector
     get() {
-        if (_expandListLineRegular != null) return _expandListLineRegular!!
-        _expandListLineRegular = buildHyperOSIcon(
+        if (_expandListRegular != null) return _expandListRegular!!
+        _expandListRegular = buildHyperOSIcon(
             name = "ExpandList.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(644f, 138f),
@@ -125,15 +125,15 @@ val MiuixIcons.Glass.Regular.ExpandList: ImageVector
             translationY = 1009.9247f,
             autoMirror = false,
         )
-        return _expandListLineRegular!!
+        return _expandListRegular!!
     }
 
-private var _expandListLineRegular: ImageVector? = null
+private var _expandListRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.ExpandList: ImageVector
     get() {
-        if (_expandListLineMedium != null) return _expandListLineMedium!!
-        _expandListLineMedium = buildHyperOSIcon(
+        if (_expandListMedium != null) return _expandListMedium!!
+        _expandListMedium = buildHyperOSIcon(
             name = "ExpandList.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(641.6f, 130.2f),
@@ -165,15 +165,15 @@ val MiuixIcons.Glass.Medium.ExpandList: ImageVector
             translationY = 1011.0016f,
             autoMirror = false,
         )
-        return _expandListLineMedium!!
+        return _expandListMedium!!
     }
 
-private var _expandListLineMedium: ImageVector? = null
+private var _expandListMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.ExpandList: ImageVector
     get() {
-        if (_expandListLineDemibold != null) return _expandListLineDemibold!!
-        _expandListLineDemibold = buildHyperOSIcon(
+        if (_expandListDemibold != null) return _expandListDemibold!!
+        _expandListDemibold = buildHyperOSIcon(
             name = "ExpandList.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(639.9f, 124.7f),
@@ -205,8 +205,8 @@ val MiuixIcons.Glass.Demibold.ExpandList: ImageVector
             translationY = 1011.7566f,
             autoMirror = false,
         )
-        return _expandListLineDemibold!!
+        return _expandListDemibold!!
     }
 
-private var _expandListLineDemibold: ImageVector? = null
+private var _expandListDemibold: ImageVector? = null
 

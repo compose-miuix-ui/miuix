@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.Backdrop
@@ -36,6 +37,18 @@ object GlassBottomSheetDefaults {
 
     /** Default panel content padding for [GlassBottomSheet]. */
     val InsideMargin: DpSize = DpSize(12.dp, 0.dp)
+
+    /** Maximum blur radius of the progressive header band. */
+    val ProgressiveBlurRadius: Dp = 32.dp
+
+    /** Extension of the progressive header band below the title row. */
+    val ProgressiveBlurOverhang: Dp = 24.dp
+
+    /** Scroll distance over which the progressive header band fades in. */
+    val ProgressiveBlurRampDistance: Dp = 32.dp
+
+    /** Diameter of the glass pill behind a bottom-sheet header button. */
+    val ButtonSize: Dp = 44.dp
 
     /** Bottom-sheet material for the current theme. */
     @Composable
@@ -60,6 +73,30 @@ object GlassBottomSheetDefaults {
     @Composable
     @ReadOnlyComposable
     fun containerColor(): Color = MiuixTheme.colorScheme.background
+
+    /** Fallback fill for bottom-sheet header buttons when backdrop material is unavailable. */
+    @Composable
+    @ReadOnlyComposable
+    fun buttonFill(): Color = when {
+        MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.surfaceContainerHigh
+        MiuixTheme.colorScheme.background.luminance() < 0.5f -> Color(0xFF2C2C2C)
+        else -> Color.White
+    }
+
+    /** Default material for bottom-sheet header buttons. */
+    @Composable
+    fun buttonMaterial(): GlassMaterial = dynamicGlassMaterial(
+        GlassMaterials.puredThinGlass(MiuixTheme.colorScheme.background.luminance() < 0.5f),
+    )
+
+    /** The small bloom stroke paired with [buttonMaterial]. */
+    @Composable
+    @ReadOnlyComposable
+    fun buttonStroke(): EdgeStroke = GlassEdgeStrokes.forTheme(
+        isDark = MiuixTheme.colorScheme.background.luminance() < 0.5f,
+        light = GlassEdgeStrokes.SmallLight,
+        dark = GlassEdgeStrokes.SmallDark,
+    )
 }
 
 /**
@@ -82,6 +119,19 @@ fun glassBottomSheetSurface(
     stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
     containerColor: Color = GlassBottomSheetDefaults.containerColor(),
 ): @Composable BottomSheetSurfaceScope.() -> Modifier = {
+    val panel = glassBottomSheetPanelSurface(backdrop, material, containerColor).invoke(this)
+    val shape = remember(cornerRadius) {
+        GlassShape(topStart = cornerRadius, topEnd = cornerRadius, bottomEnd = 0.dp, bottomStart = 0.dp)
+    }
+    panel.glassBottomSheetEdgeStroke(shape = shape, stroke = stroke, isOverscroll = isOverscroll)
+}
+
+@Composable
+internal fun glassBottomSheetPanelSurface(
+    backdrop: Backdrop?,
+    material: GlassMaterial = GlassBottomSheetDefaults.material(),
+    containerColor: Color = GlassBottomSheetDefaults.containerColor(),
+): @Composable BottomSheetSurfaceScope.() -> Modifier = {
     val effectiveBackdrop = if (backdrop != null && isRuntimeShaderSupported()) {
         remember(backdrop, scrimColor) { ScrimBackdrop(backdrop, scrimColor) }
     } else {
@@ -90,7 +140,7 @@ fun glassBottomSheetSurface(
     val shape = remember(cornerRadius) {
         GlassShape(topStart = cornerRadius, topEnd = cornerRadius, bottomEnd = 0.dp, bottomStart = 0.dp)
     }
-    val panel = Modifier.glassPanel(
+    Modifier.glassPanel(
         backdrop = effectiveBackdrop,
         shape = shape,
         material = material,
@@ -99,25 +149,42 @@ fun glassBottomSheetSurface(
         shading = false,
         fallback = if (effectiveBackdrop == null) Modifier.clip(shape).background(containerColor) else null,
     )
-    if (isOverscroll || stroke == null) {
-        panel
-    } else {
-        panel.drawWithCache {
-            val extraBottomPx = (stroke.width + stroke.bevel).toPx() + 1f
-            val strokeSize = Size(size.width, size.height + extraBottomPx)
-            val strokeDrawScope = CanvasDrawScope()
-            onDrawWithContent {
-                drawContent()
-                clipRect {
-                    drawIntoCanvas { canvas ->
-                        strokeDrawScope.draw(
-                            density = this,
-                            layoutDirection = layoutDirection,
-                            canvas = canvas,
-                            size = strokeSize,
-                        ) {
-                            drawEdgeStroke(shape = shape, stroke = stroke)
-                        }
+}
+
+@Composable
+internal fun glassBottomSheetForegroundSurface(
+    stroke: EdgeStroke? = GlassBottomSheetDefaults.stroke(),
+): @Composable BottomSheetSurfaceScope.() -> Modifier = {
+    val shape = remember(cornerRadius) {
+        GlassShape(topStart = cornerRadius, topEnd = cornerRadius, bottomEnd = 0.dp, bottomStart = 0.dp)
+    }
+    Modifier
+        .clip(shape)
+        .glassBottomSheetEdgeStroke(shape = shape, stroke = stroke, isOverscroll = isOverscroll)
+}
+
+private fun Modifier.glassBottomSheetEdgeStroke(
+    shape: GlassShape,
+    stroke: EdgeStroke?,
+    isOverscroll: Boolean,
+): Modifier = if (isOverscroll || stroke == null) {
+    this
+} else {
+    drawWithCache {
+        val extraBottomPx = (stroke.width + stroke.bevel).toPx() + 1f
+        val strokeSize = Size(size.width, size.height + extraBottomPx)
+        val strokeDrawScope = CanvasDrawScope()
+        onDrawWithContent {
+            drawContent()
+            clipRect {
+                drawIntoCanvas { canvas ->
+                    strokeDrawScope.draw(
+                        density = this,
+                        layoutDirection = layoutDirection,
+                        canvas = canvas,
+                        size = strokeSize,
+                    ) {
+                        drawEdgeStroke(shape = shape, stroke = stroke)
                     }
                 }
             }

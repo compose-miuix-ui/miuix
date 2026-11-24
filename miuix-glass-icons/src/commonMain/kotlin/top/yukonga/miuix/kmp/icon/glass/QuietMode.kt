@@ -12,8 +12,8 @@ val MiuixIcons.Glass.QuietMode: ImageVector
 
 val MiuixIcons.Glass.Light.QuietMode: ImageVector
     get() {
-        if (_quietModeLineLight != null) return _quietModeLineLight!!
-        _quietModeLineLight = buildHyperOSIcon(
+        if (_quietModeLight != null) return _quietModeLight!!
+        _quietModeLight = buildHyperOSIcon(
             name = "QuietMode.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(1129f, 687.7f),
@@ -103,15 +103,15 @@ val MiuixIcons.Glass.Light.QuietMode: ImageVector
             translationY = 1040.2365f,
             autoMirror = false,
         )
-        return _quietModeLineLight!!
+        return _quietModeLight!!
     }
 
-private var _quietModeLineLight: ImageVector? = null
+private var _quietModeLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.QuietMode: ImageVector
     get() {
-        if (_quietModeLineNormal != null) return _quietModeLineNormal!!
-        _quietModeLineNormal = buildHyperOSIcon(
+        if (_quietModeNormal != null) return _quietModeNormal!!
+        _quietModeNormal = buildHyperOSIcon(
             name = "QuietMode.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(1129f, 688.6f),
@@ -201,15 +201,15 @@ val MiuixIcons.Glass.Normal.QuietMode: ImageVector
             translationY = 1040.3129f,
             autoMirror = false,
         )
-        return _quietModeLineNormal!!
+        return _quietModeNormal!!
     }
 
-private var _quietModeLineNormal: ImageVector? = null
+private var _quietModeNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.QuietMode: ImageVector
     get() {
-        if (_quietModeLineRegular != null) return _quietModeLineRegular!!
-        _quietModeLineRegular = buildHyperOSIcon(
+        if (_quietModeRegular != null) return _quietModeRegular!!
+        _quietModeRegular = buildHyperOSIcon(
             name = "QuietMode.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(1129f, 689f),
@@ -299,15 +299,15 @@ val MiuixIcons.Glass.Regular.QuietMode: ImageVector
             translationY = 1040.3431f,
             autoMirror = false,
         )
-        return _quietModeLineRegular!!
+        return _quietModeRegular!!
     }
 
-private var _quietModeLineRegular: ImageVector? = null
+private var _quietModeRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.QuietMode: ImageVector
     get() {
-        if (_quietModeLineMedium != null) return _quietModeLineMedium!!
-        _quietModeLineMedium = buildHyperOSIcon(
+        if (_quietModeMedium != null) return _quietModeMedium!!
+        _quietModeMedium = buildHyperOSIcon(
             name = "QuietMode.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(1137.1f, 682.2f),
@@ -397,15 +397,15 @@ val MiuixIcons.Glass.Medium.QuietMode: ImageVector
             translationY = 1040.3427f,
             autoMirror = false,
         )
-        return _quietModeLineMedium!!
+        return _quietModeMedium!!
     }
 
-private var _quietModeLineMedium: ImageVector? = null
+private var _quietModeMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.QuietMode: ImageVector
     get() {
-        if (_quietModeLineDemibold != null) return _quietModeLineDemibold!!
-        _quietModeLineDemibold = buildHyperOSIcon(
+        if (_quietModeDemibold != null) return _quietModeDemibold!!
+        _quietModeDemibold = buildHyperOSIcon(
             name = "QuietMode.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(1142.8f, 677.5f),
@@ -495,8 +495,8 @@ val MiuixIcons.Glass.Demibold.QuietMode: ImageVector
             translationY = 1040.3424f,
             autoMirror = false,
         )
-        return _quietModeLineDemibold!!
+        return _quietModeDemibold!!
     }
 
-private var _quietModeLineDemibold: ImageVector? = null
+private var _quietModeDemibold: ImageVector? = null
 

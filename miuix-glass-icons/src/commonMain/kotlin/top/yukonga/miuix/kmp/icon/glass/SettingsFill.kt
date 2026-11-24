@@ -12,8 +12,8 @@ val MiuixIcons.Glass.SettingsFill: ImageVector
 
 val MiuixIcons.Glass.Light.SettingsFill: ImageVector
     get() {
-        if (_appSettingsSurfaceLight != null) return _appSettingsSurfaceLight!!
-        _appSettingsSurfaceLight = buildHyperOSIcon(
+        if (_settingsFillLight != null) return _settingsFillLight!!
+        _settingsFillLight = buildHyperOSIcon(
             name = "SettingsFill.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(511.6f, 375f),
@@ -70,15 +70,15 @@ val MiuixIcons.Glass.Light.SettingsFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _appSettingsSurfaceLight!!
+        return _settingsFillLight!!
     }
 
-private var _appSettingsSurfaceLight: ImageVector? = null
+private var _settingsFillLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.SettingsFill: ImageVector
     get() {
-        if (_appSettingsSurfaceNormal != null) return _appSettingsSurfaceNormal!!
-        _appSettingsSurfaceNormal = buildHyperOSIcon(
+        if (_settingsFillNormal != null) return _settingsFillNormal!!
+        _settingsFillNormal = buildHyperOSIcon(
             name = "SettingsFill.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(517.4f, 375f),
@@ -135,15 +135,15 @@ val MiuixIcons.Glass.Normal.SettingsFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _appSettingsSurfaceNormal!!
+        return _settingsFillNormal!!
     }
 
-private var _appSettingsSurfaceNormal: ImageVector? = null
+private var _settingsFillNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.SettingsFill: ImageVector
     get() {
-        if (_appSettingsSurfaceRegular != null) return _appSettingsSurfaceRegular!!
-        _appSettingsSurfaceRegular = buildHyperOSIcon(
+        if (_settingsFillRegular != null) return _settingsFillRegular!!
+        _settingsFillRegular = buildHyperOSIcon(
             name = "SettingsFill.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(520f, 375f),
@@ -200,15 +200,15 @@ val MiuixIcons.Glass.Regular.SettingsFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _appSettingsSurfaceRegular!!
+        return _settingsFillRegular!!
     }
 
-private var _appSettingsSurfaceRegular: ImageVector? = null
+private var _settingsFillRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.SettingsFill: ImageVector
     get() {
-        if (_appSettingsSurfaceMedium != null) return _appSettingsSurfaceMedium!!
-        _appSettingsSurfaceMedium = buildHyperOSIcon(
+        if (_settingsFillMedium != null) return _settingsFillMedium!!
+        _settingsFillMedium = buildHyperOSIcon(
             name = "SettingsFill.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(526.5f, 374.9f),
@@ -265,15 +265,15 @@ val MiuixIcons.Glass.Medium.SettingsFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _appSettingsSurfaceMedium!!
+        return _settingsFillMedium!!
     }
 
-private var _appSettingsSurfaceMedium: ImageVector? = null
+private var _settingsFillMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.SettingsFill: ImageVector
     get() {
-        if (_appSettingsSurfaceDemibold != null) return _appSettingsSurfaceDemibold!!
-        _appSettingsSurfaceDemibold = buildHyperOSIcon(
+        if (_settingsFillDemibold != null) return _settingsFillDemibold!!
+        _settingsFillDemibold = buildHyperOSIcon(
             name = "SettingsFill.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(531f, 374.9f),
@@ -330,8 +330,8 @@ val MiuixIcons.Glass.Demibold.SettingsFill: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _appSettingsSurfaceDemibold!!
+        return _settingsFillDemibold!!
     }
 
-private var _appSettingsSurfaceDemibold: ImageVector? = null
+private var _settingsFillDemibold: ImageVector? = null
 

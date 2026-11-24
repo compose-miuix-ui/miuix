@@ -12,8 +12,8 @@ val MiuixIcons.Glass.IcReference: ImageVector
 
 val MiuixIcons.Glass.Light.IcReference: ImageVector
     get() {
-        if (_icReferenceLineLight != null) return _icReferenceLineLight!!
-        _icReferenceLineLight = buildHyperOSIcon(
+        if (_icReferenceLight != null) return _icReferenceLight!!
+        _icReferenceLight = buildHyperOSIcon(
             name = "IcReference.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(209.3f, 811f),
@@ -67,15 +67,15 @@ val MiuixIcons.Glass.Light.IcReference: ImageVector
             translationY = 1021.9119f,
             autoMirror = false,
         )
-        return _icReferenceLineLight!!
+        return _icReferenceLight!!
     }
 
-private var _icReferenceLineLight: ImageVector? = null
+private var _icReferenceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.IcReference: ImageVector
     get() {
-        if (_icReferenceLineNormal != null) return _icReferenceLineNormal!!
-        _icReferenceLineNormal = buildHyperOSIcon(
+        if (_icReferenceNormal != null) return _icReferenceNormal!!
+        _icReferenceNormal = buildHyperOSIcon(
             name = "IcReference.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(200.2f, 805.5f),
@@ -129,15 +129,15 @@ val MiuixIcons.Glass.Normal.IcReference: ImageVector
             translationY = 1018.4711f,
             autoMirror = false,
         )
-        return _icReferenceLineNormal!!
+        return _icReferenceNormal!!
     }
 
-private var _icReferenceLineNormal: ImageVector? = null
+private var _icReferenceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.IcReference: ImageVector
     get() {
-        if (_icReferenceLineRegular != null) return _icReferenceLineRegular!!
-        _icReferenceLineRegular = buildHyperOSIcon(
+        if (_icReferenceRegular != null) return _icReferenceRegular!!
+        _icReferenceRegular = buildHyperOSIcon(
             name = "IcReference.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(196f, 803f),
@@ -191,15 +191,15 @@ val MiuixIcons.Glass.Regular.IcReference: ImageVector
             translationY = 1016.9067f,
             autoMirror = false,
         )
-        return _icReferenceLineRegular!!
+        return _icReferenceRegular!!
     }
 
-private var _icReferenceLineRegular: ImageVector? = null
+private var _icReferenceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.IcReference: ImageVector
     get() {
-        if (_icReferenceLineMedium != null) return _icReferenceLineMedium!!
-        _icReferenceLineMedium = buildHyperOSIcon(
+        if (_icReferenceMedium != null) return _icReferenceMedium!!
+        _icReferenceMedium = buildHyperOSIcon(
             name = "IcReference.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(186.8f, 802.7f),
@@ -253,15 +253,15 @@ val MiuixIcons.Glass.Medium.IcReference: ImageVector
             translationY = 1016.5032f,
             autoMirror = false,
         )
-        return _icReferenceLineMedium!!
+        return _icReferenceMedium!!
     }
 
-private var _icReferenceLineMedium: ImageVector? = null
+private var _icReferenceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.IcReference: ImageVector
     get() {
-        if (_icReferenceLineDemibold != null) return _icReferenceLineDemibold!!
-        _icReferenceLineDemibold = buildHyperOSIcon(
+        if (_icReferenceDemibold != null) return _icReferenceDemibold!!
+        _icReferenceDemibold = buildHyperOSIcon(
             name = "IcReference.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(180.4f, 802.5f),
@@ -315,8 +315,8 @@ val MiuixIcons.Glass.Demibold.IcReference: ImageVector
             translationY = 1016.2203f,
             autoMirror = false,
         )
-        return _icReferenceLineDemibold!!
+        return _icReferenceDemibold!!
     }
 
-private var _icReferenceLineDemibold: ImageVector? = null
+private var _icReferenceDemibold: ImageVector? = null
 

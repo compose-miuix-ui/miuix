@@ -12,8 +12,8 @@ val MiuixIcons.Glass.DecorationMaintenance: ImageVector
 
 val MiuixIcons.Glass.Light.DecorationMaintenance: ImageVector
     get() {
-        if (_decorationMaintenanceSurfaceLight != null) return _decorationMaintenanceSurfaceLight!!
-        _decorationMaintenanceSurfaceLight = buildHyperOSIcon(
+        if (_decorationMaintenanceLight != null) return _decorationMaintenanceLight!!
+        _decorationMaintenanceLight = buildHyperOSIcon(
             name = "DecorationMaintenance.Glass.Light",
             pathData = listOf(
                 PathNode.MoveTo(634.6f, -166.6f),
@@ -91,15 +91,15 @@ val MiuixIcons.Glass.Light.DecorationMaintenance: ImageVector
             translationY = 1042.3333f,
             autoMirror = false,
         )
-        return _decorationMaintenanceSurfaceLight!!
+        return _decorationMaintenanceLight!!
     }
 
-private var _decorationMaintenanceSurfaceLight: ImageVector? = null
+private var _decorationMaintenanceLight: ImageVector? = null
 
 val MiuixIcons.Glass.Normal.DecorationMaintenance: ImageVector
     get() {
-        if (_decorationMaintenanceSurfaceNormal != null) return _decorationMaintenanceSurfaceNormal!!
-        _decorationMaintenanceSurfaceNormal = buildHyperOSIcon(
+        if (_decorationMaintenanceNormal != null) return _decorationMaintenanceNormal!!
+        _decorationMaintenanceNormal = buildHyperOSIcon(
             name = "DecorationMaintenance.Glass.Normal",
             pathData = listOf(
                 PathNode.MoveTo(634.9f, -169.6f),
@@ -177,15 +177,15 @@ val MiuixIcons.Glass.Normal.DecorationMaintenance: ImageVector
             translationY = 1041.875f,
             autoMirror = false,
         )
-        return _decorationMaintenanceSurfaceNormal!!
+        return _decorationMaintenanceNormal!!
     }
 
-private var _decorationMaintenanceSurfaceNormal: ImageVector? = null
+private var _decorationMaintenanceNormal: ImageVector? = null
 
 val MiuixIcons.Glass.Regular.DecorationMaintenance: ImageVector
     get() {
-        if (_decorationMaintenanceSurfaceRegular != null) return _decorationMaintenanceSurfaceRegular!!
-        _decorationMaintenanceSurfaceRegular = buildHyperOSIcon(
+        if (_decorationMaintenanceRegular != null) return _decorationMaintenanceRegular!!
+        _decorationMaintenanceRegular = buildHyperOSIcon(
             name = "DecorationMaintenance.Glass.Regular",
             pathData = listOf(
                 PathNode.MoveTo(635f, -171f),
@@ -263,15 +263,15 @@ val MiuixIcons.Glass.Regular.DecorationMaintenance: ImageVector
             translationY = 1041.6667f,
             autoMirror = false,
         )
-        return _decorationMaintenanceSurfaceRegular!!
+        return _decorationMaintenanceRegular!!
     }
 
-private var _decorationMaintenanceSurfaceRegular: ImageVector? = null
+private var _decorationMaintenanceRegular: ImageVector? = null
 
 val MiuixIcons.Glass.Medium.DecorationMaintenance: ImageVector
     get() {
-        if (_decorationMaintenanceSurfaceMedium != null) return _decorationMaintenanceSurfaceMedium!!
-        _decorationMaintenanceSurfaceMedium = buildHyperOSIcon(
+        if (_decorationMaintenanceMedium != null) return _decorationMaintenanceMedium!!
+        _decorationMaintenanceMedium = buildHyperOSIcon(
             name = "DecorationMaintenance.Glass.Medium",
             pathData = listOf(
                 PathNode.MoveTo(628.2f, -173.4f),
@@ -349,15 +349,15 @@ val MiuixIcons.Glass.Medium.DecorationMaintenance: ImageVector
             translationY = 1041.3964f,
             autoMirror = false,
         )
-        return _decorationMaintenanceSurfaceMedium!!
+        return _decorationMaintenanceMedium!!
     }
 
-private var _decorationMaintenanceSurfaceMedium: ImageVector? = null
+private var _decorationMaintenanceMedium: ImageVector? = null
 
 val MiuixIcons.Glass.Demibold.DecorationMaintenance: ImageVector
     get() {
-        if (_decorationMaintenanceSurfaceDemibold != null) return _decorationMaintenanceSurfaceDemibold!!
-        _decorationMaintenanceSurfaceDemibold = buildHyperOSIcon(
+        if (_decorationMaintenanceDemibold != null) return _decorationMaintenanceDemibold!!
+        _decorationMaintenanceDemibold = buildHyperOSIcon(
             name = "DecorationMaintenance.Glass.Demibold",
             pathData = listOf(
                 PathNode.MoveTo(623.5f, -175.1f),
@@ -435,8 +435,8 @@ val MiuixIcons.Glass.Demibold.DecorationMaintenance: ImageVector
             translationY = 1041.2072f,
             autoMirror = false,
         )
-        return _decorationMaintenanceSurfaceDemibold!!
+        return _decorationMaintenanceDemibold!!
     }
 
-private var _decorationMaintenanceSurfaceDemibold: ImageVector? = null
+private var _decorationMaintenanceDemibold: ImageVector? = null
 
