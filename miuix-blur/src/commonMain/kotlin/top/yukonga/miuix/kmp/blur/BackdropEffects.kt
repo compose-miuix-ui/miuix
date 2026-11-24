@@ -68,7 +68,6 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     val padB = minOf(padding, scope.maxPadBottom)
     val paddedW = size.width + padL + padR
     val paddedH = size.height + padT + padB
-
     // apply() compares these against the final padding to detect a stale sampling clamp.
     scope.blurBuiltPaddedW = paddedW
     scope.blurBuiltPaddedH = paddedH

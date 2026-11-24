@@ -359,7 +359,7 @@ internal fun BottomSheetContentLayout(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) {
-                        val offsetY = (slideOffsetPx() + dragOffsetY.value).fastRoundToInt()
+                        val offsetY = (slideOffsetPx() + dragOffsetY.value).fastRoundToInt().coerceAtLeast(0)
                         placeable.placeRelative(0, offsetY)
                     }
                 }
@@ -390,12 +390,6 @@ internal fun BottomSheetContentLayout(
                 topInset = topInset,
                 enableNestedScroll = enableNestedScroll,
                 surface = surface?.let { sheetSurface -> { sheetSurface(surfaceScope) } },
-                overscrollSurface = surface?.let { sheetSurface ->
-                    {
-                        val scope = remember(scrimColor) { BottomSheetSurfaceScope(0.dp, scrimColor, isOverscroll = true) }
-                        sheetSurface(scope)
-                    }
-                },
                 startAction = startAction?.let { action ->
                     { CompositionLocalProvider(LocalDismissState provides requestDismiss) { action() } }
                 },
@@ -437,7 +431,6 @@ internal fun BottomSheetContent(
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
     surface: (@Composable () -> Modifier)? = null,
-    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -664,7 +657,6 @@ internal fun BottomSheetContent(
         onUpdateAlpha = updateDimAlpha,
         modifier = modifier,
         surface = surface,
-        overscrollSurface = overscrollSurface,
         content = {
             CompositionLocalProvider(LocalBottomSheetNestedScrollConnection provides nestedScrollConnection) {
                 content()
@@ -700,7 +692,6 @@ private fun BottomSheetColumn(
     onUpdateAlpha: (Float) -> Unit,
     modifier: Modifier = Modifier,
     surface: (@Composable () -> Modifier)? = null,
-    overscrollSurface: (@Composable () -> Modifier)? = null,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -710,15 +701,6 @@ private fun BottomSheetColumn(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        OverscrollBackground(
-            dragOffsetY = dragOffsetY,
-            slideOffsetPx = slideOffsetPx,
-            sheetMaxWidth = sheetMaxWidth,
-            outsideMargin = outsideMargin,
-            backgroundColor = backgroundColor,
-            surface = overscrollSurface,
-        )
-
         Column(
             modifier = modifier
                 .pointerInput(Unit) { detectTapGestures { /* Consume click */ } }
@@ -726,12 +708,10 @@ private fun BottomSheetColumn(
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .heightIn(max = windowHeight - topInset)
                 .onSizeChanged { size ->
-                    // Only capture the natural sheet height while the IME is closed; otherwise the
-                    // bottom inset added by imePadding would inflate sheetHeightPx, shifting the
-                    // dim threshold and causing translationY jumps mid-animation.
-                    if (imeInsets.getBottom(density) == 0) {
+                    // Only capture the natural sheet height while the IME is closed and not overscrolling;
+                    // otherwise imePadding or overscroll extension would inflate sheetHeightPx.
+                    if (imeInsets.getBottom(density) == 0 && dragOffsetY.value >= 0f && slideOffsetPx() >= 0f) {
                         sheetHeightPx.intValue = size.height
                     }
                 }
@@ -746,6 +726,17 @@ private fun BottomSheetColumn(
                         bottomStart = 0.dp,
                     ),
                 )
+                .layout { measurable, constraints ->
+                    val contentMaxH = (windowHeight - topInset).roundToPx().coerceAtLeast(0)
+                    val contentConstraints = constraints.copy(
+                        maxHeight = minOf(constraints.maxHeight, contentMaxH),
+                    )
+                    val placeable = measurable.measure(contentConstraints)
+                    val extraBottom = (-(slideOffsetPx() + dragOffsetY.value)).fastRoundToInt().coerceAtLeast(0)
+                    layout(placeable.width, (placeable.height + extraBottom).coerceAtMost(constraints.maxHeight)) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
                 .padding(horizontal = insideMargin.width)
                 .padding(bottom = insideMargin.height),
         ) {
@@ -767,49 +758,6 @@ private fun BottomSheetColumn(
 
             content()
         }
-    }
-}
-
-/**
- * Renders the elastic background fill that follows the sheet upward when the user
- * drags past the top of its contents (negative `dragOffsetY`), or when the opening
- * spring carries it past its resting place (negative slide offset). Lives in its own
- * composable so the only state it reads — the drag and slide offsets — invalidates this
- * subtree alone, leaving the surrounding [BottomSheetColumn] free of per-frame
- * recomposition during a drag or slide.
- */
-@Composable
-private fun BoxScope.OverscrollBackground(
-    dragOffsetY: Animatable<Float, *>,
-    slideOffsetPx: () -> Float,
-    sheetMaxWidth: Dp,
-    outsideMargin: DpSize,
-    backgroundColor: Color,
-    surface: (@Composable () -> Modifier)? = null,
-) {
-    val isOverscrolling by remember(dragOffsetY, slideOffsetPx) {
-        computedStateOf { dragOffsetY.value + slideOffsetPx() < 0f }
-    }
-    if (isOverscrolling) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .widthIn(max = sheetMaxWidth)
-                .fillMaxWidth()
-                .layout { measurable, constraints ->
-                    val heightPx = constraints.constrainHeight(
-                        ((-(dragOffsetY.value + slideOffsetPx())).coerceAtLeast(0f) + 1.dp.toPx()).fastRoundToInt(),
-                    )
-                    val placeable = measurable.measure(
-                        constraints.copy(minHeight = heightPx, maxHeight = heightPx),
-                    )
-                    layout(placeable.width, placeable.height) {
-                        placeable.placeRelative(0, 0)
-                    }
-                }
-                .padding(horizontal = outsideMargin.width)
-                .then(surface?.invoke() ?: Modifier.background(backgroundColor)),
-        )
     }
 }
 
