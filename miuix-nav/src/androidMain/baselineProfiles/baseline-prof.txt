@@ -1,5 +1,4 @@
 HSPLtop/yukonga/miuix/kmp/nav/core/NavDisplayKt**->**(**)**
-HSPLtop/yukonga/miuix/kmp/nav/transition/NavTransitions;->**(**)**
 Ltop/yukonga/miuix/kmp/nav/core/NavKey;
 Ltop/yukonga/miuix/kmp/nav/runtime/NavSettleSink;
 Ltop/yukonga/miuix/kmp/nav/transition/NavGesture;
@@ -47,6 +46,7 @@ SPLtop/yukonga/miuix/kmp/nav/transition/NavSettleSpec;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavSwipeDirection;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavTransition;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/NavTransitionKt**->**(**)**
+SPLtop/yukonga/miuix/kmp/nav/transition/NavTransitions;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionPreset;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionState;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/transition/internal/NavExpansionStateKt**->**(**)**

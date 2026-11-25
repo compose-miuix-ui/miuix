@@ -169,6 +169,23 @@ class BaselineProfileGenerator {
                 }
             }
 
+            val scrollX = width / 2
+            val pagerTabs = listOf("Icon", "Color", "TextStyle")
+            for (tabTitle in pagerTabs) {
+                val tab = device.findObjects(By.pkg(packageName).text(tabTitle)).lastOrNull() ?: continue
+                tab.click()
+                device.waitForIdle()
+                Thread.sleep(500)
+                repeat(2) {
+                    device.swipe(scrollX, scrollDownStart, scrollX, scrollDownEnd, 30)
+                    Thread.sleep(250)
+                }
+                device.swipe(scrollX, scrollDownStart, scrollX, scrollDownEnd, 8)
+                Thread.sleep(400)
+                device.swipe(scrollX, scrollDownEnd, scrollX, scrollDownStart, 8)
+                Thread.sleep(400)
+            }
+
             val tab = device.findObjects(By.pkg(packageName).text("Settings")).lastOrNull()
             if (tab != null) {
                 tab.click()
@@ -184,6 +201,12 @@ class BaselineProfileGenerator {
                         Thread.sleep(500)
                     }
                 }
+                repeat(2) {
+                    device.swipe(scrollX, scrollDownStart, scrollX, scrollDownEnd, 30)
+                    Thread.sleep(250)
+                }
+                device.swipe(scrollX, scrollDownEnd, scrollX, scrollDownStart, 8)
+                Thread.sleep(300)
             }
         }
     }

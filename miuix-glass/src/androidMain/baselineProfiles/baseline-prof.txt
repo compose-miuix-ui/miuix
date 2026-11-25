@@ -1,4 +1,3 @@
-HSPLtop/yukonga/miuix/kmp/glass/DeferredGlassShadowNode;->**(**)**
 HSPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarKt**->**(**)**
 PLtop/yukonga/miuix/kmp/glass/ComposableSingletons;->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassBottomSheetDefaults;->**(**)**
@@ -7,21 +6,8 @@ PLtop/yukonga/miuix/kmp/glass/GlassBottomSheetSurfaceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassDropdownPreferenceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassPopupAnchorValueElement;->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassPopupAnchorValueNode;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassPopupBackProgressKt**->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassPopupColumnKt**->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassPopupFrame;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassPopupKt**->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassPopupPlacement;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassSecondaryPopupKt**->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassTabColors;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/GlassTabRowDefaults;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/MeasuredCorner;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/MeasuredPanel;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/PopupColumnMeasurePolicy;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/PopupColumnScope;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/PopupIntrinsicCache;->**(**)**
-PLtop/yukonga/miuix/kmp/glass/TransformTravel;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/DeferredGlassShadowElement;->**(**)**
+SPLtop/yukonga/miuix/kmp/glass/DeferredGlassShadowNode;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassAnchorSurface;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassDialogDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassDialogKt**->**(**)**
@@ -61,5 +47,6 @@ SPLtop/yukonga/miuix/kmp/glass/GlassTransformPopupKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/NavigationDragTargetKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/TopAppBarBandBrush;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassHeaderContext;->**(**)**
+SPLtop/yukonga/miuix/kmp/glass/internal/GlassHeaderContextKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassShaderKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassUniformsKt**->**(**)**
