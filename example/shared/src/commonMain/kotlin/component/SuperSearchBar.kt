@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -207,10 +208,19 @@ fun SearchStatus.SearchPager(
 
                 SearchStatus.ResultStatus.LOAD -> {}
 
-                SearchStatus.ResultStatus.SHOW -> LazyColumn(
-                    Modifier.fillMaxSize(),
-                ) {
-                    result()
+                SearchStatus.ResultStatus.SHOW -> {
+                    val resultListState = rememberLazyListState()
+                    LaunchedEffect(searchStatus.searchText) {
+                        if (resultListState.firstVisibleItemIndex != 0 || resultListState.firstVisibleItemScrollOffset != 0) {
+                            resultListState.scrollToItem(0)
+                        }
+                    }
+                    LazyColumn(
+                        state = resultListState,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        result()
+                    }
                 }
             }
         }

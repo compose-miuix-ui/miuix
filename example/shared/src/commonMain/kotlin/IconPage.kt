@@ -3,6 +3,8 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -216,37 +218,66 @@ fun IconsPage(
     }
     val coroutineScope = rememberCoroutineScope()
 
+    val searchResultCardModifier = remember {
+        Modifier.padding(horizontal = 12.dp, vertical = SearchResultVerticalPadding)
+    }
+    val searchResultIconModifier = remember(searchIsGlass) {
+        Modifier.size(if (searchIsGlass) 28.dp else 24.dp)
+    }
+    val onSearchResultClick = remember(currentPage, topAppBarScrollBehavior) {
+        { index: Int ->
+            searchExpanded = false
+            legacySearchStatus = legacySearchStatus?.copy(current = SearchStatus.Status.COLLAPSING)
+            coroutineScope.launch {
+                delay(400.milliseconds)
+                val targetItemIndex = findIconListItemIndex(
+                    sections = searchCatalog.sections,
+                    columns = pageColumns[currentPage],
+                    targetIconIndex = index,
+                )
+                val scrollState = topAppBarScrollBehavior.state
+                val collapseJob = if (scrollState.heightOffsetLimit < 0f && scrollState.heightOffset > scrollState.heightOffsetLimit) {
+                    launch {
+                        animate(
+                            initialValue = scrollState.heightOffset,
+                            targetValue = scrollState.heightOffsetLimit,
+                            animationSpec = topAppBarScrollBehavior.snapAnimationSpec ?: spring(),
+                        ) { value, _ ->
+                            scrollState.heightOffset = value
+                        }
+                    }
+                } else {
+                    null
+                }
+                activeListState.animateScrollToItem(targetItemIndex)
+                if (!activeListState.canScrollBackward) {
+                    collapseJob?.cancel()
+                    scrollState.heightOffset = 0f
+                }
+            }
+            Unit
+        }
+    }
+
     val searchResultItems: LazyListScope.(List<Int>) -> Unit = { filteredIndices ->
         items(
             count = filteredIndices.size,
-            key = { filteredIndices[it] },
             contentType = { "search_result" },
         ) { i ->
             val index = filteredIndices[i]
-            Card(modifier = Modifier.padding(horizontal = 12.dp, vertical = SearchResultVerticalPadding)) {
+            val name = searchIconNames[index]
+            Card(modifier = searchResultCardModifier) {
                 BasicComponent(
-                    title = searchIconNames[index],
+                    title = name,
                     startAction = {
                         Icon(
                             imageVector = searchRegularIcons[index],
-                            contentDescription = searchIconNames[index],
+                            contentDescription = name,
                             tint = colorScheme.onBackground,
-                            modifier = Modifier.size(if (searchIsGlass) 28.dp else 24.dp),
+                            modifier = searchResultIconModifier,
                         )
                     },
-                    onClick = {
-                        searchExpanded = false
-                        legacySearchStatus = legacySearchStatus?.copy(current = SearchStatus.Status.COLLAPSING)
-                        coroutineScope.launch {
-                            delay(400.milliseconds)
-                            val targetItemIndex = findIconListItemIndex(
-                                sections = searchCatalog.sections,
-                                columns = pageColumns[currentPage],
-                                targetIconIndex = index,
-                            )
-                            activeListState.animateScrollToItem(targetItemIndex)
-                        }
-                    },
+                    onClick = { onSearchResultClick(index) },
                 )
             }
         }
@@ -546,17 +577,13 @@ fun IconsPage(
                 searchIcon = MiuixIcons.Glass.Search,
                 closeIcon = MiuixIcons.Glass.Close,
             ) { query ->
-                val filteredIndices = remember(query, searchIconNames) {
-                    if (query.isBlank()) {
-                        emptyList()
-                    } else {
-                        searchIconNames.indices.filter {
-                            searchIconNames[it].contains(
-                                query,
-                                ignoreCase = true,
-                            )
-                        }
+                LaunchedEffect(query) {
+                    if (searchListState.firstVisibleItemIndex != 0 || searchListState.firstVisibleItemScrollOffset != 0) {
+                        searchListState.scrollToItem(0)
                     }
+                }
+                val filteredIndices = remember(query, searchIconNames) {
+                    filterIconIndices(searchIconNames, query)
                 }
                 val safeInsetsPadding = pageInsets.safeInsets.asPaddingValues()
                 val searchContentPadding = remember(safeInsetsPadding, pageInsets, searchBarSpace, searchResultPadding) {
@@ -584,16 +611,7 @@ fun IconsPage(
                     legacySearchStatus = status.copy(current = SearchStatus.Status.EXPANDING)
                 }
                 val filteredIndices = remember(status.searchText, searchIconNames) {
-                    if (status.searchText.isBlank()) {
-                        emptyList()
-                    } else {
-                        searchIconNames.indices.filter {
-                            searchIconNames[it].contains(
-                                status.searchText,
-                                ignoreCase = true,
-                            )
-                        }
-                    }
+                    filterIconIndices(searchIconNames, status.searchText)
                 }
                 Box(
                     Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {
@@ -638,4 +656,66 @@ private fun findIconListItemIndex(
         listIndex += (indices.size + columns - 1) / columns
     }
     return 0
+}
+
+private fun filterIconIndices(
+    iconNames: List<String>,
+    query: String,
+): List<Int> {
+    val trimmed = query.trim()
+    if (trimmed.isEmpty()) return emptyList()
+    var exactMatches: MutableList<Int>? = null
+    var prefixMatches: MutableList<Int>? = null
+    var wordMatches: MutableList<Int>? = null
+    var substringMatches: MutableList<Int>? = null
+    for (i in iconNames.indices) {
+        val name = iconNames[i]
+        val matchIndex = name.indexOf(trimmed, ignoreCase = true)
+        if (matchIndex < 0) continue
+        when {
+            name.length == trimmed.length -> (exactMatches ?: mutableListOf<Int>().also { exactMatches = it }).add(i)
+
+            matchIndex == 0 -> (prefixMatches ?: mutableListOf<Int>().also { prefixMatches = it }).add(i)
+
+            isWordBoundaryMatch(name, trimmed, matchIndex) ->
+                (wordMatches ?: mutableListOf<Int>().also { wordMatches = it }).add(i)
+
+            else -> (substringMatches ?: mutableListOf<Int>().also { substringMatches = it }).add(i)
+        }
+    }
+    val nonEmptyCount =
+        (if (exactMatches != null) 1 else 0) +
+            (if (prefixMatches != null) 1 else 0) +
+            (if (wordMatches != null) 1 else 0) +
+            (if (substringMatches != null) 1 else 0)
+    if (nonEmptyCount == 0) return emptyList()
+    if (nonEmptyCount == 1) {
+        return exactMatches ?: prefixMatches ?: wordMatches ?: substringMatches!!
+    }
+    val totalSize =
+        (exactMatches?.size ?: 0) +
+            (prefixMatches?.size ?: 0) +
+            (wordMatches?.size ?: 0) +
+            (substringMatches?.size ?: 0)
+    return buildList(totalSize) {
+        exactMatches?.let(::addAll)
+        prefixMatches?.let(::addAll)
+        wordMatches?.let(::addAll)
+        substringMatches?.let(::addAll)
+    }
+}
+
+private fun isWordBoundaryMatch(
+    name: String,
+    query: String,
+    firstMatchIndex: Int,
+): Boolean {
+    var idx = firstMatchIndex
+    while (idx > 0) {
+        if (name[idx].isUpperCase() || !name[idx - 1].isLetterOrDigit()) {
+            return true
+        }
+        idx = name.indexOf(query, startIndex = idx + 1, ignoreCase = true)
+    }
+    return false
 }
