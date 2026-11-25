@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -412,9 +413,19 @@ fun GlassTopAppBar(
         if (progressiveBackdrop != null && rawBackdrop != null) {
             val surfaceColor = MiuixTheme.colorScheme.surface
             val blendColors = remember(surfaceColor) {
-                listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.3f)))
+                listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.2f)))
             }
             val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
+            val scrimBrush = remember(surfaceColor) {
+                Brush.verticalGradient(
+                    0f to surfaceColor.copy(alpha = 0.50f),
+                    0.25f to surfaceColor.copy(alpha = 0.44f),
+                    0.5f to surfaceColor.copy(alpha = 0.32f),
+                    0.75f to surfaceColor.copy(alpha = 0.16f),
+                    0.9f to surfaceColor.copy(alpha = 0.05f),
+                    1f to Color.Transparent,
+                )
+            }
             val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
             val bandActive by remember(useCollapseProgress, scrollBehavior, maskProgress) {
                 computedStateOf {
@@ -440,7 +451,13 @@ fun GlassTopAppBar(
                         blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
                         colors = blurColors,
                         enabled = bandActive,
-                    ),
+                    )
+                    .drawWithContent {
+                        drawContent()
+                        if (bandActive) {
+                            drawRect(brush = scrimBrush)
+                        }
+                    },
             )
         } else {
             val density = LocalDensity.current

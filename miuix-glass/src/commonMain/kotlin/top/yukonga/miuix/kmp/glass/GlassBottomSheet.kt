@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -49,12 +50,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
-private val SheetHeaderProgressiveGradient = ProgressiveBlur(
-    angle = 90f,
-    startFraction = 0.25f,
-    endFraction = 1f,
-    curve = 0.5f,
-)
+private val SheetHeaderProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.25f)
 
 /**
  * A Scaffold-hosted glass bottom sheet with an animated scrim, drag dismissal and predictive Back.
@@ -174,7 +170,17 @@ fun GlassBottomSheet(
     val rampDistancePx = with(density) { GlassBottomSheetDefaults.ProgressiveBlurRampDistance.toPx() }
     val overhangPx = with(density) { GlassBottomSheetDefaults.ProgressiveBlurOverhang.roundToPx().coerceAtLeast(0) }
     val blendColors = remember(containerColor) {
-        listOf(BlendColorEntry(containerColor.copy(alpha = 0.25f)))
+        listOf(BlendColorEntry(containerColor.copy(alpha = 0.2f)))
+    }
+    val scrimBrush = remember(containerColor) {
+        Brush.verticalGradient(
+            0f to containerColor.copy(alpha = 0.50f),
+            0.25f to containerColor.copy(alpha = 0.44f),
+            0.5f to containerColor.copy(alpha = 0.32f),
+            0.75f to containerColor.copy(alpha = 0.16f),
+            0.9f to containerColor.copy(alpha = 0.05f),
+            1f to Color.Transparent,
+        )
     }
     var isContentScrolled by remember { mutableStateOf(false) }
     val headerTransition = updateTransition(isContentScrolled, label = "glassBottomSheetHeaderFloat")
@@ -274,7 +280,7 @@ fun GlassBottomSheet(
             }
         }
     val headerBackground: @Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit =
-        remember(sheetSceneBackdrop, rampDistancePx, overhangPx, blurColors, containerColor) {
+        remember(sheetSceneBackdrop, rampDistancePx, overhangPx, blurColors, containerColor, scrimBrush) {
             { scrollOffset, headerHeightPx ->
                 LaunchedEffect(scrollOffset) {
                     snapshotFlow { scrollOffset() > 1f }
@@ -298,14 +304,21 @@ fun GlassBottomSheet(
                         }
                         .then(
                             if (sheetSceneBackdrop != null) {
-                                Modifier.progressiveTextureBlur(
-                                    backdrop = sheetSceneBackdrop,
-                                    shape = RectangleShape,
-                                    gradient = SheetHeaderProgressiveGradient,
-                                    blurRadius = GlassBottomSheetDefaults.ProgressiveBlurRadius.value,
-                                    colors = blurColors,
-                                    enabled = bandActive,
-                                )
+                                Modifier
+                                    .progressiveTextureBlur(
+                                        backdrop = sheetSceneBackdrop,
+                                        shape = RectangleShape,
+                                        gradient = SheetHeaderProgressiveGradient,
+                                        blurRadius = GlassBottomSheetDefaults.ProgressiveBlurRadius.value,
+                                        colors = blurColors,
+                                        enabled = bandActive,
+                                    )
+                                    .drawWithContent {
+                                        drawContent()
+                                        if (bandActive) {
+                                            drawRect(brush = scrimBrush)
+                                        }
+                                    }
                             } else {
                                 Modifier.drawWithCache {
                                     val headerFraction = (headerHeightPx().toFloat() / size.height.coerceAtLeast(1f)).coerceIn(0f, 0.9f)
