@@ -78,6 +78,10 @@ Include any page bars that the overlay can cover in `backdrop`, but exclude the 
 
 The caller supplies scrolling and extra body spacing. Place navigation-bar padding inside scrollable content when that spacing should scroll with it.
 
+::: tip `innerPadding`
+With `progressiveBlur = false` (default), `innerPadding` is `0.dp`. With `progressiveBlur = true`, the header overlays the body, so apply `innerPadding` to `content` or its scrollable container (e.g. `LazyColumn(contentPadding = innerPadding)`).
+:::
+
 ## Properties
 
 ### GlassBottomSheet Properties
@@ -93,7 +97,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | allowDismiss | Boolean | Allow dismissal by outside tap, drag or Back | true | No |
 | enableNestedScroll | Boolean | Hand motion between child scrolling and sheet dragging | true | No |
 | renderInRootScaffold | Boolean | Use the outermost Scaffold; false uses the current Scaffold | true | No |
-| progressiveBlur | Boolean | Overlay the header with a progressive blur band while scrolling | true | No |
+| progressiveBlur | Boolean | Overlay the header with a progressive blur band while scrolling; when `true`, apply `innerPadding` to `content` | false | No |
 | title | String? | Optional title; header shows if any of `title`, `startAction`, or `endAction` is non-null | null | No |
 | startAction | (@Composable () -> Unit)? | Leading header action | null | No |
 | endAction | (@Composable () -> Unit)? | Trailing header action | null | No |
@@ -109,7 +113,7 @@ The caller supplies scrolling and extra body spacing. Place navigation-bar paddi
 | dimColor | Color | Scrim color before animation progress is applied | GlassBottomSheetDefaults.ScrimColor | No |
 | onDismissFinished | (() -> Unit)? | Called after the hide animation completes, unless hiding is cancelled | null | No |
 | scrollOffset | (() -> Float)? | External scroll offset in pixels; `null` tracks nested scroll | null | No |
-| content | @Composable (PaddingValues) -> Unit | Sheet body receiving top header padding | - | Yes |
+| content | @Composable (PaddingValues) -> Unit | Sheet body receiving top header padding (`0.dp` when `progressiveBlur` is `false`) | - | Yes |
 
 ### glassBottomSheetSurface Properties {#glassbottomsheetsurface}
 

@@ -60,9 +60,10 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.
  * screen edge and fills upward overscroll. Apply navigation-bar padding inside scrollable content
  * when that spacing should scroll with the content.
  *
- * When [progressiveBlur] is enabled, the header overlays the sheet body with a progressive blur band
- * during scroll; apply the provided [PaddingValues] to the scrollable container so initial content
- * clears the header.
+ * When [progressiveBlur] is `false` (default), the header sits above the sheet body and the
+ * provided [PaddingValues] is `0.dp`. When [progressiveBlur] is `true`, the header overlays the
+ * sheet body with a progressive blur band during scroll; apply the provided [PaddingValues] to the
+ * body or scrollable container so initial content clears the header.
  *
  * It opens, closes and settles with [SheetMotion.Glass], the HyperOS launcher's sheet motion.
  *
@@ -75,7 +76,7 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.
  * @param allowDismiss Whether outside taps, drags and back gestures may dismiss the sheet.
  * @param enableNestedScroll Whether child scrolling can transfer motion to the sheet.
  * @param renderInRootScaffold Whether the outermost Scaffold hosts the sheet.
- * @param progressiveBlur Overlay the header with a progressive blur band while scrolling.
+ * @param progressiveBlur Overlay the header with a progressive blur band while scrolling; requires applying the provided [PaddingValues] to [content].
  * @param title Optional title; header shows if any of [title], [startAction], or [endAction] is non-null.
  * @param startAction Optional leading header action.
  * @param endAction Optional trailing header action.
@@ -91,7 +92,7 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.
  * @param dimColor Scrim color before the host applies animation progress.
  * @param onDismissFinished Called after the hide animation completes.
  * @param scrollOffset External scroll offset in pixels (e.g. active pager page); `null` tracks nested scroll.
- * @param content Sheet content receiving top header padding as [PaddingValues].
+ * @param content Sheet content receiving top header padding as [PaddingValues] when [progressiveBlur] is `true` (`0.dp` when `false`).
  */
 @Composable
 fun GlassBottomSheet(
@@ -104,7 +105,7 @@ fun GlassBottomSheet(
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    progressiveBlur: Boolean = true,
+    progressiveBlur: Boolean = false,
     title: String? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,

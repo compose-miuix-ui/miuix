@@ -207,6 +207,7 @@ class GlassOverlayComponentsTest {
                         title = "Glass BottomSheet",
                         allowDismiss = false,
                         stroke = null,
+                        progressiveBlur = true,
                     ) { innerPadding ->
                         Column(
                             modifier = Modifier
@@ -274,5 +275,32 @@ class GlassOverlayComponentsTest {
 
         val returned = onRoot().captureToImage().toPixelMap()
         assertColorNear(headerAtRest, returned[sampleX, headerY], tolerance = 4f / 255f)
+    }
+
+    @Test
+    fun sheetHeaderClearsBodyWithoutApplyingInnerPaddingByDefault() = runComposeUiTest {
+        setContent {
+            DialogTestHost {
+                GlassBottomSheet(
+                    onDismissRequest = {},
+                    show = true,
+                    backdrop = null,
+                    modifier = Modifier.testTag("sheet"),
+                    title = "Default Sheet",
+                    allowDismiss = false,
+                ) { _ ->
+                    Box(
+                        modifier = Modifier
+                            .testTag("body")
+                            .fillMaxWidth()
+                            .height(80.dp),
+                    )
+                }
+            }
+        }
+        waitForIdle()
+        val titleBottom = onNodeWithText("Default Sheet").fetchSemanticsNode().boundsInRoot.bottom
+        val bodyTop = onNodeWithTag("body").fetchSemanticsNode().boundsInRoot.top
+        assertTrue(bodyTop >= titleBottom)
     }
 }
