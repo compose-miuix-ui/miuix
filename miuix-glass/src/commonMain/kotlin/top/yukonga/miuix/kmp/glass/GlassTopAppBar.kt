@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
@@ -569,7 +571,9 @@ private fun GlassTopAppBarLayout(
                 val state = scrollBehavior.state
                 val limit = state.heightOffsetLimit
                 if (limit <= 0f && limit >= -height.toFloat()) {
-                    (height.toFloat() + limit - state.heightOffset).coerceAtLeast(
+                    val offset = state.heightOffset
+                    val boundedOffset = if (offset.isNaN()) 0f else offset.fastCoerceIn(limit, 0f)
+                    (height.toFloat() + limit - boundedOffset).fastCoerceAtLeast(
                         TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
                     )
                 } else {
@@ -584,7 +588,7 @@ private fun GlassTopAppBarLayout(
                     topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
                 )
             }
-            (coveredHeight + gradientOverhang.toPx().coerceAtLeast(0f)).fastRoundToInt()
+            (coveredHeight + gradientOverhang.toPx().fastCoerceAtLeast(0f)).fastRoundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
         }
