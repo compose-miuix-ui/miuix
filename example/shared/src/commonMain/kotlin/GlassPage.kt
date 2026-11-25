@@ -35,7 +35,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -121,6 +120,7 @@ import utils.TopLayer
 import utils.appPageHorizontalInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
+import utils.pageScrollModifiers
 import utils.rememberAppSafePadding
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -290,7 +290,7 @@ fun GlassPage(padding: PaddingValues) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .appPageHorizontalInsets()
-                        .padding(start = 24.dp, end = 24.dp, top = 20.dp)
+                        .padding(horizontal = 24.dp)
                         .layout { measurable, constraints ->
                             val bottom = maxOf(24.dp, safePadding.calculateBottomPadding() + 8.dp, padding.calculateBottomPadding() + 8.dp)
                                 .roundToPx().coerceIn(0, constraints.maxHeight)
@@ -529,7 +529,12 @@ fun GlassPage(padding: PaddingValues) {
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        .pageScrollModifiers(
+                            appState.enableScrollEndHaptic,
+                            true,
+                            scrollBehavior,
+                        ),
+                    overscrollEffect = null,
                     contentPadding = pageContentPadding(innerPadding, padding),
                 ) {
                     if (!tabsInTopBar) {
