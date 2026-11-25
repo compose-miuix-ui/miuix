@@ -75,6 +75,7 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
+import top.yukonga.miuix.kmp.glass.GlassScrollableTabRow
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
@@ -144,6 +145,7 @@ private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
 
 private val SortOrders = listOf("Updated", "Created", "Title")
 private val PrimaryTabTitles = listOf("Sound", "Haptics")
+private val ScrollableTabTitles = listOf("All", "Apps", "Games", "Media", "Tools", "Updates")
 private val NeutralTabTitles = listOf("Home", "Widget", "Theme", "Paper")
 private val SegmentedTabTitles = listOf("Privacy", "Security")
 private val AlignedPopupLabels = listOf("Start", "Center", "End")
@@ -887,6 +889,7 @@ private fun GlassPageTabRows(
     surfaceActive: () -> Boolean = { false },
 ) {
     val tabSurfaceAlpha = if (surfaceActive()) 1f else 0f
+    var scrollableTab by remember { mutableIntStateOf(0) }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         GlassTabRow(
             tabs = PrimaryTabTitles,
@@ -922,6 +925,17 @@ private fun GlassPageTabRows(
             surfaceAlpha = tabSurfaceAlpha,
             stroke = stroke,
             material = material ?: GlassSegmentedTabRowDefaults.material(),
+        )
+        GlassScrollableTabRow(
+            tabs = ScrollableTabTitles,
+            selectedIndex = scrollableTab,
+            onSelect = { scrollableTab = it },
+            backdrop = backdrop,
+            style = style,
+            alpha = alpha,
+            surfaceAlpha = tabSurfaceAlpha,
+            stroke = stroke,
+            material = material ?: GlassTabRowDefaults.material(),
         )
     }
 }

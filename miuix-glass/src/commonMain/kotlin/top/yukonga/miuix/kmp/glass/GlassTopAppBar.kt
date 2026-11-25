@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
@@ -185,7 +184,6 @@ private val TopBarProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.25f)
 /** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
 private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     val colors = opacities.map { color.copy(alpha = color.alpha * it) }
-    val topColor: Color get() = colors[0]
 
     override fun createShader(size: Size): Shader = LinearGradientShader(
         from = Offset.Zero,
