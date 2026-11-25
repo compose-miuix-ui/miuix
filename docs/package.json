@@ -1,12 +1,12 @@
 {
   "license": "Apache-2.0",
   "devDependencies": {
-    "@nolebase/vitepress-plugin-enhanced-readabilities": "^2.18.2",
-    "@nolebase/vitepress-plugin-git-changelog": "^2.18.2",
-    "medium-zoom": "^1.1.0",
+    "@nolebase/vitepress-plugin-enhanced-readabilities": "^2.21.1",
+    "@nolebase/vitepress-plugin-git-changelog": "^2.21.1",
+    "medium-zoom": "^1.1.2",
     "vitepress": "^1.6.4",
     "vitepress-plugin-comment-with-giscus": "^1.1.15",
-    "vue": "^3.5.33"
+    "vue": "^3.5.46"
   },
   "scripts": {
     "docs:dev": "vitepress dev --host",

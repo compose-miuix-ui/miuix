@@ -72,6 +72,13 @@ export default defineConfig({
       next: false,
     },
   },
+  vue: {
+    template: {
+      compilerOptions: {
+        hoistStatic: false,
+      },
+    },
+  },
   vite: {
     optimizeDeps: {
       exclude: [
