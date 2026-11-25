@@ -206,16 +206,17 @@ private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
 
 private class TopAppBarFixedFadeBrush(
     val band: TopAppBarBandBrush,
-    fadeHeight: Float,
+    private val fadeHeight: Float,
 ) : ShaderBrush() {
-    private val shader: Shader = LinearGradientShader(
-        from = Offset.Zero,
-        to = Offset(0f, fadeHeight.coerceAtLeast(1f)),
-        colors = band.colors,
-        colorStops = TopAppBarBandBrush.stops,
-    )
-
-    override fun createShader(size: Size): Shader = shader
+    override fun createShader(size: Size): Shader {
+        val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
+        return LinearGradientShader(
+            from = Offset(0f, fadeStart),
+            to = Offset(0f, fadeStart + fadeHeight.coerceAtLeast(1f)),
+            colors = band.colors,
+            colorStops = TopAppBarBandBrush.stops,
+        )
+    }
 }
 
 /**
@@ -476,13 +477,7 @@ fun GlassTopAppBar(
                     .then(
                         if (fadeBrush != null) {
                             Modifier.drawBehind {
-                                val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
-                                if (fadeStart > 0f) {
-                                    drawRect(color = fadeBrush.band.topColor, size = Size(size.width, fadeStart))
-                                }
-                                translate(top = fadeStart) {
-                                    drawRect(brush = fadeBrush, size = Size(size.width, size.height - fadeStart))
-                                }
+                                drawRect(brush = fadeBrush)
                             }
                         } else {
                             Modifier.background(bandBrush)
