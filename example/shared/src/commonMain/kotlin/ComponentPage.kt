@@ -54,6 +54,7 @@ import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
+import utils.LocalAppPageInsets
 import utils.pageContentPadding
 import utils.pageScrollModifiers
 import utils.rememberBlurBackdrop
@@ -160,6 +161,7 @@ private fun ComponentPageContent(
             }
         },
         snackbarHost = snackbarHost,
+        contentWindowInsets = LocalAppPageInsets.current.contentInsets,
     ) { innerPadding ->
         val contentPadding = pageContentPadding(
             innerPadding,

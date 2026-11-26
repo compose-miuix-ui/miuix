@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -55,8 +57,11 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.node.Ref
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
@@ -71,6 +76,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
@@ -217,6 +225,24 @@ fun IconsPage(
         computedStateOf { activeListState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
     }
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    @Suppress("DEPRECATION")
+    val clipboardManager = LocalClipboardManager.current
+    val hapticFeedback = LocalHapticFeedback.current
+    val onCopyIconName: (String) -> Unit = remember(clipboardManager, hapticFeedback, snackbarHostState, coroutineScope) {
+        { name ->
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            clipboardManager.setText(AnnotatedString(name))
+            coroutineScope.launch {
+                snackbarHostState.newestSnackbarData()?.dismiss()
+                snackbarHostState.showSnackbar(
+                    message = "Copied \"$name\"",
+                    duration = SnackbarDuration.Short,
+                )
+            }
+        }
+    }
 
     val searchResultCardModifier = remember {
         Modifier.padding(horizontal = 12.dp, vertical = SearchResultVerticalPadding)
@@ -365,6 +391,15 @@ fun IconsPage(
                     )
                 }
             },
+            snackbarHost = {
+                val safeBottom = LocalAppPageInsets.current.safeInsets.asPaddingValues().calculateBottomPadding()
+                val extraBottom = (padding.calculateBottomPadding() - safeBottom).coerceAtLeast(0.dp)
+                SnackbarHost(
+                    state = snackbarHostState,
+                    modifier = Modifier.padding(bottom = extraBottom),
+                )
+            },
+            contentWindowInsets = LocalAppPageInsets.current.contentInsets,
         ) { innerPadding ->
             val contentPadding = pageContentPadding(
                 innerPadding,
@@ -461,10 +496,13 @@ fun IconsPage(
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .clip(IconCellShape)
-                                                        .clickable {
-                                                            selectedIconIndex = iconIndex
-                                                            showWeightDialog = true
-                                                        }
+                                                        .combinedClickable(
+                                                            onClick = {
+                                                                selectedIconIndex = iconIndex
+                                                                showWeightDialog = true
+                                                            },
+                                                            onLongClick = { onCopyIconName(iconNames[iconIndex]) },
+                                                        )
                                                         .padding(horizontal = 4.dp, vertical = 10.dp),
                                                     horizontalAlignment = Alignment.CenterHorizontally,
                                                 ) {
