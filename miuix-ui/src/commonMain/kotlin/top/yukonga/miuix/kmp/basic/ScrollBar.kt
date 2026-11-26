@@ -127,6 +127,8 @@ data class ScrollBarColors(
  * @param thumbMinLength The minimum length of the thumb.
  * @param endPadding The padding from the end edge.
  * @param isFadeEnabled Whether the scrollbar fades out after scrolling or interaction stops.
+ * @param interactive Whether the scrollbar responds to hover, click, and drag gestures.
+ *   When `false`, it acts as a non-interactive scroll indicator.
  * @param topAppBarScrollBehavior Optional [ScrollBehavior] to coordinate top app bar collapse/expand
  *   and blur progress while dragging the scrollbar.
  */
@@ -142,6 +144,7 @@ fun Modifier.verticalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
     topAppBarScrollBehavior: ScrollBehavior? = null,
 ): Modifier = verticalScrollBar(
     adapter = rememberScrollBarAdapter(state, reverseLayout),
@@ -152,6 +155,7 @@ fun Modifier.verticalScrollBar(
     thumbMinLength = thumbMinLength,
     endPadding = endPadding,
     isFadeEnabled = isFadeEnabled,
+    interactive = interactive,
     topAppBarScrollBehavior = topAppBarScrollBehavior,
 )
 
@@ -169,6 +173,7 @@ fun Modifier.verticalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
     topAppBarScrollBehavior: ScrollBehavior? = null,
 ): Modifier = scrollBar(
     adapter = adapter,
@@ -180,6 +185,7 @@ fun Modifier.verticalScrollBar(
     thumbMinLength = thumbMinLength,
     endPadding = endPadding,
     isFadeEnabled = isFadeEnabled,
+    interactive = interactive,
     topAppBarScrollBehavior = topAppBarScrollBehavior,
 )
 
@@ -201,6 +207,7 @@ fun Modifier.horizontalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
 ): Modifier = horizontalScrollBar(
     adapter = rememberScrollBarAdapter(state, reverseLayout),
     trackPadding = trackPadding,
@@ -209,6 +216,7 @@ fun Modifier.horizontalScrollBar(
     cornerRadius = cornerRadius,
     thumbMinLength = thumbMinLength,
     endPadding = endPadding,
+    interactive = interactive,
     isFadeEnabled = isFadeEnabled,
 )
 
@@ -226,6 +234,7 @@ fun Modifier.horizontalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
 ): Modifier = scrollBar(
     adapter = adapter,
     orientation = Orientation.Horizontal,
@@ -236,6 +245,7 @@ fun Modifier.horizontalScrollBar(
     thumbMinLength = thumbMinLength,
     endPadding = endPadding,
     isFadeEnabled = isFadeEnabled,
+    interactive = interactive,
     topAppBarScrollBehavior = null,
 )
 
@@ -252,6 +262,8 @@ fun Modifier.horizontalScrollBar(
  * @param thumbMinLength The minimum length of the thumb.
  * @param endPadding The padding from the end edge.
  * @param isFadeEnabled Whether the scrollbar fades out after scrolling or interaction stops.
+ * @param interactive Whether the scrollbar responds to hover, click, and drag gestures.
+ *   When `false`, it acts as a non-interactive scroll indicator.
  * @param topAppBarScrollBehavior Optional [ScrollBehavior] to coordinate top app bar collapse/expand
  *   and blur progress while dragging the scrollbar.
  */
@@ -269,6 +281,7 @@ fun VerticalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
     topAppBarScrollBehavior: ScrollBehavior? = null,
 ) {
     val measurePolicy = remember(thumbWidth, endPadding) {
@@ -286,6 +299,7 @@ fun VerticalScrollBar(
             thumbMinLength = thumbMinLength,
             endPadding = endPadding,
             isFadeEnabled = isFadeEnabled,
+            interactive = interactive,
             topAppBarScrollBehavior = topAppBarScrollBehavior,
         ),
         measurePolicy = measurePolicy,
@@ -305,6 +319,8 @@ fun VerticalScrollBar(
  * @param thumbMinLength The minimum length of the thumb.
  * @param endPadding The padding from the end edge.
  * @param isFadeEnabled Whether the scrollbar fades out after scrolling or interaction stops.
+ * @param interactive Whether the scrollbar responds to hover, click, and drag gestures.
+ *   When `false`, it acts as a non-interactive scroll indicator.
  */
 @ExperimentalScrollBarApi
 @Composable
@@ -320,6 +336,7 @@ fun HorizontalScrollBar(
     thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
     isFadeEnabled: Boolean = true,
+    interactive: Boolean = true,
 ) {
     val measurePolicy = remember(thumbWidth, endPadding) {
         horizontalMeasurePolicy(endPadding = endPadding, thumbWidth = thumbWidth)
@@ -336,6 +353,7 @@ fun HorizontalScrollBar(
             thumbMinLength = thumbMinLength,
             endPadding = endPadding,
             isFadeEnabled = isFadeEnabled,
+            interactive = interactive,
             topAppBarScrollBehavior = null,
         ),
         measurePolicy = measurePolicy,
@@ -377,6 +395,7 @@ private fun Modifier.scrollBar(
     thumbMinLength: Dp,
     endPadding: Dp,
     isFadeEnabled: Boolean,
+    interactive: Boolean,
     topAppBarScrollBehavior: ScrollBehavior?,
 ): Modifier {
     val hasCustomThumbColor = colors.thumbColor != Color.Unspecified
@@ -398,6 +417,7 @@ private fun Modifier.scrollBar(
             thumbMinLength = thumbMinLength,
             endPadding = endPadding,
             isFadeEnabled = isFadeEnabled,
+            interactive = interactive,
             topAppBarScrollBehavior = topAppBarScrollBehavior,
         ),
     )
@@ -417,6 +437,7 @@ private class ScrollBarElement(
     private val thumbMinLength: Dp,
     private val endPadding: Dp,
     private val isFadeEnabled: Boolean,
+    private val interactive: Boolean,
     private val topAppBarScrollBehavior: ScrollBehavior?,
 ) : ModifierNodeElement<ScrollBarNode>() {
 
@@ -433,6 +454,7 @@ private class ScrollBarElement(
         thumbMinLength = thumbMinLength,
         endPadding = endPadding,
         isFadeEnabled = isFadeEnabled,
+        interactive = interactive,
         topAppBarScrollBehavior = topAppBarScrollBehavior,
     )
 
@@ -450,6 +472,7 @@ private class ScrollBarElement(
             thumbMinLength = thumbMinLength,
             endPadding = endPadding,
             isFadeEnabled = isFadeEnabled,
+            interactive = interactive,
             topAppBarScrollBehavior = topAppBarScrollBehavior,
         )
     }
@@ -469,6 +492,7 @@ private class ScrollBarElement(
         if (thumbMinLength != other.thumbMinLength) return false
         if (endPadding != other.endPadding) return false
         if (isFadeEnabled != other.isFadeEnabled) return false
+        if (interactive != other.interactive) return false
         if (topAppBarScrollBehavior != other.topAppBarScrollBehavior) return false
         return true
     }
@@ -486,6 +510,7 @@ private class ScrollBarElement(
         result = 31 * result + thumbMinLength.hashCode()
         result = 31 * result + endPadding.hashCode()
         result = 31 * result + isFadeEnabled.hashCode()
+        result = 31 * result + interactive.hashCode()
         result = 31 * result + (topAppBarScrollBehavior?.hashCode() ?: 0)
         return result
     }
@@ -502,6 +527,7 @@ private class ScrollBarElement(
         properties["thumbMinLength"] = thumbMinLength
         properties["endPadding"] = endPadding
         properties["isFadeEnabled"] = isFadeEnabled
+        properties["interactive"] = interactive
         properties["topAppBarScrollBehavior"] = topAppBarScrollBehavior
     }
 }
@@ -520,6 +546,7 @@ private class ScrollBarNode(
     private var thumbMinLength: Dp,
     private var endPadding: Dp,
     private var isFadeEnabled: Boolean,
+    private var interactive: Boolean,
     private var topAppBarScrollBehavior: ScrollBehavior?,
 ) : DelegatingNode(),
     DrawModifierNode,
@@ -581,10 +608,12 @@ private class ScrollBarNode(
         thumbMinLength: Dp,
         endPadding: Dp,
         isFadeEnabled: Boolean,
+        interactive: Boolean,
         topAppBarScrollBehavior: ScrollBehavior?,
     ) {
         val adapterChanged = this.adapter != adapter
         val fadeChanged = this.isFadeEnabled != isFadeEnabled
+        val interactiveChanged = this.interactive != interactive
         val behaviorChanged = this.topAppBarScrollBehavior != topAppBarScrollBehavior
         this.orientation = orientation
         this.trackPadding = trackPadding
@@ -597,6 +626,7 @@ private class ScrollBarNode(
         this.thumbMinLength = thumbMinLength
         this.endPadding = endPadding
         this.isFadeEnabled = isFadeEnabled
+        this.interactive = interactive
         this.topAppBarScrollBehavior = topAppBarScrollBehavior
 
         if (adapterChanged) {
@@ -619,6 +649,9 @@ private class ScrollBarNode(
             } else if (!isHighlighted) {
                 scheduleFadeOut(snapVisibleFirst = false)
             }
+        }
+        if (interactiveChanged && !interactive) {
+            finishPointerInteraction(cancelled = true)
         }
 
         invalidateDraw()
@@ -927,6 +960,7 @@ private class ScrollBarNode(
         pass: PointerEventPass,
         bounds: IntSize,
     ) {
+        if (!interactive) return
         if (pass != PointerEventPass.Initial) return
         cachedBounds = bounds
         val changes = pointerEvent.changes

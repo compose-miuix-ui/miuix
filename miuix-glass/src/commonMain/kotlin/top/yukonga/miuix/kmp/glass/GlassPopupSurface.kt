@@ -59,7 +59,9 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
+import top.yukonga.miuix.kmp.basic.verticalScrollBar
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -204,6 +206,7 @@ internal fun rememberGlassWindowBounds(): IntRect {
  * @param content The rows.
  */
 // The full-page dismiss layer and positioned panel must be siblings in the popup host.
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 internal fun GlassPopupSurface(
     onDismissRequest: () -> Unit,
@@ -321,7 +324,21 @@ internal fun GlassPopupSurface(
             }
             GlassPopupColumn(
                 modifier = Modifier
-                    .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .then(
+                        if (scrollable) {
+                            val scrollState = rememberScrollState()
+                            Modifier
+                                .verticalScrollBar(
+                                    state = scrollState,
+                                    trackPadding = PaddingValues(vertical = 16.dp),
+                                    isFadeEnabled = false,
+                                    interactive = false,
+                                )
+                                .verticalScroll(scrollState)
+                        } else {
+                            Modifier
+                        },
+                    )
                     .padding(contentPadding),
                 content = content,
             )

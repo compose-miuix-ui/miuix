@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.popup
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,6 +23,8 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.verticalScrollBar
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 
@@ -145,6 +148,7 @@ fun OverlayDropdownDialog(
  * Groups are separated by dividers. Item clicks call [top.yukonga.miuix.kmp.basic.DropdownItem.onClick], and [collapseOnSelection]
  * controls whether the dialog is dismissed after a click.
  */
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 fun OverlayDropdownDialog(
     entries: List<DropdownEntry>,
@@ -185,7 +189,15 @@ fun OverlayDropdownDialog(
         content = {
             Layout(
                 content = {
-                    LazyColumn {
+                    val lazyListState = rememberLazyListState()
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.verticalScrollBar(
+                            state = lazyListState,
+                            isFadeEnabled = false,
+                            interactive = false,
+                        ),
+                    ) {
                         dropdownEntriesDialogItems(
                             entries = entries,
                             dropdownColors = dropdownColors,

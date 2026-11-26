@@ -142,6 +142,7 @@ private const val OVERLAY_BOTTOM_SHEET = 3
 private const val OVERLAY_HALF_BOTTOM_SHEET = 4
 
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
+private val LongDropdownItems = (1..20).map { "Option $it" }
 
 private val SortOrders = listOf("Updated", "Created", "Title")
 private val PrimaryTabTitles = listOf("Sound", "Haptics")
@@ -214,6 +215,7 @@ fun GlassPage(padding: PaddingValues) {
     }
     var alignedPopupIndex by remember { mutableIntStateOf(-1) }
     var logLevel by remember { mutableIntStateOf(2) }
+    var longDropdownIndex by remember { mutableIntStateOf(0) }
     var dialogActive by remember { mutableStateOf(false) }
     var sheetActive by remember { mutableStateOf(false) }
     var popupActive by remember { mutableStateOf(false) }
@@ -606,6 +608,14 @@ fun GlassPage(padding: PaddingValues) {
                                 items = LogLevels,
                                 selectedIndex = logLevel,
                                 onSelectedIndexChange = { logLevel = it },
+                                backdrop = backdrop,
+                                visuals = popupVisuals,
+                            )
+                            GlassDropdownPreference(
+                                title = "Scrollable dropdown",
+                                items = LongDropdownItems,
+                                selectedIndex = longDropdownIndex,
+                                onSelectedIndexChange = { longDropdownIndex = it },
                                 backdrop = backdrop,
                                 visuals = popupVisuals,
                             )

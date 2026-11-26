@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.anim.SinOutEasing
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.squircle.addSquircleRect
 import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -81,6 +82,7 @@ private const val MAX_ITEMS_FOR_HEIGHT = 8
  *
  * @param content The items
  */
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 fun ListPopupColumn(
     content: @Composable () -> Unit,
@@ -156,6 +158,12 @@ fun ListPopupColumn(
         modifier = Modifier
             .focusGroup()
             .height(IntrinsicSize.Min)
+            .verticalScrollBar(
+                state = scrollState,
+                trackPadding = PaddingValues(vertical = 12.dp),
+                isFadeEnabled = false,
+                interactive = false,
+            )
             .verticalScroll(state = scrollState),
         measurePolicy = measurePolicy,
     )
