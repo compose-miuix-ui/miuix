@@ -173,7 +173,7 @@ object GlassTopAppBarDefaults {
     fun bandBrush(color: Color): Brush = TopAppBarBandBrush(color)
 
     /** How far the band reaches past the bottom of the bar. */
-    val BandOverhang: Dp = 15.dp
+    val BandOverhang: Dp = 10.dp
 
     @Composable
     @ReadOnlyComposable
