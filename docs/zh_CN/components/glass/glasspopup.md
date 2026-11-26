@@ -111,7 +111,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | minWidth | Dp | 面板最小宽度 | GlassPopupDefaults.MinWidth | 否 |
 | maxWidth | Dp | 面板最大宽度 | GlassPopupDefaults.MaxWidth | 否 |
-| maxHeight | Dp | 面板最大高度，超过后菜单行滚动 | GlassPopupDefaults.MaxHeight | 否 |
+| maxHeight | Dp | 面板最大高度。实际高度上限还取决于窗口安全区、弹窗宿主和设定的边距。放不下的菜单项可滚动查看。 | GlassPopupDefaults.MaxHeight | 否 |
 | safeMargin | Dp | 与窗口安全区及弹窗宿主边缘的最小距离 | GlassPopupDefaults.SafeMargin | 否 |
 
 

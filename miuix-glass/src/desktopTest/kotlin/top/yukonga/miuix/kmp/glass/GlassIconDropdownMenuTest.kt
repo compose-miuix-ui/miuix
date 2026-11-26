@@ -18,16 +18,21 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.DropdownEntry
@@ -44,6 +49,49 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class GlassIconDropdownMenuTest {
+    @Test
+    fun longMenuScrollsWithinTheWindowAndOffsetHost() = runDesktopComposeUiTest(width = 640, height = 400) {
+        val show = mutableStateOf(false)
+        val safeBottom = 280
+        val hostTop = 32
+        setContent {
+            val window = LocalWindowInfo.current
+            val safeWindow = object : WindowInfo by window {
+                override val containerSize = IntSize(window.containerSize.width, safeBottom)
+            }
+            CompositionLocalProvider(LocalDensity provides Density(1f), LocalWindowInfo provides safeWindow) {
+                DialogTestHost {
+                    Box(Modifier.offset(y = hostTop.dp).fillMaxSize()) {
+                        val anchor = rememberGlassPopupAnchor()
+                        GlassIconButton(
+                            onClick = { show.value = true },
+                            modifier = Modifier.offset(480.dp, 140.dp)
+                                .glassPopupAnchor(anchor, 20.dp)
+                                .testTag("trigger"),
+                        ) {
+                            Icon(MiuixIcons.Basic.Search, contentDescription = "Options")
+                        }
+                        GlassIconDropdownMenu(
+                            show = show.value,
+                            onDismissRequest = { show.value = false },
+                            anchor = anchor,
+                            anchorContent = { Icon(MiuixIcons.Basic.Search, contentDescription = null) },
+                            entries = listOf(DropdownEntry(List(16) { DropdownItem("Option ${it + 1}") })),
+                            backdrop = null,
+                        )
+                    }
+                }
+            }
+        }
+        onNodeWithTag("trigger").performClick()
+
+        val viewport = onNode(hasScrollAction(), useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val margin = GlassPopupDefaults.SafeMargin.value
+        assertEquals(hostTop + margin, viewport.top, 1f)
+        assertEquals(safeBottom - margin, viewport.bottom, 1f)
+        onNodeWithText("Option 16").performScrollTo().assertIsDisplayed()
+    }
+
     @Test
     fun submenuUsesTheClickedRowAndPreservesWidthAtHighDensity() = checkCascade(LayoutDirection.Ltr, false)
 

@@ -13,12 +13,11 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
@@ -55,7 +54,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
@@ -163,24 +161,17 @@ internal fun placeGlassPopup(
 
 /** Safe area of the window in window coordinates, excluding the display cutout and system bars. */
 @Composable
-internal fun rememberGlassWindowBounds(): IntRect {
+private fun glassWindowBounds(): Rect {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val displayCutout = WindowInsets.displayCutout
-    val statusBars = WindowInsets.statusBars
-    val navigationBars = WindowInsets.navigationBars
-    val captionBar = WindowInsets.captionBar
+    val insets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
     val containerSize = LocalWindowInfo.current.containerSize
-    return remember(layoutDirection, density, displayCutout, statusBars, navigationBars, captionBar, containerSize) {
-        with(density) {
-            IntRect(
-                left = displayCutout.getLeft(this, layoutDirection),
-                top = statusBars.getTop(this),
-                right = containerSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
-            )
-        }
-    }
+    return Rect(
+        left = insets.getLeft(density, layoutDirection).toFloat(),
+        top = insets.getTop(density).toFloat(),
+        right = (containerSize.width - insets.getRight(density, layoutDirection)).toFloat(),
+        bottom = (containerSize.height - insets.getBottom(density)).toFloat(),
+    )
 }
 
 /**
@@ -228,15 +219,7 @@ internal fun GlassPopupSurface(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val windowBounds = rememberGlassWindowBounds()
-    val windowRect = remember(windowBounds) {
-        Rect(
-            windowBounds.left.toFloat(),
-            windowBounds.top.toFloat(),
-            windowBounds.right.toFloat(),
-            windowBounds.bottom.toFloat(),
-        )
-    }
+    val windowRect = glassWindowBounds()
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier = Modifier
@@ -344,10 +327,22 @@ internal fun GlassPopupSurface(
             )
         },
     ) { measurables, constraints ->
-        val safeInset = if (scrollable) sizing.safeMargin.roundToPx() * 2 else 0
-        val widest = sizing.maxWidth.roundToPx().coerceAtMost((constraints.maxWidth - safeInset).coerceAtLeast(0))
+        // Measure and place against the same bounds, including hosts offset by inset padding or a rail.
+        val origin = hostOrigin.value
+        val left = maxOf(windowRect.left, origin.x)
+        val top = maxOf(windowRect.top, origin.y)
+        val placementBounds = Rect(
+            left = left,
+            top = top,
+            right = minOf(windowRect.right, origin.x + constraints.maxWidth).coerceAtLeast(left),
+            bottom = minOf(windowRect.bottom, origin.y + constraints.maxHeight).coerceAtLeast(top),
+        )
+        val margins = sizing.safeMargin.toPx() * 2f
+        val availableWidth = if (scrollable) (placementBounds.width - margins).toInt().coerceAtLeast(0) else constraints.maxWidth
+        val availableHeight = if (scrollable) (placementBounds.height - margins).toInt().coerceAtLeast(0) else constraints.maxHeight
+        val widest = sizing.maxWidth.roundToPx().coerceAtMost(availableWidth)
         val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
-        val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
+        val tallest = sizing.maxHeight.roundToPx().coerceAtMost(availableHeight)
         val width = intrinsics.width(contentToken, widest, tallest, measurables.size) {
             measurables[1].maxIntrinsicWidth(tallest)
         }.coerceIn(narrowest, widest)
@@ -363,16 +358,6 @@ internal fun GlassPopupSurface(
         )
         measured.end = Size(foreground.width.toFloat(), foreground.height.toFloat())
         onMeasured?.invoke(measured.end)
-        // Stay inside the in-page host too; wide layouts clip the pane around it.
-        val origin = hostOrigin.value
-        val hostRight = origin.x + constraints.maxWidth
-        val hostBottom = origin.y + constraints.maxHeight
-        val placementBounds = Rect(
-            left = maxOf(windowRect.left, origin.x),
-            top = maxOf(windowRect.top, origin.y),
-            right = minOf(windowRect.right, hostRight).coerceAtLeast(windowRect.left),
-            bottom = minOf(windowRect.bottom, hostBottom).coerceAtLeast(windowRect.top),
-        )
         val current = frame(measured.end, placementBounds)
         measured.rect = current.rect
         measured.cornerRadius = current.cornerRadius

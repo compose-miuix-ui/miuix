@@ -111,7 +111,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | minWidth | Dp | Narrowest panel width | GlassPopupDefaults.MinWidth | No |
 | maxWidth | Dp | Widest panel width | GlassPopupDefaults.MaxWidth | No |
-| maxHeight | Dp | Maximum panel height before rows scroll | GlassPopupDefaults.MaxHeight | No |
+| maxHeight | Dp | Maximum panel height. The height limit also accounts for the window safe area, the popup host, and the configured margins. Overflowing rows scroll. | GlassPopupDefaults.MaxHeight | No |
 | safeMargin | Dp | Minimum distance from the window safe area and the popup host edges | GlassPopupDefaults.SafeMargin | No |
 
 
