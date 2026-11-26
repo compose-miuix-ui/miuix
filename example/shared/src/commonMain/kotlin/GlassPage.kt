@@ -133,6 +133,7 @@ private val NavItems: List<GlassNavigationItem> = listOf(
 )
 
 private val TabRowPlacements = listOf("TopAppBar", "List")
+private val TopBarTabRowCounts = listOf("1", "2", "3", "4")
 private const val TABS_IN_TOP_BAR = 0
 private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
@@ -199,6 +200,7 @@ fun GlassPage(padding: PaddingValues) {
     var alpha by remember { mutableFloatStateOf(1f) }
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
     var tabRowPlacement by remember { mutableIntStateOf(TABS_IN_LIST) }
+    var topBarTabRowCount by remember { mutableIntStateOf(4) }
     var topAppBarProgressiveBlur by remember { mutableStateOf(true) }
     var navIndex by remember { mutableIntStateOf(0) }
     var navigationBarSearchButton by remember(navIndex) { mutableStateOf(navIndex == 0 || navIndex == 2) }
@@ -431,6 +433,7 @@ fun GlassPage(padding: PaddingValues) {
                                     .padding(horizontal = horizontalPadding)
                                     .padding(top = 6.dp, bottom = 12.dp),
                                 surfaceActive = contentUnderTopBarProvider,
+                                rowCount = topBarTabRowCount,
                             )
                         }
                     },
@@ -648,6 +651,16 @@ fun GlassPage(padding: PaddingValues) {
                                 backdrop = backdrop,
                                 visuals = popupVisuals,
                             )
+                            if (tabsInTopBar) {
+                                GlassDropdownPreference(
+                                    title = "TopAppBar TabRow count",
+                                    items = TopBarTabRowCounts,
+                                    selectedIndex = topBarTabRowCount - 1,
+                                    onSelectedIndexChange = { topBarTabRowCount = it + 1 },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
+                                )
+                            }
                         }
                     }
                     item(key = "controls-title") { SmallTitle(text = "Material") }
@@ -897,6 +910,7 @@ private fun GlassPageTabRows(
     onJoinedTabSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     surfaceActive: () -> Boolean = { false },
+    rowCount: Int = 4,
 ) {
     val tabSurfaceAlpha = if (surfaceActive()) 1f else 0f
     var scrollableTab by remember { mutableIntStateOf(0) }
@@ -912,40 +926,46 @@ private fun GlassPageTabRows(
             stroke = stroke,
             material = material ?: GlassTabRowDefaults.material(),
         )
-        GlassTabRow(
-            tabs = NeutralTabTitles,
-            selectedIndex = neutralTab,
-            onSelect = onNeutralTabSelect,
-            backdrop = backdrop,
-            style = style,
-            alpha = alpha,
-            surfaceAlpha = tabSurfaceAlpha,
-            stroke = stroke,
-            material = material ?: GlassTabRowDefaults.material(),
-            height = GlassTabRowDefaults.NeutralHeight,
-            colors = GlassTabRowDefaults.neutralColors(),
-        )
-        GlassSegmentedTabRow(
-            tabs = SegmentedTabTitles,
-            selectedIndex = joinedTab,
-            onSelect = onJoinedTabSelect,
-            backdrop = backdrop,
-            style = style,
-            alpha = alpha,
-            surfaceAlpha = tabSurfaceAlpha,
-            stroke = stroke,
-            material = material ?: GlassSegmentedTabRowDefaults.material(),
-        )
-        GlassScrollableTabRow(
-            tabs = ScrollableTabTitles,
-            selectedIndex = scrollableTab,
-            onSelect = { scrollableTab = it },
-            backdrop = backdrop,
-            style = style,
-            alpha = alpha,
-            surfaceAlpha = tabSurfaceAlpha,
-            stroke = stroke,
-            material = material ?: GlassTabRowDefaults.material(),
-        )
+        if (rowCount >= 2) {
+            GlassTabRow(
+                tabs = NeutralTabTitles,
+                selectedIndex = neutralTab,
+                onSelect = onNeutralTabSelect,
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
+                height = GlassTabRowDefaults.NeutralHeight,
+                colors = GlassTabRowDefaults.neutralColors(),
+            )
+        }
+        if (rowCount >= 3) {
+            GlassSegmentedTabRow(
+                tabs = SegmentedTabTitles,
+                selectedIndex = joinedTab,
+                onSelect = onJoinedTabSelect,
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassSegmentedTabRowDefaults.material(),
+            )
+        }
+        if (rowCount >= 4) {
+            GlassScrollableTabRow(
+                tabs = ScrollableTabTitles,
+                selectedIndex = scrollableTab,
+                onSelect = { scrollableTab = it },
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
+            )
+        }
     }
 }

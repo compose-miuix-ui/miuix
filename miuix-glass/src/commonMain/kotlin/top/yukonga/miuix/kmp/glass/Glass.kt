@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.BackdropPipeline
@@ -213,7 +215,7 @@ private class GlassPipeline(
         with(scope) {
             noiseDither(noiseCoefficient)
             val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
-            blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
+            blur(radius.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
             if (underlayMaterial != null) {
                 val underlay = cachedUnderlayBlendEffect ?: buildColorBlendEffect(
                     underlayMaterial,
@@ -429,10 +431,10 @@ internal fun Modifier.fallbackGlassShadow(
     alpha: () -> Float,
 ): Modifier = dropShadow(shape) {
     val sourceScale = density / GlassDefaults.SourceDensity
-    radius = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    radius = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
     offset = Offset(shadow.offsetX * sourceScale, shadow.offsetY * sourceScale)
     color = shadow.color
-    this.alpha = alpha().coerceIn(0f, 1f)
+    this.alpha = alpha().fastCoerceIn(0f, 1f)
 }
 
 /** Tints the glass material with a container surface when appropriate. */

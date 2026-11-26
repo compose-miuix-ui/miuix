@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
 import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.EdgeLightSource
 import top.yukonga.miuix.kmp.material.EdgePeak
@@ -102,14 +104,14 @@ internal fun RuntimeShader.setEdgeStrokeUniforms(
     alpha: Float,
     density: Density,
 ) {
-    val maxRadius = (widthPx * 0.5f).coerceAtMost(heightPx * 0.5f)
+    val maxRadius = (widthPx * 0.5f).fastCoerceAtMost(heightPx * 0.5f)
     setFloatUniform("in_halfViewFloor", floor(widthPx * 0.5f), floor(heightPx * 0.5f))
     val band = with(density) { stroke.width.toPx() }
     val bevel = with(density) { stroke.bevel.toPx() }
     // Preserve the half-pixel stroke-width bias without rounding to an integer.
     setFloatUniform(
         "in_strokeBand",
-        (band + 0.5f).coerceAtMost(maxRadius),
+        (band + 0.5f).fastCoerceAtMost(maxRadius),
         bevel + 0.5f,
     )
     val color = stroke.color
@@ -136,7 +138,7 @@ internal fun RuntimeShader.setEdgeLightUniform(
     val dx = light.x - LIGHT_REF_X
     val dy = light.y - LIGHT_REF_Y
     val dz = light.z
-    val length = sqrt(dx * dx + dy * dy + dz * dz).coerceAtLeast(1e-6f)
+    val length = sqrt(dx * dx + dy * dy + dz * dz).fastCoerceAtLeast(1e-6f)
     setFloatUniform(
         directionName,
         dx / length,

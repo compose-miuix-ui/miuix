@@ -3,6 +3,8 @@
 
 package top.yukonga.miuix.kmp.blur.internal
 
+import androidx.compose.ui.util.fastCoerceIn
+
 /** Builds a 1D separable Blur shader with [tapCount] symmetric tap pairs (1..7) along [axis] (0=X, 1=Y). */
 internal fun buildBlurShader(tapCount: Int, axis: Int, unpremul: Boolean): String {
     require(tapCount in 1..MAX_BLUR_TAPS)
@@ -113,14 +115,7 @@ internal fun buildProgressiveBlurShader(
         ""
     }
     val maskSlope = if (midDecay) "1.8181818" else "1.5384615"
-    val radiusDecay = if (midDecay) {
-        """
-        float om = 1.0 - m;
-        float radius = in_maxRadius * om * sqrt(om);"""
-    } else {
-        """
-        float radius = in_maxRadius * (1.0 - m * m);"""
-    }
+    val radiusDecay = "\n        float radius = in_maxRadius * (1.0 - m);"
     val bandRamp = if (sharpBand && sharpMask) {
         """
         float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
@@ -193,7 +188,7 @@ ${indent}return outColor;"""
 $curveUniform$sharpUniforms
     half4 main(float2 xy) {
         float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
-        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr$bandRamp
+        float smoothRaw = raw;$curveExpr$bandRamp
         if (radius <= 0.004) {$earlyReturn
         }
         float sigma = radius * 0.5 + 0.5;
@@ -244,7 +239,7 @@ internal fun progressiveBlurShaderForTap(
     inlineNoise: Boolean = false,
 ): String {
     require(!sharpBand || (!inlineTint && !inlineNoise)) { "inlineTint/inlineNoise cannot be combined with sharpBand" }
-    val tapIdx = ((tapBound / 4) - 1).coerceIn(0, 5)
+    val tapIdx = ((tapBound / 4) - 1).fastCoerceIn(0, 5)
     val variant = when {
         inlineTint && inlineNoise -> 8
         unpremul && inlineNoise -> 7
@@ -276,7 +271,7 @@ internal fun progressiveBlurShaderForTap(
  */
 internal fun progressiveLoopTapBound(maxRadius: Float): Int {
     val needed = kotlin.math.ceil(maxRadius).toInt()
-    return (((needed + 3) / 4) * 4).coerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
+    return (((needed + 3) / 4) * 4).fastCoerceIn(4, PROGRESSIVE_BLUR_MAX_TAP)
 }
 
 private const val PROGRESSIVE_LOOP_MODE_COUNT = 5
@@ -307,7 +302,7 @@ internal fun progressiveLoopShaderKey(
         unpremul -> 1
         else -> 0
     }
-    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val tapIdx = ((tap / 4) - 1).fastCoerceIn(0, 5)
     val slot = ((axis * PROGRESSIVE_LOOP_MODE_COUNT + mode) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) *
         PROGRESSIVE_TAP_COUNT + tapIdx
     return PROGRESSIVE_LOOP_KEYS[slot]
@@ -323,7 +318,7 @@ internal fun progressiveSharpShaderKey(
 ): String {
     val mid = if (midDecay) 1 else 0
     val maskedIdx = if (masked) 1 else 0
-    val tapIdx = ((tap / 4) - 1).coerceIn(0, 5)
+    val tapIdx = ((tap / 4) - 1).fastCoerceIn(0, 5)
     val slot = (((mid * 2 + axis) * 2 + maskedIdx) * PROGRESSIVE_CURVE_KIND_COUNT + curveKind) * PROGRESSIVE_TAP_COUNT + tapIdx
     return PROGRESSIVE_SHARP_KEYS[slot]
         ?: "LMPSL_${mid}_${axis}_m${masked}_c${curveKind}_t${(tapIdx + 1) * 4}".also { PROGRESSIVE_SHARP_KEYS[slot] = it }
@@ -364,7 +359,7 @@ private fun buildProgressiveSharpMaskShader(curveKind: Int): String {
 
     half4 main(float2 xy) {
         float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
-        float smoothRaw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
+        float smoothRaw = raw;$curveExpr
         float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
         half mw = half(clamp(m * 1.5384615, 0.0, 1.0));
         mw = mw * mw * (half(3.0) - half(2.0) * mw);
@@ -985,8 +980,7 @@ private fun buildBlendModeRampUniforms(curveKind: Int): String {
     uniform float in_gradOffset;$curveUniform
 
     float evalRampRaw(float2 fragCoord) {
-        float raw = clamp(dot(fragCoord, in_gradVec) + in_gradOffset, 0.0, 1.0);
-        raw = raw * raw * (3.0 - 2.0 * raw);$curveExpr
+        float raw = clamp(dot(fragCoord, in_gradVec) + in_gradOffset, 0.0, 1.0);$curveExpr
         return raw;
     }
 

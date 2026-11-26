@@ -8,12 +8,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.blur.BackdropEffectScopeImpl
 import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.ln
@@ -83,8 +84,8 @@ internal fun createBlurEffect(
 
     // `size / downScale` is the recording's texel space, which is the space the shader samples in;
     // the clamp sits just inside it.
-    val texW = (size.width / downScale).coerceAtLeast(1f)
-    val texH = (size.height / downScale).coerceAtLeast(1f)
+    val texW = (size.width / downScale).fastCoerceAtLeast(1f)
+    val texH = (size.height / downScale).fastCoerceAtLeast(1f)
 
     val rawScratch = scope.blurRawWeights
     val paramOffsets = scope.blurParamOffsets
@@ -127,7 +128,7 @@ internal fun createBlurEffect(
         ).apply {
             setFloatUniform("in_blurOffset", hOffsets!!)
             setFloatUniform("in_blurWeight", hWeights!!)
-            setFloatUniform("in_centerWeight", (1f - 2f * hPairWeightSum).coerceAtLeast(0f))
+            setFloatUniform("in_centerWeight", (1f - 2f * hPairWeightSum).fastCoerceAtLeast(0f))
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
         }
         effect = runtimeShaderEffect(hShader, "child")
@@ -157,7 +158,7 @@ internal fun createBlurEffect(
         ).apply {
             setFloatUniform("in_blurOffset", shaderOffsets)
             setFloatUniform("in_blurWeight", shaderWeights)
-            setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).coerceAtLeast(0f))
+            setFloatUniform("in_centerWeight", (1f - 2f * pairWeightSum).fastCoerceAtLeast(0f))
             setFloatUniform("in_maxCoord", texW - 0.5f, texH - 0.5f)
         }
         effect = effect?.chain(runtimeShaderEffect(vShader, "child"))
@@ -199,7 +200,7 @@ internal fun computeProgressiveGradient(
     scope.progGradVecX = ax * invGradSpan
     scope.progGradVecY = ay * invGradSpan
     scope.progGradOffset = -projFull * invGradSpan
-    scope.progClampedCurve = curve.coerceIn(0.05f, 20f)
+    scope.progClampedCurve = curve.fastCoerceIn(0.05f, 20f)
 }
 
 /**
@@ -244,14 +245,14 @@ internal fun createProgressiveBlurEffect(
     val gradVecY = scope.progGradVecY
     val gradOffset = scope.progGradOffset
     val clampedCurve = scope.progClampedCurve
-    val texW = ((compW + padLeft + padRight) / downScale).coerceAtLeast(1f)
-    val texH = ((compH + padTop + padBottom) / downScale).coerceAtLeast(1f)
+    val texW = ((compW + padLeft + padRight) / downScale).fastCoerceAtLeast(1f)
+    val texH = ((compH + padTop + padBottom) / downScale).fastCoerceAtLeast(1f)
     val curveKind = progressiveCurveKind(clampedCurve)
 
     // Shader uses σ = radius·0.5 + 0.5, so radius = 2·σ_ds − 1; capped at the constant loop bound.
     val maxCap = PROGRESSIVE_BLUR_MAX_TAP.toFloat()
-    val maxRadiusX = (2f * sqrt(adjustedVarianceX) - 1f).coerceIn(0f, maxCap)
-    val maxRadiusY = (2f * sqrt(adjustedVarianceY) - 1f).coerceIn(0f, maxCap)
+    val maxRadiusX = (2f * sqrt(adjustedVarianceX) - 1f).fastCoerceIn(0f, maxCap)
+    val maxRadiusY = (2f * sqrt(adjustedVarianceY) - 1f).fastCoerceIn(0f, maxCap)
 
     var effect: RenderEffect? = null
 
@@ -347,27 +348,26 @@ internal fun createProgressiveBlurEffect(
  * [primary] when `exp >= 2`, bridging 4×/8×/16× down to a narrow 1× sharp end.
  */
 internal fun progressiveMidSharpThreshold(exp: Int): Float = when {
-    exp <= 2 -> 0.72f
-    exp == 3 -> 0.83f
-    else -> 0.80f
+    exp <= 2 -> 0.60f
+    exp == 3 -> 0.68f
+    else -> 0.72f
 }
 
 /** Normalized `smoothRaw` threshold where the 1× sharp band takes over for [exp]. */
 internal fun progressiveSharpThreshold(exp: Int): Float = when (exp) {
     1 -> 0.84f
     2 -> 0.92f
-    3 -> 0.972f
-    else -> 0.967f
+    else -> 0.97f
 }
 
 private fun progressivePrimarySigmaAt(radius: Float, exp: Int, threshold: Float): Float {
     val downScale = (1 shl exp).toFloat()
     val sigma = radius * BLUR_RADIUS_TO_SIGMA
     val adjVar = adjustedVarianceForExp(sigma * sigma, exp)
-    val maxRDs = (2f * sqrt(adjVar) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+    val maxRDs = (2f * sqrt(adjVar) - 1f).fastCoerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
     val rThrDs = maxRDs * (1f - threshold)
     val sigmaDsThr = if (rThrDs > 0.004f) rThrDs * 0.5f + 0.5f else 0f
-    val impliedVar = IMPLIED_BOX_VARIANCE[exp.coerceIn(0, 4)]
+    val impliedVar = IMPLIED_BOX_VARIANCE[exp.fastCoerceIn(0, 4)]
     return sqrt((sigmaDsThr * downScale) * (sigmaDsThr * downScale) + impliedVar)
 }
 
@@ -379,7 +379,7 @@ internal fun progressiveMidSharpLoopRadius(radius: Float, exp: Int): Float {
     if (radius <= 0f || exp < 2) return 0f
     val effSigma = progressivePrimarySigmaAt(radius, exp, progressiveMidSharpThreshold(exp))
     val adjVar2x = adjustedVarianceForExp(effSigma * effSigma, 1)
-    return (2f * sqrt(adjVar2x) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+    return (2f * sqrt(adjVar2x) - 1f).fastCoerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
 }
 
 /**
@@ -390,24 +390,23 @@ internal fun progressiveSharpLoopRadius(radius: Float, exp: Int): Float {
     if (radius <= 0f || exp <= 0) return 0f
     if (exp < 2) {
         val effSigma = progressivePrimarySigmaAt(radius, exp, progressiveSharpThreshold(exp))
-        return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+        return (2f * effSigma - 1f).fastCoerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
     }
     val midMaxR = progressiveMidSharpLoopRadius(radius, exp)
     val midThr = progressiveMidSharpThreshold(exp)
     val sharpThr = progressiveSharpThreshold(exp)
-    val m = ((sharpThr - midThr) / (1f - midThr)).coerceIn(0f, 1f)
-    val om = 1f - m
-    val rMidAtSharp = midMaxR * om * sqrt(om)
+    val m = ((sharpThr - midThr) / (1f - midThr)).fastCoerceIn(0f, 1f)
+    val rMidAtSharp = midMaxR * (1f - m)
     val sigma2x = if (rMidAtSharp > 0.004f) rMidAtSharp * 0.5f + 0.5f else 0f
     val effSigma = sqrt((sigma2x * 2f) * (sigma2x * 2f) + IMPLIED_BOX_VARIANCE[1])
-    return (2f * effSigma - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+    return (2f * effSigma - 1f).fastCoerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
 }
 
-/** Linear-raw position of the band's onset (`pow(smoothstep(raw), curve) = threshold`). */
-private fun progressiveSharpRawThreshold(curve: Float, threshold: Float): Float {
-    val ssThr = threshold.toDouble().pow(1.0 / curve.coerceIn(0.05f, 20f)).coerceIn(0.0, 1.0)
-    return (0.5 - sin(asin(1.0 - 2.0 * ssThr) / 3.0)).toFloat()
-}
+/** Linear-raw position of the band's onset (`pow(raw, curve) = threshold`). */
+private fun progressiveSharpRawThreshold(curve: Float, threshold: Float): Float = threshold.toDouble().pow(1.0 / curve.fastCoerceIn(0.05f, 20f)).coerceIn(0.0, 1.0).toFloat()
+
+/** Maximum 1× handoff radius (in dp) allowed to fall back to the blur-free alpha mask shader. */
+internal const val PROGRESSIVE_SHARP_MASK_MAX_DP = 1.2f
 
 /**
  * Band-limited progressive blur overlay for `[threshold, 1]` at [downScale] (`2f` for the
@@ -448,7 +447,7 @@ internal fun createProgressiveSharpOverlayEffect(
     val gradVecX = ax * invSpan * downScale
     val gradVecY = ay * invSpan * downScale
     val gradOffset = -bandFull * invSpan
-    val clampedCurve = curve.coerceIn(0.05f, 20f)
+    val clampedCurve = curve.fastCoerceIn(0.05f, 20f)
     val curveKind = progressiveCurveKind(clampedCurve)
     val invSharpSpan = 1f / (1f - threshold)
 
@@ -456,7 +455,8 @@ internal fun createProgressiveSharpOverlayEffect(
     val hasV = maxRadiusY >= 0.5f
     if (!hasH && !hasV) return null
 
-    if (!midDecay && downScale == 1f && maxRadiusX < 5.5f && maxRadiusY < 5.5f) {
+    val maskThresholdPx = PROGRESSIVE_SHARP_MASK_MAX_DP * scope.density
+    if (!midDecay && downScale == 1f && maxRadiusX < maskThresholdPx && maxRadiusY < maskThresholdPx) {
         val shader = scope.obtainRuntimeShader(
             progressiveSharpMaskShaderKey(curveKind),
             progressiveSharpMaskShader(curveKind),
@@ -561,10 +561,10 @@ internal fun progressiveSharpBandBounds(
     if (minX > maxX || minY > maxY) return null
 
     return Rect(
-        (minX - margin).coerceAtLeast(0f),
-        (minY - margin).coerceAtLeast(0f),
-        (maxX + margin).coerceAtMost(compW),
-        (maxY + margin).coerceAtMost(compH),
+        (minX - margin).fastCoerceAtLeast(0f),
+        (minY - margin).fastCoerceAtLeast(0f),
+        (maxX + margin).fastCoerceAtMost(compW),
+        (maxY + margin).fastCoerceAtMost(compH),
     )
 }
 
@@ -601,7 +601,7 @@ internal fun computeProgressiveEdgePadding(
     var projZero = projMin + endFraction * span
     if (abs(projZero - projFull) < 1e-3f) projZero = projFull + 1e-3f
     val invSpan = 1f / (projZero - projFull)
-    val clampedCurve = curve.coerceIn(0.05f, 20f)
+    val clampedCurve = curve.fastCoerceIn(0.05f, 20f)
 
     var pLeft = 0f
     var pTop = 0f
@@ -613,9 +613,8 @@ internal fun computeProgressiveEdgePadding(
         val y = compH * iy / steps
         for (ix in 0..steps) {
             val x = compW * ix / steps
-            val raw = ((x * ax + y * ay - projFull) * invSpan).coerceIn(0f, 1f)
-            val s = raw * raw * (3f - 2f * raw)
-            val smoothRaw = if (clampedCurve == 1f) s else s.pow(clampedCurve)
+            val raw = ((x * ax + y * ay - projFull) * invSpan).fastCoerceIn(0f, 1f)
+            val smoothRaw = if (clampedCurve == 1f) raw else raw.pow(clampedCurve)
             val strength = 1f - smoothRaw
             if (strength > 0f) {
                 val rx = reachX * strength
@@ -631,10 +630,10 @@ internal fun computeProgressiveEdgePadding(
             }
         }
     }
-    outPadding[0] = pLeft.coerceIn(0f, reachX)
-    outPadding[1] = pTop.coerceIn(0f, reachY)
-    outPadding[2] = pRight.coerceIn(0f, reachX)
-    outPadding[3] = pBottom.coerceIn(0f, reachY)
+    outPadding[0] = pLeft.fastCoerceIn(0f, reachX)
+    outPadding[1] = pTop.fastCoerceIn(0f, reachY)
+    outPadding[2] = pRight.fastCoerceIn(0f, reachX)
+    outPadding[3] = pBottom.fastCoerceIn(0f, reachY)
 }
 
 /**
@@ -645,7 +644,7 @@ internal fun computeProgressiveEdgePadding(
 private val IMPLIED_BOX_VARIANCE = floatArrayOf(0f, 3.0265f, 7.5625f, 9.0f, 202.696f)
 
 /** Level for a blur of variance [sigmaSquared]: `σ / [MIN_LEVEL_SIGMA]`, clamped to 1..16. */
-private fun levelScaleFor(sigmaSquared: Float): Float = (sqrt(sigmaSquared.coerceAtLeast(0f)) / MIN_LEVEL_SIGMA).coerceIn(1f, 16f)
+private fun levelScaleFor(sigmaSquared: Float): Float = (sqrt(sigmaSquared.fastCoerceAtLeast(0f)) / MIN_LEVEL_SIGMA).fastCoerceIn(1f, 16f)
 
 /**
  * Recording level for [sigmaSquared], snapped to the 1/4-octave grid. The first step (1.19×) stays:
@@ -655,20 +654,20 @@ internal fun quantizedLevelScale(sigmaSquared: Float): Float = LEVEL_SCALES[leve
 
 /** Implied box-prefilter variance (source px²) at level [scale]. */
 internal fun impliedBoxVarianceForScale(scale: Float): Float {
-    val pos = (ln(scale.coerceIn(1f, 16f)) / LN2).coerceIn(0f, 4f)
-    val index = pos.toInt().coerceAtMost(3)
+    val pos = (ln(scale.fastCoerceIn(1f, 16f)) / LN2).fastCoerceIn(0f, 4f)
+    val index = pos.toInt().fastCoerceAtMost(3)
     val t = pos - index
     return IMPLIED_BOX_VARIANCE[index] + (IMPLIED_BOX_VARIANCE[index + 1] - IMPLIED_BOX_VARIANCE[index]) * t
 }
 
 /** Box-compensated Gaussian variance (in level px²) for [sigmaSquared] at level [scale]. */
-internal fun adjustedVarianceForScale(sigmaSquared: Float, scale: Float): Float = ((sigmaSquared - impliedBoxVarianceForScale(scale)) / (scale * scale)).coerceAtLeast(0.1f)
+internal fun adjustedVarianceForScale(sigmaSquared: Float, scale: Float): Float = ((sigmaSquared - impliedBoxVarianceForScale(scale)) / (scale * scale)).fastCoerceAtLeast(0.1f)
 
 /** [adjustedVarianceForScale] at a ladder level. */
 internal fun adjustedVarianceForExp(sigmaSquared: Float, exp: Int): Float {
-    val clampedExp = exp.coerceIn(0, 4)
+    val clampedExp = exp.fastCoerceIn(0, 4)
     val scale = (1 shl clampedExp).toFloat()
-    return ((sigmaSquared - IMPLIED_BOX_VARIANCE[clampedExp]) / (scale * scale)).coerceAtLeast(0.1f)
+    return ((sigmaSquared - IMPLIED_BOX_VARIANCE[clampedExp]) / (scale * scale)).fastCoerceAtLeast(0.1f)
 }
 
 /**
