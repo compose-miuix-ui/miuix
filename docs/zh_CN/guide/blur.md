@@ -82,16 +82,15 @@ Box(
 ::: tip 背景色
 `layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。如果捕获的内容存在透明区域（如无背景的文字），模糊时颜色会扩散到透明像素中，产生明显的色块。
 
-为避免此问题，请在 `onDraw` lambda 中绘制不透明背景：
+为避免此问题，请直接向 `rememberLayerBackdrop` 传入 `backgroundColor`，这样不透明背景会在同一次单次录制中绘制，避免重复录制内容：
 
 ```kotlin
-val backgroundColor = MaterialTheme.colorScheme.surface
-val backdrop = rememberLayerBackdrop {
-    drawRect(backgroundColor) // 确保捕获到不透明背景
-    drawContent()
-}
+val backdrop = rememberLayerBackdrop(
+    backgroundColor = MiuixTheme.colorScheme.surface,
+)
 ```
 
+如果需要在捕获内容下方额外合成另一层背景仅供模糊采样（不直接绘制到屏幕上），可使用 `onDrawUnderlay`——内容仍只录制一次，并复用于屏幕显示与背景层合成。
 :::
 
 ```kotlin

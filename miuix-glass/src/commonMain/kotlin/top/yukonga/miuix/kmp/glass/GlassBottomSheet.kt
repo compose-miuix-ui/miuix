@@ -157,13 +157,14 @@ fun GlassBottomSheet(
     val sheetSurfaceBackdrop = if (blurActive) rememberLayerBackdrop() else null
     var bodyCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val sheetSceneBackdrop = if (blurActive && sheetSurfaceBackdrop != null) {
-        rememberLayerBackdrop {
-            val coords = bodyCoordinates?.takeIf { it.isAttached }
-            with(sheetSurfaceBackdrop) {
-                drawBackdrop(this@rememberLayerBackdrop, coords)
-            }
-            drawContent()
-        }
+        rememberLayerBackdrop(
+            onDrawUnderlay = {
+                val coords = bodyCoordinates?.takeIf { it.isAttached }
+                with(sheetSurfaceBackdrop) {
+                    drawBackdrop(this@rememberLayerBackdrop, coords)
+                }
+            },
+        )
     } else {
         null
     }

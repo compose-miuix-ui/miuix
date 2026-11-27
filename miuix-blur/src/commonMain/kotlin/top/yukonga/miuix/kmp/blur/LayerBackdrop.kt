@@ -36,21 +36,27 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * @param graphicsLayer The graphics layer to record content into.
  * @param backgroundColor Optional opaque backdrop fill painted before content when using the
  *   default [onDraw], keeping recording single-pass.
+ * @param onDrawUnderlay Optional underlay drawn behind the recorded content inside [graphicsLayer]
+ *   only (not to the screen). Content is still recorded once into a reusable layer and composited
+ *   both to screen and over the underlay. Ignored when a custom [onDraw] is supplied.
  * @param onDraw Custom draw logic for the layer content.
  */
 @Composable
 fun rememberLayerBackdrop(
     graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
     backgroundColor: Color = Color.Unspecified,
+    onDrawUnderlay: (DrawScope.() -> Unit)? = null,
     onDraw: ContentDrawScope.() -> Unit = DefaultOnDraw,
 ): LayerBackdrop {
     val currentBackgroundColor by rememberUpdatedState(backgroundColor)
+    val currentOnDrawUnderlay by rememberUpdatedState(onDrawUnderlay)
     val currentOnDraw by rememberUpdatedState(onDraw)
     return remember(graphicsLayer) {
         LayerBackdrop(
             graphicsLayer = graphicsLayer,
             onDraw = { currentOnDraw() },
             backgroundColor = { currentBackgroundColor },
+            onDrawUnderlay = { currentOnDrawUnderlay },
             isDefaultOnDraw = { currentOnDraw === DefaultOnDraw },
         )
     }
@@ -66,6 +72,7 @@ class LayerBackdrop internal constructor(
     val graphicsLayer: GraphicsLayer,
     internal val onDraw: ContentDrawScope.() -> Unit,
     internal val backgroundColor: () -> Color = { Color.Unspecified },
+    internal val onDrawUnderlay: () -> (DrawScope.() -> Unit)? = { null },
     internal val isDefaultOnDraw: () -> Boolean = { false },
 ) : Backdrop {
 

@@ -83,16 +83,15 @@ Box(
 ::: tip Background Color
 `layerBackdrop` only captures the content drawn by the composable it is applied to — it does **not** include backgrounds from parent composables (e.g., Scaffold's Surface). If the captured content has transparent areas (such as text without a background), the blur will spread colors into transparency, producing visible color artifacts.
 
-To avoid this, draw an opaque background in the `onDraw` lambda:
+To avoid this, pass `backgroundColor` to `rememberLayerBackdrop` so an opaque background is painted in the same single-pass recording:
 
 ```kotlin
-val backgroundColor = MaterialTheme.colorScheme.surface
-val backdrop = rememberLayerBackdrop {
-    drawRect(backgroundColor) // Ensures an opaque background is captured
-    drawContent()
-}
+val backdrop = rememberLayerBackdrop(
+    backgroundColor = MiuixTheme.colorScheme.surface,
+)
 ```
 
+If you need to composite another backdrop behind the captured content for blur sampling only (without drawing it to the screen), use `onDrawUnderlay` — content is still recorded once and reused for both screen drawing and the backdrop layer.
 :::
 
 ```kotlin

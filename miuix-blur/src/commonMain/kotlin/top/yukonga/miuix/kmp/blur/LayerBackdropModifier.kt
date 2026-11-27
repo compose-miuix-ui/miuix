@@ -7,12 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
+import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 
 /**
@@ -57,6 +59,22 @@ private class LayerBackdropNode(
     DrawModifierNode,
     GlobalPositionAwareModifierNode {
 
+    private var contentLayer: GraphicsLayer? = null
+    private var activeUnderlay: (DrawScope.() -> Unit)? = null
+
+    private val contentOnlyRecordBlock: DrawScope.() -> Unit = {
+        (this as? ContentDrawScope)?.drawContent()
+    }
+
+    private val underlayCompositeRecordBlock: DrawScope.() -> Unit = {
+        val bg = backdrop.backgroundColor()
+        if (bg.isSpecified) {
+            drawRect(bg)
+        }
+        activeUnderlay?.invoke(this)
+        contentLayer?.let { drawLayer(it) }
+    }
+
     private val defaultRecordBlock: DrawScope.() -> Unit = {
         val bg = backdrop.backgroundColor()
         if (bg.isSpecified) {
@@ -71,10 +89,24 @@ private class LayerBackdropNode(
 
     override fun ContentDrawScope.draw() {
         if (backdrop.isDefaultOnDraw()) {
-            with(backdrop.graphicsLayer) {
-                record(block = defaultRecordBlock)
+            val underlay = backdrop.onDrawUnderlay()
+            if (underlay != null) {
+                val layer = contentLayer ?: requireGraphicsContext().createGraphicsLayer().also { contentLayer = it }
+                with(layer) {
+                    record(block = contentOnlyRecordBlock)
+                }
+                drawLayer(layer)
+                activeUnderlay = underlay
+                with(backdrop.graphicsLayer) {
+                    record(block = underlayCompositeRecordBlock)
+                }
+                activeUnderlay = null
+            } else {
+                with(backdrop.graphicsLayer) {
+                    record(block = defaultRecordBlock)
+                }
+                drawLayer(backdrop.graphicsLayer)
             }
-            drawLayer(backdrop.graphicsLayer)
         } else {
             drawContent()
             with(backdrop.graphicsLayer) {
@@ -91,5 +123,8 @@ private class LayerBackdropNode(
 
     override fun onDetach() {
         backdrop.layerCoordinates = null
+        contentLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
+        contentLayer = null
+        activeUnderlay = null
     }
 }

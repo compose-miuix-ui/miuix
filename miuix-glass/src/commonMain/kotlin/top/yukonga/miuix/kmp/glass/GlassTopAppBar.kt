@@ -389,11 +389,12 @@ fun GlassTopAppBar(
         { delta -> buttonBackdropConsumers = (buttonBackdropConsumers + delta).fastCoerceAtLeast(0) }
     }
     val progressiveBackdrop = if (progressiveBlur && rawBackdrop != null) {
-        rememberLayerBackdrop {
-            val coordinates = backgroundCoordinates?.takeIf { it.isAttached }
-            with(rawBackdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
-            drawContent()
-        }
+        rememberLayerBackdrop(
+            onDrawUnderlay = {
+                val coordinates = backgroundCoordinates?.takeIf { it.isAttached }
+                with(rawBackdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
+            },
+        )
     } else {
         null
     }
