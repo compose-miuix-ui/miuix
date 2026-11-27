@@ -3,10 +3,12 @@
 
 package top.yukonga.miuix.kmp.material
 
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import java.lang.ref.WeakReference
 
+@OptIn(InternalGraphicsResourceApi::class)
 internal actual fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache = if (graphicsResourcesResetOnResume) {
     BackdropShaderCaches.cacheFor(cache)
 } else {
@@ -18,7 +20,6 @@ private object BackdropShaderCaches {
 
     @Synchronized
     fun cacheFor(cache: RuntimeShaderCache): RuntimeShaderCache {
-        val generation = graphicsResourceGeneration
         var match: Entry? = null
         val iterator = entries.iterator()
         while (iterator.hasNext()) {
@@ -30,23 +31,24 @@ private object BackdropShaderCaches {
                 match = entry
             }
         }
-        if (match == null) {
-            entries.add(Entry(WeakReference(cache), generation))
-            return cache
-        }
-        if (match.generation == generation) return cache
-        return match.replacement ?: ReplacementCache().also { match.replacement = it }
+        val entry = match ?: Entry(WeakReference(cache), graphicsResourceGeneration).also { entries.add(it) }
+        return BoundCache(cache, entry)
     }
 
     private class Entry(val original: WeakReference<RuntimeShaderCache>, val generation: Long) {
-        var replacement: RuntimeShaderCache? = null
+        val replacement: RuntimeShaderCache by lazy { ReplacementCache() }
+    }
+
+    private class BoundCache(val original: RuntimeShaderCache, val entry: Entry) : RuntimeShaderCache {
+        override fun obtainRuntimeShader(key: String, string: String): RuntimeShader {
+            val cache = if (entry.generation == graphicsResourceGeneration) original else entry.replacement
+            return cache.obtainRuntimeShader(key, string)
+        }
     }
 }
 
-private const val MAX_REPLACEMENT_SHADERS = 32
-
 private class ReplacementCache : RuntimeShaderCache {
-    private val shaders = LinkedHashMap<Pair<String, String>, RuntimeShader>()
+    private val shaders = mutableMapOf<String, MutableMap<String, RuntimeShader>>()
     private var generation = graphicsResourceGeneration
 
     @Synchronized
@@ -56,11 +58,6 @@ private class ReplacementCache : RuntimeShaderCache {
             shaders.clear()
             generation = currentGeneration
         }
-        val shaderKey = key to string
-        // Reinsert hits so that eviction drops the least recently used shader.
-        val shader = shaders.remove(shaderKey) ?: RuntimeShader(string)
-        shaders[shaderKey] = shader
-        if (shaders.size > MAX_REPLACEMENT_SHADERS) shaders.remove(shaders.keys.first())
-        return shader
+        return shaders.getOrPut(key) { mutableMapOf() }.getOrPut(string) { RuntimeShader(string) }
     }
 }

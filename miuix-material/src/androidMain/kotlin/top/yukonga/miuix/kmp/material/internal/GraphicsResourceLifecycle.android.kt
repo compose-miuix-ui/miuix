@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 
+@InternalGraphicsResourceApi
 actual val graphicsResourcesResetOnResume: Boolean by lazy {
     Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true) &&
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
@@ -22,19 +23,21 @@ actual val graphicsResourcesResetOnResume: Boolean by lazy {
 }
 
 @Composable
+@OptIn(InternalGraphicsResourceApi::class)
 internal actual fun graphicsResourceLifecycle(): Lifecycle? {
     if (!graphicsResourcesResetOnResume) return null
     val context = LocalContext.current
     return remember(context) { context.activityLifecycle() }
 }
 
+@InternalGraphicsResourceApi
 actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? = if (graphicsResourcesResetOnResume) currentValueOf(LocalContext).activityLifecycle() else null
 
 private fun Context.activityLifecycle(): Lifecycle? {
     var context = this
     while (context is ContextWrapper) {
         if (context is Activity) return (context as? LifecycleOwner)?.lifecycle
-        val baseContext = context.baseContext
+        val baseContext = context.baseContext ?: return null
         if (baseContext === context) return null
         context = baseContext
     }

@@ -3,10 +3,12 @@
 
 package top.yukonga.miuix.kmp.material
 
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.referentialEqualityPolicy
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.SynchronizedObject
 import kotlinx.coroutines.internal.synchronized
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceGeneration
 
 /**
@@ -32,15 +34,13 @@ interface RuntimeShaderCache {
  * After a graphics resource reset, backdrop effects use a Miuix-managed replacement
  * for each custom cache previously used by those effects.
  */
-val LocalRuntimeShaderCache = staticCompositionLocalOf<RuntimeShaderCache> {
+val LocalRuntimeShaderCache = compositionLocalOf<RuntimeShaderCache>(referentialEqualityPolicy()) {
     DefaultRuntimeShaderCache()
 }
 
 /** Internal implementation shared by Miuix backdrop effects. */
-fun RuntimeShaderCache.obtainBackdropRuntimeShader(key: String, source: String): RuntimeShader {
-    val cache = if (this is DefaultRuntimeShaderCache) this else backdropCacheFor(this)
-    return cache.obtainRuntimeShader(key, source)
-}
+@InternalGraphicsResourceApi
+fun RuntimeShaderCache.forBackdropEffects(): RuntimeShaderCache = if (this is DefaultRuntimeShaderCache) this else backdropCacheFor(this)
 
 internal expect fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache
 

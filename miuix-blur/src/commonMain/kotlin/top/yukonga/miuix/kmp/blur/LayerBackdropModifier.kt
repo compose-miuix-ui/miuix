@@ -5,7 +5,6 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
@@ -15,9 +14,10 @@ import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.InspectorInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.blur.internal.recordContentLayer
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
-import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 
 /**
@@ -52,6 +52,7 @@ private class LayerBackdropElement(
     override fun hashCode(): Int = backdrop.hashCode()
 }
 
+@OptIn(InternalGraphicsResourceApi::class)
 private class LayerBackdropNode(
     var backdrop: LayerBackdrop,
 ) : Modifier.Node(),
@@ -64,13 +65,10 @@ private class LayerBackdropNode(
     private var coordinates: LayoutCoordinates? = null
 
     fun updateBackdrop(backdrop: LayerBackdrop) {
-        val resetOnResume = graphicsResourcesResetOnResume
-        if (!resetOnResume && this.backdrop === backdrop) return
-        if (this.backdrop !== backdrop) {
-            this.backdrop.layerCoordinates = null
-            this.backdrop = backdrop
-            if (resetOnResume) backdrop.layerCoordinates = coordinates
-        }
+        if (this.backdrop === backdrop) return
+        this.backdrop.layerCoordinates = null
+        this.backdrop = backdrop
+        backdrop.layerCoordinates = coordinates
         invalidateDraw()
     }
 
@@ -85,20 +83,16 @@ private class LayerBackdropNode(
         }
     }
 
-    private val recordBlock: DrawScope.() -> Unit = {
-        (this as? ContentDrawScope)?.let(backdrop.onDraw)
-    }
+    private val recordBlock: ContentDrawScope.() -> Unit = { backdrop.onDraw(this) }
 
     override fun ContentDrawScope.draw() {
         drawContent()
-        with(backdrop.graphicsLayer) {
-            record(block = recordBlock)
-        }
+        recordContentLayer(backdrop.graphicsLayer, recordBlock)
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
-            if (graphicsResourcesResetOnResume) this.coordinates = coordinates
+            this.coordinates = coordinates
             backdrop.layerCoordinates = coordinates
         }
     }

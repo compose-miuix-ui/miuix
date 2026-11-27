@@ -79,6 +79,8 @@ Box(
 }
 ```
 
+在联发科芯片小米设备上，Activity 恢复时，`rememberLayerBackdrop()` 会重建默认的捕获图层。如果传入自定义的 `graphicsLayer`，其生命周期由调用方管理。
+
 ::: tip 背景色
 `layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。如果捕获的内容存在透明区域（如无背景的文字），模糊时颜色会扩散到透明像素中，产生明显的色块。
 

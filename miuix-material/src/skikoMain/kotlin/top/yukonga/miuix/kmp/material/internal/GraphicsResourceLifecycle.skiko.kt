@@ -7,9 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.lifecycle.Lifecycle
 
+@InternalGraphicsResourceApi
 actual val graphicsResourcesResetOnResume: Boolean = false
 
 @Composable
 internal actual fun graphicsResourceLifecycle(): Lifecycle? = null
 
+@InternalGraphicsResourceApi
 actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? = null

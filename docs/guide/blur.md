@@ -80,6 +80,8 @@ Box(
 }
 ```
 
+On Xiaomi devices with MediaTek chipsets, `rememberLayerBackdrop()` recreates its default capture layer when the Activity resumes. If you supply a `graphicsLayer`, its lifetime is managed by the caller.
+
 ::: tip Background Color
 `layerBackdrop` only captures the content drawn by the composable it is applied to — it does **not** include backgrounds from parent composables (e.g., Scaffold's Surface). If the captured content has transparent areas (such as text without a background), the blur will spread colors into transparency, producing visible color artifacts.
 

@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(InternalGraphicsResourceApi::class)
+
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.animation.animateColorAsState
@@ -99,6 +101,7 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.rememberGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -658,11 +661,10 @@ private fun androidx.compose.foundation.layout.RowScope.GlassNavigationBarItemCo
             verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
         ) {
             BadgedBox(badge = { item.badge?.invoke() }) {
-                val painter = rememberVectorPainter(item.icon)
                 // Recreate the icon's draw cache and its tint layer after resume.
                 key(iconGeneration) {
                     Icon(
-                        painter = painter,
+                        painter = rememberVectorPainter(item.icon),
                         tint = tintProducer,
                         contentDescription = null,
                         modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),

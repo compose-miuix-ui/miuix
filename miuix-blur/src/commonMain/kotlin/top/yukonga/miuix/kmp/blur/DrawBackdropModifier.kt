@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(InternalGraphicsResourceApi::class)
+
 package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.runtime.getValue
@@ -11,6 +13,8 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -64,12 +68,15 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveMidSharpThreshold
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpBandBounds
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpLoopRadius
 import top.yukonga.miuix.kmp.blur.internal.progressiveSharpThreshold
+import top.yukonga.miuix.kmp.blur.internal.recordContentLayer
 import top.yukonga.miuix.kmp.blur.internal.recordLayer
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
+import top.yukonga.miuix.kmp.material.RuntimeShaderCache
+import top.yukonga.miuix.kmp.material.forBackdropEffects
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
-import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.abs
@@ -390,7 +397,7 @@ private class DrawBackdropNode(
     var onDrawBackdrop: DrawScope.(drawBackdrop: DrawScope.() -> Unit) -> Unit,
     var onDrawSurface: (DrawScope.() -> Unit)?,
     var onDrawFront: (DrawScope.() -> Unit)?,
-    var contentBlendMode: BlendMode = BlendMode.SrcOver,
+    contentBlendMode: BlendMode = BlendMode.SrcOver,
     var progressiveGradient: ProgressiveBlur? = null,
     var enabled: Boolean = true,
 ) : Modifier.Node(),
@@ -407,6 +414,9 @@ private class DrawBackdropNode(
     var pipelineRef: BackdropPipeline? = null
         private set
     private var requiresOffscreenCompositing by mutableStateOf(onDrawFront != null)
+    var contentBlendMode by mutableStateOf(contentBlendMode)
+    private val needsOffscreenCompositing: Boolean
+        get() = requiresOffscreenCompositing || contentBlendMode != BlendMode.SrcOver
 
     private val pipelineShape: () -> Shape = { pipelineRef!!.shape }
     private val pipelineEffects: BackdropEffectScope.() -> Unit = { pipelineRef!!.configureEffects(this) }
@@ -722,8 +732,7 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        val needsFullLayer = contentBlendMode != BlendMode.SrcOver ||
-            (requiresOffscreenCompositing && maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX)
+        val needsFullLayer = needsOffscreenCompositing && maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
         compositingStrategy = if (needsFullLayer) {
             CompositingStrategy.Offscreen
         } else {
@@ -736,7 +745,7 @@ private class DrawBackdropNode(
     private var drawVersion by mutableIntStateOf(0)
 
     fun requestDraw() {
-        drawVersion++
+        Snapshot.withoutReadObservation { drawVersion++ }
         invalidateDraw()
     }
 
@@ -911,6 +920,10 @@ private class DrawBackdropNode(
     private val contentPaint = Paint()
     private val tilePaint = Paint()
     private var tiledSurfaceLayer: GraphicsLayer? = null
+    private var tiledContentLayer: GraphicsLayer? = null
+    private var tiledFrontLayer: GraphicsLayer? = null
+    private var tileSize = Size.Unspecified
+    private val tileBounds = mutableListOf<Rect>()
 
     // Reused saveLayer bounds for the non-SrcOver content path (DstIn / foreground blur): Rect is a
     // plain class, so caching it avoids a per-frame allocation; rebuilt only when the size changes.
@@ -918,6 +931,7 @@ private class DrawBackdropNode(
 
     // Set once updateEffects() has run with a measured size, i.e. the effect observer is live.
     private var effectsSized = false
+    private var providedShaderCache: RuntimeShaderCache? = null
 
     // Dither chained after the assembled ramp, cached on its coefficient.
     private var stackDitherEffect: RenderEffect? = null
@@ -996,7 +1010,7 @@ private class DrawBackdropNode(
             effectScope.maxPadTop = availT
             effectScope.maxPadRight = availR
             effectScope.maxPadBottom = availB
-            updateEffects()
+            observeEffects(this)
         }
     }
 
@@ -1017,13 +1031,10 @@ private class DrawBackdropNode(
             drawContent()
             return
         }
-        if (effectScope.update(this)) {
-            // Attach skipped construction for lack of a size; re-observe with real geometry.
-            if (effectsSized) updateEffects() else observeEffects()
+        if (effectScope.update(this) || !effectsSized) {
+            observeEffects(this)
         }
-        if (requiresOffscreenCompositing && contentBlendMode == BlendMode.SrcOver &&
-            maxOf(size.width, size.height) > MAX_OFFSCREEN_PX
-        ) {
+        if (needsOffscreenCompositing && maxOf(size.width, size.height) > MAX_OFFSCREEN_PX) {
             drawTiledSurface()
             return
         }
@@ -1037,9 +1048,13 @@ private class DrawBackdropNode(
             val h = size.height
             val bounds = contentBoundsRect?.takeIf { it.right == w && it.bottom == h } ?: Rect(0f, 0f, w, h).also { contentBoundsRect = it }
             contentPaint.blendMode = contentBlendMode
-            drawContext.canvas.saveLayer(bounds, contentPaint)
-            drawContent()
-            drawContext.canvas.restore()
+            val canvas = drawContext.canvas
+            canvas.saveLayer(bounds, contentPaint)
+            try {
+                drawContent()
+            } finally {
+                canvas.restore()
+            }
         }
 
         onDrawFront?.invoke(this)
@@ -1055,30 +1070,73 @@ private class DrawBackdropNode(
     }
 
     private fun ContentDrawScope.drawTiledSurface() {
-        // Record the surface and children once. Only the tiles containing the destination blend
-        // need offscreen storage, and each tile uses the full surface's shader coordinates.
+        // Record drawing commands at the full surface size. Isolate destination blending
+        // only when replaying each tile so the offscreen layers stay within the texture limit.
+        val blendMode = contentBlendMode
+        val blendContent = blendMode != BlendMode.SrcOver
+        val drawFront = onDrawFront
         val surfaceLayer = tiledSurfaceLayer ?: graphicsContext.createGraphicsLayer().also { tiledSurfaceLayer = it }
-        surfaceLayer.record {
+        recordContentLayer(surfaceLayer) {
             drawSurface()
-            this@drawTiledSurface.drawContent()
+            if (!blendContent) {
+                drawContent()
+                drawFront?.invoke(this)
+            }
+        }
+        val contentLayer = if (blendContent) {
+            val layer = tiledContentLayer ?: graphicsContext.createGraphicsLayer().also { tiledContentLayer = it }
+            recordContentLayer(layer) { drawContent() }
+            contentPaint.blendMode = blendMode
+            layer
+        } else {
+            tiledContentLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+            tiledContentLayer = null
+            null
+        }
+        val frontLayer = if (blendContent && drawFront != null) {
+            val layer = tiledFrontLayer ?: graphicsContext.createGraphicsLayer().also { tiledFrontLayer = it }
+            recordLayer(layer, block = drawFront)
+            layer
+        } else {
+            tiledFrontLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+            tiledFrontLayer = null
+            null
         }
 
+        updateTileBounds(size)
         val canvas = drawContext.canvas
+        for (bounds in tileBounds) {
+            clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom) {
+                canvas.saveLayer(bounds, tilePaint)
+                try {
+                    drawLayer(surfaceLayer)
+                    if (contentLayer != null) {
+                        canvas.saveLayer(bounds, contentPaint)
+                        try {
+                            drawLayer(contentLayer)
+                        } finally {
+                            canvas.restore()
+                        }
+                    }
+                    if (frontLayer != null) drawLayer(frontLayer)
+                } finally {
+                    canvas.restore()
+                }
+            }
+        }
+    }
+
+    private fun updateTileBounds(size: Size) {
+        if (tileSize == size) return
+        tileSize = size
+        tileBounds.clear()
         var top = 0f
         while (top < size.height) {
             val bottom = minOf(top + MAX_OFFSCREEN_PX, size.height)
             var left = 0f
             while (left < size.width) {
                 val right = minOf(left + MAX_OFFSCREEN_PX, size.width)
-                clipRect(left, top, right, bottom) {
-                    canvas.saveLayer(Rect(left, top, right, bottom), tilePaint)
-                    try {
-                        drawLayer(surfaceLayer)
-                        onDrawFront?.invoke(this)
-                    } finally {
-                        canvas.restore()
-                    }
-                }
+                tileBounds.add(Rect(left, top, right, bottom))
                 left = right
             }
             top = bottom
@@ -1086,8 +1144,15 @@ private class DrawBackdropNode(
     }
 
     private fun releaseTiledSurfaceLayer() {
-        tiledSurfaceLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        val layer = tiledSurfaceLayer ?: return
+        graphicsContext.releaseGraphicsLayer(layer)
+        tiledContentLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
+        tiledFrontLayer?.let { graphicsContext.releaseGraphicsLayer(it) }
         tiledSurfaceLayer = null
+        tiledContentLayer = null
+        tiledFrontLayer = null
+        tileSize = Size.Unspecified
+        tileBounds.clear()
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
@@ -1112,29 +1177,24 @@ private class DrawBackdropNode(
     }
 
     fun invalidateDrawCache() {
-        if (!enabled) return
+        if (!enabled || !isAttached) return
         observeEffects()
-        if (isAttached && effectsSized) {
-            // placeWithLayer inside an ancestor GraphicsLayer (e.g. squircleSurface) can skip
-            // re-recording draw() on invalidateDraw() alone, leaving stale padding/downscale in
-            // mainLayer paired with the updated renderEffect.
-            requestDraw()
-            invalidatePlacement()
-        }
+        // An ancestor GraphicsLayer can skip re-recording on invalidateDraw() alone.
+        requestDraw()
+        invalidatePlacement()
     }
 
-    private fun observeEffects() {
+    private fun observeEffects(drawScope: DrawScope? = null) {
         observeReads {
-            if (graphicsResourcesResetOnResume) {
-                val cache = currentValueOf(LocalRuntimeShaderCache)
-                if (effectScope.runtimeShaderCache !== cache) {
-                    releaseGraphicsLayers()
-                    effectScope.runtimeShaderCache = cache
-                }
-                observeLifecycle(graphicsResourceLifecycle())
+            observeLifecycle(graphicsResourceLifecycle())
+            val cache = currentValueOf(LocalRuntimeShaderCache)
+            if (providedShaderCache !== cache) {
+                if (providedShaderCache != null) releaseGraphicsLayers()
+                providedShaderCache = cache
+                effectScope.runtimeShaderCache = cache.forBackdropEffects()
             }
-            // No size at attach time: building here would create an effect from NaN dimensions.
-            if (effectScope.size.width.isNaN() || effectScope.size.height.isNaN()) return@observeReads
+            if (drawScope != null) effectScope.update(drawScope)
+            if (!effectScope.size.isSpecified) return@observeReads
             updateEffects()
             effectsSized = true
         }
@@ -1169,11 +1229,10 @@ private class DrawBackdropNode(
     private fun recreateGraphicsResources() {
         if (!enabled) return
         releaseGraphicsLayers()
-        effectsSized = false
         // Drop the layer that contains the drawn content so placement records it into a fresh layer.
         updateLayerBlock(null)
         invalidatePlacement()
-        invalidateDraw()
+        requestDraw()
     }
 
     private fun updateEffects() {
@@ -1463,11 +1522,7 @@ private class DrawBackdropNode(
     }
 
     override fun onAttach() {
-        effectScope.runtimeShaderCache = currentValueOf(LocalRuntimeShaderCache)
-        if (enabled) {
-            primary.ensureMain()
-            observeEffects()
-        }
+        if (enabled) observeEffects()
     }
 
     /**
@@ -1574,6 +1629,7 @@ private class DrawBackdropNode(
     }
 
     fun releaseGraphicsLayers() {
+        effectsSized = false
         releaseTiledSurfaceLayer()
         primary.release()
         midSharpOverlay.release()
@@ -1596,7 +1652,7 @@ private class DrawBackdropNode(
         releaseGraphicsLayers()
         layoutCoordinates = null
         lastPositionInWindow = Offset.Unspecified
-        effectsSized = false
+        providedShaderCache = null
     }
 }
 

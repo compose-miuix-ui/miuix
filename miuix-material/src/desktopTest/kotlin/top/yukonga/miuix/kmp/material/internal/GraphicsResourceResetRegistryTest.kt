@@ -14,6 +14,25 @@ import kotlin.test.assertTrue
 
 class GraphicsResourceResetRegistryTest {
     @Test
+    fun firstSubscriptionWhilePausedResetsOnResume() {
+        val owner = object : LifecycleOwner {
+            override val lifecycle = LifecycleRegistry.createUnsafe(this)
+        }
+        val lifecycle = owner.lifecycle
+        lifecycle.currentState = Lifecycle.State.RESUMED
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+
+        val registry = GraphicsResourceResetRegistry()
+        val resets = mutableListOf<Any>()
+        registry.observe(lifecycle) { resets.add(it) }
+        assertTrue(resets.isEmpty())
+
+        lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        assertEquals(1, resets.size)
+        assertEquals(1L, registry.generation)
+    }
+
+    @Test
     fun subscribersJoiningDuringResumeShareThePendingRefresh() {
         val owner = object : LifecycleOwner {
             override val lifecycle = LifecycleRegistry.createUnsafe(this)

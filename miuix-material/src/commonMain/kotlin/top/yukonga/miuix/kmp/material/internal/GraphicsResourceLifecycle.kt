@@ -18,20 +18,28 @@ internal val graphicsResourceResetRegistry = GraphicsResourceResetRegistry()
 internal val graphicsResourceGeneration: Long
     get() = graphicsResourceResetRegistry.generation
 
+/** Implementation shared by Miuix modules. */
+@RequiresOptIn
+@Retention(AnnotationRetention.BINARY)
+annotation class InternalGraphicsResourceApi
+
 /** Internal device check shared by Miuix graphics components. */
+@InternalGraphicsResourceApi
 expect val graphicsResourcesResetOnResume: Boolean
 
 /**
  * Internal implementation shared by Miuix graphics nodes; not a supported public API.
  * Advances the shared cache once for the delayed HWUI refresh of the current resume.
  */
-fun refreshGraphicsResourceGeneration(generation: Any): Any? = if (graphicsResourcesResetOnResume) {
+@OptIn(InternalGraphicsResourceApi::class)
+private fun refreshGraphicsResourceGeneration(generation: Any): Any? = if (graphicsResourcesResetOnResume) {
     graphicsResourceResetRegistry.refresh(generation)
 } else {
     null
 }
 
 /** Waits for the delayed HWUI refresh while the host is still resumed. */
+@InternalGraphicsResourceApi
 suspend fun awaitGraphicsResourceRefresh(lifecycle: Lifecycle, generation: Any): Any? {
     // HWUI can discard resources after the first resumed frame.
     withFrameNanos { }
@@ -44,18 +52,21 @@ suspend fun awaitGraphicsResourceRefresh(lifecycle: Lifecycle, generation: Any):
 internal expect fun graphicsResourceLifecycle(): Lifecycle?
 
 /** Internal implementation shared by Miuix graphics modifier nodes. */
+@InternalGraphicsResourceApi
 expect fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle?
 
 /**
  * Internal implementation shared by Miuix graphics components; not a supported public API.
  *
- * Observes Android graphics resource resets with one observer per [lifecycle]. After an observed
- * pause, the next resume synchronously supplies the same identity token to every subscriber,
+ * Observes Android graphics resource resets with one observer per [lifecycle]. After a pause
+ * or a subscription that starts in [Lifecycle.State.STARTED], the next resume synchronously
+ * supplies the same identity token to every subscriber,
  * including subscribers that join before the delayed refresh completes.
  * Initial lifecycle catch-up does not reset resources. Other platforms do not subscribe.
  *
  * Call this function and its returned, idempotent cleanup function on the UI thread.
  */
+@InternalGraphicsResourceApi
 fun observeGraphicsResourceResets(lifecycle: Lifecycle, onReset: (Any) -> Unit): () -> Unit = if (graphicsResourcesResetOnResume) {
     graphicsResourceResetRegistry.observe(lifecycle, onReset)
 } else {
@@ -69,6 +80,7 @@ fun observeGraphicsResourceResets(lifecycle: Lifecycle, onReset: (Any) -> Unit):
  * scoped to the host Activity lifecycle and remains null until its first resource reset.
  */
 @Composable
+@InternalGraphicsResourceApi
 fun rememberGraphicsResourceGeneration(): Any? {
     if (!graphicsResourcesResetOnResume) return null
 
@@ -137,7 +149,9 @@ internal class GraphicsResourceResetRegistry {
     private inner class Entry(val lifecycle: Lifecycle) {
         val listeners = mutableListOf<Listener>()
         var observing = false
-        private var paused = false
+
+        // STARTED can mean that the Activity paused before the first observer was registered.
+        private var paused = lifecycle.currentState == Lifecycle.State.STARTED
         private var resume: Resume? = null
         val pendingResume: Any?
             get() = resume?.takeIf { it.active && it.delayedGeneration == null }

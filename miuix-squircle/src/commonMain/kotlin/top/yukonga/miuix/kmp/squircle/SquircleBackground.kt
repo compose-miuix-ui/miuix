@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(InternalGraphicsResourceApi::class)
+
 package top.yukonga.miuix.kmp.squircle
 
 import androidx.compose.foundation.background
@@ -41,10 +43,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.asBrush
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
 import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
@@ -1033,7 +1037,7 @@ private class SquircleShaderHolder {
             boundShader!!
         } else {
             val shader = if (graphicsResourcesResetOnResume) {
-                RuntimeShader(SQUIRCLE_SHADER).apply { setInputShader("cornerSdf", bakedSdfShaderFactory()) }
+                ResettableSquircleShader.obtain()
             } else {
                 shaderCache.obtainRuntimeShader(SQUIRCLE_SHADER_KEY, SQUIRCLE_SHADER).apply {
                     setInputShader("cornerSdf", bakedSdfShader)
@@ -1071,6 +1075,20 @@ private val bakedSdfShaderFactory by lazy {
 }
 
 private val bakedSdfShader: Shader by lazy { bakedSdfShaderFactory() }
+
+private object ResettableSquircleShader {
+    private val cache = DefaultRuntimeShaderCache()
+    private var boundShader: RuntimeShader? = null
+
+    fun obtain(): RuntimeShader {
+        val shader = cache.obtainRuntimeShader(SQUIRCLE_SHADER_KEY, SQUIRCLE_SHADER)
+        if (boundShader !== shader) {
+            shader.setInputShader("cornerSdf", bakedSdfShaderFactory())
+            boundShader = shader
+        }
+        return shader
+    }
+}
 
 private const val SQUIRCLE_SHADER = """
 uniform shader cornerSdf;
