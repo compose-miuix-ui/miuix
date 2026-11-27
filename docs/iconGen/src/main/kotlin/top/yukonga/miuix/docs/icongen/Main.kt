@@ -3,6 +3,13 @@
 
 package top.yukonga.miuix.docs.icongen
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.VectorPath
+import top.yukonga.miuix.kmp.symbol.SymbolCategory
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
+import top.yukonga.miuix.kmp.symbol.VariableSymbol
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import java.io.File
 
 data class SvgPath(
@@ -17,6 +24,13 @@ data class SvgPath(
 )
 
 private val WEIGHT_NAMES = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+private val SYMBOL_WEIGHT_PRESETS = listOf(
+    "Light" to SymbolWeights.Light,
+    "Normal" to SymbolWeights.Normal,
+    "Regular" to SymbolWeights.Regular,
+    "Medium" to SymbolWeights.Medium,
+    "Demibold" to SymbolWeights.Demibold,
+)
 
 /** Simple CLI entry that converts Compose vector icon definitions to SVG files. */
 fun main(args: Array<String>) {
@@ -62,7 +76,7 @@ fun main(args: Array<String>) {
     // Map of BaseName -> Map<Style, RelativePath>
     val basicIconsMap = mutableMapOf<String, MutableMap<String, String>>()
     val extendedIconsMap = mutableMapOf<String, MutableMap<String, String>>()
-    val glassIconsMap = mutableMapOf<String, MutableMap<String, String>>()
+    val symbolIconsMap = mutableMapOf<String, MutableMap<String, String>>()
 
     srcDirs.forEach { srcDir ->
         val src = File(srcDir)
@@ -73,6 +87,18 @@ fun main(args: Array<String>) {
 
         ktFiles.forEach { file ->
             val content = file.readText()
+            if (content.contains("VariableSymbol(")) {
+                val generated = generateSymbolSvgs(
+                    content = content,
+                    dest = dest,
+                    light = light,
+                    dark = dark,
+                    preserveColors = preserveColors,
+                    symbolIconsMap = symbolIconsMap,
+                )
+                count += generated
+                return@forEach
+            }
 
             // Regex to find ImageVector.Builder blocks and extract name, viewport, and pathData
             val builderRegex = Regex("ImageVector\\.Builder\\(([\\s\\S]*?)\\)\\.apply\\s*\\{([\\s\\S]*?)\\}\\.build\\(\\)")
@@ -277,11 +303,7 @@ fun main(args: Array<String>) {
 
                     val isBasic =
                         file.path.contains("basic${File.separator}") || file.path.contains("basic/") || file.path.contains("basic\\")
-                    val targetMap = when {
-                        isGlass -> glassIconsMap
-                        isBasic -> basicIconsMap
-                        else -> extendedIconsMap
-                    }
+                    val targetMap = if (isBasic) basicIconsMap else extendedIconsMap
 
                     val matchedWeight = WEIGHT_NAMES.firstOrNull { iconBaseName.endsWith(".$it") }
                     if (matchedWeight != null) {
@@ -292,57 +314,11 @@ fun main(args: Array<String>) {
                     }
                 }
             }
-            // HyperOS glass icons delegate vector construction to a shared helper.
-            extractCallArguments(content, "buildHyperOSIcon").forEach { argsContent ->
-                val name = Regex("name\\s*=\\s*\"([^\"]+)\"").find(argsContent)?.groupValues?.getOrNull(1) ?: return@forEach
-                val pathStart = argsContent.indexOf("pathData = listOf(")
-                if (pathStart == -1) return@forEach
-                val pathContentStart = pathStart + "pathData = listOf(".length
-                var depth = 1
-                var pathEnd = pathContentStart
-                while (pathEnd < argsContent.length && depth > 0) {
-                    when (argsContent[pathEnd]) {
-                        '(' -> depth++
-                        ')' -> depth--
-                    }
-                    pathEnd++
-                }
-                if (depth != 0) return@forEach
-
-                val d = parsePathNodes(argsContent.substring(pathContentStart, pathEnd - 1))
-                val scale = Regex("scale\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 1f
-                val translationX = Regex("translationX\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
-                val translationY = Regex("translationY\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
-                val matchedWeight = WEIGHT_NAMES.firstOrNull { name.endsWith(".Glass.$it") } ?: return@forEach
-                val simpleName = name.removeSuffix(".Glass.$matchedWeight")
-                val svg = buildSvg(
-                    listOf(
-                        SvgPath(
-                            d = d,
-                            fill = "#000000",
-                            transform = " transform=\"matrix($scale 0 0 ${-scale} $translationX $translationY)\"",
-                        ),
-                    ),
-                    1333.3333f,
-                    1333.3333f,
-                    light,
-                    dark,
-                    preserveColors,
-                )
-                val relativeDir = file.relativeTo(src).parentFile
-                val outSubDir = File(dest, relativeDir.path)
-                outSubDir.mkdirs()
-                val fileName = "$simpleName.$matchedWeight.svg"
-                File(outSubDir, fileName).writeText(svg)
-                count++
-                val relativePath = File(relativeDir, fileName).path.replace("\\", "/")
-                glassIconsMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
-            }
         }
     }
 
     println("[iconGen] Generated $count SVG(s) into $dest")
-    if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty() || glassIconsMap.isNotEmpty())) {
+    if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty() || symbolIconsMap.isNotEmpty())) {
         val separator = "|" + "---|".repeat(WEIGHT_NAMES.size + 1)
         fun generateTable(map: Map<String, Map<String, String>>, nameHeader: String): String {
             val sb = StringBuilder()
@@ -364,7 +340,7 @@ fun main(args: Array<String>) {
         if (docFilePath != null || docFilePathZh == null) {
             val basicTable = generateTable(basicIconsMap, "Icon Name")
             val extendedTable = generateTable(extendedIconsMap, "Icon Name")
-            val glassTable = generateTable(glassIconsMap, "Icon Name")
+            val symbolTable = generateTable(symbolIconsMap, "Icon Name")
 
             val content = StringBuilder()
             content.append("### Basic Icons\n\n")
@@ -373,10 +349,10 @@ fun main(args: Array<String>) {
             content.append("### Extended Icons\n\n")
             content.append("Extended icons include a wide variety of icons for different use cases. Below is the complete list:\n\n")
             content.append(extendedTable).append("\n")
-            if (glassIconsMap.isNotEmpty()) {
-                content.append("### Glass Icons\n\n")
-                content.append("Glass icons ship in the separate `miuix-glass-icons` artifact. They are generated from the HyperOS symbol source and exposed through `MiuixIcons.Glass`. Below is the complete list:\n\n")
-                content.append(glassTable).append("\n")
+            if (symbolIconsMap.isNotEmpty()) {
+                content.append("### Symbol Icons\n\n")
+                content.append("Variable symbol icons ship in the separate `miuix-icons-symbol` artifact and are exposed through `MiuixIcons.Symbol`. They support any continuous `wght` in `150f..700f` without external font files. Below is the complete list across the five named weight presets:\n\n")
+                content.append(symbolTable).append("\n")
             }
 
             if (docFilePath != null) {
@@ -392,7 +368,7 @@ fun main(args: Array<String>) {
         if (docFilePathZh != null) {
             val basicTable = generateTable(basicIconsMap, "图标名称")
             val extendedTable = generateTable(extendedIconsMap, "图标名称")
-            val glassTable = generateTable(glassIconsMap, "图标名称")
+            val symbolTable = generateTable(symbolIconsMap, "图标名称")
 
             val content = StringBuilder()
             content.append("### Basic（基础图标）\n\n")
@@ -401,15 +377,90 @@ fun main(args: Array<String>) {
             content.append("### Extended (扩展图标)\n\n")
             content.append("扩展图标包含更多场景下的图标。以下是完整的列表：\n\n")
             content.append(extendedTable).append("\n")
-            if (glassIconsMap.isNotEmpty()) {
-                content.append("### Glass 图标\n\n")
-                content.append("Glass 图标位于独立的 `miuix-glass-icons` 构件中，由 HyperOS 图标源生成，通过 `MiuixIcons.Glass` 访问。以下是完整的列表：\n\n")
-                content.append(glassTable).append("\n")
+            if (symbolIconsMap.isNotEmpty()) {
+                content.append("### Symbol（可变符号图标）\n\n")
+                content.append("可变符号图标位于独立的 `miuix-icons-symbol` 构件中，通过 `MiuixIcons.Symbol` 访问，无需外置字体文件即可支持 `150f..700f` 任意连续字重。以下展示五个命名预设字重下的完整列表：\n\n")
+                content.append(symbolTable).append("\n")
             }
 
             updateDocFile(File(docFilePathZh), content.toString(), "### Basic（基础图标）")
         }
     }
+}
+
+private fun generateSymbolSvgs(
+    content: String,
+    dest: File,
+    light: String,
+    dark: String,
+    preserveColors: Boolean,
+    symbolIconsMap: MutableMap<String, MutableMap<String, String>>,
+): Int {
+    val name = Regex("""name\s*=\s*"([^"]+)"""").find(content)?.groupValues?.get(1) ?: return 0
+    val encodedData = Regex("""encodedData\s*=\s*"([^"]+)"""").find(content)?.groupValues?.get(1) ?: return 0
+    val advanceWidth = Regex("""advanceWidth\s*=\s*(-?\d+)""").find(content)?.groupValues?.get(1)?.toInt()
+        ?: VariableSymbol.DEFAULT_EM_HEIGHT
+    val advDeltaMin = Regex("""advanceWidthDeltaMin\s*=\s*(-?\d+)""").find(content)?.groupValues?.get(1)?.toInt() ?: 0
+    val advDeltaMax = Regex("""advanceWidthDeltaMax\s*=\s*(-?\d+)""").find(content)?.groupValues?.get(1)?.toInt() ?: 0
+    val ascent = Regex("""ascent\s*=\s*(-?\d+)""").find(content)?.groupValues?.get(1)?.toInt()
+        ?: VariableSymbol.DEFAULT_ASCENT
+    val descent = Regex("""descent\s*=\s*(-?\d+)""").find(content)?.groupValues?.get(1)?.toInt()
+        ?: VariableSymbol.DEFAULT_DESCENT
+    val defaultColorHex = Regex("""defaultColor\s*=\s*Color\(0x([0-9A-Fa-f]{8})\)""").find(content)?.groupValues?.get(1)
+    val defaultColor = defaultColorHex?.let { Color(it.toLong(16)) } ?: Color.Unspecified
+
+    val symbol = VariableSymbol(
+        name = name,
+        category = SymbolCategory.Core,
+        encodedData = encodedData,
+        advanceWidth = advanceWidth,
+        advanceWidthDeltaMin = advDeltaMin,
+        advanceWidthDeltaMax = advDeltaMax,
+        ascent = ascent,
+        descent = descent,
+        defaultColor = defaultColor,
+    )
+
+    var generated = 0
+    val fillHex = defaultColorHex?.let { "#${it.substring(2)}" }
+    val preserveThis = preserveColors || fillHex != null
+
+    for ((weightLabel, weightValue) in SYMBOL_WEIGHT_PRESETS) {
+        val iv = symbol.toImageVector(weight = weightValue)
+        val paths = iv.root.filterIsInstance<VectorPath>().map { vp ->
+            SvgPath(
+                d = pathNodesToSvgD(vp.pathData),
+                fill = fillHex ?: "#000000",
+                fillRule = "nonzero",
+            )
+        }
+        val subDir = File(dest, "symbol/${weightLabel.lowercase()}")
+        if (!subDir.exists()) subDir.mkdirs()
+        val outFile = File(subDir, "$name.svg")
+        outFile.writeText(buildSvg(paths, iv.viewportWidth, iv.viewportHeight, light, dark, preserveThis))
+        symbolIconsMap.getOrPut(name) { mutableMapOf() }[weightLabel] = "symbol/${weightLabel.lowercase()}/$name.svg"
+        generated++
+    }
+    return generated
+}
+
+private fun pathNodesToSvgD(nodes: List<PathNode>): String {
+    val sb = StringBuilder()
+    for (node in nodes) {
+        when (node) {
+            is PathNode.MoveTo -> sb.append("M").append(node.x).append(" ").append(node.y).append(" ")
+
+            is PathNode.LineTo -> sb.append("L").append(node.x).append(" ").append(node.y).append(" ")
+
+            is PathNode.QuadTo -> sb.append("Q").append(node.x1).append(" ").append(node.y1)
+                .append(" ").append(node.x2).append(" ").append(node.y2).append(" ")
+
+            PathNode.Close -> sb.append("Z ")
+
+            else -> Unit
+        }
+    }
+    return sb.toString().trim()
 }
 
 fun updateDocFile(docFile: File, newContent: String, startHeader: String) {

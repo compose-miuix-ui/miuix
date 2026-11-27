@@ -22,9 +22,10 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.More
-import top.yukonga.miuix.kmp.icon.glass.Ok
-import top.yukonga.miuix.kmp.icon.glass.Search
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.icon.symbol.Ok
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -56,7 +57,7 @@ fun GlassIconButtonDemo() {
                     backdrop = backdrop,
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Glass.Ok,
+                        imageVector = MiuixIcons.Symbol.Ok.toImageVector(),
                         contentDescription = "Confirm",
                         tint = MiuixTheme.colorScheme.onBackground,
                     )
@@ -66,7 +67,7 @@ fun GlassIconButtonDemo() {
                     backdrop = backdrop,
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Glass.More,
+                        imageVector = MiuixIcons.Symbol.More.toImageVector(),
                         contentDescription = "More",
                         tint = MiuixTheme.colorScheme.onBackground,
                     )
@@ -76,7 +77,7 @@ fun GlassIconButtonDemo() {
                     backdrop = backdrop,
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Glass.Search,
+                        imageVector = MiuixIcons.Symbol.Search.toImageVector(),
                         contentDescription = "Search",
                         tint = MiuixTheme.colorScheme.onBackground,
                     )

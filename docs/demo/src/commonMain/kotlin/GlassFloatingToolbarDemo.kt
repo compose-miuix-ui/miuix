@@ -23,9 +23,10 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Delete
-import top.yukonga.miuix.kmp.icon.glass.Edit
-import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.symbol.Delete
+import top.yukonga.miuix.kmp.icon.symbol.Edit
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -57,13 +58,13 @@ fun GlassFloatingToolbarDemo() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     IconButton(onClick = { lastAction = "Edit" }) {
-                        Icon(MiuixIcons.Glass.Edit, contentDescription = "Edit")
+                        Icon(MiuixIcons.Symbol.Edit.toImageVector(), contentDescription = "Edit")
                     }
                     IconButton(onClick = { lastAction = "Delete" }) {
-                        Icon(MiuixIcons.Glass.Delete, contentDescription = "Delete")
+                        Icon(MiuixIcons.Symbol.Delete.toImageVector(), contentDescription = "Delete")
                     }
                     IconButton(onClick = { lastAction = "More" }) {
-                        Icon(MiuixIcons.Glass.More, contentDescription = "More")
+                        Icon(MiuixIcons.Symbol.More.toImageVector(), contentDescription = "More")
                     }
                 }
             }

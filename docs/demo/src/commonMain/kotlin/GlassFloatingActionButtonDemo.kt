@@ -21,7 +21,8 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassFloatingActionButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Create
+import top.yukonga.miuix.kmp.icon.symbol.Create
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -49,7 +50,7 @@ fun GlassFloatingActionButtonDemo() {
                 backdrop = backdrop,
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Create,
+                    imageVector = MiuixIcons.Symbol.Create.toImageVector(),
                     tint = MiuixTheme.colorScheme.onPrimary,
                     contentDescription = "Create",
                 )

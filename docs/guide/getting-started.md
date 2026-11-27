@@ -32,7 +32,7 @@ Miuix is composed of several modules that can be used independently:
 | `miuix-ui`          | Core UI component library                                  |
 | `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
 | `miuix-icons`       | Extended icon library, can be used independently           |
-| `miuix-glass-icons` | Glass icon library, can be used independently              |
+| `miuix-icons-symbol` | Built-in variable symbol icon library, can be used independently |
 | `miuix-material`    | Render primitives and material definitions                 |
 | `miuix-blur`        | Blur effect library, can be used independently             |
 | `miuix-squircle`    | Squircle shapes library, can be used independently         |
@@ -53,8 +53,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons for more icons
             implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-glass-icons for the Glass icon set
-            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
+            // Optional: Add miuix-icons-symbol for the variable Symbol icon set
+            implementation("top.yukonga.miuix.kmp:miuix-icons-symbol:<version>")
             // Optional: Add miuix-material for render primitives and material definitions
             implementation("top.yukonga.miuix.kmp:miuix-material:<version>")
             // Optional: Add miuix-blur for blur effects (requires minSdk 33 on Android)
@@ -83,8 +83,8 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // Optional: Add miuix-icons for more icons
     implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
-    // Optional: Add miuix-glass-icons for the Glass icon set
-    implementation("top.yukonga.miuix.kmp:miuix-glass-icons-android:<version>")
+    // Optional: Add miuix-icons-symbol for the variable Symbol icon set
+    implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-android:<version>")
             // Optional: Add miuix-material for render primitives and material definitions
     implementation("top.yukonga.miuix.kmp:miuix-material-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 33)
@@ -121,13 +121,13 @@ implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
-// Optional: Add miuix-glass-icons
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-wasm-js:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-glass-icons-js:<version>")
+// Optional: Add miuix-icons-symbol
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iossimulatorarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-macosarm64:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-desktop:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-wasm-js:<version>")
+implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-js:<version>")
 // Optional: Add miuix-material
 implementation("top.yukonga.miuix.kmp:miuix-material-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-material-iossimulatorarm64:<version>")

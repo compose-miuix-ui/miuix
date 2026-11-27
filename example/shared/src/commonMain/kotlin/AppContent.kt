@@ -119,13 +119,13 @@ import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.glass.DoodlePen
-import top.yukonga.miuix.kmp.icon.glass.EditSubtitle
-import top.yukonga.miuix.kmp.icon.glass.Hd
-import top.yukonga.miuix.kmp.icon.glass.HomeOutline
-import top.yukonga.miuix.kmp.icon.glass.ImageOutline
-import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
-import top.yukonga.miuix.kmp.icon.glass.Theme
+import top.yukonga.miuix.kmp.icon.symbol.Desktop
+import top.yukonga.miuix.kmp.icon.symbol.DoodlePen
+import top.yukonga.miuix.kmp.icon.symbol.EditSubtitle
+import top.yukonga.miuix.kmp.icon.symbol.Hd
+import top.yukonga.miuix.kmp.icon.symbol.Image
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.icon.symbol.Theme
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.EdgeStrokes
 import top.yukonga.miuix.kmp.material.edgeStroke
@@ -142,6 +142,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
 import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
@@ -211,11 +212,11 @@ fun AppContent(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Glass.HomeOutline),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Glass.ImageOutline),
-            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Glass.Theme),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Glass.EditSubtitle),
-            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Glass.SettingsOutline),
+            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Symbol.Desktop.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Symbol.Image.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Symbol.Theme.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Symbol.EditSubtitle.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Symbol.Settings.toImageVector()),
         )
     }
 
@@ -571,8 +572,8 @@ private fun PersistentGlassNavigationRail(
     }
     val secondaryItems = remember {
         listOf(
-            GlassNavigationItem(icon = MiuixIcons.Glass.DoodlePen, label = "Preferences"),
-            GlassNavigationItem(icon = MiuixIcons.Glass.Hd, label = "Glass"),
+            GlassNavigationItem(icon = MiuixIcons.Symbol.DoodlePen.toImageVector(), label = "Preferences"),
+            GlassNavigationItem(icon = MiuixIcons.Symbol.Hd.toImageVector(), label = "Glass"),
         )
     }
     val selectedIndex = when (currentRoute) {

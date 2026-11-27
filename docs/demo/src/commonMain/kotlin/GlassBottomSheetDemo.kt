@@ -32,9 +32,10 @@ import top.yukonga.miuix.kmp.glass.GlassCard
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.glass
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.symbol.Ok
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -79,7 +80,7 @@ fun GlassBottomSheetDemo() {
                 endAction = {
                     GlassIconButton(onClick = { showSheet = false }) {
                         Icon(
-                            imageVector = MiuixIcons.Glass.Ok,
+                            imageVector = MiuixIcons.Symbol.Ok.toImageVector(),
                             contentDescription = "Confirm",
                             tint = MiuixTheme.colorScheme.onBackground,
                         )

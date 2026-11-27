@@ -52,12 +52,13 @@ import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Refresh
-import top.yukonga.miuix.kmp.icon.glass.Refresh
+import top.yukonga.miuix.kmp.icon.symbol.Refresh
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import utils.AdaptiveTopAppBar
@@ -120,7 +121,7 @@ fun PullToRefreshPage(
                             if (appState.topAppBarStyle == 1) {
                                 GlassIconButton(onClick = { isRefreshing = true }) {
                                     Icon(
-                                        imageVector = MiuixIcons.Glass.Refresh,
+                                        imageVector = MiuixIcons.Symbol.Refresh.toImageVector(),
                                         contentDescription = "Refresh",
                                         modifier = Modifier.size(28.dp),
                                         tint = MiuixTheme.colorScheme.onBackground,

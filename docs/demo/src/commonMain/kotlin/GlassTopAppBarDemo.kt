@@ -35,8 +35,9 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
-import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.symbol.ChevronBackward
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -84,7 +85,7 @@ fun GlassTopAppBarDemo() {
                             navigationIcon = {
                                 GlassIconButton(onClick = { showAlbums = !showAlbums }) {
                                     Icon(
-                                        imageVector = MiuixIcons.Glass.ChevronBackward,
+                                        imageVector = MiuixIcons.Symbol.ChevronBackward.toImageVector(),
                                         contentDescription = "Switch library view",
                                         tint = MiuixTheme.colorScheme.onSurface,
                                     )
@@ -93,7 +94,7 @@ fun GlassTopAppBarDemo() {
                             actions = {
                                 GlassIconButton(onClick = { moreCount++ }) {
                                     Icon(
-                                        imageVector = MiuixIcons.Glass.More,
+                                        imageVector = MiuixIcons.Symbol.More.toImageVector(),
                                         contentDescription = "More actions",
                                         tint = MiuixTheme.colorScheme.onSurface,
                                     )

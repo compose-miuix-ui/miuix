@@ -39,10 +39,11 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassTextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Close
-import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.symbol.Close1
+import top.yukonga.miuix.kmp.icon.symbol.Ok
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassMaterial
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** A sheet with transparent content, so the shared material remains visible while scrolling. */
@@ -89,7 +90,7 @@ internal fun GlassBottomSheetDemo(
                 modifier = Modifier.padding(start = 12.dp),
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Close,
+                    imageVector = MiuixIcons.Symbol.Close1.toImageVector(),
                     contentDescription = "Close",
                     tint = MiuixTheme.colorScheme.onSurface,
                 )
@@ -101,7 +102,7 @@ internal fun GlassBottomSheetDemo(
                 modifier = Modifier.padding(end = 12.dp),
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Ok,
+                    imageVector = MiuixIcons.Symbol.Ok.toImageVector(),
                     contentDescription = "Confirm",
                     tint = MiuixTheme.colorScheme.onSurface,
                 )
@@ -210,7 +211,7 @@ internal fun GlassHalfBottomSheetDemo(
         startAction = {
             GlassIconButton(onClick = onDismissRequest) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Close,
+                    imageVector = MiuixIcons.Symbol.Close1.toImageVector(),
                     contentDescription = "Close",
                     tint = MiuixTheme.colorScheme.onSurface,
                 )
@@ -219,7 +220,7 @@ internal fun GlassHalfBottomSheetDemo(
         endAction = {
             GlassIconButton(onClick = onDismissRequest) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Ok,
+                    imageVector = MiuixIcons.Symbol.Ok.toImageVector(),
                     contentDescription = "Confirm",
                     tint = MiuixTheme.colorScheme.onSurface,
                 )

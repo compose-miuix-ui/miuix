@@ -5,17 +5,9 @@ package top.yukonga.miuix.kmp.icon
 
 object MiuixIcons {
     /**
-     * Glass icon family, independent of the original extended icons.
-     *
-     * Icons use a 28 dp canvas to preserve the native symbol size with room for the full outline.
+     * Variable symbol icon family backed by built-in continuous-weight outlines.
      */
-    object Glass {
-        object Light
-        object Normal
-        object Regular
-        object Medium
-        object Demibold
-    }
+    object Symbol
 
     object Basic
     object Light

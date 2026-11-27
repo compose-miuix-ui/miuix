@@ -30,8 +30,9 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
-import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.symbol.ChevronBackward
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -67,7 +68,7 @@ fun GlassSecondaryPopupDemo() {
             size = 48.dp,
         ) {
             Icon(
-                imageVector = MiuixIcons.Glass.More,
+                imageVector = MiuixIcons.Symbol.More.toImageVector(),
                 contentDescription = "More actions",
                 modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
                 tint = MiuixTheme.colorScheme.onBackground,
@@ -83,7 +84,7 @@ fun GlassSecondaryPopupDemo() {
             onMeasured = { menuWidth = with(density) { it.width.toDp() } },
             anchorContent = {
                 Icon(
-                    imageVector = MiuixIcons.Glass.More,
+                    imageVector = MiuixIcons.Symbol.More.toImageVector(),
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
                     tint = MiuixTheme.colorScheme.onBackground,
@@ -120,7 +121,7 @@ fun GlassSecondaryPopupDemo() {
         ) {
             GlassPopupItem(
                 text = "Back to actions",
-                icon = MiuixIcons.Glass.ChevronBackward,
+                icon = MiuixIcons.Symbol.ChevronBackward.toImageVector(),
                 onClick = { showSecondary = false },
             )
             sortOrders.forEach { label ->

@@ -32,7 +32,7 @@ dependencies {
 
 `miuix-glass` includes `miuix-material`, `miuix-blur` and `miuix-ui` transitively.
 
-The optional `miuix-glass-icons` module provides the Glass icon set, reached through `MiuixIcons.Glass`; see [Icon System](/guide/icons).
+The optional `miuix-icons-symbol` module provides the variable Symbol icon set, reached through `MiuixIcons.Symbol`; see [Icon System](/guide/icons).
 
 ## Basic Usage
 

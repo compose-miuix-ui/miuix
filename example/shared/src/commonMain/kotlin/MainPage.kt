@@ -69,8 +69,8 @@ import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Tune
-import top.yukonga.miuix.kmp.icon.glass.More
-import top.yukonga.miuix.kmp.icon.glass.Tune
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.icon.symbol.Tune
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.menu.OverlayIconCascadingDropdownMenu
@@ -78,6 +78,7 @@ import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
 import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
 import utils.BlurredBar
@@ -282,7 +283,7 @@ private fun MainPageTopBarActions(
                 ),
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.Tune,
+                    imageVector = MiuixIcons.Symbol.Tune.toImageVector(),
                     contentDescription = "Tune",
                     modifier = Modifier.size(28.dp).glassPopupAnchorContent(menuState.optionsAnchor),
                 )
@@ -313,7 +314,7 @@ private fun MainPageTopBarActions(
                 ),
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Glass.More,
+                    imageVector = MiuixIcons.Symbol.More.toImageVector(),
                     contentDescription = "More",
                     modifier = Modifier.size(28.dp).glassPopupAnchorContent(menuState.moreAnchor),
                 )
@@ -345,7 +346,7 @@ private fun BoxScope.MainPageGlassMenus(
         show = menuState.showOptionsMenu,
         onDismissRequest = { menuState.showOptionsMenu = false },
         anchor = menuState.optionsAnchor,
-        anchorContent = { Icon(MiuixIcons.Glass.Tune, contentDescription = null, modifier = Modifier.size(28.dp)) },
+        anchorContent = { Icon(MiuixIcons.Symbol.Tune.toImageVector(), contentDescription = null, modifier = Modifier.size(28.dp)) },
         entries = cascadingEntries,
         backdrop = pageBackdrop,
         collapseOnSelection = menuState.cascadingCollapseOnSelection,
@@ -354,7 +355,7 @@ private fun BoxScope.MainPageGlassMenus(
         show = menuState.showMoreMenu,
         onDismissRequest = { menuState.showMoreMenu = false },
         anchor = menuState.moreAnchor,
-        anchorContent = { Icon(MiuixIcons.Glass.More, contentDescription = null, modifier = Modifier.size(28.dp)) },
+        anchorContent = { Icon(MiuixIcons.Symbol.More.toImageVector(), contentDescription = null, modifier = Modifier.size(28.dp)) },
         entries = moreItems,
         backdrop = pageBackdrop,
         collapseOnSelection = false,

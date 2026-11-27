@@ -26,9 +26,10 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassNavigationRail
 import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Contacts
-import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
-import top.yukonga.miuix.kmp.icon.glass.VerticalSplit
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.icon.symbol.VerticalSplit
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -36,9 +37,9 @@ fun GlassNavigationRailDemo() {
     val backdrop = rememberLayerBackdrop()
     val items = remember {
         listOf(
-            GlassNavigationItem(MiuixIcons.Glass.VerticalSplit, "Home", "Home"),
-            GlassNavigationItem(MiuixIcons.Glass.Contacts, "Contacts", "Contacts"),
-            GlassNavigationItem(MiuixIcons.Glass.SettingsOutline, "Settings", "Settings"),
+            GlassNavigationItem(MiuixIcons.Symbol.VerticalSplit.toImageVector(), "Home", "Home"),
+            GlassNavigationItem(MiuixIcons.Symbol.Contacts.toImageVector(), "Contacts", "Contacts"),
+            GlassNavigationItem(MiuixIcons.Symbol.Settings.toImageVector(), "Settings", "Settings"),
         )
     }
     val descriptions = remember {
