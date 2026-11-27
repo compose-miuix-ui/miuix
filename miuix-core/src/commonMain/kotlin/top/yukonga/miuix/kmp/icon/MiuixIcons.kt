@@ -9,7 +9,6 @@ object MiuixIcons {
      */
     object Symbol
 
-    object Basic
     object Light
     object Normal
     object Regular

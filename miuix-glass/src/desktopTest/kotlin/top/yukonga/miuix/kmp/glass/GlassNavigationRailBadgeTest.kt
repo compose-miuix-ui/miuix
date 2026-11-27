@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -43,8 +44,8 @@ class GlassNavigationRailBadgeTest {
     fun badgeChangeDoesNotCancelHeldPress() = runComposeUiTest {
         val items = mutableStateOf(
             listOf(
-                GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                GlassNavigationItem(MiuixIcons.Basic.Search, "Library"),
+                GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Library"),
             ),
         )
         val selections = mutableListOf<Int>()
@@ -78,11 +79,11 @@ class GlassNavigationRailBadgeTest {
         val state = GlassNavigationRailState(initialExpanded = true)
         var instances = 0
         val items = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Home", badge = {
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home", badge = {
                 val instance = remember { ++instances }
                 Badge(modifier = Modifier.testTag("badge"), containerColor = Color.Magenta) { Text("$instance") }
             }),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Library"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Library"),
         )
         val shownItems = mutableStateOf(items)
         setContent {

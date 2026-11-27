@@ -115,6 +115,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.symbol.SidebarExpand
+import top.yukonga.miuix.kmp.icon.symbol.TopNavigation
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassEdgeStrokes
@@ -125,85 +128,9 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.ceil
-
-private val RailTopBarIcon: ImageVector = ImageVector.Builder(
-    name = "RailTopBar",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f,
-).apply {
-    path(
-        stroke = SolidColor(Color.White),
-        strokeLineWidth = 2f,
-        strokeLineCap = StrokeCap.Round,
-    ) {
-        moveTo(6f, 3f)
-        lineTo(18f, 3f)
-        curveTo(21f, 3f, 22f, 4f, 22f, 7f)
-        lineTo(22f, 17f)
-        curveTo(22f, 20f, 21f, 21f, 18f, 21f)
-        lineTo(6f, 21f)
-        curveTo(3f, 21f, 2f, 20f, 2f, 17f)
-        lineTo(2f, 7f)
-        curveTo(2f, 4f, 3f, 3f, 6f, 3f)
-        close()
-    }
-    path(
-        stroke = SolidColor(Color.White),
-        strokeLineWidth = 2.8f,
-        strokeLineCap = StrokeCap.Round,
-    ) {
-        moveTo(9f, 7f)
-        lineTo(15f, 7f)
-    }
-}.build()
-
-private val RailSideBarIcon: ImageVector = ImageVector.Builder(
-    name = "RailSideBar",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f,
-).apply {
-    path(
-        stroke = SolidColor(Color.White),
-        strokeLineWidth = 2f,
-        strokeLineCap = StrokeCap.Round,
-    ) {
-        moveTo(6f, 3f)
-        lineTo(18f, 3f)
-        curveTo(21f, 3f, 22f, 4f, 22f, 7f)
-        lineTo(22f, 17f)
-        curveTo(22f, 20f, 21f, 21f, 18f, 21f)
-        lineTo(6f, 21f)
-        curveTo(3f, 21f, 2f, 20f, 2f, 17f)
-        lineTo(2f, 7f)
-        curveTo(2f, 4f, 3f, 3f, 6f, 3f)
-        close()
-    }
-    path(fill = SolidColor(Color.White)) {
-        moveTo(4f, 6.6f)
-        curveTo(4f, 6.03995f, 4f, 5.75992f, 4.10899f, 5.54601f)
-        curveTo(4.20487f, 5.35785f, 4.35785f, 5.20487f, 4.54601f, 5.10899f)
-        curveTo(4.75992f, 5f, 5.03995f, 5f, 5.6f, 5f)
-        lineTo(8.4f, 5f)
-        curveTo(8.96005f, 5f, 9.24008f, 5f, 9.45399f, 5.10899f)
-        curveTo(9.64215f, 5.20487f, 9.79513f, 5.35785f, 9.89101f, 5.54601f)
-        curveTo(10f, 5.75992f, 10f, 6.03995f, 10f, 6.6f)
-        lineTo(10f, 17.4f)
-        curveTo(10f, 17.9601f, 10f, 18.2401f, 9.89101f, 18.454f)
-        curveTo(9.79513f, 18.6422f, 9.64215f, 18.7951f, 9.45399f, 18.891f)
-        curveTo(9.24008f, 19f, 8.96005f, 19f, 8.4f, 19f)
-        lineTo(5.6f, 19f)
-        curveTo(5.03995f, 19f, 4.75992f, 19f, 4.54601f, 18.891f)
-        curveTo(4.35785f, 18.7951f, 4.20487f, 18.6422f, 4.10899f, 18.454f)
-        curveTo(4f, 18.2401f, 4f, 17.9601f, 4f, 17.4f)
-        close()
-    }
-}.build()
 
 /** Default values for [GlassNavigationRail]. */
 object GlassNavigationRailDefaults {
@@ -890,18 +817,18 @@ private fun RailToggleGlyph(
 ) {
     Box(contentAlignment = Alignment.Center) {
         Icon(
-            imageVector = RailTopBarIcon,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.TopNavigation),
             contentDescription = contentDescription,
             modifier = Modifier
-                .size(RailIconSize)
+                .size(RailSideIconSize)
                 .graphicsLayer { alpha = topBarAlpha() * contentAlpha() },
             tint = tint,
         )
         Icon(
-            imageVector = RailSideBarIcon,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.SidebarExpand),
             contentDescription = null,
             modifier = Modifier
-                .size(RailIconSize)
+                .size(RailSideIconSize)
                 .graphicsLayer { alpha = sideBarAlpha() * contentAlpha() },
             tint = tint,
         )
@@ -1358,7 +1285,7 @@ private val RailExpandedCornerRadius = 20.dp
 
 /** The toggle's box: the bar's leading slot while collapsed, the header corner while expanded. */
 private val RailToggleBoxSize = GlassTopAppBarDefaults.ButtonSize
-private val RailLeadingActionWidth = RailToggleBoxSize + 4.dp
+private val RailLeadingActionWidth = RailToggleBoxSize
 private val RailCollapsedToggleBoxStart = GlassNavigationBarDefaults.ContentPaddingHorizontal - 2.dp
 private val RailExpandedToggleStart = 16.dp
 private val RailExpandedToggleTop = 12.dp

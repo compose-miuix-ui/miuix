@@ -42,8 +42,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.basic.Check
+import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.icon.symbol.Ok
 import top.yukonga.miuix.kmp.layout.CascadingPopupDefaults
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
@@ -54,6 +54,8 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.MiuixIndication
 
@@ -106,10 +108,10 @@ object GlassPopupDefaults {
     val DividerThickness: Dp = 0.5.dp
 
     /** Selected item checkmark size. */
-    val ItemTickSize: Dp = 24.dp
+    val ItemTickSize: Dp = 16.dp
 
     /** Submenu chevron size. */
-    val ItemArrowSize: Dp = 16.dp
+    val ItemArrowSize: Dp = 32.dp
 
     /** Horizontal inset of the pressed item background. */
     val ItemPressInset: Dp = 7.dp
@@ -421,7 +423,7 @@ fun GlassPopupItem(
             }
         }
         Icon(
-            imageVector = MiuixIcons.Basic.Check,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok, weight = SymbolWeights.Max),
             contentDescription = null,
             modifier = Modifier
                 .padding(start = GlassPopupDefaults.ItemIconGap)
@@ -430,11 +432,11 @@ fun GlassPopupItem(
         )
         if (showArrow) {
             Icon(
-                imageVector = MiuixIcons.Basic.ArrowRight,
+                painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(start = GlassPopupDefaults.ItemIconGap)
-                    .size(GlassPopupDefaults.ItemArrowSize)
+                    .size(width = GlassPopupDefaults.ItemTickSize, height = GlassPopupDefaults.ItemArrowSize)
                     .graphicsLayer { rotationZ = arrowRotation() },
                 tint = summaryColor,
             )

@@ -67,10 +67,9 @@ kotlin {
             api(projects.miuixCore)
             api(projects.miuixSquircle)
             api(libs.jetbrains.compose.foundation)
-
+            implementation(projects.miuixIconsSymbol)
             implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
-
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }
     }

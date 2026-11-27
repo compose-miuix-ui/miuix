@@ -29,7 +29,7 @@ import top.yukonga.miuix.kmp.basic.TooltipAnchorPosition
 TooltipBox(text = "搜索") {
     IconButton(onClick = { /* ... */ }) {
         Icon(
-            imageVector = MiuixIcons.Basic.Search,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.Search),
             contentDescription = "搜索",
         )
     }
@@ -70,7 +70,7 @@ TooltipBox(
     state = rememberTooltipState(),
 ) {
     IconButton(onClick = { /* ... */ }) {
-        Icon(imageVector = MiuixIcons.Basic.Check, contentDescription = "添加到收藏")
+        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok), contentDescription = "添加到收藏")
     }
 }
 ```
@@ -136,7 +136,7 @@ TooltipBox(
     focusable = true,
 ) {
     IconButton(onClick = { scope.launch { tooltipState.show() } }) {
-        Icon(imageVector = MiuixIcons.Basic.Check, contentDescription = "新功能")
+        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok), contentDescription = "新功能")
     }
 }
 ```

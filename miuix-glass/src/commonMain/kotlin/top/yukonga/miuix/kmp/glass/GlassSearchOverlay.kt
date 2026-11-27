@@ -90,8 +90,8 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Close
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Close1
+import top.yukonga.miuix.kmp.icon.symbol.Search
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -100,6 +100,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.PI
 import kotlin.math.abs
@@ -167,8 +168,8 @@ fun GlassSearchOverlay(
     material: GlassMaterial = GlassSearchOverlayDefaults.material(),
     stroke: EdgeStroke? = GlassSearchOverlayDefaults.stroke(),
     shadow: GlassShadow? = GlassSearchOverlayDefaults.shadow(),
-    searchIcon: ImageVector = MiuixIcons.Basic.Search,
-    closeIcon: ImageVector = MiuixIcons.Basic.Close,
+    searchIcon: ImageVector = DefaultGlassSearchIcon,
+    closeIcon: ImageVector = DefaultGlassCloseIcon,
     content: @Composable ColumnScope.(String) -> Unit = {},
 ) = GlassSearchOverlay(
     expanded = expanded,
@@ -214,8 +215,8 @@ fun GlassSearchOverlay(
     material: GlassMaterial = GlassSearchOverlayDefaults.material(),
     stroke: EdgeStroke? = GlassSearchOverlayDefaults.stroke(),
     shadow: GlassShadow? = GlassSearchOverlayDefaults.shadow(),
-    searchIcon: ImageVector = MiuixIcons.Basic.Search,
-    closeIcon: ImageVector = MiuixIcons.Basic.Close,
+    searchIcon: ImageVector = DefaultGlassSearchIcon,
+    closeIcon: ImageVector = DefaultGlassCloseIcon,
     content: @Composable ColumnScope.(String) -> Unit = {},
 ) {
     val transition = updateTransition(expanded, label = "glassSearch")
@@ -621,4 +622,12 @@ fun Modifier.glassSearchBarTransition(expanded: Boolean, blurEnabled: Boolean = 
         }
     }
     return this.then(modifierToApply)
+}
+
+private val DefaultGlassSearchIcon: ImageVector by lazy {
+    MiuixIcons.Symbol.Search.toImageVector(defaultSize = 20.dp)
+}
+
+private val DefaultGlassCloseIcon: ImageVector by lazy {
+    MiuixIcons.Symbol.Close1.toImageVector()
 }

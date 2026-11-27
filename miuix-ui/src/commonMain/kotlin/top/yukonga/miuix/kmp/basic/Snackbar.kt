@@ -68,8 +68,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Close
+import top.yukonga.miuix.kmp.icon.symbol.Close1
 import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.time.Duration.Companion.milliseconds
@@ -454,7 +455,7 @@ fun Snackbar(
                 if (visuals.withDismissAction) {
                     val onDismiss by rememberUpdatedState(data::dismiss)
                     Icon(
-                        imageVector = MiuixIcons.Basic.Close,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Close1),
                         contentDescription = "Dismiss",
                         tint = colors.dismissActionContentColor,
                         modifier = Modifier

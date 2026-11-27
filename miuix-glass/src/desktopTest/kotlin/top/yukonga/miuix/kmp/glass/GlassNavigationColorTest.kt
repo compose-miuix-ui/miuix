@@ -20,7 +20,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -68,8 +69,8 @@ class GlassNavigationColorTest {
                             if (override) {
                                 GlassNavigationBar(
                                     items = listOf(
-                                        GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                                        GlassNavigationItem(MiuixIcons.Basic.Search, "History"),
+                                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "History"),
                                     ),
                                     selectedIndex = 0,
                                     onSelect = {},
@@ -84,8 +85,8 @@ class GlassNavigationColorTest {
                             } else {
                                 GlassNavigationBar(
                                     items = listOf(
-                                        GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                                        GlassNavigationItem(MiuixIcons.Basic.Search, "History"),
+                                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "History"),
                                     ),
                                     selectedIndex = 0,
                                     onSelect = {},

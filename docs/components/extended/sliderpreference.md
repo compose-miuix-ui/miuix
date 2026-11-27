@@ -111,7 +111,7 @@ SliderPreference(
     summary = "${(volume * 100).roundToInt()}%",
     startAction = {
         Icon(
-            imageVector = MiuixIcons.Basic.Audio,
+            imageVector = MiuixIcons.Regular.Audio,
             contentDescription = "Volume Icon",
             tint = MiuixTheme.colorScheme.onBackground,
             modifier = Modifier.padding(end = 16.dp)

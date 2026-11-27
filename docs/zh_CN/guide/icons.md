@@ -107,13 +107,6 @@ Miuix 图标支持五种粗细，对应字体源 `misymbol_vf.ttf` 的 5 个命�
 
 | 图标名称 | Light | Normal | Regular | Medium | Demibold |
 |---|---|---|---|---|---|
-| `ArrowRight` | - | - | <img src="/icons/basic/ArrowRight.svg" width="24" height="24" /> | - | - |
-| `ArrowUpDown` | - | - | <img src="/icons/basic/ArrowUpDown.svg" width="24" height="24" /> | - | - |
-| `Check` | - | - | <img src="/icons/basic/Check.svg" width="24" height="24" /> | - | - |
-| `Close` | - | - | <img src="/icons/basic/Close.svg" width="24" height="24" /> | - | - |
-| `Search` | - | - | <img src="/icons/basic/Search.svg" width="24" height="24" /> | - | - |
-| `SearchCleanup` | - | - | <img src="/icons/basic/SearchCleanup.svg" width="24" height="24" /> | - | - |
-| `Sidebar` | - | - | <img src="/icons/basic/Sidebar.svg" width="24" height="24" /> | - | - |
 
 ### Extended (扩展图标)
 

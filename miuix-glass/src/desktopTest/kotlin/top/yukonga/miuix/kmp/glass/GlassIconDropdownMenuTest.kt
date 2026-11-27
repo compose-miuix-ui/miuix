@@ -42,7 +42,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.window.LocalWindowComponentFrame
 import top.yukonga.miuix.kmp.window.WindowComponentFrame
 import kotlin.test.Test
@@ -72,13 +73,13 @@ class GlassIconDropdownMenuTest {
                                 .glassPopupAnchor(anchor, 20.dp)
                                 .testTag("trigger"),
                         ) {
-                            Icon(MiuixIcons.Basic.Search, contentDescription = "Options")
+                            Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Options")
                         }
                         GlassIconDropdownMenu(
                             show = show.value,
                             onDismissRequest = { show.value = false },
                             anchor = anchor,
-                            anchorContent = { Icon(MiuixIcons.Basic.Search, contentDescription = null) },
+                            anchorContent = { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = null) },
                             entries = listOf(DropdownEntry(List(16) { DropdownItem("Option ${it + 1}") })),
                             backdrop = null,
                         )
@@ -114,13 +115,13 @@ class GlassIconDropdownMenuTest {
                                 .glassPopupAnchor(anchor, 20.dp)
                                 .testTag("trigger"),
                         ) {
-                            Icon(MiuixIcons.Basic.Search, contentDescription = "Options")
+                            Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Options")
                         }
                         GlassIconDropdownMenu(
                             show = show.value,
                             onDismissRequest = { show.value = false },
                             anchor = anchor,
-                            anchorContent = { Icon(MiuixIcons.Basic.Search, contentDescription = null) },
+                            anchorContent = { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = null) },
                             entries = listOf(DropdownEntry(List(16) { DropdownItem("Option ${it + 1}") })),
                             backdrop = null,
                         )
@@ -167,7 +168,7 @@ class GlassIconDropdownMenuTest {
                             backdrop = backdrop,
                         ) {
                             Icon(
-                                MiuixIcons.Basic.Search,
+                                MiuixIcons.Symbol.Search.toImageVector(),
                                 contentDescription = "Options",
                                 modifier = Modifier.size(24.dp).glassPopupAnchorContent(anchor),
                             )
@@ -176,7 +177,7 @@ class GlassIconDropdownMenuTest {
                             show = show.value,
                             onDismissRequest = { show.value = false },
                             anchor = anchor,
-                            anchorContent = { Icon(MiuixIcons.Basic.Search, contentDescription = null) },
+                            anchorContent = { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = null) },
                             entries = listOf(
                                 DropdownEntry(
                                     listOf(

@@ -38,7 +38,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.math.ceil
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,9 +49,9 @@ import kotlin.test.assertTrue
 class GlassNavigationRailTest {
 
     private val items = listOf(
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Library"),
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Settings"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Library"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Settings"),
     )
 
     @Test
@@ -213,7 +214,7 @@ class GlassNavigationRailTest {
 
     @Test
     fun theExpandedColumnScrollsToADestinationBelowThePanel() = runComposeUiTest {
-        val many = List(14) { GlassNavigationItem(MiuixIcons.Basic.Search, "Item $it") }
+        val many = List(14) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Item $it") }
         setContent {
             DialogTestHost {
                 Box(Modifier.size(800.dp, 360.dp)) {
@@ -239,7 +240,7 @@ class GlassNavigationRailTest {
 
     @Test
     fun compressedCollapsedLabelsKeepTextLayoutWithinTheirSlots() = runComposeUiTest {
-        val longItems = List(3) { GlassNavigationItem(MiuixIcons.Basic.Search, "Destination number $it") }
+        val longItems = List(3) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Destination number $it") }
         val state = GlassNavigationRailState(initialExpanded = false)
         setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f)) {
@@ -283,8 +284,8 @@ class GlassNavigationRailTest {
     @Test
     fun flyingLabelsNeverTruncateOnFractionalDensity() = runDesktopComposeUiTest(width = 1100, height = 825) {
         val secondary = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Preferences"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Glass"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Preferences"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Glass"),
         )
         val state = GlassNavigationRailState(initialExpanded = false)
         setContent {
@@ -331,15 +332,15 @@ class GlassNavigationRailTest {
     @Test
     fun secondaryItemsAndDividerFollowTrailingMorphDuringExpandAndCollapse() = runDesktopComposeUiTest(width = 1067, height = 711) {
         val primary = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Icon"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Color"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "TextStyle"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Settings"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Icon"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Color"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "TextStyle"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Settings"),
         )
         val secondary = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Preferences"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Glass"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Preferences"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Glass"),
         )
         val state = GlassNavigationRailState(initialExpanded = false)
         setContent {
@@ -436,8 +437,8 @@ class GlassNavigationRailTest {
     @Test
     fun secondaryItemSelectionAndCollapseSettleCleanly() = runComposeUiTest {
         val secondary = listOf(
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Preferences"),
-            GlassNavigationItem(MiuixIcons.Basic.Search, "Glass"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Preferences"),
+            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Glass"),
         )
         val state = GlassNavigationRailState(initialExpanded = true)
         var selected by mutableIntStateOf(0)

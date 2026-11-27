@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,8 +46,8 @@ class GlassNavigationBlurTest {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.Red))
                     GlassNavigationBar(
                         items = listOf(
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Settings"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Settings"),
                         ),
                         selectedIndex = selected.intValue,
                         onSelect = { selected.intValue = it },

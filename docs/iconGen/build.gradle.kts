@@ -12,10 +12,6 @@ dependencies {
     implementation(projects.miuixIconsSymbol)
 }
 
-val iconsSourceDir =
-    rootProject.layout.projectDirectory
-        .dir("miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
-        .asFile
 val extendedIconsSourceDir =
     rootProject.layout.projectDirectory
         .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
@@ -41,8 +37,6 @@ tasks.register<JavaExec>("generateIcons") {
     outputs.dir(outputDir)
     args =
         listOf(
-            "--src",
-            iconsSourceDir.absolutePath,
             "--src",
             extendedIconsSourceDir.absolutePath,
             "--src",

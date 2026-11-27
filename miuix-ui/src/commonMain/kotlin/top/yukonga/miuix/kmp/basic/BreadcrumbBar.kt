@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -56,7 +57,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
 
@@ -312,8 +314,10 @@ private fun BreadcrumbSeparator(
         modifier = Modifier
             .padding(horizontal = 4.dp)
             .size(width = 10.dp, height = 16.dp)
+            .wrapContentSize(unbounded = true)
+            .size(width = 12.dp, height = 32.dp)
             .then(flipModifier),
-        imageVector = MiuixIcons.Basic.ArrowRight,
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
         contentDescription = null,
         colorFilter = colorFilter,
     )
