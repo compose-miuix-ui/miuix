@@ -133,7 +133,7 @@ float4 processColor(float4 color) {
     return color;
 }
 
-float4 processGlassColor(float4 material, float2 local) {
+float4 computeGlassTint(float2 local) {
     float4 wide = adjustColor(sampleWide(local), in_whiteMixBg.z, in_whiteMixBg.w);
     wide.rgb = mix(wide.rgb, float3(1.0), in_whiteMixBg.x);
 
@@ -146,10 +146,7 @@ float4 processGlassColor(float4 material, float2 local) {
     // Pull near-grey backdrops all the way to grey so the glass never picks up a false cast.
     ratio = mix(float3(mean), ratio, smoothstep(0.0, 0.4, distance(wide.rgb, float3(mean))));
     ratio = mix(ratio, in_tint.rgb, in_tint.a);
-
-    material.rgb *= ratio;
-    material.rgb = mix(material.rgb, ratio, in_whiteMixBg.y * colorRatio);
-    return material;
+    return float4(ratio, in_whiteMixBg.y * colorRatio);
 }
 
 float3 addLight(float3 color, float3 lightColor, float strength) {
@@ -163,7 +160,7 @@ float3 addLight(float3 color, float3 lightColor, float strength) {
 //
 // `d` is passed in rather than measured: the caller walks it across a pixel, and over that distance
 // the distance field is a plane, so stepping the value is exact and free.
-float4 shadeMaterial(float2 local, float d, float2 gradient, float edge) {
+float4 shadeMaterial(float2 local, float d, float2 gradient, float edge, float4 glassTint) {
     float depth = clamp(-d / edge, 0.0, 1.0);
     float shaped = edgeCurve(depth, in_edgePow.x);
     // The reflection and the added light ride the same outer third of the band the rim light does.
@@ -194,7 +191,8 @@ float4 shadeMaterial(float2 local, float d, float2 gradient, float edge) {
     material.rgb = addLight(material.rgb, mirrored.rgb, (1.0 - shaped) * in_iorRefl.z);
 
     material = processColor(material);
-    material = processGlassColor(material, local);
+    material.rgb *= glassTint.rgb;
+    material.rgb = mix(material.rgb, glassTint.rgb, glassTint.a);
 
     // Additive glow along the bottom edge.
     float bottom = smoothstep(1.0, 0.0, 1.0 - local.y / max(in_size.y, 1.0));
@@ -223,6 +221,7 @@ half4 main(float2 coord) {
 
     float edge = max(in_alphaEdge.y, 1.0);
     float2 gradient = sdfGradient(local);
+    float4 glassTint = computeGlassTint(local);
     float4 material;
 
     // Now that the normal is exact, the lit part of the rim is a few display pixels wide — less
@@ -230,11 +229,11 @@ half4 main(float2 coord) {
     // the band the material is integrated across the pixel instead. One dimension is enough: the
     // rim varies along the distance field's gradient and is constant across it.
     if (-d < edge && length(gradient) > 0.5) {
-        material = shadeMaterial(local - gradient * 0.375, d - 0.375, gradient, edge) * 0.25;
-        material += shadeMaterial(local, d, gradient, edge) * 0.5;
-        material += shadeMaterial(local + gradient * 0.375, d + 0.375, gradient, edge) * 0.25;
+        material = shadeMaterial(local - gradient * 0.375, d - 0.375, gradient, edge, glassTint) * 0.25;
+        material += shadeMaterial(local, d, gradient, edge, glassTint) * 0.5;
+        material += shadeMaterial(local + gradient * 0.375, d + 0.375, gradient, edge, glassTint) * 0.25;
     } else {
-        material = shadeMaterial(local, d, gradient, edge);
+        material = shadeMaterial(local, d, gradient, edge, glassTint);
     }
 
     float alpha = material.a * in_alphaEdge.x;
