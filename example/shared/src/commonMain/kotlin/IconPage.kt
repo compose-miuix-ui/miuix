@@ -25,11 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -81,7 +77,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
@@ -92,7 +87,6 @@ import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlayDefaults
-import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
 import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -107,7 +101,6 @@ import top.yukonga.miuix.kmp.symbol.VariableSymbol
 import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import utils.AdaptiveTopAppBar
 import utils.AllVariableSymbols
 import utils.BlurredBar
@@ -129,7 +122,6 @@ private data class IconSection(
     val indices: List<Int>,
 )
 
-private val IconFamilies = listOf("Symbol")
 private val SymbolPresetWeights = listOf(
     "Light" to SymbolWeights.Light,
     "Normal" to SymbolWeights.Normal,
@@ -198,21 +190,18 @@ fun IconsPage(
     val searchModifier = Modifier.appPageSearchInsets()
     val searchResultPadding = pageBottomPadding(padding)
 
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { IconFamilies.size })
-    val currentPage by remember { computedStateOf { pagerState.currentPage } }
-    val searchIsSymbol = currentPage == 0
-    val searchIconNames = VariableSymbolCatalog.iconNames
-    val searchSections = VariableSymbolCatalog.sections
+    val iconNames = VariableSymbolCatalog.iconNames
+    val sections = VariableSymbolCatalog.sections
     val backdrop = rememberLayerBackdrop(backgroundColor = colorScheme.surface)
     val blurActive = appState.enableBlur && isRuntimeShaderSupported()
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 
     var symbolWeight by remember { mutableFloatStateOf(SymbolWeights.Regular) }
-    val listStates = remember { List(IconFamilies.size) { LazyListState() } }
-    val activeListState = listStates[currentPage]
-    val pageColumns = remember { IntArray(IconFamilies.size) { 3 } }
-    val contentUnderTopBar by remember(activeListState, topAppBarScrollBehavior) {
-        computedStateOf { activeListState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
+    val listState = rememberLazyListState()
+    val scrollBarAdapter = rememberScrollBarAdapter(listState)
+    val gridColumns = remember { Ref<Int>().apply { value = 3 } }
+    val contentUnderTopBar by remember(listState, topAppBarScrollBehavior) {
+        computedStateOf { listState.canScrollBackward || topAppBarScrollBehavior.state.overscrollOffset < -1f }
     }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -240,16 +229,15 @@ fun IconsPage(
     val searchResultIconModifier = remember {
         Modifier.size(24.dp)
     }
-    val onSearchResultClick = remember(currentPage, topAppBarScrollBehavior) {
+    val onSearchResultClick = remember(listState, topAppBarScrollBehavior) {
         { index: Int ->
             searchExpanded = false
             legacySearchStatus = legacySearchStatus?.copy(current = SearchStatus.Status.COLLAPSING)
             coroutineScope.launch {
                 delay(400.milliseconds)
-                val headerOffset = if (currentPage == 0) 1 else 0
-                val targetItemIndex = headerOffset + findIconListItemIndex(
-                    sections = searchSections,
-                    columns = pageColumns[currentPage],
+                val targetItemIndex = 1 + findIconListItemIndex(
+                    sections = sections,
+                    columns = gridColumns.value ?: 3,
                     targetIconIndex = index,
                 )
                 val scrollState = topAppBarScrollBehavior.state
@@ -266,8 +254,8 @@ fun IconsPage(
                 } else {
                     null
                 }
-                activeListState.animateScrollToItem(targetItemIndex)
-                if (!activeListState.canScrollBackward) {
+                listState.animateScrollToItem(targetItemIndex)
+                if (!listState.canScrollBackward) {
                     collapseJob?.cancel()
                     scrollState.heightOffset = 0f
                 }
@@ -282,7 +270,7 @@ fun IconsPage(
             contentType = { "search_result" },
         ) { i ->
             val index = filteredIndices[i]
-            val name = searchIconNames[index]
+            val name = iconNames[index]
             Card(modifier = searchResultCardModifier) {
                 BasicComponent(
                     title = name,
@@ -341,46 +329,26 @@ fun IconsPage(
                             }
                         },
                         bottomContent = {
-                            if (glassTopBar) {
-                                GlassSegmentedTabRow(
-                                    tabs = IconFamilies,
-                                    selectedIndex = pagerState.targetPage,
-                                    onSelect = { index ->
-                                        coroutineScope.launch { pagerState.springAnimateToPage(index) }
-                                    },
-                                    backdrop = backdrop,
-                                    surfaceAlpha = if (blurActive && contentUnderTopBar) 1f else 0f,
-                                    modifier = Modifier.padding(horizontal = 12.dp).padding(top = 6.dp, bottom = 12.dp),
-                                )
-                            } else {
-                                Column {
-                                    Box(
-                                        modifier = Modifier
-                                            .onGloballyPositioned { searchCoordinates.value = it }
-                                            .graphicsLayer { alpha = if (legacySearchStatus?.isCollapsed() != false) 1f else 0f }
-                                            .clickable {
-                                                val offset = checkNotNull(pageCoordinates.value).localPositionOf(
-                                                    checkNotNull(searchCoordinates.value),
-                                                    Offset.Zero,
-                                                )
-                                                legacySearchOffset = with(density) { offset.y.toDp() } - searchTopInset()
-                                                legacySearchStatus = SearchStatus(
-                                                    label = "Search icons",
-                                                )
-                                            },
-                                    ) {
-                                        SearchBarFake(
-                                            label = "Search icons",
-                                            searchBarTopPadding = searchBarTopPadding,
-                                        )
-                                    }
-                                    TabRow(
-                                        tabs = IconFamilies,
-                                        selectedTabIndex = pagerState.targetPage,
-                                        onTabSelected = { index ->
-                                            coroutineScope.launch { pagerState.springAnimateToPage(index) }
+                            if (!glassTopBar) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(bottom = 6.dp)
+                                        .onGloballyPositioned { searchCoordinates.value = it }
+                                        .graphicsLayer { alpha = if (legacySearchStatus?.isCollapsed() != false) 1f else 0f }
+                                        .clickable {
+                                            val offset = checkNotNull(pageCoordinates.value).localPositionOf(
+                                                checkNotNull(searchCoordinates.value),
+                                                Offset.Zero,
+                                            )
+                                            legacySearchOffset = with(density) { offset.y.toDp() } - searchTopInset()
+                                            legacySearchStatus = SearchStatus(
+                                                label = "Search icons",
+                                            )
                                         },
-                                        modifier = Modifier.padding(horizontal = 12.dp).padding(top = 6.dp, bottom = 12.dp),
+                                ) {
+                                    SearchBarFake(
+                                        label = "Search icons",
+                                        searchBarTopPadding = searchBarTopPadding,
                                     )
                                 }
                             }
@@ -402,269 +370,255 @@ fun IconsPage(
                 innerPadding,
                 padding,
             )
-            Box(modifier = if (blurActive) Modifier.layerBackdrop(backdrop) else Modifier) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                    userScrollEnabled = false,
-                    beyondViewportPageCount = 0,
-                    key = { it },
-                ) { page ->
-                    val isPageSymbol = page == 0
-                    val pageListState = listStates[page]
-                    val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
-                    val iconNames = VariableSymbolCatalog.iconNames
-                    val itemCount = iconNames.size
-                    val tintColor = colorScheme.onBackground
-                    // Dialog state for comparing weight variants of the tapped icon.
-                    var showWeightDialog by remember { mutableStateOf(false) }
-                    var selectedIconIndex by remember { mutableIntStateOf(0) }
+            val itemCount = iconNames.size
+            val tintColor = colorScheme.onBackground
+            // Dialog state for comparing weight variants of the tapped icon.
+            var showWeightDialog by remember { mutableStateOf(false) }
+            var selectedIconIndex by remember { mutableIntStateOf(0) }
 
-                    BoxWithConstraints(
-                        modifier = Modifier.fillMaxSize(),
+            Box(modifier = if (blurActive) Modifier.layerBackdrop(backdrop) else Modifier) {
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    val columns = remember(maxWidth) {
+                        ((maxWidth - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
+                    }
+                    gridColumns.value = columns
+                    val sectionRows = remember(columns) {
+                        VariableSymbolCatalog.sectionRowsFor(columns)
+                    }
+                    LazyColumn(
+                        state = listState,
+                        cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pageScrollModifiers(
+                                appState.enableScrollEndHaptic,
+                                appState.showTopAppBar,
+                                topAppBarScrollBehavior,
+                            ),
+                        overscrollEffect = null,
+                        contentPadding = contentPadding,
                     ) {
-                        val columns = remember(maxWidth) {
-                            ((maxWidth - 24.dp) / 80.dp).toInt().coerceIn(3, 8)
+                        item(key = "symbol_weight_controls", contentType = "symbol_weight_controls") {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                insideMargin = PaddingValues(16.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "Variable Weight (wght)",
+                                        style = MiuixTheme.textStyles.body2,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Text(
+                                        text = "${symbolWeight.roundToInt()}",
+                                        style = MiuixTheme.textStyles.body2,
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                }
+                                Slider(
+                                    value = symbolWeight,
+                                    onValueChange = { symbolWeight = it },
+                                    valueRange = SymbolWeights.Min..SymbolWeights.Max,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
                         }
-                        pageColumns[page] = columns
-                        val sectionRows = remember(page, columns) {
-                            VariableSymbolCatalog.sectionRowsFor(columns)
-                        }
-                        LazyColumn(
-                            state = pageListState,
-                            cacheWindow = remember { LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f) },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .pageScrollModifiers(
-                                    appState.enableScrollEndHaptic,
-                                    appState.showTopAppBar,
-                                    topAppBarScrollBehavior,
-                                ),
-                            overscrollEffect = null,
-                            contentPadding = contentPadding,
-                        ) {
-                            if (isPageSymbol) {
-                                item(key = "symbol_weight_controls", contentType = "symbol_weight_controls") {
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 12.dp),
-                                        insideMargin = PaddingValues(16.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            Text(
-                                                text = "Variable Weight (wght)",
-                                                style = MiuixTheme.textStyles.body2,
-                                                modifier = Modifier.weight(1f),
-                                            )
-                                            Text(
-                                                text = "${symbolWeight.roundToInt()}",
-                                                style = MiuixTheme.textStyles.body2,
-                                                color = colorScheme.onSurfaceVariantActions,
-                                            )
+                        sectionRows.forEachIndexed { sectionIndex, (title, rows) ->
+                            val isLastSection = sectionIndex == sectionRows.lastIndex
+                            item(key = "section_title_$title", contentType = "section_title") {
+                                SmallTitle(
+                                    text = title,
+                                    modifier = Modifier,
+                                )
+                            }
+                            items(
+                                count = rows.size,
+                                key = { "section_${title}_row_$it" },
+                                contentType = { "icon_row" },
+                            ) { rowIndex ->
+                                val isFirst = rowIndex == 0
+                                val isLast = rowIndex == rows.lastIndex
+                                val rowIndices = rows[rowIndex]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 12.dp,
+                                            end = 12.dp,
+                                            bottom = if (isLast && !isLastSection) 12.dp else 0.dp,
+                                        )
+                                        .let { mod ->
+                                            if (isFirst || isLast) {
+                                                mod.squircleClip(
+                                                    topStart = if (isFirst) 16.dp else 0.dp,
+                                                    topEnd = if (isFirst) 16.dp else 0.dp,
+                                                    bottomEnd = if (isLast) 16.dp else 0.dp,
+                                                    bottomStart = if (isLast) 16.dp else 0.dp,
+                                                )
+                                            } else {
+                                                mod
+                                            }
                                         }
-                                        Slider(
-                                            value = symbolWeight,
-                                            onValueChange = { symbolWeight = it },
-                                            valueRange = SymbolWeights.Min..SymbolWeights.Max,
-                                            modifier = Modifier.padding(top = 8.dp),
+                                        .background(colorScheme.surfaceContainer)
+                                        .padding(horizontal = 6.dp)
+                                        .padding(
+                                            top = if (isFirst) 8.dp else 2.dp,
+                                            bottom = if (isLast) 8.dp else 2.dp,
+                                        ),
+                                ) {
+                                    for (col in 0 until columns) {
+                                        if (col < rowIndices.size) {
+                                            val iconIndex = rowIndices[col]
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(IconCellShape)
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            selectedIconIndex = iconIndex
+                                                            showWeightDialog = true
+                                                        },
+                                                        onLongClick = { onCopyIconName(iconNames[iconIndex]) },
+                                                    )
+                                                    .padding(horizontal = 4.dp, vertical = 10.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                            ) {
+                                                val symbol = VariableSymbolCatalog.symbols[iconIndex]
+                                                Symbol(
+                                                    symbol = symbol,
+                                                    contentDescription = iconNames[iconIndex],
+                                                    weight = { symbolWeight },
+                                                    tint = {
+                                                        if (symbol.defaultColor != Color.Unspecified) {
+                                                            Color.Unspecified
+                                                        } else {
+                                                            tintColor
+                                                        }
+                                                    },
+                                                    modifier = Modifier.size(28.dp),
+                                                )
+                                                Spacer(modifier = Modifier.height(6.dp))
+                                                Text(
+                                                    text = iconNames[iconIndex],
+                                                    style = MiuixTheme.textStyles.footnote2,
+                                                    color = colorScheme.onSurfaceVariantActions,
+                                                    textAlign = TextAlign.Center,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            }
+                                        } else {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
+                    }
+                    VerticalScrollBar(
+                        adapter = scrollBarAdapter,
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        trackPadding = contentPadding,
+                        topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
+                    )
+                }
+
+                val safeIconIndex = selectedIconIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
+                val dialogIconName = iconNames.getOrElse(safeIconIndex) { "" }
+                GlassDialog(
+                    show = showWeightDialog && itemCount > 0,
+                    backdrop = if (blurActive) backdrop else null,
+                    title = dialogIconName,
+                    onDismissRequest = { showWeightDialog = false },
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val selectedSymbol = VariableSymbolCatalog.symbols[safeIconIndex]
+                        var dialogWeight by remember(safeIconIndex, showWeightDialog) {
+                            mutableFloatStateOf(symbolWeight)
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp, bottom = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Symbol(
+                                symbol = selectedSymbol,
+                                contentDescription = dialogIconName,
+                                weight = { dialogWeight },
+                                tint = {
+                                    if (selectedSymbol.defaultColor != Color.Unspecified) {
+                                        Color.Unspecified
+                                    } else {
+                                        tintColor
+                                    }
+                                },
+                                modifier = Modifier.size(56.dp),
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "wght = ${dialogWeight.roundToInt()} (${selectedSymbol.category.name})",
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = colorScheme.onSurfaceVariantActions,
+                            )
+                            Slider(
+                                value = dialogWeight,
+                                onValueChange = { dialogWeight = it },
+                                valueRange = SymbolWeights.Min..SymbolWeights.Max,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                SymbolPresetWeights.forEach { (label, preset) ->
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(IconCellShape)
+                                            .clickable { dialogWeight = preset }
+                                            .padding(vertical = 4.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Symbol(
+                                            symbol = selectedSymbol,
+                                            contentDescription = "$dialogIconName ($label)",
+                                            weight = preset,
+                                            tint = if (selectedSymbol.defaultColor != Color.Unspecified) {
+                                                Color.Unspecified
+                                            } else {
+                                                tintColor
+                                            },
+                                            modifier = Modifier.size(28.dp),
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = label,
+                                            style = MiuixTheme.textStyles.footnote2,
+                                            color = colorScheme.onSurfaceVariantActions,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
                                         )
                                     }
                                 }
                             }
-                            sectionRows.forEachIndexed { sectionIndex, (title, rows) ->
-                                val isLastSection = sectionIndex == sectionRows.lastIndex
-                                item(key = "section_title_$title", contentType = "section_title") {
-                                    SmallTitle(
-                                        text = title,
-                                        modifier = Modifier,
-                                    )
-                                }
-                                items(
-                                    count = rows.size,
-                                    key = { "section_${title}_row_$it" },
-                                    contentType = { "icon_row" },
-                                ) { rowIndex ->
-                                    val isFirst = rowIndex == 0
-                                    val isLast = rowIndex == rows.lastIndex
-                                    val rowIndices = rows[rowIndex]
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                start = 12.dp,
-                                                end = 12.dp,
-                                                bottom = if (isLast && !isLastSection) 12.dp else 0.dp,
-                                            )
-                                            .let { mod ->
-                                                if (isFirst || isLast) {
-                                                    mod.squircleClip(
-                                                        topStart = if (isFirst) 16.dp else 0.dp,
-                                                        topEnd = if (isFirst) 16.dp else 0.dp,
-                                                        bottomEnd = if (isLast) 16.dp else 0.dp,
-                                                        bottomStart = if (isLast) 16.dp else 0.dp,
-                                                    )
-                                                } else {
-                                                    mod
-                                                }
-                                            }
-                                            .background(colorScheme.surfaceContainer)
-                                            .padding(horizontal = 6.dp)
-                                            .padding(
-                                                top = if (isFirst) 8.dp else 2.dp,
-                                                bottom = if (isLast) 8.dp else 2.dp,
-                                            ),
-                                    ) {
-                                        for (col in 0 until columns) {
-                                            if (col < rowIndices.size) {
-                                                val iconIndex = rowIndices[col]
-                                                Column(
-                                                    modifier = Modifier
-                                                        .weight(1f)
-                                                        .clip(IconCellShape)
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                selectedIconIndex = iconIndex
-                                                                showWeightDialog = true
-                                                            },
-                                                            onLongClick = { onCopyIconName(iconNames[iconIndex]) },
-                                                        )
-                                                        .padding(horizontal = 4.dp, vertical = 10.dp),
-                                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                                ) {
-                                                    val symbol = VariableSymbolCatalog.symbols[iconIndex]
-                                                    Symbol(
-                                                        symbol = symbol,
-                                                        contentDescription = iconNames[iconIndex],
-                                                        weight = { symbolWeight },
-                                                        tint = {
-                                                            if (symbol.defaultColor != Color.Unspecified) {
-                                                                Color.Unspecified
-                                                            } else {
-                                                                tintColor
-                                                            }
-                                                        },
-                                                        modifier = Modifier.size(28.dp),
-                                                    )
-                                                    Spacer(modifier = Modifier.height(6.dp))
-                                                    Text(
-                                                        text = iconNames[iconIndex],
-                                                        style = MiuixTheme.textStyles.footnote2,
-                                                        color = colorScheme.onSurfaceVariantActions,
-                                                        textAlign = TextAlign.Center,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                    )
-                                                }
-                                            } else {
-                                                Spacer(modifier = Modifier.weight(1f))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            item(key = "bottom_spacer", contentType = "spacer") { Spacer(modifier = Modifier.height(12.dp)) }
                         }
-                        VerticalScrollBar(
-                            adapter = scrollBarAdapter,
-                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                            trackPadding = contentPadding,
-                            topAppBarScrollBehavior = topAppBarScrollBehavior.takeIf { appState.showTopAppBar },
-                        )
-                    }
-
-                    val safeIconIndex = selectedIconIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
-                    val dialogIconName = iconNames.getOrElse(safeIconIndex) { "" }
-                    GlassDialog(
-                        show = showWeightDialog && itemCount > 0,
-                        backdrop = if (blurActive) backdrop else null,
-                        title = dialogIconName,
-                        onDismissRequest = { showWeightDialog = false },
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            val selectedSymbol = VariableSymbolCatalog.symbols[safeIconIndex]
-                            var dialogWeight by remember(safeIconIndex, showWeightDialog) {
-                                mutableFloatStateOf(symbolWeight)
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp, bottom = 12.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Symbol(
-                                    symbol = selectedSymbol,
-                                    contentDescription = dialogIconName,
-                                    weight = { dialogWeight },
-                                    tint = {
-                                        if (selectedSymbol.defaultColor != Color.Unspecified) {
-                                            Color.Unspecified
-                                        } else {
-                                            tintColor
-                                        }
-                                    },
-                                    modifier = Modifier.size(56.dp),
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "wght = ${dialogWeight.roundToInt()} (${selectedSymbol.category.name})",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = colorScheme.onSurfaceVariantActions,
-                                )
-                                Slider(
-                                    value = dialogWeight,
-                                    onValueChange = { dialogWeight = it },
-                                    valueRange = SymbolWeights.Min..SymbolWeights.Max,
-                                    modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.Top,
-                                ) {
-                                    SymbolPresetWeights.forEach { (label, preset) ->
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clip(IconCellShape)
-                                                .clickable { dialogWeight = preset }
-                                                .padding(vertical = 4.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                        ) {
-                                            Symbol(
-                                                symbol = selectedSymbol,
-                                                contentDescription = "$dialogIconName ($label)",
-                                                weight = preset,
-                                                tint = if (selectedSymbol.defaultColor != Color.Unspecified) {
-                                                    Color.Unspecified
-                                                } else {
-                                                    tintColor
-                                                },
-                                                modifier = Modifier.size(28.dp),
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = label,
-                                                style = MiuixTheme.textStyles.footnote2,
-                                                color = colorScheme.onSurfaceVariantActions,
-                                                textAlign = TextAlign.Center,
-                                                maxLines = 1,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            GlassDialogButton(
-                                onClick = { showWeightDialog = false },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(
-                                    text = "Close",
-                                    style = MiuixTheme.textStyles.button,
-                                )
-                            }
+                        GlassDialogButton(
+                            onClick = { showWeightDialog = false },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                text = "Close",
+                                style = MiuixTheme.textStyles.button,
+                            )
                         }
                     }
                 }
@@ -698,8 +652,8 @@ fun IconsPage(
                         searchListState.scrollToItem(0)
                     }
                 }
-                val filteredIndices = remember(query, searchIconNames) {
-                    filterIconIndices(searchIconNames, query)
+                val filteredIndices = remember(query, iconNames) {
+                    filterIconIndices(iconNames, query)
                 }
                 val safeInsetsPadding = pageInsets.safeInsets.asPaddingValues()
                 val searchContentPadding = remember(safeInsetsPadding, pageInsets, searchBarSpace, searchResultPadding) {
@@ -726,8 +680,8 @@ fun IconsPage(
                     withFrameNanos { }
                     legacySearchStatus = status.copy(current = SearchStatus.Status.EXPANDING)
                 }
-                val filteredIndices = remember(status.searchText, searchIconNames) {
-                    filterIconIndices(searchIconNames, status.searchText)
+                val filteredIndices = remember(status.searchText, iconNames) {
+                    filterIconIndices(iconNames, status.searchText)
                 }
                 Box(
                     Modifier.fillMaxSize().then(searchModifier).onPreviewKeyEvent {
