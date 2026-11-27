@@ -650,6 +650,17 @@ fun BoxScope.GlassTransformPopup(
                 center.value > GlassMotion.TRANSFORM_VISIBILITY_THRESHOLD
         }
     }
+    val backProgress = rememberGlassPopupBackProgress(
+        show = show,
+        active = active,
+        enabled = show && !stacked,
+        retainWhenInactive = false,
+        resetSpec = GlassMotion.transformBounds(true),
+        onDismissRequest = onDismissRequest,
+    )
+
+    fun geometryProgress() = popupFractionWithBack(bounds.value, backProgress.value)
+    fun centerProgress() = popupFractionWithBack(center.value, backProgress.value)
     val currentShow by rememberUpdatedState(show)
     val closeVelocity = remember { CloseVelocityTracker() }
     val travel = remember { TransformTravel() }
@@ -676,14 +687,6 @@ fun BoxScope.GlassTransformPopup(
             closeVelocity.centerVelocity = 0f
         }
     }
-    val backProgress = rememberGlassPopupBackProgress(
-        show = show,
-        active = active,
-        enabled = show && !stacked,
-        retainWhenInactive = false,
-        resetSpec = GlassMotion.transformBounds(true),
-        onDismissRequest = onDismissRequest,
-    )
     SideEffect { anchor.popupVisuals = visuals }
     DisposableEffect(anchor) {
         onDispose { anchor.popupVisuals = null }
@@ -707,11 +710,14 @@ fun BoxScope.GlassTransformPopup(
                 }
                 val offsetX = if (anchorRect.width > 0f) travel.endCenterX - anchorRect.center.x else 0f
                 val offsetY = if (anchorRect.height > 0f) travel.endCenterY - anchorRect.center.y else 0f
+                // Start from what is on screen; a far predictive back softens the rebound
+                // momentum but keeps it until the gesture collapsed the popup fully.
+                val momentum = backReboundMomentum(backProgress.value)
                 anchor.startCloseRebound(
-                    boundsValue = bounds.value,
-                    boundsVelocity = closeVelocity.boundsVelocity,
-                    centerValue = center.value,
-                    centerVelocity = closeVelocity.centerVelocity,
+                    boundsValue = geometryProgress(),
+                    boundsVelocity = closeVelocity.boundsVelocity * momentum,
+                    centerValue = centerProgress(),
+                    centerVelocity = closeVelocity.centerVelocity * momentum,
                     scaleXFactor = scaleXFactor,
                     scaleYFactor = scaleYFactor,
                     offsetX = offsetX,
@@ -749,8 +755,6 @@ fun BoxScope.GlassTransformPopup(
     val layoutDirection = LocalLayoutDirection.current
     fun startRect() = anchor.containerBounds
     fun iconRect() = anchor.contentBounds.takeUnless { it.isEmpty } ?: anchor.containerBounds
-    fun geometryProgress() = popupFractionWithBack(bounds.value, backProgress.value)
-    fun centerProgress() = popupFractionWithBack(center.value, backProgress.value)
     fun iconProgress() = popupFractionWithBack(iconMaterial.value, backProgress.value)
     fun contentProgress() = popupFractionWithBack(contentMaterial.value, backProgress.value)
     fun stackedProgress() = popupFractionWithBack(pushedBack.value, anchor.secondaryBackProgress)
