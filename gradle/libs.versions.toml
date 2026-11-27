@@ -13,7 +13,7 @@ jetbrains-compose-window-size = "1.12.0-alpha03"
 jetbrains-dokka = "2.3.0"
 jetbrains-compose-hotReload = "1.3.0"
 jetbrains-lifecycle = "2.11.0"
-materialKolor-utilities = "6.0.0"
+materialKolor-utilities = "6.1.0"
 jna = "5.19.1"
 spotless = "8.12.0"
 
