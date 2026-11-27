@@ -8,14 +8,10 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.miuixUi)
     implementation(projects.miuixIconsSymbol)
+    implementation(libs.jetbrains.compose.foundation)
 }
 
-val extendedIconsSourceDir =
-    rootProject.layout.projectDirectory
-        .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
-        .asFile
 val symbolIconsSourceDir =
     rootProject.layout.projectDirectory
         .dir("miuix-icons-symbol/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
@@ -37,8 +33,6 @@ tasks.register<JavaExec>("generateIcons") {
     outputs.dir(outputDir)
     args =
         listOf(
-            "--src",
-            extendedIconsSourceDir.absolutePath,
             "--src",
             symbolIconsSourceDir.absolutePath,
             "--out",

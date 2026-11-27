@@ -27,7 +27,6 @@ kotlin {
             api(projects.miuixPreference)
             implementation(projects.miuixGlass)
             implementation(projects.miuixIconsSymbol)
-            implementation(projects.miuixIcons)
             implementation(projects.miuixNav)
         }
     }

@@ -31,10 +31,11 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.arrowSection() {
@@ -56,7 +57,7 @@ fun LazyListScope.arrowSection() {
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Contacts,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Contacts),
                             contentDescription = "Personal",
                             tint = MiuixTheme.colorScheme.onBackground,
                         )

@@ -23,8 +23,9 @@ import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
+import top.yukonga.miuix.kmp.icon.symbol.SelectAll
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 
 @Composable
 fun FloatingActionButtonDemo() {
@@ -56,7 +57,7 @@ fun FloatingActionButtonDemo() {
                                 },
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.SelectAll,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.SelectAll),
                                     contentDescription = "SelectAll",
                                     tint = Color.White,
                                 )
@@ -85,7 +86,7 @@ fun FloatingActionButtonDemo() {
                                 },
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.SelectAll,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.SelectAll),
                                     contentDescription = "SelectAll",
                                     tint = Color.White,
                                 )

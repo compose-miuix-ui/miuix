@@ -31,7 +31,6 @@ Miuix is composed of several modules that can be used independently:
 | ------------------- | ---------------------------------------------------------- |
 | `miuix-ui`          | Core UI component library                                  |
 | `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
-| `miuix-icons`       | Extended icon library, can be used independently           |
 | `miuix-icons-symbol` | Built-in variable symbol icon library, can be used independently |
 | `miuix-material`    | Render primitives and material definitions                 |
 | `miuix-blur`        | Blur effect library, can be used independently             |
@@ -51,8 +50,6 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
             // Optional: Add miuix-preference for preference components
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
-            // Optional: Add miuix-icons for more icons
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // Optional: Add miuix-icons-symbol for the variable Symbol icon set
             implementation("top.yukonga.miuix.kmp:miuix-icons-symbol:<version>")
             // Optional: Add miuix-material for render primitives and material definitions
@@ -81,8 +78,6 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
     // Optional: Add miuix-preference for preference components
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
-    // Optional: Add miuix-icons for more icons
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // Optional: Add miuix-icons-symbol for the variable Symbol icon set
     implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-android:<version>")
             // Optional: Add miuix-material for render primitives and material definitions
@@ -114,13 +109,6 @@ implementation("top.yukonga.miuix.kmp:miuix-preference-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-js:<version>")
-// Optional: Add miuix-icons
-implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-wasm-js:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
 // Optional: Add miuix-icons-symbol
 implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iossimulatorarm64:<version>")

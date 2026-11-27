@@ -31,7 +31,6 @@ Miuix 由多个可独立使用的模块组成：
 |---|---|
 | `miuix-ui` | 核心 UI 组件库（自动包含 `miuix-core`） |
 | `miuix-preference` | Preference 组件（SwitchPreference、CheckboxPreference 等），依赖 `miuix-ui` |
-| `miuix-icons` | 扩展图标库，可独立使用，也可与 `miuix-ui` 同时使用（自动包含 `miuix-core`） |
 | `miuix-icons-symbol` | 内置可变 Symbol 图标库，可独立使用 |
 | `miuix-material` | 渲染原语与材质定义 |
 | `miuix-blur` | 模糊效果库，可独立使用 |
@@ -51,8 +50,6 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
             // 可选：添加 miuix-preference 以获取 Preference 组件
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
-            // 可选：添加 miuix-icons 以获取更多图标
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
             // 可选：添加 miuix-icons-symbol 以获取可变 Symbol 图标
             implementation("top.yukonga.miuix.kmp:miuix-icons-symbol:<version>")
             // 可选：添加 miuix-material 以获取渲染原语与材质定义
@@ -81,8 +78,6 @@ dependencies {
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
     // 可选：添加 miuix-preference 以获取 Preference 组件
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
-    // 可选：添加 miuix-icons 以获取更多图标
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
     // 可选：添加 miuix-icons-symbol 以获取可变 Symbol 图标
     implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-android:<version>")
             // 可选：添加 miuix-material 以获取渲染原语与材质定义
@@ -114,13 +109,6 @@ implementation("top.yukonga.miuix.kmp:miuix-preference-macosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-desktop:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-wasm-js:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-preference-js:<version>")
-// 可选：添加 miuix-icons
-implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-wasm-js:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
 // 可选：添加 miuix-icons-symbol
 implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iosarm64:<version>")
 implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-iossimulatorarm64:<version>")

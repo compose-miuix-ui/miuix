@@ -30,11 +30,12 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.MoreCircle
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
-import top.yukonga.miuix.kmp.icon.extended.Sort
+import top.yukonga.miuix.kmp.icon.symbol.Edit
+import top.yukonga.miuix.kmp.icon.symbol.MoreCircle
+import top.yukonga.miuix.kmp.icon.symbol.SelectAll
+import top.yukonga.miuix.kmp.icon.symbol.Sort1
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -89,14 +90,14 @@ fun OverlayIconDropdownMenuDemo() {
                         actions = {
                             OverlayIconDropdownMenu(entry = actionEntry) {
                                 Icon(
-                                    imageVector = MiuixIcons.Edit,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Edit),
                                     tint = MiuixTheme.colorScheme.onBackground,
                                     contentDescription = "Action menu",
                                 )
                             }
                             OverlayIconDropdownMenu(entry = sortEntry) {
                                 Icon(
-                                    imageVector = MiuixIcons.Sort,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Sort1),
                                     tint = MiuixTheme.colorScheme.onBackground,
                                     contentDescription = "Sort",
                                 )
@@ -106,7 +107,7 @@ fun OverlayIconDropdownMenuDemo() {
                                 collapseOnSelection = false,
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.SelectAll,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.SelectAll),
                                     tint = MiuixTheme.colorScheme.onBackground,
                                     contentDescription = "Multiple selection",
                                 )
@@ -116,7 +117,7 @@ fun OverlayIconDropdownMenuDemo() {
                                 enabled = false,
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.MoreCircle,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.MoreCircle),
                                     tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                                     contentDescription = "More",
                                 )

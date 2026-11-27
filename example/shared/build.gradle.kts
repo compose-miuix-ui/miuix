@@ -69,7 +69,6 @@ kotlin {
                 implementation(projects.miuixBlur)
                 implementation(projects.miuixGlass)
                 implementation(projects.miuixSquircle)
-                implementation(projects.miuixIcons)
                 implementation(projects.miuixIconsSymbol)
                 implementation(projects.miuixNav)
                 implementation(libs.androidx.navigationevent)

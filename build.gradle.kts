@@ -15,7 +15,6 @@ dependencies {
     dokka(project(":miuix-core"))
     dokka(project(":miuix-ui"))
     dokka(project(":miuix-preference"))
-    dokka(project(":miuix-icons"))
     dokka(project(":miuix-icons-symbol"))
     dokka(project(":miuix-material"))
     dokka(project(":miuix-blur"))

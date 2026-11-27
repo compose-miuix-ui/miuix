@@ -8,10 +8,4 @@ object MiuixIcons {
      * Variable symbol icon family backed by built-in continuous-weight outlines.
      */
     object Symbol
-
-    object Light
-    object Normal
-    object Regular
-    object Medium
-    object Demibold
 }

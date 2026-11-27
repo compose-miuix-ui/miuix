@@ -51,13 +51,13 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.icon.symbol.Refresh
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -132,7 +132,7 @@ fun PullToRefreshPage(
                                     onClick = { isRefreshing = true },
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Refresh,
+                                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Refresh),
                                         contentDescription = "Refresh",
                                         modifier = Modifier.size(24.dp),
                                         tint = MiuixTheme.colorScheme.onBackground,

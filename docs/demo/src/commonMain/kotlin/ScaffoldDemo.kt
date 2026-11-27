@@ -28,9 +28,11 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.icon.symbol.VerticalSplit
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -51,9 +53,9 @@ fun ScaffoldDemo() {
         ) {
             val pages = listOf("Home", "Profile", "Settings")
             val items = listOf(
-                NavigationItem("Home", MiuixIcons.VerticalSplit),
-                NavigationItem("Profile", MiuixIcons.Contacts),
-                NavigationItem("Settings", MiuixIcons.Settings),
+                NavigationItem("Home", MiuixIcons.Symbol.VerticalSplit.toImageVector()),
+                NavigationItem("Profile", MiuixIcons.Symbol.Contacts.toImageVector()),
+                NavigationItem("Settings", MiuixIcons.Symbol.Settings.toImageVector()),
             )
             var selectedIndex by remember { mutableIntStateOf(0) }
             Card {
@@ -82,7 +84,7 @@ fun ScaffoldDemo() {
                             },
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Contacts,
+                                painter = rememberSymbolPainter(MiuixIcons.Symbol.Contacts),
                                 contentDescription = "Personal",
                                 tint = Color.White,
                             )

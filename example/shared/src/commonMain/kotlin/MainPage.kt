@@ -67,8 +67,6 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Tune
 import top.yukonga.miuix.kmp.icon.symbol.More
 import top.yukonga.miuix.kmp.icon.symbol.Tune
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
@@ -78,6 +76,7 @@ import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.nav.transition.NavTransitionCorners
 import top.yukonga.miuix.kmp.nav.transition.navTransitionSource
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.AdaptiveTopAppBar
@@ -295,7 +294,7 @@ private fun MainPageTopBarActions(
                 collapseOnSelection = menuState.cascadingCollapseOnSelection,
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Tune,
+                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Tune),
                     contentDescription = "Tune",
                     modifier = Modifier.size(24.dp),
                 )
@@ -326,7 +325,7 @@ private fun MainPageTopBarActions(
                 collapseOnSelection = false,
             ) {
                 Icon(
-                    imageVector = MiuixIcons.More,
+                    painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
                     contentDescription = "More",
                     modifier = Modifier.size(24.dp),
                 )

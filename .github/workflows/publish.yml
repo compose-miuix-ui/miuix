@@ -12,7 +12,6 @@ on:
       - "miuix-blur/**"
       - "miuix-glass/**"
       - "miuix-squircle/**"
-      - "miuix-icons/**"
       - "miuix-icons-symbol/**"
       - "miuix-nav/**"
       - "miuix-window/**"

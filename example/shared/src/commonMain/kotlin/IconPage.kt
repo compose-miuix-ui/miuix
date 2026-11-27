@@ -115,7 +115,6 @@ import utils.LocalAppPageInsets
 import utils.SearchStatus
 import utils.appPageHorizontalInsets
 import utils.appPageSearchInsets
-import utils.originalIconsForWeight
 import utils.pageBottomPadding
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -130,8 +129,7 @@ private data class IconSection(
     val indices: List<Int>,
 )
 
-private val IconFamilies = listOf("Symbol", "Original")
-private val IconWeightNames = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+private val IconFamilies = listOf("Symbol")
 private val SymbolPresetWeights = listOf(
     "Light" to SymbolWeights.Light,
     "Normal" to SymbolWeights.Normal,
@@ -140,55 +138,6 @@ private val SymbolPresetWeights = listOf(
     "Demibold" to SymbolWeights.Demibold,
 )
 private val IconCellShape = RoundedCornerShape(12.dp)
-
-private class IconFamilyCatalog(
-    val regularIcons: List<ImageVector>,
-    val iconNames: List<String>,
-    val sections: List<IconSection>,
-    private val weightLoader: (String) -> List<ImageVector>,
-) {
-    val weightVariants: List<Pair<String, List<ImageVector>>> by lazy {
-        IconWeightNames.map { name -> name to weightLoader(name) }
-    }
-
-    @Volatile
-    private var rowsCache: Pair<Int, List<Pair<String, List<List<Int>>>>>? = null
-
-    fun sectionRowsFor(columns: Int): List<Pair<String, List<List<Int>>>> {
-        val cached = rowsCache
-        if (cached != null && cached.first == columns) return cached.second
-        val built = sections.map { it.title to it.indices.chunked(columns) }
-        rowsCache = columns to built
-        return built
-    }
-}
-
-private fun buildIconCatalog(
-    regular: List<ImageVector>,
-    weightLoader: (String) -> List<ImageVector>,
-): IconFamilyCatalog {
-    val names = regular.map { it.name.substringBefore(".") }
-    val sections = names.indices
-        .groupBy { names[it].firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
-        .entries
-        .sortedBy { it.key }
-        .map { (title, indices) ->
-            IconSection(
-                title = title,
-                indices = indices.sortedBy { names[it] },
-            )
-        }
-    return IconFamilyCatalog(
-        regularIcons = regular,
-        iconNames = names,
-        sections = sections,
-        weightLoader = weightLoader,
-    )
-}
-
-private val OriginalIconCatalog by lazy {
-    buildIconCatalog(originalIconsForWeight("Regular"), ::originalIconsForWeight)
-}
 
 private class SymbolIconCatalog(
     val symbols: List<VariableSymbol>,
@@ -252,8 +201,8 @@ fun IconsPage(
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { IconFamilies.size })
     val currentPage by remember { computedStateOf { pagerState.currentPage } }
     val searchIsSymbol = currentPage == 0
-    val searchIconNames = if (searchIsSymbol) VariableSymbolCatalog.iconNames else OriginalIconCatalog.iconNames
-    val searchSections = if (searchIsSymbol) VariableSymbolCatalog.sections else OriginalIconCatalog.sections
+    val searchIconNames = VariableSymbolCatalog.iconNames
+    val searchSections = VariableSymbolCatalog.sections
     val backdrop = rememberLayerBackdrop(backgroundColor = colorScheme.surface)
     val blurActive = appState.enableBlur && isRuntimeShaderSupported()
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
@@ -338,27 +287,18 @@ fun IconsPage(
                 BasicComponent(
                     title = name,
                     startAction = {
-                        if (searchIsSymbol) {
-                            val symbol = VariableSymbolCatalog.symbols[index]
-                            Symbol(
-                                symbol = symbol,
-                                contentDescription = name,
-                                weight = symbolWeight,
-                                tint = if (symbol.defaultColor != Color.Unspecified) {
-                                    Color.Unspecified
-                                } else {
-                                    colorScheme.onBackground
-                                },
-                                modifier = searchResultIconModifier,
-                            )
-                        } else {
-                            Icon(
-                                imageVector = OriginalIconCatalog.regularIcons[index],
-                                contentDescription = name,
-                                tint = colorScheme.onBackground,
-                                modifier = searchResultIconModifier,
-                            )
-                        }
+                        val symbol = VariableSymbolCatalog.symbols[index]
+                        Symbol(
+                            symbol = symbol,
+                            contentDescription = name,
+                            weight = symbolWeight,
+                            tint = if (symbol.defaultColor != Color.Unspecified) {
+                                Color.Unspecified
+                            } else {
+                                colorScheme.onBackground
+                            },
+                            modifier = searchResultIconModifier,
+                        )
                     },
                     onClick = { onSearchResultClick(index) },
                 )
@@ -473,7 +413,7 @@ fun IconsPage(
                     val isPageSymbol = page == 0
                     val pageListState = listStates[page]
                     val scrollBarAdapter = rememberScrollBarAdapter(pageListState)
-                    val iconNames = if (isPageSymbol) VariableSymbolCatalog.iconNames else OriginalIconCatalog.iconNames
+                    val iconNames = VariableSymbolCatalog.iconNames
                     val itemCount = iconNames.size
                     val tintColor = colorScheme.onBackground
                     // Dialog state for comparing weight variants of the tapped icon.
@@ -488,11 +428,7 @@ fun IconsPage(
                         }
                         pageColumns[page] = columns
                         val sectionRows = remember(page, columns) {
-                            if (isPageSymbol) {
-                                VariableSymbolCatalog.sectionRowsFor(columns)
-                            } else {
-                                OriginalIconCatalog.sectionRowsFor(columns)
-                            }
+                            VariableSymbolCatalog.sectionRowsFor(columns)
                         }
                         LazyColumn(
                             state = pageListState,
@@ -599,29 +535,20 @@ fun IconsPage(
                                                         .padding(horizontal = 4.dp, vertical = 10.dp),
                                                     horizontalAlignment = Alignment.CenterHorizontally,
                                                 ) {
-                                                    if (isPageSymbol) {
-                                                        val symbol = VariableSymbolCatalog.symbols[iconIndex]
-                                                        Symbol(
-                                                            symbol = symbol,
-                                                            contentDescription = iconNames[iconIndex],
-                                                            weight = { symbolWeight },
-                                                            tint = {
-                                                                if (symbol.defaultColor != Color.Unspecified) {
-                                                                    Color.Unspecified
-                                                                } else {
-                                                                    tintColor
-                                                                }
-                                                            },
-                                                            modifier = Modifier.size(28.dp),
-                                                        )
-                                                    } else {
-                                                        Icon(
-                                                            imageVector = OriginalIconCatalog.regularIcons[iconIndex],
-                                                            contentDescription = iconNames[iconIndex],
-                                                            tint = tintColor,
-                                                            modifier = Modifier.size(24.dp),
-                                                        )
-                                                    }
+                                                    val symbol = VariableSymbolCatalog.symbols[iconIndex]
+                                                    Symbol(
+                                                        symbol = symbol,
+                                                        contentDescription = iconNames[iconIndex],
+                                                        weight = { symbolWeight },
+                                                        tint = {
+                                                            if (symbol.defaultColor != Color.Unspecified) {
+                                                                Color.Unspecified
+                                                            } else {
+                                                                tintColor
+                                                            }
+                                                        },
+                                                        modifier = Modifier.size(28.dp),
+                                                    )
                                                     Spacer(modifier = Modifier.height(6.dp))
                                                     Text(
                                                         text = iconNames[iconIndex],
@@ -658,106 +585,73 @@ fun IconsPage(
                         onDismissRequest = { showWeightDialog = false },
                     ) {
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            if (isPageSymbol) {
-                                val selectedSymbol = VariableSymbolCatalog.symbols[safeIconIndex]
-                                var dialogWeight by remember(safeIconIndex, showWeightDialog) {
-                                    mutableFloatStateOf(symbolWeight)
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 8.dp, bottom = 12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Symbol(
-                                        symbol = selectedSymbol,
-                                        contentDescription = dialogIconName,
-                                        weight = { dialogWeight },
-                                        tint = {
-                                            if (selectedSymbol.defaultColor != Color.Unspecified) {
-                                                Color.Unspecified
-                                            } else {
-                                                tintColor
-                                            }
-                                        },
-                                        modifier = Modifier.size(56.dp),
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "wght = ${dialogWeight.roundToInt()} (${selectedSymbol.category.name})",
-                                        style = MiuixTheme.textStyles.footnote2,
-                                        color = colorScheme.onSurfaceVariantActions,
-                                    )
-                                    Slider(
-                                        value = dialogWeight,
-                                        onValueChange = { dialogWeight = it },
-                                        valueRange = SymbolWeights.Min..SymbolWeights.Max,
-                                        modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
-                                    )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.Top,
-                                    ) {
-                                        SymbolPresetWeights.forEach { (label, preset) ->
-                                            Column(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(IconCellShape)
-                                                    .clickable { dialogWeight = preset }
-                                                    .padding(vertical = 4.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                            ) {
-                                                Symbol(
-                                                    symbol = selectedSymbol,
-                                                    contentDescription = "$dialogIconName ($label)",
-                                                    weight = preset,
-                                                    tint = if (selectedSymbol.defaultColor != Color.Unspecified) {
-                                                        Color.Unspecified
-                                                    } else {
-                                                        tintColor
-                                                    },
-                                                    modifier = Modifier.size(28.dp),
-                                                )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = label,
-                                                    style = MiuixTheme.textStyles.footnote2,
-                                                    color = colorScheme.onSurfaceVariantActions,
-                                                    textAlign = TextAlign.Center,
-                                                    maxLines = 1,
-                                                )
-                                            }
+                            val selectedSymbol = VariableSymbolCatalog.symbols[safeIconIndex]
+                            var dialogWeight by remember(safeIconIndex, showWeightDialog) {
+                                mutableFloatStateOf(symbolWeight)
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp, bottom = 12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Symbol(
+                                    symbol = selectedSymbol,
+                                    contentDescription = dialogIconName,
+                                    weight = { dialogWeight },
+                                    tint = {
+                                        if (selectedSymbol.defaultColor != Color.Unspecified) {
+                                            Color.Unspecified
+                                        } else {
+                                            tintColor
                                         }
-                                    }
-                                }
-                            } else {
+                                    },
+                                    modifier = Modifier.size(56.dp),
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "wght = ${dialogWeight.roundToInt()} (${selectedSymbol.category.name})",
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                                Slider(
+                                    value = dialogWeight,
+                                    onValueChange = { dialogWeight = it },
+                                    valueRange = SymbolWeights.Min..SymbolWeights.Max,
+                                    modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
+                                )
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 8.dp, bottom = 16.dp),
+                                    modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.Top,
                                 ) {
-                                    OriginalIconCatalog.weightVariants.forEach { (label, icons) ->
-                                        icons.getOrNull(safeIconIndex)?.let { icon ->
-                                            Column(
-                                                modifier = Modifier.weight(1f),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                            ) {
-                                                Icon(
-                                                    imageVector = icon,
-                                                    contentDescription = "$dialogIconName ($label)",
-                                                    tint = tintColor,
-                                                    modifier = Modifier.size(28.dp),
-                                                )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = label,
-                                                    style = MiuixTheme.textStyles.footnote2,
-                                                    color = colorScheme.onSurfaceVariantActions,
-                                                    textAlign = TextAlign.Center,
-                                                    maxLines = 1,
-                                                )
-                                            }
+                                    SymbolPresetWeights.forEach { (label, preset) ->
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(IconCellShape)
+                                                .clickable { dialogWeight = preset }
+                                                .padding(vertical = 4.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            Symbol(
+                                                symbol = selectedSymbol,
+                                                contentDescription = "$dialogIconName ($label)",
+                                                weight = preset,
+                                                tint = if (selectedSymbol.defaultColor != Color.Unspecified) {
+                                                    Color.Unspecified
+                                                } else {
+                                                    tintColor
+                                                },
+                                                modifier = Modifier.size(28.dp),
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = label,
+                                                style = MiuixTheme.textStyles.footnote2,
+                                                color = colorScheme.onSurfaceVariantActions,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                            )
                                         }
                                     }
                                 }

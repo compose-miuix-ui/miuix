@@ -31,7 +31,6 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-core/`        | Utilities + MiuixIcons base (depended on by `ui` and `icons`) |
 | `miuix-ui/`          | Main UI library                                               |
 | `miuix-preference/`  | Preference / menu / popup components                          |
-| `miuix-icons/`       | Extended icon resources                                       |
 | `miuix-icons-symbol/` | Built-in variable symbol icon library, `MiuixIcons.Symbol` (depends on `miuix-core`) |
 | `miuix-material/`    | Render primitives + material definitions (`EdgeStroke`)       |
 | `miuix-blur/`        | Background sampling + blur stack (Android minSdk=33)          |
