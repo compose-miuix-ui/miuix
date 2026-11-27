@@ -353,6 +353,52 @@ fun DrawScope.drawGlassShadow(
     )
 }
 
+/**
+ * Creates an unshared [RuntimeShader] for [drawGlassShadowForSize] so an offscreen cached
+ * [androidx.compose.ui.graphics.layer.GraphicsLayer] owns its own uniform state on platforms with
+ * mutable [RuntimeShader] instances (Android).
+ */
+fun createGlassShadowShader(): RuntimeShader = RuntimeShader(GLASS_SHADOW_SHADER)
+
+/**
+ * Draws [shadow] for a surface of [componentSize] at [alpha] without reading [DrawScope.size],
+ * enabling callers to record the shadow into an expanded offscreen layer.
+ */
+fun DrawScope.drawGlassShadowForSize(
+    componentSize: Size,
+    shape: GlassShape,
+    shadow: GlassShadow,
+    alpha: Float = 1f,
+    shader: RuntimeShader? = null,
+) {
+    if (alpha <= 0f || componentSize.width <= 0f || componentSize.height <= 0f) return
+    if (!isRuntimeShaderSupported()) return
+
+    val sourceScale = density / GlassDefaults.SourceDensity
+    val reach = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
+    val offsetX = shadow.offsetX * sourceScale
+    val offsetY = shadow.offsetY * sourceScale
+    val brush = buildGlassShadowBrush(
+        shape = shape,
+        componentSize = componentSize,
+        topStart = shape.topStart.toPx(componentSize, this),
+        topEnd = shape.topEnd.toPx(componentSize, this),
+        bottomEnd = shape.bottomEnd.toPx(componentSize, this),
+        bottomStart = shape.bottomStart.toPx(componentSize, this),
+        shadow = shadow,
+        alpha = alpha,
+        reach = reach,
+        offsetX = offsetX,
+        offsetY = offsetY,
+        shader = shader,
+    )
+    drawRect(
+        brush = brush,
+        topLeft = Offset(-reach + offsetX, -reach + offsetY),
+        size = Size(componentSize.width + reach * 2f, componentSize.height + reach * 2f),
+    )
+}
+
 private fun DrawScope.buildGlassShadowBrush(
     shape: GlassShape,
     topStart: Float,
@@ -364,20 +410,22 @@ private fun DrawScope.buildGlassShadowBrush(
     reach: Float,
     offsetX: Float,
     offsetY: Float,
+    componentSize: Size = size,
+    shader: RuntimeShader? = null,
 ): ShaderBrush {
-    val shader = sharedShaderCache.obtainRuntimeShader(GLASS_SHADOW_SHADER_KEY, GLASS_SHADOW_SHADER)
-    shader.setSilhouetteRadiiUniforms(layoutDirection, size, topStart, topEnd, bottomEnd, bottomStart, shape.smoothing)
-    shader.setFloatUniform("in_shadowOffset", offsetX, offsetY)
-    shader.setFloatUniform("in_shadowShape", reach, shadow.dispersion)
+    val targetShader = shader ?: sharedShaderCache.obtainRuntimeShader(GLASS_SHADOW_SHADER_KEY, GLASS_SHADOW_SHADER)
+    targetShader.setSilhouetteRadiiUniforms(layoutDirection, componentSize, topStart, topEnd, bottomEnd, bottomStart, shape.smoothing)
+    targetShader.setFloatUniform("in_shadowOffset", offsetX, offsetY)
+    targetShader.setFloatUniform("in_shadowShape", reach, shadow.dispersion)
     val color = shadow.color
-    shader.setFloatUniform(
+    targetShader.setFloatUniform(
         "in_shadowColor",
         color.red,
         color.green,
         color.blue,
         color.alpha * alpha,
     )
-    return shader.asBrush()
+    return targetShader.asBrush()
 }
 
 /**

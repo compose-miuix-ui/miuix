@@ -10,6 +10,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -43,6 +44,7 @@ import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastCoerceAtLeast
@@ -174,6 +176,12 @@ interface BackdropPipeline {
      * only in foreground drawing ([drawFront]). When true, updates skip rebuilding effects.
      */
     fun hasSameBackdropEffects(other: BackdropPipeline): Boolean = this == other
+
+    /**
+     * Whether [drawFront] requires an offscreen compositing buffer (e.g. for [BlendMode.DstIn]
+     * masking). Returning `false` allows the host layer to stay on [CompositingStrategy.Auto].
+     */
+    fun requiresOffscreenCompositing(size: Size, density: Density): Boolean = true
 }
 
 /** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
@@ -706,7 +714,13 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || onDrawFront != null) {
+        val pipeline = pipelineRef
+        val frontNeedsOffscreen = if (pipeline != null) {
+            pipeline.requiresOffscreenCompositing(size, this)
+        } else {
+            onDrawFront != null
+        }
+        compositingStrategy = if (contentBlendMode != BlendMode.SrcOver || frontNeedsOffscreen) {
             CompositingStrategy.Offscreen
         } else {
             CompositingStrategy.Auto

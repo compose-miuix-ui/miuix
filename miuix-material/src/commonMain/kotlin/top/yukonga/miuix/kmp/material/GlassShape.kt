@@ -11,8 +11,10 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.util.fastCoerceAtMost
 
 /**
  * Defines the silhouette of a glass surface.
@@ -54,6 +56,31 @@ class GlassShape(
                 bottomLeft = CornerRadius(if (isLtr) bottomStart else bottomEnd),
             ),
         )
+    }
+
+    /**
+     * Whether the SDF silhouette diverges from the plain rounded rectangle produced by
+     * [createOutline] at [size] and [density]. Capsules, circles, rectangles, and shapes with
+     * zero smoothing match [createOutline] exactly, so hardware clipping suffices without an
+     * offscreen [drawGlassMask] pass.
+     */
+    fun requiresContinuousMask(size: Size, density: Density): Boolean {
+        if (smoothing <= 0.001f || size.width <= 0f || size.height <= 0f) return false
+        val minHalf = size.minDimension * 0.5f
+        return cornerDiverges(topStart, size, density, minHalf) ||
+            cornerDiverges(topEnd, size, density, minHalf) ||
+            cornerDiverges(bottomEnd, size, density, minHalf) ||
+            cornerDiverges(bottomStart, size, density, minHalf)
+    }
+
+    private fun cornerDiverges(
+        corner: CornerSize,
+        size: Size,
+        density: Density,
+        minHalf: Float,
+    ): Boolean {
+        val r = corner.toPx(size, density).fastCoerceAtMost(minHalf)
+        return r >= 0.5f && (minHalf - r) > 1.0f
     }
 
     override fun copy(
