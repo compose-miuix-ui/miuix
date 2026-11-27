@@ -9,7 +9,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +35,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -51,15 +57,16 @@ import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
-import top.yukonga.miuix.kmp.basic.ListPopupLayoutInfo
+import top.yukonga.miuix.kmp.basic.PopupLayoutPosition
 import top.yukonga.miuix.kmp.basic.PopupPlacementHolder
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
 import top.yukonga.miuix.kmp.basic.resolveLocalTransformOrigin
 import top.yukonga.miuix.kmp.basic.resolvePopupLayoutPosition
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.windowComponentBounds
+import top.yukonga.miuix.kmp.window.LocalWindowComponentFrame
+import top.yukonga.miuix.kmp.window.intersectIntRect
+import top.yukonga.miuix.kmp.window.windowInsetsBounds
 
 internal val CascadingPopupCornerRadius = 16.dp
 
@@ -240,7 +247,18 @@ internal fun CascadingListPopupLayout(
     }
 
     if (!show && !internalVisible.value) return
-    val resolvedComponentBounds = componentBounds ?: if (useWindowComponentBounds) windowComponentBounds() else null
+    val systemBars = WindowInsets.systemBars
+    val displayCutout = WindowInsets.displayCutout
+    val frameInsets = if (componentBounds == null && useWindowComponentBounds) {
+        LocalWindowComponentFrame.current?.insets
+    } else {
+        null
+    }
+    val safeInsets = remember(systemBars, displayCutout, frameInsets) {
+        val base = systemBars.union(displayCutout)
+        if (frameInsets != null) base.union(frameInsets) else base
+    }
+    val windowInfo = LocalWindowInfo.current
 
     var parentBounds by remember { mutableStateOf(IntRect.Zero) }
     Spacer(
@@ -258,15 +276,9 @@ internal fun CascadingListPopupLayout(
     )
     if (parentBounds == IntRect.Zero) return
 
-    val layoutInfo = rememberListPopupLayoutInfo(
-        alignment = alignment,
-        popupPositionProvider = popupPositionProvider,
-        parentBounds = parentBounds,
-        popupContentSize = IntSize.Zero,
-        componentBounds = resolvedComponentBounds,
-    )
     val placement = remember {
-        PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)
+        val initialPosition = PopupLayoutPosition(showBelow = true, showAbove = false, isRightAligned = false)
+        PopupPlacementHolder(initialPosition, resolveLocalTransformOrigin(initialPosition))
     }
 
     val anchorBoundsByPosition = remember { HashMap<CascadingItemPosition, IntRect>() }
@@ -375,8 +387,9 @@ internal fun CascadingListPopupLayout(
                         placement = placement,
                         expandedItemPosition = expandedItemPosition,
                         displayedItemPosition = displayedItemPosition,
-                        windowBounds = layoutInfo.windowBounds,
-                        popupMargin = layoutInfo.popupMargin,
+                        safeInsets = safeInsets,
+                        componentBounds = componentBounds,
+                        windowInfo = windowInfo,
                         parentBounds = parentBounds,
                         popupPositionProvider = popupPositionProvider,
                         alignment = alignment,
@@ -391,7 +404,6 @@ internal fun CascadingListPopupLayout(
                         maskAlpha = { maskAlpha.value * (1f - backExpandProgress.value) },
                         expandFraction = { expandFraction.value * (1f - backExpandProgress.value) },
                         arrowRotation = { arrowRotation.value * (1f - backExpandProgress.value) },
-                        layoutInfo = layoutInfo,
                         layoutDirection = layoutDirection,
                         surfaceColor = surfaceColor,
                         maskColor = maskColor,
@@ -428,8 +440,9 @@ private fun CascadingMorphSubLayout(
     placement: PopupPlacementHolder,
     expandedItemPosition: CascadingItemPosition?,
     displayedItemPosition: CascadingItemPosition?,
-    windowBounds: IntRect,
-    popupMargin: IntRect,
+    safeInsets: WindowInsets,
+    componentBounds: IntRect?,
+    windowInfo: WindowInfo,
     parentBounds: IntRect,
     popupPositionProvider: PopupPositionProvider,
     alignment: PopupPositionProvider.Align,
@@ -444,24 +457,49 @@ private fun CascadingMorphSubLayout(
     maskAlpha: () -> Float,
     expandFraction: () -> Float,
     arrowRotation: () -> Float,
-    layoutInfo: ListPopupLayoutInfo,
     layoutDirection: LayoutDirection,
     surfaceColor: Color,
     surface: (@Composable (Shape) -> Modifier)?,
     maskColor: Color,
 ) {
     SubcomposeLayout(modifier = Modifier.fillMaxSize()) { constraints ->
+        val systemBounds = windowInsetsBounds(safeInsets, windowInfo.containerSize, this, layoutDirection)
+        val windowBounds = if (componentBounds != null) {
+            intersectIntRect(systemBounds, componentBounds)
+        } else {
+            systemBounds
+        }
+        val margins = popupPositionProvider.getMargins()
+        val popupMargin = IntRect(
+            left = margins.calculateLeftPadding(layoutDirection).roundToPx(),
+            top = margins.calculateTopPadding().roundToPx(),
+            right = margins.calculateRightPadding(layoutDirection).roundToPx(),
+            bottom = margins.calculateBottomPadding().roundToPx(),
+        )
+        val host = hostOriginInWindow()
+        val hostBounds = IntRect(
+            left = host.x,
+            top = host.y,
+            right = host.x + constraints.maxWidth,
+            bottom = host.y + constraints.maxHeight,
+        )
+        val placementBounds = intersectIntRect(windowBounds, hostBounds)
         val minHeightPx = ListPopupDefaults.MinPopupHeight.roundToPx()
         val requestedMaxHeight = maxHeight?.roundToPx()
         val resolvedMaxHeightPx = if (constrainHeightToViewport) {
-            popupHeightLimit(windowBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+            popupHeightLimit(placementBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+        } else if (requestedMaxHeight != null) {
+            requestedMaxHeight.coerceAtLeast(minHeightPx).coerceAtMost(placementBounds.height)
         } else {
-            (requestedMaxHeight ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)).coerceAtLeast(minHeightPx)
+            (placementBounds.height - popupMargin.top - popupMargin.bottom).coerceAtLeast(0)
         }
-        val minWidthPx = minWidth.roundToPx().coerceAtMost(constraints.maxWidth)
+        val maxWidthPx = (placementBounds.width - popupMargin.left - popupMargin.right)
+            .coerceAtLeast(0)
+            .coerceAtMost(constraints.maxWidth)
+        val minWidthPx = minWidth.roundToPx().coerceAtMost(maxWidthPx)
         val primaryConstraints = Constraints(
             minWidth = minWidthPx,
-            maxWidth = constraints.maxWidth,
+            maxWidth = maxWidthPx,
             minHeight = 0,
             maxHeight = resolvedMaxHeightPx.coerceAtMost(constraints.maxHeight),
         )
@@ -515,7 +553,7 @@ private fun CascadingMorphSubLayout(
         } else {
             popupPositionProvider.calculatePosition(
                 parentBounds,
-                windowBounds,
+                placementBounds,
                 layoutDirection,
                 primaryMeasuredSize,
                 popupMargin,
@@ -569,8 +607,9 @@ private fun CascadingMorphSubLayout(
                     val secondaryRect = computeSecondaryRect(
                         anchor = anchorRect,
                         secondarySize = secondarySize,
-                        windowBounds = windowBounds,
+                        windowBounds = placementBounds,
                         layoutDirection = layoutDirection,
+                        popupMargin = popupMargin,
                     )
                     val primaryRect = IntRect(
                         left = primaryOffsetWindow.x,
@@ -622,7 +661,6 @@ private fun CascadingMorphSubLayout(
                 null
             }
 
-        val host = hostOriginInWindow()
         layout(constraints.maxWidth, constraints.maxHeight) {
             val primaryDxLocal = primaryOffsetWindow.x - host.x
             val primaryDyLocal = primaryOffsetWindow.y - host.y
@@ -652,34 +690,41 @@ internal fun computeSecondaryRect(
     secondarySize: IntSize,
     windowBounds: IntRect,
     layoutDirection: LayoutDirection,
+    popupMargin: IntRect = IntRect.Zero,
 ): IntRect {
+    val fitsHorizontalMargins = secondarySize.width <= windowBounds.width - popupMargin.left - popupMargin.right
+    val safeLeft = if (fitsHorizontalMargins) windowBounds.left + popupMargin.left else windowBounds.left
+    val safeRight = if (fitsHorizontalMargins) windowBounds.right - popupMargin.right else windowBounds.right
+    val fitsVerticalMargins = secondarySize.height <= windowBounds.height - popupMargin.top - popupMargin.bottom
+    val safeTop = if (fitsVerticalMargins) windowBounds.top + popupMargin.top else windowBounds.top
+    val safeBottom = if (fitsVerticalMargins) windowBounds.bottom - popupMargin.bottom else windowBounds.bottom
     val ltr = layoutDirection == LayoutDirection.Ltr
     // Leading-edge align; fall back to the opposite edge if the trailing side overflows.
     val left = if (ltr) {
         val leftAligned = anchor.left
         when {
-            leftAligned + secondarySize.width <= windowBounds.right -> leftAligned
+            leftAligned + secondarySize.width <= safeRight -> leftAligned
 
-            anchor.right - secondarySize.width >= windowBounds.left ->
-                windowBounds.right - secondarySize.width
+            anchor.right - secondarySize.width >= safeLeft ->
+                safeRight - secondarySize.width
 
-            else -> windowBounds.left
+            else -> safeLeft
         }
     } else {
         val rightAligned = anchor.right - secondarySize.width
         when {
-            rightAligned >= windowBounds.left -> rightAligned
-            anchor.left + secondarySize.width <= windowBounds.right -> anchor.left
-            else -> (windowBounds.right - secondarySize.width).coerceAtLeast(windowBounds.left)
+            rightAligned >= safeLeft -> rightAligned
+            anchor.left + secondarySize.width <= safeRight -> anchor.left
+            else -> (safeRight - secondarySize.width).coerceAtLeast(safeLeft)
         }
     }
     val top = when {
-        anchor.top + secondarySize.height <= windowBounds.bottom -> anchor.top
-        anchor.bottom - secondarySize.height >= windowBounds.top -> anchor.bottom - secondarySize.height
-        else -> (windowBounds.bottom - secondarySize.height).coerceAtLeast(windowBounds.top)
+        anchor.top + secondarySize.height <= safeBottom -> anchor.top
+        anchor.bottom - secondarySize.height >= safeTop -> anchor.bottom - secondarySize.height
+        else -> (safeBottom - secondarySize.height).coerceAtLeast(safeTop)
     }
-    val x = left.coerceIn(windowBounds.left, (windowBounds.right - secondarySize.width).coerceAtLeast(windowBounds.left))
-    val y = top.coerceIn(windowBounds.top, (windowBounds.bottom - secondarySize.height).coerceAtLeast(windowBounds.top))
+    val x = left.coerceIn(safeLeft, (safeRight - secondarySize.width).coerceAtLeast(safeLeft))
+    val y = top.coerceIn(safeTop, (safeBottom - secondarySize.height).coerceAtLeast(safeTop))
     return IntRect(
         left = x,
         top = y,

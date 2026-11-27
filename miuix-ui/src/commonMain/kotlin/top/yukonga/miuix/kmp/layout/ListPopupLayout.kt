@@ -8,7 +8,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +30,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -37,16 +42,18 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ListPopupContentImpl
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
+import top.yukonga.miuix.kmp.basic.PopupLayoutPosition
 import top.yukonga.miuix.kmp.basic.PopupPlacementHolder
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.basic.rememberListPopupLayoutInfo
 import top.yukonga.miuix.kmp.basic.resolveLocalTransformOrigin
 import top.yukonga.miuix.kmp.basic.resolvePopupLayoutPosition
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.LocalWindowComponentFrame
 import top.yukonga.miuix.kmp.window.WindowListPopup
-import top.yukonga.miuix.kmp.window.windowComponentBounds
+import top.yukonga.miuix.kmp.window.intersectIntRect
+import top.yukonga.miuix.kmp.window.windowInsetsBounds
 
 /**
  * Internal shared layout logic for [OverlayListPopup] and [WindowListPopup].
@@ -88,7 +95,18 @@ internal fun ListPopupLayout(
 ) {
     val internalVisible = remember { mutableStateOf(false) }
     if (!show && !internalVisible.value) return
-    val resolvedComponentBounds = componentBounds ?: if (useWindowComponentBounds) windowComponentBounds() else null
+    val systemBars = WindowInsets.systemBars
+    val displayCutout = WindowInsets.displayCutout
+    val frameInsets = if (componentBounds == null && useWindowComponentBounds) {
+        LocalWindowComponentFrame.current?.insets
+    } else {
+        null
+    }
+    val safeInsets = remember(systemBars, displayCutout, frameInsets) {
+        val base = systemBars.union(displayCutout)
+        if (frameInsets != null) base.union(frameInsets) else base
+    }
+    val windowInfo = LocalWindowInfo.current
 
     val fractionProgress = remember { Animatable(0f) }
     val alphaProgress = remember { Animatable(0f) }
@@ -143,15 +161,9 @@ internal fun ListPopupLayout(
 
     if (parentBounds == IntRect.Zero) return
 
-    val layoutInfo = rememberListPopupLayoutInfo(
-        alignment = alignment,
-        popupPositionProvider = popupPositionProvider,
-        parentBounds = parentBounds,
-        popupContentSize = IntSize.Zero,
-        componentBounds = resolvedComponentBounds,
-    )
     val placement = remember {
-        PopupPlacementHolder(layoutInfo.popupLayoutPosition, layoutInfo.localTransformOrigin)
+        val initialPosition = PopupLayoutPosition(showBelow = true, showAbove = false, isRightAligned = false)
+        PopupPlacementHolder(initialPosition, resolveLocalTransformOrigin(initialPosition))
     }
     val requestDismiss: () -> Unit = remember {
         { currentOnDismiss?.invoke() }
@@ -184,6 +196,8 @@ internal fun ListPopupLayout(
                 }
         }
 
+        var hostOrigin by remember { mutableStateOf(Offset.Zero) }
+
         Box(
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -200,34 +214,60 @@ internal fun ListPopupLayout(
             Box(
                 modifier = popupModifier
                     .fillMaxSize()
+                    .onGloballyPositioned { hostOrigin = it.positionInWindow() }
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = { requestDismiss() },
                         )
                     }
                     .layout { measurable, constraints ->
-                        val windowBounds = layoutInfo.windowBounds
-                        val popupMargin = layoutInfo.popupMargin
+                        val systemBounds = windowInsetsBounds(safeInsets, windowInfo.containerSize, this, layoutDirection)
+                        val windowBounds = if (componentBounds != null) {
+                            intersectIntRect(systemBounds, componentBounds)
+                        } else {
+                            systemBounds
+                        }
+                        val margins = popupPositionProvider.getMargins()
+                        val popupMargin = IntRect(
+                            left = margins.calculateLeftPadding(layoutDirection).roundToPx(),
+                            top = margins.calculateTopPadding().roundToPx(),
+                            right = margins.calculateRightPadding(layoutDirection).roundToPx(),
+                            bottom = margins.calculateBottomPadding().roundToPx(),
+                        )
+                        val hostX = hostOrigin.x.toInt()
+                        val hostY = hostOrigin.y.toInt()
+                        val hostBounds = IntRect(
+                            left = hostX,
+                            top = hostY,
+                            right = hostX + constraints.maxWidth,
+                            bottom = hostY + constraints.maxHeight,
+                        )
+                        val placementBounds = intersectIntRect(windowBounds, hostBounds)
                         val minHeightPx = ListPopupDefaults.MinPopupHeight.roundToPx()
                         val requestedMaxHeight = maxHeight?.roundToPx()
                         val resolvedMaxHeight = if (constrainHeightToViewport) {
-                            popupHeightLimit(windowBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+                            popupHeightLimit(placementBounds.height, popupMargin, constraints.maxHeight, minHeightPx, requestedMaxHeight)
+                        } else if (requestedMaxHeight != null) {
+                            requestedMaxHeight.coerceAtLeast(minHeightPx).coerceAtMost(placementBounds.height)
                         } else {
-                            (requestedMaxHeight ?: (windowBounds.height - popupMargin.top - popupMargin.bottom)).coerceAtLeast(minHeightPx)
+                            (placementBounds.height - popupMargin.top - popupMargin.bottom).coerceAtLeast(0)
                         }
+                        val maxWidthPx = (placementBounds.width - popupMargin.left - popupMargin.right)
+                            .coerceAtLeast(0)
+                            .coerceAtMost(constraints.maxWidth)
                         val placeable = measurable.measure(
                             constraints.copy(
                                 maxHeight = resolvedMaxHeight,
-                                minHeight = minOf(minHeightPx, resolvedMaxHeight, constraints.maxHeight),
-                                maxWidth = constraints.maxWidth,
-                                minWidth = minWidth.roundToPx().coerceAtMost(constraints.maxWidth),
+                                minHeight = minOf(minHeightPx, resolvedMaxHeight),
+                                maxWidth = maxWidthPx,
+                                minWidth = minWidth.roundToPx().coerceAtMost(maxWidthPx),
                             ),
                         )
                         val measuredSize = IntSize(placeable.width, placeable.height)
 
                         val calculatedOffset = popupPositionProvider.calculatePosition(
                             parentBounds,
-                            windowBounds,
+                            placementBounds,
                             layoutDirection,
                             measuredSize,
                             popupMargin,
@@ -244,7 +284,7 @@ internal fun ListPopupLayout(
                         }
 
                         layout(constraints.maxWidth, constraints.maxHeight) {
-                            val hostPos = coordinates?.positionInWindow() ?: Offset.Zero
+                            val hostPos = coordinates?.positionInWindow() ?: hostOrigin
                             val adjustedOffset = IntOffset(
                                 x = calculatedOffset.x - hostPos.x.toInt(),
                                 y = calculatedOffset.y - hostPos.y.toInt(),

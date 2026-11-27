@@ -444,7 +444,8 @@ internal fun DialogContent(
                             val insetBottom = if (defaultWindowInsetsPadding) {
                                 maxOf(
                                     imeInsets.getBottom(density),
-                                    navBarInsets.getBottom(density) + captionBarInsets.getBottom(density),
+                                    navBarInsets.getBottom(density),
+                                    captionBarInsets.getBottom(density),
                                 )
                             } else {
                                 0

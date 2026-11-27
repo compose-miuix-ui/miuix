@@ -212,10 +212,12 @@ fun WindowDropdownDialog(
                 if (measurables.size != 2) {
                     layout(0, 0) { }
                 } else {
-                    val button = measurables[1].measure(constraints)
+                    val button = measurables[1].measure(constraints.copy(minHeight = 0))
+                    val maxListHeight = (constraints.maxHeight - button.height).coerceAtLeast(0)
                     val lazyList = measurables[0].measure(
                         constraints.copy(
-                            maxHeight = constraints.maxHeight - button.height,
+                            minHeight = 0,
+                            maxHeight = maxListHeight,
                         ),
                     )
                     layout(constraints.maxWidth, lazyList.height + button.height) {

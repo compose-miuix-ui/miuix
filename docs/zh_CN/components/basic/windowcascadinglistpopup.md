@@ -96,7 +96,7 @@ Box {
 | popupPositionProvider | PopupPositionProvider       | 主弹窗相对锚点的定位策略                                            | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | 主弹窗的对齐方式                                                    | PopupPositionProvider.Align.End            |
 | enableWindowDim       | Boolean                     | 弹窗显示时是否变暗背景                                              | true                                       |
-| maxHeight             | Dp?                         | 主菜单和子菜单的最大高度，均不超过扣除边距后的可用高度。            | null                                       |
+| maxHeight             | Dp?                         | 主菜单和子菜单的最大高度，均不超过扣除边距后的可用安全区高度。      | null                                       |
 | minWidth              | Dp                          | 弹窗的最小宽度                                                      | 200.dp                                     |
 | dropdownColors        | DropdownColors              | 每一行使用的颜色配置                                                | DropdownDefaults.dropdownColors()          |
 | collapseOnSelection   | Boolean                     | 为 true 时，选中任何叶子项后即关闭弹窗                              | true                                       |

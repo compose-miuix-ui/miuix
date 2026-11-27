@@ -23,8 +23,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -51,10 +54,13 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
@@ -82,7 +88,8 @@ import kotlinx.coroutines.withTimeout
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.windowComponentBounds
+import top.yukonga.miuix.kmp.window.LocalWindowComponentFrame
+import top.yukonga.miuix.kmp.window.windowInsetsBounds
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 import kotlin.time.Duration.Companion.milliseconds
@@ -351,14 +358,17 @@ private fun TooltipPopup(
     focusable: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val bounds = windowComponentBounds()
-    val boundedPositionProvider = remember(positionProvider, bounds) {
-        if (bounds == null) positionProvider else constrainTooltipPosition(positionProvider, bounds)
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val systemBars = WindowInsets.systemBars
+    val displayCutout = WindowInsets.displayCutout
+    val frameInsets = LocalWindowComponentFrame.current?.insets
+    val safeInsets = remember(systemBars, displayCutout, frameInsets) {
+        val base = systemBars.union(displayCutout)
+        if (frameInsets != null) base.union(frameInsets) else base
     }
-    val sizeModifier = if (bounds == null) {
-        Modifier
-    } else {
-        with(LocalDensity.current) { Modifier.sizeIn(maxWidth = bounds.width.toDp(), maxHeight = bounds.height.toDp()) }
+    val boundedPositionProvider = remember(positionProvider, safeInsets, windowInfo, density) {
+        constrainTooltipPosition(positionProvider, safeInsets, windowInfo, density)
     }
     Popup(
         popupPositionProvider = boundedPositionProvider,
@@ -366,23 +376,60 @@ private fun TooltipPopup(
         properties = PopupProperties(focusable = focusable),
     ) {
         Box(
-            modifier = sizeModifier.semantics {
-                liveRegion = LiveRegionMode.Assertive
-                paneTitle = TOOLTIP_PANE_TITLE
-            },
+            modifier = Modifier
+                .layout { measurable, constraints ->
+                    val containerSize = windowInfo.containerSize
+                    val safeBounds = windowInsetsBounds(safeInsets, containerSize, this, layoutDirection)
+                    val hasSafeInsets = safeBounds.left > 0 ||
+                        safeBounds.top > 0 ||
+                        safeBounds.right < containerSize.width ||
+                        safeBounds.bottom < containerSize.height
+                    val constrained = if (hasSafeInsets) {
+                        constraints.copy(
+                            maxWidth = constraints.maxWidth.coerceAtMost(safeBounds.width),
+                            maxHeight = constraints.maxHeight.coerceAtMost(safeBounds.height),
+                            minWidth = constraints.minWidth.coerceAtMost(safeBounds.width),
+                            minHeight = constraints.minHeight.coerceAtMost(safeBounds.height),
+                        )
+                    } else {
+                        constraints
+                    }
+                    val placeable = measurable.measure(constrained)
+                    layout(placeable.width, placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
+                }
+                .semantics {
+                    liveRegion = LiveRegionMode.Assertive
+                    paneTitle = TOOLTIP_PANE_TITLE
+                },
         ) {
             content()
         }
     }
 }
 
-private fun constrainTooltipPosition(provider: PopupPositionProvider, bounds: IntRect): PopupPositionProvider = object : PopupPositionProvider {
+private fun constrainTooltipPosition(
+    provider: PopupPositionProvider,
+    safeInsets: WindowInsets,
+    windowInfo: WindowInfo,
+    density: Density,
+): PopupPositionProvider = object : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
     ): IntOffset {
+        val containerSize = windowInfo.containerSize
+        val bounds = windowInsetsBounds(safeInsets, containerSize, density, layoutDirection)
+        val hasSafeInsets = bounds.left > 0 ||
+            bounds.top > 0 ||
+            bounds.right < containerSize.width ||
+            bounds.bottom < containerSize.height
+        if (!hasSafeInsets) {
+            return provider.calculatePosition(anchorBounds, windowSize, layoutDirection, popupContentSize)
+        }
         val origin = bounds.topLeft
         val position = if (provider is TooltipPopupPositionProvider) {
             origin + provider.calculatePosition(anchorBounds.translate(-origin), bounds.size, layoutDirection, popupContentSize)

@@ -92,7 +92,7 @@ Cascading depth is capped at 2. Items at the secondary level cannot have their o
 | popupPositionProvider | PopupPositionProvider       | Position strategy for the primary popup relative to its anchor.                              | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | Alignment of the primary popup.                                                              | PopupPositionProvider.Align.End            |
 | enableWindowDim       | Boolean                     | Whether to dim the rest of the window while the popup is shown.                              | true                                       |
-| maxHeight             | Dp?                         | Maximum height of either menu. Available space after margins always caps it.                 | null                                       |
+| maxHeight             | Dp?                         | Maximum height of either menu, capped by the available safe area after margins.              | null                                       |
 | minWidth              | Dp                          | Minimum width of the popup.                                                                  | 200.dp                                     |
 | dropdownColors        | DropdownColors              | Colors used by every row.                                                                    | DropdownDefaults.dropdownColors()          |
 | collapseOnSelection   | Boolean                     | When true, selecting any leaf dismisses the popup.                                           | true                                       |

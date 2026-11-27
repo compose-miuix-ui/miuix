@@ -111,7 +111,7 @@ GlassPopupItem(
 | --- | --- | --- | --- | --- |
 | minWidth | Dp | Narrowest panel width | GlassPopupDefaults.MinWidth | No |
 | maxWidth | Dp | Widest panel width | GlassPopupDefaults.MaxWidth | No |
-| maxHeight | Dp | Maximum panel height before rows scroll | GlassPopupDefaults.MaxHeight | No |
+| maxHeight | Dp | Maximum height of the panel, capped by the available safe area after margins | GlassPopupDefaults.MaxHeight | No |
 | safeMargin | Dp | Minimum distance from the window safe area and the popup host edges | GlassPopupDefaults.SafeMargin | No |
 
 
