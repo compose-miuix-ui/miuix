@@ -115,17 +115,17 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationRailDefaults
 import top.yukonga.miuix.kmp.glass.GlassNavigationRailState
 import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.symbol.AppSettings
+import top.yukonga.miuix.kmp.icon.symbol.Book
+import top.yukonga.miuix.kmp.icon.symbol.Custom
+import top.yukonga.miuix.kmp.icon.symbol.DecorationMaintenance
 import top.yukonga.miuix.kmp.icon.symbol.Delete
-import top.yukonga.miuix.kmp.icon.symbol.Desktop
-import top.yukonga.miuix.kmp.icon.symbol.DoodlePen
 import top.yukonga.miuix.kmp.icon.symbol.Edit
-import top.yukonga.miuix.kmp.icon.symbol.EditSubtitle
-import top.yukonga.miuix.kmp.icon.symbol.Hd
-import top.yukonga.miuix.kmp.icon.symbol.Image
+import top.yukonga.miuix.kmp.icon.symbol.HomeScreen
 import top.yukonga.miuix.kmp.icon.symbol.Link
 import top.yukonga.miuix.kmp.icon.symbol.More
-import top.yukonga.miuix.kmp.icon.symbol.Settings
-import top.yukonga.miuix.kmp.icon.symbol.Theme
+import top.yukonga.miuix.kmp.icon.symbol.Photos
+import top.yukonga.miuix.kmp.icon.symbol.Wallpaper
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.EdgeStrokes
 import top.yukonga.miuix.kmp.material.edgeStroke
@@ -213,11 +213,11 @@ fun AppContent(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Symbol.Desktop.toImageVector()),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Symbol.Image.toImageVector()),
-            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Symbol.Theme.toImageVector()),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Symbol.EditSubtitle.toImageVector()),
-            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Symbol.Settings.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.Symbol.HomeScreen.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Symbol.Photos.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Symbol.DecorationMaintenance.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Symbol.Book.toImageVector()),
+            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Symbol.AppSettings.toImageVector()),
         )
     }
 
@@ -573,8 +573,8 @@ private fun PersistentGlassNavigationRail(
     }
     val secondaryItems = remember {
         listOf(
-            GlassNavigationItem(icon = MiuixIcons.Symbol.DoodlePen.toImageVector(), label = "Preferences"),
-            GlassNavigationItem(icon = MiuixIcons.Symbol.Hd.toImageVector(), label = "Glass"),
+            GlassNavigationItem(icon = MiuixIcons.Symbol.Custom.toImageVector(), label = "Preferences"),
+            GlassNavigationItem(icon = MiuixIcons.Symbol.Wallpaper.toImageVector(), label = "Glass"),
         )
     }
     val selectedIndex = when (currentRoute) {

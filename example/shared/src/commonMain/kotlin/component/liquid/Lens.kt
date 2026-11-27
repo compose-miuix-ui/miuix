@@ -62,6 +62,7 @@ fun BackdropEffectScope.lens(
         setFloatUniform("size", scaledSizeW, scaledSizeH)
         setFloatUniform("offset", -scaledPadding, -scaledPadding)
         setFloatUniform("cornerRadii", radii)
+        setFloatUniform("refractionHeight", scaledRefractionHeight)
         setFloatUniform("refractionAmount", -scaledRefractionAmount)
         setFloatUniform("depthEffect", if (depthEffect) 1f else 0f)
         if (dispersionEnabled) {
