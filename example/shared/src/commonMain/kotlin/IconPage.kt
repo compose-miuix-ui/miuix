@@ -210,11 +210,7 @@ fun IconsPage(
     val searchCatalog = iconCatalogForPage(currentPage)
     val searchRegularIcons = searchCatalog.regularIcons
     val searchIconNames = searchCatalog.iconNames
-    val surfaceColor = colorScheme.surface
-    val backdrop = rememberLayerBackdrop {
-        drawRect(surfaceColor)
-        drawContent()
-    }
+    val backdrop = rememberLayerBackdrop(backgroundColor = colorScheme.surface)
     val blurActive = appState.enableBlur && isRuntimeShaderSupported()
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 

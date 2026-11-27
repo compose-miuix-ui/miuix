@@ -319,11 +319,7 @@ fun AdaptiveTopAppBar(
 fun rememberBlurBackdrop(): LayerBackdrop? {
     val appState = LocalAppState.current
     if (!appState.enableBlur || !isRuntimeShaderSupported()) return null
-    val surfaceColor = MiuixTheme.colorScheme.surface
-    return rememberLayerBackdrop {
-        drawRect(surfaceColor)
-        drawContent()
-    }
+    return rememberLayerBackdrop(backgroundColor = MiuixTheme.colorScheme.surface)
 }
 
 @Composable

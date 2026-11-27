@@ -6,6 +6,8 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
@@ -55,14 +57,29 @@ private class LayerBackdropNode(
     DrawModifierNode,
     GlobalPositionAwareModifierNode {
 
+    private val defaultRecordBlock: DrawScope.() -> Unit = {
+        val bg = backdrop.backgroundColor()
+        if (bg.isSpecified) {
+            drawRect(bg)
+        }
+        (this as? ContentDrawScope)?.drawContent()
+    }
+
     private val recordBlock: DrawScope.() -> Unit = {
         (this as? ContentDrawScope)?.let(backdrop.onDraw)
     }
 
     override fun ContentDrawScope.draw() {
-        drawContent()
-        with(backdrop.graphicsLayer) {
-            record(block = recordBlock)
+        if (backdrop.isDefaultOnDraw()) {
+            with(backdrop.graphicsLayer) {
+                record(block = defaultRecordBlock)
+            }
+            drawLayer(backdrop.graphicsLayer)
+        } else {
+            drawContent()
+            with(backdrop.graphicsLayer) {
+                record(block = recordBlock)
+            }
         }
     }
 
