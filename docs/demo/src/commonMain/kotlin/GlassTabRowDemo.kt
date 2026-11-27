@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassScrollableTabRow
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
@@ -29,9 +30,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun GlassTabRowDemo() {
     val backdrop = rememberLayerBackdrop()
     val tabs = remember { listOf("All", "Photos", "Videos") }
+    val scrollableTabs = remember { listOf("All", "Photos", "Videos", "Music", "Documents", "Archive") }
     var primaryIndex by remember { mutableIntStateOf(0) }
     var neutralIndex by remember { mutableIntStateOf(0) }
     var segmentedIndex by remember { mutableIntStateOf(0) }
+    var scrollableIndex by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -92,6 +95,20 @@ fun GlassTabRowDemo() {
                     tabs = tabs,
                     selectedIndex = segmentedIndex,
                     onSelect = { segmentedIndex = it },
+                    backdrop = backdrop,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Scrollable: ${scrollableTabs[scrollableIndex]}",
+                    style = MiuixTheme.textStyles.title3,
+                    color = MiuixTheme.colorScheme.onBackground,
+                )
+                GlassScrollableTabRow(
+                    tabs = scrollableTabs,
+                    selectedIndex = scrollableIndex,
+                    onSelect = { scrollableIndex = it },
                     backdrop = backdrop,
                     modifier = Modifier.fillMaxWidth(),
                 )

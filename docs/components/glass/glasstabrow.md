@@ -1,6 +1,6 @@
 # GlassTabRow
 
-`GlassTabRow` displays equal-width glass tabs with primary or neutral colors. `GlassSegmentedTabRow` uses a joined track and sliding indicator. Both use caller-owned selection state.
+`GlassTabRow` displays equal-width glass tabs with primary or neutral colors. `GlassScrollableTabRow` sizes each pill to its label with a minimum width and scrolls horizontally. `GlassSegmentedTabRow` uses a joined track and sliding indicator. All three use caller-owned selection state.
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTabRow" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -14,6 +14,7 @@ Record an opaque background without the glass surface itself. See [Glass Surface
 
 ```kotlin
 import top.yukonga.miuix.kmp.glass.GlassTabRow
+import top.yukonga.miuix.kmp.glass.GlassScrollableTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTabColors
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
@@ -57,6 +58,23 @@ GlassTabRow(
 )
 ```
 
+### Scrollable Pills
+
+```kotlin
+val scrollableTabs = listOf("All", "Apps", "Games", "Media", "Tools", "Updates")
+var selectedIndex by remember { mutableIntStateOf(0) }
+
+GlassScrollableTabRow(
+    tabs = scrollableTabs,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    modifier = Modifier.fillMaxWidth(),
+)
+```
+
+Each pill sizes to its label with a `minTabWidth` floor and scrolls horizontally when tabs overflow.
+
 ### Joined Segmented Track
 
 ```kotlin
@@ -98,6 +116,27 @@ Provide bounded width and distinct labels. Tabs select on click or horizontal dr
 | tabGap | Dp | Gap between pills | GlassTabRowDefaults.TabGap | No |
 | colors | GlassTabColors | Selection, resting and press colors | GlassTabRowDefaults.primaryColors() | No |
 
+
+### GlassScrollableTabRow Properties {#glassscrollabletabrow}
+
+| Property Name | Type | Description | Default Value | Required |
+| --- | --- | --- | --- | --- |
+| tabs | List\<String> | Ordered, distinct tab labels | - | Yes |
+| selectedIndex | Int | Current tab index | - | Yes |
+| onSelect | (Int) -> Unit | Callback with the clicked tab index | - | Yes |
+| backdrop | Backdrop? | Background sampling source; may be null | - | Yes |
+| modifier | Modifier | Modifier applied to the row | Modifier | No |
+| contentPadding | PaddingValues | Padding around the scrollable tab list | PaddingValues(0.dp) | No |
+| style | GlassStyle | Blur style when material is null | GlassDefaults.Style | No |
+| alpha | Float | Material color-layer, stroke and shadow opacity multiplier; without a backdrop, multiplies the entire pill drawing | 1f | No |
+| surfaceAlpha | Float | Material progress, clamped to 0–1; without a backdrop, also multiplies the entire pill drawing | 1f | No |
+| stroke | EdgeStroke? | Stroke on each pill; null removes it | GlassTabRowDefaults.stroke() | No |
+| shadow | GlassShadow? | Shadow on each pill; null removes it | GlassShadows.Float | No |
+| material | GlassMaterial? | Pill material; null uses style-based blur | GlassTabRowDefaults.material() | No |
+| height | Dp | Fixed pill height | GlassTabRowDefaults.Height | No |
+| tabGap | Dp | Gap between pills | GlassTabRowDefaults.TabGap | No |
+| minTabWidth | Dp | Minimum width of each pill | GlassTabRowDefaults.MinTabWidth | No |
+| colors | GlassTabColors | Selection, resting and press colors | GlassTabRowDefaults.primaryColors() | No |
 ### GlassSegmentedTabRow Properties {#glasssegmentedtabrow}
 
 | Property Name | Type | Description | Default Value | Required |

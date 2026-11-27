@@ -17,6 +17,7 @@ import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
+import kotlin.math.sqrt
 
 /**
  * Predictive-back progress with independent cancellation recovery. Completed gestures retain
@@ -62,3 +63,10 @@ internal fun rememberGlassPopupBackProgress(
 
 /** Preserve normal spring overshoot; only the external gesture fraction is clamped. */
 internal fun popupFractionWithBack(fraction: Float, backProgress: Float): Float = fraction * (1f - backProgress.coerceIn(0f, 1f))
+
+/**
+ * Scale for the close-rebound momentum handed to the anchor after a predictive back. Linear
+ * scaling by the visible fraction leaves the rebound imperceptible; the square root keeps it
+ * visible for any partial gesture and only drops it to zero once fully collapsed.
+ */
+internal fun backReboundMomentum(backProgress: Float): Float = sqrt(1f - backProgress.coerceIn(0f, 1f))

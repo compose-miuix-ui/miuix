@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.glass
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -90,5 +91,41 @@ class GlassDropdownPopupTest {
 
         val rtlEnd = placeGlassPopup(anchor, panel, 12f, window, LayoutDirection.Rtl, androidx.compose.ui.Alignment.End)
         assertEquals(150f, rtlEnd.rect.left)
+    }
+
+    @Test
+    fun clampedDropdownAndDirectionFramesOriginateAtAnchorCenter() {
+        val landscapeWindow = Rect(0f, 0f, 640f, 360f)
+        val landscapeRow = Rect(16f, 120f, 624f, 180f)
+        val valueAnchor = Rect(520f, 134f, 608f, 166f)
+        val tallPanel = Size(200f, 336f)
+
+        val arcStart = arcFrame(
+            anchor = landscapeRow,
+            valueAnchor = valueAnchor,
+            end = tallPanel,
+            window = landscapeWindow,
+            margin = 12f,
+            sizeFraction = 0f,
+            positionFraction = 0f,
+            startRadius = 4.dp,
+            endRadius = 24.dp,
+            layoutDirection = LayoutDirection.Ltr,
+        )
+        assertEquals(valueAnchor.center.y, arcStart.rect.center.y, 0.5f)
+
+        val placement = placeGlassPopup(valueAnchor, tallPanel, 12f, landscapeWindow, LayoutDirection.Ltr)
+        val directionStart = directionFrame(
+            anchor = valueAnchor,
+            placement = placement,
+            end = tallPanel,
+            progress = 0f,
+            startRadius = 16.dp,
+            endRadius = 24.dp,
+            layoutDirection = LayoutDirection.Ltr,
+        )
+        val expectedPivotY = (valueAnchor.center.y - placement.rect.top) / tallPanel.height
+        val expectedTop = placement.rect.top + (tallPanel.height - directionStart.rect.height) * expectedPivotY
+        assertEquals(expectedTop, directionStart.rect.top, 0.5f)
     }
 }

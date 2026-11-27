@@ -11,11 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -55,9 +54,12 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.anim.SinOutEasing
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.squircle.addSquircleRect
 import top.yukonga.miuix.kmp.squircle.isSquircleEnabled
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.intersectIntRect
+import top.yukonga.miuix.kmp.window.windowInsetsBounds
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -81,6 +83,7 @@ private const val MAX_ITEMS_FOR_HEIGHT = 8
  *
  * @param content The items
  */
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 fun ListPopupColumn(
     content: @Composable () -> Unit,
@@ -139,7 +142,11 @@ fun ListPopupColumn(
                     val w = measurables[i].maxIntrinsicWidth(Int.MAX_VALUE)
                     if (w > maxIntrinsic) maxIntrinsic = w
                 }
-                val listWidth = maxIntrinsic.coerceIn(minPx, maxPx)
+                val listWidth = if (width != Constraints.Infinity && width > 0) {
+                    maxIntrinsic.coerceIn(minPx.coerceAtMost(width), maxPx.coerceAtMost(width))
+                } else {
+                    maxIntrinsic.coerceIn(minPx, maxPx)
+                }
 
                 val heightCount = min(MAX_ITEMS_FOR_HEIGHT, measurables.size)
                 var height = 0
@@ -156,6 +163,12 @@ fun ListPopupColumn(
         modifier = Modifier
             .focusGroup()
             .height(IntrinsicSize.Min)
+            .verticalScrollBar(
+                state = scrollState,
+                trackPadding = PaddingValues(vertical = 12.dp),
+                isFadeEnabled = false,
+                interactive = false,
+            )
             .verticalScroll(state = scrollState),
         measurePolicy = measurePolicy,
     )
@@ -167,8 +180,8 @@ interface PopupPositionProvider {
      * Calculate the position (offset) of Popup
      *
      * @param anchorBounds Bounds of the anchored (parent) component
-     * @param windowBounds Bounds of the safe area of window (excluding the [WindowInsets.Companion.statusBars],
-     *   [WindowInsets.Companion.navigationBars] and [WindowInsets.Companion.captionBar])
+     * @param windowBounds Bounds of the safe area of window (excluding [WindowInsets.Companion.systemBars]
+     *   and [WindowInsets.Companion.displayCutout], intersected with the popup host)
      * @param layoutDirection [LayoutDirection]
      * @param popupContentSize Actual size of the popup content
      * @param popupMargin (Extra) Margins for the popup content. See [PopupPositionProvider.getMargins]
@@ -258,26 +271,17 @@ object ListPopupDefaults {
             } else {
                 anchorBounds.left + popupMargin.left
             }
-            val offsetY = if (windowBounds.bottom - anchorBounds.bottom > popupContentSize.height) {
+            val offsetY = if (windowBounds.bottom - popupMargin.bottom - anchorBounds.bottom >= popupContentSize.height) {
                 // Show below
                 anchorBounds.bottom + popupMargin.bottom
-            } else if (anchorBounds.top - windowBounds.top > popupContentSize.height) {
+            } else if (anchorBounds.top - windowBounds.top - popupMargin.top >= popupContentSize.height) {
                 // Show above
                 anchorBounds.top - popupContentSize.height - popupMargin.top
             } else {
                 // Middle
                 anchorBounds.top + anchorBounds.height / 2 - popupContentSize.height / 2
             }
-            return IntOffset(
-                x = offsetX.coerceIn(
-                    windowBounds.left,
-                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left),
-                ),
-                y = offsetY.coerceIn(
-                    (windowBounds.top + popupMargin.top).coerceAtMost(windowBounds.bottom - popupContentSize.height - popupMargin.bottom),
-                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
-                ),
-            )
+            return clampPopupPosition(offsetX, offsetY, windowBounds, popupContentSize, popupMargin)
         }
 
         override fun getMargins(): PaddingValues = margins
@@ -326,10 +330,10 @@ object ListPopupDefaults {
                     } else {
                         anchorBounds.left + popupMargin.left
                     }
-                    offsetY = if (windowBounds.bottom - anchorBounds.bottom > popupContentSize.height) {
+                    offsetY = if (windowBounds.bottom - popupMargin.bottom - anchorBounds.bottom >= popupContentSize.height) {
                         // Show below
                         anchorBounds.bottom + popupMargin.bottom
-                    } else if (anchorBounds.top - windowBounds.top > popupContentSize.height) {
+                    } else if (anchorBounds.top - windowBounds.top - popupMargin.top >= popupContentSize.height) {
                         // Show above
                         anchorBounds.top - popupContentSize.height - popupMargin.top
                     } else {
@@ -338,22 +342,40 @@ object ListPopupDefaults {
                     }
                 }
             }
-            return IntOffset(
-                x = offsetX.coerceIn(
-                    windowBounds.left,
-                    (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left),
-                ),
-                y = offsetY.coerceIn(
-                    (windowBounds.top + popupMargin.top).coerceAtMost(windowBounds.bottom - popupContentSize.height - popupMargin.bottom),
-                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
-                ),
-            )
+            return clampPopupPosition(offsetX, offsetY, windowBounds, popupContentSize, popupMargin)
         }
 
         private val ZeroMargins = PaddingValues(0.dp)
 
         override fun getMargins(): PaddingValues = ZeroMargins
     }
+}
+
+private fun clampPopupPosition(
+    offsetX: Int,
+    offsetY: Int,
+    windowBounds: IntRect,
+    popupContentSize: IntSize,
+    popupMargin: IntRect,
+): IntOffset {
+    val fitsHorizontalMargins = popupContentSize.width <= windowBounds.width - popupMargin.left - popupMargin.right
+    val minX = if (fitsHorizontalMargins) windowBounds.left + popupMargin.left else windowBounds.left
+    val maxX = if (fitsHorizontalMargins) {
+        windowBounds.right - popupContentSize.width - popupMargin.right
+    } else {
+        (windowBounds.right - popupContentSize.width).coerceAtLeast(windowBounds.left)
+    }
+    val fitsVerticalMargins = popupContentSize.height <= windowBounds.height - popupMargin.top - popupMargin.bottom
+    val minY = if (fitsVerticalMargins) windowBounds.top + popupMargin.top else windowBounds.top
+    val maxY = if (fitsVerticalMargins) {
+        windowBounds.bottom - popupContentSize.height - popupMargin.bottom
+    } else {
+        (windowBounds.bottom - popupContentSize.height).coerceAtLeast(windowBounds.top)
+    }
+    return IntOffset(
+        x = offsetX.coerceIn(minX, maxX.coerceAtLeast(minX)),
+        y = offsetY.coerceIn(minY, maxY.coerceAtLeast(minY)),
+    )
 }
 
 internal fun safeTransformOrigin(x: Float, y: Float): TransformOrigin {
@@ -369,12 +391,20 @@ internal fun safeTransformOrigin(x: Float, y: Float): TransformOrigin {
  * @property showBelow Whether the popup is shown below the anchor.
  * @property showAbove Whether the popup is shown above the anchor.
  * @property isRightAligned Whether the popup is aligned to the right edge of the anchor.
+ * @property pivotFractionX Normalized horizontal anchor pivot within the popup (`0f` = left, `1f` = right).
+ * @property pivotFractionY Normalized vertical anchor pivot within the popup (`0f` = top, `1f` = bottom).
  */
 @Immutable
 data class PopupLayoutPosition(
     val showBelow: Boolean,
     val showAbove: Boolean,
     val isRightAligned: Boolean,
+    val pivotFractionX: Float = if (isRightAligned) 1f else 0f,
+    val pivotFractionY: Float = when {
+        !showBelow && !showAbove -> 0.5f
+        showBelow -> 0f
+        else -> 1f
+    },
 )
 
 /**
@@ -422,10 +452,11 @@ internal fun rememberListPopupLayoutInfo(
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     val layoutDirection = LocalLayoutDirection.current
+    val systemBars = WindowInsets.systemBars
     val displayCutout = WindowInsets.displayCutout
-    val statusBars = WindowInsets.statusBars
-    val navigationBars = WindowInsets.navigationBars
-    val captionBar = WindowInsets.captionBar
+    val safeInsets = remember(systemBars, displayCutout) {
+        systemBars.union(displayCutout)
+    }
 
     val margins = popupPositionProvider.getMargins()
     val popupMargin = remember(layoutDirection, density, margins) {
@@ -441,23 +472,11 @@ internal fun rememberListPopupLayoutInfo(
 
     val containerSize = windowInfo.containerSize
 
-    val windowBounds = componentBounds ?: remember(
-        layoutDirection,
-        density,
-        displayCutout,
-        statusBars,
-        navigationBars,
-        captionBar,
-        containerSize,
-    ) {
-        with(density) {
-            IntRect(
-                left = displayCutout.getLeft(this, layoutDirection),
-                top = statusBars.getTop(this),
-                right = containerSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
-            )
-        }
+    val systemBounds = windowInsetsBounds(safeInsets, containerSize, density, layoutDirection)
+    val windowBounds = if (componentBounds != null) {
+        intersectIntRect(systemBounds, componentBounds)
+    } else {
+        systemBounds
     }
 
     val predictedTransformOrigin = remember(alignment, popupMargin, parentBounds, layoutDirection, containerSize) {
@@ -524,16 +543,7 @@ internal fun rememberListPopupLayoutInfo(
             }
             PopupLayoutPosition(showBelow = true, showAbove = false, isRightAligned = isRightAligned)
         } else {
-            val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
-            val anchorCenterY = parentBounds.top + parentBounds.height / 2
-            val showBelow = popupCenterY > anchorCenterY
-            val showAbove = popupCenterY < anchorCenterY
-
-            val distLeft = abs(calculatedOffset.x - parentBounds.left)
-            val distRight = abs((calculatedOffset.x + popupContentSize.width) - parentBounds.right)
-            val isRightAligned = distRight < distLeft
-
-            PopupLayoutPosition(showBelow = showBelow, showAbove = showAbove, isRightAligned = isRightAligned)
+            resolvePopupLayoutPosition(parentBounds, popupContentSize, calculatedOffset)
         }
     }
 
@@ -551,21 +561,8 @@ internal fun rememberListPopupLayoutInfo(
         if (popupContentSize == IntSize.Zero) {
             predictedTransformOrigin
         } else {
-            val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
-            val cornerX = if (isRightAligned) {
-                (calculatedOffset.x + popupContentSize.width).toFloat()
-            } else {
-                calculatedOffset.x.toFloat()
-            }
-
-            val showMiddle = !showBelow && !showAbove
-            val topLeftY = calculatedOffset.y
-            val cornerY = when {
-                showMiddle -> (topLeftY + popupContentSize.height / 2f)
-                showBelow -> topLeftY.toFloat()
-                showAbove -> (topLeftY + popupContentSize.height).toFloat()
-                else -> topLeftY.toFloat()
-            }
+            val cornerX = calculatedOffset.x + popupContentSize.width * popupLayoutPosition.pivotFractionX
+            val cornerY = calculatedOffset.y + popupContentSize.height * popupLayoutPosition.pivotFractionY
 
             safeTransformOrigin(
                 cornerX / containerSize.width.toFloat(),
@@ -588,34 +585,48 @@ internal fun resolvePopupLayoutPosition(
     popupContentSize: IntSize,
     calculatedOffset: IntOffset,
 ): PopupLayoutPosition {
-    val popupCenterY = calculatedOffset.y + popupContentSize.height / 2
-    val anchorCenterY = parentBounds.top + parentBounds.height / 2
-    val showBelow = popupCenterY > anchorCenterY
-    val showAbove = popupCenterY < anchorCenterY
+    val popupTop = calculatedOffset.y
+    val popupBottom = popupTop + popupContentSize.height
+    val anchorCenterY = parentBounds.top + parentBounds.height / 2f
+    val pivotFractionY = if (popupContentSize.height > 0) {
+        ((anchorCenterY - popupTop) / popupContentSize.height).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+    val showBelow = popupTop >= parentBounds.bottom || (pivotFractionY == 0f && popupBottom > parentBounds.bottom)
+    val showAbove = !showBelow && (popupBottom <= parentBounds.top || (pivotFractionY == 1f && popupTop < parentBounds.top))
 
-    val distLeft = abs(calculatedOffset.x - parentBounds.left)
-    val distRight = abs((calculatedOffset.x + popupContentSize.width) - parentBounds.right)
+    val popupLeft = calculatedOffset.x
+    val popupRight = popupLeft + popupContentSize.width
+    val distLeft = abs(popupLeft - parentBounds.left)
+    val distRight = abs(popupRight - parentBounds.right)
     val isRightAligned = distRight < distLeft
+    val pivotFractionX = when {
+        popupContentSize.width <= 0 -> if (isRightAligned) 1f else 0f
 
-    return PopupLayoutPosition(showBelow = showBelow, showAbove = showAbove, isRightAligned = isRightAligned)
+        parentBounds.left > popupLeft && parentBounds.right < popupRight ->
+            ((parentBounds.left + parentBounds.width / 2f - popupLeft) / popupContentSize.width).coerceIn(0f, 1f)
+
+        isRightAligned -> 1f
+
+        else -> 0f
+    }
+
+    return PopupLayoutPosition(
+        showBelow = showBelow,
+        showAbove = showAbove,
+        isRightAligned = isRightAligned,
+        pivotFractionX = pivotFractionX,
+        pivotFractionY = pivotFractionY,
+    )
 }
 
 internal fun resolveLocalTransformOrigin(
     popupLayoutPosition: PopupLayoutPosition,
-): TransformOrigin {
-    val (showBelow, showAbove, isRightAligned) = popupLayoutPosition
-    val showMiddle = !showBelow && !showAbove
-
-    return TransformOrigin(
-        pivotFractionX = if (isRightAligned) 1f else 0f,
-        pivotFractionY = when {
-            showMiddle -> 0.5f
-            showBelow -> 0f
-            showAbove -> 1f
-            else -> 0f
-        },
-    )
-}
+): TransformOrigin = TransformOrigin(
+    pivotFractionX = popupLayoutPosition.pivotFractionX.coerceIn(0f, 1f),
+    pivotFractionY = popupLayoutPosition.pivotFractionY.coerceIn(0f, 1f),
+)
 
 internal class PopupPlacementHolder(
     initialPosition: PopupLayoutPosition,
@@ -694,13 +705,11 @@ internal fun ListPopupContentImpl(
 }
 
 /**
- * Directional clip-reveal used during popup enter/exit. The visible band grows along the popup's
- * spawn direction encoded by [popupLayoutPosition] as [fractionProgress] moves 0 → 1: from the top
- * when shown below the anchor, from the bottom when shown above, and outwards from the center
- * otherwise. The band itself is shaped as a squircle (via [addSquircleRect]) so the four corners
- * stay aligned with the surrounding [squircleSurface] / [squircleClip] during reveal — when
- * [squircleEnabled] is `false`, [addSquircleRect] falls back to a plain rounded rectangle to
- * match the squircle modifiers' fallback rendering.
+ * Directional clip-reveal used during popup enter/exit. As [fractionProgress] moves 0 → 1, the
+ * visible band expands from [PopupLayoutPosition.pivotFractionY] (`0f` = top, `1f` = bottom, or
+ * any intermediate anchor fraction). The band is shaped as a squircle (via [addSquircleRect]) so
+ * its corners stay aligned with [squircleSurface] / [squircleClip], falling back to a rounded
+ * rectangle when [squircleEnabled] is `false`.
  */
 fun Modifier.popupClipReveal(
     fractionProgress: () -> Float,
@@ -788,12 +797,8 @@ private class PopupClipRevealNode(
         val visibleHeight = height * progress
         if (visibleHeight <= 0f) return
 
-        val layoutPosition = popupLayoutPositionProvider()
-        val clipStart = when {
-            layoutPosition.showBelow -> 0f
-            layoutPosition.showAbove -> height * (1f - progress)
-            else -> height * (0.5f - 0.5f * progress)
-        }
+        val pivotY = popupLayoutPositionProvider().pivotFractionY.coerceIn(0f, 1f)
+        val clipStart = height * (1f - progress) * pivotY
 
         path.rewind()
         path.addSquircleRect(

@@ -1,3 +1,4 @@
+HSPLtop/yukonga/miuix/kmp/nav/core/LiveNavTransitionScope;->**(**)**
 HSPLtop/yukonga/miuix/kmp/nav/core/NavDisplayKt**->**(**)**
 HSPLtop/yukonga/miuix/kmp/nav/transition/NavTransitions;->**(**)**
 Ltop/yukonga/miuix/kmp/nav/core/NavKey;
@@ -15,7 +16,6 @@ PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionSourceKt**->**(**)**
 PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionSourceNode;->**(**)**
 PLtop/yukonga/miuix/kmp/nav/transition/NavTransitionsKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/ComposableSingletons;->**(**)**
-SPLtop/yukonga/miuix/kmp/nav/core/LiveNavTransitionScope;->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/LocalNavTransitionScopeKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/NavBackStackKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/nav/core/NavCornerClipMode;->**(**)**

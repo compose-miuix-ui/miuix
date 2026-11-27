@@ -136,7 +136,7 @@ OverlayCascadingListPopup(
 | popupPositionProvider | PopupPositionProvider       | 主弹窗相对锚点的定位策略                                                                                       | ListPopupDefaults.DropdownPositionProvider |
 | alignment             | PopupPositionProvider.Align | 主弹窗的对齐方式                                                                                               | PopupPositionProvider.Align.End            |
 | enableWindowDim       | Boolean                     | 弹窗显示时是否变暗背景                                                                                         | true                                       |
-| maxHeight             | Dp?                         | 任一面的最大高度。null 时由安全区限制                                                                          | null                                       |
+| maxHeight             | Dp?                         | 主菜单和子菜单的最大高度，均不超过可用安全区高度。                                                             | null                                       |
 | minWidth              | Dp                          | 弹窗的最小宽度                                                                                                 | 200.dp                                     |
 | renderInRootScaffold  | Boolean                     | 是否在根（最外层）Scaffold 中渲染弹窗。为 true 时，弹窗覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染并进行位置补偿 | true                                       |
 | dropdownColors        | DropdownColors              | 每一行使用的颜色配置                                                                                           | DropdownDefaults.dropdownColors()          |

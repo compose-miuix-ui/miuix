@@ -13,12 +13,11 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
@@ -49,17 +48,17 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
+import top.yukonga.miuix.kmp.basic.verticalScrollBar
 import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.material.EdgeStroke
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
@@ -68,13 +67,14 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.window.LocalWindowComponentFrame
 
 /**
  * Size limits and window margin for a glass popup.
  *
  * @property minWidth Minimum panel width.
  * @property maxWidth Maximum panel width.
- * @property maxHeight Maximum panel height before content scrolls.
+ * @property maxHeight Maximum panel height before content scrolls; also bounded by the window safe area, host, and [safeMargin].
  * @property safeMargin Minimum margin from the window's safe area and the popup host edges.
  */
 @Immutable
@@ -159,28 +159,6 @@ internal fun placeGlassPopup(
     return GlassPopupPlacement(Rect(left, top, left + size.width, top + size.height), alignTop)
 }
 
-/** Safe area of the window in window coordinates, excluding the display cutout and system bars. */
-@Composable
-internal fun rememberGlassWindowBounds(): IntRect {
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val displayCutout = WindowInsets.displayCutout
-    val statusBars = WindowInsets.statusBars
-    val navigationBars = WindowInsets.navigationBars
-    val captionBar = WindowInsets.captionBar
-    val containerSize = LocalWindowInfo.current.containerSize
-    return remember(layoutDirection, density, displayCutout, statusBars, navigationBars, captionBar, containerSize) {
-        with(density) {
-            IntRect(
-                left = displayCutout.getLeft(this, layoutDirection),
-                top = statusBars.getTop(this),
-                right = containerSize.width - displayCutout.getRight(this, layoutDirection),
-                bottom = containerSize.height - navigationBars.getBottom(this) - captionBar.getBottom(this),
-            )
-        }
-    }
-}
-
 /**
  * Shared glass popup surface with outside-tap dismissal and fixed-size content during transitions.
  *
@@ -204,6 +182,7 @@ internal fun rememberGlassWindowBounds(): IntRect {
  * @param content The rows.
  */
 // The full-page dismiss layer and positioned panel must be siblings in the popup host.
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 internal fun GlassPopupSurface(
     onDismissRequest: () -> Unit,
@@ -225,15 +204,14 @@ internal fun GlassPopupSurface(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    val windowBounds = rememberGlassWindowBounds()
-    val windowRect = remember(windowBounds) {
-        Rect(
-            windowBounds.left.toFloat(),
-            windowBounds.top.toFloat(),
-            windowBounds.right.toFloat(),
-            windowBounds.bottom.toFloat(),
-        )
+    val systemBars = WindowInsets.systemBars
+    val displayCutout = WindowInsets.displayCutout
+    val frameInsets = LocalWindowComponentFrame.current?.insets
+    val safeInsets = remember(systemBars, displayCutout, frameInsets) {
+        val base = systemBars.union(displayCutout)
+        if (frameInsets != null) base.union(frameInsets) else base
     }
+    val windowInfo = LocalWindowInfo.current
     val hostOrigin = remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier = Modifier
@@ -321,16 +299,49 @@ internal fun GlassPopupSurface(
             }
             GlassPopupColumn(
                 modifier = Modifier
-                    .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .then(
+                        if (scrollable) {
+                            val scrollState = rememberScrollState()
+                            Modifier
+                                .verticalScrollBar(
+                                    state = scrollState,
+                                    trackPadding = PaddingValues(vertical = 16.dp),
+                                    isFadeEnabled = false,
+                                    interactive = false,
+                                )
+                                .verticalScroll(scrollState)
+                        } else {
+                            Modifier
+                        },
+                    )
                     .padding(contentPadding),
                 content = content,
             )
         },
     ) { measurables, constraints ->
-        val safeInset = if (scrollable) sizing.safeMargin.roundToPx() * 2 else 0
-        val widest = sizing.maxWidth.roundToPx().coerceAtMost((constraints.maxWidth - safeInset).coerceAtLeast(0))
+        // Measure and place against the same bounds, including hosts offset by inset padding or a rail.
+        val containerSize = windowInfo.containerSize
+        val windowWidth = containerSize.width.coerceAtLeast(0)
+        val windowHeight = containerSize.height.coerceAtLeast(0)
+        val safeLeft = safeInsets.getLeft(this, layoutDirection).coerceIn(0, windowWidth)
+        val safeTop = safeInsets.getTop(this).coerceIn(0, windowHeight)
+        val safeRight = (windowWidth - safeInsets.getRight(this, layoutDirection)).coerceIn(safeLeft, windowWidth)
+        val safeBottom = (windowHeight - safeInsets.getBottom(this)).coerceIn(safeTop, windowHeight)
+        val origin = hostOrigin.value
+        val left = maxOf(safeLeft.toFloat(), origin.x)
+        val top = maxOf(safeTop.toFloat(), origin.y)
+        val placementBounds = Rect(
+            left = left,
+            top = top,
+            right = minOf(safeRight.toFloat(), origin.x + constraints.maxWidth).coerceAtLeast(left),
+            bottom = minOf(safeBottom.toFloat(), origin.y + constraints.maxHeight).coerceAtLeast(top),
+        )
+        val margins = if (scrollable) sizing.safeMargin.toPx() * 2f else 0f
+        val availableWidth = (placementBounds.width - margins).toInt().coerceAtLeast(0)
+        val availableHeight = (placementBounds.height - margins).toInt().coerceAtLeast(0)
+        val widest = sizing.maxWidth.roundToPx().coerceAtMost(availableWidth)
         val narrowest = sizing.minWidth.roundToPx().coerceAtMost(widest)
-        val tallest = sizing.maxHeight.roundToPx().coerceAtMost((constraints.maxHeight - safeInset).coerceAtLeast(0))
+        val tallest = sizing.maxHeight.roundToPx().coerceAtMost(availableHeight)
         val width = intrinsics.width(contentToken, widest, tallest, measurables.size) {
             measurables[1].maxIntrinsicWidth(tallest)
         }.coerceIn(narrowest, widest)
@@ -346,16 +357,6 @@ internal fun GlassPopupSurface(
         )
         measured.end = Size(foreground.width.toFloat(), foreground.height.toFloat())
         onMeasured?.invoke(measured.end)
-        // Stay inside the in-page host too; wide layouts clip the pane around it.
-        val origin = hostOrigin.value
-        val hostRight = origin.x + constraints.maxWidth
-        val hostBottom = origin.y + constraints.maxHeight
-        val placementBounds = Rect(
-            left = maxOf(windowRect.left, origin.x),
-            top = maxOf(windowRect.top, origin.y),
-            right = minOf(windowRect.right, hostRight).coerceAtLeast(windowRect.left),
-            bottom = minOf(windowRect.bottom, hostBottom).coerceAtLeast(windowRect.top),
-        )
         val current = frame(measured.end, placementBounds)
         measured.rect = current.rect
         measured.cornerRadius = current.cornerRadius

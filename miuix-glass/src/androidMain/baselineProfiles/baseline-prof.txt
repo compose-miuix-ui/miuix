@@ -1,5 +1,10 @@
+HSPLtop/yukonga/miuix/kmp/glass/CachedGlassShadowDrawer;->**(**)**
 HSPLtop/yukonga/miuix/kmp/glass/DeferredGlassShadowNode;->**(**)**
+HSPLtop/yukonga/miuix/kmp/glass/GlassNavigationBarKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/glass/GlassPipeline;->**(**)**
 HSPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarKt**->**(**)**
+HSPLtop/yukonga/miuix/kmp/glass/GlassTransformPopupKt**->**(**)**
+PLtop/yukonga/miuix/kmp/glass/CloseVelocityTracker;->**(**)**
 PLtop/yukonga/miuix/kmp/glass/ComposableSingletons;->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassBottomSheetDefaults;->**(**)**
 PLtop/yukonga/miuix/kmp/glass/GlassBottomSheetKt**->**(**)**
@@ -31,7 +36,6 @@ SPLtop/yukonga/miuix/kmp/glass/GlassIconDropdownMenuKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassMotion;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationBarDefaults;->**(**)**
-SPLtop/yukonga/miuix/kmp/glass/GlassNavigationBarKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationBarLayoutKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationIndicatorKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationItem;->**(**)**
@@ -39,7 +43,6 @@ SPLtop/yukonga/miuix/kmp/glass/GlassNavigationRailDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationRailKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassNavigationRailState;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassPanelKt**->**(**)**
-SPLtop/yukonga/miuix/kmp/glass/GlassPipeline;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassPopupAnchor;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassPopupAnchorContentElement;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassPopupAnchorContentNode;->**(**)**
@@ -57,9 +60,9 @@ SPLtop/yukonga/miuix/kmp/glass/GlassShadowNode;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTabRowKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarDefaults;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/GlassTopAppBarMeasurements;->**(**)**
-SPLtop/yukonga/miuix/kmp/glass/GlassTransformPopupKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/NavigationDragTargetKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/TopAppBarBandBrush;->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassHeaderContext;->**(**)**
+SPLtop/yukonga/miuix/kmp/glass/internal/GlassHeaderContextKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassShaderKt**->**(**)**
 SPLtop/yukonga/miuix/kmp/glass/internal/GlassUniformsKt**->**(**)**

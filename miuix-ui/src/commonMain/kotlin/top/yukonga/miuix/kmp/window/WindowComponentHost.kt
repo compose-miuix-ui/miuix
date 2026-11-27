@@ -22,8 +22,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.utils.RemovePlatformDialogDefaultEffects
@@ -60,16 +63,40 @@ val LocalWindowComponentFrame = compositionLocalOf<WindowComponentFrame?> { null
 @ReadOnlyComposable
 internal fun windowComponentBounds(): IntRect? {
     val insets = LocalWindowComponentFrame.current?.insets ?: return null
-    val density = LocalDensity.current
-    val direction = LocalLayoutDirection.current
-    val size = LocalWindowInfo.current.containerSize
-    val left = insets.getLeft(density, direction).coerceIn(0, size.width.coerceAtLeast(0))
-    val top = insets.getTop(density).coerceIn(0, size.height.coerceAtLeast(0))
+    return windowInsetsBounds(
+        insets = insets,
+        containerSize = LocalWindowInfo.current.containerSize,
+        density = LocalDensity.current,
+        layoutDirection = LocalLayoutDirection.current,
+    )
+}
+
+internal fun windowInsetsBounds(
+    insets: WindowInsets,
+    containerSize: IntSize,
+    density: Density,
+    layoutDirection: LayoutDirection,
+): IntRect {
+    val width = containerSize.width.coerceAtLeast(0)
+    val height = containerSize.height.coerceAtLeast(0)
+    val left = insets.getLeft(density, layoutDirection).coerceIn(0, width)
+    val top = insets.getTop(density).coerceIn(0, height)
     return IntRect(
         left = left,
         top = top,
-        right = (size.width - insets.getRight(density, direction)).coerceAtLeast(left),
-        bottom = (size.height - insets.getBottom(density)).coerceAtLeast(top),
+        right = (width - insets.getRight(density, layoutDirection)).coerceIn(left, width),
+        bottom = (height - insets.getBottom(density)).coerceIn(top, height),
+    )
+}
+
+internal fun intersectIntRect(a: IntRect, b: IntRect): IntRect {
+    val left = maxOf(a.left, b.left)
+    val top = maxOf(a.top, b.top)
+    return IntRect(
+        left = left,
+        top = top,
+        right = minOf(a.right, b.right).coerceAtLeast(left),
+        bottom = minOf(a.bottom, b.bottom).coerceAtLeast(top),
     )
 }
 

@@ -12,13 +12,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
@@ -64,6 +68,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -133,6 +138,9 @@ object GlassTabRowDefaults {
 
     /** Vertical padding inside a tab. */
     val TabPaddingVertical: Dp = 6.dp
+
+    /** Minimum width of each tab in [GlassScrollableTabRow]. */
+    val MinTabWidth: Dp = 76.dp
 
     /** How much white an unselected tab carries over a dark page, before the material comes up. */
     private val RestingAlpha: Float = 0.067f
@@ -472,6 +480,230 @@ fun GlassTabRow(
         }
     }
 }
+private val EmptyDrawWithContent = Modifier.drawWithContent {}
+
+/**
+ * A horizontally scrollable row of pill tabs, each one its own pill, sized to its label with a
+ * [minTabWidth] floor instead of dividing the row equally.
+ *
+ * @param tabs The tab labels, in order.
+ * @param selectedIndex The index of the current tab.
+ * @param onSelect Called with the index of a tapped tab.
+ * @param backdrop The [Backdrop] supplying the material. Inside [GlassTopAppBar] the bar's own
+ *   backdrop and effective blur take precedence. `null` outside a bar uses the resting fills.
+ * @param modifier The modifier applied to the row.
+ * @param contentPadding Padding around the scrollable tab list inside the scroll container.
+ * @param style Blur style used only when [material] is null.
+ * @param alpha Opacity multiplier for the material colour layers, bloom stroke and shadow.
+ * @param surfaceAlpha How far the material has come up, 0 to 1.
+ * @param stroke Optional bloom stroke along each tab's rim. The default is Middle.
+ * @param shadow The shadow each tab casts. `null` removes it.
+ * @param material Each tab's own body. `null` leaves the tabs at the blur selected by [style].
+ * @param height Height of a tab. [GlassTabRowDefaults.NeutralHeight] goes with the neutral colours.
+ * @param tabGap Gap between two tabs.
+ * @param minTabWidth Minimum width of each tab pill.
+ * @param colors The colours the tabs wear.
+ */
+@Composable
+fun GlassScrollableTabRow(
+    tabs: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    backdrop: Backdrop?,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    style: GlassStyle = GlassDefaults.Style,
+    alpha: Float = 1f,
+    surfaceAlpha: Float = 1f,
+    stroke: EdgeStroke? = GlassTabRowDefaults.stroke(),
+    shadow: GlassShadow? = GlassShadows.Float,
+    material: GlassMaterial? = GlassTabRowDefaults.material(),
+    height: Dp = GlassTabRowDefaults.Height,
+    tabGap: Dp = GlassTabRowDefaults.TabGap,
+    minTabWidth: Dp = GlassTabRowDefaults.MinTabWidth,
+    colors: GlassTabColors = GlassTabRowDefaults.primaryColors(),
+) {
+    if (tabs.isEmpty()) return
+    val index = selectedIndex.coerceIn(0, tabs.lastIndex)
+    val shape = GlassTabRowDefaults.shape(height)
+    val headerContext = LocalGlassHeaderContext.current
+    val resolvedBackdrop = (headerContext?.backdrop ?: backdrop)?.takeIf { isRuntimeShaderSupported() }
+    val underlayMaterial = headerContext?.underlayMaterial
+    val resolvedMaterial = remember(material, underlayMaterial) { material?.withUnderlayBlur(underlayMaterial) }
+    val targetRamp = if (resolvedBackdrop != null) surfaceAlpha.coerceIn(0f, 1f) else 0f
+    val rampState = animateFloatAsState(
+        targetValue = targetRamp,
+        animationSpec = GlassTabMaterialTransitionSpec,
+        label = "scrollableGlassTabRamp",
+    )
+    val showGlass by remember(resolvedBackdrop) {
+        computedStateOf { resolvedBackdrop != null && rampState.value > 0.001f }
+    }
+
+    // Reserve vertical bleed inside horizontalScroll so its clipToBounds never cuts tab shadows.
+    Box(
+        modifier = modifier.layout { measurable, constraints ->
+            val padPx = ScrollableGlassTabShadowPadding.roundToPx()
+            val looseConstraints = constraints.copy(
+                minHeight = 0,
+                maxHeight = if (constraints.maxHeight == Constraints.Infinity) {
+                    Constraints.Infinity
+                } else {
+                    constraints.maxHeight + padPx * 2
+                },
+            )
+            val placeable = measurable.measure(looseConstraints)
+            val layoutHeight = (placeable.height - padPx * 2).coerceAtLeast(0)
+            layout(placeable.width, layoutHeight) {
+                placeable.placeRelative(0, -padPx)
+            }
+        },
+    ) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(vertical = ScrollableGlassTabShadowPadding)
+                .padding(contentPadding)
+                .height(height)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(tabGap),
+        ) {
+            tabs.forEachIndexed { position, label ->
+                key(label) {
+                    val selected = position == index
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val edgeBrushCache = remember { ShaderBrushCache() }
+                    val target = animateColorAsState(
+                        targetValue = if (selected) colors.selectedContainerColor else colors.containerColor,
+                        animationSpec = GlassMotion.navContent(),
+                        label = "scrollableGlassTabContainer",
+                    )
+                    val contentColorState = animateColorAsState(
+                        targetValue = if (selected) colors.selectedContentColor else colors.contentColor,
+                        animationSpec = GlassMotion.navContent(),
+                        label = "scrollableGlassTabContent",
+                    )
+                    val contentColorProducer = remember { ColorProducer { contentColorState.value } }
+                    val rim = animateFloatAsState(
+                        targetValue = if (selected) 0f else colors.restingStrokeAlpha,
+                        animationSpec = GlassMotion.navContentFloat(),
+                        label = "scrollableGlassTabRim",
+                    )
+
+                    fun containerColor(): Color {
+                        val settled = target.value
+                        return if (selected) {
+                            settled
+                        } else {
+                            lerp(
+                                colors.restingContainerColor,
+                                settled,
+                                if (resolvedBackdrop != null) rampState.value else 0f,
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .widthIn(min = minTabWidth)
+                            .glassShadow(shape, shadow, alpha * if (resolvedBackdrop != null) rampState.value else 1f)
+                            .clip(shape)
+                            .drawBehind {
+                                if (!selected) {
+                                    drawRect(colors.restingContainerColor)
+                                }
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (resolvedBackdrop != null) {
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .graphicsLayer { this.alpha = if (showGlass) rampState.value else 0f }
+                                    .glass(
+                                        backdrop = resolvedBackdrop,
+                                        shape = shape,
+                                        style = style,
+                                        alpha = alpha,
+                                        material = resolvedMaterial,
+                                        stroke = stroke,
+                                        enabled = showGlass,
+                                        shading = false,
+                                    ),
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .widthIn(min = minTabWidth)
+                                .drawBehind {
+                                    val settled = target.value
+                                    val currentRamp = if (resolvedBackdrop != null) rampState.value else 0f
+                                    if (selected) {
+                                        drawRect(settled)
+                                    } else if (settled.alpha > 0f) {
+                                        val fillAlpha = if (settled != colors.containerColor) 1f else currentRamp
+                                        if (fillAlpha > 0f) {
+                                            drawRect(settled.copy(alpha = settled.alpha * fillAlpha))
+                                        }
+                                    }
+                                }
+                                .drawWithContent {
+                                    drawContent()
+                                    val currentRamp = if (resolvedBackdrop != null) rampState.value else 0f
+                                    val restingRim = alpha * (1f - currentRamp) * rim.value
+                                    if (restingRim > 0.001f) {
+                                        if (stroke != null) {
+                                            drawGlassEdge(shape, stroke, style, containerColor(), restingRim, brushCache = edgeBrushCache)
+                                        } else {
+                                            drawGlassRim(shape, style, containerColor(), restingRim)
+                                        }
+                                    }
+                                }
+                                .selectable(
+                                    selected = selected,
+                                    onClick = { onSelect(position) },
+                                    role = Role.Tab,
+                                    interactionSource = interactionSource,
+                                    indication = remember { MiuixIndication() },
+                                )
+                                .padding(
+                                    horizontal = GlassTabRowDefaults.TabPaddingHorizontal,
+                                    vertical = GlassTabRowDefaults.TabPaddingVertical,
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (!selected) {
+                                Text(
+                                    text = label,
+                                    style = MiuixTheme.textStyles.subtitle,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = EmptyDrawWithContent,
+                                )
+                            }
+                            Text(
+                                text = label,
+                                color = contentColorProducer,
+                                style = if (selected) {
+                                    MiuixTheme.textStyles.subtitle
+                                } else {
+                                    MiuixTheme.textStyles.body2
+                                },
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private val ScrollableGlassTabShadowPadding = 20.dp
 
 private val GlassTabMaterialTransitionSpec = tween<Float>(450, easing = LinearEasing)
 

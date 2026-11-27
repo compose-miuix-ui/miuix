@@ -273,7 +273,7 @@ fun BoxScope.GlassPopup(
         overlay = {},
         frame = { end, windowBounds ->
             val settled = placeGlassPopup(anchorBounds, end, sizing.safeMargin.toPx(), windowBounds, layoutDirection, horizontalAlignment)
-            directionFrame(settled, end, progress.value, startRadius, cornerRadius, layoutDirection, horizontalAlignment)
+            directionFrame(anchorBounds, settled, end, progress.value, startRadius, cornerRadius, layoutDirection, horizontalAlignment)
         },
         contentLayer = { _, _ ->
             val t = progress.value.coerceAtLeast(0f)
@@ -291,7 +291,8 @@ fun BoxScope.GlassPopup(
 }
 
 /** Interpolates the panel bounds while keeping two edges fixed. */
-private fun directionFrame(
+internal fun directionFrame(
+    anchor: Rect,
     placement: GlassPopupPlacement,
     end: Size,
     progress: Float,
@@ -307,7 +308,15 @@ private fun directionFrame(
     val ratio = GlassMotion.POPUP_START_RATIO + (endRatio - GlassMotion.POPUP_START_RATIO) * t
     val height = width * ratio
     val left = alignPopupLeft(placement.rect.left, placement.rect.right, width, layoutDirection, horizontalAlignment)
-    val top = if (placement.alignTop) placement.rect.top else placement.rect.bottom - height
+    val pivotY = when {
+        end.height > 0f && anchor.top > placement.rect.top && anchor.bottom < placement.rect.bottom ->
+            ((anchor.center.y - placement.rect.top) / end.height).coerceIn(0f, 1f)
+
+        placement.alignTop -> 0f
+
+        else -> 1f
+    }
+    val top = placement.rect.top + (end.height - height) * pivotY
     return GlassPopupFrame(
         rect = Rect(left, top, left + width, top + height),
         cornerRadius = startRadius + (endRadius - startRadius) * t,

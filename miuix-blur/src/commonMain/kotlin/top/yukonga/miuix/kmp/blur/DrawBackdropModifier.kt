@@ -50,8 +50,10 @@ import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.node.updateLayerBlock
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.Job
@@ -59,6 +61,7 @@ import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_2X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.DOWNSAMPLE_4X_SHADER
 import top.yukonga.miuix.kmp.blur.internal.NOISE_DITHER_SHADER
+import top.yukonga.miuix.kmp.blur.internal.PROGRESSIVE_SHARP_MASK_MAX_DP
 import top.yukonga.miuix.kmp.blur.internal.ShapeProvider
 import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.blur.internal.computeProgressiveEdgePadding
@@ -184,9 +187,6 @@ interface BackdropPipeline {
     /** Draws above the content, such as a rim or mask. */
     fun drawFront(scope: DrawScope) {}
 
-    /** Whether [drawFront] uses destination blending that must be isolated from the parent canvas. */
-    val requiresOffscreenCompositing: Boolean get() = false
-
     /** Optional progressive gradient for multi-level composite rendering. */
     val progressiveGradient: ProgressiveBlur? get() = null
 
@@ -195,6 +195,12 @@ interface BackdropPipeline {
      * only in foreground drawing ([drawFront]). When true, updates skip rebuilding effects.
      */
     fun hasSameBackdropEffects(other: BackdropPipeline): Boolean = this == other
+
+    /**
+     * Whether [drawFront] requires an offscreen compositing buffer (e.g. for [BlendMode.DstIn]
+     * masking). Returning `false` allows the host layer to stay on [CompositingStrategy.Auto].
+     */
+    fun requiresOffscreenCompositing(size: Size, density: Density): Boolean = true
 }
 
 /** Applies [pipeline] as a value-equal backdrop, so unchanged inputs keep the node. */
@@ -411,20 +417,23 @@ private class DrawBackdropNode(
 
     private val shapeProvider: ShapeProvider = ShapeProvider(shape)
 
-    var pipelineRef: BackdropPipeline? = null
+    var pipelineRef by mutableStateOf<BackdropPipeline?>(null)
         private set
-    private var requiresOffscreenCompositing by mutableStateOf(onDrawFront != null)
+    private var hasDrawFront by mutableStateOf(onDrawFront != null)
     var contentBlendMode by mutableStateOf(contentBlendMode)
-    private val needsOffscreenCompositing: Boolean
-        get() = requiresOffscreenCompositing || contentBlendMode != BlendMode.SrcOver
+
+    private fun needsOffscreenCompositing(size: Size, density: Density): Boolean = contentBlendMode != BlendMode.SrcOver ||
+        (pipelineRef?.requiresOffscreenCompositing(size, density) ?: hasDrawFront)
 
     private val pipelineShape: () -> Shape = { pipelineRef!!.shape }
-    private val pipelineEffects: BackdropEffectScope.() -> Unit = { pipelineRef!!.configureEffects(this) }
+    private val pipelineEffects: BackdropEffectScope.() -> Unit = {
+        // The element already invalidates effects when their inputs change.
+        Snapshot.withoutReadObservation { pipelineRef!! }.configureEffects(this)
+    }
     private val pipelineDrawFront: DrawScope.() -> Unit = { pipelineRef!!.drawFront(this) }
 
     fun updatePipeline(pipeline: BackdropPipeline) {
         pipelineRef = pipeline
-        requiresOffscreenCompositing = pipeline.requiresOffscreenCompositing
         shapeProvider.shapeBlock = pipelineShape
         effects = pipelineEffects
         onDrawFront = pipelineDrawFront
@@ -432,12 +441,13 @@ private class DrawBackdropNode(
 
     fun updateDrawing(shape: () -> Shape, onDrawFront: (DrawScope.() -> Unit)?) {
         pipelineRef = null
-        requiresOffscreenCompositing = onDrawFront != null
+        hasDrawFront = onDrawFront != null
         shapeProvider.shapeBlock = shape
         this.onDrawFront = onDrawFront
     }
     private val effectScope = object : BackdropEffectScopeImpl() {
-        override val shape: Shape get() = shapeProvider.innerShape
+        override val shape: Shape
+            get() = Snapshot.withoutReadObservation { pipelineRef }?.shape ?: shapeProvider.innerShape
     }
 
     /** The node's graphics context; the (necessarily `inner`) [LevelTarget] reaches it through here. */
@@ -610,7 +620,8 @@ private class DrawBackdropNode(
                 active = false
                 return
             }
-            val isMaskMode = !midDecay && downScale == 1 && maxRX < 5.5f && maxRY < 5.5f
+            val maskThresholdPx = PROGRESSIVE_SHARP_MASK_MAX_DP * scope.density
+            val isMaskMode = !midDecay && downScale == 1 && maxRX < maskThresholdPx && maxRY < maskThresholdPx
             val keyRX = if (isMaskMode) -1f else maxRX
             val keyRY = if (isMaskMode) -1f else maxRY
             if (cachedGradient != gradient || cachedW != sw || cachedH != sh ||
@@ -639,8 +650,8 @@ private class DrawBackdropNode(
                 } else {
                     val left = (floor(band.left).toInt() / downScale) * downScale
                     val top = (floor(band.top).toInt() / downScale) * downScale
-                    val texW = ((ceil(band.right).toInt() - left + downScale - 1) / downScale).coerceAtLeast(1)
-                    val texH = ((ceil(band.bottom).toInt() - top + downScale - 1) / downScale).coerceAtLeast(1)
+                    val texW = ((ceil(band.right).toInt() - left + downScale - 1) / downScale).fastCoerceAtLeast(1)
+                    val texH = ((ceil(band.bottom).toInt() - top + downScale - 1) / downScale).fastCoerceAtLeast(1)
                     bandOffset = IntOffset(left, top)
                     bandTexSize = IntSize(texW, texH)
                     effect = createProgressiveSharpOverlayEffect(
@@ -732,7 +743,7 @@ private class DrawBackdropNode(
     private val layoutLayerBlock: GraphicsLayerScope.() -> Unit = {
         clip = true
         shape = shapeProvider.shape
-        val needsFullLayer = needsOffscreenCompositing && maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX
+        val needsFullLayer = maxOf(size.width, size.height) <= MAX_OFFSCREEN_PX && needsOffscreenCompositing(size, this)
         compositingStrategy = if (needsFullLayer) {
             CompositingStrategy.Offscreen
         } else {
@@ -798,8 +809,8 @@ private class DrawBackdropNode(
 
         // Texel size of the padded region recorded at [scale].
         fun recordedSize(scale: Float): IntSize = IntSize(
-            (fullWidth / scale).fastRoundToInt().coerceAtLeast(1),
-            (fullHeight / scale).fastRoundToInt().coerceAtLeast(1),
+            (fullWidth / scale).fastRoundToInt().fastCoerceAtLeast(1),
+            (fullHeight / scale).fastRoundToInt().fastCoerceAtLeast(1),
         )
 
         // Filters from an earlier frame must not survive into this one: the cascade layers are
@@ -969,10 +980,10 @@ private class DrawBackdropNode(
         }
         val layerW = layerCoords.size.width.toFloat()
         val layerH = layerCoords.size.height.toFloat()
-        val availL = pos.x.coerceAtLeast(0f)
-        val availT = pos.y.coerceAtLeast(0f)
-        val availR = (layerW - (pos.x + size.width)).coerceAtLeast(0f)
-        val availB = (layerH - (pos.y + size.height)).coerceAtLeast(0f)
+        val availL = pos.x.fastCoerceAtLeast(0f)
+        val availT = pos.y.fastCoerceAtLeast(0f)
+        val availR = (layerW - (pos.x + size.width)).fastCoerceAtLeast(0f)
+        val availB = (layerH - (pos.y + size.height)).fastCoerceAtLeast(0f)
         val nextL = minOf(progBasePadLeft, availL)
         val nextT = minOf(progBasePadTop, availT)
         val nextR = minOf(progBasePadRight, availR)
@@ -997,10 +1008,10 @@ private class DrawBackdropNode(
         }
         val layerW = layerCoords.size.width.toFloat()
         val layerH = layerCoords.size.height.toFloat()
-        val availL = pos.x.coerceAtLeast(0f)
-        val availT = pos.y.coerceAtLeast(0f)
-        val availR = (layerW - (pos.x + size.width)).coerceAtLeast(0f)
-        val availB = (layerH - (pos.y + size.height)).coerceAtLeast(0f)
+        val availL = pos.x.fastCoerceAtLeast(0f)
+        val availT = pos.y.fastCoerceAtLeast(0f)
+        val availR = (layerW - (pos.x + size.width)).fastCoerceAtLeast(0f)
+        val availB = (layerH - (pos.y + size.height)).fastCoerceAtLeast(0f)
         val nextL = minOf(blurBasePadding, availL)
         val nextT = minOf(blurBasePadding, availT)
         val nextR = minOf(blurBasePadding, availR)
@@ -1034,7 +1045,7 @@ private class DrawBackdropNode(
         if (effectScope.update(this) || !effectsSized) {
             observeEffects(this)
         }
-        if (needsOffscreenCompositing && maxOf(size.width, size.height) > MAX_OFFSCREEN_PX) {
+        if (maxOf(size.width, size.height) > MAX_OFFSCREEN_PX && needsOffscreenCompositing(size, this)) {
             drawTiledSurface()
             return
         }
@@ -1256,7 +1267,7 @@ private class DrawBackdropNode(
             primary.padBottom = minOf(basePad, effectScope.maxPadBottom)
         }
         primary.mainLayer?.renderEffect = effectScope.renderEffect
-        primary.downscaleFactor = effectScope.downscaleFactor.coerceAtLeast(1f)
+        primary.downscaleFactor = effectScope.downscaleFactor.fastCoerceAtLeast(1f)
     }
 
     private fun rebuildPrimaryProgressiveEffect(
@@ -1392,10 +1403,10 @@ private class DrawBackdropNode(
                     if (pos != null) {
                         val layerW = layerCoords.size.width.toFloat()
                         val layerH = layerCoords.size.height.toFloat()
-                        padL = minOf(padL, pos.x.coerceAtLeast(0f))
-                        padT = minOf(padT, pos.y.coerceAtLeast(0f))
-                        padR = minOf(padR, (layerW - (pos.x + scope.size.width)).coerceAtLeast(0f))
-                        padB = minOf(padB, (layerH - (pos.y + scope.size.height)).coerceAtLeast(0f))
+                        padL = minOf(padL, pos.x.fastCoerceAtLeast(0f))
+                        padT = minOf(padT, pos.y.fastCoerceAtLeast(0f))
+                        padR = minOf(padR, (layerW - (pos.x + scope.size.width)).fastCoerceAtLeast(0f))
+                        padB = minOf(padB, (layerH - (pos.y + scope.size.height)).fastCoerceAtLeast(0f))
                     }
                 }
             }
@@ -1573,8 +1584,8 @@ private class DrawBackdropNode(
         val residualY = backdrop.offsetResidualY
         if (noiseCoeff > 0f) {
             layer.topLeft = IntOffset.Zero
-            val compW = ceil(size.width).toInt().coerceAtLeast(1)
-            val compH = ceil(size.height).toInt().coerceAtLeast(1)
+            val compW = ceil(size.width).toInt().fastCoerceAtLeast(1)
+            val compH = ceil(size.height).toInt().fastCoerceAtLeast(1)
             val noiseL = target.noiseLayer
                 ?: graphicsContext.createGraphicsLayer().also { target.noiseLayer = it }
             target.pendingNoiseLayer = layer

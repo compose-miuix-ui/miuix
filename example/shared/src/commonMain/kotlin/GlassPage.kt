@@ -35,7 +35,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -76,6 +75,7 @@ import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassPopupItem
 import top.yukonga.miuix.kmp.glass.GlassPopupSizing
+import top.yukonga.miuix.kmp.glass.GlassScrollableTabRow
 import top.yukonga.miuix.kmp.glass.GlassSearchOverlay
 import top.yukonga.miuix.kmp.glass.GlassSecondaryPopup
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
@@ -121,6 +121,7 @@ import utils.TopLayer
 import utils.appPageHorizontalInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
+import utils.pageScrollModifiers
 import utils.rememberAppSafePadding
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -132,6 +133,7 @@ private val NavItems: List<GlassNavigationItem> = listOf(
 )
 
 private val TabRowPlacements = listOf("TopAppBar", "List")
+private val TopBarTabRowCounts = listOf("1", "2", "3", "4")
 private const val TABS_IN_TOP_BAR = 0
 private const val TABS_IN_LIST = 1
 private const val OVERLAY_NONE = 0
@@ -141,9 +143,11 @@ private const val OVERLAY_BOTTOM_SHEET = 3
 private const val OVERLAY_HALF_BOTTOM_SHEET = 4
 
 private val LogLevels = listOf("Verbose", "Debug", "Info", "Warn", "Error")
+private val LongDropdownItems = (1..20).map { "Option $it" }
 
 private val SortOrders = listOf("Updated", "Created", "Title")
 private val PrimaryTabTitles = listOf("Sound", "Haptics")
+private val ScrollableTabTitles = listOf("All", "Apps", "Games", "Media", "Tools", "Updates")
 private val NeutralTabTitles = listOf("Home", "Widget", "Theme", "Paper")
 private val SegmentedTabTitles = listOf("Privacy", "Security")
 private val AlignedPopupLabels = listOf("Start", "Center", "End")
@@ -196,6 +200,7 @@ fun GlassPage(padding: PaddingValues) {
     var alpha by remember { mutableFloatStateOf(1f) }
     var overlayIndex by remember { mutableIntStateOf(OVERLAY_NONE) }
     var tabRowPlacement by remember { mutableIntStateOf(TABS_IN_LIST) }
+    var topBarTabRowCount by remember { mutableIntStateOf(4) }
     var topAppBarProgressiveBlur by remember { mutableStateOf(true) }
     var navIndex by remember { mutableIntStateOf(0) }
     var navigationBarSearchButton by remember(navIndex) { mutableStateOf(navIndex == 0 || navIndex == 2) }
@@ -212,6 +217,7 @@ fun GlassPage(padding: PaddingValues) {
     }
     var alignedPopupIndex by remember { mutableIntStateOf(-1) }
     var logLevel by remember { mutableIntStateOf(2) }
+    var longDropdownIndex by remember { mutableIntStateOf(0) }
     var dialogActive by remember { mutableStateOf(false) }
     var sheetActive by remember { mutableStateOf(false) }
     var popupActive by remember { mutableStateOf(false) }
@@ -290,7 +296,7 @@ fun GlassPage(padding: PaddingValues) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .appPageHorizontalInsets()
-                        .padding(start = 24.dp, end = 24.dp, top = 20.dp)
+                        .padding(horizontal = 24.dp)
                         .layout { measurable, constraints ->
                             val bottom = maxOf(24.dp, safePadding.calculateBottomPadding() + 8.dp, padding.calculateBottomPadding() + 8.dp)
                                 .roundToPx().coerceIn(0, constraints.maxHeight)
@@ -427,6 +433,7 @@ fun GlassPage(padding: PaddingValues) {
                                     .padding(horizontal = horizontalPadding)
                                     .padding(top = 6.dp, bottom = 12.dp),
                                 surfaceActive = contentUnderTopBarProvider,
+                                rowCount = topBarTabRowCount,
                             )
                         }
                     },
@@ -529,7 +536,12 @@ fun GlassPage(padding: PaddingValues) {
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        .pageScrollModifiers(
+                            appState.enableScrollEndHaptic,
+                            true,
+                            scrollBehavior,
+                        ),
+                    overscrollEffect = null,
                     contentPadding = pageContentPadding(innerPadding, padding),
                 ) {
                     if (!tabsInTopBar) {
@@ -602,6 +614,14 @@ fun GlassPage(padding: PaddingValues) {
                                 backdrop = backdrop,
                                 visuals = popupVisuals,
                             )
+                            GlassDropdownPreference(
+                                title = "Scrollable dropdown",
+                                items = LongDropdownItems,
+                                selectedIndex = longDropdownIndex,
+                                onSelectedIndexChange = { longDropdownIndex = it },
+                                backdrop = backdrop,
+                                visuals = popupVisuals,
+                            )
                         }
                     }
                     item(key = "layout-title") { SmallTitle(text = "Layout") }
@@ -631,6 +651,16 @@ fun GlassPage(padding: PaddingValues) {
                                 backdrop = backdrop,
                                 visuals = popupVisuals,
                             )
+                            if (tabsInTopBar) {
+                                GlassDropdownPreference(
+                                    title = "TopAppBar TabRow count",
+                                    items = TopBarTabRowCounts,
+                                    selectedIndex = topBarTabRowCount - 1,
+                                    onSelectedIndexChange = { topBarTabRowCount = it + 1 },
+                                    backdrop = backdrop,
+                                    visuals = popupVisuals,
+                                )
+                            }
                         }
                     }
                     item(key = "controls-title") { SmallTitle(text = "Material") }
@@ -880,8 +910,10 @@ private fun GlassPageTabRows(
     onJoinedTabSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     surfaceActive: () -> Boolean = { false },
+    rowCount: Int = 4,
 ) {
     val tabSurfaceAlpha = if (surfaceActive()) 1f else 0f
+    var scrollableTab by remember { mutableIntStateOf(0) }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         GlassTabRow(
             tabs = PrimaryTabTitles,
@@ -894,29 +926,46 @@ private fun GlassPageTabRows(
             stroke = stroke,
             material = material ?: GlassTabRowDefaults.material(),
         )
-        GlassTabRow(
-            tabs = NeutralTabTitles,
-            selectedIndex = neutralTab,
-            onSelect = onNeutralTabSelect,
-            backdrop = backdrop,
-            style = style,
-            alpha = alpha,
-            surfaceAlpha = tabSurfaceAlpha,
-            stroke = stroke,
-            material = material ?: GlassTabRowDefaults.material(),
-            height = GlassTabRowDefaults.NeutralHeight,
-            colors = GlassTabRowDefaults.neutralColors(),
-        )
-        GlassSegmentedTabRow(
-            tabs = SegmentedTabTitles,
-            selectedIndex = joinedTab,
-            onSelect = onJoinedTabSelect,
-            backdrop = backdrop,
-            style = style,
-            alpha = alpha,
-            surfaceAlpha = tabSurfaceAlpha,
-            stroke = stroke,
-            material = material ?: GlassSegmentedTabRowDefaults.material(),
-        )
+        if (rowCount >= 2) {
+            GlassTabRow(
+                tabs = NeutralTabTitles,
+                selectedIndex = neutralTab,
+                onSelect = onNeutralTabSelect,
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
+                height = GlassTabRowDefaults.NeutralHeight,
+                colors = GlassTabRowDefaults.neutralColors(),
+            )
+        }
+        if (rowCount >= 3) {
+            GlassSegmentedTabRow(
+                tabs = SegmentedTabTitles,
+                selectedIndex = joinedTab,
+                onSelect = onJoinedTabSelect,
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassSegmentedTabRowDefaults.material(),
+            )
+        }
+        if (rowCount >= 4) {
+            GlassScrollableTabRow(
+                tabs = ScrollableTabTitles,
+                selectedIndex = scrollableTab,
+                onSelect = { scrollableTab = it },
+                backdrop = backdrop,
+                style = style,
+                alpha = alpha,
+                surfaceAlpha = tabSurfaceAlpha,
+                stroke = stroke,
+                material = material ?: GlassTabRowDefaults.material(),
+            )
+        }
     }
 }

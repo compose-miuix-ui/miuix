@@ -8,16 +8,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.BackdropPipeline
@@ -40,14 +51,19 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.GlassStyles
+import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.ShaderBrushCache
+import top.yukonga.miuix.kmp.material.createGlassShadowShader
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
 import top.yukonga.miuix.kmp.material.drawGlassEdge
 import top.yukonga.miuix.kmp.material.drawGlassMask
 import top.yukonga.miuix.kmp.material.drawGlassRim
-import top.yukonga.miuix.kmp.material.drawGlassShadow
+import top.yukonga.miuix.kmp.material.drawGlassShadowForSize
+import top.yukonga.miuix.kmp.material.isRuntimeShaderBrushImmutable
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import kotlin.math.ceil
+import androidx.compose.ui.graphics.layer.CompositingStrategy as LayerCompositingStrategy
 
 /**
  * Applies a glass surface over [backdrop].
@@ -208,13 +224,12 @@ private class GlassPipeline(
     private val maskBrushCache = ShaderBrushCache()
 
     override val shape: Shape get() = glassShape
-    override val requiresOffscreenCompositing: Boolean get() = true
 
     override fun configureEffects(scope: BackdropEffectScope) {
         with(scope) {
             noiseDither(noiseCoefficient)
             val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
-            blur(radius.coerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
+            blur(radius.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
             if (underlayMaterial != null) {
                 val underlay = cachedUnderlayBlendEffect ?: buildColorBlendEffect(
                     underlayMaterial,
@@ -233,9 +248,14 @@ private class GlassPipeline(
             if (shading) glassEffect(style, glassShape, alpha, tint)
         }
     }
+
+    override fun requiresOffscreenCompositing(size: Size, density: Density): Boolean = glassShape.requiresContinuousMask(size, density)
+
     override fun drawFront(scope: DrawScope) {
         with(scope) {
-            // Stroke and rim share one silhouette pass; the mask trims it afterwards.
+            // Stroke and rim share one silhouette pass; the mask only runs when continuous
+            // corners diverge from the hardware-clipped rounded rectangle.
+            val needsMask = glassShape.requiresContinuousMask(size, this)
             val current = strokeProvider?.invoke() ?: stroke
             val fuse = current != null && shading &&
                 current.width.value > 0f &&
@@ -249,10 +269,10 @@ private class GlassPipeline(
                     alpha = alpha,
                     brushCache = edgeBrushCache,
                 )
-                drawGlassMask(glassShape, brushCache = maskBrushCache)
+                if (needsMask) drawGlassMask(glassShape, brushCache = maskBrushCache)
             } else {
                 if (current != null) drawEdgeStroke(glassShape, current, alpha, brushCache = edgeBrushCache)
-                drawGlassMask(glassShape, brushCache = maskBrushCache)
+                if (needsMask) drawGlassMask(glassShape, brushCache = maskBrushCache)
                 if (shading) {
                     drawGlassRim(glassShape, style, if (tint.isSpecified) tint else style.inner.tint, alpha, brushCache = rimBrushCache)
                 }
@@ -362,17 +382,118 @@ private class GlassShadowElement(
     }
 }
 
+private class CachedGlassShadowDrawer {
+    private var layer: GraphicsLayer? = null
+    private var ownedShader: RuntimeShader? = null
+    private var cachedSize = Size.Unspecified
+    private var cachedDensity = Float.NaN
+    private var cachedLayoutDirection: LayoutDirection? = null
+    private var cachedShape: GlassShape? = null
+    private var cachedShadow: GlassShadow? = null
+    private var topLeftX = 0f
+    private var topLeftY = 0f
+    private var recordTranslateX = 0f
+    private var recordTranslateY = 0f
+
+    // GraphicsLayer retains this lambda and may re-invoke it to recreate a discarded DisplayList
+    // (e.g. after alpha == 0 or memory trim), so it must read durable cached fields, not transient ones.
+    private val recordBlock: DrawScope.() -> Unit = {
+        val shape = cachedShape
+        val shadow = cachedShadow
+        val size = cachedSize
+        if (shape != null && shadow != null && size != Size.Unspecified) {
+            val shader = if (isRuntimeShaderBrushImmutable()) {
+                null
+            } else {
+                ownedShader ?: createGlassShadowShader().also { ownedShader = it }
+            }
+            translate(recordTranslateX, recordTranslateY) {
+                drawGlassShadowForSize(
+                    componentSize = size,
+                    shape = shape,
+                    shadow = shadow,
+                    alpha = 1f,
+                    shader = shader,
+                )
+            }
+        }
+    }
+
+    fun draw(
+        node: DelegatableNode,
+        scope: DrawScope,
+        shape: GlassShape,
+        shadow: GlassShadow,
+        alpha: Float,
+    ) {
+        val clampedAlpha = alpha.fastCoerceIn(0f, 1f)
+        val size = scope.size
+        if (clampedAlpha <= 0f || size.width <= 0f || size.height <= 0f) return
+        if (!isRuntimeShaderSupported()) return
+
+        val needsRecord = layer == null ||
+            cachedSize != size ||
+            cachedDensity != scope.density ||
+            cachedLayoutDirection != scope.layoutDirection ||
+            cachedShape != shape ||
+            cachedShadow != shadow
+
+        val target = layer ?: node.requireGraphicsContext().createGraphicsLayer().apply {
+            compositingStrategy = LayerCompositingStrategy.Offscreen
+        }.also { layer = it }
+        if (needsRecord) {
+            val sourceScale = scope.density / GlassDefaults.SourceDensity
+            val reach = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
+            val offsetX = shadow.offsetX * sourceScale
+            val offsetY = shadow.offsetY * sourceScale
+            topLeftX = -reach + offsetX
+            topLeftY = -reach + offsetY
+            recordTranslateX = reach - offsetX
+            recordTranslateY = reach - offsetY
+            val layerSize = IntSize(
+                ceil(size.width + reach * 2f).toInt().fastCoerceAtLeast(1),
+                ceil(size.height + reach * 2f).toInt().fastCoerceAtLeast(1),
+            )
+            cachedSize = size
+            cachedDensity = scope.density
+            cachedLayoutDirection = scope.layoutDirection
+            cachedShape = shape
+            cachedShadow = shadow
+            target.record(scope, scope.layoutDirection, layerSize, recordBlock)
+        }
+        target.alpha = clampedAlpha
+        scope.translate(topLeftX, topLeftY) {
+            drawLayer(target)
+        }
+    }
+
+    fun release(node: DelegatableNode) {
+        layer?.let { node.requireGraphicsContext().releaseGraphicsLayer(it) }
+        layer = null
+        ownedShader = null
+        cachedSize = Size.Unspecified
+        cachedDensity = Float.NaN
+        cachedLayoutDirection = null
+        cachedShape = null
+        cachedShadow = null
+    }
+}
+
 private class GlassShadowNode(
     var shape: GlassShape,
     var shadow: GlassShadow,
     var alpha: Float,
 ) : Modifier.Node(),
     DrawModifierNode {
-    private val brushCache = ShaderBrushCache()
+    private val drawer = CachedGlassShadowDrawer()
 
     override fun ContentDrawScope.draw() {
-        drawGlassShadow(shape, shadow, alpha, brushCache = brushCache)
+        drawer.draw(this@GlassShadowNode, this, shape, shadow, alpha)
         drawContent()
+    }
+
+    override fun onDetach() {
+        drawer.release(this)
     }
 }
 
@@ -415,11 +536,15 @@ private class DeferredGlassShadowNode(
     var alpha: () -> Float,
 ) : Modifier.Node(),
     DrawModifierNode {
-    private val brushCache = ShaderBrushCache()
+    private val drawer = CachedGlassShadowDrawer()
 
     override fun ContentDrawScope.draw() {
-        drawGlassShadow(shape, shadow, alpha(), brushCache = brushCache)
+        drawer.draw(this@DeferredGlassShadowNode, this, shape, shadow, alpha())
         drawContent()
+    }
+
+    override fun onDetach() {
+        drawer.release(this)
     }
 }
 
@@ -430,10 +555,10 @@ internal fun Modifier.fallbackGlassShadow(
     alpha: () -> Float,
 ): Modifier = dropShadow(shape) {
     val sourceScale = density / GlassDefaults.SourceDensity
-    radius = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    radius = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
     offset = Offset(shadow.offsetX * sourceScale, shadow.offsetY * sourceScale)
     color = shadow.color
-    this.alpha = alpha().coerceIn(0f, 1f)
+    this.alpha = alpha().fastCoerceIn(0f, 1f)
 }
 
 /** Tints the glass material with a container surface when appropriate. */

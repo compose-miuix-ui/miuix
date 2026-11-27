@@ -75,6 +75,7 @@ internal fun GlassBottomSheetDemo(
         show = show,
         insideMargin = DpSize(0.dp, 0.dp),
         modifier = modifier,
+        progressiveBlur = true,
         scrollOffset = { scrollStates[pagerState.currentPage].value.toFloat() },
         title = "Glass BottomSheet",
         backdrop = backdrop,

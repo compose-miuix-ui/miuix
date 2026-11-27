@@ -8,6 +8,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_EXTENDED
 import top.yukonga.miuix.kmp.blur.internal.BLEND_MODE_SHADER_STANDARD
 import top.yukonga.miuix.kmp.blur.internal.BLUR_KERNEL_REACH
@@ -122,8 +124,8 @@ fun BackdropEffectScope.progressiveBlur(
 ) {
     if (!isRuntimeShaderSupported()) return
     val scope = impl
-    val rX = radiusX.coerceAtLeast(0f)
-    val rY = radiusY.coerceAtLeast(0f)
+    val rX = radiusX.fastCoerceAtLeast(0f)
+    val rY = radiusY.fastCoerceAtLeast(0f)
     if (!scope.progressiveRampActive && rX <= 0f && rY <= 0f) return
 
     val sigmaX = rX * BLUR_RADIUS_TO_SIGMA
@@ -140,7 +142,7 @@ fun BackdropEffectScope.progressiveBlur(
 
     if (rX > 0f || rY > 0f) {
         val maxAdjVar = adjustedVarianceForExp(sigma * sigma, exp)
-        val maxLoopR = (2f * sqrt(maxAdjVar) - 1f).coerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
+        val maxLoopR = (2f * sqrt(maxAdjVar) - 1f).fastCoerceIn(0f, PROGRESSIVE_BLUR_MAX_TAP.toFloat())
         if (maxLoopR >= 0.5f) {
             val kernelPadding = (ceil(maxLoopR).toInt() + 1) * scale
             if (kernelPadding > padding) {
@@ -422,8 +424,8 @@ fun BackdropEffectScope.textureBlurEffect(
     noiseCoefficient: Float = BlurDefaults.NoiseCoefficient,
     colors: BlurColors = BlurColors(),
 ) {
-    val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
-    val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedX = blurRadiusX.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedY = blurRadiusY.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius)
     noiseDither(noiseCoefficient)
     colorControls(colors.brightness, colors.contrast, colors.saturation)
     blur(clampedX * density, clampedY * density)
@@ -448,8 +450,8 @@ fun BackdropEffectScope.progressiveTextureBlurEffect(
     noiseCoefficient: Float = BlurDefaults.ProgressiveNoiseCoefficient,
     colors: BlurColors = BlurColors(),
 ) {
-    val clampedX = blurRadiusX.coerceIn(0f, BlurDefaults.MaxBlurRadius)
-    val clampedY = blurRadiusY.coerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedX = blurRadiusX.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius)
+    val clampedY = blurRadiusY.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius)
     noiseDither(noiseCoefficient)
     colorControls(colors.brightness, colors.contrast, colors.saturation)
     progressiveBlur(clampedX * density, clampedY * density, gradient)

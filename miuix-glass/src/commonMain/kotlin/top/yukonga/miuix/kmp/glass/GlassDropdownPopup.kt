@@ -203,7 +203,7 @@ internal fun BoxScope.GlassDropdownPopupContent(
 }
 
 /** Interpolates size and center independently for the dropdown's curved motion. */
-private fun arcFrame(
+internal fun arcFrame(
     anchor: Rect,
     valueAnchor: Rect?,
     end: Size,
@@ -229,10 +229,14 @@ private fun arcFrame(
     } else {
         placement.rect.right - startWidth / 2f
     }
-    val startCenterY = if (placement.alignTop) {
-        placement.rect.top + startHeight / 2f
-    } else {
-        placement.rect.bottom - startHeight / 2f
+    val targetAnchor = valueAnchor ?: anchor
+    val clampedAnchor = targetAnchor.top > placement.rect.top && targetAnchor.bottom < placement.rect.bottom
+    val minStartCenterY = placement.rect.top + startHeight / 2f
+    val maxStartCenterY = (placement.rect.bottom - startHeight / 2f).coerceAtLeast(minStartCenterY)
+    val startCenterY = when {
+        clampedAnchor -> targetAnchor.center.y.coerceIn(minStartCenterY, maxStartCenterY)
+        placement.alignTop -> minStartCenterY
+        else -> maxStartCenterY
     }
     val centerX = startCenterX + (placement.rect.center.x - startCenterX) * positionFraction
     val centerY = startCenterY + (placement.rect.center.y - startCenterY) * positionFraction

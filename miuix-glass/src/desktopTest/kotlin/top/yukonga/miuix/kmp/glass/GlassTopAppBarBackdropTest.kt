@@ -190,4 +190,63 @@ class GlassTopAppBarBackdropTest {
         val belowBarY = with(density) { 165.dp.roundToPx() }
         assertColorNear(Color.Blue, scrolled[20, belowBarY], tolerance = 3f / 255f)
     }
+
+    @Test
+    fun progressiveBandWithTallBottomContentBlursThroughBottomContentAndOverhang() = runComposeUiTest {
+        val scrollState = TopAppBarState(-1000f, 0f, 0f)
+        setContent {
+            DialogTestHost {
+                MiuixTheme(colors = lightColorScheme()) {
+                    val backdrop = rememberLayerBackdrop()
+                    Box(Modifier.size(400.dp, 450.dp)) {
+                        Column(Modifier.matchParentSize().layerBackdrop(backdrop)) {
+                            repeat(22) { index ->
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(20.dp)
+                                        .background(if (index % 2 == 0) Color.Red else Color.Blue),
+                                )
+                            }
+                        }
+                        GlassTopAppBar(
+                            title = "",
+                            isContentScrolled = true,
+                            progressiveBlur = true,
+                            backdrop = backdrop,
+                            scrollBehavior = MiuixScrollBehavior(scrollState),
+                            defaultWindowInsetsPadding = false,
+                            bottomContent = {
+                                Box(Modifier.fillMaxWidth().height(220.dp))
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        runOnIdle {
+            scrollState.contentOffset = -1000f
+            scrollState.heightOffset = scrollState.heightOffsetLimit
+        }
+        val image = onRoot().captureToImage().toPixelMap()
+        // Near the bottom of bottomContent (260..280dp is Blue; 262dp is 2dp past the Red/Blue edge):
+        // must still blur strongly with the adjacent Red stripe while keeping the scrim light.
+        val bottomContentY = with(density) { 262.dp.roundToPx() }
+        val atBottomContent = image[20, bottomContentY]
+        assertTrue(
+            atBottomContent.blue > 0.15f && atBottomContent.red > 0.15f && atBottomContent.green < 0.20f,
+            "Progressive blur must stay active near the bottom of tall bottomContent: $atBottomContent",
+        )
+        // At the bottom edge of bottomContent (280dp Red/Blue boundary; 281dp is 1dp into Red):
+        // progressive blur still blends Blue into Red while the scrim stays light (low green channel).
+        val bottomEdgeY = with(density) { 281.dp.roundToPx() }
+        val atBottomEdge = image[20, bottomEdgeY]
+        assertTrue(
+            atBottomEdge.red > 0.15f && atBottomEdge.blue > 0.15f && atBottomEdge.green < 0.15f,
+            "Progressive blur must stay active through bottomContent without a heavy scrim: $atBottomEdge",
+        )
+        // Well below the overhang (340..360dp is Blue): must stay crisp.
+        val belowOverhangY = with(density) { 350.dp.roundToPx() }
+        assertColorNear(Color.Blue, image[20, belowOverhangY], tolerance = 3f / 255f)
+    }
 }

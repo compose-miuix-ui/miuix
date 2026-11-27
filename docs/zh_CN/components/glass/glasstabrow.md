@@ -1,6 +1,6 @@
 # GlassTabRow
 
-`GlassTabRow` 提供 primary 和 neutral 配色的等宽玻璃标签。`GlassSegmentedTabRow` 使用相连轨道和滑动指示器，两者的选中状态均由调用方管理。
+`GlassTabRow` 提供 primary 和 neutral 配色的等宽玻璃标签；`GlassScrollableTabRow` 按标签内容自适应宽度并支持横向滚动；`GlassSegmentedTabRow` 使用相连轨道和滑动指示器。三者的选中状态均由调用方管理。
 
 <div style="position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../../compose/index.html?id=glassTabRow" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -14,6 +14,7 @@
 
 ```kotlin
 import top.yukonga.miuix.kmp.glass.GlassTabRow
+import top.yukonga.miuix.kmp.glass.GlassScrollableTabRow
 import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
 import top.yukonga.miuix.kmp.glass.GlassTabColors
 import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
@@ -57,6 +58,23 @@ GlassTabRow(
 )
 ```
 
+### 可滚动胶囊
+
+```kotlin
+val scrollableTabs = listOf("全部", "应用", "游戏", "媒体", "工具", "更新")
+var selectedIndex by remember { mutableIntStateOf(0) }
+
+GlassScrollableTabRow(
+    tabs = scrollableTabs,
+    selectedIndex = selectedIndex,
+    onSelect = { selectedIndex = it },
+    backdrop = backdrop,
+    modifier = Modifier.fillMaxWidth(),
+)
+```
+
+每个胶囊按标签文本自适应宽度（不小于 `minTabWidth`），超出容器宽度时支持横向滚动。
+
 ### 相连分段轨道
 
 ```kotlin
@@ -98,6 +116,27 @@ GlassSegmentedTabRow(
 | tabGap | Dp | 胶囊之间的间距 | GlassTabRowDefaults.TabGap | 否 |
 | colors | GlassTabColors | 选中、静止和按下配色 | GlassTabRowDefaults.primaryColors() | 否 |
 
+
+### GlassScrollableTabRow 属性 {#glassscrollabletabrow}
+
+| 属性名 | 类型 | 说明 | 默认值 | 是否必须 |
+| --- | --- | --- | --- | --- |
+| tabs | List\<String> | 按顺序排列且互不相同的标签文本 | - | 是 |
+| selectedIndex | Int | 当前标签索引 | - | 是 |
+| onSelect | (Int) -> Unit | 返回所点击标签索引的回调 | - | 是 |
+| backdrop | Backdrop? | 背景采样源，允许为 null | - | 是 |
+| modifier | Modifier | 应用于标签栏的修饰符 | Modifier | 否 |
+| contentPadding | PaddingValues | 滚动容器内边距 | PaddingValues(0.dp) | 否 |
+| style | GlassStyle | material 为 null 时使用的模糊样式 | GlassDefaults.Style | 否 |
+| alpha | Float | 材质色层、描边和阴影的透明度乘数；无背景采样源时作用于整个胶囊绘制 | 1f | 否 |
+| surfaceAlpha | Float | 材质进度，限制到 0–1；无背景采样源时还会乘到整个胶囊的绘制透明度上 | 1f | 否 |
+| stroke | EdgeStroke? | 每个胶囊的描边，null 表示不绘制 | GlassTabRowDefaults.stroke() | 否 |
+| shadow | GlassShadow? | 每个胶囊的阴影，null 表示不绘制 | GlassShadows.Float | 否 |
+| material | GlassMaterial? | 胶囊材质，null 时使用样式提供的模糊 | GlassTabRowDefaults.material() | 否 |
+| height | Dp | 胶囊固定高度 | GlassTabRowDefaults.Height | 否 |
+| tabGap | Dp | 胶囊之间的间距 | GlassTabRowDefaults.TabGap | 否 |
+| minTabWidth | Dp | 每个胶囊的最小宽度 | GlassTabRowDefaults.MinTabWidth | 否 |
+| colors | GlassTabColors | 选中、静止和按下配色 | GlassTabRowDefaults.primaryColors() | 否 |
 ### GlassSegmentedTabRow 属性 {#glasssegmentedtabrow}
 
 | 属性名 | 类型 | 说明 | 默认值 | 是否必须 |

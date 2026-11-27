@@ -62,6 +62,34 @@ float4 sampleBackdrop(float2 local) {
 // a sparse ring would paint the pattern it leaves behind onto a bright object. Taps are averaged by
 // coverage, so one that lands past the recorded backdrop contributes nothing rather than pulling
 // the colour toward black.
+const float2 kVogel[25] = float2[25](
+    float2(0.141421, 0.000000),
+    float2(-0.180618, 0.165461),
+    float2(0.027646, -0.315017),
+    float2(0.227657, 0.296938),
+    float2(-0.417779, -0.073899),
+    float2(0.395756, -0.251748),
+    float2(-0.132373, 0.492420),
+    float2(-0.252449, -0.486076),
+    float2(0.547714, 0.200024),
+    float2(-0.569805, 0.235207),
+    float2(0.274684, -0.586983),
+    float2(0.202984, 0.647146),
+    float2(-0.611797, -0.354549),
+    float2(0.717707, -0.157786),
+    float2(-0.438006, 0.623018),
+    float2(-0.101189, -0.780872),
+    float2(0.621204, 0.523551),
+    float2(-0.835946, 0.034569),
+    float2(0.609758, -0.606791),
+    float2(-0.040795, 0.882233),
+    float2(-0.580187, -0.695258),
+    float2(0.919080, 0.123661),
+    float2(-0.778735, 0.541823),
+    float2(0.212795, -0.945895),
+    float2(0.492184, 0.858927)
+);
+
 float4 sampleWide(float2 local) {
     float2 outer = in_edgePow.yz;
     if (outer.x <= 0.5 || outer.y <= 0.5) return sampleBackdrop(local);
@@ -72,10 +100,7 @@ float4 sampleWide(float2 local) {
     float3 sum = float3(0.0);
     float coverage = 0.0;
     for (int i = 0; i < 25; i++) {
-        float index = float(i);
-        float radius = sqrt((index + 0.5) * 0.04);
-        float angle = index * 2.39996323;
-        float4 tap = tapLayer(origin + float2(cos(angle), sin(angle)) * radius * outer);
+        float4 tap = tapLayer(origin + kVogel[i] * outer);
         sum += tap.rgb;
         coverage += tap.a;
     }
@@ -108,7 +133,7 @@ float4 processColor(float4 color) {
     return color;
 }
 
-float4 processGlassColor(float4 material, float2 local) {
+float4 computeGlassTint(float2 local) {
     float4 wide = adjustColor(sampleWide(local), in_whiteMixBg.z, in_whiteMixBg.w);
     wide.rgb = mix(wide.rgb, float3(1.0), in_whiteMixBg.x);
 
@@ -121,10 +146,7 @@ float4 processGlassColor(float4 material, float2 local) {
     // Pull near-grey backdrops all the way to grey so the glass never picks up a false cast.
     ratio = mix(float3(mean), ratio, smoothstep(0.0, 0.4, distance(wide.rgb, float3(mean))));
     ratio = mix(ratio, in_tint.rgb, in_tint.a);
-
-    material.rgb *= ratio;
-    material.rgb = mix(material.rgb, ratio, in_whiteMixBg.y * colorRatio);
-    return material;
+    return float4(ratio, in_whiteMixBg.y * colorRatio);
 }
 
 float3 addLight(float3 color, float3 lightColor, float strength) {
@@ -138,7 +160,7 @@ float3 addLight(float3 color, float3 lightColor, float strength) {
 //
 // `d` is passed in rather than measured: the caller walks it across a pixel, and over that distance
 // the distance field is a plane, so stepping the value is exact and free.
-float4 shadeMaterial(float2 local, float d, float2 gradient, float edge) {
+float4 shadeMaterial(float2 local, float d, float2 gradient, float edge, float4 glassTint) {
     float depth = clamp(-d / edge, 0.0, 1.0);
     float shaped = edgeCurve(depth, in_edgePow.x);
     // The reflection and the added light ride the same outer third of the band the rim light does.
@@ -169,7 +191,8 @@ float4 shadeMaterial(float2 local, float d, float2 gradient, float edge) {
     material.rgb = addLight(material.rgb, mirrored.rgb, (1.0 - shaped) * in_iorRefl.z);
 
     material = processColor(material);
-    material = processGlassColor(material, local);
+    material.rgb *= glassTint.rgb;
+    material.rgb = mix(material.rgb, glassTint.rgb, glassTint.a);
 
     // Additive glow along the bottom edge.
     float bottom = smoothstep(1.0, 0.0, 1.0 - local.y / max(in_size.y, 1.0));
@@ -198,6 +221,7 @@ half4 main(float2 coord) {
 
     float edge = max(in_alphaEdge.y, 1.0);
     float2 gradient = sdfGradient(local);
+    float4 glassTint = computeGlassTint(local);
     float4 material;
 
     // Now that the normal is exact, the lit part of the rim is a few display pixels wide — less
@@ -205,11 +229,11 @@ half4 main(float2 coord) {
     // the band the material is integrated across the pixel instead. One dimension is enough: the
     // rim varies along the distance field's gradient and is constant across it.
     if (-d < edge && length(gradient) > 0.5) {
-        material = shadeMaterial(local - gradient * 0.375, d - 0.375, gradient, edge) * 0.25;
-        material += shadeMaterial(local, d, gradient, edge) * 0.5;
-        material += shadeMaterial(local + gradient * 0.375, d + 0.375, gradient, edge) * 0.25;
+        material = shadeMaterial(local - gradient * 0.375, d - 0.375, gradient, edge, glassTint) * 0.25;
+        material += shadeMaterial(local, d, gradient, edge, glassTint) * 0.5;
+        material += shadeMaterial(local + gradient * 0.375, d + 0.375, gradient, edge, glassTint) * 0.25;
     } else {
-        material = shadeMaterial(local, d, gradient, edge);
+        material = shadeMaterial(local, d, gradient, edge, glassTint);
     }
 
     float alpha = material.a * in_alphaEdge.x;

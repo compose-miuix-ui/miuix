@@ -116,7 +116,7 @@ OverlayListPopup(
 | enableWindowDim       | Boolean                     | 是否在弹窗显示时使背景变暗           | true                                       |
 | onDismissRequest      | (() -> Unit)?               | 当用户请求关闭（例如点击外部）时触发 | null                                       |
 | onDismissFinished     | (() -> Unit)?               | 关闭动画完成后调用；若关闭过程被中途取消（例如 `show` 被设回 true），则不会触发 | null    |
-| maxHeight             | Dp?                         | 弹窗内容的最大高度                   | null                                       |
+| maxHeight             | Dp?                         | 弹窗的最大高度，不超过可用安全区高度。 | null                                       |
 | minWidth              | Dp                          | 弹窗内容的最小宽度                   | ListPopupDefaults.MinWidth                 |
 | renderInRootScaffold  | Boolean                     | 是否在根（最外层）Scaffold 中渲染弹窗。为 true 时，弹窗覆盖全屏。为 false 时，在当前 Scaffold 的范围内渲染并进行位置补偿 | true |
 | content               | @Composable () -> Unit      | 要在弹窗内显示的内容                 | -                                          |

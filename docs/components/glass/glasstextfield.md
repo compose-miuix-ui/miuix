@@ -1,6 +1,6 @@
 # GlassTextField
 
-`GlassTextField` is a text input field styled for translucent glass surfaces such as [GlassDialog](./glassdialog) and [GlassBottomSheet](./glassbottomsheet). It delegates to [TextField](../textfield) with `GlassTextFieldDefaults.textFieldColors()` so the input container and label remain legible over frosted glass.
+`GlassTextField` is a text input field styled for translucent glass surfaces such as [GlassDialog](./glassdialog) and [GlassBottomSheet](./glassbottomsheet). It delegates to [TextField](../basic/textfield) with `GlassTextFieldDefaults.textFieldColors()` so the input container and label remain legible over frosted glass.
 
 <div style="position: relative; height: 240px; border-radius: 10px; overflow: hidden; border: 1px solid #777;">
     <iframe id="demoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="../../compose/index.html?id=glassTextField" title="Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -29,7 +29,7 @@ GlassTextField(
 
 ## Properties
 
-`GlassTextField` accepts the same parameters as [TextField](../textfield#properties), with `colors` defaulting to `GlassTextFieldDefaults.textFieldColors()`, `cornerRadius` defaulting to `GlassTextFieldDefaults.CornerRadius`, and `insideMargin` defaulting to `GlassTextFieldDefaults.InsideMargin`.
+`GlassTextField` accepts the same parameters as [TextField](../basic/textfield#properties), with `colors` defaulting to `GlassTextFieldDefaults.textFieldColors()`, `cornerRadius` defaulting to `GlassTextFieldDefaults.CornerRadius`, and `insideMargin` defaulting to `GlassTextFieldDefaults.InsideMargin`.
 
 ## Defaults
 

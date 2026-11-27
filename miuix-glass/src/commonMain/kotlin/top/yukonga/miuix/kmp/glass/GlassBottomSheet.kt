@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -49,12 +50,7 @@ import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
-private val SheetHeaderProgressiveGradient = ProgressiveBlur(
-    angle = 90f,
-    startFraction = 0.25f,
-    endFraction = 1f,
-    curve = 0.5f,
-)
+private val SheetHeaderProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.25f)
 
 /**
  * A Scaffold-hosted glass bottom sheet with an animated scrim, drag dismissal and predictive Back.
@@ -64,9 +60,10 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur(
  * screen edge and fills upward overscroll. Apply navigation-bar padding inside scrollable content
  * when that spacing should scroll with the content.
  *
- * When [progressiveBlur] is enabled, the header overlays the sheet body with a progressive blur band
- * during scroll; apply the provided [PaddingValues] to the scrollable container so initial content
- * clears the header.
+ * When [progressiveBlur] is `false` (default), the header sits above the sheet body and the
+ * provided [PaddingValues] is `0.dp`. When [progressiveBlur] is `true`, the header overlays the
+ * sheet body with a progressive blur band during scroll; apply the provided [PaddingValues] to the
+ * body or scrollable container so initial content clears the header.
  *
  * It opens, closes and settles with [SheetMotion.Glass], the HyperOS launcher's sheet motion.
  *
@@ -79,7 +76,7 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur(
  * @param allowDismiss Whether outside taps, drags and back gestures may dismiss the sheet.
  * @param enableNestedScroll Whether child scrolling can transfer motion to the sheet.
  * @param renderInRootScaffold Whether the outermost Scaffold hosts the sheet.
- * @param progressiveBlur Overlay the header with a progressive blur band while scrolling.
+ * @param progressiveBlur Overlay the header with a progressive blur band while scrolling; requires applying the provided [PaddingValues] to [content].
  * @param title Optional title; header shows if any of [title], [startAction], or [endAction] is non-null.
  * @param startAction Optional leading header action.
  * @param endAction Optional trailing header action.
@@ -95,7 +92,7 @@ private val SheetHeaderProgressiveGradient = ProgressiveBlur(
  * @param dimColor Scrim color before the host applies animation progress.
  * @param onDismissFinished Called after the hide animation completes.
  * @param scrollOffset External scroll offset in pixels (e.g. active pager page); `null` tracks nested scroll.
- * @param content Sheet content receiving top header padding as [PaddingValues].
+ * @param content Sheet content receiving top header padding as [PaddingValues] when [progressiveBlur] is `true` (`0.dp` when `false`).
  */
 @Composable
 fun GlassBottomSheet(
@@ -108,7 +105,7 @@ fun GlassBottomSheet(
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
     renderInRootScaffold: Boolean = true,
-    progressiveBlur: Boolean = true,
+    progressiveBlur: Boolean = false,
     title: String? = null,
     startAction: @Composable (() -> Unit)? = null,
     endAction: @Composable (() -> Unit)? = null,
@@ -160,13 +157,14 @@ fun GlassBottomSheet(
     val sheetSurfaceBackdrop = if (blurActive) rememberLayerBackdrop() else null
     var bodyCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val sheetSceneBackdrop = if (blurActive && sheetSurfaceBackdrop != null) {
-        rememberLayerBackdrop {
-            val coords = bodyCoordinates?.takeIf { it.isAttached }
-            with(sheetSurfaceBackdrop) {
-                drawBackdrop(this@rememberLayerBackdrop, coords)
-            }
-            drawContent()
-        }
+        rememberLayerBackdrop(
+            onDrawUnderlay = {
+                val coords = bodyCoordinates?.takeIf { it.isAttached }
+                with(sheetSurfaceBackdrop) {
+                    drawBackdrop(this@rememberLayerBackdrop, coords)
+                }
+            },
+        )
     } else {
         null
     }
@@ -174,7 +172,17 @@ fun GlassBottomSheet(
     val rampDistancePx = with(density) { GlassBottomSheetDefaults.ProgressiveBlurRampDistance.toPx() }
     val overhangPx = with(density) { GlassBottomSheetDefaults.ProgressiveBlurOverhang.roundToPx().coerceAtLeast(0) }
     val blendColors = remember(containerColor) {
-        listOf(BlendColorEntry(containerColor.copy(alpha = 0.25f)))
+        listOf(BlendColorEntry(containerColor.copy(alpha = 0.2f)))
+    }
+    val scrimBrush = remember(containerColor) {
+        Brush.verticalGradient(
+            0f to containerColor.copy(alpha = 0.50f),
+            0.25f to containerColor.copy(alpha = 0.44f),
+            0.5f to containerColor.copy(alpha = 0.32f),
+            0.75f to containerColor.copy(alpha = 0.16f),
+            0.9f to containerColor.copy(alpha = 0.05f),
+            1f to Color.Transparent,
+        )
     }
     var isContentScrolled by remember { mutableStateOf(false) }
     val headerTransition = updateTransition(isContentScrolled, label = "glassBottomSheetHeaderFloat")
@@ -274,7 +282,7 @@ fun GlassBottomSheet(
             }
         }
     val headerBackground: @Composable (scrollOffset: () -> Float, headerHeightPx: () -> Int) -> Unit =
-        remember(sheetSceneBackdrop, rampDistancePx, overhangPx, blurColors, containerColor) {
+        remember(sheetSceneBackdrop, rampDistancePx, overhangPx, blurColors, containerColor, scrimBrush) {
             { scrollOffset, headerHeightPx ->
                 LaunchedEffect(scrollOffset) {
                     snapshotFlow { scrollOffset() > 1f }
@@ -298,14 +306,21 @@ fun GlassBottomSheet(
                         }
                         .then(
                             if (sheetSceneBackdrop != null) {
-                                Modifier.progressiveTextureBlur(
-                                    backdrop = sheetSceneBackdrop,
-                                    shape = RectangleShape,
-                                    gradient = SheetHeaderProgressiveGradient,
-                                    blurRadius = GlassBottomSheetDefaults.ProgressiveBlurRadius.value,
-                                    colors = blurColors,
-                                    enabled = bandActive,
-                                )
+                                Modifier
+                                    .progressiveTextureBlur(
+                                        backdrop = sheetSceneBackdrop,
+                                        shape = RectangleShape,
+                                        gradient = SheetHeaderProgressiveGradient,
+                                        blurRadius = GlassBottomSheetDefaults.ProgressiveBlurRadius.value,
+                                        colors = blurColors,
+                                        enabled = bandActive,
+                                    )
+                                    .drawWithContent {
+                                        drawContent()
+                                        if (bandActive) {
+                                            drawRect(brush = scrimBrush)
+                                        }
+                                    }
                             } else {
                                 Modifier.drawWithCache {
                                     val headerFraction = (headerHeightPx().toFloat() / size.height.coerceAtLeast(1f)).coerceIn(0f, 0.9f)

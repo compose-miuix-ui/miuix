@@ -78,6 +78,10 @@ Scaffold { padding ->
 
 内容滚动与额外间距由调用方提供。若底部留白应随内容滚动，应将导航栏内边距放在可滚动内容内部。
 
+::: tip `innerPadding`
+默认（`progressiveBlur = false`）时 `innerPadding` 为 `0.dp`；开启 `progressiveBlur = true` 后标题栏悬浮覆盖内容，需为 `content` 或滚动容器应用 `innerPadding`（如 `LazyColumn(contentPadding = innerPadding)`）。
+:::
+
 ## 属性
 
 ### GlassBottomSheet 属性
@@ -93,7 +97,7 @@ Scaffold { padding ->
 | allowDismiss | Boolean | 允许外部点击、拖动或返回关闭 | true | 否 |
 | enableNestedScroll | Boolean | 在子内容滚动与抽屉拖动之间传递位移 | true | 否 |
 | renderInRootScaffold | Boolean | 使用最外层 Scaffold；false 使用当前 Scaffold | true | 否 |
-| progressiveBlur | Boolean | 标题栏覆盖于内容之上并在滚动时绘制渐进模糊带 | true | 否 |
+| progressiveBlur | Boolean | 标题栏覆盖于内容之上并在滚动时绘制渐进模糊带；开启时需为 `content` 应用 `innerPadding` | false | 否 |
 | title | String? | 可选标题；与 `startAction` / `endAction` 任一非 `null` 时显示标题栏 | null | 否 |
 | startAction | (@Composable () -> Unit)? | 标题栏前侧操作 | null | 否 |
 | endAction | (@Composable () -> Unit)? | 标题栏后侧操作 | null | 否 |
@@ -109,7 +113,7 @@ Scaffold { padding ->
 | dimColor | Color | 应用动画进度之前的遮罩颜色 | GlassBottomSheetDefaults.ScrimColor | 否 |
 | onDismissFinished | (() -> Unit)? | 隐藏动画完成后调用；隐藏被取消时不调用 | null | 否 |
 | scrollOffset | (() -> Float)? | 外部滚动偏移（像素）；`null` 时自动跟踪嵌套滚动 | null | 否 |
-| content | @Composable (PaddingValues) -> Unit | 接收顶部标题栏内边距的抽屉主体内容 | - | 是 |
+| content | @Composable (PaddingValues) -> Unit | 接收顶部标题栏内边距的抽屉主体内容（`progressiveBlur` 为 `false` 时为 `0.dp`） | - | 是 |
 
 ### glassBottomSheetSurface 属性 {#glassbottomsheetsurface}
 

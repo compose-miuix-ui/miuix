@@ -5,12 +5,17 @@ package top.yukonga.miuix.kmp.blur
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
+import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -72,22 +77,67 @@ private class LayerBackdropNode(
         invalidateDraw()
     }
 
+    private var contentLayer: GraphicsLayer? = null
+    private var activeUnderlay: (DrawScope.() -> Unit)? = null
+
+    private val contentOnlyRecordBlock: ContentDrawScope.() -> Unit = { drawContent() }
+
+    private val underlayCompositeRecordBlock: ContentDrawScope.() -> Unit = {
+        val bg = backdrop.backgroundColor()
+        if (bg.isSpecified) {
+            drawRect(bg)
+        }
+        activeUnderlay?.invoke(this)
+        contentLayer?.let { drawLayer(it) }
+    }
+
+    private val defaultRecordBlock: ContentDrawScope.() -> Unit = {
+        val bg = backdrop.backgroundColor()
+        if (bg.isSpecified) {
+            drawRect(bg)
+        }
+        drawContent()
+    }
+
     override fun onAttach() {
         val ownerLifecycle = graphicsResourceLifecycle() ?: return
         stopObservingResets = observeGraphicsResourceResets(ownerLifecycle) { generation ->
             resumeJob?.cancel()
-            invalidateDraw()
+            recreateGraphicsResources()
             resumeJob = coroutineScope.launch {
-                if (awaitGraphicsResourceRefresh(ownerLifecycle, generation) != null) invalidateDraw()
+                if (awaitGraphicsResourceRefresh(ownerLifecycle, generation) != null) recreateGraphicsResources()
             }
         }
     }
 
     private val recordBlock: ContentDrawScope.() -> Unit = { backdrop.onDraw(this) }
 
+    private fun recreateGraphicsResources() {
+        releaseContentLayer()
+        invalidateDraw()
+    }
+
     override fun ContentDrawScope.draw() {
-        drawContent()
-        recordContentLayer(backdrop.graphicsLayer, recordBlock)
+        if (backdrop.isDefaultOnDraw()) {
+            val underlay = backdrop.onDrawUnderlay()
+            if (underlay != null) {
+                val layer = contentLayer ?: requireGraphicsContext().createGraphicsLayer().also { contentLayer = it }
+                recordContentLayer(layer, contentOnlyRecordBlock)
+                drawLayer(layer)
+                activeUnderlay = underlay
+                try {
+                    recordContentLayer(backdrop.graphicsLayer, underlayCompositeRecordBlock)
+                } finally {
+                    activeUnderlay = null
+                }
+            } else {
+                recordContentLayer(backdrop.graphicsLayer, defaultRecordBlock)
+                drawLayer(backdrop.graphicsLayer)
+            }
+        } else {
+            drawContent()
+            recordContentLayer(backdrop.graphicsLayer, recordBlock)
+        }
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
@@ -104,5 +154,12 @@ private class LayerBackdropNode(
         stopObservingResets = null
         coordinates = null
         backdrop.layerCoordinates = null
+        releaseContentLayer()
+        activeUnderlay = null
+    }
+
+    private fun releaseContentLayer() {
+        contentLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
+        contentLayer = null
     }
 }

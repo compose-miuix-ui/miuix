@@ -53,12 +53,8 @@ fun LicensePage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val blurSupported = isRuntimeShaderSupported()
-    val surfaceColor = MiuixTheme.colorScheme.surface
     val backdrop = if (blurSupported) {
-        rememberLayerBackdrop {
-            drawRect(surfaceColor)
-            drawContent()
-        }
+        rememberLayerBackdrop(backgroundColor = MiuixTheme.colorScheme.surface)
     } else {
         null
     }

@@ -12,6 +12,9 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
+import androidx.compose.ui.util.fastCoerceIn
 import top.yukonga.miuix.kmp.material.internal.GLASS_MASK_SHADER
 import top.yukonga.miuix.kmp.material.internal.GLASS_MASK_SHADER_KEY
 import top.yukonga.miuix.kmp.material.internal.GLASS_RIM_SHADER
@@ -64,7 +67,7 @@ class ShaderBrushCache {
         val topEnd = shape.topEnd.toPx(size, scope)
         val bottomEnd = shape.bottomEnd.toPx(size, scope)
         val bottomStart = shape.bottomStart.toPx(size, scope)
-        val clampedSmoothing = smoothing.coerceIn(0f, 1f)
+        val clampedSmoothing = smoothing.fastCoerceIn(0f, 1f)
         if (!isRuntimeShaderBrushImmutable()) {
             return build(topStart, topEnd, bottomEnd, bottomStart)
         }
@@ -164,8 +167,8 @@ private fun DrawScope.buildGlassRimBrush(
     val shader = sharedShaderCache.obtainRuntimeShader(GLASS_RIM_SHADER_KEY, GLASS_RIM_SHADER)
     // Tiny surfaces take precedence over the nominal minimum band width.
     val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
-        .coerceAtLeast(1f)
-        .coerceAtMost(size.minDimension * 0.5f)
+        .fastCoerceAtLeast(1f)
+        .fastCoerceAtMost(size.minDimension * 0.5f)
 
     shader.setSilhouetteRadiiUniforms(layoutDirection, size, topStart, topEnd, bottomEnd, bottomStart, shape.smoothing)
     shader.setRimUniforms(style, surface, alpha, edge)
@@ -240,8 +243,8 @@ private fun DrawScope.buildGlassEdgeBrush(
     )
     // Tiny surfaces take precedence over the nominal minimum band width.
     val edge = (style.edge.width * density / GlassDefaults.SourceDensity)
-        .coerceAtLeast(1f)
-        .coerceAtMost(size.minDimension * 0.5f)
+        .fastCoerceAtLeast(1f)
+        .fastCoerceAtMost(size.minDimension * 0.5f)
     shader.setRimUniforms(style, surface, alpha, edge)
     return shader.asBrush()
 }
@@ -256,7 +259,7 @@ private fun RuntimeShader.setRimUniforms(
     // A fully unshaded style renders no rim; zero the light instead of dropping the whole pass, so
     // the stroke still draws.
     val rimAlpha = if (style.background.unShade >= 0.999f) 0f else alpha
-    setFloatUniform("in_rimEdge", edge, style.edge.pow.coerceAtLeast(0.01f), rimAlpha, 0f)
+    setFloatUniform("in_rimEdge", edge, style.edge.pow.fastCoerceAtLeast(0.01f), rimAlpha, 0f)
     setFloatUniform(
         "in_lightDir",
         style.light.directionX,
@@ -321,7 +324,7 @@ fun DrawScope.drawGlassShadow(
     if (!isRuntimeShaderSupported()) return
 
     val sourceScale = density / GlassDefaults.SourceDensity
-    val reach = (shadow.radius * sourceScale).coerceAtLeast(1f)
+    val reach = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
     val offsetX = shadow.offsetX * sourceScale
     val offsetY = shadow.offsetY * sourceScale
     val brush = if (brushCache != null) {
@@ -350,6 +353,52 @@ fun DrawScope.drawGlassShadow(
     )
 }
 
+/**
+ * Creates an unshared [RuntimeShader] for [drawGlassShadowForSize] so an offscreen cached
+ * [androidx.compose.ui.graphics.layer.GraphicsLayer] owns its own uniform state on platforms with
+ * mutable [RuntimeShader] instances (Android).
+ */
+fun createGlassShadowShader(): RuntimeShader = RuntimeShader(GLASS_SHADOW_SHADER)
+
+/**
+ * Draws [shadow] for a surface of [componentSize] at [alpha] without reading [DrawScope.size],
+ * enabling callers to record the shadow into an expanded offscreen layer.
+ */
+fun DrawScope.drawGlassShadowForSize(
+    componentSize: Size,
+    shape: GlassShape,
+    shadow: GlassShadow,
+    alpha: Float = 1f,
+    shader: RuntimeShader? = null,
+) {
+    if (alpha <= 0f || componentSize.width <= 0f || componentSize.height <= 0f) return
+    if (!isRuntimeShaderSupported()) return
+
+    val sourceScale = density / GlassDefaults.SourceDensity
+    val reach = (shadow.radius * sourceScale).fastCoerceAtLeast(1f)
+    val offsetX = shadow.offsetX * sourceScale
+    val offsetY = shadow.offsetY * sourceScale
+    val brush = buildGlassShadowBrush(
+        shape = shape,
+        componentSize = componentSize,
+        topStart = shape.topStart.toPx(componentSize, this),
+        topEnd = shape.topEnd.toPx(componentSize, this),
+        bottomEnd = shape.bottomEnd.toPx(componentSize, this),
+        bottomStart = shape.bottomStart.toPx(componentSize, this),
+        shadow = shadow,
+        alpha = alpha,
+        reach = reach,
+        offsetX = offsetX,
+        offsetY = offsetY,
+        shader = shader,
+    )
+    drawRect(
+        brush = brush,
+        topLeft = Offset(-reach + offsetX, -reach + offsetY),
+        size = Size(componentSize.width + reach * 2f, componentSize.height + reach * 2f),
+    )
+}
+
 private fun DrawScope.buildGlassShadowBrush(
     shape: GlassShape,
     topStart: Float,
@@ -361,20 +410,22 @@ private fun DrawScope.buildGlassShadowBrush(
     reach: Float,
     offsetX: Float,
     offsetY: Float,
+    componentSize: Size = size,
+    shader: RuntimeShader? = null,
 ): ShaderBrush {
-    val shader = sharedShaderCache.obtainRuntimeShader(GLASS_SHADOW_SHADER_KEY, GLASS_SHADOW_SHADER)
-    shader.setSilhouetteRadiiUniforms(layoutDirection, size, topStart, topEnd, bottomEnd, bottomStart, shape.smoothing)
-    shader.setFloatUniform("in_shadowOffset", offsetX, offsetY)
-    shader.setFloatUniform("in_shadowShape", reach, shadow.dispersion)
+    val targetShader = shader ?: sharedShaderCache.obtainRuntimeShader(GLASS_SHADOW_SHADER_KEY, GLASS_SHADOW_SHADER)
+    targetShader.setSilhouetteRadiiUniforms(layoutDirection, componentSize, topStart, topEnd, bottomEnd, bottomStart, shape.smoothing)
+    targetShader.setFloatUniform("in_shadowOffset", offsetX, offsetY)
+    targetShader.setFloatUniform("in_shadowShape", reach, shadow.dispersion)
     val color = shadow.color
-    shader.setFloatUniform(
+    targetShader.setFloatUniform(
         "in_shadowColor",
         color.red,
         color.green,
         color.blue,
         color.alpha * alpha,
     )
-    return shader.asBrush()
+    return targetShader.asBrush()
 }
 
 /**
@@ -430,10 +481,10 @@ internal fun RuntimeShader.setSilhouetteRadiiUniforms(
     setFloatUniform("in_size", size.width / scale, size.height / scale)
     setFloatUniform(
         "in_radii",
-        (if (isLtr) start else end).coerceIn(0f, halfMin) / scale,
-        (if (isLtr) end else start).coerceIn(0f, halfMin) / scale,
-        (if (isLtr) bottomEnd else bottomStart).coerceIn(0f, halfMin) / scale,
-        (if (isLtr) bottomStart else bottomEnd).coerceIn(0f, halfMin) / scale,
+        (if (isLtr) start else end).fastCoerceIn(0f, halfMin) / scale,
+        (if (isLtr) end else start).fastCoerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomEnd else bottomStart).fastCoerceIn(0f, halfMin) / scale,
+        (if (isLtr) bottomStart else bottomEnd).fastCoerceIn(0f, halfMin) / scale,
     )
-    setFloatUniform("in_smoothing", smoothing.coerceIn(0f, 1f))
+    setFloatUniform("in_smoothing", smoothing.fastCoerceIn(0f, 1f))
 }

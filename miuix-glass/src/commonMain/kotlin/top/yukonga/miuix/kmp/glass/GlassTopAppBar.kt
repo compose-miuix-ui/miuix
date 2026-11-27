@@ -21,6 +21,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -38,7 +40,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
@@ -51,6 +52,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
@@ -58,6 +61,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBarLayout
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
@@ -96,7 +100,7 @@ object GlassTopAppBarDefaults {
     val ButtonSize: Dp = 44.dp
 
     /** Maximum radius of the progressive background band. */
-    val ProgressiveBlurRadius: Dp = 80.dp
+    val ProgressiveBlurRadius: Dp = 32.dp
 
     /** Scroll distance over which the progressive band fades in. */
     val ProgressiveBlurRampDistance: Dp = 48.dp
@@ -120,7 +124,7 @@ object GlassTopAppBarDefaults {
         return remember(scrollBehavior, startPx, rampPx) {
             computedStateOf {
                 val offset = currentOffset?.invoke() ?: scrollBehavior?.state?.visualContentOffset
-                if (offset == null) 1f else ((-offset - startPx) / rampPx).coerceIn(0f, 1f)
+                if (offset == null) 1f else ((-offset - startPx) / rampPx).fastCoerceIn(0f, 1f)
             }
         }
     }
@@ -169,7 +173,7 @@ object GlassTopAppBarDefaults {
     fun bandBrush(color: Color): Brush = TopAppBarBandBrush(color)
 
     /** How far the band reaches past the bottom of the bar. */
-    val BandOverhang: Dp = 32.dp
+    val BandOverhang: Dp = 10.dp
 
     @Composable
     @ReadOnlyComposable
@@ -177,16 +181,12 @@ object GlassTopAppBarDefaults {
 }
 
 /** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
-private val TopBarProgressiveGradient = ProgressiveBlur.Top.copy(curve = 0.25f)
-
-/** Starts fading inside the collapsed bar so the title area stays legible while avoiding an opaque shelf. */
 private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
     val colors = opacities.map { color.copy(alpha = color.alpha * it) }
-    val topColor: Color get() = colors[0]
 
     override fun createShader(size: Size): Shader = LinearGradientShader(
         from = Offset.Zero,
-        to = Offset(0f, size.height.coerceAtLeast(1f)),
+        to = Offset(0f, size.height.fastCoerceAtLeast(1f)),
         colors = colors,
         colorStops = stops,
     )
@@ -203,16 +203,17 @@ private data class TopAppBarBandBrush(val color: Color) : ShaderBrush() {
 
 private class TopAppBarFixedFadeBrush(
     val band: TopAppBarBandBrush,
-    fadeHeight: Float,
+    private val fadeHeight: Float,
 ) : ShaderBrush() {
-    private val shader: Shader = LinearGradientShader(
-        from = Offset.Zero,
-        to = Offset(0f, fadeHeight.coerceAtLeast(1f)),
-        colors = band.colors,
-        colorStops = TopAppBarBandBrush.stops,
-    )
-
-    override fun createShader(size: Size): Shader = shader
+    override fun createShader(size: Size): Shader {
+        val fadeStart = (size.height - fadeHeight).fastCoerceAtLeast(0f)
+        return LinearGradientShader(
+            from = Offset(0f, fadeStart),
+            to = Offset(0f, fadeStart + fadeHeight.fastCoerceAtLeast(1f)),
+            colors = band.colors,
+            colorStops = TopAppBarBandBrush.stops,
+        )
+    }
 }
 
 /**
@@ -367,7 +368,7 @@ fun GlassTopAppBar(
     val useCollapseProgress = expandable && scrollBehavior != null
     val bandProgress: () -> Float = remember(useCollapseProgress, scrollBehavior, maskProgress) {
         if (useCollapseProgress) {
-            { scrollBehavior.state.collapsedFraction.coerceIn(0f, 1f) }
+            { scrollBehavior.state.collapsedFraction.fastCoerceIn(0f, 1f) }
         } else {
             { maskProgress.value }
         }
@@ -385,14 +386,15 @@ fun GlassTopAppBar(
     var buttonBackdropConsumers by remember { mutableIntStateOf(0) }
     val hasButtonBackdropConsumers = buttonBackdropConsumers > 0
     val onButtonBackdropConsumerChange: (Int) -> Unit = remember {
-        { delta -> buttonBackdropConsumers = (buttonBackdropConsumers + delta).coerceAtLeast(0) }
+        { delta -> buttonBackdropConsumers = (buttonBackdropConsumers + delta).fastCoerceAtLeast(0) }
     }
     val progressiveBackdrop = if (progressiveBlur && rawBackdrop != null) {
-        rememberLayerBackdrop {
-            val coordinates = backgroundCoordinates?.takeIf { it.isAttached }
-            with(rawBackdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
-            drawContent()
-        }
+        rememberLayerBackdrop(
+            onDrawUnderlay = {
+                val coordinates = backgroundCoordinates?.takeIf { it.isAttached }
+                with(rawBackdrop) { drawBackdrop(this@rememberLayerBackdrop, coordinates) }
+            },
+        )
     } else {
         null
     }
@@ -408,41 +410,19 @@ fun GlassTopAppBar(
         gradientOverhang = if (bandBrush is TopAppBarBandBrush) bandOverhang else 0.dp,
     ) {
         if (progressiveBackdrop != null && rawBackdrop != null) {
-            val surfaceColor = MiuixTheme.colorScheme.surface
-            val blendColors = remember(surfaceColor) {
-                listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.3f)))
-            }
-            val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
-            val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
-            val bandActive by remember(useCollapseProgress, scrollBehavior, maskProgress) {
-                computedStateOf {
-                    bandProgress() * currentBgAlpha().coerceIn(0f, 1f) > 0.001f
-                }
-            }
-            val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
-                Modifier
-                    .onGloballyPositioned { backgroundCoordinates = it }
-                    .layerBackdrop(progressiveBackdrop)
-            } else {
-                Modifier
-            }
-            Box(
-                modifier = backdropCaptureModifier
-                    .graphicsLayer {
-                        this.alpha = bandProgress() * backgroundAlpha().coerceIn(0f, 1f)
-                    }
-                    .progressiveTextureBlur(
-                        backdrop = rawBackdrop,
-                        shape = RectangleShape,
-                        gradient = TopBarProgressiveGradient,
-                        blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
-                        colors = blurColors,
-                        enabled = bandActive,
-                    ),
+            ProgressiveTopAppBarBand(
+                rawBackdrop = rawBackdrop,
+                progressiveBackdrop = progressiveBackdrop,
+                bandProgress = bandProgress,
+                backgroundAlpha = backgroundAlpha,
+                hasButtonBackdropConsumers = hasButtonBackdropConsumers,
+                keepMaterial = keepMaterial,
+                measurements = measurements,
+                onBackgroundCoordinates = { backgroundCoordinates = it },
             )
         } else {
             val density = LocalDensity.current
-            val overhangPx = with(density) { bandOverhang.roundToPx().coerceAtLeast(0).toFloat() }
+            val overhangPx = with(density) { bandOverhang.roundToPx().fastCoerceAtLeast(0).toFloat() }
             val fadeHeight = overhangPx + with(density) { 36.dp.toPx() }
             val fadeBrush = remember(bandBrush, fadeHeight) {
                 if (bandBrush is TopAppBarBandBrush) TopAppBarFixedFadeBrush(bandBrush, fadeHeight) else null
@@ -450,20 +430,14 @@ fun GlassTopAppBar(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        this.alpha = bandProgress() * backgroundAlpha().coerceIn(0f, 1f)
+                        this.alpha = bandProgress() * backgroundAlpha().fastCoerceIn(0f, 1f)
                         transformOrigin = TransformOrigin(0.5f, 0f)
                         scaleY = if (bandBrush !is TopAppBarBandBrush && size.height > 0f) (size.height + overhangPx) / size.height else 1f
                     }
                     .then(
                         if (fadeBrush != null) {
                             Modifier.drawBehind {
-                                val fadeStart = (size.height - fadeHeight).coerceAtLeast(0f)
-                                if (fadeStart > 0f) {
-                                    drawRect(color = fadeBrush.band.topColor, size = Size(size.width, fadeStart))
-                                }
-                                translate(top = fadeStart) {
-                                    drawRect(brush = fadeBrush, size = Size(size.width, size.height - fadeStart))
-                                }
+                                drawRect(brush = fadeBrush)
                             }
                         } else {
                             Modifier.background(bandBrush)
@@ -544,8 +518,78 @@ fun GlassTopAppBar(
     }
 }
 
+@Composable
+private fun ProgressiveTopAppBarBand(
+    rawBackdrop: Backdrop,
+    progressiveBackdrop: LayerBackdrop,
+    bandProgress: () -> Float,
+    backgroundAlpha: () -> Float,
+    hasButtonBackdropConsumers: Boolean,
+    keepMaterial: Boolean,
+    measurements: GlassTopAppBarMeasurements,
+    onBackgroundCoordinates: (LayoutCoordinates) -> Unit,
+) {
+    val surfaceColor = MiuixTheme.colorScheme.surface
+    val blendColors = remember(surfaceColor) {
+        listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.2f)))
+    }
+    val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
+    val startFraction = measurements.progressiveStartFraction
+    val progressiveGradient = remember(startFraction) {
+        if (startFraction > 0f) {
+            ProgressiveBlur.Top.copy(startFraction = startFraction)
+        } else {
+            ProgressiveBlur.Top
+        }
+    }
+    val scrimBrush = remember(surfaceColor) {
+        Brush.verticalGradient(
+            0f to surfaceColor.copy(alpha = 0.50f),
+            0.25f to surfaceColor.copy(alpha = 0.44f),
+            0.5f to surfaceColor.copy(alpha = 0.32f),
+            0.75f to surfaceColor.copy(alpha = 0.16f),
+            0.9f to surfaceColor.copy(alpha = 0.05f),
+            1f to Color.Transparent,
+        )
+    }
+    val currentBgAlpha by rememberUpdatedState(backgroundAlpha)
+    val bandActive by remember(bandProgress) {
+        computedStateOf {
+            bandProgress() * currentBgAlpha().fastCoerceIn(0f, 1f) > 0.001f
+        }
+    }
+    val backdropCaptureModifier = if (hasButtonBackdropConsumers && (keepMaterial || bandActive)) {
+        Modifier
+            .onGloballyPositioned(onBackgroundCoordinates)
+            .layerBackdrop(progressiveBackdrop)
+    } else {
+        Modifier
+    }
+    Box(
+        modifier = backdropCaptureModifier
+            .graphicsLayer {
+                this.alpha = bandProgress() * backgroundAlpha().fastCoerceIn(0f, 1f)
+            }
+            .progressiveTextureBlur(
+                backdrop = rawBackdrop,
+                shape = RectangleShape,
+                gradient = progressiveGradient,
+                blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
+                colors = blurColors,
+                enabled = bandActive,
+            )
+            .drawWithContent {
+                drawContent()
+                if (bandActive) {
+                    drawRect(brush = scrimBrush)
+                }
+            },
+    )
+}
+
 private class GlassTopAppBarMeasurements {
     var bottomContentHeight: Int = 0
+    var progressiveStartFraction: Float by mutableFloatStateOf(0f)
 }
 
 @Composable
@@ -569,7 +613,9 @@ private fun GlassTopAppBarLayout(
                 val state = scrollBehavior.state
                 val limit = state.heightOffsetLimit
                 if (limit <= 0f && limit >= -height.toFloat()) {
-                    (height.toFloat() + limit - state.heightOffset).coerceAtLeast(
+                    val offset = state.heightOffset
+                    val boundedOffset = if (offset.isNaN()) 0f else offset.fastCoerceIn(limit, 0f)
+                    (height.toFloat() + limit - boundedOffset).fastCoerceAtLeast(
                         TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
                     )
                 } else {
@@ -584,9 +630,17 @@ private fun GlassTopAppBarLayout(
                     topInsets.getTop(this) + TopAppBarDefaults.CollapsedHeight.toPx() + measurements.bottomContentHeight,
                 )
             }
-            (coveredHeight + gradientOverhang.toPx().coerceAtLeast(0f)).fastRoundToInt()
+            (coveredHeight + gradientOverhang.toPx().fastCoerceAtLeast(0f)).fastRoundToInt()
         } else {
             height + gradientOverhang.roundToPx().coerceAtLeast(0)
+        }
+        val nextStartFraction = if (progressiveBlur && bandHeight > 0 && measurements.bottomContentHeight > 0) {
+            (measurements.bottomContentHeight.toFloat() / bandHeight.toFloat()).fastCoerceIn(0f, 0.95f)
+        } else {
+            0f
+        }
+        if (measurements.progressiveStartFraction != nextStartFraction) {
+            measurements.progressiveStartFraction = nextStartFraction
         }
         val background = measurables[0].measure(Constraints.fixed(width, bandHeight))
         layout(width, height) {
