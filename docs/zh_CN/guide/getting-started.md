@@ -47,7 +47,7 @@ Miuix 由多个可独立使用的模块组成：
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>") // [!code ++]
             // 可选：添加 miuix-preference 以获取 Preference 组件
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // 可选：添加 miuix-icons-symbol 以获取可变 Symbol 图标
@@ -75,12 +75,12 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>") // [!code ++]
     // 可选：添加 miuix-preference 以获取 Preference 组件
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // 可选：添加 miuix-icons-symbol 以获取可变 Symbol 图标
     implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-android:<version>")
-            // 可选：添加 miuix-material 以获取渲染原语与材质定义
+    // 可选：添加 miuix-material 以获取渲染原语与材质定义
     implementation("top.yukonga.miuix.kmp:miuix-material-android:<version>")
     // 可选：添加 miuix-blur 以获取模糊效果（需要 minSdk 33）
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")

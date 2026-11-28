@@ -42,7 +42,7 @@ A UI library for Compose Multiplatform.
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
++           implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
             // Optional: Add miuix-preference for preference components
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons-symbol for the variable Symbol icon set

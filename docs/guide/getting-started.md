@@ -47,7 +47,7 @@ Miuix is composed of several modules that can be used independently:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>") // [!code ++]
             // Optional: Add miuix-preference for preference components
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
             // Optional: Add miuix-icons-symbol for the variable Symbol icon set
@@ -75,12 +75,12 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:<version>") // [!code ++]
     // Optional: Add miuix-preference for preference components
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:<version>")
     // Optional: Add miuix-icons-symbol for the variable Symbol icon set
     implementation("top.yukonga.miuix.kmp:miuix-icons-symbol-android:<version>")
-            // Optional: Add miuix-material for render primitives and material definitions
+    // Optional: Add miuix-material for render primitives and material definitions
     implementation("top.yukonga.miuix.kmp:miuix-material-android:<version>")
     // Optional: Add miuix-blur for blur effects (requires minSdk 33)
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:<version>")

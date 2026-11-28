@@ -179,7 +179,7 @@ compose.desktop {
 
 在 `proguard-rules.pro` 中加入规则：
 
-```pro
+```
 # JNA
 -keep class com.sun.jna.** { *; }
 -keepclassmembers class * extends com.sun.jna.** { *; }

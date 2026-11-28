@@ -179,7 +179,7 @@ compose.desktop {
 
 Add to `proguard-rules.pro`:
 
-```pro
+```
 # JNA
 -keep class com.sun.jna.** { *; }
 -keepclassmembers class * extends com.sun.jna.** { *; }
