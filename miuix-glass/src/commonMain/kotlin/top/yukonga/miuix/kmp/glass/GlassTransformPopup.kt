@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LayerOutsets
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -488,7 +489,11 @@ private class GlassPopupAnchorValueNode(
         val placeable = measurable.measure(constraints)
         return layout(placeable.width, placeable.height) {
             placeable.placeWithLayer(0, 0) {
-                alpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
+                val currentAlpha = maxOf(anchor.valueAlphaState?.value ?: 1f, anchor.dropdownValueAlpha)
+                alpha = currentAlpha
+                val blurRadius = AnchorValueBlurRadius.toPx() * (1f - currentAlpha).coerceIn(0f, 1f)
+                renderEffect = if (blurRadius > 0.1f) BlurEffect(blurRadius, blurRadius, TileMode.Decal) else null
+                outsets = if (currentAlpha < 1f) AnchorValueLayerOutsets else LayerOutsets.Zero
             }
         }
     }
@@ -498,6 +503,9 @@ private class GlassPopupAnchorValueNode(
         lastCoordinates = null
     }
 }
+
+private val AnchorValueBlurRadius = 4.dp
+private val AnchorValueLayerOutsets = LayerOutsets(left = 12.dp, top = 16.dp, right = 12.dp, bottom = 16.dp)
 
 /**
  * Remembers a [GlassPopupAnchor] and its value fade, which must continue after the popup exits.
