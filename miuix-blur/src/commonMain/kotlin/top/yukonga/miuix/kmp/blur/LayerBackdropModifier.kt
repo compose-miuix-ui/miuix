@@ -10,12 +10,20 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.blur.internal.recordContentLayer
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
+import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 
 /**
  * Captures the content of this composable into the given [LayerBackdrop]'s graphics layer.
@@ -32,11 +40,7 @@ private class LayerBackdropElement(
     override fun create(): LayerBackdropNode = LayerBackdropNode(backdrop)
 
     override fun update(node: LayerBackdropNode) {
-        if (node.backdrop !== backdrop) {
-            node.backdrop.layerCoordinates = null
-            node.backdrop = backdrop
-            node.invalidateDraw()
-        }
+        node.updateBackdrop(backdrop)
     }
 
     override fun InspectorInfo.inspectableProperties() {
@@ -53,20 +57,32 @@ private class LayerBackdropElement(
     override fun hashCode(): Int = backdrop.hashCode()
 }
 
+@OptIn(InternalGraphicsResourceApi::class)
 private class LayerBackdropNode(
     var backdrop: LayerBackdrop,
 ) : Modifier.Node(),
     DrawModifierNode,
-    GlobalPositionAwareModifierNode {
+    GlobalPositionAwareModifierNode,
+    CompositionLocalConsumerModifierNode {
+
+    private var stopObservingResets: (() -> Unit)? = null
+    private var resumeJob: Job? = null
+    private var coordinates: LayoutCoordinates? = null
+
+    fun updateBackdrop(backdrop: LayerBackdrop) {
+        if (this.backdrop === backdrop) return
+        this.backdrop.layerCoordinates = null
+        this.backdrop = backdrop
+        backdrop.layerCoordinates = coordinates
+        invalidateDraw()
+    }
 
     private var contentLayer: GraphicsLayer? = null
     private var activeUnderlay: (DrawScope.() -> Unit)? = null
 
-    private val contentOnlyRecordBlock: DrawScope.() -> Unit = {
-        (this as? ContentDrawScope)?.drawContent()
-    }
+    private val contentOnlyRecordBlock: ContentDrawScope.() -> Unit = { drawContent() }
 
-    private val underlayCompositeRecordBlock: DrawScope.() -> Unit = {
+    private val underlayCompositeRecordBlock: ContentDrawScope.() -> Unit = {
         val bg = backdrop.backgroundColor()
         if (bg.isSpecified) {
             drawRect(bg)
@@ -75,16 +91,30 @@ private class LayerBackdropNode(
         contentLayer?.let { drawLayer(it) }
     }
 
-    private val defaultRecordBlock: DrawScope.() -> Unit = {
+    private val defaultRecordBlock: ContentDrawScope.() -> Unit = {
         val bg = backdrop.backgroundColor()
         if (bg.isSpecified) {
             drawRect(bg)
         }
-        (this as? ContentDrawScope)?.drawContent()
+        drawContent()
     }
 
-    private val recordBlock: DrawScope.() -> Unit = {
-        (this as? ContentDrawScope)?.let(backdrop.onDraw)
+    override fun onAttach() {
+        val ownerLifecycle = graphicsResourceLifecycle() ?: return
+        stopObservingResets = observeGraphicsResourceResets(ownerLifecycle) { generation ->
+            resumeJob?.cancel()
+            recreateGraphicsResources()
+            resumeJob = coroutineScope.launch {
+                if (awaitGraphicsResourceRefresh(ownerLifecycle, generation) != null) recreateGraphicsResources()
+            }
+        }
+    }
+
+    private val recordBlock: ContentDrawScope.() -> Unit = { backdrop.onDraw(this) }
+
+    private fun recreateGraphicsResources() {
+        releaseContentLayer()
+        invalidateDraw()
     }
 
     override fun ContentDrawScope.draw() {
@@ -92,39 +122,41 @@ private class LayerBackdropNode(
             val underlay = backdrop.onDrawUnderlay()
             if (underlay != null) {
                 val layer = contentLayer ?: requireGraphicsContext().createGraphicsLayer().also { contentLayer = it }
-                with(layer) {
-                    record(block = contentOnlyRecordBlock)
-                }
+                recordContentLayer(layer, contentOnlyRecordBlock)
                 drawLayer(layer)
                 activeUnderlay = underlay
-                with(backdrop.graphicsLayer) {
-                    record(block = underlayCompositeRecordBlock)
-                }
+                recordContentLayer(backdrop.graphicsLayer, underlayCompositeRecordBlock)
                 activeUnderlay = null
             } else {
-                with(backdrop.graphicsLayer) {
-                    record(block = defaultRecordBlock)
-                }
+                recordContentLayer(backdrop.graphicsLayer, defaultRecordBlock)
                 drawLayer(backdrop.graphicsLayer)
             }
         } else {
             drawContent()
-            with(backdrop.graphicsLayer) {
-                record(block = recordBlock)
-            }
+            recordContentLayer(backdrop.graphicsLayer, recordBlock)
         }
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
+            this.coordinates = coordinates
             backdrop.layerCoordinates = coordinates
         }
     }
 
     override fun onDetach() {
+        resumeJob?.cancel()
+        resumeJob = null
+        stopObservingResets?.invoke()
+        stopObservingResets = null
+        coordinates = null
         backdrop.layerCoordinates = null
+        releaseContentLayer()
+        activeUnderlay = null
+    }
+
+    private fun releaseContentLayer() {
         contentLayer?.let { requireGraphicsContext().releaseGraphicsLayer(it) }
         contentLayer = null
-        activeUnderlay = null
     }
 }

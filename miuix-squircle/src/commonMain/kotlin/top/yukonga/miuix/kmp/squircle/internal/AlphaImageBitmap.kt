@@ -10,4 +10,4 @@ import androidx.compose.ui.graphics.Shader
  * [alphaBytes] (one byte per pixel in `.a`; RGB is zero). Per-platform because commonMain has neither
  * a raw single-channel pixel writer nor a linear-sampling `ImageShader` factory.
  */
-internal expect fun makeLinearAlphaShader(size: Int, alphaBytes: ByteArray): Shader
+internal expect fun makeLinearAlphaShaderFactory(size: Int, alphaBytes: ByteArray): () -> Shader

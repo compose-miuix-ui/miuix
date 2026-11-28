@@ -4,7 +4,11 @@
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
@@ -19,9 +23,11 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Density
@@ -29,13 +35,17 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceIn
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.BackdropPipeline
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.blurWithFullBackdrop
 import top.yukonga.miuix.kmp.blur.drawBackdrop
 import top.yukonga.miuix.kmp.blur.effect
+import top.yukonga.miuix.kmp.blur.effectShaderCache
 import top.yukonga.miuix.kmp.blur.noiseDither
 import top.yukonga.miuix.kmp.glass.internal.GLASS_COLOR_BLEND_SHADER_KEY
 import top.yukonga.miuix.kmp.glass.internal.buildColorBlendEffect
@@ -52,6 +62,7 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
 import top.yukonga.miuix.kmp.material.GlassStyles
 import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.ShaderBrushCache
 import top.yukonga.miuix.kmp.material.createGlassShadowShader
 import top.yukonga.miuix.kmp.material.drawEdgeStroke
@@ -59,6 +70,11 @@ import top.yukonga.miuix.kmp.material.drawGlassEdge
 import top.yukonga.miuix.kmp.material.drawGlassMask
 import top.yukonga.miuix.kmp.material.drawGlassRim
 import top.yukonga.miuix.kmp.material.drawGlassShadowForSize
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
+import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceGeneration
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 import top.yukonga.miuix.kmp.material.isRuntimeShaderBrushImmutable
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -219,17 +235,34 @@ private class GlassPipeline(
 
     private var cachedUnderlayBlendEffect: RenderEffect? = null
     private var cachedMaterialBlendEffect: RenderEffect? = null
+    private var cachedBlendEffectGeneration = 0L
+    private var cachedBlendShaderCache: RuntimeShaderCache? = null
     private val edgeBrushCache = ShaderBrushCache()
     private val rimBrushCache = ShaderBrushCache()
     private val maskBrushCache = ShaderBrushCache()
 
     override val shape: Shape get() = glassShape
 
+    @OptIn(InternalGraphicsResourceApi::class)
     override fun configureEffects(scope: BackdropEffectScope) {
+        val generation = graphicsResourceGeneration
+        val shaderCache = scope.effectShaderCache
+        if (cachedBlendEffectGeneration != generation || cachedBlendShaderCache !== shaderCache) {
+            cachedUnderlayBlendEffect = null
+            cachedMaterialBlendEffect = null
+            cachedBlendEffectGeneration = generation
+            cachedBlendShaderCache = shaderCache
+        }
         with(scope) {
             noiseDither(noiseCoefficient)
-            val radius = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
-            blur(radius.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius) * density)
+            val radiusDp = material?.blurRadius?.value ?: (style.blur.small / GlassDefaults.SourceDensity)
+            val radius = radiusDp.fastCoerceIn(0f, BlurDefaults.MaxBlurRadius) * density
+            if (shading) {
+                // Refraction and wide tint taps must see the entire backdrop.
+                blurWithFullBackdrop(radius)
+            } else {
+                blur(radius)
+            }
             if (underlayMaterial != null) {
                 val underlay = cachedUnderlayBlendEffect ?: buildColorBlendEffect(
                     underlayMaterial,
@@ -483,18 +516,8 @@ private class GlassShadowNode(
     var shape: GlassShape,
     var shadow: GlassShadow,
     var alpha: Float,
-) : Modifier.Node(),
-    DrawModifierNode {
-    private val drawer = CachedGlassShadowDrawer()
-
-    override fun ContentDrawScope.draw() {
-        drawer.draw(this@GlassShadowNode, this, shape, shadow, alpha)
-        drawContent()
-    }
-
-    override fun onDetach() {
-        drawer.release(this)
-    }
+) : BaseGlassShadowNode() {
+    override fun DrawScope.drawShadow() = shadowDrawer.draw(this@GlassShadowNode, this, shape, shadow, alpha)
 }
 
 private class DeferredGlassShadowElement(
@@ -534,17 +557,53 @@ private class DeferredGlassShadowNode(
     var shape: GlassShape,
     var shadow: GlassShadow,
     var alpha: () -> Float,
-) : Modifier.Node(),
-    DrawModifierNode {
-    private val drawer = CachedGlassShadowDrawer()
+) : BaseGlassShadowNode() {
+    override fun DrawScope.drawShadow() = shadowDrawer.draw(this@DeferredGlassShadowNode, this, shape, shadow, alpha())
+}
 
-    override fun ContentDrawScope.draw() {
-        drawer.draw(this@DeferredGlassShadowNode, this, shape, shadow, alpha())
-        drawContent()
+@OptIn(InternalGraphicsResourceApi::class)
+private abstract class BaseGlassShadowNode :
+    Modifier.Node(),
+    DrawModifierNode,
+    CompositionLocalConsumerModifierNode {
+    protected val shadowDrawer = CachedGlassShadowDrawer()
+    private var drawVersion by mutableIntStateOf(0)
+    private var stopObservingResets: (() -> Unit)? = null
+    private var resumeJob: Job? = null
+
+    override fun onAttach() {
+        val lifecycle = graphicsResourceLifecycle() ?: return
+        stopObservingResets = observeGraphicsResourceResets(lifecycle) { generation ->
+            resumeJob?.cancel()
+            invalidateShadow()
+            resumeJob = coroutineScope.launch {
+                if (awaitGraphicsResourceRefresh(lifecycle, generation) != null) invalidateShadow()
+            }
+        }
     }
 
     override fun onDetach() {
-        drawer.release(this)
+        resumeJob?.cancel()
+        resumeJob = null
+        stopObservingResets?.invoke()
+        stopObservingResets = null
+        shadowDrawer.release(this)
+    }
+
+    private fun invalidateShadow() {
+        shadowDrawer.release(this)
+        Snapshot.withoutReadObservation { drawVersion++ }
+        invalidateDraw()
+    }
+
+    protected abstract fun DrawScope.drawShadow()
+
+    override fun ContentDrawScope.draw() {
+        // An enclosing GraphicsLayer also needs to re-record its shadow commands.
+        @Suppress("UNUSED_EXPRESSION")
+        drawVersion
+        drawShadow()
+        drawContent()
     }
 }
 

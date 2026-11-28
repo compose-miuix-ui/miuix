@@ -11,12 +11,14 @@ import androidx.compose.ui.graphics.Shader
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import java.nio.ByteBuffer
 
-internal actual fun makeLinearAlphaShader(size: Int, alphaBytes: ByteArray): Shader {
+internal actual fun makeLinearAlphaShaderFactory(size: Int, alphaBytes: ByteArray): () -> Shader {
     val bitmap = createBitmap(size, size, Bitmap.Config.ALPHA_8)
     bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(alphaBytes))
-    return BitmapShader(bitmap, TileMode.CLAMP, TileMode.CLAMP).apply {
-        if (isRuntimeShaderSupported()) {
-            filterMode = BitmapShader.FILTER_MODE_LINEAR
+    return {
+        BitmapShader(bitmap, TileMode.CLAMP, TileMode.CLAMP).apply {
+            if (isRuntimeShaderSupported()) {
+                filterMode = BitmapShader.FILTER_MODE_LINEAR
+            }
         }
     }
 }

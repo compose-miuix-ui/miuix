@@ -13,13 +13,12 @@ import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.SamplingMode
 
-internal actual fun makeLinearAlphaShader(size: Int, alphaBytes: ByteArray): Shader {
+internal actual fun makeLinearAlphaShaderFactory(size: Int, alphaBytes: ByteArray): () -> Shader {
     val info = ImageInfo(
         colorInfo = ColorInfo(ColorType.ALPHA_8, ColorAlphaType.UNPREMUL, null),
         width = size,
         height = size,
     )
-    return Image.makeRaster(info, alphaBytes, size)
-        .makeShader(FilterTileMode.CLAMP, FilterTileMode.CLAMP, SamplingMode.LINEAR, null)
-        .asComposeShader()
+    val image = Image.makeRaster(info, alphaBytes, size)
+    return { image.makeShader(FilterTileMode.CLAMP, FilterTileMode.CLAMP, SamplingMode.LINEAR, null).asComposeShader() }
 }

@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(InternalGraphicsResourceApi::class)
+
 package top.yukonga.miuix.kmp.squircle
 
 import androidx.compose.foundation.background
@@ -34,17 +36,26 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.invalidatePlacement
+import androidx.compose.ui.node.updateLayerBlock
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.material.LocalRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.RuntimeShaderCache
 import top.yukonga.miuix.kmp.material.asBrush
+import top.yukonga.miuix.kmp.material.forGraphicsResources
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
+import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceGeneration
+import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
+import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 import top.yukonga.miuix.kmp.material.isRuntimeShaderBrushImmutable
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
-import top.yukonga.miuix.kmp.squircle.internal.makeLinearAlphaShader
+import top.yukonga.miuix.kmp.squircle.internal.makeLinearAlphaShaderFactory
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -485,6 +496,33 @@ private data class SquircleBackgroundElement(
     }
 }
 
+private abstract class SquircleGraphicsNode :
+    Modifier.Node(),
+    CompositionLocalConsumerModifierNode {
+    private var stopObservingResets: (() -> Unit)? = null
+    private var resumeJob: Job? = null
+
+    override fun onAttach() {
+        val lifecycle = graphicsResourceLifecycle() ?: return
+        stopObservingResets = observeGraphicsResourceResets(lifecycle) { generation ->
+            resumeJob?.cancel()
+            resetGraphicsResources()
+            resumeJob = coroutineScope.launch {
+                if (awaitGraphicsResourceRefresh(lifecycle, generation) != null) resetGraphicsResources()
+            }
+        }
+    }
+
+    override fun onDetach() {
+        resumeJob?.cancel()
+        resumeJob = null
+        stopObservingResets?.invoke()
+        stopObservingResets = null
+    }
+
+    protected abstract fun resetGraphicsResources()
+}
+
 private class SquircleBackgroundNode(
     private var color: Color,
     private var topStart: Dp,
@@ -493,9 +531,8 @@ private class SquircleBackgroundNode(
     private var bottomStart: Dp,
     private var extension: Float,
     private var layoutDirectionAware: Boolean,
-) : Modifier.Node(),
-    DrawModifierNode,
-    CompositionLocalConsumerModifierNode {
+) : SquircleGraphicsNode(),
+    DrawModifierNode {
 
     private val shaderHolder = SquircleShaderHolder()
 
@@ -555,7 +592,13 @@ private class SquircleBackgroundNode(
     }
 
     override fun onDetach() {
+        super.onDetach()
+        shaderHolder.releaseCache()
+    }
+
+    override fun resetGraphicsResources() {
         shaderHolder.invalidateCache()
+        invalidateDraw()
     }
 }
 
@@ -589,8 +632,13 @@ private class SquircleLayerNode(
     private var bottomEnd: Dp,
     private var bottomStart: Dp,
     private var extension: Float,
-) : Modifier.Node(),
+) : SquircleGraphicsNode(),
     LayoutModifierNode {
+
+    override fun resetGraphicsResources() {
+        updateLayerBlock(null)
+        invalidatePlacement()
+    }
 
     fun updateParams(
         topStart: Dp,
@@ -677,9 +725,8 @@ private class SquircleShaderMaskNode(
     private var bottomStart: Dp,
     private var extension: Float,
     private var layoutDirectionAware: Boolean,
-) : Modifier.Node(),
-    DrawModifierNode,
-    CompositionLocalConsumerModifierNode {
+) : SquircleGraphicsNode(),
+    DrawModifierNode {
 
     private val shaderHolder = SquircleShaderHolder()
     private var clipPath: Path? = null
@@ -794,9 +841,15 @@ private class SquircleShaderMaskNode(
     }
 
     override fun onDetach() {
+        super.onDetach()
         clipPath = null
         cachedPathSize = Size.Unspecified
+        shaderHolder.releaseCache()
+    }
+
+    override fun resetGraphicsResources() {
         shaderHolder.invalidateCache()
+        invalidateDraw()
     }
 }
 
@@ -914,6 +967,8 @@ private fun ContentDrawScope.maskSquircleCorners(
 
 private class SquircleShaderHolder {
     private var boundCache: RuntimeShaderCache? = null
+    private var graphicsShaderCache: RuntimeShaderCache? = null
+    private var boundGeneration = 0L
     private var boundShader: RuntimeShader? = null
     private var cachedBrush: ShaderBrush? = null
     private var cachedWidth: Float = Float.NaN
@@ -931,8 +986,13 @@ private class SquircleShaderHolder {
     fun invalidateCache() {
         cachedBrush = null
         boundShader = null
-        boundCache = null
         cachedWidth = Float.NaN
+    }
+
+    fun releaseCache() {
+        invalidateCache()
+        boundCache = null
+        graphicsShaderCache = null
     }
 
     fun obtainBrush(
@@ -944,13 +1004,23 @@ private class SquircleShaderHolder {
         bl: Float,
         shaderCache: RuntimeShaderCache,
     ): ShaderBrush {
+        val generation = graphicsResourceGeneration
+        if (boundGeneration != generation) {
+            invalidateCache()
+            boundGeneration = generation
+        }
+        val effectiveCache = graphicsShaderCache?.takeIf { boundCache === shaderCache } ?: shaderCache.forGraphicsResources().also {
+            invalidateCache()
+            boundCache = shaderCache
+            graphicsShaderCache = it
+        }
         val geometryUnchanged = cachedWidth == size.width &&
             cachedHeight == size.height &&
             cachedTl == tl &&
             cachedTr == tr &&
             cachedBr == br &&
             cachedBl == bl
-        if (isRuntimeShaderBrushImmutable() && boundCache === shaderCache) {
+        if (isRuntimeShaderBrushImmutable()) {
             val cached = cachedBrush
             if (cached != null && geometryUnchanged && cachedColor == color) {
                 return cached
@@ -979,14 +1049,9 @@ private class SquircleShaderHolder {
             cachedBr = br
             cachedBl = bl
         }
-        val shader = if (boundCache === shaderCache && boundShader != null) {
-            boundShader!!
-        } else {
-            shaderCache.obtainRuntimeShader(SQUIRCLE_SHADER_KEY, SQUIRCLE_SHADER).also {
-                it.setInputShader("cornerSdf", bakedSdfShader)
-                boundCache = shaderCache
-                boundShader = it
-            }
+        val shader = boundShader ?: effectiveCache.obtainRuntimeShader(SQUIRCLE_SHADER_KEY, SQUIRCLE_SHADER).apply {
+            setInputShader("cornerSdf", BakedSdfShaderCache.obtain(generation))
+            boundShader = this
         }
         shader.setColorUniform("color", color)
         shader.setFloatUniform("size", size.width, size.height)
@@ -1009,9 +1074,22 @@ private const val SQUIRCLE_SHADER_KEY = "SquircleBackground"
 private const val MAX_OFFSCREEN_PX = 4096f
 private const val MAX_OFFSCREEN_AREA_PX = 4096f * 2160f
 
-// Decoded once per process; LINEAR-sampled so the corner branch does one bilinear tap (see [makeLinearAlphaShader]).
-private val bakedSdfShader: Shader by lazy {
-    makeLinearAlphaShader(BakedSquircleSdf.SIZE, BakedSquircleSdf.decodeBytes())
+// Keep the CPU image for fresh shader instances after Android graphics resource resets.
+private val bakedSdfShaderFactory by lazy {
+    makeLinearAlphaShaderFactory(BakedSquircleSdf.SIZE, BakedSquircleSdf.decodeBytes())
+}
+
+private object BakedSdfShaderCache {
+    private var generation = graphicsResourceGeneration
+    private var shader: Shader = bakedSdfShaderFactory()
+
+    fun obtain(currentGeneration: Long): Shader {
+        if (generation != currentGeneration) {
+            shader = bakedSdfShaderFactory()
+            generation = currentGeneration
+        }
+        return shader
+    }
 }
 
 private const val SQUIRCLE_SHADER = """

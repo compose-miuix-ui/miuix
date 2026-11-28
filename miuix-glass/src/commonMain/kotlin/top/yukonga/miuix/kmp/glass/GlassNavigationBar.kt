@@ -1,6 +1,8 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:OptIn(InternalGraphicsResourceApi::class)
+
 package top.yukonga.miuix.kmp.glass
 
 import androidx.compose.animation.animateColorAsState
@@ -99,6 +101,8 @@ import top.yukonga.miuix.kmp.material.GlassShadow
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.GlassStyle
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
+import top.yukonga.miuix.kmp.material.internal.rememberGraphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.Platform
@@ -254,6 +258,7 @@ fun GlassNavigationBar(
 ) {
     if (items.isEmpty()) return
     val index = selectedIndex.coerceIn(0, items.lastIndex)
+    val iconGeneration = rememberGraphicsResourceGeneration()
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val labelSize = with(density) {
@@ -569,6 +574,7 @@ fun GlassNavigationBar(
                             height = height,
                             interactionEnabled = interactionEnabled,
                             onSelect = onSelectState,
+                            iconGeneration = iconGeneration,
                         )
                     }
                 }
@@ -589,6 +595,7 @@ private fun androidx.compose.foundation.layout.RowScope.GlassNavigationBarItemCo
     height: Dp,
     interactionEnabled: Boolean,
     onSelect: (Int) -> Unit,
+    iconGeneration: Any?,
 ) {
     val tintState = animateColorAsState(
         targetValue = if (selected) selectedColor else unselectedColor,
@@ -654,12 +661,15 @@ private fun androidx.compose.foundation.layout.RowScope.GlassNavigationBarItemCo
             verticalArrangement = Arrangement.spacedBy(GlassNavigationBarDefaults.LabelSpacing),
         ) {
             BadgedBox(badge = { item.badge?.invoke() }) {
-                Icon(
-                    painter = rememberVectorPainter(item.icon),
-                    tint = tintProducer,
-                    contentDescription = null,
-                    modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
-                )
+                // Recreate the icon's draw cache and its tint layer after resume.
+                key(iconGeneration) {
+                    Icon(
+                        painter = rememberVectorPainter(item.icon),
+                        tint = tintProducer,
+                        contentDescription = null,
+                        modifier = Modifier.size(GlassNavigationBarDefaults.IconSize),
+                    )
+                }
             }
             if (item.label != null) {
                 val baseLabelStyle = MiuixTheme.textStyles.footnote2

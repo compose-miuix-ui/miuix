@@ -6,6 +6,7 @@ package top.yukonga.miuix.kmp.blur
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -23,6 +24,8 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.Density
 import top.yukonga.miuix.kmp.blur.internal.InverseLayerScope
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
+import top.yukonga.miuix.kmp.material.internal.rememberGraphicsResourceGeneration
 
 private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
 
@@ -33,7 +36,9 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * modifiers. Keyed only on [graphicsLayer]; [onDraw] is read via [rememberUpdatedState] (a fresh
  * lambda each frame does not reset the layer coordinates), so it may close over state.
  *
- * @param graphicsLayer The graphics layer to record content into.
+ * @param graphicsLayer The graphics layer to record content into. The default layer is recreated
+ *   when the device requires a graphics resource reset after resuming, which also returns a new
+ *   [LayerBackdrop]; key objects derived from it on the returned backdrop.
  * @param backgroundColor Optional opaque backdrop fill painted before content when using the
  *   default [onDraw], keeping recording single-pass.
  * @param onDrawUnderlay Optional underlay drawn behind the recorded content inside [graphicsLayer]
@@ -42,8 +47,9 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * @param onDraw Custom draw logic for the layer content.
  */
 @Composable
+@OptIn(InternalGraphicsResourceApi::class)
 fun rememberLayerBackdrop(
-    graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+    graphicsLayer: GraphicsLayer = key(rememberGraphicsResourceGeneration()) { rememberGraphicsLayer() },
     backgroundColor: Color = Color.Unspecified,
     onDrawUnderlay: (DrawScope.() -> Unit)? = null,
     onDraw: ContentDrawScope.() -> Unit = DefaultOnDraw,

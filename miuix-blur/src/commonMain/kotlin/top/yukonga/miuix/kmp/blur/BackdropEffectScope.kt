@@ -16,6 +16,7 @@ import top.yukonga.miuix.kmp.blur.internal.chain
 import top.yukonga.miuix.kmp.material.DefaultRuntimeShaderCache
 import top.yukonga.miuix.kmp.material.RuntimeShader
 import top.yukonga.miuix.kmp.material.RuntimeShaderCache
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.internal.runtimeShaderEffect as createRuntimeShaderEffect
 
@@ -51,6 +52,11 @@ sealed interface BackdropEffectScope :
      */
     var noiseCoefficient: Float
 }
+
+/** Effective shader cache used by this scope. Compare by identity when caching shader effects. */
+@InternalGraphicsResourceApi
+val BackdropEffectScope.effectShaderCache: RuntimeShaderCache
+    get() = impl.runtimeShaderCache
 
 /**
  * Applies brightness, contrast and saturation. Brightness works in approximate linear (gamma 2.0)
