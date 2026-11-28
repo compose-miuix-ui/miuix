@@ -19,30 +19,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            platform: macos arm64
-            build-command: ./gradlew packageDmgNativeReleaseMacosArm64
-            artifact-path: example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg
-            artifact-name: Miuix-darwin-arm64-dmg.dmg
-            archive: false
           - os: ubuntu-latest
             platform: linux x64
-            build-command: ./gradlew createReleaseDistributable
-            artifact-path: example/desktop/build/compose/binaries/main-release/app/Miuix
             artifact-name: Miuix-linux-x64-bin
-            archive: true
           - os: ubuntu-26.04-arm
             platform: linux arm64
-            build-command: ./gradlew createReleaseDistributable
-            artifact-path: example/desktop/build/compose/binaries/main-release/app/Miuix
             artifact-name: Miuix-linux-arm64-bin
-            archive: true
           - os: windows-latest
             platform: windows x64
-            build-command: ./gradlew createReleaseDistributable
-            artifact-path: example/desktop/build/compose/binaries/main-release/app/Miuix
             artifact-name: Miuix-windows-x64-exe
-            archive: true
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v7
@@ -58,26 +43,20 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           gradle-home-cache-cleanup: true
-      - name: Cache Kotlin/Native toolchain
-        if: runner.os == 'macOS'
-        uses: actions/cache@v6
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-release-cache-${{ hashFiles('gradle/libs.versions.toml') }}
-          restore-keys: ${{ runner.os }}-konan-
       - name: Build ${{ matrix.platform }} platform
-        run: ${{ matrix.build-command }}
+        run: ./gradlew createReleaseDistributable
       - name: Rename ${{ matrix.platform }} artifact
-        run: mv ${{ matrix.artifact-path }} ${{ matrix.artifact-name }}
+        run: mv example/desktop/build/compose/binaries/main-release/app/Miuix ${{ matrix.artifact-name }}
         shell: bash
       - name: Upload Miuix ${{ matrix.platform }} artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-name }}
-          archive: ${{ matrix.archive }}
-  ios:
-    runs-on: macos-latest
+          archive: true
+
+  apple:
+    runs-on: self-hosted
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v7
@@ -99,10 +78,21 @@ jobs:
           path: ~/.konan
           key: ${{ runner.os }}-konan-release-cache-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-konan-
+      - name: Build macOS DMG and iOS framework
+        run: ./gradlew :example:macos:packageDmgNativeReleaseMacosArm64 :example:shared:linkReleaseFrameworkIosArm64 :example:shared:generateVersionInfo
+      - name: Rename macos arm64 artifact
+        run: mv example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg Miuix-darwin-arm64-dmg.dmg
+        shell: bash
+      - name: Upload Miuix macos arm64 artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Miuix-darwin-arm64-dmg.dmg
+          path: Miuix-darwin-arm64-dmg.dmg
+          archive: false
       - name: Build unsigned iOS IPA
         shell: bash
         run: |
-          ./gradlew :example:shared:generateVersionInfo --no-daemon
+          rm -rf "$RUNNER_TEMP/Miuix.xcarchive" "$RUNNER_TEMP/Payload"
           xcodebuild archive \
             -project example/ios/iosApp.xcodeproj \
             -scheme 'example [ios]' \
@@ -212,7 +202,7 @@ jobs:
           archive: true
 
   post_telegram:
-    needs: [build, ios, android, graalvm]
+    needs: [build, apple, android, graalvm]
     runs-on: ubuntu-latest
     if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
     steps:
