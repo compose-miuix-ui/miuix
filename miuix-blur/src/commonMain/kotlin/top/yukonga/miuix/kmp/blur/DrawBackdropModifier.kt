@@ -617,6 +617,13 @@ private class DrawBackdropNode(
         private var bandOffset = IntOffset.Zero
         private var bandTexSize = IntSize.Zero
 
+        /**
+         * Component-space bounds of the overlay's non-zero output. Clipping the draw to it skips
+         * the band's all-zero tap-reach margin and keeps the overlay's effect from being
+         * evaluated across the rest of the surface.
+         */
+        private var visibleRect: Rect? = null
+
         fun update(
             scope: BackdropEffectScopeImpl,
             gradient: ProgressiveBlur,
@@ -660,6 +667,7 @@ private class DrawBackdropNode(
                     effect = null
                     bandOffset = IntOffset.Zero
                     bandTexSize = IntSize.Zero
+                    visibleRect = null
                 } else {
                     val left = (floor(band.left).toInt() / downScale) * downScale
                     val top = (floor(band.top).toInt() / downScale) * downScale
@@ -686,6 +694,18 @@ private class DrawBackdropNode(
                         preEffect = pre,
                         scope = scope,
                     )
+                    // Below the threshold the masked pass outputs exactly 0; the guard covers the
+                    // texel-centre gradient sampling and bilinear upscale of the `downScale` band.
+                    visibleRect = progressiveSharpBandBounds(
+                        threshold = threshold,
+                        compW = sw,
+                        compH = sh,
+                        angleDeg = gradient.angle,
+                        startFraction = gradient.startFraction,
+                        endFraction = gradient.endFraction,
+                        curve = gradient.curve,
+                        margin = dsFloat + 1f,
+                    )
                 }
                 cachedGradient = gradient
                 cachedW = sw
@@ -706,6 +726,18 @@ private class DrawBackdropNode(
             if (!active) return
             val texSize = bandTexSize
             if (texSize.width <= 0 || texSize.height <= 0) return
+            val visible = visibleRect ?: return
+            clipRect(floor(visible.left), floor(visible.top), ceil(visible.right), ceil(visible.bottom)) {
+                drawBand(texSize, shared2xSource, sharedPadLeft, sharedPadTop)
+            }
+        }
+
+        private fun DrawScope.drawBand(
+            texSize: IntSize,
+            shared2xSource: GraphicsLayer?,
+            sharedPadLeft: Float,
+            sharedPadTop: Float,
+        ) {
             val offset = bandOffset
             val dsFloat = downScale.toFloat()
             val targetLayer = layer ?: graphicsContext.createGraphicsLayer().also { layer = it }
@@ -747,6 +779,7 @@ private class DrawBackdropNode(
             cachedExp = -1
             bandOffset = IntOffset.Zero
             bandTexSize = IntSize.Zero
+            visibleRect = null
         }
     }
 
