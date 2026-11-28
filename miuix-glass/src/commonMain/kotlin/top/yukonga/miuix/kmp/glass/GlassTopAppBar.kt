@@ -59,8 +59,6 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBarLayout
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -530,23 +528,15 @@ private fun ProgressiveTopAppBarBand(
     onBackgroundCoordinates: (LayoutCoordinates) -> Unit,
 ) {
     val surfaceColor = MiuixTheme.colorScheme.surface
-    val blendColors = remember(surfaceColor) {
-        listOf(BlendColorEntry(surfaceColor.copy(alpha = 0.2f)))
-    }
-    val blurColors = BlurDefaults.blurColors(blendColors = blendColors)
     val startFraction = measurements.progressiveStartFraction
     val progressiveGradient = remember(startFraction) {
-        if (startFraction > 0f) {
-            ProgressiveBlur.Top.copy(startFraction = startFraction)
-        } else {
-            ProgressiveBlur.Top
-        }
+        ProgressiveBlur.Top.copy(startFraction = startFraction, curve = 0.6f)
     }
     val scrimBrush = remember(surfaceColor) {
         Brush.verticalGradient(
-            0f to surfaceColor.copy(alpha = 0.50f),
-            0.25f to surfaceColor.copy(alpha = 0.44f),
-            0.5f to surfaceColor.copy(alpha = 0.32f),
+            0f to surfaceColor.copy(alpha = 0.56f),
+            0.25f to surfaceColor.copy(alpha = 0.48f),
+            0.5f to surfaceColor.copy(alpha = 0.34f),
             0.75f to surfaceColor.copy(alpha = 0.16f),
             0.9f to surfaceColor.copy(alpha = 0.05f),
             1f to Color.Transparent,
@@ -575,7 +565,6 @@ private fun ProgressiveTopAppBarBand(
                 shape = RectangleShape,
                 gradient = progressiveGradient,
                 blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
-                colors = blurColors,
                 enabled = bandActive,
             )
             .drawWithContent {

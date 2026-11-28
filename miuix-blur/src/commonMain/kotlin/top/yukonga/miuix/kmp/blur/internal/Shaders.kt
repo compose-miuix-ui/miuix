@@ -361,7 +361,7 @@ private fun buildProgressiveSharpMaskShader(curveKind: Int): String {
         float raw = clamp(dot(xy, in_gradVec) + in_gradOffset, 0.0, 1.0);
         float smoothRaw = raw;$curveExpr
         float m = clamp((smoothRaw - in_sharpThreshold) * in_invSharpSpan, 0.0, 1.0);
-        half mw = half(clamp(m * 1.5384615, 0.0, 1.0));
+        half mw = half(m);
         mw = mw * mw * (half(3.0) - half(2.0) * mw);
         if (mw <= half(0.004)) {
             return half4(0.0);
