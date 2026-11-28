@@ -94,7 +94,7 @@ private val EmptyEffects: BackdropEffectScope.() -> Unit = {}
 private val DefaultShapeBlock: () -> Shape = { androidx.compose.ui.graphics.RectangleShape }
 
 // Bound every offscreen texture (blend tiles, effect inputs, noise layers) to the guaranteed GPU texture size.
-internal const val MAX_OFFSCREEN_PX = 2048
+internal const val MAX_OFFSCREEN_PX = 4096
 private const val EFFECT_TILE_PX = MAX_OFFSCREEN_PX / 2
 private const val EFFECT_TILE_OVERLAP_PX = (MAX_OFFSCREEN_PX - EFFECT_TILE_PX) / 2
 

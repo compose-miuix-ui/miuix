@@ -54,7 +54,6 @@ kotlin {
         commonMain.dependencies {
             api(libs.jetbrains.lifecycle.runtime)
             implementation(libs.jetbrains.compose.foundation)
-            implementation(libs.jetbrains.lifecycle.runtime.compose)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

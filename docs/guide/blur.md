@@ -355,15 +355,11 @@ Box(
 
 #### BackdropPipeline compositing
 
-The `drawBackdrop(backdrop, pipeline)` overload isolates the backdrop, content, and `drawFront` in an offscreen layer by default. This keeps blends such as `BlendMode.Clear` and `BlendMode.DstIn` from affecting pixels already drawn by the parent.
+`drawBackdrop(backdrop, pipeline)` isolates the backdrop, content, and `drawFront` in an offscreen layer by default, keeping blends such as `BlendMode.Clear` and `BlendMode.DstIn` from affecting parent pixels.
 
-Override `BackdropPipeline.requiresOffscreenCompositing` to return `false` when the pipeline can safely draw directly into the parent canvas, for example when `drawFront` is empty and the content uses ordinary source-over drawing. A `contentBlendMode` other than `BlendMode.SrcOver` still forces offscreen compositing.
+Override `BackdropPipeline.requiresOffscreenCompositing` to return `false` when direct drawing is safe (for example, when `drawFront` is empty and content uses `BlendMode.SrcOver`); Compose state read inside it is observed automatically. A non-`SrcOver` `contentBlendMode` still forces offscreen compositing.
 
-`textureBlur`, `textureEffect`, and `progressiveTextureBlur` retain offscreen isolation for their content. To opt into direct drawing, use a custom `BackdropPipeline` with `textureBlurEffect` or `progressiveTextureBlurEffect`. The pipeline can read Compose state in `requiresOffscreenCompositing` to switch isolation when its drawing behavior changes.
-
-Offscreen textures are kept within 2048 px per side. Oversized full-resolution backdrop effects render in overlapping tiles. Shader coordinates still refer to the full surface. Custom effects that sample distant parts of the input may reach beyond a tile's overlap.
-
-Downscaled blurs on oversized surfaces use a coarser capture so the whole input fits in one texture, and glass shading always does so to keep the full backdrop available to its wide tint samples. On oversized surfaces, grain is applied at the capture resolution.
+`textureBlur`, `textureEffect`, and `progressiveTextureBlur` keep offscreen isolation by default. To opt into direct drawing, use a custom `BackdropPipeline` with `textureBlurEffect` or `progressiveTextureBlurEffect`.
 
 #### BackdropEffectScope Extensions
 

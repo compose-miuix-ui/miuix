@@ -354,15 +354,11 @@ Box(
 
 #### BackdropPipeline 合成
 
-`drawBackdrop(backdrop, pipeline)` 重载默认在离屏图层中合成背景、内容和 `drawFront`，使 `BlendMode.Clear` 和 `BlendMode.DstIn` 等混合操作不会影响父级已绘制的像素。
+`drawBackdrop(backdrop, pipeline)` 默认在离屏图层中合成背景、内容和 `drawFront`，避免 `BlendMode.Clear`、`BlendMode.DstIn` 等混合模式影响父级像素。
 
-如果管线可以安全地直接绘制到父级画布，例如 `drawFront` 为空且内容使用普通的源覆盖绘制，可覆写 `BackdropPipeline.requiresOffscreenCompositing` 并返回 `false`。当 `contentBlendMode` 设为 `BlendMode.SrcOver` 以外的模式时，仍会使用离屏合成。
+当直接绘制安全时（例如 `drawFront` 为空且内容使用 `BlendMode.SrcOver`），可覆写 `BackdropPipeline.requiresOffscreenCompositing` 返回 `false`；其中读取的 Compose 状态会自动触发更新。非 `SrcOver` 的 `contentBlendMode` 仍会强制使用离屏合成。
 
-`textureBlur`、`textureEffect` 和 `progressiveTextureBlur` 对内容保留离屏隔离。若要显式启用直接绘制，可在自定义 `BackdropPipeline` 中使用 `textureBlurEffect` 或 `progressiveTextureBlurEffect`。管线可在 `requiresOffscreenCompositing` 中读取 Compose 状态，在绘制行为变化时切换隔离模式。
-
-离屏纹理的每边尺寸限制在 2048 px 以内。尺寸过大的全分辨率背景效果会分块渲染，相邻块的采样区域会重叠。着色器坐标仍以完整表面为基准。自定义效果若采样较远的输入像素，可能超出分块的重叠范围。
-
-超大表面上的降采样模糊会进一步降低捕获分辨率，使整个输入放进单张纹理；玻璃着色始终如此，让广域色调采样覆盖整个背景。超大表面的噪点按捕获分辨率应用。
+`textureBlur`、`textureEffect` 和 `progressiveTextureBlur` 默认保留离屏隔离。如需直接绘制，可在自定义 `BackdropPipeline` 中配合 `textureBlurEffect` 或 `progressiveTextureBlurEffect` 使用。
 
 #### BackdropEffectScope 扩展函数
 

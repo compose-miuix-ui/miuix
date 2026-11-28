@@ -45,14 +45,14 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class OversizedGlassTest {
     @Test
-    fun wideGlassTintSamplesBeyondTheFirstEffectTile() = runSkikoComposeUiTest(Size(3000f, 180f), Density(3f)) {
+    fun wideGlassTintSamplesBeyondTheFirstEffectTile() = runSkikoComposeUiTest(Size(4500f, 180f), Density(3f)) {
         setContent {
             val backdrop = rememberLayerBackdrop()
-            Box(Modifier.size(1000.dp, 60.dp)) {
+            Box(Modifier.size(1500.dp, 60.dp)) {
                 Box(
                     Modifier.matchParentSize().layerBackdrop(backdrop).drawBehind {
                         drawRect(Color.Black)
-                        drawRect(Color.White, topLeft = Offset(1536f, 0f), size = Size(size.width - 1536f, size.height))
+                        drawRect(Color.White, topLeft = Offset(2286f, 0f), size = Size(size.width - 2286f, size.height))
                     },
                 )
                 Box(
@@ -67,15 +67,15 @@ class OversizedGlassTest {
         }
 
         val pixels = onRoot().captureToImage().toPixelMap()
-        val left = pixels[1023, 90].red
-        val right = pixels[1024, 90].red
+        val left = pixels[2047, 90].red
+        val right = pixels[2048, 90].red
         assertTrue(abs(left - right) <= 1f / 255f, "Wide tint changed across the tile boundary: $left to $right")
         assertTrue(left > pixels[100, 90].red + 1f / 255f, "The tint should pick up the distant white backdrop")
     }
 
     @Test
     fun tallBackdropFiltersCapturedPixelsInSurfaceCoordinatesAcrossTiles() = runComposeUiTest {
-        val scroll = ScrollState(1950)
+        val scroll = ScrollState(3998)
         val recordingClipHeights = mutableListOf<Float>()
         val effects: BackdropEffectScope.() -> Unit = {
             runtimeShaderEffect(
@@ -84,7 +84,7 @@ class OversizedGlassTest {
                 uniform shader child;
                 half4 main(float2 coord) {
                     half4 color = child.eval(coord);
-                    return coord.y < 2048.0 ? half4(color.gbr, color.a) : half4(color.brg, color.a);
+                    return coord.y < 4096.0 ? half4(color.gbr, color.a) : half4(color.brg, color.a);
                 }
                 """.trimIndent(),
                 "child",
@@ -96,7 +96,7 @@ class OversizedGlassTest {
                 Box(Modifier.matchParentSize().layerBackdrop(backdrop).background(Color.Red))
                 Box(Modifier.matchParentSize().verticalScroll(scroll)) {
                     Box(
-                        Modifier.size(100.dp, 2300.dp).drawBackdrop(
+                        Modifier.size(100.dp, 4350.dp).drawBackdrop(
                             backdrop = backdrop,
                             shape = { RectangleShape },
                             effects = effects,
@@ -117,16 +117,16 @@ class OversizedGlassTest {
         assertEquals(Color.Green, pixels[50, 98])
         // Skia's clip bounds include a one-pixel outset on each edge.
         assertTrue(recordingClipHeights.isNotEmpty())
-        assertTrue(recordingClipHeights.all { it <= 2050f }, "Recording clips were $recordingClipHeights")
+        assertTrue(recordingClipHeights.all { it <= 4098f }, "Recording clips were $recordingClipHeights")
     }
 
     @Test
     fun tallGlassKeepsChildrenVisibleAcrossTileBoundary() = runComposeUiTest {
-        val scroll = ScrollState(1950)
+        val scroll = ScrollState(3998)
         setContent {
             Box(Modifier.size(100.dp, 180.dp).background(Color.White).verticalScroll(scroll)) {
                 Box(
-                    Modifier.size(100.dp, 2300.dp)
+                    Modifier.size(100.dp, 4350.dp)
                         .glass(rememberLayerBackdrop(), GlassShape(16.dp), noiseCoefficient = 0f, shading = false)
                         .background(Color.Red),
                 )
@@ -140,7 +140,7 @@ class OversizedGlassTest {
 
     @Test
     fun tallBackdropPipelineClearPreservesParentPixels() = runComposeUiTest {
-        val scroll = ScrollState(1950)
+        val scroll = ScrollState(3998)
         val pipeline = object : BackdropPipeline {
             override val shape = RectangleShape
 
@@ -153,7 +153,7 @@ class OversizedGlassTest {
         setContent {
             Box(Modifier.size(100.dp, 180.dp).background(Color.Green).verticalScroll(scroll)) {
                 Box(
-                    Modifier.size(100.dp, 2300.dp)
+                    Modifier.size(100.dp, 4350.dp)
                         .drawBackdrop(rememberLayerBackdrop(), pipeline)
                         .background(Color.Red),
                 )
@@ -169,11 +169,11 @@ class OversizedGlassTest {
 
     @Test
     fun tallBackdropMasksTheSurfaceAcrossTileBoundary() = runComposeUiTest {
-        val scroll = ScrollState(1950)
+        val scroll = ScrollState(3998)
         setContent {
             Box(Modifier.size(100.dp, 180.dp).background(Color.White).verticalScroll(scroll)) {
                 Box(
-                    Modifier.size(100.dp, 2300.dp).drawBackdrop(
+                    Modifier.size(100.dp, 4350.dp).drawBackdrop(
                         backdrop = rememberLayerBackdrop(),
                         shape = { RectangleShape },
                         effects = {},
