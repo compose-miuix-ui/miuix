@@ -27,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
 import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -107,7 +108,7 @@ private fun RowScope.ArrowPreferenceEndAction(
             .wrapContentSize(unbounded = true)
             .size(width = 12.dp, height = 32.dp)
             .then(flipModifier),
-        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next, weight = SymbolWeights.Light),
         contentDescription = null,
         colorFilter = tintFilter,
     )

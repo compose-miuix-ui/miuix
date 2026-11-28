@@ -56,7 +56,7 @@ fun RowScope.DropdownArrowEndAction(
             .align(Alignment.CenterVertically)
             .wrapContentSize(unbounded = true)
             .size(width = 14.dp, height = 32.dp),
-        painter = rememberSymbolPainter(MiuixIcons.Symbol.CallOutMenu),
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.CallOutMenu, weight = SymbolWeights.Light),
         colorFilter = colorFilter,
         contentDescription = null,
     )

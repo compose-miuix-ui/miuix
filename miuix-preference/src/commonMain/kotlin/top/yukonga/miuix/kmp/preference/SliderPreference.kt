@@ -35,6 +35,7 @@ import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
 import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -351,7 +352,7 @@ private fun RowScope.SliderPreferenceArrowIcon(
             .wrapContentSize(unbounded = true)
             .size(width = 12.dp, height = 32.dp)
             .then(flipModifier),
-        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next, weight = SymbolWeights.Light),
         contentDescription = null,
         colorFilter = tintFilter,
     )
