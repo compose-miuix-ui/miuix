@@ -70,7 +70,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import component.liquid.IosLiquidGlassNavigationBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -818,17 +817,6 @@ private fun NavigationBar(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 24.dp),
-                        )
-                    }
-
-                    2 -> {
-                        IosLiquidGlassNavigationBar(
-                            items = navigationItems,
-                            selectedIndex = page,
-                            onItemClick = { mainPagerState.animateToPage(it) },
-                            backdrop = if (blurActive) backdrop else null,
-                            isBlurActive = blurActive,
-                            badge = { navigationItemBadge(it, appState.showNavigationBarBadge) },
                         )
                     }
 

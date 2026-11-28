@@ -43,7 +43,7 @@ import utils.rememberBlurBackdrop
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
 private val SidebarStyleOptions = listOf("Original", "Glass")
-private val FloatingNavigationBarStyleOptions = listOf("Original", "Glass", "iOS-like")
+private val FloatingNavigationBarStyleOptions = listOf("Original", "Glass")
 private val FloatingNavigationBarPositionOptions = listOf("Center", "Start", "End")
 private val FloatingToolbarPositionOptions =
     listOf("TopStart", "CenterStart", "BottomStart", "TopEnd", "CenterEnd", "BottomEnd", "TopCenter", "BottomCenter")
