@@ -106,15 +106,19 @@ fun AppTheme(
 
 ### Screenshots
 
-<table>
-  <tr>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true" width="300" alt="Screenshot 001"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true" width="300" alt="Screenshot 002"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true" width="300" alt="Screenshot 003"/></a></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true" width="300" alt="Screenshot 004"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true" width="300" alt="Screenshot 005"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true" width="300" alt="Screenshot 006"/></a></td>
-  </tr>
-</table>
+<p>
+  <a href="assets/light/001.webp"><img src="assets/light/001.webp" width="14.2%" alt="Home (Light)"/></a><!--
+--><a href="assets/light/002.webp"><img src="assets/light/002.webp" width="14.2%" alt="Icons (Light)"/></a><!--
+--><a href="assets/light/003.webp"><img src="assets/light/003.webp" width="14.2%" alt="Colors (Light)"/></a><!--
+--><a href="assets/light/004.webp"><img src="assets/light/004.webp" width="14.2%" alt="Text Styles (Light)"/></a><!--
+--><a href="assets/light/005.webp"><img src="assets/light/005.webp" width="14.2%" alt="Settings (Light)"/></a><!--
+--><a href="assets/light/006.webp"><img src="assets/light/006.webp" width="14.2%" alt="Theme Settings (Light)"/></a><!--
+--><a href="assets/light/007.webp"><img src="assets/light/007.webp" width="14.2%" alt="About (Light)"/></a><br><!--
+--><a href="assets/dark/001.webp"><img src="assets/dark/001.webp" width="14.2%" alt="Home (Dark)"/></a><!--
+--><a href="assets/dark/002.webp"><img src="assets/dark/002.webp" width="14.2%" alt="Icons (Dark)"/></a><!--
+--><a href="assets/dark/003.webp"><img src="assets/dark/003.webp" width="14.2%" alt="Colors (Dark)"/></a><!--
+--><a href="assets/dark/004.webp"><img src="assets/dark/004.webp" width="14.2%" alt="Text Styles (Dark)"/></a><!--
+--><a href="assets/dark/005.webp"><img src="assets/dark/005.webp" width="14.2%" alt="Settings (Dark)"/></a><!--
+--><a href="assets/dark/006.webp"><img src="assets/dark/006.webp" width="14.2%" alt="Theme Settings (Dark)"/></a><!--
+--><a href="assets/dark/007.webp"><img src="assets/dark/007.webp" width="14.2%" alt="About (Dark)"/></a>
+</p>
