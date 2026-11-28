@@ -19,10 +19,11 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Rename
-import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Edit
+import top.yukonga.miuix.kmp.icon.symbol.Rename
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -48,22 +49,22 @@ fun IconDemo() {
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Contacts,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Contacts),
                         contentDescription = "Personal",
                         tint = MiuixTheme.colorScheme.onBackground,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Settings,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Settings),
                         contentDescription = "Settings",
                         tint = MiuixTheme.colorScheme.onBackground,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Edit,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Edit),
                         contentDescription = "Blue Edit",
                         tint = Color.Blue,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Rename,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Rename),
                         contentDescription = "Green Rename",
                         tint = Color.Green,
                     )

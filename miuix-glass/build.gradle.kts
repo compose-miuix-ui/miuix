@@ -57,6 +57,7 @@ kotlin {
             api(projects.miuixMaterial)
             api(projects.miuixUi)
             implementation(libs.jetbrains.compose.foundation)
+            implementation(projects.miuixIconsSymbol)
             implementation(libs.androidx.navigationevent)
         }
         commonTest.dependencies {

@@ -21,8 +21,9 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.basic.rememberTooltipState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.symbol.Edit
+import top.yukonga.miuix.kmp.icon.symbol.Info
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 
 fun LazyListScope.tooltipSection() {
     item(key = "tooltip") {
@@ -46,7 +47,7 @@ fun LazyListScope.tooltipSection() {
                 ) {
                     TooltipBox(text = "Edit") {
                         IconButton(onClick = {}) {
-                            Icon(imageVector = MiuixIcons.Edit, contentDescription = "Edit")
+                            Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Edit), contentDescription = "Edit")
                         }
                     }
                     RichTooltipBox(
@@ -58,7 +59,7 @@ fun LazyListScope.tooltipSection() {
                         state = richState,
                     ) {
                         IconButton(onClick = {}) {
-                            Icon(imageVector = MiuixIcons.Info, contentDescription = "Rich tooltip")
+                            Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Info), contentDescription = "Rich tooltip")
                         }
                     }
                 }

@@ -41,8 +41,9 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.glassSearchBarTransition
 import top.yukonga.miuix.kmp.glass.rememberGlassSearchBarAlpha
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Close
-import top.yukonga.miuix.kmp.icon.glass.Search
+import top.yukonga.miuix.kmp.icon.symbol.Close1
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -118,7 +119,7 @@ fun GlassSearchOverlayDemo() {
                                         onClick = { expanded = true },
                                     ) {
                                         Icon(
-                                            imageVector = MiuixIcons.Glass.Search,
+                                            imageVector = MiuixIcons.Symbol.Search.toImageVector(),
                                             contentDescription = "Search",
                                             modifier = Modifier.size(28.dp),
                                             tint = MiuixTheme.colorScheme.onSurface,
@@ -166,8 +167,8 @@ fun GlassSearchOverlayDemo() {
                         scrollMaterialThreshold = searchBarPadding + searchResultTopPadding,
                         label = "Search items",
                         topInsets = topInsets,
-                        searchIcon = MiuixIcons.Glass.Search,
-                        closeIcon = MiuixIcons.Glass.Close,
+                        searchIcon = MiuixIcons.Symbol.Search.toImageVector(),
+                        closeIcon = MiuixIcons.Symbol.Close1.toImageVector(),
                         scrollOffset = {
                             when {
                                 searchListState.layoutInfo.totalItemsCount == 0 -> 0f

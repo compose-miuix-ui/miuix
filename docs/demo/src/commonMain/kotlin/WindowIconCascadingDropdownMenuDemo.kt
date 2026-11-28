@@ -29,9 +29,10 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.MoreCircle
-import top.yukonga.miuix.kmp.icon.extended.Tune
+import top.yukonga.miuix.kmp.icon.symbol.MoreCircle
+import top.yukonga.miuix.kmp.icon.symbol.Tune
 import top.yukonga.miuix.kmp.menu.WindowIconCascadingDropdownMenu
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -96,7 +97,7 @@ fun WindowIconCascadingDropdownMenuDemo() {
                         actions = {
                             WindowIconCascadingDropdownMenu(entries = entries) {
                                 Icon(
-                                    imageVector = MiuixIcons.Tune,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Tune),
                                     tint = MiuixTheme.colorScheme.onBackground,
                                     contentDescription = "Adjust",
                                 )
@@ -106,7 +107,7 @@ fun WindowIconCascadingDropdownMenuDemo() {
                                 enabled = false,
                             ) {
                                 Icon(
-                                    imageVector = MiuixIcons.MoreCircle,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.MoreCircle),
                                     tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                                     contentDescription = "More",
                                 )

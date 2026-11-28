@@ -31,8 +31,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `miuix-core/`        | Utilities + MiuixIcons base (depended on by `ui` and `icons`) |
 | `miuix-ui/`          | Main UI library                                               |
 | `miuix-preference/`  | Preference / menu / popup components                          |
-| `miuix-icons/`       | Extended icon resources                                       |
-| `miuix-glass-icons/` | Glass icon set, `MiuixIcons.Glass` (depends on `miuix-core`)  |
+| `miuix-icons-symbol/` | Built-in variable symbol icon library, `MiuixIcons.Symbol` (depends on `miuix-core`) |
 | `miuix-material/`    | Render primitives + material definitions (`EdgeStroke`)       |
 | `miuix-blur/`        | Background sampling + blur stack (Android minSdk=33)          |
 | `miuix-squircle/`    | Squircle corner shapes                                        |
@@ -86,7 +85,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | `glass/`          | Glass surfaces + components (GlassPanel, GlassDialog, GlassTabRow, …) |
 | `glass/internal/` | Refraction / colour-blend shaders and their uniform packing           |
 
-`miuix-glass-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon/` is a flat `glass/` icon set — one file per icon, reached through `MiuixIcons.Glass`.
+`miuix-icons-symbol/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon/symbol/` is a flat variable symbol set — one file per symbol, reached through `MiuixIcons.Symbol`, backed by `top.yukonga.miuix.kmp.symbol.*`.
 
 ### Platform Source Sets
 

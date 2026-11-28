@@ -110,6 +110,7 @@ fun GlassIconButton(
         shadow = shadow,
         sharedProgress = headerContext?.materialProgress,
         sharedKeepMaterial = headerContext?.keepMaterial,
+        interactionSource = interactionSource,
         modifier = modifier
             .clickable(
                 interactionSource = interactionSource,

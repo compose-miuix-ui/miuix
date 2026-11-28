@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -35,9 +36,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.basic.ArrowUpDown
-import top.yukonga.miuix.kmp.icon.basic.Check
+import top.yukonga.miuix.kmp.icon.symbol.CallOutMenu
+import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.icon.symbol.Ok
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -50,8 +53,10 @@ fun RowScope.DropdownArrowEndAction(
     Image(
         modifier = modifier
             .size(width = DropdownDefaults.ArrowSize.width, height = DropdownDefaults.ArrowSize.height)
-            .align(Alignment.CenterVertically),
-        imageVector = MiuixIcons.Basic.ArrowUpDown,
+            .align(Alignment.CenterVertically)
+            .wrapContentSize(unbounded = true)
+            .size(width = 14.dp, height = 32.dp),
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.CallOutMenu),
         colorFilter = colorFilter,
         contentDescription = null,
     )
@@ -197,7 +202,7 @@ fun DropdownImpl(
             }
             Image(
                 modifier = ChevronIconBaseModifier,
-                imageVector = MiuixIcons.Basic.ArrowRight,
+                painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
                 colorFilter = chevronColorFilter,
                 contentDescription = null,
             )
@@ -207,7 +212,7 @@ fun DropdownImpl(
             }
             Image(
                 modifier = CheckIconBaseModifier,
-                imageVector = MiuixIcons.Basic.Check,
+                painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok, weight = SymbolWeights.Max),
                 colorFilter = checkColorFilter,
                 contentDescription = null,
             )
@@ -447,13 +452,13 @@ object DropdownDefaults {
     val MinWidth: Dp = 200.dp
 
     /** Size of the trailing check icon shown on the selected option. */
-    val CheckIconSize: Dp = 20.dp
+    val CheckIconSize: Dp = 16.dp
 
     /** Size of the up-down arrow rendered by [DropdownArrowEndAction]. */
     val ArrowSize: DpSize = DpSize(width = 10.dp, height = 16.dp)
 
     /** Size of the trailing chevron shown on rows that own a submenu. */
-    val ChevronSize: DpSize = DpSize(width = 10.dp, height = 16.dp)
+    val ChevronSize: DpSize = DpSize(width = 16.dp, height = 32.dp)
 
     /** Minimum size of the leading icon cell. */
     val IconMinSize: Dp = 26.dp

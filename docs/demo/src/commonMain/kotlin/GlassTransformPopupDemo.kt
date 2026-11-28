@@ -24,7 +24,8 @@ import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -54,7 +55,7 @@ fun GlassTransformPopupDemo() {
             size = 48.dp,
         ) {
             Icon(
-                imageVector = MiuixIcons.Glass.More,
+                imageVector = MiuixIcons.Symbol.More.toImageVector(),
                 contentDescription = "Change library view",
                 modifier = Modifier.size(28.dp).glassPopupAnchorContent(anchor),
                 tint = MiuixTheme.colorScheme.onBackground,
@@ -68,7 +69,7 @@ fun GlassTransformPopupDemo() {
             simplified = true,
             anchorContent = {
                 Icon(
-                    imageVector = MiuixIcons.Glass.More,
+                    imageVector = MiuixIcons.Symbol.More.toImageVector(),
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
                     tint = MiuixTheme.colorScheme.onBackground,

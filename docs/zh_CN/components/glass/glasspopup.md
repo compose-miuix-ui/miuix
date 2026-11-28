@@ -47,7 +47,7 @@ Box(Modifier.fillMaxSize()) {
         anchorBounds = anchorBounds,
         backdrop = backdrop,
     ) {
-        GlassPopupItem(text = "分享", icon = MiuixIcons.Glass.Share, onClick = { show = false })
+        GlassPopupItem(text = "分享", icon = MiuixIcons.Symbol.Share.toImageVector(), onClick = { show = false })
         GlassPopupItem(text = "收藏", selected = true, onClick = { show = false })
         GlassPopupItem(text = "更多选项", summary = "详细配置", showArrow = true, onClick = { show = false })
         GlassPopupItem(text = "不可用操作", enabled = false, onClick = {})

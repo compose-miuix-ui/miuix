@@ -110,7 +110,7 @@ RangeSliderPreference(
     summary = "${frequencyRange.start.roundToInt()}Hz - ${frequencyRange.endInclusive.roundToInt()}Hz",
     startAction = {
         Icon(
-            imageVector = MiuixIcons.Basic.Audio,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.VolumeUp),
             contentDescription = "Frequency Icon",
             tint = MiuixTheme.colorScheme.onBackground,
             modifier = Modifier.padding(end = 16.dp)

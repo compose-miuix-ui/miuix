@@ -32,7 +32,8 @@ import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -110,7 +111,7 @@ internal fun MorphHeaderRow(
                             height = DropdownDefaults.ChevronSize.height,
                         )
                         .graphicsLayer { rotationZ = arrowRotation() },
-                    imageVector = MiuixIcons.Basic.ArrowRight,
+                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
                     colorFilter = chevronColorFilter,
                     contentDescription = null,
                 )

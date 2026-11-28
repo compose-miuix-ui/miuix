@@ -27,9 +27,10 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.symbol.Back
+import top.yukonga.miuix.kmp.icon.symbol.More
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 
 @Composable
 fun TopAppBarDemo() {
@@ -65,7 +66,7 @@ fun TopAppBarDemo() {
                                         onClick = { /* Handle click event */ },
                                     ) {
                                         Icon(
-                                            MiuixIcons.Back,
+                                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Back),
                                             contentDescription = "Back",
                                         )
                                     }
@@ -75,7 +76,7 @@ fun TopAppBarDemo() {
                                         onClick = { /* Handle click event */ },
                                     ) {
                                         Icon(
-                                            MiuixIcons.More,
+                                            painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
                                             contentDescription = "More",
                                         )
                                     }
@@ -116,7 +117,7 @@ fun TopAppBarDemo() {
                                         onClick = { /* Handle click event */ },
                                     ) {
                                         Icon(
-                                            MiuixIcons.Back,
+                                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Back),
                                             contentDescription = "Back",
                                         )
                                     }
@@ -126,7 +127,7 @@ fun TopAppBarDemo() {
                                         onClick = { /* Handle click event */ },
                                     ) {
                                         Icon(
-                                            MiuixIcons.More,
+                                            painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
                                             contentDescription = "More",
                                         )
                                     }

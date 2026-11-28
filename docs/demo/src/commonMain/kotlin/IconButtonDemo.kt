@@ -19,8 +19,9 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.symbol.Favorites
+import top.yukonga.miuix.kmp.icon.symbol.More
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -50,7 +51,7 @@ fun IconButtonDemo() {
                         onClick = {},
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.More,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
                             tint = MiuixTheme.colorScheme.onBackground,
                             contentDescription = "More",
                         )
@@ -60,7 +61,7 @@ fun IconButtonDemo() {
                         onClick = {},
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Favorites,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Favorites),
                             contentDescription = "Favorites",
                         )
                     }
@@ -70,7 +71,7 @@ fun IconButtonDemo() {
                         enabled = false,
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.More,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                             contentDescription = "More",
                         )
@@ -81,7 +82,7 @@ fun IconButtonDemo() {
                         enabled = false,
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Favorites,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Favorites),
                             tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                             contentDescription = "Favorites",
                         )

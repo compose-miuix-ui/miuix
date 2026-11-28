@@ -23,7 +23,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -78,9 +79,9 @@ class GlassRecompositionTest {
                 val backdrop = rememberLayerBackdrop()
                 val items = remember {
                     listOf(
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Home", badge = { SideEffect { badgeCompositions[0]++ } }),
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Explore", badge = { SideEffect { badgeCompositions[1]++ } }),
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Profile", badge = { SideEffect { badgeCompositions[2]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home", badge = { SideEffect { badgeCompositions[0]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Explore", badge = { SideEffect { badgeCompositions[1]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Profile", badge = { SideEffect { badgeCompositions[2]++ } }),
                     )
                 }
                 GlassNavigationRail(
@@ -154,9 +155,9 @@ class GlassRecompositionTest {
                 val backdrop = rememberLayerBackdrop()
                 val items = remember {
                     listOf(
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Home", badge = { SideEffect { badgeCompositions[0]++ } }),
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Add", badge = { SideEffect { badgeCompositions[1]++ } }),
-                        GlassNavigationItem(MiuixIcons.Basic.Search, "Settings", badge = { SideEffect { badgeCompositions[2]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home", badge = { SideEffect { badgeCompositions[0]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Add", badge = { SideEffect { badgeCompositions[1]++ } }),
+                        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Settings", badge = { SideEffect { badgeCompositions[2]++ } }),
                     )
                 }
                 GlassNavigationBar(

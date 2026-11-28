@@ -37,7 +37,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,8 +57,8 @@ class GlassNavigationActionTest {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                     GlassNavigationBar(
                         items = listOf(
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Gallery"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Gallery"),
                         ),
                         selectedIndex = 0,
                         onSelect = {},
@@ -69,7 +70,7 @@ class GlassNavigationActionTest {
                                     onClick = {},
                                     backdrop = backdrop,
                                     size = GlassNavigationBarDefaults.Height,
-                                ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                                ) { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Search") }
                             }
                         } else {
                             null
@@ -134,7 +135,7 @@ class GlassNavigationActionTest {
                 Box(Modifier.size(410.dp, 180.dp).testTag("scene")) {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                     GlassNavigationBar(
-                        items = listOf(GlassNavigationItem(MiuixIcons.Basic.Search, "Home")),
+                        items = listOf(GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home")),
                         selectedIndex = 0,
                         onSelect = {},
                         backdrop = backdrop,
@@ -146,7 +147,7 @@ class GlassNavigationActionTest {
                                 backdrop = backdrop,
                                 size = GlassNavigationBarDefaults.Height,
                                 modifier = Modifier.testTag("action"),
-                            ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                            ) { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Search") }
                         },
                     )
                 }
@@ -184,7 +185,7 @@ class GlassNavigationActionTest {
                     Box(Modifier.size(800.dp, 180.dp).testTag("scene")) {
                         Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                         GlassNavigationBar(
-                            items = List(3) { GlassNavigationItem(MiuixIcons.Basic.Search, "Tab $it") },
+                            items = List(3) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Tab $it") },
                             selectedIndex = 0,
                             onSelect = {},
                             backdrop = backdrop,
@@ -196,7 +197,7 @@ class GlassNavigationActionTest {
                                     backdrop = backdrop,
                                     size = GlassNavigationBarDefaults.Height,
                                     modifier = Modifier.testTag("action"),
-                                ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                                ) { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Search") }
                             },
                         )
                     }
@@ -232,8 +233,8 @@ class GlassNavigationActionTest {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                     GlassNavigationBar(
                         items = listOf(
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-                            GlassNavigationItem(MiuixIcons.Basic.Search, "Files"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Files"),
                         ),
                         selectedIndex = selected.intValue,
                         onSelect = {
@@ -250,7 +251,7 @@ class GlassNavigationActionTest {
                                     backdrop = backdrop,
                                     size = GlassNavigationBarDefaults.Height,
                                     modifier = Modifier.testTag("action"),
-                                ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                                ) { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Search") }
                             }
                         } else {
                             null
@@ -300,7 +301,7 @@ class GlassNavigationActionTest {
                 CompositionLocalProvider(LocalLayoutDirection provides direction) {
                     Box(Modifier.size(410.dp, 150.dp).background(Color.White)) {
                         GlassNavigationBar(
-                            items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                            items = labels.map { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it) },
                             selectedIndex = selected.intValue,
                             onSelect = { selected.intValue = it },
                             backdrop = null,
@@ -366,7 +367,7 @@ class GlassNavigationActionTest {
                 CompositionLocalProvider(LocalLayoutDirection provides direction) {
                     Box(Modifier.size(410.dp, 150.dp)) {
                         GlassNavigationBar(
-                            items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                            items = labels.map { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it) },
                             selectedIndex = selected.intValue,
                             onSelect = {
                                 selected.intValue = it
@@ -428,7 +429,7 @@ class GlassNavigationActionTest {
                     },
                 ) {
                     GlassNavigationBar(
-                        items = listOf("Home", "Files", "Profile").map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                        items = listOf("Home", "Files", "Profile").map { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it) },
                         selectedIndex = 0,
                         onSelect = { selections.add(it) },
                         backdrop = null,
@@ -476,7 +477,7 @@ class GlassNavigationActionTest {
                 Box(Modifier.size(400.dp, 100.dp)) {
                     GlassNavigationBar(
                         items = listOf("Home", "Files", "Profile").map {
-                            GlassNavigationItem(MiuixIcons.Basic.Search, it)
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it)
                         },
                         selectedIndex = selected.intValue,
                         onSelect = {
@@ -519,7 +520,7 @@ class GlassNavigationActionTest {
             DialogTestHost {
                 Box(Modifier.size(400.dp, 100.dp)) {
                     GlassNavigationBar(
-                        items = labels.map { GlassNavigationItem(MiuixIcons.Basic.Search, it) },
+                        items = labels.map { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it) },
                         selectedIndex = selected.intValue,
                         onSelect = {
                             selected.intValue = it
@@ -587,7 +588,7 @@ class GlassNavigationActionTest {
                 ) {
                     GlassNavigationBar(
                         items = listOf("Home", "Files", "Profile").map {
-                            GlassNavigationItem(MiuixIcons.Basic.Search, it)
+                            GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), it)
                         },
                         selectedIndex = selected.intValue,
                         onSelect = {
@@ -650,7 +651,7 @@ class GlassNavigationActionTest {
                 Box(Modifier.size(280.dp, 180.dp).background(Color.White)) {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop).background(Color.White))
                     GlassNavigationBar(
-                        items = List(4) { GlassNavigationItem(MiuixIcons.Basic.Search, "Long destination $it") },
+                        items = List(4) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Long destination $it") },
                         selectedIndex = 0,
                         onSelect = {},
                         backdrop = backdrop,
@@ -662,7 +663,7 @@ class GlassNavigationActionTest {
                                 backdrop = backdrop,
                                 size = GlassNavigationBarDefaults.Height,
                                 modifier = Modifier.testTag("action"),
-                            ) { Icon(MiuixIcons.Basic.Search, contentDescription = "Search") }
+                            ) { Icon(MiuixIcons.Symbol.Search.toImageVector(), contentDescription = "Search") }
                         },
                     )
                 }

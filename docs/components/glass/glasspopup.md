@@ -47,7 +47,7 @@ Box(Modifier.fillMaxSize()) {
         anchorBounds = anchorBounds,
         backdrop = backdrop,
     ) {
-        GlassPopupItem(text = "Share", icon = MiuixIcons.Glass.Share, onClick = { show = false })
+        GlassPopupItem(text = "Share", icon = MiuixIcons.Symbol.Share.toImageVector(), onClick = { show = false })
         GlassPopupItem(text = "Favorite", selected = true, onClick = { show = false })
         GlassPopupItem(text = "More options", summary = "Detailed preferences", showArrow = true, onClick = { show = false })
         GlassPopupItem(text = "Unavailable", enabled = false, onClick = {})

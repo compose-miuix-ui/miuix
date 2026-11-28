@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -25,7 +26,8 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.symbol.Next
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -101,9 +103,11 @@ private fun RowScope.ArrowPreferenceEndAction(
     Image(
         modifier = Modifier
             .size(width = 10.dp, height = 16.dp)
-            .then(flipModifier)
-            .align(Alignment.CenterVertically),
-        imageVector = MiuixIcons.Basic.ArrowRight,
+            .align(Alignment.CenterVertically)
+            .wrapContentSize(unbounded = true)
+            .size(width = 12.dp, height = 32.dp)
+            .then(flipModifier),
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.Next),
         contentDescription = null,
         colorFilter = tintFilter,
     )

@@ -63,7 +63,8 @@ import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.SearchClearButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import utils.SearchStatus
 import utils.rememberAppSafePadding
@@ -248,7 +249,7 @@ fun SearchBar(
         label = searchStatus.label,
         leadingIcon = {
             Icon(
-                imageVector = MiuixIcons.Basic.Search,
+                painter = rememberSymbolPainter(MiuixIcons.Symbol.Search, defaultSize = 20.dp),
                 contentDescription = "back",
                 modifier = Modifier
                     .size(44.dp)
@@ -308,7 +309,7 @@ fun SearchBarFake(
         label = label,
         leadingIcon = {
             Icon(
-                imageVector = MiuixIcons.Basic.Search,
+                painter = rememberSymbolPainter(MiuixIcons.Symbol.Search, defaultSize = 20.dp),
                 contentDescription = "Search",
                 modifier = Modifier
                     .size(44.dp)

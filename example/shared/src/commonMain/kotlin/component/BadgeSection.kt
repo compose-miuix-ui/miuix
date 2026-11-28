@@ -21,10 +21,11 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Email
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.icon.extended.Messages
-import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.symbol.Email
+import top.yukonga.miuix.kmp.icon.symbol.Favorites
+import top.yukonga.miuix.kmp.icon.symbol.Messages
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 
 fun LazyListScope.badgeSection() {
     item(key = "badge") {
@@ -48,28 +49,28 @@ fun LazyListScope.badgeSection() {
                 ) {
                     BadgedBox(badge = { Badge() }) {
                         Icon(
-                            imageVector = MiuixIcons.Messages,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Messages),
                             contentDescription = "Messages",
                             modifier = Modifier.size(28.dp),
                         )
                     }
                     BadgedBox(badge = { Badge { Text("8") } }) {
                         Icon(
-                            imageVector = MiuixIcons.Email,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Email),
                             contentDescription = "Email",
                             modifier = Modifier.size(28.dp),
                         )
                     }
                     BadgedBox(badge = { Badge { Text("99+") } }) {
                         Icon(
-                            imageVector = MiuixIcons.Settings,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Settings),
                             contentDescription = "Settings",
                             modifier = Modifier.size(28.dp),
                         )
                     }
                     BadgedBox(badge = { Badge { Text("5") } }) {
                         Icon(
-                            imageVector = MiuixIcons.Favorites,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Favorites),
                             contentDescription = "Favorites",
                             modifier = Modifier.size(28.dp),
                         )

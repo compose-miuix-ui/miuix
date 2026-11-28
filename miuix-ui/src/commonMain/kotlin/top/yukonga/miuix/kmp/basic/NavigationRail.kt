@@ -68,8 +68,9 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Sidebar
+import top.yukonga.miuix.kmp.icon.symbol.Sidebar
 import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -307,7 +308,7 @@ private fun NavigationRailExpandToggle(
     ) {
         Icon(
             modifier = Modifier.size(NavigationRailDefaults.IconSize),
-            imageVector = MiuixIcons.Basic.Sidebar,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.Sidebar),
             contentDescription = if (state.isExpanded) collapseContentDescription else expandContentDescription,
             tint = MiuixTheme.colorScheme.onSurfaceContainer,
         )

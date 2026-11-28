@@ -54,6 +54,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.miuixUi)
             api(libs.jetbrains.compose.foundation)
+            implementation(projects.miuixIconsSymbol)
         }
     }
 }

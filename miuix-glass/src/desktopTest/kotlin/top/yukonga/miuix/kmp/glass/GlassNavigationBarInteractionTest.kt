@@ -21,7 +21,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,7 +44,7 @@ class GlassNavigationBarInteractionTest {
                     Box(Modifier.size(600.dp, 120.dp), contentAlignment = AbsoluteAlignment.TopLeft) {
                         Box(Modifier.size(width.value, 120.dp)) {
                             GlassNavigationBar(
-                                items = List(3) { GlassNavigationItem(MiuixIcons.Basic.Search, "Tab $it") },
+                                items = List(3) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Tab $it") },
                                 selectedIndex = selected.intValue,
                                 onSelect = {
                                     selections += it

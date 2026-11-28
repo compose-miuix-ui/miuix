@@ -20,13 +20,14 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.symbol.More
 import top.yukonga.miuix.kmp.menu.OverlayDropdownMenu
 import top.yukonga.miuix.kmp.menu.OverlayIconCascadingDropdownMenu
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.menu.WindowDropdownMenu
 import top.yukonga.miuix.kmp.menu.WindowIconCascadingDropdownMenu
 import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.menuSection() {
@@ -181,7 +182,7 @@ private fun cascadingMenuEntry(
 @Composable
 private fun MenuMoreIcon(contentDescription: String) {
     Icon(
-        imageVector = MiuixIcons.More,
+        painter = rememberSymbolPainter(MiuixIcons.Symbol.More),
         contentDescription = contentDescription,
         modifier = Modifier.size(24.dp),
         tint = MiuixTheme.colorScheme.onSurfaceVariantActions,

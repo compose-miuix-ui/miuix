@@ -26,7 +26,7 @@
 
 ## Setup
 
-See [Glass Surfaces](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-glass-icons` module provides icons through `MiuixIcons.Glass`.
+See [Glass Surfaces](/guide/glass#setup) for dependencies and background sampling setup. The optional `miuix-icons-symbol` module provides variable symbol icons through `MiuixIcons.Symbol`.
 
 ## Usage Requirements
 

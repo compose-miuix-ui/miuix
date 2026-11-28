@@ -32,7 +32,7 @@ dependencies {
 
 `miuix-glass` 会传递引入 `miuix-material`、`miuix-blur` 与 `miuix-ui`。
 
-Glass 图标由可选的 `miuix-glass-icons` 模块提供，通过 `MiuixIcons.Glass` 访问，参见[图标系统](/zh_CN/guide/icons)。
+可变 Symbol 图标由可选的 `miuix-icons-symbol` 模块提供，通过 `MiuixIcons.Symbol` 访问，参见[图标系统](/zh_CN/guide/icons)。
 
 ## 基本用法
 

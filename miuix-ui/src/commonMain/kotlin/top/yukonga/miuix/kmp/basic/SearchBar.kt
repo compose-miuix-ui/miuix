@@ -57,7 +57,8 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.hasFocusReassignBug
@@ -248,7 +249,7 @@ fun InputField(
                                 start = SearchBarDefaults.LeadingIconStartPadding,
                                 end = SearchBarDefaults.LeadingIconEndPadding,
                             ),
-                            imageVector = MiuixIcons.Basic.Search,
+                            painter = rememberSymbolPainter(MiuixIcons.Symbol.Search, defaultSize = 20.dp),
                             tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
                             contentDescription = "Search",
                         )

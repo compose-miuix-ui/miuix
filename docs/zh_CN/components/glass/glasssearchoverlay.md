@@ -32,7 +32,7 @@ Box(Modifier.fillMaxSize()) {
                 contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f },
                 actions = {
                     GlassIconButton(onClick = { searchExpanded = true }) {
-                        Icon(MiuixIcons.Basic.Search, contentDescription = "Search")
+                        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Search), contentDescription = "Search")
                     }
                 },
             )
@@ -84,8 +84,8 @@ Box(Modifier.fillMaxSize()) {
 | material | GlassMaterial | GlassSearchOverlayDefaults.material() | 搜索框与取消按钮的玻璃材质 |
 | stroke | EdgeStroke? | GlassSearchOverlayDefaults.stroke() | 玻璃胶囊边缘描边 |
 | shadow | GlassShadow? | GlassSearchOverlayDefaults.shadow() | 玻璃胶囊外阴影 |
-| searchIcon | ImageVector | MiuixIcons.Basic.Search | 搜索框前置图标 |
-| closeIcon | ImageVector | MiuixIcons.Basic.Close | 输入框旁的取消图标 |
+| searchIcon | ImageVector | MiuixIcons.Symbol.Search.toImageVector(defaultSize = 20.dp) | 搜索框前置图标 |
+| closeIcon | ImageVector | MiuixIcons.Symbol.Close1.toImageVector() | 输入框旁的取消图标 |
 | content | @Composable ColumnScope.(String) -> Unit | `{}` | 搜索结果内容，接收当前输入文本 |
 
 ### GlassSearchOverlayDefaults

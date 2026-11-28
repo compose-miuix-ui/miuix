@@ -29,7 +29,7 @@ The quickest way to label an icon-only control is the `text` convenience overloa
 TooltipBox(text = "Search") {
     IconButton(onClick = { /* ... */ }) {
         Icon(
-            imageVector = MiuixIcons.Basic.Search,
+            painter = rememberSymbolPainter(MiuixIcons.Symbol.Search),
             contentDescription = "Search",
         )
     }
@@ -70,7 +70,7 @@ TooltipBox(
     state = rememberTooltipState(),
 ) {
     IconButton(onClick = { /* ... */ }) {
-        Icon(imageVector = MiuixIcons.Basic.Check, contentDescription = "Add to favorites")
+        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok), contentDescription = "Add to favorites")
     }
 }
 ```
@@ -136,7 +136,7 @@ TooltipBox(
     focusable = true,
 ) {
     IconButton(onClick = { scope.launch { tooltipState.show() } }) {
-        Icon(imageVector = MiuixIcons.Basic.Check, contentDescription = "What's new")
+        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok), contentDescription = "What's new")
     }
 }
 ```

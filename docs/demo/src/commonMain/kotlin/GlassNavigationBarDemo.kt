@@ -29,10 +29,11 @@ import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.Contacts
-import top.yukonga.miuix.kmp.icon.glass.Search
-import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
-import top.yukonga.miuix.kmp.icon.glass.VerticalSplit
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.icon.symbol.Settings
+import top.yukonga.miuix.kmp.icon.symbol.VerticalSplit
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -40,9 +41,9 @@ fun GlassNavigationBarDemo() {
     val backdrop = rememberLayerBackdrop()
     val items = remember {
         listOf(
-            GlassNavigationItem(MiuixIcons.Glass.VerticalSplit, "Home", "Home"),
-            GlassNavigationItem(MiuixIcons.Glass.Contacts, "Contacts", "Contacts", badge = { Badge { Text("8") } }),
-            GlassNavigationItem(MiuixIcons.Glass.SettingsOutline, "Settings", "Settings", badge = { Badge() }),
+            GlassNavigationItem(MiuixIcons.Symbol.VerticalSplit.toImageVector(), "Home", "Home"),
+            GlassNavigationItem(MiuixIcons.Symbol.Contacts.toImageVector(), "Contacts", "Contacts", badge = { Badge { Text("8") } }),
+            GlassNavigationItem(MiuixIcons.Symbol.Settings.toImageVector(), "Settings", "Settings", badge = { Badge() }),
         )
     }
     val descriptions = remember {
@@ -88,7 +89,7 @@ fun GlassNavigationBarDemo() {
                                         backdrop = backdrop,
                                     ) {
                                         Icon(
-                                            imageVector = MiuixIcons.Glass.Search,
+                                            imageVector = MiuixIcons.Symbol.Search.toImageVector(),
                                             contentDescription = "Search current page",
                                             tint = MiuixTheme.colorScheme.onBackground,
                                         )

@@ -32,7 +32,7 @@ Box(Modifier.fillMaxSize()) {
                 contentModifier = Modifier.glassSearchBarTransition(searchExpanded) { 1f },
                 actions = {
                     GlassIconButton(onClick = { searchExpanded = true }) {
-                        Icon(MiuixIcons.Basic.Search, contentDescription = "Search")
+                        Icon(painter = rememberSymbolPainter(MiuixIcons.Symbol.Search), contentDescription = "Search")
                     }
                 },
             )
@@ -84,8 +84,8 @@ Box(Modifier.fillMaxSize()) {
 | material | GlassMaterial | GlassSearchOverlayDefaults.material() | Glass material for the search input and cancel button |
 | stroke | EdgeStroke? | GlassSearchOverlayDefaults.stroke() | Edge stroke along the glass capsules |
 | shadow | GlassShadow? | GlassSearchOverlayDefaults.shadow() | Drop shadow behind the glass capsules |
-| searchIcon | ImageVector | MiuixIcons.Basic.Search | Leading search icon |
-| closeIcon | ImageVector | MiuixIcons.Basic.Close | Cancel icon beside the input |
+| searchIcon | ImageVector | MiuixIcons.Symbol.Search.toImageVector(defaultSize = 20.dp) | Leading search icon |
+| closeIcon | ImageVector | MiuixIcons.Symbol.Close1.toImageVector() | Cancel icon beside the input |
 | content | @Composable ColumnScope.(String) -> Unit | `{}` | Search result content receiving the current query string |
 
 ### GlassSearchOverlayDefaults

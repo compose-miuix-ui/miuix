@@ -27,8 +27,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Favorites
+import top.yukonga.miuix.kmp.icon.symbol.Contacts
+import top.yukonga.miuix.kmp.icon.symbol.Favorites
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -62,7 +63,7 @@ fun ButtonDemo() {
                     },
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Favorites,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Favorites),
                         contentDescription = "Favorites",
                         tint = Color.Unspecified,
                         modifier = Modifier.size(24.dp),
@@ -92,7 +93,7 @@ fun ButtonDemo() {
                     colors = ButtonDefaults.buttonColorsPrimary(),
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Contacts,
+                        painter = rememberSymbolPainter(MiuixIcons.Symbol.Contacts),
                         contentDescription = null,
                         tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
                         modifier = Modifier.size(24.dp),

@@ -15,8 +15,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.symbol.Back
+import top.yukonga.miuix.kmp.icon.symbol.ChevronBackward
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Composable
@@ -38,7 +39,7 @@ fun BackNavigationIcon(
                 .graphicsLayer {
                     if (layoutDirection == LayoutDirection.Rtl) scaleX = -1f
                 },
-            imageVector = if (glassStyle) MiuixIcons.Glass.ChevronBackward else MiuixIcons.Back,
+            painter = rememberSymbolPainter(if (glassStyle) MiuixIcons.Symbol.ChevronBackward else MiuixIcons.Symbol.Back),
             contentDescription = "Back",
             tint = if (glassStyle) colorScheme.onSurface else colorScheme.onBackground,
         )

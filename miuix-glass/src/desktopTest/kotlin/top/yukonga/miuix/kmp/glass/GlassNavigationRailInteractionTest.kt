@@ -34,7 +34,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
+import top.yukonga.miuix.kmp.icon.symbol.Search
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,9 +44,9 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class, InternalComposeUiApi::class)
 class GlassNavigationRailInteractionTest {
     private val destinations = listOf(
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Home"),
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Library"),
-        GlassNavigationItem(MiuixIcons.Basic.Search, "Settings"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Home"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Library"),
+        GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Settings"),
     )
 
     @Test
@@ -283,7 +284,7 @@ class GlassNavigationRailInteractionTest {
         val state = GlassNavigationRailState(initialExpanded = true)
         val scroll = ScrollState(0)
         val selections = mutableListOf<Int>()
-        val items = List(14) { GlassNavigationItem(MiuixIcons.Basic.Search, "Item $it") }
+        val items = List(14) { GlassNavigationItem(MiuixIcons.Symbol.Search.toImageVector(), "Item $it") }
         setContent {
             Scene(onSelect = { selections += it }, state = state, items = items, scrollState = scroll)
         }

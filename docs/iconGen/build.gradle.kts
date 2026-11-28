@@ -8,20 +8,13 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.miuixUi)
+    implementation(projects.miuixIconsSymbol)
+    implementation(libs.jetbrains.compose.foundation)
 }
 
-val iconsSourceDir =
+val symbolIconsSourceDir =
     rootProject.layout.projectDirectory
-        .dir("miuix-ui/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
-        .asFile
-val extendedIconsSourceDir =
-    rootProject.layout.projectDirectory
-        .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
-        .asFile
-val glassIconsSourceDir =
-    rootProject.layout.projectDirectory
-        .dir("miuix-glass-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .dir("miuix-icons-symbol/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
         .asFile
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
@@ -41,11 +34,7 @@ tasks.register<JavaExec>("generateIcons") {
     args =
         listOf(
             "--src",
-            iconsSourceDir.absolutePath,
-            "--src",
-            extendedIconsSourceDir.absolutePath,
-            "--src",
-            glassIconsSourceDir.absolutePath,
+            symbolIconsSourceDir.absolutePath,
             "--out",
             outputDir.absolutePath,
             "--light",

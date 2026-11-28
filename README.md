@@ -28,8 +28,7 @@ A UI library for Compose Multiplatform.
 | ------------------- | ---------------------------------------------------------- |
 | `miuix-ui`          | Core UI component library                                  |
 | `miuix-preference`  | Preference components library, depends on `miuix-ui`       |
-| `miuix-icons`       | Extended icon library, can be used independently           |
-| `miuix-glass-icons` | Glass icon library, can be used independently              |
+| `miuix-icons-symbol` | Built-in variable symbol icon library, can be used independently |
 | `miuix-material`    | Render primitives and material definitions                 |
 | `miuix-blur`        | Blur effect library, can be used independently             |
 | `miuix-squircle`    | Squircle shapes library, can be used independently         |
@@ -46,10 +45,8 @@ kotlin {
             implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
             // Optional: Add miuix-preference for preference components
             implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
-            // Optional: Add miuix-icons for more icons
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-glass-icons for the Glass icon set
-            implementation("top.yukonga.miuix.kmp:miuix-glass-icons:<version>")
+            // Optional: Add miuix-icons-symbol for the variable Symbol icon set
+            implementation("top.yukonga.miuix.kmp:miuix-icons-symbol:<version>")
             // Optional: Add miuix-blur for blur effects
             implementation("top.yukonga.miuix.kmp:miuix-blur:<version>")
             // Optional: Add miuix-squircle for squircle (smooth rounded corner) shapes

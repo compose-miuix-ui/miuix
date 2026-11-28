@@ -23,10 +23,11 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.icon.symbol.Close1
+import top.yukonga.miuix.kmp.icon.symbol.Ok
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -62,7 +63,7 @@ fun OverlayBottomSheetDemo() {
                         startAction = {
                             IconButton(onClick = { showBottomSheet = false }) {
                                 Icon(
-                                    imageVector = MiuixIcons.Close,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Close1),
                                     contentDescription = "Cancel",
                                     tint = MiuixTheme.colorScheme.onBackground,
                                 )
@@ -71,7 +72,7 @@ fun OverlayBottomSheetDemo() {
                         endAction = {
                             IconButton(onClick = { showBottomSheet = false }) {
                                 Icon(
-                                    imageVector = MiuixIcons.Ok,
+                                    painter = rememberSymbolPainter(MiuixIcons.Symbol.Ok),
                                     contentDescription = "Confirm",
                                     tint = MiuixTheme.colorScheme.onBackground,
                                 )

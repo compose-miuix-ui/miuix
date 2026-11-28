@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -30,13 +29,15 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.icon.symbol.Close1
+import top.yukonga.miuix.kmp.icon.symbol.Ok
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
+import top.yukonga.miuix.kmp.symbol.VariableSymbol
+import top.yukonga.miuix.kmp.symbol.rememberSymbolPainter
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -123,10 +124,10 @@ private fun SuperBottomSheetDemo(
         dimColor = MiuixTheme.colorScheme.windowDimming.copy(alpha = 0.2f),
         onDismissRequest = onDismissRequest,
         startAction = {
-            BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = onDismissRequest)
+            BottomSheetActionButton(MiuixIcons.Symbol.Close1, "Cancel", onClick = onDismissRequest)
         },
         endAction = {
-            BottomSheetActionButton(MiuixIcons.Ok, "Confirm", onClick = onDismissRequest)
+            BottomSheetActionButton(MiuixIcons.Symbol.Ok, "Confirm", onClick = onDismissRequest)
         },
     ) {
         BottomSheetContent(
@@ -167,11 +168,11 @@ private fun WindowBottomSheetDemo(
         onDismissRequest = onDismissRequest,
         startAction = {
             val dismissState = LocalDismissState.current
-            BottomSheetActionButton(MiuixIcons.Close, "Cancel", onClick = { dismissState?.invoke() })
+            BottomSheetActionButton(MiuixIcons.Symbol.Close1, "Cancel", onClick = { dismissState?.invoke() })
         },
         endAction = {
             val dismissState = LocalDismissState.current
-            BottomSheetActionButton(MiuixIcons.Ok, "Confirm", onClick = { dismissState?.invoke() })
+            BottomSheetActionButton(MiuixIcons.Symbol.Ok, "Confirm", onClick = { dismissState?.invoke() })
         },
     ) {
         BottomSheetContent(
@@ -267,7 +268,7 @@ private fun BottomSheetContent(
 
 @Composable
 private fun BottomSheetActionButton(
-    imageVector: ImageVector,
+    symbol: VariableSymbol,
     contentDescription: String,
     onClick: () -> Unit,
 ) {
@@ -275,7 +276,7 @@ private fun BottomSheetActionButton(
         onClick = onClick,
     ) {
         Icon(
-            imageVector = imageVector,
+            painter = rememberSymbolPainter(symbol),
             contentDescription = contentDescription,
             tint = MiuixTheme.colorScheme.onBackground,
         )

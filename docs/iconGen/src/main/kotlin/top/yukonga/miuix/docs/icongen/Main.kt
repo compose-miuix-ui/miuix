@@ -3,557 +3,242 @@
 
 package top.yukonga.miuix.docs.icongen
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.VectorPath
+import top.yukonga.miuix.kmp.symbol.SymbolCategory
+import top.yukonga.miuix.kmp.symbol.SymbolWeights
+import top.yukonga.miuix.kmp.symbol.VariableSymbol
+import top.yukonga.miuix.kmp.symbol.toImageVector
 import java.io.File
 
-data class SvgPath(
-    val d: String,
-    val fill: String? = null,
-    val fillAlpha: Float = 1.0f,
-    val fillRule: String = "nonzero",
-    val stroke: String? = null,
-    val strokeAlpha: Float = 1.0f,
-    val strokeWidth: Float = 0.0f,
-    val transform: String = "",
+private val SYMBOL_WEIGHT_PRESETS = listOf(
+    "Light" to SymbolWeights.Light,
+    "Normal" to SymbolWeights.Normal,
+    "Regular" to SymbolWeights.Regular,
+    "Medium" to SymbolWeights.Medium,
+    "Demibold" to SymbolWeights.Demibold,
 )
 
-private val WEIGHT_NAMES = listOf("Light", "Normal", "Regular", "Medium", "Demibold")
+private data class SvgPath(
+    val d: String,
+    val fill: String,
+    val fillRule: String,
+)
 
-/** Simple CLI entry that converts Compose vector icon definitions to SVG files. */
 fun main(args: Array<String>) {
-    val map = mutableMapOf<String, String>()
     val srcDirs = mutableListOf<String>()
+    val options = mutableMapOf<String, String>()
     var i = 0
     while (i < args.size) {
-        val a = args[i]
-        if (a == "--src") {
-            val next = args.getOrNull(i + 1)
-            if (next != null && !next.startsWith("--")) {
-                srcDirs.add(next)
-                i += 2
-            } else {
-                error("--src <dir> required")
-            }
-        } else if (a.startsWith("--")) {
-            val next = args.getOrNull(i + 1)
-            if (next != null && !next.startsWith("--")) {
-                map[a] = next
-                i += 2
-            } else {
-                map[a] = "true"
-                i += 1
-            }
+        val arg = args[i]
+        if (arg == "--src" && i + 1 < args.size) {
+            srcDirs.add(args[i + 1])
+            i += 2
+        } else if (arg.startsWith("--") && i + 1 < args.size) {
+            options[arg] = args[i + 1]
+            i += 2
         } else {
             i++
         }
     }
-    if (srcDirs.isEmpty()) error("--src <dir> required")
-    val outDir = map["--out"] ?: error("--out <dir> required")
-    val light = map["--light"] ?: "#000000"
-    val dark = map["--dark"] ?: "#FFFFFF"
-    val preserveColors = map["--preserve-colors"]?.equals("true", true) == true
-    val genDoc = map["--gen-doc"]?.equals("true", true) == true
-    val docFilePath = map["--doc-file"]
-    val docFilePathZh = map["--doc-file-zh"]
+
+    val outDir = options["--out"] ?: error("--out is required")
+    val light = options["--light"] ?: "#000000"
+    val dark = options["--dark"] ?: "#FFFFFF"
+    val preserveColors = options["--preserve-colors"]?.equals("true", ignoreCase = true) ?: false
+    val genDoc = options["--gen-doc"]?.equals("true", ignoreCase = true) ?: false
+    val docFilePath = options["--doc-file"]
+    val docFilePathZh = options["--doc-file-zh"]
 
     val dest = File(outDir)
     if (!dest.exists()) dest.mkdirs()
 
     var count = 0
-    // Map of BaseName -> Map<Style, RelativePath>
-    val basicIconsMap = mutableMapOf<String, MutableMap<String, String>>()
-    val extendedIconsMap = mutableMapOf<String, MutableMap<String, String>>()
-    val glassIconsMap = mutableMapOf<String, MutableMap<String, String>>()
+    val symbolIconsMap = mutableMapOf<String, MutableMap<String, String>>()
 
     srcDirs.forEach { srcDir ->
         val src = File(srcDir)
         if (!src.isDirectory) error("Source directory not found: $src")
 
-        val ktFiles =
-            src.walkTopDown().filter { it.isFile && it.extension == "kt" && it.name != "MiuixIcon.kt" && it.name != "AllIcons.kt" }
-
-        ktFiles.forEach { file ->
-            val content = file.readText()
-
-            // Regex to find ImageVector.Builder blocks and extract name, viewport, and pathData
-            val builderRegex = Regex("ImageVector\\.Builder\\(([\\s\\S]*?)\\)\\.apply\\s*\\{([\\s\\S]*?)\\}\\.build\\(\\)")
-
-            builderRegex.findAll(content).forEach { match ->
-                val builderParams = match.groupValues[1]
-                val applyBlock = match.groupValues[2]
-
-                var iconName = file.nameWithoutExtension
-                var viewportWidth = 24f
-                var viewportHeight = 24f
-
-                // Parse Builder Params
-                if (builderParams.contains("name =")) {
-                    val nameRegex = Regex("name\\s*=\\s*\"([^\"]+)\"")
-                    iconName = nameRegex.find(builderParams)?.groupValues?.getOrNull(1) ?: iconName
-
-                    val viewportWRegex = Regex("viewportWidth\\s*=\\s*([0-9.]+)f")
-                    val viewportHRegex = Regex("viewportHeight\\s*=\\s*([0-9.]+)f")
-                    viewportWidth = viewportWRegex.find(builderParams)?.groupValues?.getOrNull(1)?.toFloatOrNull() ?: 24f
-                    viewportHeight = viewportHRegex.find(builderParams)?.groupValues?.getOrNull(1)?.toFloatOrNull() ?: 24f
-                } else {
-                    // Positional args: "Name", w.dp, h.dp, vw, vh
-                    val posRegex =
-                        Regex("\"([^\"]+)\"\\s*,\\s*([0-9.]+)f?\\.dp\\s*,\\s*([0-9.]+)f?\\.dp\\s*,\\s*([0-9.]+)f\\s*,\\s*([0-9.]+)f")
-                    val posMatch = posRegex.find(builderParams)
-                    if (posMatch != null) {
-                        iconName = posMatch.groupValues[1]
-                        viewportWidth = posMatch.groupValues[4].toFloatOrNull() ?: 24f
-                        viewportHeight = posMatch.groupValues[5].toFloatOrNull() ?: 24f
-                    }
-                }
-
-                var scaleX: Float
-                var scaleY: Float
-                var translationX: Float
-                var translationY: Float
-                var groupTransform = ""
-
-                val groupRegex = Regex("group\\(([^)]+)\\)")
-                val groupMatch = groupRegex.find(applyBlock)
-                if (groupMatch != null) {
-                    val params = groupMatch.groupValues[1]
-                    scaleX = Regex("scaleX\\s*=\\s*([0-9.-]+)f").find(params)?.groupValues?.get(1)?.toFloatOrNull() ?: 1.0f
-                    scaleY = Regex("scaleY\\s*=\\s*([0-9.-]+)f").find(params)?.groupValues?.get(1)?.toFloatOrNull() ?: 1.0f
-                    translationX = Regex("translationX\\s*=\\s*([0-9.-]+)f").find(params)?.groupValues?.get(1)?.toFloatOrNull() ?: 0.0f
-                    translationY = Regex("translationY\\s*=\\s*([0-9.-]+)f").find(params)?.groupValues?.get(1)?.toFloatOrNull() ?: 0.0f
-
-                    if (scaleX != 1.0f || scaleY != 1.0f || translationX != 0.0f || translationY != 0.0f) {
-                        groupTransform = " transform=\"matrix($scaleX 0 0 $scaleY $translationX $translationY)\""
-                    }
-                }
-
-                val paths = mutableListOf<SvgPath>()
-
-                // Helper functions for attribute parsing
-                fun parseFill(text: String): String? {
-                    val fillRegex = Regex("fill\\s*=\\s*SolidColor\\(Color\\.([a-zA-Z]+)\\)")
-                    val match = fillRegex.find(text)
-                    return when (match?.groupValues?.getOrNull(1)) {
-                        "Black" -> "#000000"
-                        "White" -> "#FFFFFF"
-                        "Transparent" -> "none"
-                        else -> null
-                    }
-                }
-
-                fun parseStroke(text: String): String? {
-                    val regex = Regex("stroke\\s*=\\s*SolidColor\\(Color\\.([a-zA-Z]+)\\)")
-                    val match = regex.find(text)
-                    return when (match?.groupValues?.getOrNull(1)) {
-                        "Black" -> "#000000"
-                        "White" -> "#FFFFFF"
-                        "Transparent" -> "none"
-                        else -> null
-                    }
-                }
-
-                fun parseAlpha(text: String, key: String): Float {
-                    val regex = Regex("$key\\s*=\\s*([0-9.]+)f")
-                    return regex.find(text)?.groupValues?.get(1)?.toFloatOrNull() ?: 1.0f
-                }
-
-                fun parseFloat(text: String, key: String): Float {
-                    val regex = Regex("$key\\s*=\\s*([0-9.]+)f")
-                    return regex.find(text)?.groupValues?.get(1)?.toFloatOrNull() ?: 0.0f
-                }
-
-                fun parseFillRule(text: String): String {
-                    val regex = Regex("pathFillType\\s*=\\s*PathFillType\\.([a-zA-Z]+)")
-                    return if (regex.find(text)?.groupValues?.getOrNull(1) == "EvenOdd") "evenodd" else "nonzero"
-                }
-
-                // 1. Find DSL paths: path(params) { body }
-                val pathDslRegex = Regex("path\\(([\\s\\S]*?)\\)\\s*\\{")
-                pathDslRegex.findAll(applyBlock).forEach { match ->
-                    val params = match.groupValues[1]
-                    val blockStart = match.range.last + 1
-
-                    // Extract block body
-                    var count = 1
-                    var currentIndex = blockStart
-                    while (currentIndex < applyBlock.length && count > 0) {
-                        val char = applyBlock[currentIndex]
-                        if (char == '{') {
-                            count++
-                        } else if (char == '}') {
-                            count--
-                        }
-                        currentIndex++
-                    }
-
-                    if (count == 0) {
-                        val body = applyBlock.substring(blockStart, currentIndex - 1)
-                        val d = parseDslPath(body)
-
-                        paths.add(
-                            SvgPath(
-                                d = d,
-                                fill = parseFill(params),
-                                fillAlpha = parseAlpha(params, "fillAlpha"),
-                                fillRule = parseFillRule(params),
-                                stroke = parseStroke(params),
-                                strokeAlpha = parseAlpha(params, "strokeAlpha"),
-                                strokeWidth = parseFloat(params, "strokeLineWidth"),
-                                transform = groupTransform,
-                            ),
-                        )
-                    }
-                }
-
-                // 2. Find Vector paths: addPath(params containing pathData)
-                val addPathRegex = Regex("addPath\\s*\\(")
-                addPathRegex.findAll(applyBlock).forEach { match ->
-                    val start = match.range.last
-                    var count = 1
-                    var currentIndex = start + 1
-                    while (currentIndex < applyBlock.length && count > 0) {
-                        val char = applyBlock[currentIndex]
-                        if (char == '(') {
-                            count++
-                        } else if (char == ')') {
-                            count--
-                        }
-                        currentIndex++
-                    }
-
-                    if (count == 0) {
-                        val argsContent = applyBlock.substring(start + 1, currentIndex - 1)
-                        // Extract pathData list
-                        val listStartIdx = argsContent.indexOf("listOf(")
-                        if (listStartIdx != -1) {
-                            // extract list content
-                            var lCount = 1
-                            var lIndex = listStartIdx + 7 // after "listOf("
-                            while (lIndex < argsContent.length && lCount > 0) {
-                                val char = argsContent[lIndex]
-                                if (char == '(') {
-                                    lCount++
-                                } else if (char == ')') {
-                                    lCount--
-                                }
-                                lIndex++
-                            }
-                            if (lCount == 0) {
-                                val pathDataContent = argsContent.substring(listStartIdx + 7, lIndex - 1)
-                                val d = parsePathNodes(pathDataContent)
-                                paths.add(
-                                    SvgPath(
-                                        d = d,
-                                        fill = parseFill(argsContent),
-                                        fillAlpha = parseAlpha(argsContent, "fillAlpha"),
-                                        fillRule = parseFillRule(argsContent),
-                                        stroke = parseStroke(argsContent),
-                                        strokeAlpha = parseAlpha(argsContent, "strokeAlpha"),
-                                        strokeWidth = parseFloat(argsContent, "strokeLineWidth"),
-                                        transform = groupTransform,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (paths.isNotEmpty()) {
-                    val svg = buildSvg(paths, viewportWidth, viewportHeight, light, dark, preserveColors)
-
-                    val relativeDir = file.relativeTo(src).parentFile
-                    val relativeDirPath = relativeDir.path.replace("\\", "/")
-                    val outSubDir = File(dest, relativeDir.path)
-                    outSubDir.mkdirs()
-
-                    // Glass vectors name themselves "Close.Glass.Light". Drop the family segment so
-                    // the table keys, and the SVG file names, match the other families.
-                    val isGlass = relativeDirPath == "glass" || relativeDirPath.startsWith("glass/")
-                    val iconBaseName = if (isGlass) iconName.replace(".Glass", "") else iconName
-
-                    File(outSubDir, "$iconBaseName.svg").writeText(svg)
-                    count++
-
-                    val relativePath = File(relativeDir, "$iconBaseName.svg").path.replace("\\", "/")
-
-                    val isBasic =
-                        file.path.contains("basic${File.separator}") || file.path.contains("basic/") || file.path.contains("basic\\")
-                    val targetMap = when {
-                        isGlass -> glassIconsMap
-                        isBasic -> basicIconsMap
-                        else -> extendedIconsMap
-                    }
-
-                    val matchedWeight = WEIGHT_NAMES.firstOrNull { iconBaseName.endsWith(".$it") }
-                    if (matchedWeight != null) {
-                        val simpleName = iconBaseName.removeSuffix(".$matchedWeight")
-                        targetMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
-                    } else if (!iconBaseName.contains(".")) {
-                        targetMap.getOrPut(iconBaseName) { mutableMapOf() }["Regular"] = relativePath
-                    }
+        src.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .forEach { file ->
+                val content = file.readText()
+                if (content.contains("VariableSymbol(")) {
+                    count += generateSymbolSvgs(
+                        content = content,
+                        dest = dest,
+                        light = light,
+                        dark = dark,
+                        preserveColors = preserveColors,
+                        symbolIconsMap = symbolIconsMap,
+                    )
                 }
             }
-            // HyperOS glass icons delegate vector construction to a shared helper.
-            extractCallArguments(content, "buildHyperOSIcon").forEach { argsContent ->
-                val name = Regex("name\\s*=\\s*\"([^\"]+)\"").find(argsContent)?.groupValues?.getOrNull(1) ?: return@forEach
-                val pathStart = argsContent.indexOf("pathData = listOf(")
-                if (pathStart == -1) return@forEach
-                val pathContentStart = pathStart + "pathData = listOf(".length
-                var depth = 1
-                var pathEnd = pathContentStart
-                while (pathEnd < argsContent.length && depth > 0) {
-                    when (argsContent[pathEnd]) {
-                        '(' -> depth++
-                        ')' -> depth--
-                    }
-                    pathEnd++
-                }
-                if (depth != 0) return@forEach
-
-                val d = parsePathNodes(argsContent.substring(pathContentStart, pathEnd - 1))
-                val scale = Regex("scale\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 1f
-                val translationX = Regex("translationX\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
-                val translationY = Regex("translationY\\s*=\\s*(-?[0-9.]+)f").find(argsContent)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
-                val matchedWeight = WEIGHT_NAMES.firstOrNull { name.endsWith(".Glass.$it") } ?: return@forEach
-                val simpleName = name.removeSuffix(".Glass.$matchedWeight")
-                val svg = buildSvg(
-                    listOf(
-                        SvgPath(
-                            d = d,
-                            fill = "#000000",
-                            transform = " transform=\"matrix($scale 0 0 ${-scale} $translationX $translationY)\"",
-                        ),
-                    ),
-                    1333.3333f,
-                    1333.3333f,
-                    light,
-                    dark,
-                    preserveColors,
-                )
-                val relativeDir = file.relativeTo(src).parentFile
-                val outSubDir = File(dest, relativeDir.path)
-                outSubDir.mkdirs()
-                val fileName = "$simpleName.$matchedWeight.svg"
-                File(outSubDir, fileName).writeText(svg)
-                count++
-                val relativePath = File(relativeDir, fileName).path.replace("\\", "/")
-                glassIconsMap.getOrPut(simpleName) { mutableMapOf() }[matchedWeight] = relativePath
-            }
-        }
     }
 
-    println("[iconGen] Generated $count SVG(s) into $dest")
-    if (genDoc && (basicIconsMap.isNotEmpty() || extendedIconsMap.isNotEmpty() || glassIconsMap.isNotEmpty())) {
-        val separator = "|" + "---|".repeat(WEIGHT_NAMES.size + 1)
-        fun generateTable(map: Map<String, Map<String, String>>, nameHeader: String): String {
+    println("[iconGen] Generated $count SVG(s) into ${dest.absolutePath}")
+
+    if (genDoc && symbolIconsMap.isNotEmpty()) {
+        val weightNames = SYMBOL_WEIGHT_PRESETS.map { it.first }
+        val separator = "|" + "---|".repeat(weightNames.size + 1)
+
+        fun generateTable(headerName: String): String {
             val sb = StringBuilder()
-            sb.append("| $nameHeader | ").append(WEIGHT_NAMES.joinToString(" | ")).append(" |\n")
-            sb.append(separator).append("\n")
-            map.keys.sorted().forEach { name ->
-                val variants = map[name]!!
-                sb.append("| `$name` |")
-                WEIGHT_NAMES.forEach { weight ->
-                    val cell = variants[weight]?.let { "<img src=\"/icons/$it\" width=\"24\" height=\"24\" />" } ?: "-"
-                    sb.append(" ").append(cell).append(" |")
+            sb.append("| $headerName | ${weightNames.joinToString(" | ")} |\n")
+            sb.append("$separator\n")
+            symbolIconsMap.keys.sorted().forEach { name ->
+                val styles = symbolIconsMap[name]!!
+                val row = weightNames.joinToString(" | ") { weight ->
+                    val path = styles[weight]
+                    if (path != null) """<img src="/icons/$path" width="24" height="24" />""" else ""
                 }
-                sb.append("\n")
+                sb.append("| `$name` | $row |\n")
             }
             return sb.toString()
         }
 
-        // Generate English Doc
         if (docFilePath != null || docFilePathZh == null) {
-            val basicTable = generateTable(basicIconsMap, "Icon Name")
-            val extendedTable = generateTable(extendedIconsMap, "Icon Name")
-            val glassTable = generateTable(glassIconsMap, "Icon Name")
-
-            val content = StringBuilder()
-            content.append("### Basic Icons\n\n")
-            content.append("Basic icons include commonly used basic UI elements such as arrows and checkmarks. These icons are also used in Miuix's own components. Below is the complete list:\n\n")
-            content.append(basicTable).append("\n")
-            content.append("### Extended Icons\n\n")
-            content.append("Extended icons include a wide variety of icons for different use cases. Below is the complete list:\n\n")
-            content.append(extendedTable).append("\n")
-            if (glassIconsMap.isNotEmpty()) {
-                content.append("### Glass Icons\n\n")
-                content.append("Glass icons ship in the separate `miuix-glass-icons` artifact. They are generated from the HyperOS symbol source and exposed through `MiuixIcons.Glass`. Below is the complete list:\n\n")
-                content.append(glassTable).append("\n")
+            val content = buildString {
+                append("### Symbol Icons\n\n")
+                append(
+                    "Variable symbol icons ship in `miuix-icons-symbol` and are exposed through `MiuixIcons.Symbol`. " +
+                        "They support any continuous `wght` in `150f..700f`. " +
+                        "Below is the complete list across the five named weight presets:\n\n",
+                )
+                append(generateTable("Icon Name")).append("\n")
             }
-
             if (docFilePath != null) {
-                updateDocFile(File(docFilePath), content.toString(), "### Basic Icons")
+                updateDocFile(File(docFilePath), content, "### Symbol Icons")
             } else {
                 val docFile = File(dest, "icons-list.md")
-                docFile.writeText(content.toString())
+                docFile.writeText(content)
                 println("[iconGen] Generated documentation list into $docFile")
             }
         }
 
-        // Generate Chinese Doc
         if (docFilePathZh != null) {
-            val basicTable = generateTable(basicIconsMap, "图标名称")
-            val extendedTable = generateTable(extendedIconsMap, "图标名称")
-            val glassTable = generateTable(glassIconsMap, "图标名称")
-
-            val content = StringBuilder()
-            content.append("### Basic（基础图标）\n\n")
-            content.append("基础图标包含一些常用的基本界面元素，如箭头、勾选等，这些图标在 Miuix 本身的组件中也会使用到。以下是完整的列表：\n\n")
-            content.append(basicTable).append("\n")
-            content.append("### Extended (扩展图标)\n\n")
-            content.append("扩展图标包含更多场景下的图标。以下是完整的列表：\n\n")
-            content.append(extendedTable).append("\n")
-            if (glassIconsMap.isNotEmpty()) {
-                content.append("### Glass 图标\n\n")
-                content.append("Glass 图标位于独立的 `miuix-glass-icons` 构件中，由 HyperOS 图标源生成，通过 `MiuixIcons.Glass` 访问。以下是完整的列表：\n\n")
-                content.append(glassTable).append("\n")
+            val content = buildString {
+                append("### Symbol（可变符号图标）\n\n")
+                append(
+                    "可变符号图标位于 `miuix-icons-symbol` 构件中，通过 `MiuixIcons.Symbol` 访问，" +
+                        "支持 `150f..700f` 任意连续字重。以下展示五个命名预设字重下的完整列表：\n\n",
+                )
+                append(generateTable("图标名称")).append("\n")
             }
-
-            updateDocFile(File(docFilePathZh), content.toString(), "### Basic（基础图标）")
+            updateDocFile(File(docFilePathZh), content, "### Symbol（可变符号图标）")
         }
     }
 }
 
-fun updateDocFile(docFile: File, newContent: String, startHeader: String) {
-    if (docFile.exists()) {
-        val content = docFile.readText()
-        val startIndex = content.indexOf(startHeader)
-        val finalContent = if (startIndex != -1) {
-            content.take(startIndex) + newContent
-        } else {
-            content + "\n\n" + newContent
+private fun generateSymbolSvgs(
+    content: String,
+    dest: File,
+    light: String,
+    dark: String,
+    preserveColors: Boolean,
+    symbolIconsMap: MutableMap<String, MutableMap<String, String>>,
+): Int {
+    val name = Regex("""name\s*=\s*"([^"]+)"""").find(content)?.groupValues?.get(1) ?: return 0
+    val categoryName = Regex("""category\s*=\s*SymbolCategory\.(\w+)""").find(content)?.groupValues?.get(1) ?: "Core"
+    val category = runCatching { SymbolCategory.valueOf(categoryName) }.getOrDefault(SymbolCategory.Core)
+    val advanceWidth = Regex("""advanceWidth\s*=\s*(\d+)""").find(content)?.groupValues?.get(1)?.toInt() ?: 1330
+    val defaultColorHex = Regex("""defaultColor\s*=\s*Color\(0x([0-9A-Fa-f]{8})\)""").find(content)?.groupValues?.get(1)
+    val encodedData = Regex("""encodedData\s*=\s*"([^"]+)"""").find(content)?.groupValues?.get(1) ?: return 0
+
+    val defaultColor = if (defaultColorHex != null) {
+        Color(defaultColorHex.toLong(16))
+    } else {
+        Color.Unspecified
+    }
+    val symbol = VariableSymbol(
+        name = name,
+        category = category,
+        advanceWidth = advanceWidth,
+        defaultColor = defaultColor,
+        encodedData = encodedData,
+    )
+
+    var generated = 0
+    val fillHex = defaultColorHex?.let { "#${it.substring(2)}" }
+    val preserveThis = preserveColors || fillHex != null
+
+    for ((weightLabel, weightValue) in SYMBOL_WEIGHT_PRESETS) {
+        val iv = symbol.toImageVector(weight = weightValue)
+        val paths = iv.root.filterIsInstance<VectorPath>().map { vp ->
+            SvgPath(
+                d = pathNodesToSvgD(vp.pathData),
+                fill = fillHex ?: "#000000",
+                fillRule = "nonzero",
+            )
         }
-        docFile.writeText(finalContent)
+        val subDir = File(dest, "symbol/${weightLabel.lowercase()}")
+        if (!subDir.exists()) subDir.mkdirs()
+        File(subDir, "$name.svg").writeText(
+            buildSvg(paths, iv.viewportWidth, iv.viewportHeight, light, dark, preserveThis),
+        )
+        symbolIconsMap.getOrPut(name) { mutableMapOf() }[weightLabel] = "symbol/${weightLabel.lowercase()}/$name.svg"
+        generated++
+    }
+    return generated
+}
+
+private fun pathNodesToSvgD(nodes: List<PathNode>): String {
+    val sb = StringBuilder()
+    for (node in nodes) {
+        when (node) {
+            is PathNode.MoveTo -> sb.append("M").append(node.x).append(" ").append(node.y).append(" ")
+
+            is PathNode.LineTo -> sb.append("L").append(node.x).append(" ").append(node.y).append(" ")
+
+            is PathNode.QuadTo -> sb.append("Q").append(node.x1).append(" ").append(node.y1)
+                .append(" ").append(node.x2).append(" ").append(node.y2).append(" ")
+
+            PathNode.Close -> sb.append("Z ")
+
+            else -> Unit
+        }
+    }
+    return sb.toString().trim()
+}
+
+private fun updateDocFile(docFile: File, newContent: String, startHeader: String) {
+    if (!docFile.exists()) {
+        println("[iconGen] Warning: Doc file not found at $docFile")
+        return
+    }
+    val content = docFile.readText()
+    val startIndex = content.indexOf(startHeader)
+    if (startIndex != -1) {
+        docFile.writeText(content.substring(0, startIndex) + newContent)
         println("[iconGen] Updated documentation at $docFile")
     } else {
-        println("[iconGen] Documentation file not found at $docFile, creating new one.")
-        docFile.writeText(newContent)
+        println("[iconGen] Warning: Could not find header '$startHeader' in $docFile")
     }
 }
 
-fun extractCallArguments(content: String, functionName: String): List<String> {
-    val results = mutableListOf<String>()
-    val callRegex = Regex("\\b${Regex.escape(functionName)}\\s*\\(")
-    callRegex.findAll(content).forEach { match ->
-        var depth = 1
-        var index = match.range.last + 1
-        while (index < content.length && depth > 0) {
-            when (content[index]) {
-                '(' -> depth++
-                ')' -> depth--
-            }
-            index++
-        }
-        if (depth == 0) results += content.substring(match.range.last + 1, index - 1)
+private fun buildSvg(
+    paths: List<SvgPath>,
+    vw: Float,
+    vh: Float,
+    light: String,
+    dark: String,
+    preserveColors: Boolean,
+): String {
+    val style = if (!preserveColors) {
+        """<style>:root{--icon-color:$light;}@media (prefers-color-scheme: dark){:root{--icon-color:$dark;}}</style>"""
+    } else {
+        ""
     }
-    return results
+    val pathEls = paths.joinToString("\n") { p ->
+        val fill = if (preserveColors) p.fill else "var(--icon-color)"
+        """<path d="${p.d}" fill="$fill" fill-rule="${p.fillRule}"/>"""
+    }
+    return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw.toCleanString()} ${vh.toCleanString()}">$style$pathEls</svg>"""
 }
 
-fun parsePathNodes(content: String): String {
-    val sb = StringBuilder()
-    val nodeRegex = Regex("PathNode\\.([a-zA-Z]+)(?:\\(([^)]*)\\))?")
-    nodeRegex.findAll(content).forEach { match ->
-        val type = match.groupValues[1]
-        val argsStr = match.groupValues[2]
-        val args = argsStr.split(",").mapNotNull { it.trim().removeSuffix("f").toFloatOrNull() }
-        when (type) {
-            "MoveTo" -> if (args.size >= 2) sb.append("M${args[0]} ${args[1]} ")
-            "RelativeMoveTo" -> if (args.size >= 2) sb.append("m${args[0]} ${args[1]} ")
-            "LineTo" -> if (args.size >= 2) sb.append("L${args[0]} ${args[1]} ")
-            "RelativeLineTo" -> if (args.size >= 2) sb.append("l${args[0]} ${args[1]} ")
-            "HorizontalTo" -> if (args.isNotEmpty()) sb.append("H${args[0]} ")
-            "RelativeHorizontalTo" -> if (args.isNotEmpty()) sb.append("h${args[0]} ")
-            "VerticalTo" -> if (args.isNotEmpty()) sb.append("V${args[0]} ")
-            "RelativeVerticalTo" -> if (args.isNotEmpty()) sb.append("v${args[0]} ")
-            "QuadTo" -> if (args.size >= 4) sb.append("Q${args[0]} ${args[1]} ${args[2]} ${args[3]} ")
-            "RelativeQuadTo" -> if (args.size >= 4) sb.append("q${args[0]} ${args[1]} ${args[2]} ${args[3]} ")
-            "CurveTo" -> if (args.size >= 6) sb.append("C${args[0]} ${args[1]} ${args[2]} ${args[3]} ${args[4]} ${args[5]} ")
-            "RelativeCurveTo" -> if (args.size >= 6) sb.append("c${args[0]} ${args[1]} ${args[2]} ${args[3]} ${args[4]} ${args[5]} ")
-            "ReflectiveQuadTo" -> if (args.size >= 2) sb.append("T${args[0]} ${args[1]} ")
-            "RelativeReflectiveQuadTo" -> if (args.size >= 2) sb.append("t${args[0]} ${args[1]} ")
-            "ReflectiveCurveTo" -> if (args.size >= 4) sb.append("S${args[0]} ${args[1]} ${args[2]} ${args[3]} ")
-            "RelativeReflectiveCurveTo" -> if (args.size >= 4) sb.append("s${args[0]} ${args[1]} ${args[2]} ${args[3]} ")
-            "Close" -> sb.append("Z ")
-        }
-    }
-    return sb.toString().trim()
-}
-
-fun parseDslPath(content: String): String {
-    val sb = StringBuilder()
-    val moveRegex = Regex("moveTo\\((.*?)f, (.*?)f\\)")
-    val lineToRegex = Regex("lineTo\\((.*?)f, (.*?)f\\)")
-    val curveToRegex = Regex("curveTo\\((.*?)f, (.*?)f, (.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val moveRelRegex = Regex("moveToRelative\\((.*?)f, (.*?)f\\)")
-    val lineRelRegex = Regex("lineToRelative\\((.*?)f, (.*?)f\\)")
-    val curveRelRegex = Regex("curveToRelative\\((.*?)f, (.*?)f, (.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val hLineRegex = Regex("horizontalLineTo\\((.*?)f\\)")
-    val vLineRegex = Regex("verticalLineTo\\((.*?)f\\)")
-    val hLineRelRegex = Regex("horizontalLineToRelative\\((.*?)f\\)")
-    val vLineRelRegex = Regex("verticalLineToRelative\\((.*?)f\\)")
-    val quadRegex = Regex("quadTo\\((.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val quadRelRegex = Regex("quadToRelative\\((.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val rCurveRegex = Regex("reflectiveCurveTo\\((.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val rCurveRelRegex = Regex("reflectiveCurveToRelative\\((.*?)f, (.*?)f, (.*?)f, (.*?)f\\)")
-    val rQuadRegex = Regex("reflectiveQuadTo\\((.*?)f, (.*?)f\\)")
-    val rQuadRelRegex = Regex("reflectiveQuadToRelative\\((.*?)f, (.*?)f\\)")
-    val closeRegex = Regex("close\\(\\)")
-
-    content.lineSequence().forEach { line ->
-        moveRegex.findAll(line).forEach { r -> sb.append("M${r.groupValues[1]} ${r.groupValues[2]} ") }
-        lineToRegex.findAll(line).forEach { r -> sb.append("L${r.groupValues[1]} ${r.groupValues[2]} ") }
-        curveToRegex.findAll(line)
-            .forEach { r -> sb.append("C${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ${r.groupValues[5]} ${r.groupValues[6]} ") }
-        moveRelRegex.findAll(line).forEach { r -> sb.append("m${r.groupValues[1]} ${r.groupValues[2]} ") }
-        lineRelRegex.findAll(line).forEach { r -> sb.append("l${r.groupValues[1]} ${r.groupValues[2]} ") }
-        curveRelRegex.findAll(line)
-            .forEach { r -> sb.append("c${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ${r.groupValues[5]} ${r.groupValues[6]} ") }
-        hLineRegex.findAll(line).forEach { r -> sb.append("H${r.groupValues[1]} ") }
-        vLineRegex.findAll(line).forEach { r -> sb.append("V${r.groupValues[1]} ") }
-        hLineRelRegex.findAll(line).forEach { r -> sb.append("h${r.groupValues[1]} ") }
-        vLineRelRegex.findAll(line).forEach { r -> sb.append("v${r.groupValues[1]} ") }
-        quadRegex.findAll(line)
-            .forEach { r -> sb.append("Q${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ") }
-        quadRelRegex.findAll(line)
-            .forEach { r -> sb.append("q${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ") }
-        rCurveRegex.findAll(line)
-            .forEach { r -> sb.append("S${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ") }
-        rCurveRelRegex.findAll(line)
-            .forEach { r -> sb.append("s${r.groupValues[1]} ${r.groupValues[2]} ${r.groupValues[3]} ${r.groupValues[4]} ") }
-        rQuadRegex.findAll(line).forEach { r -> sb.append("T${r.groupValues[1]} ${r.groupValues[2]} ") }
-        rQuadRelRegex.findAll(line).forEach { r -> sb.append("t${r.groupValues[1]} ${r.groupValues[2]} ") }
-        if (closeRegex.containsMatchIn(line)) sb.append("Z ")
-    }
-    return sb.toString().trim()
-}
-
-fun buildSvg(paths: List<SvgPath>, w: Float, h: Float, light: String, dark: String, preserve: Boolean): String {
-    fun num(v: Float): String = if (v % 1f == 0f) v.toInt().toString() else v.toString().trimEnd('0').trimEnd('.')
-
-    return buildString {
-        appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        appendLine("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 ${num(w)} ${num(h)}\" fill=\"none\" stroke=\"none\">")
-        appendLine("  <style>\n    :root{color-scheme:light dark;}\n    svg{color:$light;}\n    @media (prefers-color-scheme: dark){svg{color:$dark;}}\n  </style>")
-
-        paths.forEach { p ->
-            val fillValue = if (preserve) {
-                p.fill ?: "currentColor"
-            } else {
-                if (p.fill == "#000000" || p.fill == "#FFFFFF") "currentColor" else (p.fill ?: "currentColor")
-            }
-
-            val opacityAttr = if (p.fillAlpha < 1.0f) " fill-opacity=\"${p.fillAlpha}\"" else ""
-
-            val strokeAttr = if (p.stroke != null) {
-                val sVal = if (p.stroke == "#000000" || p.stroke == "#FFFFFF") "currentColor" else p.stroke
-                " stroke=\"$sVal\""
-            } else {
-                ""
-            }
-
-            val strokeAlphaAttr = if (p.strokeAlpha < 1.0f) " stroke-opacity=\"${p.strokeAlpha}\"" else ""
-            val strokeWidthAttr = if (p.strokeWidth > 0f) " stroke-width=\"${p.strokeWidth}\"" else ""
-
-            appendLine("  <path d=\"${p.d}\" fill=\"$fillValue\"$opacityAttr$strokeAttr$strokeAlphaAttr$strokeWidthAttr${p.transform} fill-rule=\"${p.fillRule}\" clip-rule=\"${p.fillRule}\" />")
-        }
-        appendLine("</svg>")
-    }
+private fun Float.toCleanString(): String {
+    val i = toInt()
+    return if (this == i.toFloat()) i.toString() else toString()
 }

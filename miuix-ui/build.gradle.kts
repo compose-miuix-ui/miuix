@@ -67,10 +67,9 @@ kotlin {
             api(projects.miuixCore)
             api(projects.miuixSquircle)
             api(libs.jetbrains.compose.foundation)
-
+            implementation(projects.miuixIconsSymbol)
             implementation(libs.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
-
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }
     }
@@ -108,8 +107,7 @@ val convertBaselineProfile =
         targetPackage.set("top/yukonga/miuix/kmp/")
         excludePackages.set(
             listOf(
-                "top/yukonga/miuix/kmp/icon/extended/",
-                "top/yukonga/miuix/kmp/icon/glass/",
+                "top/yukonga/miuix/kmp/icon/symbol/",
                 "top/yukonga/miuix/kmp/shared/",
             ),
         )
@@ -121,6 +119,7 @@ val convertBaselineProfile =
         additionalOutputs.put("top/yukonga/miuix/kmp/material/", baselineProfilePath("miuix-material"))
         additionalOutputs.put("top/yukonga/miuix/kmp/squircle/", baselineProfilePath("miuix-squircle"))
         additionalOutputs.put("top/yukonga/miuix/kmp/glass/", baselineProfilePath("miuix-glass"))
+        additionalOutputs.put("top/yukonga/miuix/kmp/symbol/", baselineProfilePath("miuix-icons-symbol"))
     }
 
 tasks.matching { it.name == "generateBaselineProfile" }.configureEach {
