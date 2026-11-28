@@ -52,7 +52,6 @@ import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.internal.awaitGraphicsResourceRefresh
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceGeneration
 import top.yukonga.miuix.kmp.material.internal.graphicsResourceLifecycle
-import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import top.yukonga.miuix.kmp.material.internal.observeGraphicsResourceResets
 import top.yukonga.miuix.kmp.material.isRuntimeShaderBrushImmutable
 import top.yukonga.miuix.kmp.squircle.internal.BakedSquircleSdf
@@ -504,7 +503,6 @@ private abstract class SquircleGraphicsNode :
     private var resumeJob: Job? = null
 
     override fun onAttach() {
-        if (!graphicsResourcesResetOnResume) return
         val lifecycle = graphicsResourceLifecycle() ?: return
         stopObservingResets = observeGraphicsResourceResets(lifecycle) { generation ->
             resumeJob?.cancel()

@@ -161,7 +161,6 @@ internal abstract class BackdropEffectScopeImpl :
     override var renderEffect: RenderEffect? = null
     override var downscaleFactor: Float = 1f
     override var noiseCoefficient: Float = 0f
-    var requiresFullBackdrop: Boolean = false
 
     var runtimeShaderCache: RuntimeShaderCache = DefaultRuntimeShaderCache()
 
@@ -291,7 +290,6 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1f
         noiseCoefficient = 0f
-        requiresFullBackdrop = false
         blurBuiltPaddedW = Float.NaN
         blurBuiltPaddedH = Float.NaN
         // Stale pre-blur stash must not survive an effects block that stops calling progressiveBlur.
@@ -313,7 +311,6 @@ internal abstract class BackdropEffectScopeImpl :
             renderEffect = null
             downscaleFactor = 1f
             noiseCoefficient = 0f
-            requiresFullBackdrop = false
             blurBuiltPaddedW = Float.NaN
             blurBuiltPaddedH = Float.NaN
             progressivePreEffect = null
@@ -335,7 +332,6 @@ internal abstract class BackdropEffectScopeImpl :
         renderEffect = null
         downscaleFactor = 1f
         noiseCoefficient = 0f
-        requiresFullBackdrop = false
         blurBuiltPaddedW = Float.NaN
         blurBuiltPaddedH = Float.NaN
         cachedBlurRadiusX = Float.NaN

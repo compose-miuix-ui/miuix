@@ -79,7 +79,7 @@ Box(
 }
 ```
 
-在搭载联发科芯片的小米设备上，`rememberLayerBackdrop()` 会在恢复前台时重建默认捕获图层。它优先使用 Activity 的生命周期，嵌入式 Compose 无法取得该生命周期时则使用宿主 View 树的生命周期。如果传入自定义的 `graphicsLayer`，其生命周期由调用方管理。
+在搭载联发科芯片的小米设备上，`rememberLayerBackdrop()` 会在恢复前台时重建默认捕获图层。它优先使用 Activity 的生命周期，嵌入式 Compose 无法取得该生命周期时则使用宿主 View 树的生命周期。每次重建都会返回新的 `LayerBackdrop`，因此由它派生的对象应以该 backdrop 作为 key，不要缓存在无 key 的 `remember` 中。如果传入自定义的 `graphicsLayer`，其生命周期由调用方管理。
 
 ::: tip 背景色
 `layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。如果捕获的内容存在透明区域（如无背景的文字），模糊时颜色会扩散到透明像素中，产生明显的色块。
@@ -360,9 +360,9 @@ Box(
 
 `textureBlur`、`textureEffect` 和 `progressiveTextureBlur` 对内容保留离屏隔离。若要显式启用直接绘制，可在自定义 `BackdropPipeline` 中使用 `textureBlurEffect` 或 `progressiveTextureBlurEffect`。管线可在 `requiresOffscreenCompositing` 中读取 Compose 状态，在绘制行为变化时切换隔离模式。
 
-尺寸过大的全分辨率背景效果会分块渲染，相邻块的采样区域会重叠。着色器坐标仍以完整表面为基准。自定义效果若采样较远的输入像素，可能超出分块的重叠范围。
+离屏纹理的每边尺寸限制在 2048 px 以内。尺寸过大的全分辨率背景效果会分块渲染，相邻块的采样区域会重叠。着色器坐标仍以完整表面为基准。自定义效果若采样较远的输入像素，可能超出分块的重叠范围。
 
-玻璃着色会在需要时降低背景捕获的分辨率，让广域色调采样覆盖整个背景。超大表面的噪点按捕获分辨率应用。
+超大表面上的降采样模糊会进一步降低捕获分辨率，使整个输入放进单张纹理；玻璃着色始终如此，让广域色调采样覆盖整个背景。超大表面的噪点按捕获分辨率应用。
 
 #### BackdropEffectScope 扩展函数
 

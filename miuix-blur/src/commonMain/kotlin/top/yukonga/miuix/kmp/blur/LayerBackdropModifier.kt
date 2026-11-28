@@ -125,11 +125,8 @@ private class LayerBackdropNode(
                 recordContentLayer(layer, contentOnlyRecordBlock)
                 drawLayer(layer)
                 activeUnderlay = underlay
-                try {
-                    recordContentLayer(backdrop.graphicsLayer, underlayCompositeRecordBlock)
-                } finally {
-                    activeUnderlay = null
-                }
+                recordContentLayer(backdrop.graphicsLayer, underlayCompositeRecordBlock)
+                activeUnderlay = null
             } else {
                 recordContentLayer(backdrop.graphicsLayer, defaultRecordBlock)
                 drawLayer(backdrop.graphicsLayer)

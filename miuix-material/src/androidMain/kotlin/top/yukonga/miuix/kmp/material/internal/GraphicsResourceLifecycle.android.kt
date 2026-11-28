@@ -39,12 +39,10 @@ actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lif
 }
 
 private fun Context.activityLifecycle(): Lifecycle? {
-    var context = this
+    var context: Context? = this
     while (context is ContextWrapper) {
         if (context is Activity) return (context as? LifecycleOwner)?.lifecycle
-        val baseContext = context.baseContext ?: return null
-        if (baseContext === context) return null
-        context = baseContext
+        context = context.baseContext
     }
     return null
 }

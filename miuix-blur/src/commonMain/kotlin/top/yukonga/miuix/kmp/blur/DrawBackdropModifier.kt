@@ -93,7 +93,7 @@ private val DefaultOnDrawBackdrop: DrawScope.(DrawScope.() -> Unit) -> Unit = { 
 private val EmptyEffects: BackdropEffectScope.() -> Unit = {}
 private val DefaultShapeBlock: () -> Shape = { androidx.compose.ui.graphics.RectangleShape }
 
-// Bound each destination-blend tile to the guaranteed GPU texture size.
+// Bound every offscreen texture (blend tiles, effect inputs, noise layers) to the guaranteed GPU texture size.
 internal const val MAX_OFFSCREEN_PX = 2048
 private const val EFFECT_TILE_PX = MAX_OFFSCREEN_PX / 2
 private const val EFFECT_TILE_OVERLAP_PX = (MAX_OFFSCREEN_PX - EFFECT_TILE_PX) / 2
@@ -849,7 +849,7 @@ private class DrawBackdropNode(
             return
         }
 
-        if (level <= 2.001f || (effectScope.requiresFullBackdrop && longestSide > 2 * MAX_OFFSCREEN_PX)) {
+        if (level <= 2.001f || longestSide > 2 * MAX_OFFSCREEN_PX) {
             // Record directly if the half-size cascade input would exceed the texture budget.
             target.cascadeFirstStepScale = level
             recordLayer(layer, size = recordedSize(level), block = target.recordBackdropBlock)
@@ -977,11 +977,8 @@ private class DrawBackdropNode(
                         translate(-sampleLeft.toFloat(), -sampleTop.toFloat()) {
                             val recordedSize = drawContext.size
                             drawContext.size = Size(fullSize.width.toFloat(), fullSize.height.toFloat())
-                            try {
-                                recordBackdrop(target)
-                            } finally {
-                                drawContext.size = recordedSize
-                            }
+                            recordBackdrop(target)
+                            drawContext.size = recordedSize
                         }
                     }
                 }
@@ -1148,11 +1145,8 @@ private class DrawBackdropNode(
             contentPaint.blendMode = contentBlendMode
             val canvas = drawContext.canvas
             canvas.saveLayer(bounds, contentPaint)
-            try {
-                drawContent()
-            } finally {
-                canvas.restore()
-            }
+            drawContent()
+            canvas.restore()
         }
 
         onDrawFront?.invoke(this)
@@ -1207,20 +1201,14 @@ private class DrawBackdropNode(
             if (canvas.rejectsTile(bounds)) continue
             clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom) {
                 canvas.saveLayer(bounds, tilePaint)
-                try {
-                    drawLayer(surfaceLayer)
-                    if (contentLayer != null) {
-                        canvas.saveLayer(bounds, contentPaint)
-                        try {
-                            drawLayer(contentLayer)
-                        } finally {
-                            canvas.restore()
-                        }
-                    }
-                    if (frontLayer != null) drawLayer(frontLayer)
-                } finally {
+                drawLayer(surfaceLayer)
+                if (contentLayer != null) {
+                    canvas.saveLayer(bounds, contentPaint)
+                    drawLayer(contentLayer)
                     canvas.restore()
                 }
+                if (frontLayer != null) drawLayer(frontLayer)
+                canvas.restore()
             }
         }
     }
@@ -1343,7 +1331,7 @@ private class DrawBackdropNode(
         if (effectScope.progressiveRampActive) {
             finalizeProgressiveRamp()
         } else {
-            stackDitherChained = effectScope.requiresFullBackdrop && maxOf(effectScope.size.width, effectScope.size.height) > MAX_OFFSCREEN_PX
+            stackDitherChained = maxOf(effectScope.size.width, effectScope.size.height) > MAX_OFFSCREEN_PX
             chainFullResNoiseIfNeeded()
             midSharpOverlay.active = false
             sharpOverlay.active = false

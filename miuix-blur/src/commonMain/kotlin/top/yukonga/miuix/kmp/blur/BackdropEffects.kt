@@ -50,10 +50,7 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) = blur(ra
 
 /** Keeps the full input in one texture for shaders that read across the surface. */
 @InternalGraphicsResourceApi
-fun BackdropEffectScope.blurWithFullBackdrop(radius: Float) {
-    impl.requiresFullBackdrop = true
-    blur(radius, radius, fitFullBackdrop = true)
-}
+fun BackdropEffectScope.blurWithFullBackdrop(radius: Float) = blur(radius, radius, fitFullBackdrop = true)
 
 private fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float, fitFullBackdrop: Boolean) {
     if (!isRuntimeShaderSupported()) return
@@ -72,9 +69,10 @@ private fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float, fitFullBack
     // sampling phase hold between steps — a per-radius level resampled every frame.
     val sigma = maxOf(sigmaX, sigmaY)
     val blurScale = quantizedLevelScale(sigma * sigma)
-    val scale = if (fitFullBackdrop) {
+    // Full-resolution blur is tiled when oversized. A downscaled input, or one that must stay
+    // whole, has to fit one texture together with the kernel padding.
+    val scale = if (fitFullBackdrop || blurScale > 1f) {
         val longestSide = maxOf(size.width, size.height)
-        // Leave room for the blur kernel in the same texture as the input.
         maxOf(
             blurScale,
             longestSide / (MAX_OFFSCREEN_PX - 2 * BLUR_KERNEL_REACH),

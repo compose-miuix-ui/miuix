@@ -37,7 +37,8 @@ private val DefaultOnDraw: ContentDrawScope.() -> Unit = { drawContent() }
  * lambda each frame does not reset the layer coordinates), so it may close over state.
  *
  * @param graphicsLayer The graphics layer to record content into. The default layer is recreated
- *   when the device requires a graphics resource reset after resuming.
+ *   when the device requires a graphics resource reset after resuming, which also returns a new
+ *   [LayerBackdrop]; key objects derived from it on the returned backdrop.
  * @param backgroundColor Optional opaque backdrop fill painted before content when using the
  *   default [onDraw], keeping recording single-pass.
  * @param onDrawUnderlay Optional underlay drawn behind the recorded content inside [graphicsLayer]
