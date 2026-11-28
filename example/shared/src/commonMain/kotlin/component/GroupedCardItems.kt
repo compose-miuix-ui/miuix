@@ -97,6 +97,7 @@ fun LazyListScope.groupedCardItems(
             CardSegment(
                 isFirst = index == 0,
                 isLast = index == lastIndex,
+                modifier = Modifier.animateItem(),
                 outerHorizontalPadding = outerHorizontalPadding,
                 outerTopPadding = if (index == 0) outerTopPadding else 0.dp,
                 outerBottomPadding = if (index == lastIndex) outerBottomPadding else 0.dp,

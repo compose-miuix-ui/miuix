@@ -3,11 +3,6 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.animation.CapturedAnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -218,51 +213,51 @@ fun ThemeSettingsPage(
                 }
 
                 item(key = "monetTitle") {
-                    SmallTitle(text = "Dynamic Color")
+                    SmallTitle(text = "Dynamic Color", modifier = Modifier.animateItem())
                 }
 
                 groupedCardItems(
                     keyPrefix = "themeMonet",
                     outerTopPadding = 0.dp,
                     outerBottomPadding = 12.dp,
-                    items = listOf(
-                        CardItem("monetSwitch") {
-                            SwitchPreference(
-                                title = "Monet Dynamic Color",
-                                checked = isMonet,
-                                onCheckedChange = { enableMonet ->
-                                    updateAppState { state ->
-                                        val newMode = when {
-                                            enableMonet && isSystem -> 3
-                                            enableMonet && isDark -> 5
-                                            enableMonet -> 4
-                                            isSystem -> 0
-                                            isDark -> 2
-                                            else -> 1
+                    items = buildList {
+                        add(
+                            CardItem("monetSwitch") {
+                                SwitchPreference(
+                                    title = "Monet Dynamic Color",
+                                    checked = isMonet,
+                                    onCheckedChange = { enableMonet ->
+                                        updateAppState { state ->
+                                            val newMode = when {
+                                                enableMonet && isSystem -> 3
+                                                enableMonet && isDark -> 5
+                                                enableMonet -> 4
+                                                isSystem -> 0
+                                                isDark -> 2
+                                                else -> 1
+                                            }
+                                            state.copy(colorMode = newMode)
                                         }
-                                        state.copy(colorMode = newMode)
-                                    }
+                                    },
+                                )
+                            },
+                        )
+                        if (isMonet) {
+                            add(
+                                CardItem("keyColor") {
+                                    GlassDropdownPreference(
+                                        backdrop = backdrop,
+                                        title = "Key Color",
+                                        items = KeyColorOptions,
+                                        selectedIndex = appState.seedIndex,
+                                        onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
+                                    )
                                 },
                             )
-                            CapturedAnimatedVisibility(
-                                visible = isMonet,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
-                                GlassDropdownPreference(
-                                    backdrop = backdrop,
-                                    title = "Key Color",
-                                    items = KeyColorOptions,
-                                    selectedIndex = appState.seedIndex,
-                                    onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
-                                )
-                            }
-                            CapturedAnimatedVisibility(
-                                visible = isMonet && appState.seedIndex > 0,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically(),
-                            ) {
-                                Column {
+                        }
+                        if (isMonet && appState.seedIndex > 0) {
+                            add(
+                                CardItem("paletteStyle") {
                                     GlassDropdownPreference(
                                         backdrop = backdrop,
                                         title = "Palette Style",
@@ -270,6 +265,10 @@ fun ThemeSettingsPage(
                                         selectedIndex = appState.paletteStyle,
                                         onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
                                     )
+                                },
+                            )
+                            add(
+                                CardItem("colorSpec") {
                                     val currentStyle =
                                         ThemePaletteStyle.entries.getOrNull(appState.paletteStyle) ?: ThemePaletteStyle.TonalSpot
                                     val isCmf = currentStyle == ThemePaletteStyle.Cmf
@@ -287,14 +286,14 @@ fun ThemeSettingsPage(
                                         selectedIndex = colorSpecIndex,
                                         onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                                     )
-                                }
-                            }
-                        },
-                    ),
+                                },
+                            )
+                        }
+                    },
                 )
 
                 item(key = "appearanceTitle") {
-                    SmallTitle(text = "Appearance & Interaction")
+                    SmallTitle(text = "Appearance & Interaction", modifier = Modifier.animateItem())
                 }
 
                 groupedCardItems(
@@ -338,11 +337,11 @@ fun ThemeSettingsPage(
                                     checked = appState.enablePageUserScroll,
                                     onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                                 )
-                                CapturedAnimatedVisibility(
-                                    visible = appState.enablePageUserScroll,
-                                    enter = fadeIn() + expandVertically(),
-                                    exit = fadeOut() + shrinkVertically(),
-                                ) {
+                            },
+                        )
+                        if (appState.enablePageUserScroll) {
+                            add(
+                                CardItem("pagerGestureMode") {
                                     GlassDropdownPreference(
                                         backdrop = backdrop,
                                         title = "Pager Gesture Mode",
@@ -350,9 +349,9 @@ fun ThemeSettingsPage(
                                         selectedIndex = appState.pagerInterceptionMode,
                                         onSelectedIndexChange = { updateAppState { state -> state.copy(pagerInterceptionMode = it) } },
                                     )
-                                }
-                            },
-                        )
+                                },
+                            )
+                        }
                         add(
                             CardItem("densityScale") {
                                 GlobalScalePreference(
@@ -368,7 +367,7 @@ fun ThemeSettingsPage(
                 )
 
                 item(key = "themeNavigationTitle") {
-                    SmallTitle(text = "Navigation")
+                    SmallTitle(text = "Navigation", modifier = Modifier.animateItem())
                 }
 
                 groupedCardItems(

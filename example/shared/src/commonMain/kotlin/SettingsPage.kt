@@ -332,7 +332,7 @@ private fun SettingsContent(
                     }
                 },
             )
-            item(key = "settingsAboutTitle") { SmallTitle("Other") }
+            item(key = "settingsAboutTitle") { SmallTitle("Other", modifier = Modifier.animateItem()) }
             groupedCardItems(
                 keyPrefix = "settingsAbout",
                 outerTopPadding = 0.dp,
