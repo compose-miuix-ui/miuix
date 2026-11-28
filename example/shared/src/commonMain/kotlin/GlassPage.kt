@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.offset
 import component.GlassBottomSheetDemo
 import component.GlassDemoDefaults
 import component.GlassHalfBottomSheetDemo
@@ -123,7 +122,6 @@ import utils.appPageHorizontalInsets
 import utils.appPageTopBarInsets
 import utils.pageContentPadding
 import utils.pageScrollModifiers
-import utils.rememberAppSafePadding
 import kotlin.time.Duration.Companion.milliseconds
 
 private val NavItems: List<GlassNavigationItem> = listOf(
@@ -166,7 +164,6 @@ fun GlassPage(padding: PaddingValues) {
     val isWideScreen = LocalIsWideScreen.current
     val horizontalPadding = GlassTopAppBarDefaults.HorizontalPadding
     val isInDark = isInDarkTheme()
-    val safePadding = rememberAppSafePadding()
     val backdrop = rememberLayerBackdrop()
     val primaryPopupBackdrop = rememberLayerBackdrop()
     val wallpaperBackdrop = rememberLayerBackdrop()
@@ -297,15 +294,7 @@ fun GlassPage(padding: PaddingValues) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .appPageHorizontalInsets()
-                        .padding(horizontal = 24.dp)
-                        .layout { measurable, constraints ->
-                            val bottom = maxOf(24.dp, safePadding.calculateBottomPadding() + 8.dp, padding.calculateBottomPadding() + 8.dp)
-                                .roundToPx().coerceIn(0, constraints.maxHeight)
-                            val placeable = measurable.measure(constraints.offset(vertical = -bottom))
-                            layout(placeable.width, placeable.height + bottom) {
-                                placeable.placeRelative(0, 0)
-                            }
-                        },
+                        .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -314,7 +303,6 @@ fun GlassPage(padding: PaddingValues) {
                         selectedIndex = navIndex,
                         onSelect = { navIndex = it },
                         backdrop = backdrop,
-                        defaultWindowInsetsPadding = false,
                         modifier = Modifier.layout { measurable, constraints ->
                             val actionWidth = (GlassNavigationBarDefaults.Height + GlassNavigationBarDefaults.ActionSpacing).roundToPx()
                             val available = constraints.maxWidth - actionWidth + (10.dp * (NavItems.size - 1) - 6.dp).roundToPx()
