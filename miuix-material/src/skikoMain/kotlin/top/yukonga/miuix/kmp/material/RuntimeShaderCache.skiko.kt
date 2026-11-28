@@ -3,4 +3,4 @@
 
 package top.yukonga.miuix.kmp.material
 
-internal actual fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache = cache
+internal actual fun graphicsResourceCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache = cache

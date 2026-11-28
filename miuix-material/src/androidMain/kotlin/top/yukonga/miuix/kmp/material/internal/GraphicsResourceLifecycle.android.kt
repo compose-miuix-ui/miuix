@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 
 @InternalGraphicsResourceApi
 actual val graphicsResourcesResetOnResume: Boolean by lazy {
@@ -27,11 +29,14 @@ actual val graphicsResourcesResetOnResume: Boolean by lazy {
 internal actual fun graphicsResourceLifecycle(): Lifecycle? {
     if (!graphicsResourcesResetOnResume) return null
     val context = LocalContext.current
-    return remember(context) { context.activityLifecycle() }
+    return remember(context) { context.activityLifecycle() } ?: LocalView.current.findViewTreeLifecycleOwner()?.lifecycle
 }
 
 @InternalGraphicsResourceApi
-actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? = if (graphicsResourcesResetOnResume) currentValueOf(LocalContext).activityLifecycle() else null
+actual fun CompositionLocalConsumerModifierNode.graphicsResourceLifecycle(): Lifecycle? {
+    if (!graphicsResourcesResetOnResume) return null
+    return currentValueOf(LocalContext).activityLifecycle() ?: currentValueOf(LocalView).findViewTreeLifecycleOwner()?.lifecycle
+}
 
 private fun Context.activityLifecycle(): Lifecycle? {
     var context = this

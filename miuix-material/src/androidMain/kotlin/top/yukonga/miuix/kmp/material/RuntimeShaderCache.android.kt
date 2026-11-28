@@ -9,13 +9,14 @@ import top.yukonga.miuix.kmp.material.internal.graphicsResourcesResetOnResume
 import java.lang.ref.WeakReference
 
 @OptIn(InternalGraphicsResourceApi::class)
-internal actual fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache = if (graphicsResourcesResetOnResume) {
-    BackdropShaderCaches.cacheFor(cache)
+internal actual fun graphicsResourceCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache = if (graphicsResourcesResetOnResume) {
+    GraphicsResourceShaderCaches.cacheFor(cache)
 } else {
     cache
 }
 
-private object BackdropShaderCaches {
+@OptIn(InternalGraphicsResourceApi::class)
+private object GraphicsResourceShaderCaches {
     private val entries = mutableListOf<Entry>()
 
     @Synchronized
@@ -32,21 +33,27 @@ private object BackdropShaderCaches {
             }
         }
         val entry = match ?: Entry(WeakReference(cache), graphicsResourceGeneration).also { entries.add(it) }
-        return BoundCache(cache, entry)
+        return entry.boundCache?.get() ?: BoundCache(cache, entry.generation).also {
+            entry.boundCache = WeakReference(it)
+        }
     }
 
     private class Entry(val original: WeakReference<RuntimeShaderCache>, val generation: Long) {
-        val replacement: RuntimeShaderCache by lazy { ReplacementCache() }
+        // Consumers own the wrapper and its replacement. The registry only remembers the original generation.
+        var boundCache: WeakReference<BoundCache>? = null
     }
 
-    private class BoundCache(val original: RuntimeShaderCache, val entry: Entry) : RuntimeShaderCache {
+    private class BoundCache(val original: RuntimeShaderCache, val generation: Long) : RuntimeShaderCache {
+        private val replacement by lazy { ReplacementCache() }
+
         override fun obtainRuntimeShader(key: String, string: String): RuntimeShader {
-            val cache = if (entry.generation == graphicsResourceGeneration) original else entry.replacement
+            val cache = if (generation == graphicsResourceGeneration) original else replacement
             return cache.obtainRuntimeShader(key, string)
         }
     }
 }
 
+@OptIn(InternalGraphicsResourceApi::class)
 private class ReplacementCache : RuntimeShaderCache {
     private val shaders = mutableMapOf<String, MutableMap<String, RuntimeShader>>()
     private var generation = graphicsResourceGeneration

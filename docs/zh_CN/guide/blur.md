@@ -79,7 +79,7 @@ Box(
 }
 ```
 
-在联发科芯片小米设备上，Activity 恢复时，`rememberLayerBackdrop()` 会重建默认的捕获图层。如果传入自定义的 `graphicsLayer`，其生命周期由调用方管理。
+在搭载联发科芯片的小米设备上，`rememberLayerBackdrop()` 会在恢复前台时重建默认捕获图层。它优先使用 Activity 的生命周期，嵌入式 Compose 无法取得该生命周期时则使用宿主 View 树的生命周期。如果传入自定义的 `graphicsLayer`，其生命周期由调用方管理。
 
 ::: tip 背景色
 `layerBackdrop` 仅捕获其所在 composable 绘制的内容，**不包含**父级 composable 的背景（例如 Scaffold 的 Surface）。如果捕获的内容存在透明区域（如无背景的文字），模糊时颜色会扩散到透明像素中，产生明显的色块。
@@ -351,6 +351,18 @@ Box(
     // 内容
 }
 ```
+
+#### BackdropPipeline 合成
+
+`drawBackdrop(backdrop, pipeline)` 重载默认在离屏图层中合成背景、内容和 `drawFront`，使 `BlendMode.Clear` 和 `BlendMode.DstIn` 等混合操作不会影响父级已绘制的像素。
+
+如果管线可以安全地直接绘制到父级画布，例如 `drawFront` 为空且内容使用普通的源覆盖绘制，可覆写 `BackdropPipeline.requiresOffscreenCompositing` 并返回 `false`。当 `contentBlendMode` 设为 `BlendMode.SrcOver` 以外的模式时，仍会使用离屏合成。
+
+`textureBlur`、`textureEffect` 和 `progressiveTextureBlur` 对内容保留离屏隔离。若要显式启用直接绘制，可在自定义 `BackdropPipeline` 中使用 `textureBlurEffect` 或 `progressiveTextureBlurEffect`。管线可在 `requiresOffscreenCompositing` 中读取 Compose 状态，在绘制行为变化时切换隔离模式。
+
+尺寸过大的全分辨率背景效果会分块渲染，相邻块的采样区域会重叠。着色器坐标仍以完整表面为基准。自定义效果若采样较远的输入像素，可能超出分块的重叠范围。
+
+玻璃着色会在需要时降低背景捕获的分辨率，让广域色调采样覆盖整个背景。超大表面的噪点按捕获分辨率应用。
 
 #### BackdropEffectScope 扩展函数
 

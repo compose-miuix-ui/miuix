@@ -31,8 +31,8 @@ interface RuntimeShaderCache {
  * All backdrop effect scopes within the same composition share this cache,
  * avoiding redundant shader compilation while allowing the cache to be
  * garbage-collected when the composition is disposed.
- * After a graphics resource reset, backdrop effects use a Miuix-managed replacement
- * for each custom cache previously used by those effects.
+ * After a graphics resource reset, backdrop effects and shader-backed squircles use a
+ * Miuix-managed replacement for each custom cache previously used by them.
  */
 val LocalRuntimeShaderCache = compositionLocalOf<RuntimeShaderCache>(referentialEqualityPolicy()) {
     DefaultRuntimeShaderCache()
@@ -40,11 +40,15 @@ val LocalRuntimeShaderCache = compositionLocalOf<RuntimeShaderCache>(referential
 
 /** Internal implementation shared by Miuix backdrop effects. */
 @InternalGraphicsResourceApi
-fun RuntimeShaderCache.forBackdropEffects(): RuntimeShaderCache = if (this is DefaultRuntimeShaderCache) this else backdropCacheFor(this)
+fun RuntimeShaderCache.forBackdropEffects(): RuntimeShaderCache = forGraphicsResources()
 
-internal expect fun backdropCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache
+/** Uses the provided cache until its graphics resources become stale. */
+@InternalGraphicsResourceApi
+fun RuntimeShaderCache.forGraphicsResources(): RuntimeShaderCache = if (this is DefaultRuntimeShaderCache) this else graphicsResourceCacheFor(this)
 
-@OptIn(InternalCoroutinesApi::class)
+internal expect fun graphicsResourceCacheFor(cache: RuntimeShaderCache): RuntimeShaderCache
+
+@OptIn(InternalCoroutinesApi::class, InternalGraphicsResourceApi::class)
 class DefaultRuntimeShaderCache : RuntimeShaderCache {
 
     private val lock = SynchronizedObject()

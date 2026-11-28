@@ -62,34 +62,6 @@ float4 sampleBackdrop(float2 local) {
 // a sparse ring would paint the pattern it leaves behind onto a bright object. Taps are averaged by
 // coverage, so one that lands past the recorded backdrop contributes nothing rather than pulling
 // the colour toward black.
-const float2 kVogel[25] = float2[25](
-    float2(0.141421, 0.000000),
-    float2(-0.180618, 0.165461),
-    float2(0.027646, -0.315017),
-    float2(0.227657, 0.296938),
-    float2(-0.417779, -0.073899),
-    float2(0.395756, -0.251748),
-    float2(-0.132373, 0.492420),
-    float2(-0.252449, -0.486076),
-    float2(0.547714, 0.200024),
-    float2(-0.569805, 0.235207),
-    float2(0.274684, -0.586983),
-    float2(0.202984, 0.647146),
-    float2(-0.611797, -0.354549),
-    float2(0.717707, -0.157786),
-    float2(-0.438006, 0.623018),
-    float2(-0.101189, -0.780872),
-    float2(0.621204, 0.523551),
-    float2(-0.835946, 0.034569),
-    float2(0.609758, -0.606791),
-    float2(-0.040795, 0.882233),
-    float2(-0.580187, -0.695258),
-    float2(0.919080, 0.123661),
-    float2(-0.778735, 0.541823),
-    float2(0.212795, -0.945895),
-    float2(0.492184, 0.858927)
-);
-
 float4 sampleWide(float2 local) {
     float2 outer = in_edgePow.yz;
     if (outer.x <= 0.5 || outer.y <= 0.5) return sampleBackdrop(local);
@@ -97,15 +69,35 @@ float4 sampleWide(float2 local) {
     // bar or a button it is very nearly one colour. `in_edgePow.w` says how completely: at 1 the
     // disc is centred on the surface and every pixel reads the same average.
     float2 origin = mix(local, in_size * 0.5, in_edgePow.w);
-    float3 sum = float3(0.0);
-    float coverage = 0.0;
-    for (int i = 0; i < 25; i++) {
-        float4 tap = tapLayer(origin + kVogel[i] * outer);
-        sum += tap.rgb;
-        coverage += tap.a;
-    }
-    if (coverage < 0.0001) return sampleBackdrop(local);
-    float3 color = sum / coverage;
+    // Runtime SkSL does not accept constant array initializers.
+    float4 sum = float4(0.0);
+    sum += tapLayer(origin + float2(0.141421, 0.000000) * outer);
+    sum += tapLayer(origin + float2(-0.180618, 0.165461) * outer);
+    sum += tapLayer(origin + float2(0.027646, -0.315017) * outer);
+    sum += tapLayer(origin + float2(0.227657, 0.296938) * outer);
+    sum += tapLayer(origin + float2(-0.417779, -0.073899) * outer);
+    sum += tapLayer(origin + float2(0.395756, -0.251748) * outer);
+    sum += tapLayer(origin + float2(-0.132373, 0.492420) * outer);
+    sum += tapLayer(origin + float2(-0.252449, -0.486076) * outer);
+    sum += tapLayer(origin + float2(0.547714, 0.200024) * outer);
+    sum += tapLayer(origin + float2(-0.569805, 0.235207) * outer);
+    sum += tapLayer(origin + float2(0.274684, -0.586983) * outer);
+    sum += tapLayer(origin + float2(0.202984, 0.647146) * outer);
+    sum += tapLayer(origin + float2(-0.611797, -0.354549) * outer);
+    sum += tapLayer(origin + float2(0.717707, -0.157786) * outer);
+    sum += tapLayer(origin + float2(-0.438006, 0.623018) * outer);
+    sum += tapLayer(origin + float2(-0.101189, -0.780872) * outer);
+    sum += tapLayer(origin + float2(0.621204, 0.523551) * outer);
+    sum += tapLayer(origin + float2(-0.835946, 0.034569) * outer);
+    sum += tapLayer(origin + float2(0.609758, -0.606791) * outer);
+    sum += tapLayer(origin + float2(-0.040795, 0.882233) * outer);
+    sum += tapLayer(origin + float2(-0.580187, -0.695258) * outer);
+    sum += tapLayer(origin + float2(0.919080, 0.123661) * outer);
+    sum += tapLayer(origin + float2(-0.778735, 0.541823) * outer);
+    sum += tapLayer(origin + float2(0.212795, -0.945895) * outer);
+    sum += tapLayer(origin + float2(0.492184, 0.858927) * outer);
+    if (sum.a < 0.0001) return sampleBackdrop(local);
+    float3 color = sum.rgb / sum.a;
     float t = smoothstep(in_darker.x, in_darker.y, luma(color)) * in_darker.z;
     return float4(mix(color, kShadowTint, t), 1.0);
 }

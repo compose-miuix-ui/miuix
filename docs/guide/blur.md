@@ -80,7 +80,7 @@ Box(
 }
 ```
 
-On Xiaomi devices with MediaTek chipsets, `rememberLayerBackdrop()` recreates its default capture layer when the Activity resumes. If you supply a `graphicsLayer`, its lifetime is managed by the caller.
+On Xiaomi devices with MediaTek chipsets, `rememberLayerBackdrop()` recreates its default capture layer on resume. It uses the Activity lifecycle when available and falls back to the host view tree's lifecycle for embedded Compose. If you supply a `graphicsLayer`, its lifetime is managed by the caller.
 
 ::: tip Background Color
 `layerBackdrop` only captures the content drawn by the composable it is applied to — it does **not** include backgrounds from parent composables (e.g., Scaffold's Surface). If the captured content has transparent areas (such as text without a background), the blur will spread colors into transparency, producing visible color artifacts.
@@ -352,6 +352,18 @@ Box(
     // Content
 }
 ```
+
+#### BackdropPipeline compositing
+
+The `drawBackdrop(backdrop, pipeline)` overload isolates the backdrop, content, and `drawFront` in an offscreen layer by default. This keeps blends such as `BlendMode.Clear` and `BlendMode.DstIn` from affecting pixels already drawn by the parent.
+
+Override `BackdropPipeline.requiresOffscreenCompositing` to return `false` when the pipeline can safely draw directly into the parent canvas, for example when `drawFront` is empty and the content uses ordinary source-over drawing. A `contentBlendMode` other than `BlendMode.SrcOver` still forces offscreen compositing.
+
+`textureBlur`, `textureEffect`, and `progressiveTextureBlur` retain offscreen isolation for their content. To opt into direct drawing, use a custom `BackdropPipeline` with `textureBlurEffect` or `progressiveTextureBlurEffect`. The pipeline can read Compose state in `requiresOffscreenCompositing` to switch isolation when its drawing behavior changes.
+
+Oversized full-resolution backdrop effects render in overlapping tiles. Shader coordinates still refer to the full surface. Custom effects that sample distant parts of the input may reach beyond a tile's overlap.
+
+Glass shading uses a downscaled capture when needed to keep the full backdrop available to its wide tint samples. On oversized surfaces, grain is applied at the capture resolution.
 
 #### BackdropEffectScope Extensions
 

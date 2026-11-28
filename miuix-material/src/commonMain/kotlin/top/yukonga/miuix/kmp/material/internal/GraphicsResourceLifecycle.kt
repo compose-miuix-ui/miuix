@@ -12,16 +12,19 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import kotlin.concurrent.Volatile
 
 internal val graphicsResourceResetRegistry = GraphicsResourceResetRegistry()
-
-internal val graphicsResourceGeneration: Long
-    get() = graphicsResourceResetRegistry.generation
 
 /** Implementation shared by Miuix modules. */
 @RequiresOptIn
 @Retention(AnnotationRetention.BINARY)
 annotation class InternalGraphicsResourceApi
+
+/** Generation of graphics resources shared by Miuix shader and effect caches. */
+@InternalGraphicsResourceApi
+val graphicsResourceGeneration: Long
+    get() = graphicsResourceResetRegistry.generation
 
 /** Internal device check shared by Miuix graphics components. */
 @InternalGraphicsResourceApi
@@ -47,7 +50,7 @@ suspend fun awaitGraphicsResourceRefresh(lifecycle: Lifecycle, generation: Any):
     return if (lifecycle.currentState == Lifecycle.State.RESUMED) refreshGraphicsResourceGeneration(generation) else null
 }
 
-/** Host lifecycle used for graphics resources; Android always resolves the Activity lifecycle. */
+/** Host lifecycle used for graphics resources. Android prefers the Activity to the view tree. */
 @Composable
 internal expect fun graphicsResourceLifecycle(): Lifecycle?
 
@@ -77,7 +80,7 @@ fun observeGraphicsResourceResets(lifecycle: Lifecycle, onReset: (Any) -> Unit):
  * Internal implementation shared by Miuix graphics components; not a supported public API.
  *
  * Returns a new identity token when Android graphics resources must be recreated. The token is
- * scoped to the host Activity lifecycle and remains null until its first resource reset.
+ * scoped to the host lifecycle and remains null until its first resource reset.
  */
 @Composable
 @InternalGraphicsResourceApi
@@ -102,6 +105,9 @@ fun rememberGraphicsResourceGeneration(): Any? {
 
 internal class GraphicsResourceResetRegistry {
     private val entries = mutableMapOf<Lifecycle, Entry>()
+
+    // Lifecycle callbacks own the writes. Shader caches can read the generation on other threads.
+    @Volatile
     var generation: Long = 0
         private set
 

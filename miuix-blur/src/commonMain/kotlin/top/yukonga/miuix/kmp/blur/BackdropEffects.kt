@@ -25,6 +25,7 @@ import top.yukonga.miuix.kmp.blur.internal.progressiveCurveKind
 import top.yukonga.miuix.kmp.blur.internal.quantizedLevelScale
 import top.yukonga.miuix.kmp.blur.internal.rampBlendModeShader
 import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.internal.InternalGraphicsResourceApi
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import kotlin.math.ceil
 import kotlin.math.sqrt
@@ -45,8 +46,24 @@ internal const val MAX_BLEND_LAYERS = 8
  * @param radiusX Horizontal blur radius in pixels.
  * @param radiusY Vertical blur radius in pixels. Defaults to [radiusX].
  */
-fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
-    if (!isRuntimeShaderSupported() || (radiusX <= 0f && radiusY <= 0f)) return
+fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) = blur(radiusX, radiusY, fitFullBackdrop = false)
+
+/** Keeps the full input in one texture for shaders that read across the surface. */
+@InternalGraphicsResourceApi
+fun BackdropEffectScope.blurWithFullBackdrop(radius: Float) {
+    impl.requiresFullBackdrop = true
+    blur(radius, radius, fitFullBackdrop = true)
+}
+
+private fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float, fitFullBackdrop: Boolean) {
+    if (!isRuntimeShaderSupported()) return
+    if (radiusX <= 0f && radiusY <= 0f) {
+        if (fitFullBackdrop) {
+            val longestSide = maxOf(size.width, size.height)
+            downscaleFactor = maxOf(downscaleFactor, (longestSide + 2f * padding) / MAX_OFFSCREEN_PX)
+        }
+        return
+    }
     val scope = impl
     val sigmaX = radiusX * BLUR_RADIUS_TO_SIGMA
     val sigmaY = radiusY * BLUR_RADIUS_TO_SIGMA
@@ -54,7 +71,18 @@ fun BackdropEffectScope.blur(radiusX: Float, radiusY: Float = radiusX) {
     // 1/4-octave grid: a step is ~19% in scale (a fifth of the old 2× jump), while size and
     // sampling phase hold between steps — a per-radius level resampled every frame.
     val sigma = maxOf(sigmaX, sigmaY)
-    val scale = quantizedLevelScale(sigma * sigma)
+    val blurScale = quantizedLevelScale(sigma * sigma)
+    val scale = if (fitFullBackdrop) {
+        val longestSide = maxOf(size.width, size.height)
+        // Leave room for the blur kernel in the same texture as the input.
+        maxOf(
+            blurScale,
+            longestSide / (MAX_OFFSCREEN_PX - 2 * BLUR_KERNEL_REACH),
+            (longestSide + 2f * padding) / MAX_OFFSCREEN_PX,
+        )
+    } else {
+        blurScale
+    }
 
     // Padding covers the kernel reach in source pixels; typical radii (adjVar <= 9) only reach 9 texels.
     val adjVar = adjustedVarianceForScale(sigma * sigma, scale)
