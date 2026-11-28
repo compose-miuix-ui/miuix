@@ -62,6 +62,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          clean: false
       - name: Setup JDK
         uses: actions/setup-java@v6
         with:
@@ -70,16 +71,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          gradle-home-cache-cleanup: true
-      - name: Cache Kotlin/Native toolchain
-        uses: actions/cache@v6
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-release-cache-${{ hashFiles('gradle/libs.versions.toml') }}
-          restore-keys: ${{ runner.os }}-konan-
+          cache-disabled: true
       - name: Build macOS DMG and iOS framework
-        run: ./gradlew :example:macos:packageDmgNativeReleaseMacosArm64 :example:shared:linkReleaseFrameworkIosArm64 :example:shared:generateVersionInfo
+        shell: bash
+        run: |
+          rm -f Miuix-darwin-arm64-dmg.dmg Miuix-ios-arm64-unsigned.ipa example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg
+          ./gradlew :example:macos:packageDmgNativeReleaseMacosArm64 :example:shared:linkReleaseFrameworkIosArm64 :example:shared:generateVersionInfo
       - name: Rename macos arm64 artifact
         run: mv example/macos/build/compose/binaries/main/native-macosArm64-release-dmg/*.dmg Miuix-darwin-arm64-dmg.dmg
         shell: bash
