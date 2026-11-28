@@ -722,13 +722,21 @@ private class DrawBackdropNode(
                 recordLayer(targetLayer, size = texSize, block = recordDirectBackdropBlock)
             }
             targetLayer.renderEffect = effect
-            if (downScale == 1) {
-                targetLayer.topLeft = offset
-                drawLayer(targetLayer)
-            } else {
-                targetLayer.topLeft = IntOffset.Zero
-                translate(offset.x.toFloat(), offset.y.toFloat()) {
-                    scale(dsFloat, dsFloat, Offset.Zero) { drawLayer(targetLayer) }
+            // Keep the unbounded RuntimeShader effect confined to the band while preserving its
+            // tap-reach margin for Skia's zero-radius input bounds propagation.
+            val bandLeft = offset.x.toFloat()
+            val bandTop = offset.y.toFloat()
+            val bandRight = (offset.x + texSize.width * downScale).toFloat()
+            val bandBottom = (offset.y + texSize.height * downScale).toFloat()
+            clipRect(bandLeft, bandTop, bandRight, bandBottom) {
+                if (downScale == 1) {
+                    targetLayer.topLeft = offset
+                    drawLayer(targetLayer)
+                } else {
+                    targetLayer.topLeft = IntOffset.Zero
+                    translate(bandLeft, bandTop) {
+                        scale(dsFloat, dsFloat, Offset.Zero) { drawLayer(targetLayer) }
+                    }
                 }
             }
         }
