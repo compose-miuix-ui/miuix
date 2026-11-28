@@ -938,9 +938,12 @@ private class DrawBackdropNode(
     private class EffectTile(val layer: GraphicsLayer) {
         var sourceEffect: RenderEffect? = null
         var origin = IntOffset.Zero
+        var lastUsedFrame = 0
     }
 
     private var effectTileSize = Size.Unspecified
+    private var effectTileFrame = 0
+    private var tileClipCanvas: androidx.compose.ui.graphics.Canvas? = null
     private val effectTiles = mutableMapOf<IntOffset, EffectTile>()
 
     private fun DrawScope.drawFullResolutionTiles(target: LevelTarget, effect: RenderEffect, fullSize: IntSize) {
@@ -952,13 +955,14 @@ private class DrawBackdropNode(
         val padT = target.padTop
         // Reserve an input halo around each output tile for filters that sample neighbours.
         val overlap = EFFECT_TILE_OVERLAP_PX
-        val canvas = drawContext.canvas
+        val clipCanvas = tileClipCanvas ?: drawContext.canvas
+        val frame = ++effectTileFrame
         for (top in 0 until ceil(size.height).toInt() step EFFECT_TILE_PX) {
             val bottom = minOf(size.height, (top + EFFECT_TILE_PX).toFloat())
             for (left in 0 until ceil(size.width).toInt() step EFFECT_TILE_PX) {
                 val right = minOf(size.width, (left + EFFECT_TILE_PX).toFloat())
                 val bounds = Rect(left.toFloat(), top.toFloat(), right, bottom)
-                if (canvas.rejectsTile(bounds)) continue
+                if (clipCanvas.rejectsTile(bounds)) continue
 
                 val sampleLeft = (floor(bounds.left + padL).toInt() - overlap).coerceAtLeast(0)
                 val sampleTop = (floor(bounds.top + padT).toInt() - overlap).coerceAtLeast(0)
@@ -966,6 +970,7 @@ private class DrawBackdropNode(
                 val sampleBottom = (floor(bottom + padT).toInt() + overlap).coerceAtMost(fullSize.height)
                 val origin = IntOffset(sampleLeft, sampleTop)
                 val tile = effectTiles.getOrPut(IntOffset(left, top)) { EffectTile(graphicsContext.createGraphicsLayer()) }
+                tile.lastUsedFrame = frame
                 if (tile.sourceEffect !== effect || tile.origin != origin) {
                     tile.layer.renderEffect = if (origin == IntOffset.Zero) effect else effect.withTileOrigin(sampleLeft.toFloat(), sampleTop.toFloat())
                     tile.sourceEffect = effect
@@ -985,6 +990,14 @@ private class DrawBackdropNode(
                 clipRect(bounds.left, bounds.top, right, bottom) {
                     translate(sampleLeft - padL, sampleTop - padT) { drawLayer(tile.layer) }
                 }
+            }
+        }
+        val iterator = effectTiles.values.iterator()
+        while (iterator.hasNext()) {
+            val tile = iterator.next()
+            if (tile.lastUsedFrame != frame) {
+                graphicsContext.releaseGraphicsLayer(tile.layer)
+                iterator.remove()
             }
         }
     }
@@ -1168,12 +1181,17 @@ private class DrawBackdropNode(
         val blendContent = blendMode != BlendMode.SrcOver
         val drawFront = onDrawFront
         val surfaceLayer = tiledSurfaceLayer ?: graphicsContext.createGraphicsLayer().also { tiledSurfaceLayer = it }
-        recordContentLayer(surfaceLayer) {
-            drawSurface()
-            if (!blendContent) {
-                drawContent()
-                drawFront?.invoke(this)
+        tileClipCanvas = drawContext.canvas
+        try {
+            recordContentLayer(surfaceLayer) {
+                drawSurface()
+                if (!blendContent) {
+                    drawContent()
+                    drawFront?.invoke(this)
+                }
             }
+        } finally {
+            tileClipCanvas = null
         }
         val contentLayer = if (blendContent) {
             val layer = tiledContentLayer ?: graphicsContext.createGraphicsLayer().also { tiledContentLayer = it }
