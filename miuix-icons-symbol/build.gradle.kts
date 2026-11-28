@@ -57,7 +57,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        val desktopTest by getting {
+        named("desktopTest") {
             dependencies {
                 implementation(kotlin("test"))
             }
