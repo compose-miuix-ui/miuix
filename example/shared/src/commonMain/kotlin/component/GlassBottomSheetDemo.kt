@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.GlassBottomSheet
@@ -209,7 +210,7 @@ internal fun GlassHalfBottomSheetDemo(
         material = material,
         stroke = stroke,
         startAction = {
-            GlassIconButton(onClick = onDismissRequest) {
+            IconButton(onClick = onDismissRequest) {
                 Icon(
                     imageVector = MiuixIcons.Symbol.Close1.toImageVector(),
                     contentDescription = "Close",
@@ -218,7 +219,7 @@ internal fun GlassHalfBottomSheetDemo(
             }
         },
         endAction = {
-            GlassIconButton(onClick = onDismissRequest) {
+            IconButton(onClick = onDismissRequest) {
                 Icon(
                     imageVector = MiuixIcons.Symbol.Ok.toImageVector(),
                     contentDescription = "Confirm",
