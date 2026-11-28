@@ -404,6 +404,7 @@ fun IconsPage(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .padding(top = 12.dp)
                                     .padding(horizontal = 12.dp),
                                 insideMargin = PaddingValues(16.dp),
                             ) {
